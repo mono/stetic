@@ -1,5 +1,12 @@
 2005-02-09  Dan Winship  <danw@novell.com>
 
+	* libstetic/editor/Color.cs: add an editor for Gdk.Color-valued
+	properties
+
+	* stetic/PropertyEditor.cs: Use it
+
+2005-02-09  Dan Winship  <danw@novell.com>
+
 	* Major reorg again... Now instead of having the widget wrappers
 	be subclasses of the types they wrap, they are a parallel set of
 	classes. This lets them share code between each other more easily

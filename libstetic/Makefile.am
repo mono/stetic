@@ -15,6 +15,7 @@ libstetic_dll_sources =			\
 	WidgetSite.cs			\
 	editor/Boolean.cs		\
 	editor/Char.cs			\
+	editor/Color.cs			\
 	editor/Enumeration.cs		\
 	editor/File.cs			\
 	editor/FloatRange.cs		\
