@@ -6,45 +6,58 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class Palette : Gtk.VBox {
+	public class Palette : Gtk.ScrolledWindow {
 
-		VBox normals, containers, windows;
-		SizeGroup sgroup;
-		ComboBox combo;
-		ListStore model;
+		private Gtk.VBox main;
+		private Hashtable groups;
 
-		Hashtable widgets = new Hashtable ();
-
-		public Palette () : base (false, 6)
-		{
-			BorderWidth = 6;
-
-			normals = new VBox (false, 0);
-			containers = new VBox (false, 0);
-			windows = new VBox (false, 0);
+		class Group : Gtk.Expander {
+		
+			private Gtk.Alignment align;
+			private Gtk.VBox vbox;
 			
-			combo = new ComboBox ();
-			model = new ListStore (typeof (string));
-			combo.Model = model;
-			CellRendererText text_renderer = new CellRendererText ();
-			combo.PackStart (text_renderer, true);
-			combo.AddAttribute (text_renderer, "text", 0);
-			combo.Changed += new EventHandler (OnSelectorChanged);
+			public Group (string name) : base ("<b>" + name + "</b>")
+			{
+				vbox  = new VBox (false, 5);
+				
+				align = new Gtk.Alignment (0, 0, 0, 0);
+				align.SetPadding (0, 0, 20, 0);
+				align.Child = vbox;
 
-			PackStart (combo, false, false, 3);
-			PackStart (new Gtk.VBox (false, 0), true, true, 3);
-
-			ShowAll ();
-		}
-
-		void OnSelectorChanged (object o, EventArgs e)
-		{
-			Remove (Children[1]);
-			TreeIter iter;
-			if (combo.GetActiveIter (out iter)) {
-				PackStart ((Widget)widgets[(string)model.GetValue (iter, 0)], true, true, 3);
+				UseMarkup = true;
+				Expanded  = true;
+				Child     = align;
 			}
-			ShowAll ();
+			
+			public void Append (Widget w)
+			{
+				vbox.PackStart (w, false, false, 0);
+			} 
+		}
+		
+		public Palette () : base ()
+		{
+			HscrollbarPolicy = Gtk.PolicyType.Never;
+			VscrollbarPolicy = Gtk.PolicyType.Automatic;
+			ShadowType       = ShadowType.None;
+			
+			groups = new Hashtable(); 
+			
+			main = new VBox (false, 0);
+			AddWithViewport (main);
+		}
+		
+		private Group AddOrGetGroup(string name)
+		{
+			Group group = (Group) groups[name];
+			
+			if (group == null) {
+				group = new Group(name); 
+				main.PackStart (group, false, false, 0);
+				groups.Add(name, group);
+			}
+			
+			return group; 
 		}
 
 		public static Pixbuf IconForType (Type type)
@@ -66,42 +79,30 @@ namespace Stetic {
 			foreach (object attr in type.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)) {
 				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
 				ObjectWrapper.RegisterWrapperType (type, owattr.WrappedType);
-				Pixbuf icon;
-
-				try {
+				
+				Pixbuf icon = Palette.IconForType (type);
+				
+				/*try {
 					icon = new Gdk.Pixbuf (assem, owattr.IconName);
 				} catch {
 					icon = Gdk.Pixbuf.LoadFromResource ("missing.png");
-				}
-
-				Widget w;
-				string catalogue;
+				}*/
 				
+				
+
 				switch (owattr.Type) {
 				case ObjectWrapperType.Container:
-					w = new WidgetFactory (owattr.Name, icon, type);
-					catalogue = "GTK# Containers";
+					AddOrGetGroup("Containers").Append (new WidgetFactory (owattr.Name, icon, type));
 					break;
+
 				case ObjectWrapperType.Window:
-					w = new WindowFactory (owattr.Name, icon, type);
-					catalogue = "GTK# Windows";
+					AddOrGetGroup("Windows").Append (new WindowFactory (owattr.Name, icon, type));
 					break;
+
 				default:
-					w = new WidgetFactory (owattr.Name, icon, type);
-					catalogue = "GTK# Widgets";
+					AddOrGetGroup("Widgets").Append (new WidgetFactory (owattr.Name, icon, type));
 					break;
 				}
-				if (!widgets.Contains (catalogue)) {
-					ScrolledWindow scroller = new ScrolledWindow ();
-					scroller.AddWithViewport (new Gtk.VBox (false, 0));
-					scroller.ShadowType = ShadowType.None;
-					scroller.HscrollbarPolicy = PolicyType.Never;
-					widgets[catalogue] = scroller;
-					model.AppendValues (catalogue);
-					if (combo.Active == -1)
-						combo.Active = 0;
-				}
-				((Box)((Bin)((Bin)widgets[catalogue]).Child).Child).PackStart (w, false, false, 0);
 			}
 		}
 

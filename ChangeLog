@@ -1,3 +1,7 @@
+2005-02-22  Everaldo Canuto  <everaldo_canuto@yahoo.com.br>
+
+	* stetic/Palette.cs: New palette GUI.
+
 2005-02-22  Todd Berman  <tberman@off.net>
 
 	* libstetic/wrapper/Button.cs:
