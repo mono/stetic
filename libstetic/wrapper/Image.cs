@@ -25,6 +25,8 @@ namespace Stetic.Wrapper {
 			return new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog);
 		}
 
+		static Gdk.Pixbuf missing = Gdk.Pixbuf.LoadFromResource ("missing.png");
+
 		protected override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
@@ -32,7 +34,8 @@ namespace Stetic.Wrapper {
 			if (useStock) {
 				stock = Stock;
 				iconSize = IconSize;
-			}
+			} else
+				File = filename;
 		}
 
 		Gtk.Image image {
@@ -92,6 +95,8 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				image.File = filename = value;
+				if (value == "")
+					image.Pixbuf = missing;
 			}
 		}
 	}

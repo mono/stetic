@@ -1,5 +1,52 @@
 2005-02-28  Dan Winship  <danw@novell.com>
 
+	* libstetic/GladeUtils.cs (HydrateProperties): Handle "adjustment"
+	properties, which glade serializes as 6 doubles separated by
+	spaces.
+
+	* libstetic/WidgetSite.cs (Selected): new event
+	(Focus): emit it
+
+	* libstetic/wrapper/ComboBox.cs (GladeImport): use CreateInstance
+	rather than calling down to base.GladeImport, so that we end up
+	with a text-only combobox. Handle the "items" property.
+	(Items): ignore trailing newlines
+
+	* libstetic/wrapper/Dialog.cs (Wrap): Put WidgetSites around the
+	VBox and ActionArea.
+
+	* libstetic/wrapper/Container.cs (FindInternalChild): make this a
+	little more complicated (read: grosser) to deal with the extra
+	WidgetSites inside a Dialog now.
+
+	* libstetic/wrapper/Expander.cs (GladeImport): Do the same label
+	widget hack as in Notebook and Frame
+
+	* libstetic/wrapper/Image.cs: if filename is "", use a "broken
+	image" image.
+
+	* libstetic/wrapper/Label.cs: add a new ctor that takes a string
+	and constructs a label with that string, and a wrapper around the
+	label.
+
+	* libstetic/wrapper/Notebook.cs: connect to the Selected event
+	on the label WidgetSites, and switch pages when a label is
+	selected.
+	(InsertPage): use the new Stetic.Wrapper.Label ctor
+
+	* libstetic/wrapper/OptionMenu.cs (Wrap): if the optionmenu has no
+	Menu, create one here rather than in FlattenMenu.
+
+	* libstetic/wrapper/Table.cs (GladeImportChild): if x_options or
+	y_options is unspecified, consider it to be "expand|fill", which
+	is glade's default value.
+	(SiteOccupancyChanged): don't adjust the cell's packing unless it
+	is set to AutoSize.
+
+	* libstetic/wrapper/Window.cs (Type): make this a shadow prop too
+
+2005-02-28  Dan Winship  <danw@novell.com>
+
 	* libstetic/ObjectWrapperAttribute.cs: add a "Deprecated" flag
 
 	* libstetic/wrapper/OptionMenu.cs: New, wrap Gtk.OptionMenu, but

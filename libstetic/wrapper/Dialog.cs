@@ -29,13 +29,25 @@ namespace Stetic.Wrapper {
 
 		protected override void Wrap (object obj, bool initialized)
 		{
+			WidgetSite site;
+
 			base.Wrap (obj, initialized);
+			Gtk.Dialog dialog = (Gtk.Dialog)Wrapped;
+
+			site = CreateWidgetSite ();
+			dialog.VBox.Reparent (site);
+			dialog.Add (site);
+
+			site = CreateWidgetSite ();
+			dialog.ActionArea.Reparent (site);
+			dialog.VBox.PackEnd (site, false, true, 0);
+
 			if (!initialized) {
-				WidgetSite site = CreateWidgetSite ();
+				site = CreateWidgetSite ();
 				Gtk.Requisition req;
 				req.Width = req.Height = 200;
 				site.EmptySize = req;
-				((Gtk.Dialog)Wrapped).VBox.Add (site);
+				dialog.VBox.Add (site);
 			}
 		}
 	}

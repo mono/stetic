@@ -33,6 +33,8 @@ namespace Stetic.Wrapper {
 					     "InsertAfter");
 		}
 
+		ArrayList tabs = new ArrayList ();
+
 		protected override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
@@ -49,9 +51,11 @@ namespace Stetic.Wrapper {
 			    (string)packingVals[0] == "tab") {
 				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, propNames, propVals);
 				WidgetSite site = CreateWidgetSite ();
+				site.Selected += LabelSelected;
 				site.Add ((Gtk.Widget)wrapper.Wrapped);
 
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), site);
+				tabs.Add (site);
 				return (Widget)wrapper;
 			} else {
 				return base.GladeImportChild (className, id,
@@ -68,10 +72,16 @@ namespace Stetic.Wrapper {
 
 		int InsertPage (int position)
 		{
-			WidgetSite pageSite;
+			WidgetSite labelSite, pageSite;
+
+			labelSite = CreateWidgetSite ();
+			labelSite.Selected += LabelSelected;
+			Stetic.Wrapper.Label label = new Stetic.Wrapper.Label ("page" + (notebook.NPages + 1).ToString ());
+			labelSite.Add ((Gtk.Widget)label.Wrapped);
+			tabs.Insert (position, labelSite);
 
 			pageSite = CreateWidgetSite ();
-			return notebook.InsertPage (pageSite, null /* FIXME */, position);
+			return notebook.InsertPage (pageSite, labelSite, position);
 		}
 
 		[Command ("Go to Previous Page", "Show the previous page", "CheckPreviousPage")]
@@ -99,6 +109,7 @@ namespace Stetic.Wrapper {
 		[Command ("Delete Page", "Delete the current page")]
 		void DeletePage ()
 		{
+			tabs.RemoveAt (notebook.CurrentPage);
 			notebook.RemovePage (notebook.CurrentPage);
 		}
 
@@ -143,6 +154,16 @@ namespace Stetic.Wrapper {
 						return true;
 				}
 				return false;
+			}
+		}
+
+		void LabelSelected (object obj, EventArgs args)
+		{
+			WidgetSite site = obj as WidgetSite;
+			int index = tabs.IndexOf (site);
+			if (index != -1 && index != notebook.CurrentPage) {
+				notebook.CurrentPage = index;
+				site.GrabFocus ();
 			}
 		}
 

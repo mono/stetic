@@ -284,9 +284,13 @@ namespace Stetic {
 			return false;
 		}
 
+		public event EventHandler Selected;
+
 		public void Focus ()
 		{
 			ShowHandles = true;
+			if (Selected != null)
+				Selected (this, EventArgs.Empty);
 		}
 
 		public void UnFocus ()

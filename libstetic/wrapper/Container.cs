@@ -70,25 +70,28 @@ namespace Stetic.Wrapper {
 			return site;
 		}
 
-		protected virtual Gtk.Widget FindInternalChild (string childName)
+		Gtk.Widget FindInternalChild (string childName, Gtk.Container container)
 		{
-			// The fact that this tends to work does not mean it is not an
-			// awful kludge
-
 			Type type = container.GetType ();
 			PropertyInfo pinfo = type.GetProperty (childName.Replace ("_", ""), BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.Instance);
 			if (pinfo != null &&
 			    (pinfo.PropertyType == typeof (Gtk.Widget) ||
 			     pinfo.PropertyType.IsSubclassOf (typeof (Gtk.Widget))))
 				return pinfo.GetValue (container, null) as Gtk.Widget;
+			return null;
+		}
 
-			if (container.Parent != null) {
-				type = container.Parent.GetType ();
-				pinfo = type.GetProperty (childName.Replace ("_", ""), BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.Instance);
-				if (pinfo != null &&
-				    (pinfo.PropertyType == typeof (Gtk.Widget) ||
-				     pinfo.PropertyType.IsSubclassOf (typeof (Gtk.Widget))))
-					return pinfo.GetValue (container.Parent, null) as Gtk.Widget;
+		protected virtual Gtk.Widget FindInternalChild (string childName)
+		{
+			// The fact that this tends to work does not mean it is not an
+			// awful kludge
+
+			Gtk.Container ancestor = container;
+			while (ancestor != null) {
+				Gtk.Widget child = FindInternalChild (childName, ancestor);
+				if (child != null)
+					return child;
+				ancestor = ancestor.Parent as Gtk.Container;
 			}
 
 			Console.WriteLine ("Could not find internal child {0} of {1}",
@@ -168,10 +171,8 @@ namespace Stetic.Wrapper {
 		void SiteRemoved (object obj, Gtk.RemovedArgs args)
 		{
 			WidgetSite site = args.Widget as WidgetSite;
-
-			if (site != null) {
+			if (site != null)
 				site.OccupancyChanged -= SiteOccupancyChanged;
-			}
 		}
 
 		protected virtual void SiteRemoved (WidgetSite site)

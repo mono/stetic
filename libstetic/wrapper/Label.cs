@@ -20,6 +20,13 @@ namespace Stetic.Wrapper {
 				      "Selectable");
 		}
 
+		public Label () {}
+
+		public Label (string text)
+		{
+			Wrap (new Gtk.Label (text), false);
+		}
+
 		protected override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);

@@ -65,11 +65,14 @@ namespace Stetic.Wrapper {
 		{
 			string modal = GladeUtils.ExtractProperty ("modal", propNames, propVals);
 			string type_hint = GladeUtils.ExtractProperty ("type_hint", propNames, propVals);
+			string type = GladeUtils.ExtractProperty ("type", propNames, propVals);
 			base.GladeImport (className, id, propNames, propVals);
 			Modal = (modal == "True");
 
 			if (type_hint != null && type_hint.StartsWith ("GDK_WINDOW_TYPE_HINT_"))
 				TypeHint = (Gdk.WindowTypeHint) Enum.Parse (typeof (Gdk.WindowTypeHint), type_hint.Substring (21), true);
+			if (type != null && type.StartsWith ("GTK_WINDOW_"))
+				Type = (Gtk.WindowType) Enum.Parse (typeof (Gtk.WindowType), type.Substring (11), true);
 		}
 
 		[ConnectBefore]
@@ -101,6 +104,16 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				typeHint = value;
+			}
+		}
+
+		Gtk.WindowType type;
+		public Gtk.WindowType Type {
+			get {
+				return type;
+			}
+			set {
+				type = value;
 			}
 		}
 	}

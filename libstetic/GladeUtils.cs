@@ -27,39 +27,65 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern bool stetic_g_value_hydrate (ref GLib.Value value, string data);
 
+		static bool Hydrate (IntPtr gtype, bool childprop, string name, string strval, out GLib.Value value)
+		{
+			value = new GLib.Value ();
+			bool inited = false;
+
+			if (childprop)
+				inited = stetic_g_value_init_for_child_property (ref value, gtype, name);
+			else
+				inited = stetic_g_value_init_for_property (ref value, gtype, name);
+
+			if (!inited) {
+				Console.WriteLine ("Unrecognized {0}property name '{1}'",
+						   childprop ? "child " : "", name);
+				return false;
+			}
+
+			if (name == "adjustment") {
+				try {
+					string[] vals = strval.Split (' ');
+					double deflt, min, max, step, page_inc, page_size;
+
+					deflt = Double.Parse (vals[0]);
+					min = Double.Parse (vals[1]);
+					max = Double.Parse (vals[2]);
+					step = Double.Parse (vals[3]);
+					page_inc = Double.Parse (vals[4]);
+					page_size = Double.Parse (vals[5]);
+
+					value.Val = new Gtk.Adjustment (deflt, min, max, step, page_inc, page_size);
+					return true;
+				} catch {
+					;
+				}
+			}
+
+			if (!stetic_g_value_hydrate (ref value, strval)) {
+				Console.WriteLine ("Could not hydrate {0}property '{1}' with value '{2}'",
+						   childprop ? "child " : "", name, strval);
+				return false;
+			}
+
+			return true;
+		}
+
 		static void HydrateProperties (IntPtr gtype, bool childprops, ArrayList names, ArrayList strvals, out ArrayList values)
 		{
 			values = new ArrayList ();
 
 			int i = 0;
 			while (i < names.Count) {
-				string name = names[i] as string;
-				string strval = strvals[i] as string;
+				GLib.Value value;
 
-				GLib.Value value = new GLib.Value ();
-				bool inited = false;
-
-				if (childprops)
-					inited = stetic_g_value_init_for_child_property (ref value, gtype, name);
-				else
-					inited = stetic_g_value_init_for_property (ref value, gtype, name);
-
-				if (!inited) {
-					Console.WriteLine ("Unrecognized {0}property name '{1}'",
-							   childprops ? "child " : "", name);
-					names.RemoveAt (i);
-					strvals.RemoveAt (i);
-					continue;
-				}
-				if (!stetic_g_value_hydrate (ref value, strval)) {
-					Console.WriteLine ("Could not hydrate {0}property '{1}' with value '{2}'",
-							   childprops ? "child " : "", name, strval);
+				if (Hydrate (gtype, childprops, names[i] as string, strvals[i] as string, out value)) {
+					values.Add (value);
+					i++;
+				} else {
 					names.RemoveAt (i);
 					strvals.RemoveAt (i);
 				}
-
-				values.Add (value);
-				i++;
 			}
 		}
 

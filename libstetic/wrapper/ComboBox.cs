@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 namespace Stetic.Wrapper {
 
@@ -23,6 +24,16 @@ namespace Stetic.Wrapper {
 			return Gtk.ComboBox.NewText ();
 		}
 
+		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		{
+			Gtk.ComboBox combobox = CreateInstance ();
+			string items = GladeUtils.ExtractProperty ("items", propNames, propVals);
+			GladeUtils.SetProps (combobox, propNames, propVals);
+			combobox.Name = id;
+			Wrap (combobox, true);
+			Items = items;
+		}
+
 		string items = "";
 		string[] item = new string[0];
 
@@ -33,6 +44,9 @@ namespace Stetic.Wrapper {
 				return items;
 			}
 			set {
+				while (value.EndsWith ("\n"))
+					value = value.Substring (0, value.Length - 1);
+
 				Gtk.ComboBox combobox = (Gtk.ComboBox)Wrapped;
 				string[] newitem = value.Split ('\n');
 				int active = combobox.Active;

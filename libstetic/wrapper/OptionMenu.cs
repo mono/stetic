@@ -21,6 +21,11 @@ namespace Stetic.Wrapper {
 		protected override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
+			if (optionmenu.Menu == null) {
+				Gtk.Menu menu = new Gtk.Menu ();
+				menu.Show ();
+				optionmenu.Menu = menu;
+			}
 		}
 
 		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
@@ -48,12 +53,6 @@ namespace Stetic.Wrapper {
 		void FlattenMenu ()
 		{
 			Gtk.Menu menu = optionmenu.Menu as Gtk.Menu;
-			if (menu == null) {
-				menu = new Gtk.Menu ();
-				menu.Show ();
-				optionmenu.Menu = menu;
-			}
-
 			System.Text.StringBuilder sb = new System.Text.StringBuilder ();
 
 			foreach (Gtk.Widget w in menu.Children) {

@@ -47,6 +47,24 @@ namespace Stetic.Wrapper {
 			base.GladeImport (className, id, propNames, propVals);
 		}
 
+		public override Widget GladeImportChild (string className, string id,
+							 ArrayList propNames, ArrayList propVals,
+							 ArrayList packingNames, ArrayList packingVals)
+		{
+			if (packingNames.IndexOf ("x_options") == -1) {
+				packingNames.Add ("x_options");
+				packingVals.Add ("expand|fill");
+			}
+			if (packingNames.IndexOf ("y_options") == -1) {
+				packingNames.Add ("y_options");
+				packingVals.Add ("expand|fill");
+			}
+
+			return base.GladeImportChild (className, id,
+						      propNames, propVals,
+						      packingNames, packingVals);
+		}
+
 		void DoSync ()
 		{
 			Sync ();
@@ -358,14 +376,10 @@ namespace Stetic.Wrapper {
 		protected override void SiteOccupancyChanged (WidgetSite site)
 		{
 			Freeze ();
-			if (site.Occupied) {
+			if (site.Occupied && AutoSize[site]) {
 				Gtk.Table.TableChild tc = table[site] as Gtk.Table.TableChild;
-				// FIXME: This check is to workaround a weird
-				// gtk warning. Something is going wrong.
-				if (tc.Child.Parent == tc.Parent) {
-					tc.XOptions = 0;
-					tc.YOptions = 0;
-				}
+				tc.XOptions = 0;
+				tc.YOptions = 0;
 			}
 			Thaw ();
 			base.SiteOccupancyChanged (site);
