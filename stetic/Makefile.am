@@ -3,7 +3,7 @@ noinst_SCRIPTS = stetic
 
 stetic_exe_SOURCES =			\
 	ContextMenu.cs			\
-	GladeImport.cs			\
+	Glade.cs			\
 	Grid.cs				\
 	Palette.cs			\
 	Project.cs			\

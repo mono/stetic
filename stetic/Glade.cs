@@ -8,15 +8,11 @@ using Gtk;
 
 namespace Stetic {
 
-	public class GladeImport {
-
-		static WidgetFactory empty_istetic;
+	public static class Glade {
 
 		public const string Glade20SystemId = "http://glade.gnome.org/glade-2.0.dtd";
 
-		static MethodInfo setProperty = typeof (GLib.Object).GetMethod ("SetProperty", BindingFlags.NonPublic | BindingFlags.Instance);
-		
-		public static void Load (string filename, Project project)
+		public static void Import (string filename, Project project)
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
@@ -73,19 +69,19 @@ namespace Stetic {
 			ExtractProperties (widget.SelectNodes ("property"), out props);
 
 			ObjectWrapper wrapper;
-			if (thischild == null) {
-				wrapper = Stetic.ObjectWrapper.GladeImport (project, className, id, props);
-			} else if (thischild.Attributes["internal-child"] != null) {
-				wrapper = parent.GladeSetInternalChild (thischild.Attributes["internal-child"].Value,
-									className, id, props);
-			} else {
-				Hashtable childprops;
-				ExtractProperties (thischild.SelectNodes ("packing/property"), out childprops);
-				wrapper = parent.GladeImportChild (className, id, props, childprops);
-			}
-
-			if (wrapper == null) {
-				Console.WriteLine ("Could not create stetic wrapper for type {0}", className);
+			try {
+				if (thischild == null) {
+					wrapper = Stetic.ObjectWrapper.GladeImport (project, className, id, props);
+				} else if (thischild.Attributes["internal-child"] != null) {
+					wrapper = parent.GladeSetInternalChild (thischild.Attributes["internal-child"].Value,
+										className, id, props);
+				} else {
+					Hashtable childprops;
+					ExtractProperties (thischild.SelectNodes ("packing/property"), out childprops);
+					wrapper = parent.GladeImportChild (className, id, props, childprops);
+				}
+			} catch (GladeException ge) {
+				Console.Error.WriteLine ("Could not import widget: {0}", ge);
 				return null;
 			}
 

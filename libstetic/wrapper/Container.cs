@@ -50,9 +50,6 @@ namespace Stetic.Wrapper {
 							Hashtable props, Hashtable childprops)
 		{
 			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
-			if (wrapper == null)
-				return null;
-
 			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
 			if (container.ChildType () == Gtk.Widget.GType) {
@@ -97,9 +94,6 @@ namespace Stetic.Wrapper {
 					return child;
 				ancestor = ancestor.Parent as Gtk.Container;
 			}
-
-			Console.WriteLine ("Could not find internal child {0} of {1}",
-					   childName, container);
 			return null;
 		}
 
@@ -108,7 +102,7 @@ namespace Stetic.Wrapper {
 		{
 			Gtk.Widget widget = FindInternalChild (childName);
 			if (widget == null)
-				return null;
+				throw new GladeException ("Unrecognized internal child name", className, false, "internal-child", childName);
 
 			widget.Name = id;
 			GladeUtils.SetProps (widget, props);

@@ -1,5 +1,25 @@
 2005-03-08  Dan Winship  <danw@novell.com>
 
+	* libstetic/GladeException.cs: exception class for Glade import problems
+
+	* libstetic/GladeUtils.cs:
+	* libstetic/ObjectWrapper.cs:
+	* libstetic/wrapper/Container.cs: use GladeException
+
+	* libstetic/GladeUtils.cs (Hydrate): Call g_type_class_ref() and
+	pass the GObjectClass* to the glue methods rather than the GType*
+	(to save a bunch of lookups).
+
+	* glue/value.c (stetic_g_value_init_for_property,
+	stetic_g_value_init_for_child_property): Update for that
+
+	* stetic/Glade.cs: renamed from GladeImport.cs
+	(Import): renamed from Load. Use GladeException.
+
+	* libstetic/wrapper/Box.cs (Sync): Fix to not crash on empty boxes
+
+2005-03-08  Dan Winship  <danw@novell.com>
+
 	* libstetic/GladeUtils.cs (ExtractProperty, CreateWidget,
 	SetProps, SetPacking): Make these all take a Hashtable of
 	propname->value rather than a pair of ArrayLists.

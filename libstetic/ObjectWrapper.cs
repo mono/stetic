@@ -109,15 +109,15 @@ namespace Stetic {
 		{
 			Type type = (Type)wrapperTypes[className];
 			if (type == null)
-				return null;
+				throw new GladeException ("No Stetic wrapper for type", className);
 
 			MethodInfo info = type.GetMethod ("GladeImport", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 			if (info == null)
-				return null;
+				throw new GladeException ("No Import method for type " + type.FullName, className);
 
 			ObjectWrapper wrapper = Activator.CreateInstance (type) as ObjectWrapper;
 			if (wrapper == null)
-				return null;
+				throw new GladeException ("Can't create wrapper for type " + type.FullName, className);
 			wrapper.stetic = stetic;
 			info.Invoke (wrapper, new object[] { className, id, props });
 			return wrapper;

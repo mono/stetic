@@ -14,30 +14,18 @@ namespace Stetic {
 			return value;
 		}
 
-		[DllImport("libsteticglue")]
-		static extern bool stetic_g_value_init_for_property (ref GLib.Value value, IntPtr gtype, string propertyName);
-
-		[DllImport("libsteticglue")]
-		static extern bool stetic_g_value_init_for_child_property (ref GLib.Value value, IntPtr gtype, string propertyName);
-
-		[DllImport("libsteticglue")]
-		static extern bool stetic_g_value_hydrate (ref GLib.Value value, string data);
-
-		static bool Hydrate (IntPtr gtype, bool childprop, string name, string strval, out GLib.Value value)
+		static void Hydrate (IntPtr klass, bool childprop, string name, string strval, out GLib.Value value)
 		{
 			value = new GLib.Value ();
-			bool inited = false;
+			bool inited;
 
 			if (childprop)
-				inited = stetic_g_value_init_for_child_property (ref value, gtype, name);
+				inited = stetic_g_value_init_for_child_property (ref value, klass, name);
 			else
-				inited = stetic_g_value_init_for_property (ref value, gtype, name);
+				inited = stetic_g_value_init_for_property (ref value, klass, name);
 
-			if (!inited) {
-				Console.WriteLine ("Unrecognized {0}property name '{1}'",
-						   childprop ? "child " : "", name);
-				return false;
-			}
+			if (!inited)
+				throw new GladeException ("Unrecognized property name", null, childprop, name, strval);
 
 			if (name == "adjustment") {
 				try {
@@ -52,24 +40,21 @@ namespace Stetic {
 					page_size = Double.Parse (vals[5]);
 
 					value.Val = new Gtk.Adjustment (deflt, min, max, step, page_inc, page_size);
-					return true;
+					return;
 				} catch {
 					;
 				}
 			}
 
-			if (!stetic_g_value_hydrate (ref value, strval)) {
-				Console.WriteLine ("Could not hydrate {0}property '{1}' with value '{2}'",
-						   childprop ? "child " : "", name, strval);
-				return false;
-			}
-
-			return true;
+			if (!stetic_g_value_hydrate (ref value, strval))
+				throw new GladeException ("Could not hydrate property", null, childprop, name, strval);
 		}
 
 		static void HydrateProperties (IntPtr gtype, bool childprops, Hashtable props,
 					       out string[] propNames, out GLib.Value[] propVals)
 		{
+			IntPtr klass = g_type_class_ref (gtype);
+
 			ArrayList names = new ArrayList ();
 			ArrayList values = new ArrayList ();
 
@@ -77,24 +62,21 @@ namespace Stetic {
 				string strval = props[name] as string;
 
 				GLib.Value value;
-				if (Hydrate (gtype, childprops, name, strval, out value)) {
+				try {
+					Hydrate (klass, childprops, name, strval, out value);
 					names.Add (name);
 					values.Add (value);
+				} catch (GladeException ge) {
+					ge.ClassName = Marshal.PtrToStringAnsi (g_type_name (gtype));
+					Console.Error.WriteLine (ge);
 				}
 			}
 
 			propNames = (string[])names.ToArray (typeof (string));
 			propVals = (GLib.Value[])values.ToArray (typeof (GLib.Value));
+
+			g_type_class_unref (klass);
 		}
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_type_from_name (string name);
-
-		[DllImport("glibsharpglue-2")]
-		static extern IntPtr gtksharp_object_newv (IntPtr gtype, int n_params, string[] names, GLib.Value[] vals);
-
-		[DllImport("libgtk-win32-2.0-0.dll")]
-		static extern void gtk_object_sink (IntPtr raw);
 
 		static public Gtk.Widget CreateWidget (string className, Hashtable props)
 		{
@@ -105,25 +87,17 @@ namespace Stetic {
 			HydrateProperties (gtype, false, props, out propNames, out propVals);
 
 			IntPtr raw = gtksharp_object_newv (gtype, propNames.Length, propNames, propVals);
-			if (raw == IntPtr.Zero) {
-				Console.WriteLine ("Could not create widget of type {0}", className);
-				return null;
-			}
+			if (raw == IntPtr.Zero)
+				throw new GladeException ("Could not create widget", className);
 
 			Gtk.Widget widget = (Gtk.Widget)GLib.Object.GetObject (raw, true);
 			if (widget == null) {
-				Console.WriteLine ("Could not create gtk# wrapper for type {0}", className);
 				gtk_object_sink (raw);
+				throw new GladeException ("Could not create gtk# wrapper", className);
 			}
 
 			return widget;
 		}
-
-		[DllImport("glibsharpglue-2")]
-		static extern IntPtr gtksharp_get_type_id (IntPtr obj);
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern void g_object_set_property (IntPtr obj, string name, ref GLib.Value val);
 
 		static public void SetProps (Gtk.Widget widget, Hashtable props)
 		{
@@ -146,5 +120,38 @@ namespace Stetic {
 			for (int i = 0; i < propNames.Length; i++)
 				parent.ChildSetProperty (child, propNames[i], propVals[i]);
 		}
+
+		[DllImport("libsteticglue")]
+		static extern bool stetic_g_value_init_for_property (ref GLib.Value value, IntPtr klass, string propertyName);
+
+		[DllImport("libsteticglue")]
+		static extern bool stetic_g_value_init_for_child_property (ref GLib.Value value, IntPtr klass, string propertyName);
+
+		[DllImport("libsteticglue")]
+		static extern bool stetic_g_value_hydrate (ref GLib.Value value, string data);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_type_name (IntPtr gtype);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_type_from_name (string name);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_type_class_ref (IntPtr gtype);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern void g_type_class_unref (IntPtr gtype);
+
+		[DllImport("glibsharpglue-2")]
+		static extern IntPtr gtksharp_object_newv (IntPtr gtype, int n_params, string[] names, GLib.Value[] vals);
+
+		[DllImport("libgtk-win32-2.0-0.dll")]
+		static extern void gtk_object_sink (IntPtr raw);
+
+		[DllImport("glibsharpglue-2")]
+		static extern IntPtr gtksharp_get_type_id (IntPtr obj);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern void g_object_set_property (IntPtr obj, string name, ref GLib.Value val);
 	}
 }

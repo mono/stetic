@@ -75,7 +75,7 @@ namespace Stetic {
 			FileChooserDialog dialog = new FileChooserDialog ("Load glade file", null, FileChooserAction.Open, Gtk.Stock.Cancel, Gtk.ResponseType.Cancel, Gtk.Stock.Open, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();
 			if (response == (int)Gtk.ResponseType.Ok) {
-				GladeImport.Load (dialog.Filename, Project);
+				Glade.Import (dialog.Filename, Project);
 			}
 			dialog.Hide ();
 		}

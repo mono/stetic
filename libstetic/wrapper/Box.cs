@@ -56,6 +56,8 @@ namespace Stetic.Wrapper {
 			Gdk.Rectangle alloc = box.Allocation;
 
 			site.ClearFaults ();
+			if (sorted.Length == 0)
+				return;
 
 			if (this is HBox) {
 				if (sorted[0] != null)
