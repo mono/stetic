@@ -1,3 +1,17 @@
+2004-12-10  Dan Winship  <danw@novell.com>
+
+	* stetic/WidgetBox.cs: Always have a GdkWindow, so that the
+	background of a container can be clicked on to select it (if any
+	background is visible). Fix up coordinate handling accordingly.
+
+	* stetic/WidgetFactory.cs (DefaultWidgets): add VButtonBox and
+	HButtonBox.
+
+	* stetic/Makefile.am (stetic_exe_SOURCES): add
+	HButtonBoxWrapper.cs, VButtonBoxWrapper.cs
+	(stetic.exe): Use -pkg:gtk-sharp-2.0 rather than the output we
+	already cached in configure.in, because Miggie says so. :)
+	
 2004-12-08  Dan Winship  <danw@novell.com>
 
 	* Initial commit
