@@ -1,3 +1,38 @@
+2005-01-20  Dan Winship  <danw@novell.com>
+
+	* stetic/IObjectWrapper.cs (PropertyGroup): Make this take a
+	varargs list of property names and build the PropertyDescriptors
+	itself, to cut down on the amount of work the wrappers need to do.
+	Also add an indexer to retrieve a PropertyDescriptor by name.
+	(IPropertySensitizer): Gone
+
+	* stetic/PropertyDescriptor.cs: Update the ctor for how
+	PropertyGroup uses it now.
+	(DependsOn, DependsInverselyOn, Dependencies,
+	InverseDependencies): stuff to specify/probe inter-property
+	dependencies, to replace the old IPropertySensitizer stuff more
+	simply.
+
+	* stetic/PropertyGrid.cs: Replace IPropertySensitizer stuff with
+	PropertyDescriptor.Dependencies, etc
+
+	* stetic/Palette.cs (AddWidgets): Catch exceptions from the
+	Gdk.Pixbuf ctor and use the "broken image" image instead if it
+	can't load the wrapper's specified image.
+
+	* stetic/wrapper/*.cs: Update for new, simpler PropertyGroup
+	creation and inter-property sensitivity settings.
+
+	* stetic/wrapper/ColorButton.cs: 
+	* stetic/wrapper/HScale.cs: 
+	* stetic/wrapper/ProgressBar.cs: 
+	* stetic/wrapper/Scale.cs: 
+	* stetic/wrapper/Statusbar.cs: 
+	* stetic/wrapper/VScale.cs: New wrappers
+
+	* pixmaps/missing.png: "missing image" pixmap to use for now for
+	widgets I don't have an icon for.
+
 2005-01-14  Dan Winship  <danw@novell.com>
 
 	* stetic/PropertyEditor.cs (BasicEditor.EditorValueChanged,

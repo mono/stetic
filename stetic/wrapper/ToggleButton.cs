@@ -15,17 +15,13 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup ToggleButtonProperties;
 
 		static ToggleButton () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Button), "UseStock"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.ToggleButton), "StockId"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.ToggleButton), typeof (Gtk.Button), "Label"),
-//				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "Icon")
-				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Active"),
-				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Inconsistent"),
-			};				
-			ToggleButtonProperties = new PropertyGroup ("Toggle Button Properties", props);
+			ToggleButtonProperties = new PropertyGroup ("Toggle Button Properties",
+								    typeof (Stetic.Wrapper.ToggleButton),
+								    "UseStock",
+								    "StockId",
+								    "Label",
+								    "Active",
+								    "Inconsistent");
 
 			groups = new PropertyGroup[] {
 				ToggleButtonProperties,

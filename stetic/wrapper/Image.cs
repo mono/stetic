@@ -15,12 +15,9 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup ImageProperties;
 
 		static Image () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Image), "File"),
-			};				
-			ImageProperties = new PropertyGroup ("Image Properties", props);
+			ImageProperties = new PropertyGroup ("Image Properties",
+							     typeof (Stetic.Wrapper.Image),
+							     "File");
 
 			groups = new PropertyGroup[] {
 				ImageProperties, Misc.MiscProperties,

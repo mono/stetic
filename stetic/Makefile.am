@@ -31,6 +31,7 @@ stetic_exe_SOURCES =			\
 	wrapper/Button.cs		\
 	wrapper/ButtonBox.cs		\
 	wrapper/CheckButton.cs		\
+	wrapper/ColorButton.cs		\
 	wrapper/ComboBox.cs		\
 	wrapper/Dialog.cs		\
 	wrapper/DrawingArea.cs		\
@@ -39,6 +40,7 @@ stetic_exe_SOURCES =			\
 	wrapper/HBox.cs			\
 	wrapper/HButtonBox.cs		\
 	wrapper/HPaned.cs		\
+	wrapper/HScale.cs		\
 	wrapper/HScrollbar.cs		\
 	wrapper/HSeparator.cs		\
 	wrapper/Icon.cs			\
@@ -47,15 +49,19 @@ stetic_exe_SOURCES =			\
 	wrapper/Misc.cs			\
 	wrapper/Notebook.cs		\
 	wrapper/Paned.cs		\
+	wrapper/ProgressBar.cs		\
 	wrapper/RadioButton.cs		\
 	wrapper/Range.cs		\
+	wrapper/Scale.cs		\
 	wrapper/SpinButton.cs		\
+	wrapper/Statusbar.cs		\
 	wrapper/Table.cs		\
 	wrapper/TextView.cs		\
 	wrapper/ToggleButton.cs		\
 	wrapper/VBox.cs			\
 	wrapper/VButtonBox.cs		\
 	wrapper/VPaned.cs		\
+	wrapper/VScale.cs		\
 	wrapper/VScrollbar.cs		\
 	wrapper/VSeparator.cs		\
 	wrapper/Widget.cs		\

@@ -11,16 +11,12 @@ namespace Stetic.Wrapper {
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
 		public static PropertyGroup ArrowProperties;
-		public static PropertyGroup ArrowExtraProperties;
 
 		static Arrow () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Arrow), "ArrowType"),
-				new PropertyDescriptor (typeof (Gtk.Arrow), "ShadowType"),
-			};				
-			ArrowProperties = new PropertyGroup ("Arrow Properties", props);
+			ArrowProperties = new PropertyGroup ("Arrow Properties",
+							     typeof (Gtk.Arrow),
+							     "ArrowType",
+							     "ShadowType");
 
 			groups = new PropertyGroup[] {
 				ArrowProperties, Misc.MiscProperties,

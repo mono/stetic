@@ -9,15 +9,12 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup MiscProperties;
 
 		static Misc () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Misc), "Xpad"),
-				new PropertyDescriptor (typeof (Gtk.Misc), "Ypad"),
-				new PropertyDescriptor (typeof (Gtk.Misc), "Xalign"),
-				new PropertyDescriptor (typeof (Gtk.Misc), "Yalign"),
-			};
-			MiscProperties = new PropertyGroup ("Miscellaneous Alignment Properties", props);
+			MiscProperties = new PropertyGroup ("Miscellaneous Alignment Properties",
+							    typeof (Gtk.Misc),
+							    "Xpad",
+							    "Ypad",
+							    "Xalign",
+							    "Yalign");
 		}
 	}
 }

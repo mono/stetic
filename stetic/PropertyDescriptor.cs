@@ -2,6 +2,7 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
+using System.Collections;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -14,8 +15,9 @@ namespace Stetic {
 		EventInfo eventInfo;
 		Type editorType;
 		object defaultValue;
+		ArrayList dependencies = new ArrayList (), inverseDependencies = new ArrayList ();
 
-		public PropertyDescriptor (Type objectType, Type baseType, string propertyName)
+		public PropertyDescriptor (Type objectType, string propertyName)
 		{
 			Type parentType;
 
@@ -24,24 +26,28 @@ namespace Stetic {
 			if (dot == -1) {
 				parentType = objectType;
 				memberInfo = null;
-				propertyInfo = objectType.GetProperty (propertyName);
+				propertyInfo = objectType.GetProperty (propertyName, BindingFlags.Public | BindingFlags.Instance);
 			} else {
-				memberInfo = objectType.GetProperty (propertyName.Substring (0, dot));
+				memberInfo = objectType.GetProperty (propertyName.Substring (0, dot), BindingFlags.Public | BindingFlags.Instance);
 				if (memberInfo == null)
 					throw new ArgumentException ("Invalid property name " + objectType.Name + "." + propertyName);
 				parentType = memberInfo.PropertyType;
-				propertyInfo = parentType.GetProperty (propertyName.Substring (dot + 1));
+				propertyInfo = parentType.GetProperty (propertyName.Substring (dot + 1), BindingFlags.Public | BindingFlags.Instance);
 			}
 			if (propertyInfo == null)
-				throw new ArgumentException ("Invalid property name " + parentType.Name + "." + propertyName);
+				throw new ArgumentException ("Invalid property name " + objectType.Name + "." + propertyName);
 
-			eventInfo = parentType.GetEvent (propertyInfo.Name + "Changed");
+			eventInfo = parentType.GetEvent (propertyInfo.Name + "Changed", BindingFlags.Public | BindingFlags.Instance);
 
-			if (baseType != null) {
-				PropertyDescriptor baseProp = new PropertyDescriptor (baseType, propertyName);
-				editorType = baseProp.editorType;
-				defaultValue = baseProp.defaultValue;
-				pspec = baseProp.pspec;
+			// FIXME. This is ugly.
+			if (objectType.GetInterface ("Stetic.IObjectWrapper") != null &&
+			    objectType.BaseType.GetProperty (propertyName) != null) {
+				PropertyDescriptor baseProp = new PropertyDescriptor (objectType.BaseType, propertyName);
+				if (baseProp != null) {
+					editorType = baseProp.editorType;
+					defaultValue = baseProp.defaultValue;
+					pspec = baseProp.pspec;
+				}
 			}
 
 			foreach (object attr in propertyInfo.GetCustomAttributes (false)) {
@@ -66,8 +72,6 @@ namespace Stetic {
 				}
 			}
 		}
-
-		public PropertyDescriptor (Type objectType, string propertyName) : this (objectType, null, propertyName) {}
 
 		public string Name {
 			get {
@@ -141,5 +145,28 @@ namespace Stetic {
 				obj = memberInfo.GetValue (obj, null);
 			propertyInfo.SetValue (obj, value, null);
 		}
+
+		public void DependsOn (PropertyDescriptor master)
+		{
+			dependencies.Add (master);
+		}
+
+		public void DependsInverselyOn (PropertyDescriptor master)
+		{
+			inverseDependencies.Add (master);
+		}
+
+		public IList Dependencies {
+			get {
+				return dependencies;
+			}
+		}
+
+		public IList InverseDependencies {
+			get {
+				return inverseDependencies;
+			}
+		}
+
 	}
 }

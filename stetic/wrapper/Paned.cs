@@ -10,20 +10,16 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup PanedChildProperties;
 
 		static Paned () {
-			PropertyDescriptor[] props;
+			PanedProperties = new PropertyGroup ("Pane Properties",
+							     typeof (Stetic.Wrapper.Paned),
+							     "MinPosition",
+							     "MaxPosition",
+							     "BorderWidth");
 
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Paned), "MinPosition"),
-				new PropertyDescriptor (typeof (Gtk.Paned), "MaxPosition"),
-				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth"),
-			};
-			PanedProperties = new PropertyGroup ("Pane Properties", props);
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Paned.PanedChild), "Resize"),
-				new PropertyDescriptor (typeof (Gtk.Paned.PanedChild), "Shrink"),
-			};
-			PanedChildProperties = new PropertyGroup ("Pane Child Layout", props);
+			PanedChildProperties = new PropertyGroup ("Pane Child Layout",
+								  typeof (Gtk.Paned.PanedChild),
+								  "Resize",
+								  "Shrink");
 		}
 	}
 }

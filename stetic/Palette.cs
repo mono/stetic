@@ -40,7 +40,13 @@ namespace Stetic {
 					if (wwattr.Type != wtype)
 						continue;
 
-					Pixbuf icon = new Gdk.Pixbuf (assem, wwattr.IconName);
+					Pixbuf icon;
+
+					try {
+						icon = new Gdk.Pixbuf (assem, wwattr.IconName);
+					} catch {
+						icon = Gdk.Pixbuf.LoadFromResource ("missing.png");
+					}
 
 					if (wtype == WidgetType.Window)
 						box.PackStart (new WindowFactory (wwattr.Name, icon, type));

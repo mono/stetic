@@ -14,15 +14,12 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup RadioButtonExtraProperties;
 
 		static RadioButton () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Button), "Label"),
-				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Active"),
-				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Inconsistent"),
-				new PropertyDescriptor (typeof (Gtk.ToggleButton), "DrawIndicator"),
-			};				
-			RadioButtonProperties = new PropertyGroup ("Radio Button Properties", props);
+			RadioButtonProperties = new PropertyGroup ("Radio Button Properties",
+								   typeof (Stetic.Wrapper.RadioButton),
+								   "Label",
+								   "Active",
+								   "Inconsistent",
+								   "DrawIndicator");
 
 			groups = new PropertyGroup[] {
 				RadioButtonProperties, Button.ButtonExtraProperties,

@@ -8,7 +8,7 @@ using System.ComponentModel;
 namespace Stetic.Wrapper {
 
 	[WidgetWrapper ("Button", "button.png")]
-	public class Button : Gtk.Button, Stetic.IObjectWrapper, Stetic.IPropertySensitizer, Stetic.IContextMenuProvider {
+	public class Button : Gtk.Button, Stetic.IObjectWrapper, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -16,23 +16,21 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup ButtonExtraProperties;
 
 		static Button () {
-			PropertyDescriptor[] props;
+			ButtonProperties = new PropertyGroup ("Button Properties",
+							      typeof (Stetic.Wrapper.Button),
+							      "UseStock",
+							      "StockId",
+							      "Label");
+			ButtonProperties["StockId"].DependsOn (ButtonProperties["UseStock"]);
+			ButtonProperties["Label"].DependsInverselyOn (ButtonProperties["UseStock"]);
 
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Button), "UseStock"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "StockId"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), typeof (Gtk.Button), "Label"),
-			};				
-			ButtonProperties = new PropertyGroup ("Button Properties", props);
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Button), "FocusOnClick"),
-				new PropertyDescriptor (typeof (Gtk.Button), "UseUnderline"),
-				new PropertyDescriptor (typeof (Gtk.Button), "Relief"),
-				new PropertyDescriptor (typeof (Gtk.Button), "Xalign"),
-				new PropertyDescriptor (typeof (Gtk.Button), "Yalign"),
-			};
-			ButtonExtraProperties = new PropertyGroup ("Extra Button Properties", props);
+			ButtonExtraProperties = new PropertyGroup ("Extra Button Properties",
+								   typeof (Stetic.Wrapper.Button),
+								   "FocusOnClick",
+								   "UseUnderline",
+								   "Relief",
+								   "Xalign",
+								   "Yalign");
 
 			groups = new PropertyGroup[] {
 				ButtonProperties, ButtonExtraProperties,
@@ -44,7 +42,6 @@ namespace Stetic.Wrapper {
 		{
 			UseStock = UseUnderline = true;
 			StockId = Gtk.Stock.Ok;
-			Notify.Add (this, new NotifyDelegate (Notified));
 		}
 
 		public IEnumerable ContextMenuItems (IWidgetSite context)
@@ -72,10 +69,6 @@ namespace Stetic.Wrapper {
 			WidgetSite site = new WidgetSite ();
 			site.Show ();
 			Add (site);
-
-			EmitSensitivityChanged ("UseStock", false);
-			EmitSensitivityChanged ("StockId", false);
-			EmitSensitivityChanged ("Label", false);
 		}
 
 		void RestoreLabel (IWidgetSite context)
@@ -87,26 +80,23 @@ namespace Stetic.Wrapper {
 				base.Label = stockId;
 			else
 				base.Label = label;
-
-			EmitSensitivityChanged ("UseStock", true);
-			EmitSensitivityChanged ("StockId", true);
-			EmitSensitivityChanged ("Label", true);
-		}
-
-		void Notified (ParamSpec pspec)
-		{
-			if (pspec.Name == "use-stock") {
-				EmitSensitivityChanged ("StockId", UseStock);
-				EmitSensitivityChanged ("Label", !UseStock);
-				if (UseStock)
-					base.Label = stockId;
-				else
-					base.Label = label;
-			}
 		}
 
 		string stockId;
 		string label;
+
+		public new bool UseStock {
+			get {
+				return base.UseStock;
+			}
+			set {
+				if (value)
+					base.Label = stockId;
+				else
+					base.Label = label;
+				base.UseStock = value;
+			}
+		}
 
 		[Editor (typeof (Stetic.Editor.StockItem), typeof (Gtk.Widget))]
 		[DefaultValue ("gtk-ok")]
@@ -133,31 +123,7 @@ namespace Stetic.Wrapper {
 				label = value;
 				if (!UseStock)
 					base.Label = value;
-
-				if (LabelChanged != null)
-					LabelChanged (this, EventArgs.Empty);
 			}
-		}
-
-		public event EventHandler LabelChanged;
-
-		public IEnumerable InsensitiveProperties {
-			get {
-				if (Child is WidgetBox)
-					return new string[] { "UseStock", "StockId", "Label" };
-				else if (UseStock)
-					return new string[] { "Label" };
-				else
-					return new string[0];
-			}
-		}
-
-		public event SensitivityChangedDelegate SensitivityChanged;
-
-		void EmitSensitivityChanged (string property, bool sensitivity)
-		{
-			if (SensitivityChanged != null)
-				SensitivityChanged (property, sensitivity);
 		}
 	}
 }

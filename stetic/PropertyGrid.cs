@@ -11,8 +11,9 @@ namespace Stetic {
 
 		SizeGroup sgroup;
 		Hashtable editors;
+		ArrayList sensitives;
 
-		GLib.Object selection;
+		protected object selection;
 		IntPtr notifyId;
 
 		public PropertyGrid () : base (false, 6)
@@ -25,14 +26,15 @@ namespace Stetic {
 
 		protected void Clear ()
 		{
-			if (selection != null) {
-				Notify.Remove (selection, notifyId);
-				selection = null;
+			if (selection is GLib.Object) {
+				Notify.Remove ((GLib.Object)selection, notifyId);
 				notifyId = IntPtr.Zero;
 			}
+			selection = null;
 			foreach (Widget w in Children)
 				Remove (w);
 			editors = new Hashtable ();
+			sensitives = new ArrayList ();
 		}
 
 		protected VBox AddGroup (string name)
@@ -72,7 +74,7 @@ namespace Stetic {
 				if (prop.ParamSpec != null)
 					editors[prop.ParamSpec.Name] = rep;
 				else if (prop.EventInfo != null)
-					prop.EventInfo.AddEventHandler (selection, new EventHandler (rep.Update));
+					prop.EventInfo.AddEventHandler (obj, new EventHandler (rep.Update));
 				rep.ShowAll ();
 				sgroup.AddWidget (rep);
 				box.PackStart (rep, false, false, 0);
@@ -80,6 +82,19 @@ namespace Stetic {
 
 			box.ShowAll ();
 			group.PackStart (box, false, false, 0);
+
+			if (prop.Dependencies.Count > 0 || prop.InverseDependencies.Count > 0) {
+				sensitives.Add (prop);
+
+				foreach (PropertyDescriptor master in prop.Dependencies) {
+					if (master.ParamSpec == null && master.EventInfo != null)
+						master.EventInfo.AddEventHandler (obj, new EventHandler (UpdateSensitivity));
+				}
+				foreach (PropertyDescriptor master in prop.InverseDependencies) {
+					if (master.ParamSpec == null && master.EventInfo != null)
+						master.EventInfo.AddEventHandler (obj, new EventHandler (UpdateSensitivity));
+				}
+			}
 		}
 
 		public void NoSelection ()
@@ -94,32 +109,43 @@ namespace Stetic {
 			PackStart (label, true, true, 0);
 		}
 
-		void SensitivityChanged (string prop, bool sensitivity)
-		{
-			Widget w = editors[prop] as Widget;
-			if (w != null)
-				w.Sensitive = sensitivity;
-		}
-
 		void Notified (ParamSpec pspec)
 		{
 			PropertyEditor ed = editors[pspec.Name] as PropertyEditor;
 			if (ed != null)
 				ed.Update (selection, EventArgs.Empty);
+			UpdateSensitivity ();
 		}
 
-		protected void SetupSensitivity (object obj)
+		protected void UpdateSensitivity ()
 		{
-			Stetic.IPropertySensitizer sens = obj as Stetic.IPropertySensitizer;
-			if (sens == null)
-				return;
+			foreach (PropertyDescriptor prop in sensitives) {
+				Widget w = editors[prop.Name] as Widget;
+				if (w == null)
+					continue;
 
-			foreach (string prop in sens.InsensitiveProperties) {
-				Widget w = editors[prop] as Widget;
-				if (w != null)
-					w.Sensitive = false;
+				foreach (PropertyDescriptor dep in prop.Dependencies) {
+					if (!(bool)dep.GetValue (selection)) {
+						w.Sensitive = false;
+						goto next;
+					}
+				}
+				foreach (PropertyDescriptor dep in prop.InverseDependencies) {
+					if ((bool)dep.GetValue (selection)) {
+						w.Sensitive = false;
+						goto next;
+					}
+				}
+				w.Sensitive = true;
+
+			next:
+				;
 			}
-			sens.SensitivityChanged += SensitivityChanged;
+		}
+
+		protected void UpdateSensitivity (object obj, EventArgs args)
+		{
+			UpdateSensitivity ();
 		}
 
 		public void Select (IWidgetSite site)
@@ -131,14 +157,14 @@ namespace Stetic {
 				return;
 
 			selection = w;
-			notifyId = Notify.Add (selection, new NotifyDelegate (Notified));
+			notifyId = Notify.Add (w, new NotifyDelegate (Notified));
 
 			if (w is Stetic.IObjectWrapper)
 				AddObjectWrapperProperties (w, ((IObjectWrapper)w).PropertyGroups);
 			else
 				AddParamSpecProperties (w, w);
 
-			SetupSensitivity (w);
+			UpdateSensitivity ();
 		}
 
 		public virtual ParamSpec LookupParamSpec (object obj, PropertyInfo info)
@@ -189,13 +215,14 @@ namespace Stetic {
 				return;
 
 			ContainerChild cc = parent[(Widget)site];
+			selection = cc;
 
 			if (parent is Stetic.IContainerWrapper)
 				AddObjectWrapperProperties (cc, ((IContainerWrapper)parent).ChildPropertyGroups);
 			else
 				AddParamSpecProperties (cc, parent);
 
-			SetupSensitivity (cc);
+		       UpdateSensitivity ();
 		}
 
 		public override ParamSpec LookupParamSpec (object obj, PropertyInfo info)

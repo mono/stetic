@@ -16,17 +16,14 @@ namespace Stetic.Wrapper {
 		public PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
 
 		static Frame () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Frame), "Shadow"),
-				new PropertyDescriptor (typeof (Gtk.Frame), "ShadowType"),
-				new PropertyDescriptor (typeof (Gtk.Frame), "Label"),
-				new PropertyDescriptor (typeof (Gtk.Frame), "LabelXalign"),
-				new PropertyDescriptor (typeof (Gtk.Frame), "LabelYalign"),
-				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth"),
-			};				
-			FrameProperties = new PropertyGroup ("Frame Properties", props);
+			FrameProperties = new PropertyGroup ("Frame Properties",
+							     typeof (Stetic.Wrapper.Frame),
+							     "Shadow",
+							     "ShadowType",
+							     "Label",
+							     "LabelXalign",
+							     "LabelYalign",
+							     "BorderWidth");
 
 			groups = new PropertyGroup[] {
 				FrameProperties,

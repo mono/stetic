@@ -10,23 +10,18 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup BoxChildProperties;
 
 		static Box () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Box), "Homogeneous"),
-				new PropertyDescriptor (typeof (Gtk.Box), "Spacing"),
-				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth"),
-			};
-			BoxProperties = new PropertyGroup ("Box Properties", props);
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Box.BoxChild), "PackType"),
-				new PropertyDescriptor (typeof (Gtk.Box.BoxChild), "Position"),
-				new PropertyDescriptor (typeof (Gtk.Box.BoxChild), "Expand"),
-				new PropertyDescriptor (typeof (Gtk.Box.BoxChild), "Fill"),
-				new PropertyDescriptor (typeof (Gtk.Box.BoxChild), "Padding")
-			};
-			BoxChildProperties = new PropertyGroup ("Box Child Layout", props);
+			BoxProperties = new PropertyGroup ("Box Properties",
+							   typeof (Gtk.Box),
+							   "Homogeneous",
+							   "Spacing",
+							   "BorderWidth");
+			BoxChildProperties = new PropertyGroup ("Box Child Layout",
+								typeof (Gtk.Box.BoxChild),
+								"PackType",
+								"Position",
+								"Expand",
+								"Fill",
+								"Padding");
 		}
 	}
 }

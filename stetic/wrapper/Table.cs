@@ -19,35 +19,33 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup TableChildProperties;
 
 		static Table () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Table), typeof (Gtk.Table), "NRows"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Table), typeof (Gtk.Table), "NColumns"),
-				new PropertyDescriptor (typeof (Gtk.Table), "Homogeneous"),
-				new PropertyDescriptor (typeof (Gtk.Table), "RowSpacing"),
-				new PropertyDescriptor (typeof (Gtk.Table), "ColumnSpacing"),
-				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth"),
-			};				
-			TableProperties = new PropertyGroup ("Table Properties", props);
+			TableProperties = new PropertyGroup ("Table Properties",
+							     typeof (Stetic.Wrapper.Table),
+							     "NRows",
+							     "NColumns",
+							     "Homogeneous",
+							     "RowSpacing",
+							     "ColumnSpacing",
+							     "BorderWidth");
 
 			groups = new PropertyGroup[] {
 				TableProperties,
 				Widget.CommonWidgetProperties
 			};
 
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "TopAttach"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "BottomAttach"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "LeftAttach"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "RightAttach"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "XPadding"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "YPadding"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Table.TableChild), "AutoSize"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "XOptions"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "YOptions")
-			};				
-			TableChildProperties = new PropertyGroup ("Table Child Layout", props);
+			TableChildProperties = new PropertyGroup ("Table Child Layout",
+								  typeof (Stetic.Wrapper.Table.TableChild),
+								  "TopAttach",
+								  "BottomAttach",
+								  "LeftAttach",
+								  "RightAttach",
+								  "XPadding",
+								  "YPadding",
+								  "AutoSize",
+								  "XOptions",
+								  "YOptions");
+			TableChildProperties["XOptions"].DependsOn (TableChildProperties["AutoSize"]);
+			TableChildProperties["YOptions"].DependsOn (TableChildProperties["AutoSize"]);
 
 			childgroups = new PropertyGroup[] {
 				TableChildProperties
@@ -62,7 +60,7 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
-		public new class TableChild : Gtk.Table.TableChild, Stetic.IPropertySensitizer {
+		public new class TableChild : Gtk.Table.TableChild {
 			protected internal TableChild (Gtk.Container parent, Gtk.Widget child) : base (parent, child)
 			{
 				autosize = (child is WidgetSite);
@@ -76,24 +74,10 @@ namespace Stetic.Wrapper {
 				}
 				set {
 					autosize = value;
-					if (SensitivityChanged != null) {
-						SensitivityChanged ("XOptions", !autosize);
-						SensitivityChanged ("YOptions", !autosize);
-					}
+					Child.ChildNotify ("AutoSize");
 					((Stetic.Wrapper.Table)parent).Sync ();
 				}
 			}
-
-			public IEnumerable InsensitiveProperties {
-				get {
-					if (autosize)
-						return new string[] { "XOptions", "YOptions" };
-					else
-						return new string[0];
-				}
-			}
-
-			public event SensitivityChangedDelegate SensitivityChanged;
 		}
 
 		Hashtable children = new Hashtable ();

@@ -14,27 +14,22 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup SpinButtonAdjustmentProperties;
 
 		static SpinButton () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Adjustment.Lower"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Adjustment.Upper"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Adjustment.PageIncrement"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Adjustment.PageSize"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Adjustment.StepIncrement"),
-			};
-			SpinButtonAdjustmentProperties = new PropertyGroup ("Range Properties", props);
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "ClimbRate"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Digits"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Numeric"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "SnapToTicks"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "UpdatePolicy"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Value"),
-				new PropertyDescriptor (typeof (Gtk.SpinButton), "Wrap"),
-			};				
-			SpinButtonProperties = new PropertyGroup ("Spin Button Properties", props);
+			SpinButtonAdjustmentProperties = new PropertyGroup ("Range Properties",
+									    typeof (Gtk.Range),
+									    "Adjustment.Lower",
+									    "Adjustment.Upper",
+									    "Adjustment.PageIncrement",
+									    "Adjustment.PageSize",
+									    "Adjustment.StepIncrement");
+			SpinButtonProperties = new PropertyGroup ("Spin Button Properties",
+								  typeof (Stetic.Wrapper.SpinButton),
+								  "ClimbRate",
+								  "Digits",
+								  "Numeric",
+								  "SnapToTicks",
+								  "UpdatePolicy",
+								  "Value",
+								  "Wrap");
 
 			groups = new PropertyGroup[] {
 				SpinButtonProperties, SpinButtonAdjustmentProperties,

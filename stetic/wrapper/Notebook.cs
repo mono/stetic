@@ -19,36 +19,32 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup NotebookChildProperties;
 
 		static Notebook () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Notebook), "EnablePopup"),
-				new PropertyDescriptor (typeof (Gtk.Notebook), "Homogeneous"),
-				new PropertyDescriptor (typeof (Gtk.Notebook), "TabPos"),
-				new PropertyDescriptor (typeof (Gtk.Notebook), "TabBorder"),
-				new PropertyDescriptor (typeof (Gtk.Notebook), "TabHborder"),
-				new PropertyDescriptor (typeof (Gtk.Notebook), "TabVborder"),
-				new PropertyDescriptor (typeof (Gtk.Notebook), "ShowBorder"),
-				new PropertyDescriptor (typeof (Gtk.Notebook), "ShowTabs"),
-				new PropertyDescriptor (typeof (Gtk.Notebook), "Scrollable"),
-				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth")
-			};				
-			NotebookProperties = new PropertyGroup ("Notebook Properties", props);
+			NotebookProperties = new PropertyGroup ("Notebook Properties",
+								typeof (Stetic.Wrapper.Notebook),
+								"EnablePopup",
+								"Homogeneous",
+								"TabPos",
+								"TabBorder",
+								"TabHborder",
+								"TabVborder",
+								"ShowBorder",
+								"ShowTabs",
+								"Scrollable",
+								"BorderWidth");
 
 			groups = new PropertyGroup[] {
 				NotebookProperties,
 				Widget.CommonWidgetProperties
 			};
 
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Notebook.NotebookChild), "TabLabel"),
-				new PropertyDescriptor (typeof (Gtk.Notebook.NotebookChild), "Position"),
-				new PropertyDescriptor (typeof (Gtk.Notebook.NotebookChild), "TabPack"),
-				new PropertyDescriptor (typeof (Gtk.Notebook.NotebookChild), "TabExpand"),
-				new PropertyDescriptor (typeof (Gtk.Notebook.NotebookChild), "TabFill"),
-				new PropertyDescriptor (typeof (Gtk.Notebook.NotebookChild), "MenuLabel"),
-			};
-			NotebookChildProperties = new PropertyGroup ("Notebook Child Layout", props);
+			NotebookChildProperties = new PropertyGroup ("Notebook Child Layout",
+								     typeof (Gtk.Notebook.NotebookChild),
+								     "TabLabel",
+								     "Position",
+								     "TabPack",
+								     "TabExpand",
+								     "TabFill",
+								     "MenuLabel");
 
 			childgroups = new PropertyGroup[] {
 				NotebookChildProperties

@@ -11,18 +11,14 @@ namespace Stetic.Wrapper {
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
 		public static PropertyGroup CheckButtonProperties;
-		public static PropertyGroup CheckButtonExtraProperties;
 
 		static CheckButton () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Button), "Label"),
-				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Active"),
-				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Inconsistent"),
-				new PropertyDescriptor (typeof (Gtk.ToggleButton), "DrawIndicator"),
-			};				
-			CheckButtonProperties = new PropertyGroup ("Check Button Properties", props);
+			CheckButtonProperties = new PropertyGroup ("Check Box Properties",
+								   typeof (Stetic.Wrapper.CheckButton),
+								   "Label",
+								   "Active",
+								   "Inconsistent",
+								   "DrawIndicator");
 
 			groups = new PropertyGroup[] {
 				CheckButtonProperties, Button.ButtonExtraProperties,

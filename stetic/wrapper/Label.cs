@@ -13,18 +13,15 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup LabelProperties;
 
 		static Label () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Label), "LabelProp"),
-				new PropertyDescriptor (typeof (Gtk.Label), "UseMarkup"),
-				new PropertyDescriptor (typeof (Gtk.Label), "UseUnderline"),
-				new PropertyDescriptor (typeof (Gtk.Label), "Wrap"),
-				new PropertyDescriptor (typeof (Gtk.Label), "MnemonicWidget"),
-				new PropertyDescriptor (typeof (Gtk.Label), "Justify"),
-				new PropertyDescriptor (typeof (Gtk.Label), "Selectable"),
-			};				
-			LabelProperties = new PropertyGroup ("Label Properties", props);
+			LabelProperties = new PropertyGroup ("Label Properties",
+							     typeof (Stetic.Wrapper.Label),
+							     "LabelProp",
+							     "UseMarkup",
+							     "UseUnderline",
+							     "Wrap",
+							     "MnemonicWidget",
+							     "Justify",
+							     "Selectable");
 
 			groups = new PropertyGroup[] {
 				LabelProperties, Misc.MiscProperties,

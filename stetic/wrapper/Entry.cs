@@ -14,24 +14,19 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup EntryExtraProperties;
 
 		static Entry () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Entry), "Text"),
-				new PropertyDescriptor (typeof (Gtk.Entry), "Editable"),
-				new PropertyDescriptor (typeof (Gtk.Entry), "WidthChars"),
-				new PropertyDescriptor (typeof (Gtk.Entry), "MaxLength"),
-				new PropertyDescriptor (typeof (Gtk.Entry), "HasFrame"),
-				new PropertyDescriptor (typeof (Gtk.Entry), "ActivatesDefault"),
-				new PropertyDescriptor (typeof (Gtk.Entry), "Visibility"),
-			};				
-			EntryProperties = new PropertyGroup ("Entry Properties", props);
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Entry), "InvisibleChar"),
-				new PropertyDescriptor (typeof (Gtk.Entry), "Xalign"),
-			};
-			EntryExtraProperties = new PropertyGroup ("Extra Entry Properties", props);
+			EntryProperties = new PropertyGroup ("Entry Properties",
+							     typeof (Stetic.Wrapper.Entry),
+							     "Text",
+							     "Editable",
+							     "WidthChars",
+							     "MaxLength",
+							     "HasFrame",
+							     "ActivatesDefault",
+							     "Visibility");
+			EntryExtraProperties = new PropertyGroup ("Extra Entry Properties",
+								  typeof (Stetic.Wrapper.Entry),
+								  "InvisibleChar",
+								  "Xalign");
 
 			groups = new PropertyGroup[] {
 				EntryProperties, EntryExtraProperties,

@@ -14,20 +14,15 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup ComboBoxExtraProperties;
 
 		static ComboBox () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.ComboBox), "Model"),
-				new PropertyDescriptor (typeof (Gtk.ComboBox), "Active"),
-			};				
-			ComboBoxProperties = new PropertyGroup ("ComboBox Properties", props);
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.ComboBox), "WrapWidth"),
-				new PropertyDescriptor (typeof (Gtk.ComboBox), "ColumnSpanColumn"),
-				new PropertyDescriptor (typeof (Gtk.ComboBox), "RowSpanColumn"),
-			};
-			ComboBoxExtraProperties = new PropertyGroup ("Extra ComboBox Properties", props);
+			ComboBoxProperties = new PropertyGroup ("Combo Box Properties",
+								typeof (Stetic.Wrapper.ComboBox),
+								"Model",
+								"Active");
+			ComboBoxExtraProperties = new PropertyGroup ("Extra ComboBox Properties",
+								     typeof (Stetic.Wrapper.ComboBox),
+								     "WrapWidth",
+								     "ColumnSpanColumn",
+								     "RowSpanColumn");
 
 			groups = new PropertyGroup[] {
 				ComboBoxProperties, ComboBoxExtraProperties,

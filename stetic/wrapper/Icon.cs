@@ -15,13 +15,10 @@ namespace Stetic.Wrapper {
 		public static PropertyGroup IconProperties;
 
 		static Icon () {
-			PropertyDescriptor[] props;
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Icon), typeof (Gtk.Image), "Stock"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Icon), typeof (Gtk.Image), "IconSize"),
-			};				
-			IconProperties = new PropertyGroup ("Stock Icon Properties", props);
+			IconProperties = new PropertyGroup ("Stock Icon Properties",
+							    typeof (Stetic.Wrapper.Icon),
+							    "Stock",
+							    "IconSize");
 
 			groups = new PropertyGroup[] {
 				IconProperties, Misc.MiscProperties,
