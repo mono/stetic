@@ -5,12 +5,13 @@ using System.Collections;
 namespace Stetic {
 
 	public class Project : IStetic {
-		Hashtable nodes;
+		Hashtable nodes, widgets;
 		NodeStore store;
 
 		public Project ()
 		{
 			nodes = new Hashtable ();
+			widgets = new Hashtable ();
 			store = new NodeStore (typeof (ProjectNode));
 		}
 
@@ -35,6 +36,8 @@ namespace Stetic {
 				if (container != null)
 					container.ContentsChanged += ContentsChanged;
 			}
+
+			widgets[widget.Name] = widget;
 
 			if (widget is Container) {
 				Container container = (Container)widget;
@@ -101,6 +104,24 @@ namespace Stetic {
 				m.Popup ();
 			};
 			return site;
+		}
+
+		public Gtk.Widget LookupWidgetById (string id)
+		{
+			return widgets[id] as Gtk.Widget;
+		}
+
+		public event GladeImportCompleteDelegate GladeImportComplete;
+
+		public void BeginGladeImport ()
+		{
+			;
+		}
+
+		public void EndGladeImport ()
+		{
+			if (GladeImportComplete != null)
+				GladeImportComplete ();
 		}
 	}
 

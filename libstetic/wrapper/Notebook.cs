@@ -40,6 +40,26 @@ namespace Stetic.Wrapper {
 				InsertPage (0);
 		}
 
+		public override Widget GladeImportChild (string className, string id,
+							 ArrayList propNames, ArrayList propVals,
+							 ArrayList packingNames, ArrayList packingVals)
+		{
+			if (packingNames.Count == 1 &&
+			    (string)packingNames[0] == "type" &&
+			    (string)packingVals[0] == "tab") {
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, propNames, propVals);
+				WidgetSite site = CreateWidgetSite ();
+				site.Add ((Gtk.Widget)wrapper.Wrapped);
+
+				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), site);
+				return (Widget)wrapper;
+			} else {
+				return base.GladeImportChild (className, id,
+							      propNames, propVals,
+							      packingNames, packingVals);
+			}
+		}
+
 		private Gtk.Notebook notebook {
 			get {
 				return (Gtk.Notebook)Wrapped;

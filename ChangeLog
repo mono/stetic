@@ -1,5 +1,55 @@
 2005-02-25  Dan Winship  <danw@novell.com>
 
+	Reorganize the glade import code; put all the wacky exceptions
+	into the wrapper classes rather than adding more and more to
+	GladeImport itself.
+
+	* libstetic/ObjectWrapper.cs (GladeImport): static method to find
+	the wrapper type for a given class name and create a wrapper and
+	object based on glade data.
+	(Create): add a new overload using a className rather than a Type.
+	
+	* libstetic/IStetic.cs: add GladeImportComplete event and
+	LookupWidgetById method.
+
+	* libstetic/GladeUtils.cs: utilities for GladeImport, etc
+
+	* libstetic/wrapper/Widget.cs (GladeImport): virtual method to
+	create widget from a glade description.
+
+	* libstetic/wrapper/Container.cs (GladeImportChild): virtual
+	method to add and pack a child widget from a glade file.
+	(AddPlaceholder): virtual method to add a placeholder
+	(GladeSetInternalChild): virtual method to set properties on an
+	internal child
+
+	* libstetic/wrapper/ButtonBox.cs (GladeImportChild): remove
+	"response_id" from the child's properties, and set the "secondary"
+	packing flag if the response_id is ResponseType.Help. This is not
+	a complete fix; we need to get the response_id back to the parent
+	Dialog somehow.
+
+	* libstetic/wrapper/Entry.cs (GladeImport): Handle the
+	"invisible_char" property.
+
+	* libstetic/wrapper/Frame.cs (GladeImportChild): handle the
+	special "label_item" child.
+
+	* libstetic/wrapper/Label.cs (GladeImport): Handle the
+	"mnemonic_widget" property.
+
+	* libstetic/wrapper/Notebook.cs (GladeImportChild): handle the
+	special "tab" child. (This is the only "new" exception so far; all
+	the others were previously handled in GladeImport.)
+
+	* stetic/Project.cs (LookupWidgetById, GladeImportComplete):
+	implement.
+
+	* stetic/GladeImport.cs: lots of code moved from here into
+	GladeUtils, ObjectWrapper, and various wrapper classes.
+
+2005-02-25  Dan Winship  <danw@novell.com>
+
 	* libstetic/wrapper/Table.cs: 
 	* libstetic/wrapper/Container.cs: move the "AutoSize" child
 	property from Table/TableChild to Container/ContainerChild. Also,

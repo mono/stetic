@@ -63,10 +63,10 @@ namespace Stetic.Wrapper {
 		}
 
 		protected override void SiteOccupancyChanged (WidgetSite site) {
-			Gtk.Box.BoxChild bc = ((Gtk.Box)Wrapped)[site] as Gtk.Box.BoxChild;
-
-			if (AutoSize[site])
+			if (AutoSize[site]) {
+				Gtk.Box.BoxChild bc = ((Gtk.Box)Wrapped)[site] as Gtk.Box.BoxChild;
 				bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
+			}
 			base.SiteOccupancyChanged (site);
 		}
 

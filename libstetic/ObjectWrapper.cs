@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Stetic {
 	public abstract class ObjectWrapper : IDisposable {
@@ -34,16 +35,25 @@ namespace Stetic {
 			}
 		}
 
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_type_name (IntPtr gtype);
+
+		static string NativeTypeName (Type gtkSharpType)
+		{
+			PropertyInfo pinfo = gtkSharpType.GetProperty ("GType", BindingFlags.Static | BindingFlags.Public);
+			if (pinfo == null)
+				return null;
+
+			GLib.GType gtype = (GLib.GType)pinfo.GetValue (null, null);
+			return Marshal.PtrToStringAnsi (g_type_name (gtype.Val));
+		}
+
 		public static void Register (Type type)
 		{
 			Type wrappedType = WrappedType (type);
-
-			// FIXME: still needed? Why?
-			PropertyInfo pinfo = wrappedType.GetProperty ("GType", BindingFlags.Static | BindingFlags.Public);
-			if (pinfo != null)
-				pinfo.GetValue (null, null);
-
-			wrapperTypes[wrappedType] = type;
+			string className = NativeTypeName (wrappedType);
+			if (className != null)
+				wrapperTypes[className] = type;
 
 			MethodBase instanceCtor = type.GetMethod ("CreateInstance",
 								  BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
@@ -87,20 +97,38 @@ namespace Stetic {
 			return wrapper;
 		}
 
+		public static ObjectWrapper Create (IStetic stetic, string className, object wrapped)
+		{
+			Type type = wrapperTypes[className] as Type;
+			if (type == null)
+				return null;
+			return Create (stetic, type, wrapped);
+		}
+
+		public static ObjectWrapper GladeImport (IStetic stetic, string className, string id, ArrayList propNames, ArrayList propVals)
+		{
+			Type type = (Type)wrapperTypes[className];
+			if (type == null)
+				return null;
+
+			MethodInfo info = type.GetMethod ("GladeImport", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			if (info == null)
+				return null;
+
+			ObjectWrapper wrapper = Activator.CreateInstance (type) as ObjectWrapper;
+			if (wrapper == null)
+				return null;
+			wrapper.stetic = stetic;
+			info.Invoke (wrapper, new object[] { className, id, propNames, propVals });
+			return wrapper;
+		}
+
 		public static ObjectWrapper Lookup (object obj)
 		{
 			if (obj == null)
 				return null;
 			else
 				return wrappers[obj] as Stetic.ObjectWrapper;
-		}
-
-		public static Type WrapperType (object obj)
-		{
-			if (obj == null)
-				return null;
-			else 
-				return wrapperTypes[obj.GetType ()] as Type;
 		}
 
 		public object Wrapped {

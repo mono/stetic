@@ -42,6 +42,13 @@ namespace Stetic.Wrapper {
 			counters[type] = (int)counters[type] + 1;
 		}
 
+		protected virtual void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		{
+			Gtk.Widget widget = GladeUtils.CreateWidget (className, propNames, propVals);
+			widget.Name = id;
+			Wrap (widget, true);
+		}
+
 		public static new Widget Lookup (GLib.Object obj)
 		{
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Widget;

@@ -5,17 +5,13 @@
 #include <glib-object.h>
 #include <gtk/gtkcontainer.h>
 
-gboolean stetic_g_value_init_for_property (GValue *value, const char *class_name, const char *property_name);
-gboolean stetic_g_value_init_for_child_property (GValue *value, const char *class_name, const char *property_name);
+gboolean stetic_g_value_init_for_property (GValue *value, GType gtype, const char *property_name);
+gboolean stetic_g_value_init_for_child_property (GValue *value, GType gtype, const char *property_name);
 gboolean stetic_g_value_hydrate (GValue *value, const char *data);
 
 gboolean
-stetic_g_value_init_for_property (GValue *value, const char *class_name, const char *property_name)
+stetic_g_value_init_for_property (GValue *value, GType gtype, const char *property_name)
 {
-	GType gtype = g_type_from_name (class_name);
-	if (gtype == G_TYPE_INVALID)
-		return FALSE;
-
 	GObjectClass *klass = g_type_class_ref (gtype);
 	GParamSpec *spec = g_object_class_find_property (klass, property_name);
 	g_type_class_unref (klass);
@@ -27,12 +23,8 @@ stetic_g_value_init_for_property (GValue *value, const char *class_name, const c
 }
 
 gboolean
-stetic_g_value_init_for_child_property (GValue *value, const char *class_name, const char *property_name)
+stetic_g_value_init_for_child_property (GValue *value, GType gtype, const char *property_name)
 {
-	GType gtype = g_type_from_name (class_name);
-	if (gtype == G_TYPE_INVALID)
-		return FALSE;
-
 	GtkContainerClass *klass = g_type_class_ref (gtype);
 	GParamSpec *spec = gtk_container_class_find_child_property (G_OBJECT_CLASS(klass), property_name);
 	g_type_class_unref (klass);
