@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Font Button", "fontbutton.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Font Button", "fontbutton.png", typeof (Gtk.FontButton), ObjectWrapperType.Widget)]
 	public class FontButton : Stetic.Wrapper.Widget {
 
 		public static ItemGroup FontButtonProperties;
@@ -24,8 +24,8 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public FontButton (IStetic stetic) : this (stetic, new Gtk.FontButton ()) {}
-		public FontButton (IStetic stetic, Gtk.FontButton fontbutton) : base (stetic, fontbutton) {}
+		public FontButton (IStetic stetic) : this (stetic, new Gtk.FontButton (), false) {}
+		public FontButton (IStetic stetic, Gtk.FontButton fontbutton, bool initialized) : base (stetic, fontbutton, initialized) {}
 
 		public bool UseFont {
 			get {

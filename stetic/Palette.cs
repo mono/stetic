@@ -6,33 +6,44 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class Palette : Gtk.HBox {
+	public class Palette : Gtk.VBox {
 
 		VBox normals, containers, windows;
 		SizeGroup sgroup;
+		ComboBox combo;
+		ListStore model;
+
+		Hashtable widgets = new Hashtable ();
 
 		public Palette () : base (false, 6)
 		{
 			BorderWidth = 6;
 
-			normals = new VBox (true, 6);
-			containers = new VBox (true, 6);
-			windows = new VBox (true, 6);
+			normals = new VBox (false, 0);
+			containers = new VBox (false, 0);
+			windows = new VBox (false, 0);
+			
+			combo = new ComboBox ();
+			model = new ListStore (typeof (string));
+			combo.Model = model;
+			CellRendererText text_renderer = new CellRendererText ();
+			combo.PackStart (text_renderer, true);
+			combo.AddAttribute (text_renderer, "text", 0);
+			combo.Changed += new EventHandler (OnSelectorChanged);
 
-			VBox right = new VBox (false, 12);
+			PackStart (combo, false, false, 3);
+			PackStart (new Gtk.VBox (false, 0), true, true, 3);
 
-			PackStart (normals);
-			PackStart (new VSeparator ());
-			PackStart (right);
+			ShowAll ();
+		}
 
-			sgroup = new SizeGroup (SizeGroupMode.Horizontal);
-			sgroup.AddWidget (normals);
-			sgroup.AddWidget (right);
-
-			right.PackStart (containers, false, false, 0);
-			right.PackStart (new HSeparator (), false, false, 0);
-			right.PackStart (windows, false, false, 0);
-
+		void OnSelectorChanged (object o, EventArgs e)
+		{
+			Remove (Children[1]);
+			TreeIter iter;
+			if (combo.GetActiveIter (out iter)) {
+				PackStart ((Widget)widgets[(string)model.GetValue (iter, 0)], true, true, 3);
+			}
 			ShowAll ();
 		}
 
@@ -54,6 +65,7 @@ namespace Stetic {
 		{
 			foreach (object attr in type.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)) {
 				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
+				ObjectWrapper.RegisterWrapperType (type, owattr.WrappedType);
 				Pixbuf icon;
 
 				try {
@@ -62,19 +74,34 @@ namespace Stetic {
 					icon = Gdk.Pixbuf.LoadFromResource ("missing.png");
 				}
 
+				Widget w;
+				string catalogue;
+				
 				switch (owattr.Type) {
 				case ObjectWrapperType.Container:
-					containers.PackStart (new WidgetFactory (owattr.Name, icon, type), false, false, 0);
+					w = new WidgetFactory (owattr.Name, icon, type);
+					catalogue = "GTK# Containers";
 					break;
-
 				case ObjectWrapperType.Window:
-					windows.PackStart (new WindowFactory (owattr.Name, icon, type), false, false, 0);
+					w = new WindowFactory (owattr.Name, icon, type);
+					catalogue = "GTK# Windows";
 					break;
-
 				default:
-					normals.PackStart (new WidgetFactory (owattr.Name, icon, type), false, false, 0);
+					w = new WidgetFactory (owattr.Name, icon, type);
+					catalogue = "GTK# Widgets";
 					break;
 				}
+				if (!widgets.Contains (catalogue)) {
+					ScrolledWindow scroller = new ScrolledWindow ();
+					scroller.AddWithViewport (new Gtk.VBox (false, 0));
+					scroller.ShadowType = ShadowType.None;
+					scroller.HscrollbarPolicy = PolicyType.Never;
+					widgets[catalogue] = scroller;
+					model.AppendValues (catalogue);
+					if (combo.Active == -1)
+						combo.Active = 0;
+				}
+				((Box)((Bin)((Bin)widgets[catalogue]).Child).Child).PackStart (w, false, false, 0);
 			}
 		}
 

@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Message Dialog", "messagedialog.png", ObjectWrapperType.Window)]
+	[ObjectWrapper ("Message Dialog", "messagedialog.png", typeof (Gtk.MessageDialog), ObjectWrapperType.Window)]
 	public class MessageDialog : Dialog {
 
 		public static ItemGroup MessageDialogProperties;
@@ -30,41 +30,44 @@ namespace Stetic.Wrapper {
 		Gtk.Label label, secondaryLabel;
 		Gtk.Image icon;
 
-		public MessageDialog (IStetic stetic) : this (stetic, new Gtk.Dialog ()) {}
+		public MessageDialog (IStetic stetic) : this (stetic, new Gtk.Dialog (), false) {}
 
-		public MessageDialog (IStetic stetic, Gtk.Dialog dialog) : base (stetic, dialog)
+
+		public MessageDialog (IStetic stetic, Gtk.Dialog dialog, bool initialized) : base (stetic, dialog, initialized)
 		{
-			dialog.Resizable = false;
-			dialog.BorderWidth = 12;
+			if (!initialized) {
+				dialog.Resizable = false;
+				dialog.BorderWidth = 12;
 
-			label = new Gtk.Label ();
-			label.LineWrap = true;
-			label.Selectable = true;
-			label.UseMarkup = true;
-			label.SetAlignment (0.0f, 0.0f);
+				label = new Gtk.Label ();
+				label.LineWrap = true;
+				label.Selectable = true;
+				label.UseMarkup = true;
+				label.SetAlignment (0.0f, 0.0f);
 
-			secondaryLabel = new Gtk.Label ();
-			secondaryLabel.LineWrap = true;
-			secondaryLabel.Selectable = true;
-			secondaryLabel.UseMarkup = true;
-			secondaryLabel.SetAlignment (0.0f, 0.0f);
+				secondaryLabel = new Gtk.Label ();
+				secondaryLabel.LineWrap = true;
+				secondaryLabel.Selectable = true;
+				secondaryLabel.UseMarkup = true;
+				secondaryLabel.SetAlignment (0.0f, 0.0f);
 
-			icon = new Gtk.Image (Gtk.Stock.DialogInfo, Gtk.IconSize.Dialog);
-			icon.SetAlignment (0.5f, 0.0f);
+				icon = new Gtk.Image (Gtk.Stock.DialogInfo, Gtk.IconSize.Dialog);
+				icon.SetAlignment (0.5f, 0.0f);
 
-			Gtk.HBox hbox = new Gtk.HBox (false, 12);
-			Gtk.VBox vbox = new Gtk.VBox (false, 12);
+				Gtk.HBox hbox = new Gtk.HBox (false, 12);
+				Gtk.VBox vbox = new Gtk.VBox (false, 12);
 
-			vbox.PackStart (label, false, false, 0);
-			vbox.PackStart (secondaryLabel, true, true, 0);
+				vbox.PackStart (label, false, false, 0);
+				vbox.PackStart (secondaryLabel, true, true, 0);
 
-			hbox.PackStart (icon, false, false, 0);
-			hbox.PackStart (vbox, true, true, 0);
+				hbox.PackStart (icon, false, false, 0);
+				hbox.PackStart (vbox, true, true, 0);
 
-			dialog.VBox.PackStart (hbox, false, false, 0);
-			hbox.ShowAll ();
+				dialog.VBox.PackStart (hbox, false, false, 0);
+				hbox.ShowAll ();
 
-			Buttons = Gtk.ButtonsType.OkCancel;
+				Buttons = Gtk.ButtonsType.OkCancel;
+			}
 		}
 
 		private Gtk.Dialog dialog {

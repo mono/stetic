@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Notebook", "notebook.png", ObjectWrapperType.Container)]
+	[ObjectWrapper ("Notebook", "notebook.png", typeof (Gtk.Notebook), ObjectWrapperType.Container)]
 	public class Notebook : Stetic.Wrapper.Container {
 
 		public static ItemGroup NotebookProperties;
@@ -40,11 +40,14 @@ namespace Stetic.Wrapper {
 			RegisterContextMenu (typeof (Stetic.Wrapper.Notebook), contextMenu);
 		}
 
-		public Notebook (IStetic stetic) : this (stetic, new Gtk.Notebook ()) {}
+		public Notebook (IStetic stetic) : this (stetic, new Gtk.Notebook (), false) {}
 
-		public Notebook (IStetic stetic, Gtk.Notebook notebook) : base (stetic, notebook)
+
+		public Notebook (IStetic stetic, Gtk.Notebook notebook, bool initialized) : base (stetic, notebook, initialized)
 		{
-			InsertPage (0);
+			if (!initialized) {
+				InsertPage (0);
+			}
 		}
 
 		private Gtk.Notebook notebook {
@@ -152,7 +155,7 @@ namespace Stetic.Wrapper {
 						 NotebookChildProperties);
 			}
 
-			public NotebookChild (IStetic stetic, Gtk.Notebook.NotebookChild nc) : base (stetic, nc) {}
+			public NotebookChild (IStetic stetic, Gtk.Notebook.NotebookChild notebookchild, bool initialized) : base (stetic, notebookchild, initialized) {}
 		}
 	}
 }

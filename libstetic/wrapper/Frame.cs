@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Frame", "frame.png", ObjectWrapperType.Container)]
+	[ObjectWrapper ("Frame", "frame.png", typeof (Gtk.Frame), ObjectWrapperType.Container)]
 	public class Frame : Bin {
 
 		public static ItemGroup FrameProperties;
@@ -21,11 +21,14 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Frame (IStetic stetic) : this (stetic, new Gtk.Frame ()) {}
+		public Frame (IStetic stetic) : this (stetic, new Gtk.Frame (), false) {}
 
-		public Frame (IStetic stetic, Gtk.Frame frame) : base (stetic, frame)
+
+		public Frame (IStetic stetic, Gtk.Frame frame, bool initialized) : base (stetic, frame, initialized)
 		{
-			frame.Label = frame.Name;
+			if (!initialized) {
+				frame.Label = frame.Name;
+			}
 		}
 	}
 }

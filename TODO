@@ -3,7 +3,7 @@ replacement:
 
     - A real main window, with menus and a toolbar and all that.
 
-    - Glade Import/Export. (Todd is working on import)
+    - Glade Export.
 
 
 Application UI:
@@ -49,12 +49,11 @@ UI-Designing UI:
 
     - Add wrappers for things that aren't wrapped yet
 
-	- TreeView (NodeView?)
-
 	- Layout/Fixed
 
 	- Menubar, Toolbar. (Mike Kestner has some code here.) Use the
-          new GtkAction-based stuff
+          new GtkAction-based stuff. Should also support the old stuff as well
+	  as far as creation/editing (Toolbar, ToolbarItem, etc)
 
 	- Gnome widgets (the not-yet-deprecated ones anyway)
 		- Not in a separate "Gnome widgets" group.

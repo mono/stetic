@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Toggle Button", "togglebutton.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Toggle Button", "togglebutton.png", typeof (Gtk.ToggleButton), ObjectWrapperType.Widget)]
 	public class ToggleButton : Button {
 
 		public static ItemGroup ToggleButtonProperties;
@@ -24,11 +24,14 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public ToggleButton (IStetic stetic) : this (stetic, new Gtk.ToggleButton ()) {}
+		public ToggleButton (IStetic stetic) : this (stetic, new Gtk.ToggleButton (), false) {}
 
-		public ToggleButton (IStetic stetic, Gtk.ToggleButton button) : base (stetic, button)
+
+		public ToggleButton (IStetic stetic, Gtk.ToggleButton button, bool initialized) : base (stetic, button, initialized)
 		{
-			button.Label = button.Name;
+			if (!initialized) {
+				button.Label = button.Name;
+			}
 		}
 	}
 }

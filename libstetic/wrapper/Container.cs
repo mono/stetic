@@ -10,6 +10,12 @@ namespace Stetic.Wrapper {
 					 new ItemGroup[0]);
 		}
 
+
+		protected Container (IStetic stetic, Gtk.Container container, bool initialized) : base (stetic, container, initialized)
+		{
+			container.Removed += SiteRemoved;
+		}
+
 		public static new Container Lookup (GLib.Object obj)
 		{
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Container;
@@ -33,10 +39,11 @@ namespace Stetic.Wrapper {
 			// Find the ContainerChild type's constructor
 			foreach (ConstructorInfo ctor in childType.GetConstructors ()) {
 				ParameterInfo[] parms = ctor.GetParameters ();
-				if (parms.Length == 2 &&
+				if (parms.Length == 3 &&
 				    parms[0].ParameterType == typeof (Stetic.IStetic) &&
 				    (parms[1].ParameterType == typeof (Gtk.Container.ContainerChild) ||
-				     parms[1].ParameterType.IsSubclassOf (typeof (Gtk.Container.ContainerChild)))) {
+				     parms[1].ParameterType.IsSubclassOf (typeof (Gtk.Container.ContainerChild))) &&
+				    parms[2].ParameterType == typeof (bool)) {
 					childTypes[t] = ctor;
 					break;
 				}
@@ -68,12 +75,7 @@ namespace Stetic.Wrapper {
 				return null;
 
 			Gtk.Container.ContainerChild cc = parent[sitew];
-			return ctor.Invoke (new object[] { pwrap.stetic, cc }) as ContainerChild;
-		}
-
-		protected Container (IStetic stetic, Gtk.Container container) : base (stetic, container)
-		{
-			container.Removed += SiteRemoved;
+			return ctor.Invoke (new object[] { pwrap.stetic, cc, false }) as ContainerChild;
 		}
 
 		public delegate void ContentsChangedHandler (Container container);
@@ -92,6 +94,21 @@ namespace Stetic.Wrapper {
 			return site;
 		}
 
+		public WidgetSite AddSite ()
+		{
+			return AddSite (null);
+		}
+
+		public virtual WidgetSite AddSite (Gtk.Widget child)
+		{
+			WidgetSite site = CreateWidgetSite ();
+			if (child != null) {
+				site.Add (child);
+			}
+			((Gtk.Container)Wrapped).Add (site);
+			return site;
+		}
+
 		protected virtual void SiteOccupancyChanged (WidgetSite site) {
 			EmitContentsChanged ();
 		}
@@ -100,7 +117,9 @@ namespace Stetic.Wrapper {
 		{
 			WidgetSite site = args.Widget as WidgetSite;
 
-			site.OccupancyChanged -= SiteOccupancyChanged;
+			if (site != null) {
+				site.OccupancyChanged -= SiteOccupancyChanged;
+			}
 		}
 
 		protected virtual void SiteRemoved (WidgetSite site)
@@ -122,7 +141,8 @@ namespace Stetic.Wrapper {
 						 new ItemGroup[0]);
 			}
 
-			public ContainerChild (IStetic stetic, Gtk.Container.ContainerChild cc) : base (stetic, cc)
+
+			public ContainerChild (IStetic stetic, Gtk.Container.ContainerChild cc, bool initialized) : base (stetic, cc)
 			{
 				cc.Child.ChildNotified += ChildNotifyHandler;
 

@@ -1,3 +1,91 @@
+2005-02-22  Todd Berman  <tberman@off.net>
+
+	* libstetic/wrapper/Button.cs:
+	* libstetic/wrapper/ToggleButton.cs:
+	* libstetic/wrapper/VScale.cs:
+	* libstetic/wrapper/Label.cs:
+	* libstetic/wrapper/TextView.cs:
+	* libstetic/wrapper/Container.cs:
+	* libstetic/wrapper/Widget.cs:
+	* libstetic/wrapper/VSeparator.cs:
+	* libstetic/wrapper/Paned.cs:
+	* libstetic/wrapper/Icon.cs:
+	* libstetic/wrapper/Box.cs:
+	* libstetic/wrapper/ProgressBar.cs:
+	* libstetic/wrapper/RadioButton.cs:
+	* libstetic/wrapper/ComboBoxEntry.cs:
+	* libstetic/wrapper/EventBox.cs:
+	* libstetic/wrapper/Frame.cs:
+	* libstetic/wrapper/HPaned.cs:
+	* libstetic/wrapper/ScrolledWindow.cs:
+	* libstetic/wrapper/HBox.cs:
+	* libstetic/wrapper/SpinButton.cs:
+	* libstetic/wrapper/Window.cs:
+	* libstetic/wrapper/ComboBox.cs:
+	* libstetic/wrapper/ColorButton.cs:
+	* libstetic/wrapper/VPaned.cs:
+	* libstetic/wrapper/Alignment.cs:
+	* libstetic/wrapper/VBox.cs:
+	* libstetic/wrapper/Notebook.cs:
+	* libstetic/wrapper/Image.cs:
+	* libstetic/wrapper/ButtonBox.cs:
+	* libstetic/wrapper/DrawingArea.cs:
+	* libstetic/wrapper/Scale.cs:
+	* libstetic/wrapper/Table.cs:
+	* libstetic/wrapper/Arrow.cs:
+	* libstetic/wrapper/TreeView.cs:
+	* libstetic/wrapper/Misc.cs:
+	* libstetic/wrapper/HScrollbar.cs:
+	* libstetic/wrapper/HButtonBox.cs:
+	* libstetic/wrapper/Range.cs:
+	* libstetic/wrapper/HScale.cs:
+	* libstetic/wrapper/Dialog.cs:
+	* libstetic/wrapper/Entry.cs:
+	* libstetic/wrapper/FontButton.cs:
+	* libstetic/wrapper/MessageDialog.cs:
+	* libstetic/wrapper/Expander.cs:
+	* libstetic/wrapper/HSeparator.cs:
+	* libstetic/wrapper/Bin.cs:
+	* libstetic/wrapper/Statusbar.cs:
+	* libstetic/wrapper/Calendar.cs:
+	* libstetic/wrapper/CheckButton.cs:
+	* libstetic/wrapper/VScrollbar.cs:
+	* libstetic/wrapper/VButtonBox.cs:
+
+	Move to a 3 param'd ctor, to provide initialized information
+	Add a Site property in Bin.
+	Add a 4th parameter to the ObjectWrapperAttributes to show which
+	gtk# type is wrapped.
+	Dummy TreeView wrapper.
+	
+	* libstetic/ObjectWrapperAttribute.cs: New parameter to show which
+	gtk# type is wrapped.
+
+	* libstetic/Makefile.am: Add wrapper/TreeView.cs
+
+	* libstetic/ObjectWrapper.cs: Add LookupWrappedTypes, to return a
+	Type[] of the Stetic.Wrapper.* classes that wrap a given gtk# type.
+
+	* TODO: Update.
+
+	* stetic/WidgetFactory.cs: Make sure to hit wrappedObject.GType so
+	that GObject stuff is properly initialized.
+
+	* stetic/Stetic.cs: Change the GUI around a bit.
+
+	* stetic/Palette.cs: New palette GUI.
+
+	* stetic/Makefile.am: Add GladeImport.cs.
+
+	* stetic/Project.cs: Add Project.Clear ();
+
+	* stetic/GladeImport.cs: New file, used to provide glade file
+	importation.
+
+	* glue/Makefile.am: Add value.c
+	* glue/value.c: New glue file to help with interacting with GValues,
+	and used in the GladeImport process.
+
 2005-02-22  Dan Winship  <danw@novell.com>
 
 	* TODO: New

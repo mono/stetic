@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Statusbar", "statusbar.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Statusbar", "statusbar.png", typeof (Gtk.Statusbar), ObjectWrapperType.Widget)]
 	public class Statusbar : Stetic.Wrapper.Widget {
 
 		public static ItemGroup StatusbarProperties;
@@ -16,7 +16,7 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Statusbar (IStetic stetic) : this (stetic, new Gtk.Statusbar ()) {}
-		public Statusbar (IStetic stetic, Gtk.Statusbar statusbar) : base (stetic, statusbar) {}
+		public Statusbar (IStetic stetic) : this (stetic, new Gtk.Statusbar (), false) {}
+		public Statusbar (IStetic stetic, Gtk.Statusbar statusbar, bool initialized) : base (stetic, statusbar, initialized) {}
 	}
 }

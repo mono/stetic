@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Spin Button", "spinbutton.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Spin Button", "spinbutton.png", typeof (Gtk.SpinButton), ObjectWrapperType.Widget)]
 	public class SpinButton : Stetic.Wrapper.Widget {
 
 		public static ItemGroup SpinButtonProperties;
@@ -31,7 +31,7 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public SpinButton (IStetic stetic) : this (stetic, new Gtk.SpinButton (0.0, 100.0, 1.0)) {}
-		public SpinButton (IStetic stetic, Gtk.SpinButton spinbutton) : base (stetic, spinbutton) {}
+		public SpinButton (IStetic stetic) : this (stetic, new Gtk.SpinButton (0.0, 100.0, 1.0), false) {}
+		public SpinButton (IStetic stetic, Gtk.SpinButton spinbutton, bool initialized) : base (stetic, spinbutton, initialized) {}
 	}
 }

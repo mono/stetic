@@ -25,7 +25,8 @@ namespace Stetic.Wrapper {
 
 		static Hashtable counters = new Hashtable ();
 
-		protected Widget (IStetic stetic, Gtk.Widget widget) : base (stetic, widget)
+		
+		protected Widget (IStetic stetic, Gtk.Widget widget, bool initialized) : base (stetic, widget)
 		{
 			if (!(widget is Gtk.Window))
 				widget.ShowAll ();
@@ -34,7 +35,9 @@ namespace Stetic.Wrapper {
 			if (!counters.Contains (type))
 				counters[type] = 1;
 
-			widget.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
+			if (!initialized) {
+				widget.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
+			}
 			counters[type] = (int)counters[type] + 1;
 		}
 

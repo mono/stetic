@@ -26,7 +26,8 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		protected Range (IStetic stetic, Gtk.Range range) : base (stetic, range)
+		
+		protected Range (IStetic stetic, Gtk.Range range, bool initialized) : base (stetic, range, initialized)
 		{
 			range.Adjustment.AddNotification (AdjustmentNotifyHandler);
 		}

@@ -33,6 +33,13 @@ namespace Stetic {
 			this.ctor = wrapperType.GetConstructor (new Type[] { typeof (IStetic) });
 			if (this.ctor == null)
 				throw new ApplicationException ("No constructor for widget type " + wrapperType.ToString ());
+
+			// This is done to make sure the underlying gobject is
+			// properly setup. If this is removed, for example,
+			// loading a glade file with a spinbutton will not work.
+			
+			ObjectWrapperAttribute attr = (ObjectWrapperAttribute)wrapperType.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)[0];
+			attr.WrappedType.GetProperty ("GType", BindingFlags.Static | BindingFlags.Public).GetGetMethod ().Invoke (null, null);
 		}
 
 		protected override bool StartDrag (Gdk.EventMotion evt)

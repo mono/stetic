@@ -23,7 +23,8 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		protected Scale (IStetic stetic, Gtk.Scale scale) : base (stetic, scale)
+
+		protected Scale (IStetic stetic, Gtk.Scale scale, bool initialized) : base (stetic, scale, initialized)
 		{
 			scale.Adjustment.AddNotification (AdjustmentNotifyHandler);
 		}

@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Event Box", "eventbox.png", ObjectWrapperType.Container)]
+	[ObjectWrapper ("Event Box", "eventbox.png", typeof (Gtk.EventBox), ObjectWrapperType.Container)]
 	public class EventBox : Bin {
 
 		public static ItemGroup EventBoxProperties;
@@ -19,7 +19,7 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public EventBox (IStetic stetic) : this (stetic, new Gtk.EventBox ()) {}
-		public EventBox (IStetic stetic, Gtk.EventBox eventbox) : base (stetic, eventbox) {}
+		public EventBox (IStetic stetic) : this (stetic, new Gtk.EventBox (), false) {}
+		public EventBox (IStetic stetic, Gtk.EventBox eventbox, bool initialized) : base (stetic, eventbox, initialized) {}
 	}
 }

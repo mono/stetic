@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Dialog Box", "dialog.png", ObjectWrapperType.Window)]
+	[ObjectWrapper ("Dialog Box", "dialog.png", typeof (Gtk.Dialog), ObjectWrapperType.Window)]
 	public class Dialog : Window {
 
 		public static ItemGroup DialogProperties;
@@ -33,16 +33,18 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Dialog (IStetic stetic) : this (stetic, new Gtk.Dialog ()) {}
+		public Dialog (IStetic stetic) : this (stetic, new Gtk.Dialog (), false) {}
 
-		public Dialog (IStetic stetic, Gtk.Dialog dialog) : base (stetic, dialog)
+
+		public Dialog (IStetic stetic, Gtk.Dialog dialog, bool initialized) : base (stetic, dialog, initialized)
 		{
-			WidgetSite site = CreateWidgetSite ();
-			Gtk.Requisition req;
-			req.Width = req.Height = 200;
-			site.EmptySize = req;
-
-			dialog.VBox.Add (site);
+			if (!initialized) {
+				WidgetSite site = CreateWidgetSite ();
+				Gtk.Requisition req;
+				req.Width = req.Height = 200;
+				site.EmptySize = req;
+				dialog.VBox.Add (site);
+			}
 		}
 	}
 }

@@ -85,6 +85,12 @@ namespace Stetic {
 				return store;
 			}
 		}
+
+		public void Clear ()
+		{
+			nodes.Clear ();
+			store = new NodeStore (typeof (ProjectNode));
+		}
 	}
 
 	[TreeNode (ColumnCount=2)]

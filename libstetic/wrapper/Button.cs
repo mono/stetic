@@ -3,8 +3,8 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Button", "button.png", ObjectWrapperType.Widget)]
-	public class Button : Stetic.Wrapper.Widget {
+	[ObjectWrapper ("Button", "button.png", typeof (Gtk.Button), ObjectWrapperType.Widget)]
+	public class Button : Stetic.Wrapper.Container {
 
 		public static ItemGroup ButtonProperties;
 		public static ItemGroup ButtonExtraProperties;
@@ -57,16 +57,19 @@ namespace Stetic.Wrapper {
 			RegisterContextMenu (typeof (Stetic.Wrapper.Button), contextMenu);
 		}
 
-		public Button (IStetic stetic) : this (stetic, new Gtk.Button (Gtk.Stock.Ok)) {}
+		public Button (IStetic stetic) : this (stetic, new Gtk.Button (Gtk.Stock.Ok), false) {}
+		
 
-		public Button (IStetic stetic, Gtk.Button button) : base (stetic, button)
+		public Button (IStetic stetic, Gtk.Button button, bool initialized) : base (stetic, button, initialized)
 		{
-			if (button.UseStock) {
-				stockId = button.Label;
-				label = button.Name;
-			} else {
-				label = button.Name;
-				stockId = Gtk.Stock.Ok;
+			if (!initialized) {
+				if (button.UseStock) {
+					stockId = button.Label;
+					label = button.Name;
+				} else {
+					label = button.Name;
+					stockId = Gtk.Stock.Ok;
+				}
 			}
 		}
 

@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Entry", "entry.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Entry", "entry.png", typeof (Gtk.Entry), ObjectWrapperType.Widget)]
 	public class Entry : Stetic.Wrapper.Widget {
 
 		public static ItemGroup EntryProperties;
@@ -29,7 +29,7 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Entry (IStetic stetic) : this (stetic, new Gtk.Entry ()) {}
-		public Entry (IStetic stetic, Gtk.Entry entry) : base (stetic, entry) {}
+		public Entry (IStetic stetic) : this (stetic, new Gtk.Entry (), false) {}
+		public Entry (IStetic stetic, Gtk.Entry entry, bool initialized) : base (stetic, entry, initialized) {}
 	}
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Combo Box Entry", "comboboxentry.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Combo Box Entry", "comboboxentry.png", typeof (Gtk.ComboBoxEntry), ObjectWrapperType.Widget)]
 	public class ComboBoxEntry : Stetic.Wrapper.ComboBox {
 
 		static ComboBoxEntry () {
@@ -12,7 +12,7 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public ComboBoxEntry (IStetic stetic) : this (stetic, Gtk.ComboBoxEntry.NewText ()) {}
-		public ComboBoxEntry (IStetic stetic, Gtk.ComboBoxEntry comboboxentry) : base (stetic, comboboxentry) {}
+		public ComboBoxEntry (IStetic stetic) : this (stetic, Gtk.ComboBoxEntry.NewText (), false) {}
+		public ComboBoxEntry (IStetic stetic, Gtk.ComboBoxEntry comboboxentry, bool initialized) : base (stetic, comboboxentry, initialized) {}
 	}
 }

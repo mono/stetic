@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Color Button", "colorbutton.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Color Button", "colorbutton.png", typeof (Gtk.ColorButton), ObjectWrapperType.Widget)]
 	public class ColorButton : Stetic.Wrapper.Widget {
 
 		public static ItemGroup ColorButtonProperties;
@@ -19,8 +19,8 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public ColorButton (IStetic stetic) : this (stetic, new Gtk.ColorButton ()) {}
-		public ColorButton (IStetic stetic, Gtk.ColorButton colorbutton) : base (stetic, colorbutton) {}
+		public ColorButton (IStetic stetic) : this (stetic, new Gtk.ColorButton (), false) {}
+		public ColorButton (IStetic stetic, Gtk.ColorButton colorbutton, bool initialized) : base (stetic, colorbutton, initialized) {}
 
 		[Range (-1, 65535)]
 		public int Alpha {

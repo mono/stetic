@@ -8,6 +8,7 @@ namespace Stetic {
 		protected object wrapped;
 
 		static Hashtable wrappers = new Hashtable ();
+		static Hashtable wrapperTypes = new Hashtable ();
 
 		protected ObjectWrapper (IStetic stetic, object obj)
 		{
@@ -28,6 +29,27 @@ namespace Stetic {
 				return null;
 			else
 				return wrappers[obj] as Stetic.ObjectWrapper;
+		}
+
+		public static Type[] LookupWrapperTypes (object obj)
+		{
+			if (obj == null)
+				return null;
+			else 
+				return wrapperTypes[obj.GetType ()] as Type[];
+		}
+
+		public static void RegisterWrapperType (Type objectWrapper, Type wrappedType)
+		{
+			if (wrapperTypes.Contains (wrappedType)) {
+				Type[] old_type_array = wrapperTypes[wrappedType] as Type[];
+				Type[] new_type_array = new Type[old_type_array.Length + 1];
+				old_type_array.CopyTo (new_type_array, 0);
+				new_type_array[old_type_array.Length] = objectWrapper;
+				wrapperTypes[wrappedType] = new_type_array;
+			} else {
+				wrapperTypes[wrappedType] = new Type[] { objectWrapper };
+			}
 		}
 
 		public object Wrapped {

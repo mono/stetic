@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Expander", "expander.png", ObjectWrapperType.Container)]
+	[ObjectWrapper ("Expander", "expander.png", typeof (Gtk.Expander), ObjectWrapperType.Container)]
 	public class Expander : Bin {
 
 		public static ItemGroup ExpanderProperties;
@@ -22,11 +22,13 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Expander (IStetic stetic) : this (stetic, new Gtk.Expander ("")) {}
+		public Expander (IStetic stetic) : this (stetic, new Gtk.Expander (""), false) {}
 
-		public Expander (IStetic stetic, Gtk.Expander expander) : base (stetic, expander)
+		public Expander (IStetic stetic, Gtk.Expander expander, bool initialized) : base (stetic, expander, initialized)
 		{
-			expander.Label = expander.Name;
+			if (!initialized) {
+				expander.Label = expander.Name;
+			}
 			expander.Activated += delegate (object obj, EventArgs args) {
 				EmitContentsChanged ();
 			};

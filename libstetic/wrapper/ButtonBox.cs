@@ -18,7 +18,7 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		protected ButtonBox (IStetic stetic, Gtk.ButtonBox bbox) : base (stetic, bbox) {}
+		protected ButtonBox (IStetic stetic, Gtk.ButtonBox bbox, bool initialized) : base (stetic, bbox, initialized) {}
 
 		public class ButtonBoxChild : Stetic.Wrapper.Box.BoxChild {
 			public static ItemGroup ButtonBoxChildProperties;
@@ -37,7 +37,7 @@ namespace Stetic.Wrapper {
 						 ButtonBoxChildProperties);
 			}
 
-			public ButtonBoxChild (IStetic stetic, Gtk.ButtonBox.ButtonBoxChild bbc) : base (stetic, bbc) {}
+			public ButtonBoxChild (IStetic stetic, Gtk.ButtonBox.ButtonBoxChild bbc, bool initialized) : base (stetic, bbc, initialized) {}
 		}
 	}
 }

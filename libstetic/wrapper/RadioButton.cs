@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Radio Button", "radiobutton.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Radio Button", "radiobutton.png", typeof (Gtk.RadioButton), ObjectWrapperType.Widget)]
 	public class RadioButton : ToggleButton {
 
 		public static ItemGroup RadioButtonProperties;
@@ -31,17 +31,20 @@ namespace Stetic.Wrapper {
 			GroupLeaders = new ArrayList ();
 		}
 
-		public RadioButton (IStetic stetic) : this (stetic, new Gtk.RadioButton ("")) {}
+		public RadioButton (IStetic stetic) : this (stetic, new Gtk.RadioButton (""), false) {}
 
-		public RadioButton (IStetic stetic, Gtk.RadioButton radiobutton) : base (stetic, radiobutton)
+
+		public RadioButton (IStetic stetic, Gtk.RadioButton radiobutton, bool initialized) : base (stetic, radiobutton, initialized)
 		{
-			radiobutton.Label = radiobutton.Name;
+			if (!initialized) {
+				radiobutton.Label = radiobutton.Name;
 
-			if (GroupList.Count == 0) {
-				GroupList.Add ("radiogroup1");
-				GroupLeaders.Add (radiobutton);
+				if (GroupList.Count == 0) {
+					GroupList.Add ("radiogroup1");
+					GroupLeaders.Add (radiobutton);
+				}
+				Group = GroupList.Count - 1;
 			}
-			Group = GroupList.Count - 1;
 		}
 
 		[Editor (typeof (Stetic.Editor.GroupPicker))]

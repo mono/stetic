@@ -16,10 +16,13 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		protected Paned (IStetic stetic, Gtk.Paned paned) : base (stetic, paned)
+
+		protected Paned (IStetic stetic, Gtk.Paned paned, bool initialized) : base (stetic, paned, initialized)
 		{
-			paned.Pack1 (CreateWidgetSite (), true, false);
-			paned.Pack2 (CreateWidgetSite (), true, false);
+			if (!initialized) {
+				paned.Pack1 (CreateWidgetSite (), true, false);
+				paned.Pack2 (CreateWidgetSite (), true, false);
+			}
 		}
 
 		public class PanedChild : Stetic.Wrapper.Container.ContainerChild {
@@ -35,7 +38,7 @@ namespace Stetic.Wrapper {
 						 PanedChildProperties);
 			}
 
-			public PanedChild (IStetic stetic, Gtk.Paned.PanedChild bc) : base (stetic, bc) {}
+			public PanedChild (IStetic stetic, Gtk.Paned.PanedChild bc, bool initialized) : base (stetic, bc, false) {}
 		}
 	}
 }

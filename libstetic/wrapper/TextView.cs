@@ -2,8 +2,8 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Text View", "textview.png", ObjectWrapperType.Widget)]
-	public class TextView : Stetic.Wrapper.Widget {
+	[ObjectWrapper ("Text View", "textview.png", typeof (Gtk.TextView), ObjectWrapperType.Widget)]
+	public class TextView : Stetic.Wrapper.Container {
 
 		public static ItemGroup TextViewProperties;
 		public static ItemGroup TextViewExtraProperties;
@@ -31,9 +31,10 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public TextView (IStetic stetic) : this (stetic, new Gtk.TextView ()) {}
+		public TextView (IStetic stetic) : this (stetic, new Gtk.TextView (), false) {}
 
-		public TextView (IStetic stetic, Gtk.TextView textview) : base (stetic, textview)
+
+		public TextView (IStetic stetic, Gtk.TextView textview, bool initialized) : base (stetic, textview, initialized)
 		{
 			textview.Buffer.Changed += Buffer_Changed;
 		}

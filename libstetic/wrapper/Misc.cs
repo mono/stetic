@@ -14,6 +14,6 @@ namespace Stetic.Wrapper {
 							"Yalign");
 		}
 
-		protected Misc (IStetic stetic, Gtk.Misc misc) : base (stetic, misc) {}
+		protected Misc (IStetic stetic, Gtk.Misc misc, bool initialized) : base (stetic, misc, initialized) {}
 	}
 }

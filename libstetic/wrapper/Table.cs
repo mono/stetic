@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Table", "table.png", ObjectWrapperType.Container)]
+	[ObjectWrapper ("Table", "table.png", typeof (Gtk.Table), ObjectWrapperType.Container)]
 	public class Table : Stetic.Wrapper.Container {
 
 		public static ItemGroup TableProperties;
@@ -37,9 +37,10 @@ namespace Stetic.Wrapper {
 		const Gtk.AttachOptions expandOpts = Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill;
 		const Gtk.AttachOptions fillOpts = Gtk.AttachOptions.Fill;
 
-		public Table (IStetic stetic) : this (stetic, new Gtk.Table (3, 3, false)) {}
+		public Table (IStetic stetic) : this (stetic, new Gtk.Table (3, 3, false), false) {}
 
-		public Table (IStetic stetic, Gtk.Table table) : base (stetic, table)
+
+		public Table (IStetic stetic, Gtk.Table table, bool initialized) : base (stetic, table, initialized)
 		{
 			AutoSize = new Set ();
 			Sync ();
@@ -349,8 +350,12 @@ namespace Stetic.Wrapper {
 			Freeze ();
 			if (site.Occupied) {
 				Gtk.Table.TableChild tc = table[site] as Gtk.Table.TableChild;
-				tc.XOptions = 0;
-				tc.YOptions = 0;
+				// FIXME: This check is to workaround a weird
+				// gtk warning. Something is going wrong.
+				if (tc.Child.Parent == tc.Parent) {
+					tc.XOptions = 0;
+					tc.YOptions = 0;
+				}
 			} else
 				AutoSize[site] = true;
 			Thaw ();
@@ -461,7 +466,6 @@ namespace Stetic.Wrapper {
 						 TableChildProperties);
 			}
 
-			public TableChild (IStetic stetic, Gtk.Table.TableChild tc) : base (stetic, tc) {}
 
 			Gtk.Table.TableChild tc {
 				get {
@@ -585,6 +589,8 @@ namespace Stetic.Wrapper {
 				base.EmitNotify (propertyName);
 				parent.Sync ();
 			}
+
+			public TableChild (IStetic stetic, Gtk.Table.TableChild tablechild, bool initialized) : base (stetic, tablechild, initialized) {}
 		}
 	}
 }

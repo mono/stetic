@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("ScrolledWindow", "scrolledwindow.png", ObjectWrapperType.Container)]
+	[ObjectWrapper ("ScrolledWindow", "scrolledwindow.png", typeof (Gtk.ScrolledWindow), ObjectWrapperType.Container)]
 	public class ScrolledWindow : Bin {
 
 		public static ItemGroup ScrolledWindowProperties;
@@ -21,12 +21,17 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public ScrolledWindow (IStetic stetic) : this (stetic, new Gtk.ScrolledWindow ()) {}
+		public ScrolledWindow (IStetic stetic) : this (stetic, new Gtk.ScrolledWindow (), false) {}
 
-		public ScrolledWindow (IStetic stetic, Gtk.ScrolledWindow scrolledwindow) : base (stetic, scrolledwindow)
+
+		public ScrolledWindow (IStetic stetic, Gtk.ScrolledWindow scrolledwindow, bool initialized) : base (stetic, scrolledwindow, initialized)
 		{
-			scrolledwindow.SetPolicy (Gtk.PolicyType.Always, Gtk.PolicyType.Always);
-			scrolledwindow.AddWithViewport (CreateWidgetSite ());
+			if (!initialized) {
+				scrolledwindow.SetPolicy (Gtk.PolicyType.Always, Gtk.PolicyType.Always);
+			}
+			if (!initialized && scrolledwindow.Child == null) {
+				scrolledwindow.AddWithViewport (CreateWidgetSite ());
+			}
 		}
 
 		public override bool HExpandable { get { return true; } }

@@ -24,10 +24,13 @@ namespace Stetic.Wrapper {
 			RegisterContextMenu (typeof (Stetic.Wrapper.Box), contextMenu);
 		}
 
-		protected Box (IStetic stetic, Gtk.Box box) : base (stetic, box)
+
+		protected Box (IStetic stetic, Gtk.Box box, bool initialized) : base (stetic, box, initialized)
 		{
-			for (int i = 0; i < 3; i++)
-				box.PackStart (CreateWidgetSite ());
+			if (!initialized) {
+				for (int i = 0; i < 3; i++)
+					box.PackStart (CreateWidgetSite ());
+			}
 		}
 
 		[Command ("Insert Before", "Insert an empty row/column before the selected one")]
@@ -62,7 +65,11 @@ namespace Stetic.Wrapper {
 
 		protected override void SiteOccupancyChanged (WidgetSite site) {
 			Gtk.Box.BoxChild bc = ((Gtk.Box)Wrapped)[site] as Gtk.Box.BoxChild;
-			bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
+			// FIXME: This check is to prevent a weird gtk warning
+			// Something is going wrong.
+			if (bc.Child.Parent == bc.Parent) {
+				bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
+			}
 			base.SiteOccupancyChanged (site);
 		}
 
@@ -84,7 +91,7 @@ namespace Stetic.Wrapper {
 						 BoxChildProperties);
 			}
 
-			public BoxChild (IStetic stetic, Gtk.Box.BoxChild bc) : base (stetic, bc) {}
+			public BoxChild (IStetic stetic, Gtk.Box.BoxChild bc, bool initialized) : base (stetic, bc, initialized) {}
 		}
 	}
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Calendar", "calendar.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Calendar", "calendar.png", typeof (Gtk.Calendar), ObjectWrapperType.Widget)]
 	public class Calendar : Stetic.Wrapper.Widget {
 
 		public static ItemGroup CalendarProperties;
@@ -19,7 +19,9 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Calendar (IStetic stetic) : this (stetic, new Gtk.Calendar ()) {}
-		public Calendar (IStetic stetic, Gtk.Calendar calendar) : base (stetic, calendar) {}
+		public Calendar (IStetic stetic) : this (stetic, new Gtk.Calendar (), false) {}
+
+		
+		public Calendar (IStetic stetic, Gtk.Calendar calendar, bool initialized) : base (stetic, calendar, initialized) {}
 	}
 }

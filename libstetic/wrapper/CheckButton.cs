@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Check Box", "checkbutton.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Check Box", "checkbutton.png", typeof (Gtk.CheckButton), ObjectWrapperType.Widget)]
 	public class CheckButton : ToggleButton {
 
 		public static ItemGroup CheckButtonProperties;
@@ -20,11 +20,14 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public CheckButton (IStetic stetic) : this (stetic, new Gtk.CheckButton ()) {}
+		public CheckButton (IStetic stetic) : this (stetic, new Gtk.CheckButton (), false) {}
 
-		public CheckButton (IStetic stetic, Gtk.CheckButton checkbutton) : base (stetic, checkbutton)
+
+		public CheckButton (IStetic stetic, Gtk.CheckButton checkbutton, bool initialized) : base (stetic, checkbutton, initialized)
 		{
-			checkbutton.Label = checkbutton.Name;
+			if (!initialized) {
+				checkbutton.Label = checkbutton.Name;
+			}
 		}
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Stock Icon", "image.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Stock Icon", "image.png", typeof (Gtk.Image), ObjectWrapperType.Widget)]
 	public class Icon : Misc {
 
 		public static ItemGroup IconProperties;
@@ -20,8 +20,8 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Icon (IStetic stetic) : this (stetic, new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog)) {}
-		public Icon (IStetic stetic, Gtk.Image icon) : base (stetic, icon) {}
+		public Icon (IStetic stetic) : this (stetic, new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog), false) {}
+		public Icon (IStetic stetic, Gtk.Image icon, bool initialized) : base (stetic, icon, initialized) {}
 
 		[Editor (typeof (Stetic.Editor.StockItem))]
 		[Description ("Stock Icon", "The stock icon to display")]

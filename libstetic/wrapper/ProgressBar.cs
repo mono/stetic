@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("ProgressBar", "progressbar.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("ProgressBar", "progressbar.png", typeof (Gtk.ProgressBar), ObjectWrapperType.Widget)]
 	public class ProgressBar : Stetic.Wrapper.Widget {
 
 		public static ItemGroup ProgressBarProperties;
@@ -18,7 +18,7 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public ProgressBar (IStetic stetic) : this (stetic, new Gtk.ProgressBar ()) {}
-		public ProgressBar (IStetic stetic, Gtk.ProgressBar progressbar) : base (stetic, progressbar) {}
+		public ProgressBar (IStetic stetic) : this (stetic, new Gtk.ProgressBar (), false) {}
+		public ProgressBar (IStetic stetic, Gtk.ProgressBar progressbar, bool initialized) : base (stetic, progressbar, initialized) {}
 	}
 }

@@ -3,7 +3,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Window", "window.png", ObjectWrapperType.Window)]
+	[ObjectWrapper ("Window", "window.png", typeof (Gtk.Window), ObjectWrapperType.Window)]
 	public class Window : Bin {
 
 		public static ItemGroup WindowProperties;
@@ -43,16 +43,21 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Window (IStetic stetic) : this (stetic, new Gtk.Window (Gtk.WindowType.Toplevel)) {}
+		public Window (IStetic stetic) : this (stetic, new Gtk.Window (Gtk.WindowType.Toplevel), false) {}
 
-		public Window (IStetic stetic, Gtk.Window window) : base (stetic, window)
+
+		public Window (IStetic stetic, Gtk.Window window, bool initialized) : base (stetic, window, initialized)
 		{
-			window.Title = window.Name;
-			window.DeleteEvent += DeleteEvent;
+			if (!initialized) {
+				window.Title = window.Name;
 
-			Gtk.Requisition req;
-			req.Width = req.Height = 200;
-			site.EmptySize = req;
+				if (Site != null) {
+					Gtk.Requisition req;
+					req.Width = req.Height = 200;
+					Site.EmptySize = req;
+				}
+			}
+			window.DeleteEvent += DeleteEvent;
 		}
 
 		[ConnectBefore]

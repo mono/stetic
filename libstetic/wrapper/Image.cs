@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Image", "image.png", ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Image", "image.png", typeof (Gtk.Image), ObjectWrapperType.Widget)]
 	public class Image : Misc {
 
 		public static ItemGroup ImageProperties;
@@ -19,8 +19,8 @@ namespace Stetic.Wrapper {
 					 Widget.CommonWidgetProperties);
 		}
 
-		public Image (IStetic stetic) : this (stetic, new Gtk.Image ("")) {}
-		public Image (IStetic stetic, Gtk.Image image) : base (stetic, image) {}
+		public Image (IStetic stetic) : this (stetic, new Gtk.Image (""), false) {}
+		public Image (IStetic stetic, Gtk.Image image, bool initialized) : base (stetic, image, initialized) {}
 
 		string filename = "";
 
