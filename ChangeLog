@@ -1,5 +1,17 @@
 2005-02-25  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/Icon.cs: 
+	* libstetic/wrapper/Image.cs: Merge these two together, with a
+	bool property to switch between stock icon and pixmap behavior.
+	It's too messy to have two GtkImage wrappers.
+
+	* libstetic/ObjectWrapper.cs (Register, WrapperType): Simplify the
+	logic here for 1-1 mapping between gtk and stetic types.
+
+	* stetic/GladeImport.cs: Likewise
+
+2005-02-25  Dan Winship  <danw@novell.com>
+
 	* stetic/Project.cs: implement IStetic
 
 	* stetic/GladeImport.cs: pass the Project down into CreateWidget

@@ -249,24 +249,13 @@ namespace Stetic {
 
 		static ObjectWrapper CreateWrapperType (Project project, Widget widget)
 		{
-			Type[] wrapper_types = ObjectWrapper.LookupWrapperTypes (widget);
-			if (wrapper_types == null) {
-				Console.WriteLine ("no wrapper types for widget {0}", widget);
+			Type wrapper_type = ObjectWrapper.WrapperType (widget);
+			if (wrapper_type == null) {
+				Console.WriteLine ("no wrapper type for widget {0}", widget);
 				return null;
 			}
 
-			Type final_wrapper_type = null;
-			if (wrapper_types.Length == 1) {
-				final_wrapper_type = wrapper_types[0];
-			} else {
-				if (((Gtk.Image)widget).Stock != String.Empty) {
-					final_wrapper_type = typeof (Stetic.Wrapper.Icon);
-				} else {
-					final_wrapper_type = typeof (Stetic.Wrapper.Image);
-				}
-			}
-
-			return Stetic.ObjectWrapper.Create (project, final_wrapper_type, widget);
+			return Stetic.ObjectWrapper.Create (project, wrapper_type, widget);
 		}
 	}
 }

@@ -43,15 +43,7 @@ namespace Stetic {
 			if (pinfo != null)
 				pinfo.GetValue (null, null);
 
-			if (wrapperTypes.Contains (wrappedType)) {
-				Type[] old_type_array = wrapperTypes[wrappedType] as Type[];
-				Type[] new_type_array = new Type[old_type_array.Length + 1];
-				old_type_array.CopyTo (new_type_array, 0);
-				new_type_array[old_type_array.Length] = type;
-				wrapperTypes[wrappedType] = new_type_array;
-			} else {
-				wrapperTypes[wrappedType] = new Type[] { type };
-			}
+			wrapperTypes[wrappedType] = type;
 
 			MethodBase instanceCtor = type.GetMethod ("CreateInstance",
 								  BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
@@ -103,12 +95,12 @@ namespace Stetic {
 				return wrappers[obj] as Stetic.ObjectWrapper;
 		}
 
-		public static Type[] LookupWrapperTypes (object obj)
+		public static Type WrapperType (object obj)
 		{
 			if (obj == null)
 				return null;
 			else 
-				return wrapperTypes[obj.GetType ()] as Type[];
+				return wrapperTypes[obj.GetType ()] as Type;
 		}
 
 		public object Wrapped {
