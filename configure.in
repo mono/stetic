@@ -1,0 +1,47 @@
+AC_PREREQ(2.53)
+AC_INIT(stetic, 0.0.0)
+AC_CONFIG_SRCDIR(stetic/Stetic.cs)
+AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
+
+AM_CONFIG_HEADER(config.h)
+AM_MAINTAINER_MODE
+AC_PROG_MAKE_SET
+
+AC_DISABLE_STATIC
+AC_PROG_LIBTOOL
+
+MONO_REQUIRED_VERSION=1.1.2
+PKG_CHECK_MODULES(MONO, mono >= $MONO_REQUIRED_VERSION)
+
+AC_PATH_PROG(MONO, mono, no)
+AC_PATH_PROG(MCS, mcs, no)
+
+CS="C#"
+if test "$MCS" = "no" ; then
+	AC_MSG_ERROR([No $CS compiler found])
+fi
+
+AC_PATH_PROG(GACUTIL, gacutil, no)
+if test "x$GACUTIL" = "xno" ; then
+	AC_MSG_ERROR([No gacutil tool found])
+fi
+GACUTIL_FLAGS='/package $(PACKAGE_VERSION) /gacdir $(DESTDIR)$(libdir)'
+
+AC_SUBST(MONO)
+AC_SUBST(MCS)
+AC_SUBST(GACUTIL)
+AC_SUBST(GACUTIL_FLAGS)
+
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.4)
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
+
+PKG_CHECK_MODULES(STETIC, gtk-sharp-2.0 gnome-sharp-2.0)
+AC_SUBST(STETIC_LIBS)
+
+AC_OUTPUT([
+Makefile
+pixmaps/Makefile
+glue/Makefile
+stetic/Makefile
+])

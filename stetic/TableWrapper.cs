@@ -1,0 +1,268 @@
+using Gtk;
+using Gdk;
+using GLib;
+using System;
+using System.Collections;
+
+namespace Stetic {
+
+	public class TableWrapper : Gtk.Table, IWidgetSite {
+
+		const AttachOptions expandOpts = AttachOptions.Expand | AttachOptions.Fill;
+		const AttachOptions fillOpts = AttachOptions.Fill;
+
+		public TableWrapper (uint rows, uint cols, bool homogeneous) : base (rows, cols, homogeneous)
+		{
+			Sync ();
+		}
+
+		private bool syncing;
+		private void Sync ()
+		{
+			uint left, right, top, bottom;
+			uint row, col;
+			WidgetSite site;
+			WidgetSite[,] grid;
+			Table.TableChild tc;
+			Widget[] children;
+
+			if (syncing)
+				return;
+			syncing = true;
+
+			children = Children;
+
+			grid = new WidgetSite[NRows,NColumns];
+
+			// First fill in the placesites in the grid. If we find any
+			// placesites covering more than one grid square, remove them.
+			// (New ones will be created below.)
+                        foreach (Widget child in children) {
+				site = (WidgetSite) child;
+				if (site.Occupied)
+					continue;
+
+                                tc = this[child] as Table.TableChild;
+                                left = tc.LeftAttach;
+                                right = tc.RightAttach;
+                                top = tc.TopAttach;
+                                bottom = tc.BottomAttach;
+
+				if (right == left + 1 && bottom == top + 1)
+					grid[top,left] = child as WidgetSite;
+				else
+					Remove (child);
+                        }
+
+			// Now fill in the real widgets, knocking out any placesites
+			// they overlap.
+                        foreach (Widget child in children) {
+				site = (WidgetSite) child;
+				if (!site.Occupied)
+					continue;
+
+                                tc = this[child] as Table.TableChild;
+                                left = tc.LeftAttach;
+                                right = tc.RightAttach;
+                                top = tc.TopAttach;
+                                bottom = tc.BottomAttach;
+
+                                for (row = top; row < bottom; row++) {
+                                        for (col = left; col < right; col++) {
+						if (grid[row,col] != null)
+							Remove (grid[row,col]);
+                                                grid[row,col] = child as WidgetSite;
+                                        }
+                                }
+                        }
+
+			// Scan each row; if there are any empty cells, fill them in
+			// with placesites. If a row contains only placesites, then
+			// set them all to expand vertically so the row won't collapse.
+			// OTOH, if the row contains any real widget, set any placesites
+			// in that row to not expand vertically, so they don't force the
+			// real widgets to expand further than they should. If any row
+			// is vertically expandable, then the table as a whole is.
+			vexpandable = false;
+			for (row = 0; row < NRows; row++) {
+				bool allPlacesites = true;
+
+				for (col = 0; col < NColumns; col++) {
+					if (grid[row,col] == null) {
+						site = new WidgetSite ();
+						site.OccupancyChanged += ChildOccupancyChanged;
+						site.ChildNotified += ChildNotification;
+						site.Show ();
+						Attach (site, col, col + 1, row, row + 1);
+						grid[row,col] = site;
+					} else if (!grid[row,col].VExpandable)
+						allPlacesites = false;
+				}
+
+				for (col = 0; col < NColumns; col++) {
+					tc = this[grid[row,col]] as Table.TableChild;
+					tc.YOptions = allPlacesites ? expandOpts : fillOpts;
+				}
+
+				if (allPlacesites)
+					vexpandable = true;
+			}
+
+			// Now do the same for columns and horizontal expansion (but we
+			// don't have to worry about empty cells this time).
+			hexpandable = false;
+			for (col = 0; col < NColumns; col++) {
+				bool allPlacesites = true;
+
+				for (row = 0; row < NRows; row++) {
+					if (!grid[row,col].HExpandable) {
+						allPlacesites = false;
+						break;
+					}
+				}
+
+				for (row = 0; row < NRows; row++) {
+					tc = this[grid[row,col]] as Table.TableChild;
+					tc.XOptions = allPlacesites ? expandOpts : fillOpts;
+				}
+
+				if (allPlacesites)
+					hexpandable = true;
+			}
+
+			syncing = false;
+
+			if (OccupancyChanged != null)
+				OccupancyChanged (this);
+		}
+
+		private bool hexpandable, vexpandable;
+		public bool HExpandable { get { return hexpandable; } }
+		public bool VExpandable { get { return vexpandable; } }
+
+		public event OccupancyChangedHandler OccupancyChanged;
+
+		protected override void OnRemoved (Widget w)
+		{
+			WidgetSite site = w as WidgetSite;
+
+			if (site == null)
+				return;
+
+			site.OccupancyChanged -= ChildOccupancyChanged;
+			site.ChildNotified -= ChildNotification;
+
+			base.OnRemoved (w);
+		}
+
+		private void ChildOccupancyChanged (IWidgetSite site)
+		{
+			Sync ();
+		}
+
+		private void ChildNotification (object o, ChildNotifiedArgs args)
+		{
+//			if (!(args.Pspec is ParamSpecUInt))
+//				return;
+
+			Sync ();
+		}
+
+		private const int delta = 4;
+		private enum Where { None, Above, Below, Left, Right };
+
+		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
+		{
+			int diff, closest;
+			Where where = Where.None;
+			Rectangle alloc;
+
+			if (evt.Type != EventType.TwoButtonPress)
+				return false;
+
+			if (FocusChild == null)
+				return false;
+
+			alloc = FocusChild.Allocation;
+
+			closest = delta;
+			diff = (int)evt.X;
+			if (diff < closest) {
+				closest = diff;
+				where = Where.Left;
+			}
+			diff = alloc.Width - (int)evt.X;
+			if (diff < closest) {
+				closest = diff;
+				where = Where.Right;
+			}
+			diff = (int)evt.Y;
+			if (diff < closest) {
+				closest = diff;
+				where = Where.Above;
+			}
+			diff = alloc.Height - (int)evt.Y;
+			if (diff < closest) {
+				closest = diff;
+				where = Where.Below;
+			}
+
+			Table.TableChild tc = this[FocusChild] as Table.TableChild;
+
+			switch (where) {
+			case Where.None:
+				return false;
+
+			case Where.Left:
+				AddColumn (tc.LeftAttach);
+				break;
+
+			case Where.Right:
+				AddColumn (tc.RightAttach);
+				break;
+
+			case Where.Above:
+				AddRow (tc.TopAttach);
+				break;
+
+			case Where.Below:
+				AddRow (tc.BottomAttach);
+				break;
+			}
+
+			return true;
+		}
+
+		private void AddColumn (uint col)
+		{
+			uint left, right;
+
+			Resize (NRows, NColumns + 1);
+			foreach (Widget w in Children) {
+				Table.TableChild tc = this[w] as Table.TableChild;
+
+				if (tc.RightAttach > col)
+					tc.RightAttach++;
+				if (tc.LeftAttach >= col)
+					tc.LeftAttach++;
+			}
+			Sync ();
+		}
+
+		private void AddRow (uint row)
+		{
+			uint top, bottom;
+
+			Resize (NRows + 1, NColumns);
+			foreach (Widget w in Children) {
+				Table.TableChild tc = this[w] as Table.TableChild;
+
+				if (tc.BottomAttach > row)
+					tc.BottomAttach++;
+				if (tc.TopAttach >= row)
+					tc.TopAttach++;
+			}
+			Sync ();
+		}
+	}
+}

@@ -1,0 +1,1 @@
+SUBDIRS = pixmaps glue stetic
