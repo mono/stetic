@@ -2,10 +2,11 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
+using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public class HBox : Gtk.HBox, Stetic.IContainerWrapper {
+	public class HBox : Gtk.HBox, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -29,6 +30,50 @@ namespace Stetic.Wrapper {
 				WidgetSite site = new WidgetSite ();
 				site.OccupancyChanged += SiteOccupancyChanged;
 				PackStart (site);
+			}
+		}
+
+		public IEnumerable ContextMenuItems {
+			get {
+				ContextMenuItem[] items;
+
+				// FIXME; I'm only assigning to a variable rather than
+				// returning it directly to make emacs indentation happy
+				items = new ContextMenuItem[] {
+					new ContextMenuItem ("Insert Before", new ContextMenuItemDelegate (InsertBefore)),
+					new ContextMenuItem ("Insert After", new ContextMenuItemDelegate (InsertAfter)),
+				};
+				return items;
+			}
+		}
+
+		void InsertBefore (IWidgetSite context)
+		{
+			Gtk.Box.BoxChild bc = this[(Gtk.Widget)context] as Gtk.Box.BoxChild;
+			WidgetSite site = new WidgetSite ();
+			site.OccupancyChanged += SiteOccupancyChanged;
+			site.Show ();
+			if (bc.PackType == PackType.Start) {
+				PackStart (site);
+				ReorderChild (site, bc.Position);
+			} else {
+				PackEnd (site);
+				ReorderChild (site, bc.Position + 1);
+			}
+		}
+
+		void InsertAfter (IWidgetSite context)
+		{
+			Gtk.Box.BoxChild bc = this[(Gtk.Widget)context] as Gtk.Box.BoxChild;
+			WidgetSite site = new WidgetSite ();
+			site.OccupancyChanged += SiteOccupancyChanged;
+			site.Show ();
+			if (bc.PackType == PackType.Start) {
+				PackStart (site);
+				ReorderChild (site, bc.Position + 1);
+			} else {
+				PackEnd (site);
+				ReorderChild (site, bc.Position);
 			}
 		}
 

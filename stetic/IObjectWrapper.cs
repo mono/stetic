@@ -36,7 +36,7 @@ namespace Stetic {
 	public delegate void SensitivityChangedDelegate (string property, bool sensitivity);
 
 	public interface IPropertySensitizer {
-		IEnumerable InsensitiveProperties ();
+		IEnumerable InsensitiveProperties { get; }
 
 		event SensitivityChangedDelegate SensitivityChanged;
 	}

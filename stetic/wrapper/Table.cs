@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public class Table : Gtk.Table, Stetic.IContainerWrapper {
+	public class Table : Gtk.Table, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -21,8 +21,8 @@ namespace Stetic.Wrapper {
 			PropertyDescriptor[] props;
 
 			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Table), "NRows"),
-				new PropertyDescriptor (typeof (Gtk.Table), "NColumns"),
+				new PropertyDescriptor (typeof (Stetic.Wrapper.Table), typeof (Gtk.Table), "NRows"),
+				new PropertyDescriptor (typeof (Stetic.Wrapper.Table), typeof (Gtk.Table), "NColumns"),
 				new PropertyDescriptor (typeof (Gtk.Table), "Homogeneous"),
 				new PropertyDescriptor (typeof (Gtk.Table), "RowSpacing"),
 				new PropertyDescriptor (typeof (Gtk.Table), "ColumnSpacing"),
@@ -83,12 +83,13 @@ namespace Stetic.Wrapper {
 				}
 			}
 
-			public IEnumerable InsensitiveProperties ()
-			{
-				if (autosize)
-					return new string[] { "XOptions", "YOptions" };
-				else
-					return new string[0];
+			public IEnumerable InsensitiveProperties {
+				get {
+					if (autosize)
+						return new string[] { "XOptions", "YOptions" };
+					else
+						return new string[0];
+				}
 			}
 
 			public event SensitivityChangedDelegate SensitivityChanged;
@@ -113,7 +114,7 @@ namespace Stetic.Wrapper {
 				Sync ();
 		}
 
-		private void Sync ()
+		void Sync ()
 		{
 			uint left, right, top, bottom;
 			uint row, col;
@@ -239,6 +240,166 @@ namespace Stetic.Wrapper {
 				ExpandabilityChanged (this);
 		}
 
+		public new uint NRows {
+			get {
+				return base.NRows;
+			}
+			set {
+				Freeze ();
+				while (value < base.NRows)
+					DeleteRow (base.NRows);
+				base.NRows = value;
+				Thaw ();
+			}
+		}
+
+		public new uint NColumns {
+			get {
+				return base.NColumns;
+			}
+			set {
+				Freeze ();
+				while (value < base.NColumns)
+					DeleteColumn (base.NColumns);
+				base.NColumns = value;
+				Thaw ();
+			}
+		}
+
+		void AddRow (uint row)
+		{
+			Freeze ();
+			base.NRows++;
+			foreach (Gtk.Widget w in Children) {
+				Table.TableChild tc = this[w] as Table.TableChild;
+
+				if (tc.BottomAttach > row)
+					tc.BottomAttach++;
+				if (tc.TopAttach >= row)
+					tc.TopAttach++;
+			}
+			Thaw ();
+		}
+
+		void DeleteRow (uint row)
+		{
+			Gtk.Widget[] children = Children;
+			Table.TableChild tc;
+
+			Freeze ();
+			foreach (Gtk.Widget child in children) {
+				tc = this[child] as Table.TableChild;
+
+				if (tc.TopAttach == row) {
+					if (tc.BottomAttach == tc.TopAttach + 1)
+						Remove (child);
+					else
+						tc.BottomAttach--;
+				} else {
+					if (tc.TopAttach > row)
+						tc.TopAttach--;
+					if (tc.BottomAttach > row)
+						tc.BottomAttach--;
+				}
+			}
+			base.NRows--;
+			Thaw ();
+		}
+
+		void AddColumn (uint col)
+		{
+			Freeze ();
+			base.NColumns++;
+			foreach (Gtk.Widget w in Children) {
+				Table.TableChild tc = this[w] as Table.TableChild;
+
+				if (tc.RightAttach > col)
+					tc.RightAttach++;
+				if (tc.LeftAttach >= col)
+					tc.LeftAttach++;
+			}
+			Thaw ();
+		}
+
+		void DeleteColumn (uint col)
+		{
+			Gtk.Widget[] children = Children;
+			Table.TableChild tc;
+
+			Freeze ();
+			foreach (Gtk.Widget child in children) {
+				tc = this[child] as Table.TableChild;
+
+				if (tc.LeftAttach == col) {
+					if (tc.RightAttach == tc.LeftAttach + 1)
+						Remove (child);
+					else
+						tc.RightAttach--;
+				} else {
+					if (tc.LeftAttach > col)
+						tc.LeftAttach--;
+					if (tc.RightAttach > col)
+						tc.RightAttach--;
+				}
+			}
+			base.NColumns--;
+			Thaw ();
+		}
+
+		public IEnumerable ContextMenuItems {
+			get {
+				ContextMenuItem[] items;
+
+				// FIXME; I'm only assigning to a variable rather than
+				// returning it directly to make emacs indentation happy
+				items = new ContextMenuItem[] {
+					new ContextMenuItem ("Insert Row Before", new ContextMenuItemDelegate (InsertRowBefore)),
+					new ContextMenuItem ("Insert Row After", new ContextMenuItemDelegate (InsertRowAfter)),
+					new ContextMenuItem ("Insert Column Before", new ContextMenuItemDelegate (InsertColumnBefore)),
+					new ContextMenuItem ("Insert Column After", new ContextMenuItemDelegate (InsertColumnAfter)),
+					new ContextMenuItem ("Delete Row", new ContextMenuItemDelegate (DeleteRow)),
+					new ContextMenuItem ("Delete Column", new ContextMenuItemDelegate (DeleteColumn)),
+				};
+				return items;
+			}
+		}
+
+		void InsertRowBefore (IWidgetSite context)
+		{
+			Table.TableChild tc = this[(Gtk.Widget)context] as Table.TableChild;
+			AddRow (tc.TopAttach);
+		}
+
+		void InsertRowAfter (IWidgetSite context)
+		{
+			Table.TableChild tc = this[(Gtk.Widget)context] as Table.TableChild;
+			AddRow (tc.BottomAttach);
+		}
+
+		void InsertColumnBefore (IWidgetSite context)
+		{
+			Table.TableChild tc = this[(Gtk.Widget)context] as Table.TableChild;
+			AddColumn (tc.LeftAttach);
+		}
+
+		void InsertColumnAfter (IWidgetSite context)
+		{
+			Table.TableChild tc = this[(Gtk.Widget)context] as Table.TableChild;
+			AddColumn (tc.RightAttach);
+		}
+
+		void DeleteRow (IWidgetSite context)
+		{
+			Table.TableChild tc = this[(Gtk.Widget)context] as Table.TableChild;
+			DeleteRow (tc.TopAttach);
+		}
+
+		void DeleteColumn (IWidgetSite context)
+		{
+			Table.TableChild tc = this[(Gtk.Widget)context] as Table.TableChild;
+			DeleteColumn (tc.LeftAttach);
+		}
+
 		private bool hexpandable, vexpandable;
 		public bool HExpandable { get { return hexpandable; } }
 		public bool VExpandable { get { return vexpandable; } }
@@ -343,34 +504,6 @@ namespace Stetic.Wrapper {
 			}
 
 			return true;
-		}
-
-		private void AddColumn (uint col)
-		{
-			Resize (NRows, NColumns + 1);
-			foreach (Gtk.Widget w in Children) {
-				Table.TableChild tc = this[w] as Table.TableChild;
-
-				if (tc.RightAttach > col)
-					tc.RightAttach++;
-				if (tc.LeftAttach >= col)
-					tc.LeftAttach++;
-			}
-			Sync ();
-		}
-
-		private void AddRow (uint row)
-		{
-			Resize (NRows + 1, NColumns);
-			foreach (Gtk.Widget w in Children) {
-				Table.TableChild tc = this[w] as Table.TableChild;
-
-				if (tc.BottomAttach > row)
-					tc.BottomAttach++;
-				if (tc.TopAttach >= row)
-					tc.TopAttach++;
-			}
-			Sync ();
 		}
 	}
 }

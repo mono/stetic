@@ -22,7 +22,7 @@ namespace Stetic.Wrapper {
 			ComboBoxProperties = new PropertyGroup ("ComboBox Properties", props);
 
 			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.ComboBox), "WrapWidget"),
+				new PropertyDescriptor (typeof (Gtk.ComboBox), "WrapWidth"),
 				new PropertyDescriptor (typeof (Gtk.ComboBox), "ColumnSpanColumn"),
 				new PropertyDescriptor (typeof (Gtk.ComboBox), "RowSpanColumn"),
 			};

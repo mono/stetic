@@ -1,4 +1,4 @@
 #!/bin/sh
 
 export LD_LIBRARY_PATH=../glue/.libs:$LD_LIBRARY_PATH
-exec @MONO@ --debug stetic.exe
+exec @MONO@ "$@" --debug stetic.exe

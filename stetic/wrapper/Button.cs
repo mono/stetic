@@ -20,7 +20,7 @@ namespace Stetic.Wrapper {
 			props = new PropertyDescriptor[] {
 				new PropertyDescriptor (typeof (Gtk.Button), "UseStock"),
 				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "StockId"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "Label"),
+				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), typeof (Gtk.Button), "Label"),
 //				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "Icon")
 			};				
 			ButtonProperties = new PropertyGroup ("Button Properties", props);
@@ -96,12 +96,13 @@ namespace Stetic.Wrapper {
 
 		public event EventHandler LabelChanged;
 
-		public IEnumerable InsensitiveProperties ()
-		{
-			if (UseStock)
-				return new string[] { "Label" };
-			else
-				return new string[0];
+		public IEnumerable InsensitiveProperties {
+			get {
+				if (UseStock)
+					return new string[] { "Label" };
+				else
+					return new string[0];
+			}
 		}
 
 		public event SensitivityChangedDelegate SensitivityChanged;

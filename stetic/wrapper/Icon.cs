@@ -17,8 +17,8 @@ namespace Stetic.Wrapper {
 			PropertyDescriptor[] props;
 
 			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Icon), "StockId"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Icon), "Size"),
+				new PropertyDescriptor (typeof (Stetic.Wrapper.Icon), typeof (Gtk.Image), "Stock"),
+				new PropertyDescriptor (typeof (Stetic.Wrapper.Icon), typeof (Gtk.Image), "IconSize"),
 			};				
 			IconProperties = new PropertyGroup ("Stock Icon Properties", props);
 
@@ -31,21 +31,21 @@ namespace Stetic.Wrapper {
 		public Icon () : base (Gtk.Stock.Execute, Gtk.IconSize.Dialog) {}
 
 		[Editor (typeof (Stetic.Editor.StockItem), typeof (Gtk.Widget))]
-		public string StockId {
+		public new string Stock {
 			get {
-				return Stock;
+				return base.Stock;
 			}
 			set {
-				Stock = value;
+				base.Stock = value;
 			}
 		}
 
-		public Gtk.IconSize Size {
+		public new Gtk.IconSize IconSize {
 			get {
-				return (Gtk.IconSize)IconSize;
+				return (Gtk.IconSize)base.IconSize;
 			}
 			set {
-				IconSize = (int)value;
+				base.IconSize = (int)value;
 			}
 		}
 	}

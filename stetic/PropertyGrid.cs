@@ -114,7 +114,7 @@ namespace Stetic {
 			if (sens == null)
 				return;
 
-			foreach (string prop in sens.InsensitiveProperties ()) {
+			foreach (string prop in sens.InsensitiveProperties) {
 				Widget w = editors[prop] as Widget;
 				if (w != null)
 					w.Sensitive = false;

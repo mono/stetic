@@ -15,7 +15,7 @@ namespace Stetic {
 		Type editorType;
 		object defaultValue;
 
-		public PropertyDescriptor (Type objectType, string propertyName)
+		public PropertyDescriptor (Type objectType, Type baseType, string propertyName)
 		{
 			Type parentType;
 
@@ -27,10 +27,22 @@ namespace Stetic {
 				propertyInfo = objectType.GetProperty (propertyName);
 			} else {
 				memberInfo = objectType.GetProperty (propertyName.Substring (0, dot));
+				if (memberInfo == null)
+					throw new ArgumentException ("Invalid property name " + objectType.Name + "." + propertyName);
 				parentType = memberInfo.PropertyType;
 				propertyInfo = parentType.GetProperty (propertyName.Substring (dot + 1));
 			}
+			if (propertyInfo == null)
+				throw new ArgumentException ("Invalid property name " + parentType.Name + "." + propertyName);
+
 			eventInfo = parentType.GetEvent (propertyInfo.Name + "Changed");
+
+			if (baseType != null) {
+				PropertyDescriptor baseProp = new PropertyDescriptor (baseType, propertyName);
+				editorType = baseProp.editorType;
+				defaultValue = baseProp.defaultValue;
+				pspec = baseProp.pspec;
+			}
 
 			foreach (object attr in propertyInfo.GetCustomAttributes (false)) {
 				if (attr is System.ComponentModel.EditorAttribute) {
@@ -54,6 +66,8 @@ namespace Stetic {
 				}
 			}
 		}
+
+		public PropertyDescriptor (Type objectType, string propertyName) : this (objectType, null, propertyName) {}
 
 		public string Name {
 			get {

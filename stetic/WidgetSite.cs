@@ -300,7 +300,7 @@ namespace Stetic {
 
 		protected override bool OnPopupMenu ()
 		{
-			Menu m = new ContextMenu (this, true);
+			Menu m = new ContextMenu (this);
 			m.Popup ();
 			return true;
 		}

@@ -1,3 +1,47 @@
+2005-01-13  Dan Winship  <danw@novell.com>
+
+	* stetic/ContextMenu.cs (IContextMenuProvider): New interface for
+	widget wrappers that want to add items to their context menus.
+	(ContextMenu): support IContextMenuProvider.
+
+	* stetic/IObjectWrapper.cs (IPropertySensitizer): Make
+	InsensitiveProperties a property rather than a method
+
+	* stetic/PropertyDescriptor.cs (PropertyDescriptor): Add a new
+	constructor for "proxy" descriptors, which get a ParamSpec from
+	the base class, but use the property on the derived class. Also,
+	if the passed-in propertyName is invalid, throw an
+	ArgumentException with a useful message rather than causing a
+	NullArgumentException later.
+
+	* stetic/PropertyGrid.cs (SetupSensitivity): Update for
+	InsensitiveProperties change
+
+	* stetic/WidgetSite.cs: Update for ContextMenu ctor change
+
+	* stetic/wrapper/Button.cs: Use a proxy PropertyDescriptor for
+	"Label", update InsensitiveProperties.
+
+	* stetic/wrapper/ComboBox.cs: Fix a crasher typo noted by Peter
+	Williams.
+
+	* stetic/wrapper/Icon.cs: Use proxy PropertyDescriptors for Stock
+	and IconSize.
+
+	* stetic/wrapper/HBox.cs:
+	* stetic/wrapper/VBox.cs: Implement IContextMenuProvider, adding
+	"Insert Before" and "Insert After" commands.
+
+	* stetic/wrapper/Table.cs: Implement IContextMenuProvider, adding
+	"Insert Row/Column Before/After" and "Delete Row/Column". Use
+	proxy PropertyDescriptors for NRows and NColumns since the base
+	properties won't let you remove non-empty rows/columns. Update
+	InsensitiveProperties.
+
+	* stetic/stetic.in: If command-line args are passed, pass them to
+	mono (since stetic doesn't take any arguments at the moment, and I
+	use mono --trace a lot).
+
 2005-01-12  Dan Winship  <danw@novell.com>
 
 	* stetic/PropertyGrid.cs: Reorganize stuff so that ContainerChild
