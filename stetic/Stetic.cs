@@ -49,6 +49,7 @@ namespace Stetic {
 			
 			ProjectView = new ProjectView (Project);
 			scwin = new Gtk.ScrolledWindow ();
+			scwin.ShadowType = ShadowType.In;
 			scwin.Add (ProjectView);
 			vpaned.Pack1 (scwin, false, false);
 

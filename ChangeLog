@@ -1,3 +1,7 @@
+2005-03-03  Todd Berman  <tberman@off.net>
+
+	* stetic/Stetic.cs: Add a ShadowType.In to the widget TreeView.
+
 2005-03-03  Dan Winship  <danw@novell.com>
 
 	* libstetic/DND.cs: static class to handle various
