@@ -4,7 +4,7 @@ using System;
 
 namespace Stetic {
 
-	public class Stetic  {
+	public class SteticMain  {
 
 		static Gnome.Program program;
 

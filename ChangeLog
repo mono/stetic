@@ -1,5 +1,14 @@
 2005-01-13  Dan Winship  <danw@novell.com>
 
+	* stetic/Stetic.cs: Rename the main class from "Stetic" to
+	"SteticMain", to work around what is either a bug in csc (which
+	mcs now matches) or a bug in the C# spec.
+
+	* stetic/WidgetFactory.cs (WindowFactory.OnButtonPressEvent):
+	update for that
+
+2005-01-13  Dan Winship  <danw@novell.com>
+
 	* stetic/WidgetFactory.cs (WidgetFactoryAttribute): gone, turned
 	into WidgetWrapperAttribute
 	(WidgetFactory, WindowFactory): Take a Type directly rather than a

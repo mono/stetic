@@ -49,12 +49,12 @@ namespace Stetic {
 			win.Present ();
 
 			WindowSite site = new WindowSite (win);
-			Stetic.Select (site);
+			SteticMain.Select (site);
 			site.FocusChanged += delegate (WindowSite site, IWidgetSite focus) {
 				if (focus == null)
-					Stetic.NoSelection ();
+					SteticMain.NoSelection ();
 				else
-					Stetic.Select (focus);
+					SteticMain.Select (focus);
 			};
 			return true;
 		}
