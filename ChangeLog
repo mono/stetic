@@ -1,5 +1,15 @@
 2005-03-08  Dan Winship  <danw@novell.com>
 
+	* libstetic/WidgetSite.cs (SetupFaults): Pass "false" to DND.DestSet,
+	not true, so that the whole widget isn't drop-on-able.
+	(AddHFault, AddVFault): don't create windows if we're not realized.
+
+	* libstetic/wrapper/Box.cs (Wrap): call box_ParentSet from here so
+	that the DropOn handler will be set up if the Parent is already
+	set when it's wrapped (ie, if it's an internal child)
+
+2005-03-08  Dan Winship  <danw@novell.com>
+
 	* libstetic/GladeException.cs: exception class for Glade import problems
 
 	* libstetic/GladeUtils.cs:

@@ -165,11 +165,13 @@ namespace Stetic {
 				DND.DragEnd += HideFaults;
 			}
 			if (Occupancy == SiteOccupancy.Occupied)
-				DND.DestSet (this, true);
+				DND.DestSet (this, false);
 		}
 
 		public void AddHFault (object id, int y, int x1, int x2)
 		{
+			if (!IsRealized)
+				return;
 			Gdk.Window win = NewWindow (GdkWindow, Gdk.WindowClass.InputOnly);
 			win.MoveResize (x1, y - 2, x2 - x1 , 5);
 			if (faults == null || faults.Count == 0)
@@ -179,6 +181,8 @@ namespace Stetic {
 
 		public void AddVFault (object id, int x, int y1, int y2)
 		{
+			if (!IsRealized)
+				return;
 			Gdk.Window win = NewWindow (GdkWindow, Gdk.WindowClass.InputOnly);
 			win.MoveResize (x - 2, y1, 5, y2 - y1);
 			if (faults == null || faults.Count == 0)

@@ -28,6 +28,7 @@ namespace Stetic.Wrapper {
 			}
 			box.SizeAllocated += box_SizeAllocated;
 			box.ParentSet += box_ParentSet;
+			box_ParentSet (this, null);
 		}
 
 		Gtk.Box box {
@@ -42,7 +43,12 @@ namespace Stetic.Wrapper {
 			if (site == null)
 				return;
 
+			site.ClearFaults ();
+
 			Gtk.Widget[] children = box.Children;
+			if (children.Length == 0)
+				return;
+
 			WidgetSite[] sorted = new WidgetSite[children.Length];
 
 			foreach (Gtk.Widget child in children) {
@@ -54,10 +60,6 @@ namespace Stetic.Wrapper {
 			}
 
 			Gdk.Rectangle alloc = box.Allocation;
-
-			site.ClearFaults ();
-			if (sorted.Length == 0)
-				return;
 
 			if (this is HBox) {
 				if (sorted[0] != null)
