@@ -5,6 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("Frame", "frame.png", WidgetType.Container)]
 	public class Frame : Gtk.Frame, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
@@ -35,7 +36,7 @@ namespace Stetic.Wrapper {
 			childgroups = new PropertyGroup[0];
 		}
 
-		public Frame (string label) : base (label)
+		public Frame () : base ("Frame")
 		{
 			WidgetSite site = new WidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;

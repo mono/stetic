@@ -5,6 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("Radio Button", "radiobutton.png")]
 	public class RadioButton : Gtk.RadioButton, Stetic.IObjectWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

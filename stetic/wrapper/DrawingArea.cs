@@ -5,6 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("Drawing Area", "drawingarea.png")]
 	public class DrawingArea : Gtk.DrawingArea, Stetic.IObjectWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

@@ -5,6 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("Check Box", "checkbutton.png")]
 	public class CheckButton : Gtk.CheckButton, Stetic.IObjectWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

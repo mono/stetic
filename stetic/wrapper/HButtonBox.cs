@@ -5,6 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("HButtonBox", "hbuttonbox.png", WidgetType.Container)]
 	public class HButtonBox : Gtk.HButtonBox, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

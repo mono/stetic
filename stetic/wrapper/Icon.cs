@@ -7,6 +7,7 @@ using System.ComponentModel;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("Stock Icon", "image.png")]
 	public class Icon : Gtk.Image, Stetic.IObjectWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

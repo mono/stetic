@@ -7,45 +7,37 @@ using System.ComponentModel;
 
 namespace Stetic.Wrapper {
 
-	[WidgetWrapper ("Button", "button.png")]
-	public class Button : Gtk.Button, Stetic.IObjectWrapper, Stetic.IPropertySensitizer {
+	[WidgetWrapper ("Toggle Button", "togglebutton.png")]
+	public class ToggleButton : Gtk.ToggleButton, Stetic.IObjectWrapper, Stetic.IPropertySensitizer {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
-		public static PropertyGroup ButtonProperties;
-		public static PropertyGroup ButtonExtraProperties;
+		public static PropertyGroup ToggleButtonProperties;
 
-		static Button () {
+		static ToggleButton () {
 			PropertyDescriptor[] props;
 
 			props = new PropertyDescriptor[] {
 				new PropertyDescriptor (typeof (Gtk.Button), "UseStock"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "StockId"),
-				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), typeof (Gtk.Button), "Label"),
+				new PropertyDescriptor (typeof (Stetic.Wrapper.ToggleButton), "StockId"),
+				new PropertyDescriptor (typeof (Stetic.Wrapper.ToggleButton), typeof (Gtk.Button), "Label"),
 //				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "Icon")
+				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Active"),
+				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Inconsistent"),
 			};				
-			ButtonProperties = new PropertyGroup ("Button Properties", props);
-
-			props = new PropertyDescriptor[] {
-				new PropertyDescriptor (typeof (Gtk.Button), "FocusOnClick"),
-				new PropertyDescriptor (typeof (Gtk.Button), "UseUnderline"),
-				new PropertyDescriptor (typeof (Gtk.Button), "Relief"),
-				new PropertyDescriptor (typeof (Gtk.Button), "Xalign"),
-				new PropertyDescriptor (typeof (Gtk.Button), "Yalign"),
-				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth")
-			};
-			ButtonExtraProperties = new PropertyGroup ("Extra Button Properties", props);
+			ToggleButtonProperties = new PropertyGroup ("Toggle Button Properties", props);
 
 			groups = new PropertyGroup[] {
-				ButtonProperties, ButtonExtraProperties,
+				ToggleButtonProperties,
+				Button.ButtonExtraProperties,
 				Widget.CommonWidgetProperties
 			};
 		}
 
-		public Button ()
+		public ToggleButton () : base ("Toggle")
 		{
-			UseStock = UseUnderline = true;
-			StockId = Gtk.Stock.Ok;
+			UseStock = false;
+			UseUnderline = true;
 			Notify.Add (this, new NotifyDelegate (Notified));
 		}
 

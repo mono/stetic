@@ -19,7 +19,7 @@ namespace Stetic {
 			win.AllowGrow = false;
 			win.DeleteEvent += Window_Delete;
 			palette = new Stetic.Palette ();
-			palette.AddWidgets (typeof (Stetic.Wrapper.DefaultWidgets));
+			palette.AddWidgets (System.Reflection.Assembly.GetCallingAssembly ());
 			win.Add (palette);
 			win.ShowAll ();
 

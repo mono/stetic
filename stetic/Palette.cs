@@ -28,44 +28,35 @@ namespace Stetic {
 			ShowAll ();
 		}
 
-		public void AddWidgets (Type type, WidgetType wtype, VBox box)
+		public void AddWidgets (Assembly assem, WidgetType wtype, VBox box)
 		{
-			foreach (MethodInfo minfo in type.GetMethods (BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)) {
-				if (minfo.ReturnType != typeof (Widget) || minfo.GetParameters ().Length != 0)
+			foreach (Type type in assem.GetExportedTypes ()) {
+				if (!type.IsSubclassOf (typeof (Gtk.Widget)) ||
+				    type.GetConstructor (Type.EmptyTypes) == null)
 					continue;
 
-				foreach (object attr in minfo.GetCustomAttributes (typeof (WidgetFactoryAttribute), false)) {
-					WidgetFactoryAttribute wfattr = attr as WidgetFactoryAttribute;
-					if (wfattr.Type != wtype)
+				foreach (object attr in type.GetCustomAttributes (typeof (WidgetWrapperAttribute), false)) {
+					WidgetWrapperAttribute wwattr = attr as WidgetWrapperAttribute;
+					if (wwattr.Type != wtype)
 						continue;
 
-					WidgetFactoryDelegate deleg = Delegate.CreateDelegate (typeof (WidgetFactoryDelegate), minfo) as WidgetFactoryDelegate;
-					if (deleg == null)
-						continue;
-
-					Pixbuf icon = new Gdk.Pixbuf (System.Reflection.Assembly.GetAssembly (type), wfattr.IconName);
+					Pixbuf icon = new Gdk.Pixbuf (assem, wwattr.IconName);
 
 					if (wtype == WidgetType.Window)
-						box.PackStart (new WindowFactory (wfattr.Name, icon, deleg));
+						box.PackStart (new WindowFactory (wwattr.Name, icon, type));
 					else
-						box.PackStart (new WidgetFactory (wfattr.Name, icon, deleg));
+						box.PackStart (new WidgetFactory (wwattr.Name, icon, type));
 				}
 			}
 
 			ShowAll ();
 		}
 
-		public void AddWidgets (Type type)
+		public void AddWidgets (Assembly assem)
 		{
-			AddWidgets (type, WidgetType.Normal, normals);
-			AddWidgets (type, WidgetType.Container, containers);
-			AddWidgets (type, WidgetType.Window, windows);
+			AddWidgets (assem, WidgetType.Normal, normals);
+			AddWidgets (assem, WidgetType.Container, containers);
+			AddWidgets (assem, WidgetType.Window, windows);
 		}			
-
-		public void AddWidgets (object obj)
-		{
-			AddWidgets (obj.GetType ());
-		}
-
 	}
 }

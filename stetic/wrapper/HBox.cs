@@ -6,6 +6,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("HBox", "hbox.png", WidgetType.Container)]
 	public class HBox : Gtk.HBox, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
@@ -24,7 +25,7 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public HBox (bool homogeneous, int spacing) : base (homogeneous, spacing)
+		public HBox () : base (false, 0)
 		{
 			for (int i = 0; i < 3; i++) {
 				WidgetSite site = new WidgetSite ();

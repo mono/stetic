@@ -5,6 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("Label", "label.png")]
 	public class Label : Gtk.Label, Stetic.IObjectWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
@@ -32,5 +33,7 @@ namespace Stetic.Wrapper {
 		}
 
 		public Label () : base ("Label:") {}
+
+		public Label (string label) : base (label) {}
 	}
 }

@@ -16,6 +16,7 @@ stetic_exe_SOURCES =			\
 	WidgetBox.cs			\
 	WidgetFactory.cs		\
 	WidgetSite.cs			\
+	WidgetWrapperAttribute.cs	\
 	editor/Boolean.cs		\
 	editor/Char.cs			\
 	editor/Enumeration.cs		\
@@ -31,7 +32,7 @@ stetic_exe_SOURCES =			\
 	wrapper/ButtonBox.cs		\
 	wrapper/CheckButton.cs		\
 	wrapper/ComboBox.cs		\
-	wrapper/DefaultWidgets.cs	\
+	wrapper/Dialog.cs		\
 	wrapper/DrawingArea.cs		\
 	wrapper/Entry.cs		\
 	wrapper/Frame.cs		\
@@ -44,11 +45,14 @@ stetic_exe_SOURCES =			\
 	wrapper/Image.cs		\
 	wrapper/Label.cs		\
 	wrapper/Misc.cs			\
+	wrapper/Notebook.cs		\
 	wrapper/Paned.cs		\
 	wrapper/RadioButton.cs		\
 	wrapper/Range.cs		\
 	wrapper/SpinButton.cs		\
 	wrapper/Table.cs		\
+	wrapper/TextView.cs		\
+	wrapper/ToggleButton.cs		\
 	wrapper/VBox.cs			\
 	wrapper/VButtonBox.cs		\
 	wrapper/VPaned.cs		\

@@ -5,49 +5,11 @@ using System;
 
 namespace Stetic {
 
-	public delegate Widget WidgetFactoryDelegate ();
-
-	public enum WidgetType {
-		Normal,
-		Container,
-		Window
-	};
-
-	public class WidgetFactoryAttribute : Attribute {
-		string name, iconName;
-		WidgetType type;
-
-		public string Name {
-			get { return name; }
-			set { name = value; }
-		}
-
-		public string IconName {
-			get { return iconName; }
-			set { iconName = value; }
-		}
-
-		public WidgetType Type {
-			get { return type; }
-			set { type = value; }
-		}
-
-		public WidgetFactoryAttribute (string name, string iconName, WidgetType type)
-		{
-			this.name = name;
-			this.iconName = iconName;
-			this.type = type;
-		}
-
-		public WidgetFactoryAttribute (string name, string iconName) : this (name, iconName, WidgetType.Normal) {}
-	}
-
 	public class WidgetFactory : WidgetSite {
 
-		protected WidgetFactoryDelegate makeWidget;
+		protected Type widgetType;
 
-		public WidgetFactory (string name, Pixbuf icon,
-				      WidgetFactoryDelegate makeWidget) : base ()
+		public WidgetFactory (string name, Pixbuf icon, Type widgetType)
 		{
 			Gtk.HBox hbox;
 			Gtk.Label label;
@@ -66,24 +28,24 @@ namespace Stetic {
 			hbox.PackEnd (label, true, true, 0);
 
 			Add (hbox);
-			this.makeWidget = makeWidget;
+			this.widgetType = widgetType;
 		}
 
 		protected override bool StartDrag ()
 		{
-			dragWidget = makeWidget ();
+			dragWidget = System.Activator.CreateInstance (widgetType) as Widget;
 			dragWidget.ShowAll ();
 			return true;
 		}
 	}
 
 	public class WindowFactory : WidgetFactory {
-		public WindowFactory (string name, Pixbuf icon,
-				      WidgetFactoryDelegate makeWidget) : base (name, icon, makeWidget) {}
+		public WindowFactory (string name, Pixbuf icon, Type widgetType) :
+			base (name, icon, widgetType) {}
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
-			Gtk.Window win = makeWidget () as Gtk.Window;
+			Gtk.Window win = System.Activator.CreateInstance (widgetType) as Gtk.Window;
 			win.Present ();
 
 			WindowSite site = new WindowSite (win);

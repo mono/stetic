@@ -6,6 +6,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
+	[WidgetWrapper ("Table", "table.png", WidgetType.Container)]
 	public class Table : Gtk.Table, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
@@ -56,7 +57,7 @@ namespace Stetic.Wrapper {
 		const AttachOptions expandOpts = AttachOptions.Expand | AttachOptions.Fill;
 		const AttachOptions fillOpts = AttachOptions.Fill;
 
-		public Table (uint rows, uint cols, bool homogeneous) : base (rows, cols, homogeneous)
+		public Table () : base (3, 3, false)
 		{
 			Sync ();
 		}
