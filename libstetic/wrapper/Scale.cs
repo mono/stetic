@@ -24,7 +24,15 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		protected Scale (IStetic stetic, Gtk.Scale scale) : base (stetic, scale) {}
+		protected Scale (IStetic stetic, Gtk.Scale scale) : base (stetic, scale)
+		{
+			scale.Adjustment.AddNotification (AdjustmentNotifyHandler);
+		}
+
+		void AdjustmentNotifyHandler (object obj, GLib.NotifyArgs args)
+		{
+			EmitNotify (args.Property);
+		}
 
 		static ItemGroup[] groups;
 		public override ItemGroup[] ItemGroups { get { return groups; } }

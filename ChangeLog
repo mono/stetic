@@ -1,5 +1,12 @@
 2005-02-14  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/Range.cs: 
+	* libstetic/wrapper/Scale.cs: proxy notifications from the
+	Adjustment so that the PropertyGrid will reflect manual changes to
+	the widget's value
+
+2005-02-14  Dan Winship  <danw@novell.com>
+
 	* libstetic/RangeAttribute.cs: new attribute for specifying the
 	range of a property.
 

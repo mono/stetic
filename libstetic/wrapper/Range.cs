@@ -21,6 +21,14 @@ namespace Stetic.Wrapper {
 								   "Adjustment.Value");
 		}
 
-		protected Range (IStetic stetic, Gtk.Range range) : base (stetic, range) {}
+		protected Range (IStetic stetic, Gtk.Range range) : base (stetic, range)
+		{
+			range.Adjustment.AddNotification (AdjustmentNotifyHandler);
+		}
+
+		void AdjustmentNotifyHandler (object obj, GLib.NotifyArgs args)
+		{
+			EmitNotify (args.Property);
+		}
 	}
 }
