@@ -252,13 +252,13 @@ namespace Stetic.Wrapper {
 
 		public bool HasResponseId {
 			get {
-				WidgetSite site = button.Parent as WidgetSite;
-				if (site == null)
+				Stetic.Wrapper.Widget pwrap = ParentWrapper;
+				if (pwrap == null)
 					return false;
-				site = site.ParentSite as WidgetSite;
-				if (site == null)
+				pwrap = pwrap.ParentWrapper;
+				if (pwrap == null)
 					return false;
-				return site.InternalChildId == "action_area";
+				return pwrap.InternalChildId == "action_area";
 			}
 		}
 

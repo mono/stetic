@@ -1,5 +1,56 @@
 2005-03-23  Dan Winship  <danw@novell.com>
 
+	Move IWidgetSite and WindowSite interfaces to
+	Stetic.Wrapper.Widget and Stetic.Wrapper.Window.
+
+	* libstetic/wrapper/Widget.cs (Wrapped): override to return a
+	Gtk.Widget, to get rid of lots of typecasting
+	(ParentWrapper): replacement for WidgetSite.ParentSite; returns
+	the wrapper for the wrapped widget's parent
+	(InternalChildId, Select): Moved here from WidgetSite.
+
+	* libstetic/wrapper/Window.cs (FocusChanged): moved here from
+	WindowSite.
+	(Select): override
+
+	* libstetic/WidgetSite.cs (ParentSite): gone; replaced by
+	Wrapper.Widget.ParentWrapper.
+	(Internal): replaces InternalChildId.
+	(Drop): call Select on the wrapper, not the site.
+	(Select, UnSelect, Delete): gone
+
+	* libstetic/IWidgetSite.cs: 
+	* libstetic/WindowSite.cs: gone
+
+	* libstetic/wrapper/Button.cs (HasResponseId): use ParentWrapper
+	rather than ParentSite.
+
+	* libstetic/wrapper/Container.cs (GladeExportChild,
+	FindInternalChild): update for InternalChildId move from
+	WidgetSite to Wrapper.Widget.
+	(ChildWrapper): take a Wrapper.Widget instead of an IWidgetSite.
+	(PlaceholderDrop): call Select on the wrapper, not the site.
+
+	* libstetic/wrapper/Dialog.cs (Wrap): set InternalChildId on the
+	wrapper, not the site.
+
+	* stetic/ContextMenu.cs: Change all IWidgetSites to
+	Stetic.Wrapper.Widgets
+
+	* stetic/Project.cs (AddWindow): take a Stetic.Wrapper.Window
+	rather than a WindowSite.
+	(ProjectNode): add a "Wrapper" field
+
+	* stetic/ProjectView.cs (RowSelected, WidgetSelected): update to
+	use wrappers intead of sites.
+
+	* stetic/Glade.cs (Import): 
+	* stetic/WidgetFactory.cs (WindowFactory.OnButtonPressEvent):
+	don't need to create a WindowSite for top-level windows any more.
+	Just pass the wrapper to Project.AddWindow instead.
+
+2005-03-23  Dan Winship  <danw@novell.com>
+
 	Split apart placeholders and WidgetSites. This is an intermediate
 	step on the road to killing off WidgetSite, and several wrappers
 	are broken in this check-in because it doesn't make much sense to

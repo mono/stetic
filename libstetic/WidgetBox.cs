@@ -54,7 +54,7 @@ namespace Stetic {
 		}
 
 		bool isInternal;
-		protected bool Internal {
+		public virtual bool Internal {
 			get { return isInternal; }
 			set {
 				if (value == isInternal)

@@ -32,11 +32,10 @@ namespace Stetic {
 
 			project.BeginGladeImport ();
 			foreach (XmlNode toplevel in node.SelectNodes ("widget")) {
-				Widget w = ImportWidget (project, null, null, toplevel);
-				if (w == null)
-					continue;
-				WindowSite site = new WindowSite ((Gtk.Window)w);
-				project.AddWindow (site);
+				Stetic.Wrapper.Window window =
+					ImportWidget (project, null, null, toplevel) as Stetic.Wrapper.Window;
+				if (window != null)
+					project.AddWindow (window);
 			}
 			project.EndGladeImport ();
 		}
@@ -44,7 +43,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern bool stetic_g_value_init_for_child_property (ref GLib.Value value, string className, string propertyName);
 
-		static Widget ImportWidget (Project project, Stetic.Wrapper.Container parent, XmlNode thischild, XmlNode widget)
+		static Stetic.Wrapper.Widget ImportWidget (Project project, Stetic.Wrapper.Container parent, XmlNode thischild, XmlNode widget)
 		{
 			string className = widget.Attributes["class"].Value;
 			string id = widget.Attributes["id"].Value;
@@ -81,7 +80,7 @@ namespace Stetic {
 				}
 			}
 
-			return (Gtk.Widget)wrapper.Wrapped;
+			return (Stetic.Wrapper.Widget)wrapper;
 		}
 
 		static void ExtractProperties (XmlNodeList nodes, out Hashtable props)

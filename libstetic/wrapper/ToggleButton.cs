@@ -43,7 +43,7 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 			if (!initialized) {
 				Icon = null;
-				Label = ((Gtk.Widget)Wrapped).Name;
+				Label = Wrapped.Name;
 			}
 		}
 	}

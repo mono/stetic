@@ -12,7 +12,6 @@ libstetic_dll_sources =			\
 	ItemDescriptor.cs		\
 	ItemGroup.cs			\
 	IStetic.cs			\
-	IWidgetSite.cs			\
 	ObjectWrapper.cs		\
 	ObjectWrapperAttribute.cs	\
 	ParamSpec.cs			\
@@ -24,7 +23,6 @@ libstetic_dll_sources =			\
 	TranslatableAttribute.cs	\
 	WidgetBox.cs			\
 	WidgetSite.cs			\
-	WindowSite.cs			\
 	editor/Boolean.cs		\
 	editor/Char.cs			\
 	editor/Color.cs			\

@@ -48,7 +48,7 @@ namespace Stetic.Wrapper {
 			if (group != null)
 				stetic.GladeImportComplete += SetGroup;
 			else {
-				GroupList.Add (((Gtk.Widget)Wrapped).Name);
+				GroupList.Add (Wrapped.Name);
 				GroupLeaders.Add (Wrapped);
 			}
 		}

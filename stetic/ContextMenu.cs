@@ -7,13 +7,13 @@ namespace Stetic {
 
 	public class ContextMenu : Gtk.Menu {
 
-		IWidgetSite site;
+		Stetic.Wrapper.Widget wrapper;
 
 		public ContextMenu (Placeholder ph)
 		{
 			MenuItem item;
 
-			this.site = null;
+			this.wrapper = null;
 
 			item = LabelItem ("Placeholder");
 			item.Sensitive = false;
@@ -23,24 +23,18 @@ namespace Stetic {
 			item.Sensitive = false;
 			Add (item);
 
-			Widget w = ph;
-			while (w.Parent != null && !(w is WidgetSite))
-				w = w.Parent;
-			if (w is WidgetSite)
-				BuildContextMenu ((WidgetSite)w, false, false, ph);
-			else
-				BuildContextMenu (WindowSite.LookupSite (w), false, false, ph);
+			BuildContextMenu (Stetic.Wrapper.Widget.Lookup (ph.Parent), false, false, ph);
 		}
 
-		public ContextMenu (IWidgetSite site) : this (site, site as Gtk.Widget) {}
+		public ContextMenu (Stetic.Wrapper.Widget wrapper) : this (wrapper, wrapper.Wrapped.Parent) {}
 
-		public ContextMenu (IWidgetSite site, Gtk.Widget context)
+		public ContextMenu (Stetic.Wrapper.Widget wrapper, Gtk.Widget context)
 		{
 			MenuItem item;
 
-			this.site = site;
+			this.wrapper = wrapper;
 
-			item = LabelItem (site.Contents.Name);
+			item = LabelItem (wrapper.Wrapped.Name);
 			item.Sensitive = false;
 			Add (item);
 
@@ -48,22 +42,19 @@ namespace Stetic {
 			item.Activated += DoSelect;
 			Add (item);
 
-			Stetic.Wrapper.Object wrapper = Stetic.Wrapper.Object.Lookup (site.Contents);
-			if (wrapper != null) {
-				foreach (CommandDescriptor cmd in wrapper.ContextMenuItems.Items) {
-					item = new MenuItem (cmd.Label);
-					if (cmd.Enabled (wrapper, context))
-						item.Activated += new Stupid69614Workaround (cmd, wrapper, context).Activate;
-					else
-						item.Sensitive = false;
-					Add (item);
-				}
+			foreach (CommandDescriptor cmd in wrapper.ContextMenuItems.Items) {
+				item = new MenuItem (cmd.Label);
+				if (cmd.Enabled (wrapper, context))
+					item.Activated += new Stupid69614Workaround (cmd, wrapper, context).Activate;
+				else
+					item.Sensitive = false;
+				Add (item);
 			}
 
-			BuildContextMenu (site.ParentSite, true, site.Internal, context);
+			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildId != null, context);
 		}
 
-		void BuildContextMenu (IWidgetSite parentSite, bool occupied, bool isInternal, Widget context)
+		void BuildContextMenu (Stetic.Wrapper.Widget parentWrapper, bool occupied, bool isInternal, Widget context)
 		{
 			MenuItem item;
 
@@ -86,11 +77,11 @@ namespace Stetic {
 				item.Sensitive = false;
 			Add (item);
 
-			for (; parentSite != null; parentSite = parentSite.ParentSite) {
+			for (; parentWrapper != null; parentWrapper = parentWrapper.ParentWrapper) {
 				Add (new SeparatorMenuItem ());
 
-				item = LabelItem (parentSite.Contents.Name);
-				item.Submenu = new ContextMenu (parentSite, context);
+				item = LabelItem (parentWrapper.Wrapped.Name);
+				item.Submenu = new ContextMenu (parentWrapper, context);
 				Add (item);
 			}
 
@@ -116,12 +107,12 @@ namespace Stetic {
 
 		void DoSelect (object obj, EventArgs args)
 		{
-			site.Select ();
+			wrapper.Select ();
 		}
 
 		void DoDelete (object obj, EventArgs args)
 		{
-			site.Delete ();
+			wrapper.Wrapped.Destroy ();
 		}
 
 		static MenuItem LabelItem (string labelString)

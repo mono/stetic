@@ -27,7 +27,7 @@ namespace Stetic {
 			project.Selected += WidgetSelected;
 		}
 
-		IWidgetSite SelectedSite {
+		Stetic.Wrapper.Widget SelectedWrapper {
 			get {
 				ITreeNode[] nodes = NodeSelection.SelectedNodes;
 
@@ -35,15 +35,7 @@ namespace Stetic {
 					return null;
 
 				ProjectNode node = (ProjectNode)nodes[0];
-
-				Widget w = node.Widget.Parent;
-				while (w != null && !(w is IWidgetSite))
-					w = w.Parent;
-
-				if (w == null)
-					return WindowSite.LookupSite (node.Widget);
-				else
-					return (IWidgetSite)w;
+				return node.Wrapper;
 			}
 		}
 
@@ -53,7 +45,7 @@ namespace Stetic {
 		{
 			if (!syncing) {
 				syncing = true;
-				IWidgetSite selection = SelectedSite;
+				Stetic.Wrapper.Widget selection = SelectedWrapper;
 				if (selection != null)
 					selection.Select ();
 				syncing = false;
@@ -81,7 +73,7 @@ namespace Stetic {
 
 		protected override bool OnPopupMenu ()
 		{
-			IWidgetSite selection = SelectedSite;
+			Stetic.Wrapper.Widget selection = SelectedWrapper;
 
 			if (selection != null) {
 				Menu m = new ContextMenu (selection);

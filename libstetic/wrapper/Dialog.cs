@@ -31,23 +31,24 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			WidgetSite site;
+			Stetic.Wrapper.Widget wrapper;
 
 			base.Wrap (obj, initialized);
 			dialog.HasSeparator = false;
 
 			dialog.VBox.Unparent ();
 			site = CreateWidgetSite (dialog.VBox);
-			site.InternalChildId = "vbox";
 			dialog.Add (site);
-			ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.VBox), dialog.VBox);
+			wrapper = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.VBox), dialog.VBox) as Stetic.Wrapper.Widget;
+			wrapper.InternalChildId = "vbox";
 			if (dialog.VBox.Name == "GtkVBox")
 				dialog.VBox.Name = dialog.Name + "_vbox";
 
 			dialog.ActionArea.Unparent ();
 			site = CreateWidgetSite (dialog.ActionArea);
-			site.InternalChildId = "action_area";
 			dialog.VBox.PackEnd (site, false, true, 0);
-			ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.HButtonBox), dialog.ActionArea);
+			wrapper = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.HButtonBox), dialog.ActionArea) as Stetic.Wrapper.Widget;
+			wrapper.InternalChildId = "action_area";
 			if (dialog.ActionArea.Name == "GtkHButtonBox")
 				dialog.ActionArea.Name = dialog.Name + "_action_area";
 

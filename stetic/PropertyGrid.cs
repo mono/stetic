@@ -11,7 +11,8 @@ namespace Stetic {
 		Hashtable editors;
 		Hashtable sensitives;
 
-		ObjectWrapper selection, packingSelection;
+		Stetic.Wrapper.Widget selection;
+		Stetic.Wrapper.Container.ContainerChild packingSelection;
 
 		public PropertyGrid (Project project)
 		{
@@ -102,16 +103,15 @@ namespace Stetic {
 				return;
 			}
 
-			selection = Stetic.ObjectWrapper.Lookup (site.Contents);
+			selection = Stetic.Wrapper.Widget.Lookup (site.Contents);
 			if (selection == null)
 				return;
 			selection.Notify += Notified;
 
-			if (selection is Stetic.Wrapper.Widget)
-				AppendProperty (new PropertyDescriptor (typeof (Stetic.Wrapper.Widget), typeof (Gtk.Widget), "Name"), selection);
+			AppendProperty (new PropertyDescriptor (typeof (Stetic.Wrapper.Widget), typeof (Gtk.Widget), "Name"), selection);
 			AppendWrapperGroups (selection);
 
-			packingSelection = Stetic.Wrapper.Container.ChildWrapper (site);
+			packingSelection = Stetic.Wrapper.Container.ChildWrapper (selection);
 			if (packingSelection != null && packingSelection.ItemGroups.Count > 0) {
 				AppendWrapperGroups (packingSelection);
 				packingSelection.Notify += Notified;

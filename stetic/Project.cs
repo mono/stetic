@@ -14,18 +14,18 @@ namespace Stetic {
 			store = new NodeStore (typeof (ProjectNode));
 		}
 
-		public void AddWindow (WindowSite site)
+		public void AddWindow (Stetic.Wrapper.Window window)
 		{
-			AddWindow (site, false);
+			AddWindow (window, false);
 		}
 
-		public void AddWindow (WindowSite site, bool select)
+		public void AddWindow (Stetic.Wrapper.Window window, bool select)
 		{
-			site.FocusChanged += WindowFocusChanged;
-			AddWidget (site.Contents, null, -1);
+			window.FocusChanged += WindowFocusChanged;
+			AddWidget (window.Wrapped, null, -1);
 
 			if (select)
-				WindowFocusChanged (site, null);
+				WindowFocusChanged (window, null);
 		}
 
 		void AddWidget (Widget widget, ProjectNode parent)
@@ -35,10 +35,11 @@ namespace Stetic {
 
 		void AddWidget (Widget widget, ProjectNode parent, int position)
 		{
-			if (Stetic.Wrapper.Widget.Lookup (widget) == null)
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
+			if (wrapper == null)
 				return;
 
-			ProjectNode node = new ProjectNode (widget);
+			ProjectNode node = new ProjectNode (wrapper);
 			nodes[widget] = node;
 			if (parent == null) {
 				if (position == -1)
@@ -157,7 +158,7 @@ namespace Stetic {
 		public delegate void SelectedHandler (WidgetBox box, ProjectNode node);
 		public event SelectedHandler Selected;
 
-		void WindowFocusChanged (WindowSite site, WidgetBox focus)
+		void WindowFocusChanged (Stetic.Wrapper.Window window, WidgetBox focus)
 		{
 			if (Selected == null)
 				return;
@@ -179,7 +180,7 @@ namespace Stetic {
 			WidgetSite site = new WidgetSite (w);
 			site.PopupContextMenu += delegate (object obj, EventArgs args) {
 				if (m == null)
-					m = new ContextMenu (site);
+					m = new ContextMenu (Stetic.Wrapper.Widget.Lookup (site.Contents));
 				m.Popup ();
 			};
 			site.Destroyed += delegate (object obj, EventArgs args) {
@@ -231,19 +232,24 @@ namespace Stetic {
 
 	[TreeNode (ColumnCount=2)]
 	public class ProjectNode : TreeNode {
-		Widget widget;
+		Stetic.Wrapper.Widget wrapper;
 		Gdk.Pixbuf icon;
 
-		public ProjectNode (Widget widget)
+		public ProjectNode (Stetic.Wrapper.Widget wrapper)
 		{
-			this.widget = widget;
-			Stetic.Wrapper.Object wrapper = Stetic.Wrapper.Object.Lookup (widget);
+			this.wrapper = wrapper;
 			icon = Stetic.Palette.IconForType (wrapper.GetType ());
+		}
+
+		public Stetic.Wrapper.Widget Wrapper {
+			get {
+				return wrapper;
+			}
 		}
 
 		public Widget Widget {
 			get {
-				return widget;
+				return (Gtk.Widget)wrapper.Wrapped;
 			}
 		}
 
@@ -257,13 +263,13 @@ namespace Stetic {
 		[TreeNodeValue (Column=1)]
 		public string Name {
 			get {
-				return widget.Name;
+				return Widget.Name;
 			}
 		}
 
 		public override string ToString ()
 		{
-			return "[ProjectNode " + GetHashCode().ToString() + " " + widget.GetType().FullName + " '" + Name + "']";
+			return "[ProjectNode " + GetHashCode().ToString() + " " + Widget.GetType().FullName + " '" + Name + "']";
 		}
 	}
 

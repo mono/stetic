@@ -46,13 +46,12 @@ namespace Stetic {
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
-			Stetic.Wrapper.Widget wrapper = Stetic.ObjectWrapper.Create (project, wrapperType) as Stetic.Wrapper.Widget;
+			Stetic.Wrapper.Window wrapper = Stetic.ObjectWrapper.Create (project, wrapperType) as Stetic.Wrapper.Window;
 
 			Gtk.Window win = wrapper.Wrapped as Gtk.Window;
 			win.Present ();
 
-			WindowSite site = new WindowSite (win);
-			project.AddWindow (site, true);
+			project.AddWindow (wrapper, true);
 
 			return true;
 		}

@@ -75,15 +75,12 @@ namespace Stetic.Wrapper {
 			while (child != null && !(child is WidgetSite))
 				child = child.Parent;
 
-			WidgetSite site = child as WidgetSite;
-			if (site != null) {
-				if (site.InternalChildId != null)
-					internalId = site.InternalChildId;
-				else {
-					ObjectWrapper childwrapper = ChildWrapper (site);
-					if (childwrapper != null)
-						GladeUtils.GetProps (childwrapper, out childprops);
-				}
+			if (InternalChildId != null)
+				internalId = InternalChildId;
+			else {
+				ObjectWrapper childwrapper = ChildWrapper (wrapper);
+				if (childwrapper != null)
+					GladeUtils.GetProps (childwrapper, out childprops);
 			}
 		}
 
@@ -105,11 +102,12 @@ namespace Stetic.Wrapper {
 		{
 			Container ancestor = this;
 			while (ancestor != null) {
-				foreach (WidgetSite site in ancestor.Sites) {
-					if (site.InternalChildId == childId)
-						return site.Contents;
+				foreach (Gtk.Widget w in ancestor.container.Children) {
+					Widget wrapper = Lookup (w);
+					if (wrapper != null && wrapper.InternalChildId == childId)
+						return w;
 				}
-				ancestor = Lookup (ancestor.container.Parent);
+				ancestor = ParentWrapper;
 			}
 			return null;
 		}
@@ -131,21 +129,23 @@ namespace Stetic.Wrapper {
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Container;
 		}
 
-		public static Stetic.Wrapper.Container.ContainerChild ChildWrapper (Stetic.IWidgetSite site) {
-			Gtk.Widget sitew = site as Gtk.Widget;
-			if (sitew == null || site.ParentSite == null)
+		public static Stetic.Wrapper.Container.ContainerChild ChildWrapper (Stetic.Wrapper.Widget wrapper) {
+			Stetic.Wrapper.Container parentWrapper = wrapper.ParentWrapper;
+			if (parentWrapper == null)
 				return null;
 
-			Gtk.Container parent = site.ParentSite.Contents as Gtk.Container;
+			Gtk.Container parent = parentWrapper.Wrapped as Gtk.Container;
 			if (parent == null)
 				return null;
 
-			Stetic.Wrapper.Container pwrap = Stetic.Wrapper.Container.Lookup (parent);
-			if (pwrap == null)
+			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
+			while (child != null && child.Parent != parent)
+				child = child.Parent;
+			if (child == null)
 				return null;
 
 			Type ct = null;
-			for (Type t = pwrap.GetType (); t != null; t = t.BaseType) {
+			for (Type t = parentWrapper.GetType (); t != null; t = t.BaseType) {
 				ct = childTypes[t] as Type;
 				if (ct != null)
 					break;
@@ -153,8 +153,8 @@ namespace Stetic.Wrapper {
 			if (ct == null)
 				return null;
 
-			Gtk.Container.ContainerChild cc = parent[sitew];
-			return Stetic.ObjectWrapper.Create (pwrap.stetic, ct, cc) as ContainerChild;
+			Gtk.Container.ContainerChild cc = parent[child];
+			return Stetic.ObjectWrapper.Create (parentWrapper.stetic, ct, cc) as ContainerChild;
 		}
 
 		public delegate void ContentsChangedHandler (Container container);
@@ -196,7 +196,9 @@ namespace Stetic.Wrapper {
 			WidgetSite site = CreateWidgetSite (dropped);
 			ReplaceChild (ph, site);
 			ph.Destroy ();
-			site.Select ();
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (dropped);
+			if (wrapper != null)
+				wrapper.Select ();
 			EmitContentsChanged ();
 		}
 

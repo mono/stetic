@@ -29,17 +29,22 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 
-			Gtk.Widget widget = (Gtk.Widget)Wrapped;
-			if (!(widget is Gtk.Window))
-				widget.ShowAll ();
+			if (!(Wrapped is Gtk.Window))
+				Wrapped.ShowAll ();
 
 			Type type = GetType ();
 			if (!counters.Contains (type))
 				counters[type] = 1;
 
 			if (!initialized)
-				widget.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
+				Wrapped.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
 			counters[type] = (int)counters[type] + 1;
+		}
+
+		public new Gtk.Widget Wrapped {
+			get {
+				return (Gtk.Widget)base.Wrapped;
+			}
 		}
 
 		protected virtual void GladeImport (string className, string id, Hashtable props)
@@ -72,6 +77,39 @@ namespace Stetic.Wrapper {
 			return ph;
 		}
 
+		public Stetic.Wrapper.Container ParentWrapper {
+			get {
+				Gtk.Widget p = Wrapped.Parent;
+				while (p != null && (p is WidgetSite))
+					p = p.Parent;
+				return Stetic.Wrapper.Container.Lookup (p);
+			}
+		}
+
+		string internalChildId;
+		public string InternalChildId {
+			get {
+				return internalChildId;
+			}
+			set {
+				internalChildId = value;
+
+				if (Wrapped != null) {
+					WidgetSite site = Wrapped.Parent as WidgetSite;
+					if (site != null)
+						site.Internal = (value != null);
+				}
+			}
+		}
+
+		public virtual void Select ()
+		{
+			Gtk.Widget w = Wrapped;
+			if (!w.CanFocus && w.Parent is WidgetSite)
+				w = w.Parent;
+			w.GrabFocus ();
+		}
+
 		public virtual bool HExpandable { get { return false; } }
 		public virtual bool VExpandable { get { return false; } }
 
@@ -82,13 +120,13 @@ namespace Stetic.Wrapper {
 				if (Wrapped is Gtk.Window)
 					return window_visible;
 				else
-					return ((Gtk.Widget)Wrapped).Visible;
+					return Wrapped.Visible;
 			}
 			set {
 				if (Wrapped is Gtk.Window)
 					window_visible = value;
 				else
-					((Gtk.Widget)Wrapped).Visible = value;
+					Wrapped.Visible = value;
 			}
 		}
 
@@ -101,21 +139,18 @@ namespace Stetic.Wrapper {
 			set {
 				hasDefault = value;
 
-				Gtk.Widget widget = (Gtk.Widget)Wrapped;
-				if (widget.Toplevel != null)
-					widget.HasDefault = hasDefault;
+				if (Wrapped.Toplevel != null)
+					Wrapped.HasDefault = hasDefault;
 				else
-					widget.HierarchyChanged += HierarchyChanged;
+					Wrapped.HierarchyChanged += HierarchyChanged;
 			}
 		}
 
 		void HierarchyChanged (object obj, Gtk.HierarchyChangedArgs args)
 		{
-			Gtk.Widget widget = (Gtk.Widget)Wrapped;
-
-			if (widget.Toplevel != null) {
-				widget.HasDefault = hasDefault;
-				widget.HierarchyChanged -= HierarchyChanged;
+			if (Wrapped.Toplevel != null) {
+				Wrapped.HasDefault = hasDefault;
+				Wrapped.HierarchyChanged -= HierarchyChanged;
 			}
 		}
 	}

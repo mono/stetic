@@ -7,7 +7,7 @@ namespace Stetic {
 
 	public delegate void ChangedHandler (WidgetSite site);
 
-	public class WidgetSite : WidgetBox, IWidgetSite {
+	public class WidgetSite : WidgetBox {
 
 		public WidgetSite (Widget child)
 		{
@@ -19,19 +19,6 @@ namespace Stetic {
 		public Widget Contents {
 			get {
 				return Child;
-			}
-		}
-
-		public IWidgetSite ParentSite {
-			get {
-				for (Widget w = Parent; ; w = w.Parent) {
-					if (w == null)
-						return null;
-					if (w is IWidgetSite)
-						return w as IWidgetSite;
-					if (w.Parent == null)
-						return WindowSite.LookupSite (w);
-				}
 			}
 		}
 
@@ -64,20 +51,16 @@ namespace Stetic {
 				EmitEmpty ();
 		}
 
-		string internalChildId;
-		public string InternalChildId {
+		public override bool Internal {
 			get {
-				return internalChildId;
+				return base.Internal;
 			}
 			set {
-				if (internalChildId == null && value != null) {
+				if (!base.Internal && value)
 					DND.SourceUnset (this);
-					Internal = true;
-				} else if (internalChildId != null && value == null) {
+				else if (base.Internal && !value)
 					DND.SourceSet (this, false);
-					Internal = false;
-				}
-				internalChildId = value;
+				base.Internal = value;
 			}
 		}
 
@@ -390,12 +373,12 @@ namespace Stetic {
 				Gdk.Window win;
 				FindFault (x, y, out faultId, out win);
 				DropOn (w, faultId);
-				if (w.Parent is WidgetSite)
-					((WidgetSite)w.Parent).Select ();
-			} else {
+			} else
 				Add (w);
-				Select ();
-			}
+
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (w);
+			if (wrapper != null)
+				wrapper.Select ();
 		}
 
 		protected override bool OnDragDrop (DragContext ctx, int x, int y, uint time)
@@ -430,28 +413,13 @@ namespace Stetic {
 		protected override bool OnKeyReleaseEvent (Gdk.EventKey evt)
 		{
 			if (evt.Key == Gdk.Key.Delete) {
-				Delete ();
+				if (Child != null) {
+					Child.Destroy ();
+					EmitEmpty ();
+				}
 				return true;
 			}
 			return false;
-		}
-
-		public void Select ()
-		{
-			GrabFocus ();
-		}
-
-		public void UnSelect ()
-		{
-			UnFocus ();
-		}
-
-		public void Delete ()
-		{
-			if (Child != null) {
-				Child.Destroy ();
-				EmitEmpty ();
-			}
 		}
 
 		public override string ToString ()
