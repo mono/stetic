@@ -1,6 +1,6 @@
 using System;
 
 namespace Stetic {
-	public interface IWindowWrapper : IObjectWrapper {
+	public interface IWindowWrapper : IContainerWrapper {
 	}
 }

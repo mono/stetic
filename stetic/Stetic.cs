@@ -40,6 +40,13 @@ namespace Stetic {
 			notebook.AppendPage (ChildProperties, new Label ("Packing"));
 			win.ShowAll ();
 
+			win = new Gtk.Window ("Project");
+			win.DeleteEvent += Window_Delete;
+			Project = new Project ();
+			ProjectView = new ProjectView (Project);
+			win.Add (ProjectView);
+			win.ShowAll ();
+
 			program.Run ();
 			return 0;
 		}
@@ -48,6 +55,9 @@ namespace Stetic {
 			program.Quit ();
 			args.RetVal = true;
 		}
+
+		public static Stetic.Project Project;
+		static Stetic.ProjectView ProjectView;
 
 		static Stetic.PropertyGrid Properties;
 		static Stetic.ChildPropertyGrid ChildProperties;

@@ -164,5 +164,10 @@ namespace Stetic.Widget {
 				}
 			}
 		}
+
+		public bool HExpandable { get { return true; } }
+		public bool VExpandable { get { return true; } }
+
+		public event ContentsChangedHandler ContentsChanged;
 	}
 }

@@ -41,7 +41,7 @@ namespace Stetic.Widget {
 		public bool HExpandable { get { return true; } }
 		public bool VExpandable { get { return true; } }
 
-		public event ExpandabilityChangedHandler ExpandabilityChanged;
+		public event ContentsChangedHandler ContentsChanged;
 
 		void SiteOccupancyChanged (WidgetSite site)
 		{
@@ -61,6 +61,9 @@ namespace Stetic.Widget {
 					AddWithViewport (site);
 				}
 			}
+
+			if (ContentsChanged != null)
+				ContentsChanged (this);
 		}
 	}
 }

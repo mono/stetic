@@ -1,3 +1,44 @@
+2005-01-27  Dan Winship  <danw@novell.com>
+
+	* stetic/ProjectView.cs: TreeView subclass for displaying the
+	widget tree.
+
+	* stetic/Project.cs: model for ProjectView
+
+	* stetic/Palette.cs (IconForType): Split this code out so the
+	Project window can make use of it too.
+
+	* stetic/Stetic.cs (Main): Create a "Project" window. Some day
+	there will be windows whose names don't start with "P".
+
+	* stetic/WidgetSite.cs: s/ExpandabilityChanged/ContentsChanged/
+
+	* stetic/WidgetFactory.cs (WidgetFactory, Create): set the widget
+	Name property, a la glade
+	(WindowFactory.OnButtonPressEvent): call
+	SteticMain.Project.AddWindow()
+
+	* libstetic/IContainerWrapper.cs: subclass IWidgetWrapper, not
+	IObjectWrapper.
+	(ContentsChanged): new event that replaces ExpandabilityChanged
+
+	* libstetic/IWindowWrapper.cs: subclass IContainerWrapper, not
+	IObjectWrapper
+
+	* libstetic/SiteContentEnumerator.cs: IEnumerator to enumerate the
+	real widget children of a container (rather than its WidgetSites)
+
+	* widgets/*.cs: s/ExpandabilityChanged/ContentsChanged/
+
+	* widgets/Dialog.cs: 
+	* widgets/MessageDialog.cs: 
+	* widgets/Window.cs: Implement ContentsChanged
+
+	* widgets/Paned.cs (Paned): fix a bug in the shared Paned
+	properties
+
+	* widgets/ToggleButton.cs (ToggleButton): Initialize "label"
+
 2005-01-25  Dan Winship  <danw@novell.com>
 
 	* libstetic/IWidgetWrapper.cs: New dummy subclass of

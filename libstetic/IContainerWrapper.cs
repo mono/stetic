@@ -1,13 +1,15 @@
 using System;
+using System.Collections;
 
 namespace Stetic {
-	public interface IContainerWrapper : IObjectWrapper {
+	public interface IContainerWrapper : IWidgetWrapper {
 		PropertyGroup[] ChildPropertyGroups { get; }
 
 		bool HExpandable { get; }
 		bool VExpandable { get; }
-		event ExpandabilityChangedHandler ExpandabilityChanged;
+
+		event ContentsChangedHandler ContentsChanged;
 	}
 
-	public delegate void ExpandabilityChangedHandler (IContainerWrapper container);
+	public delegate void ContentsChangedHandler (IContainerWrapper container);
 }

@@ -100,12 +100,12 @@ namespace Stetic.Widget {
 			}
 		}
 
-		public event ExpandabilityChangedHandler ExpandabilityChanged;
+		public event ContentsChangedHandler ContentsChanged;
 
 		private void SiteOccupancyChanged (WidgetSite site)
 		{
-			if (ExpandabilityChanged != null)
-				ExpandabilityChanged (this);
+			if (ContentsChanged != null)
+				ContentsChanged (this);
 		}
 	}
 }

@@ -43,19 +43,19 @@ namespace Stetic.Widget {
 		public bool HExpandable { get { return Expanded && site.HExpandable; } }
 		public bool VExpandable { get { return Expanded && site.VExpandable; } }
 
-		public event ExpandabilityChangedHandler ExpandabilityChanged;
+		public event ContentsChangedHandler ContentsChanged;
 
 		private void SiteOccupancyChanged (WidgetSite site)
 		{
-			if (ExpandabilityChanged != null)
-				ExpandabilityChanged (this);
+			if (ContentsChanged != null)
+				ContentsChanged (this);
 		}
 
 		protected override void OnActivated ()
 		{
 			base.OnActivated ();
-			if (ExpandabilityChanged != null)
-				ExpandabilityChanged (this);
+			if (ContentsChanged != null)
+				ContentsChanged (this);
 		}
 	}
 }

@@ -34,6 +34,7 @@ namespace Stetic.Widget {
 		{
 			UseStock = false;
 			UseUnderline = true;
+			label = Label;
 		}
 
 		string stockId;

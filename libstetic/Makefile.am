@@ -13,6 +13,7 @@ libstetic_dll_sources =			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
 	PropertyGroup.cs		\
+	SiteContentEnumerator.cs	\
 	WidgetBox.cs			\
 	WidgetSite.cs			\
 	WidgetWrapperAttribute.cs	\

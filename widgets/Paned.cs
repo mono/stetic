@@ -9,7 +9,7 @@ namespace Stetic.Widget {
 
 		static Paned () {
 			PanedProperties = new PropertyGroup ("Pane Properties",
-							     typeof (Stetic.Widget.Paned),
+							     typeof (Gtk.Paned),
 							     "MinPosition",
 							     "MaxPosition",
 							     "BorderWidth");

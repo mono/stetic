@@ -7,8 +7,9 @@ namespace Stetic {
 
 	public class WidgetFactory : WidgetSiteImpl, IStetic {
 
-		protected Type widgetType;
-		protected ConstructorInfo ctor;
+		ConstructorInfo ctor;
+		string basename;
+		int counter;
 
 		public WidgetFactory (string name, Pixbuf icon, Type widgetType)
 		{
@@ -29,16 +30,25 @@ namespace Stetic {
 			hbox.PackEnd (label, true, true, 0);
 
 			Add (hbox);
-			this.widgetType = widgetType;
 
 			this.ctor = widgetType.GetConstructor (new Type[] { typeof (IStetic) });
 			if (this.ctor == null)
 				throw new ApplicationException ("No constructor for widget type " + widgetType.ToString ());
+
+			basename = widgetType.Name.ToLower ();
+			counter = 1;
+		}
+
+		protected Widget Create ()
+		{
+			Widget w = ctor.Invoke (new object[] { this }) as Widget;
+			w.Name = basename + (counter++).ToString ();
+			return w;
 		}
 
 		protected override bool StartDrag (Gdk.EventMotion evt)
 		{
-			dragWidget = ctor.Invoke (new object[] { this }) as Widget;
+			dragWidget = Create ();
 			dragWidget.ShowAll ();
 			return true;
 		}
@@ -60,8 +70,10 @@ namespace Stetic {
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
-			Gtk.Window win = ctor.Invoke (new object[] { this }) as Gtk.Window;
+			Gtk.Window win = Create () as Gtk.Window;
 			win.Present ();
+
+			SteticMain.Project.AddWindow (win);
 
 			WindowSite site = new WindowSite (win);
 			SteticMain.Select (site);

@@ -53,8 +53,20 @@ namespace Stetic.Widget {
 		public Window (IStetic stetic) : base ("Window")
 		{
 			WidgetSite site = stetic.CreateWidgetSite (200, 200);
+			site.OccupancyChanged += SiteOccupancyChanged;
 			site.Show ();
 			Add (site);
+		}
+
+		public bool HExpandable { get { return true; } }
+		public bool VExpandable { get { return true; } }
+
+		public event ContentsChangedHandler ContentsChanged;
+
+		private void SiteOccupancyChanged (WidgetSite site)
+		{
+			if (ContentsChanged != null)
+				ContentsChanged (this);
 		}
 	}
 }

@@ -36,6 +36,20 @@ namespace Stetic {
 			ShowAll ();
 		}
 
+		public static Pixbuf IconForType (Type type)
+		{
+			foreach (object attr in type.GetCustomAttributes (typeof (WidgetWrapperAttribute), false)) {
+				WidgetWrapperAttribute wwattr = attr as WidgetWrapperAttribute;
+
+				try {
+					return new Gdk.Pixbuf (type.Assembly, wwattr.IconName);
+				} catch {
+					;
+				}
+			}
+			return Gdk.Pixbuf.LoadFromResource ("missing.png");
+		}
+
 		public void AddWidget (Assembly assem, Type type, VBox box, bool window)
 		{
 			foreach (object attr in type.GetCustomAttributes (typeof (WidgetWrapperAttribute), false)) {

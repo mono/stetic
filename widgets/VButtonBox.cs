@@ -37,12 +37,12 @@ namespace Stetic.Widget {
 		public bool HExpandable { get { return false; } }
 		public bool VExpandable { get { return true; } }
 
-		public event ExpandabilityChangedHandler ExpandabilityChanged;
+		public event ContentsChangedHandler ContentsChanged;
 
 		private void SiteOccupancyChanged (WidgetSite site)
 		{
-			if (ExpandabilityChanged != null)
-				ExpandabilityChanged (this);
+			if (ContentsChanged != null)
+				ContentsChanged (this);
 		}
 	}
 }

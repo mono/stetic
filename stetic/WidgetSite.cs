@@ -53,7 +53,7 @@ namespace Stetic {
 			}
 		}
 
-		private void ChildExpandabilityChanged (IContainerWrapper container)
+		private void ChildContentsChanged (IContainerWrapper container)
 		{
 			if (OccupancyChanged != null)
 				OccupancyChanged (this);
@@ -63,7 +63,7 @@ namespace Stetic {
 		{
 			base.OnAdded (child);
 			if (child is IContainerWrapper)
-				((IContainerWrapper)child).ExpandabilityChanged += ChildExpandabilityChanged;
+				((IContainerWrapper)child).ContentsChanged += ChildContentsChanged;
 			Occupancy = SiteOccupancy.Occupied;
 		}
 
@@ -72,7 +72,7 @@ namespace Stetic {
 			if (Occupancy == SiteOccupancy.Occupied)
 				Occupancy = SiteOccupancy.Empty;
 			if (w is IContainerWrapper)
-				((IContainerWrapper)w).ExpandabilityChanged -= ChildExpandabilityChanged;
+				((IContainerWrapper)w).ContentsChanged -= ChildContentsChanged;
 			base.OnRemoved (w);
 		}
 

@@ -223,8 +223,8 @@ namespace Stetic.Widget {
 
 			freeze = 0;
 
-			if (ExpandabilityChanged != null)
-				ExpandabilityChanged (this);
+			if (ContentsChanged != null)
+				ContentsChanged (this);
 		}
 
 		public new uint NRows {
@@ -390,7 +390,7 @@ namespace Stetic.Widget {
 		public bool HExpandable { get { return hexpandable; } }
 		public bool VExpandable { get { return vexpandable; } }
 
-		public event ExpandabilityChangedHandler ExpandabilityChanged;
+		public event ContentsChangedHandler ContentsChanged;
 
 		protected override void OnRemoved (Gtk.Widget w)
 		{
