@@ -1,5 +1,61 @@
 2005-03-08  Dan Winship  <danw@novell.com>
 
+	* libstetic/GladePropertyAttribute.cs: new attribute to mark
+	properties that need special treatment for glade import/export (to
+	allow us to do the special treatment automatically rather than
+	needing custom GladeImport/GladeExport routines).
+	(GladeProperty): flags type for GladePropertyAttribute. Currently
+	defines Proxied (meaning that an alternate property is actually
+	used for glade import/export) and LateImport (meaning that on
+	import, the property shouldn't be set until the import has
+	completed).
+
+	* libstetic/PropertyDescriptor.cs: track glade-related info
+	(GladeFlags, GladeName): new accessors
+	(GladeProxyGetValue, GladeProxySetValue): getter/setter for glade
+	proxy properties
+
+	* libstetic/GladeUtils.cs (ImportWidget): replace CreateWidget and
+	SetProps with two new ImportWidget methods that also handle
+	[GladeProperty] properties.
+
+	* libstetic/ObjectWrapper.cs (GladeImport): if the GladeImport
+	invocation throws a TargetInvocationException, throw its
+	InnerException (presumably a GladeException) up to the caller.
+
+	* libstetic/wrapper/ComboBox.cs	(Items): add
+	GladePropertyAttribute noting that this is glade's "items"
+	property.
+	(GladeImport): simplify
+
+	* libstetic/wrapper/Container.cs (GladeSetInternalChild): update.
+
+	* libstetic/wrapper/Entry.cs (InvisibleChar): add this, with a
+	GladePropertyAttribute marking GladeInvisibleChar as its proxy
+	(GladeInvisibleChar): get/set InvisibleChar as a string
+	(GladeImport): gone
+
+	* libstetic/wrapper/Label.cs (MnemonicWidget): add this, with a
+	GladePropertyAttribute marking GladeMnemonicWidget as its
+	LateImport proxy
+	(GladeMnemonicWidget): get/set MnemonicWidget as a string
+	(GladeImport): gone
+
+	* libstetic/wrapper/TextView.cs	(Text): add a
+	GladePropertyAttribute noting that this is glade's "text"
+	property.
+	(GladeImport): gone
+
+	* libstetic/wrapper/Widget.cs (Visible, HasDefault): add
+	GladePropertyAttributes. (HasDefault is LateImport)
+	(GladeImport): simplified
+	
+	* libstetic/wrapper/Window.cs (Modal, TypeHint, Type): add
+	GladePropertyAttributes
+	(GladeImport): gone
+
+2005-03-08  Dan Winship  <danw@novell.com>
+
 	* libstetic/WidgetSite.cs (SetupFaults): Pass "false" to DND.DestSet,
 	not true, so that the whole widget isn't drop-on-able.
 	(AddHFault, AddVFault): don't create windows if we're not realized.

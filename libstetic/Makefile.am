@@ -7,6 +7,7 @@ libstetic_dll_sources =			\
 	DND.cs				\
 	EditorAttribute.cs		\
 	GladeException.cs		\
+	GladePropertyAttribute.cs	\
 	GladeUtils.cs			\
 	ItemDescriptor.cs		\
 	ItemGroup.cs			\

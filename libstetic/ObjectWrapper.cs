@@ -97,12 +97,17 @@ namespace Stetic {
 			return wrapper;
 		}
 
-		public static ObjectWrapper Create (IStetic stetic, string className, object wrapped)
+		public static ObjectWrapper Create (IStetic stetic, string className)
 		{
 			Type type = wrapperTypes[className] as Type;
 			if (type == null)
 				return null;
-			return Create (stetic, type, wrapped);
+
+			ObjectWrapper wrapper = Activator.CreateInstance (type) as ObjectWrapper;
+			if (wrapper == null)
+				return null;
+			wrapper.stetic = stetic;
+			return wrapper;
 		}
 
 		public static ObjectWrapper GladeImport (IStetic stetic, string className, string id, Hashtable props)
@@ -119,7 +124,11 @@ namespace Stetic {
 			if (wrapper == null)
 				throw new GladeException ("Can't create wrapper for type " + type.FullName, className);
 			wrapper.stetic = stetic;
-			info.Invoke (wrapper, new object[] { className, id, props });
+			try {
+				info.Invoke (wrapper, new object[] { className, id, props });
+			} catch (TargetInvocationException tie) {
+				throw tie.InnerException;
+			}
 			return wrapper;
 		}
 

@@ -23,17 +23,23 @@ namespace Stetic.Wrapper {
 				      "Xalign");
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
-		{
-			string invisible_char = props["invisible_char"] as string;
-			if (invisible_char != null) {
-				// invisible_char is a guint, but glade
-				// serializes it as a string, so we have
-				// to translate it
-				props["invisible_char"] = ((int)invisible_char[0]).ToString ();
+		[GladeProperty (Proxy = "GladeInvisibleChar")]
+		public char InvisibleChar {
+			get {
+				return ((Gtk.Entry)Wrapped).InvisibleChar;
 			}
+			set {
+				((Gtk.Entry)Wrapped).InvisibleChar = value;
+			}
+		}
 
-			base.GladeImport (className, id, props);
+		private string GladeInvisibleChar {
+			get {
+				return InvisibleChar.ToString ();
+			}
+			set {
+				InvisibleChar = Char.Parse (value);
+			}
 		}
 	}
 }

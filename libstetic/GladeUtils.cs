@@ -14,6 +14,27 @@ namespace Stetic {
 			return value;
 		}
 
+		static void ExtractWrapperProperties (ObjectWrapper wrapper, Hashtable props, 
+						      out Hashtable wProps)
+		{
+			wProps = null;
+
+			foreach (ItemGroup group in wrapper.ItemGroups) {
+				foreach (ItemDescriptor item in group.Items) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop == null || prop.GladeName == null)
+						continue;
+
+					string val = ExtractProperty (prop.GladeName, props);
+					if (val != null) {
+						if (wProps == null)
+							wProps = new Hashtable ();
+						wProps[prop] = val;
+					}
+				}
+			}
+		}
+
 		static void Hydrate (IntPtr klass, bool childprop, string name, string strval, out GLib.Value value)
 		{
 			value = new GLib.Value ();
@@ -78,8 +99,12 @@ namespace Stetic {
 			g_type_class_unref (klass);
 		}
 
-		static public Gtk.Widget CreateWidget (string className, Hashtable props)
+		static public void ImportWidget (IStetic stetic, ObjectWrapper wrapper,
+						 string className, string id, Hashtable props)
 		{
+			Hashtable wProps;
+			ExtractWrapperProperties (wrapper, props, out wProps);
+
 			IntPtr gtype = g_type_from_name (className);
 
 			string[] propNames;
@@ -96,11 +121,15 @@ namespace Stetic {
 				throw new GladeException ("Could not create gtk# wrapper", className);
 			}
 
-			return widget;
+			Wrap (stetic, wrapper, widget, id, wProps);
 		}
 
-		static public void SetProps (Gtk.Widget widget, Hashtable props)
+		static public void ImportWidget (IStetic stetic, ObjectWrapper wrapper,
+						 Gtk.Widget widget, string id, Hashtable props)
 		{
+			Hashtable wProps;
+			ExtractWrapperProperties (wrapper, props, out wProps);
+
 			string[] propNames;
 			GLib.Value[] propVals;
 			HydrateProperties (gtksharp_get_type_id (widget.Handle), false, props,
@@ -108,6 +137,78 @@ namespace Stetic {
 
 			for (int i = 0; i < propNames.Length; i++)
 				g_object_set_property (widget.Handle, propNames[i], ref propVals[i]);
+
+			Wrap (stetic, wrapper, widget, id, wProps);
+		}
+
+		static void Wrap (IStetic stetic, ObjectWrapper wrapper,
+				  Gtk.Widget widget, string id, Hashtable wProps)
+		{
+			widget.Name = id;
+			wrapper.Wrap (widget, true);
+
+			if (wProps == null)
+				return;
+
+			IntPtr klass = g_type_class_ref (gtksharp_get_type_id (widget.Handle));
+			LateImportHelper helper = null;
+
+			foreach (PropertyDescriptor prop in wProps.Keys) {
+				if ((prop.GladeFlags & GladeProperty.LateImport) != 0) {
+					if (helper == null) {
+						helper = new LateImportHelper (stetic, wrapper, klass, false);
+						stetic.GladeImportComplete += helper.LateImport;
+					}
+					helper.Props[prop] = wProps[prop];
+				} else
+					HydrateGladeProp (wrapper, klass, false, prop, wProps[prop] as string);
+			}
+
+			if (helper == null)
+				g_type_class_unref (klass);
+		}
+
+		private class LateImportHelper {
+			public LateImportHelper (IStetic stetic, ObjectWrapper wrapper, IntPtr klass, bool childprop) {
+				this.stetic = stetic;
+				this.wrapper = wrapper;
+				this.klass = klass;
+				this.childprop = childprop;
+				Props = new Hashtable ();
+			}
+
+			IStetic stetic;
+			ObjectWrapper wrapper;
+			IntPtr klass;
+			bool childprop;
+			public Hashtable Props;
+
+			public void LateImport () {
+				foreach (PropertyDescriptor prop in Props.Keys) {
+					HydrateGladeProp (wrapper, klass, childprop,
+							  prop, Props[prop] as string);
+				}
+				g_type_class_unref (klass);
+				stetic.GladeImportComplete -= LateImport;
+			}
+		}
+
+		static void HydrateGladeProp (ObjectWrapper wrapper, IntPtr klass, bool childprop,
+					      PropertyDescriptor prop, string strval)
+		{
+			if ((prop.GladeFlags & GladeProperty.Proxied) != 0)
+				prop.GladeProxySetValue (wrapper, strval);
+			else if (prop.ParamSpec == null && prop.PropertyType == typeof (string))
+				prop.SetValue (wrapper, strval);
+			else {
+				GLib.Value value;
+				Hydrate (klass, childprop, prop.GladeName, strval, out value);
+				if (prop.PropertyType.IsEnum) {
+					GLib.EnumWrapper wrap = (GLib.EnumWrapper)value;
+					prop.SetValue (wrapper, Enum.ToObject (prop.PropertyType, (int)wrap));
+				} else
+					prop.SetValue (wrapper, value.Val);
+			}
 		}
 
 		static public void SetPacking (Gtk.Container parent, Gtk.Widget child, Hashtable childprops)

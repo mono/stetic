@@ -8,12 +8,13 @@ namespace Stetic {
 
 	public class PropertyDescriptor : ItemDescriptor {
 
-		PropertyInfo memberInfo, propertyInfo;
+		PropertyInfo memberInfo, propertyInfo, gladeProxyInfo;
 		bool isWrapperProperty;
 		ParamSpec pspec;
 		Type editorType;
 		string label, description;
 		object minimum, maximum;
+		GladePropertyAttribute gladeProperty;
 
 		public PropertyDescriptor (Type objectType, string propertyName) : this (null, objectType, propertyName) {}
 
@@ -86,6 +87,12 @@ namespace Stetic {
 				if (attr is Gtk.ChildPropertyAttribute) {
 					ChildPropertyAttribute cpattr = (ChildPropertyAttribute)attr;
 					pspec = ParamSpec.LookupChildProperty (trueObjectType.DeclaringType, cpattr.Name);
+				}
+
+				if (attr is Stetic.GladePropertyAttribute) {
+					gladeProperty = (GladePropertyAttribute)attr;
+					if (gladeProperty.Proxy != null)
+						gladeProxyInfo = wrapperType.GetProperty (gladeProperty.Proxy, flags | BindingFlags.NonPublic);
 				}
 			}
 
@@ -173,6 +180,35 @@ namespace Stetic {
 			if (memberInfo != null)
 				obj = memberInfo.GetValue (obj, null);
 			propertyInfo.SetValue (obj, value, null);
+		}
+
+		public GladeProperty GladeFlags {
+			get {
+				return gladeProperty != null ? gladeProperty.Flags : 0;
+			}
+		}
+
+		public string GladeName {
+			get {
+				if (gladeProperty == null)
+					return null;
+				if (gladeProperty.Name != null)
+					return gladeProperty.Name;
+				else if (pspec != null)
+					return pspec.Name.Replace ('-', '_');
+				else
+					return null;
+			}
+		}
+
+		public string GladeProxyGetValue (ObjectWrapper wrapper)
+		{
+			return (string)gladeProxyInfo.GetValue (wrapper, null);
+		}
+
+		public void GladeProxySetValue (ObjectWrapper wrapper, string value)
+		{
+			gladeProxyInfo.SetValue (wrapper, value, null);
 		}
 	}
 }

@@ -36,22 +36,28 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		string mnemonic_widget;
-
-		protected override void GladeImport (string className, string id, Hashtable props)
-		{
-			mnemonic_widget = GladeUtils.ExtractProperty ("mnemonic_widget", props);
-			if (mnemonic_widget != null)
-				stetic.GladeImportComplete += SetMnemonicWidget;
-			base.GladeImport (className, id, props);
+		[GladeProperty (GladeProperty.LateImport, Proxy = "GladeMnemonicWidget")]
+		public Gtk.Widget MnemonicWidget {
+			get {
+				return ((Gtk.Label)Wrapped).MnemonicWidget;
+			}
+			set {
+				((Gtk.Label)Wrapped).MnemonicWidget = value;
+			}
 		}
 
-		void SetMnemonicWidget ()
-		{
-			Gtk.Widget mnem = stetic.LookupWidgetById (mnemonic_widget);
-			if (mnem != null)
-				((Gtk.Label)Wrapped).MnemonicWidget = mnem;
-			stetic.GladeImportComplete -= SetMnemonicWidget;
+		private string GladeMnemonicWidget {
+			get {
+				Gtk.Widget mnem = MnemonicWidget;
+				if (mnem == null)
+					return null;
+				else
+					return mnem.Name;
+			}
+			set {
+				Gtk.Widget mnem = stetic.LookupWidgetById (value);
+				MnemonicWidget = mnem;
+			}
 		}
 	}
 }

@@ -103,10 +103,10 @@ namespace Stetic.Wrapper {
 			if (widget == null)
 				throw new GladeException ("Unrecognized internal child name", className, false, "internal-child", childName);
 
-			widget.Name = id;
-			GladeUtils.SetProps (widget, props);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.Create (stetic, className);
+			GladeUtils.ImportWidget (stetic, wrapper, widget, id, props);
 
-			return (Widget) Stetic.ObjectWrapper.Create (stetic, className, widget);
+			return (Widget) wrapper;
 		}
 
 		public static new Container Lookup (GLib.Object obj)

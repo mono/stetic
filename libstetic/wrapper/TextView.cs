@@ -33,15 +33,9 @@ namespace Stetic.Wrapper {
 			((Gtk.TextView)Wrapped).Buffer.Changed += Buffer_Changed;
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
-		{
-			string text = GladeUtils.ExtractProperty ("text", props);
-			base.GladeImport (className, id, props);
-			Text = text;
-		}
-
 		[Editor (typeof (Stetic.Editor.Text))]
 		[Description ("Text", "The initial text to display in the Text View")]
+		[GladeProperty (Name = "text")]
 		public string Text {
 			get {
 				return ((Gtk.TextView)Wrapped).Buffer.Text;

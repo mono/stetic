@@ -61,20 +61,6 @@ namespace Stetic.Wrapper {
 			window.DeleteEvent += DeleteEvent;
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
-		{
-			string modal = GladeUtils.ExtractProperty ("modal", props);
-			string type_hint = GladeUtils.ExtractProperty ("type_hint", props);
-			string type = GladeUtils.ExtractProperty ("type", props);
-			base.GladeImport (className, id, props);
-			Modal = (modal == "True");
-
-			if (type_hint != null && type_hint.StartsWith ("GDK_WINDOW_TYPE_HINT_"))
-				TypeHint = (Gdk.WindowTypeHint) Enum.Parse (typeof (Gdk.WindowTypeHint), type_hint.Substring (21), true);
-			if (type != null && type.StartsWith ("GTK_WINDOW_"))
-				Type = (Gtk.WindowType) Enum.Parse (typeof (Gtk.WindowType), type.Substring (11), true);
-		}
-
 		[ConnectBefore]
 		void DeleteEvent (object obj, Gtk.DeleteEventArgs args)
 		{
@@ -88,6 +74,7 @@ namespace Stetic.Wrapper {
 		// We don't want to actually set the underlying properties for these;
 		// that would be annoying to interact with.
 		bool modal;
+		[GladeProperty]
 		public bool Modal {
 			get {
 				return modal;
@@ -98,6 +85,7 @@ namespace Stetic.Wrapper {
 		}
 
 		Gdk.WindowTypeHint typeHint;
+		[GladeProperty]
 		public Gdk.WindowTypeHint TypeHint {
 			get {
 				return typeHint;
@@ -108,6 +96,7 @@ namespace Stetic.Wrapper {
 		}
 
 		Gtk.WindowType type;
+		[GladeProperty]
 		public Gtk.WindowType Type {
 			get {
 				return type;

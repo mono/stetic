@@ -44,21 +44,7 @@ namespace Stetic.Wrapper {
 
 		protected virtual void GladeImport (string className, string id, Hashtable props)
 		{
-			string visible = GladeUtils.ExtractProperty ("visible", props);
-			string has_default = GladeUtils.ExtractProperty ("has_default", props);
-			Gtk.Widget widget = GladeUtils.CreateWidget (className, props);
-			widget.Name = id;
-			Wrap (widget, true);
-
-			Visible = (visible == "True");
-			if (has_default == "True")
-				stetic.GladeImportComplete += SetDefault;
-		}
-
-		void SetDefault ()
-		{
-			((Gtk.Widget)Wrapped).HasDefault = true;
-			stetic.GladeImportComplete -= SetDefault;
+			GladeUtils.ImportWidget (stetic, this, className, id, props);
 		}
 
 		public static new Widget Lookup (GLib.Object obj)
@@ -77,6 +63,7 @@ namespace Stetic.Wrapper {
 		public virtual bool VExpandable { get { return false; } }
 
 		bool window_visible;
+		[GladeProperty]
 		public bool Visible {
 			get {
 				if (Wrapped is Gtk.Window)
@@ -89,6 +76,16 @@ namespace Stetic.Wrapper {
 					window_visible = value;
 				else
 					((Gtk.Widget)Wrapped).Visible = value;
+			}
+		}
+
+		[GladeProperty (GladeProperty.LateImport)]
+		public bool HasDefault {
+			get {
+				return ((Gtk.Widget)Wrapped).HasDefault;
+			}
+			set {
+				((Gtk.Widget)Wrapped).HasDefault = value;
 			}
 		}
 	}

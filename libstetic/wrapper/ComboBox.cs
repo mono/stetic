@@ -26,12 +26,7 @@ namespace Stetic.Wrapper {
 
 		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			Gtk.ComboBox combobox = CreateInstance ();
-			string items = GladeUtils.ExtractProperty ("items", props);
-			GladeUtils.SetProps (combobox, props);
-			combobox.Name = id;
-			Wrap (combobox, true);
-			Items = items;
+			GladeUtils.ImportWidget (stetic, this, CreateInstance (), id, props);
 		}
 
 		string items = "";
@@ -39,6 +34,7 @@ namespace Stetic.Wrapper {
 
 		[Editor (typeof (Stetic.Editor.Text))]
 		[Description ("Items", "The items to display in the Combo Box, one per line")]
+		[GladeProperty]
 		public string Items {
 			get {
 				return items;
