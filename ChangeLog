@@ -1,3 +1,27 @@
+2005-01-12  Dan Winship  <danw@novell.com>
+
+	* stetic/IObjectWrapper.cs (IContainerWrapper): new interface a la
+	IObjectWrapper, but including child properties as well.
+
+	* stetic/PropertyGrid.cs (ChildPropertyGrid): Use IContainerWrapper
+
+	* stetic/wrapper/Box.cs: 
+	* stetic/wrapper/ButtonBox.cs: 
+	* stetic/wrapper/Paned.cs: add static child PropertyGroups
+
+	* stetic/wrapper/HBox.cs: 
+	* stetic/wrapper/HButtonBox.cs: 
+	* stetic/wrapper/HPaned.cs: 
+	* stetic/wrapper/Table.cs: 
+	* stetic/wrapper/VBox.cs: 
+	* stetic/wrapper/VButtonBox.cs: 
+	* stetic/wrapper/VPaned.cs: Implement IContainerWrapper, add child
+	PropertyGroups
+
+	* stetic/wrapper/Frame.cs: 
+	* stetic/wrapper/Window.cs: Implement IContainerWrapper, but
+	return an empty ChildPropertyGroups
+
 2005-01-11  Dan Winship  <danw@novell.com>
 
 	* stetic/WidgetBox.cs (WidgetBox, OnRealized): Use WidgetFlags
