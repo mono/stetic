@@ -74,11 +74,8 @@ namespace Stetic {
 		protected override void OnAdded (Widget child)
 		{
 			base.OnAdded (child);
-			ShowPlaceholder = false;
 			if (child is IContainerWrapper)
 				((IContainerWrapper)child).ExpandabilityChanged += ChildExpandabilityChanged;
-			else
-				InterceptEvents = true;
 			Occupancy = SiteOccupancy.Occupied;
 		}
 
@@ -88,8 +85,6 @@ namespace Stetic {
 				Occupancy = SiteOccupancy.Empty;
 			if (w is IContainerWrapper)
 				((IContainerWrapper)w).ExpandabilityChanged -= ChildExpandabilityChanged;
-			ShowPlaceholder = true;
-			InterceptEvents = false;
 			base.OnRemoved (w);
 		}
 
@@ -181,6 +176,18 @@ namespace Stetic {
 			}
 		}
 
+		protected override bool OnChildButtonPress (Gdk.EventButton evt)
+		{
+			if (evt.Button == 3 && evt.Type == EventType.ButtonPress)
+				return OnPopupMenu ();
+
+			if (!ShowHandles) {
+				GrabFocus ();
+				return true;
+			} else
+				return false;
+		}
+
 		protected int clickX, clickY;
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
@@ -196,17 +203,13 @@ namespace Stetic {
 			return true;
 		}
 
-		protected override bool OnButtonReleaseEvent (Gdk.EventButton evt)
-		{
-			if (ShowHandles)
-				InterceptEvents = false;
-			return false;
-		}
-
 		protected Widget dragWidget;
 
-		protected virtual bool StartDrag ()
+		protected virtual bool StartDrag (Gdk.EventMotion evt)
 		{
+			if (evt.Window != HandleWindow)
+				return false;
+
 			dragWidget = Child;
 			if (dragWidget == null)
 				return false;
@@ -228,7 +231,7 @@ namespace Stetic {
 			if (!Gtk.Drag.CheckThreshold (this, clickX, clickY, (int)evt.XRoot, (int)evt.YRoot))
 				return true;
 
-			if (!StartDrag ())
+			if (!StartDrag (evt))
 				return true;
 
 			mx = (int)evt.XRoot;
@@ -325,8 +328,6 @@ namespace Stetic {
 		public void UnFocus ()
 		{
 			ShowHandles = false;
-			if (Child != null && !(Child is IContainerWrapper))
-				InterceptEvents = true;
 		}
 
 		public void Select ()
@@ -378,8 +379,14 @@ namespace Stetic {
 		[ConnectBefore] // otherwise contents.Focus will be the new focus, not the old
 		void ContentsSetFocus (object obj, SetFocusArgs args)
 		{
-			WidgetSite oldf = contents.Focus as WidgetSite;
-			Widget w = args.Focus;
+			Widget w;
+
+			w = contents.Focus;
+			while (w != null && !(w is WidgetSite))
+				w = w.Parent;
+			WidgetSite oldf = (WidgetSite)w;
+
+			w = args.Focus;
 			while (w != null && !(w is WidgetSite))
 				w = w.Parent;
 			WidgetSite newf = (WidgetSite)w;

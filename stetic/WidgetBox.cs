@@ -44,7 +44,7 @@ namespace Stetic {
 			}
 		}
 
-		Gdk.Window HandleWindow;
+		protected Gdk.Window HandleWindow;
 		bool showHandles;
 		protected bool ShowHandles {
 			get { return showHandles; }
@@ -71,28 +71,30 @@ namespace Stetic {
 			}
 		}
 
-		Gdk.Window EventWindow;
-		bool interceptEvents;
-		protected bool InterceptEvents {
-			get { return interceptEvents; }
-			set {
-				if (value == interceptEvents)
-					return;
-				interceptEvents = value;
+		protected override void OnAdded (Widget child)
+		{
+			child.ButtonPressEvent += InterceptButtonPress;
+			ShowPlaceholder = false;
+			base.OnAdded (child);
+		}
 
-				if (interceptEvents) {
-					if (IsRealized)
-						EventWindow = NewWindow (ParentWindow, Gdk.WindowClass.InputOnly);
-					if (IsMapped)
-						EventWindow.Show ();
-				} else {
-					if (EventWindow != null) {
-						EventWindow.Hide ();
-						EventWindow.Destroy ();
-						EventWindow = null;
-					}
-				}
-			}
+		protected override void OnRemoved (Widget child)
+		{
+			child.ButtonPressEvent -= InterceptButtonPress;
+			ShowPlaceholder = true;
+			ShowHandles = false;
+			base.OnRemoved (child);
+		}
+
+		protected virtual bool OnChildButtonPress (Gdk.EventButton evt)
+		{
+			return false;
+		}
+
+		[ConnectBefore]
+		void InterceptButtonPress (object obj, ButtonPressEventArgs args)
+		{
+			args.RetVal = OnChildButtonPress (args.Event);
 		}
 
 		protected override void OnSizeRequested (ref Requisition req)
@@ -107,8 +109,6 @@ namespace Stetic {
 		{
 			Allocation = allocation;
 
-			if (EventWindow != null)
-				EventWindow.MoveResize (allocation);
 			if (GdkWindow != null && GdkWindow != ParentWindow)
 				GdkWindow.MoveResize (allocation);
 			if (HandleWindow != null)
@@ -185,9 +185,6 @@ namespace Stetic {
 			} else
 				Style.SetBackground (GdkWindow, StateType.Normal);
 
-			if (InterceptEvents)
-				EventWindow = NewWindow (ParentWindow, Gdk.WindowClass.InputOnly);
-
 			if (ShowHandles) {
 				HandleWindow = NewWindow (Toplevel.GdkWindow, Gdk.WindowClass.InputOutput);
 				HandleWindow.Background = black;
@@ -238,16 +235,12 @@ namespace Stetic {
 		protected override void OnMapped ()
 		{
 			base.OnMapped ();
-			if (EventWindow != null)
-				EventWindow.Show ();
 			if (HandleWindow != null)
 				HandleWindow.Show ();
 		}
 
 		protected override void OnUnmapped ()
 		{
-			if (EventWindow != null)
-				EventWindow.Hide ();
 			if (HandleWindow != null)
 				HandleWindow.Hide ();
 			base.OnUnmapped ();
@@ -255,10 +248,6 @@ namespace Stetic {
 
 		protected override void OnUnrealized ()
 		{
-			if (EventWindow != null) {
-				EventWindow.Destroy ();
-				EventWindow = null;
-			}
 			if (HandleWindow != null) {
 				HandleWindow.Destroy ();
 				HandleWindow = null;

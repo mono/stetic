@@ -1,3 +1,23 @@
+2005-01-14  Dan Winship  <danw@novell.com>
+
+	* stetic/WidgetBox.cs: Remove InterceptEvents property and
+	EventWindow. Instead, ConnectBefore to the child's
+	ButtonPressEvent. (This should help to deal with
+	non-container-like containers. Eg, GtkButton if you replace the
+	label widget with something else.)
+	(OnChildButtonPress): called when a button press is intercepted on
+	the child widget
+
+	* stetic/WidgetSite.cs: Update for WidgetBox changes.
+	(OnChildButtonPress): Handle context menu or focus grabbing as
+	needed
+	(StartDrag): Change this to take an EventMotion arg. Return false
+	if the event window isn't the WidgetBox's HandleWindow. (ie, don't
+	allow drags from the widget itself any more, only from its
+	handles).
+	
+	* stetic/WidgetFactory.cs (StartDrag): add evt arg
+
 2005-01-13  Dan Winship  <danw@novell.com>
 
 	* stetic/ContextMenu.cs (ContextMenuItem): add an "Enabled" field

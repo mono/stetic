@@ -31,7 +31,7 @@ namespace Stetic {
 			this.widgetType = widgetType;
 		}
 
-		protected override bool StartDrag ()
+		protected override bool StartDrag (Gdk.EventMotion evt)
 		{
 			dragWidget = System.Activator.CreateInstance (widgetType) as Widget;
 			dragWidget.ShowAll ();
