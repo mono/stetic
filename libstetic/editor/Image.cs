@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Reflection;
 
 namespace Stetic.Editor {
 
@@ -19,8 +20,21 @@ namespace Stetic.Editor {
 
 		static Image ()
 		{
+			ArrayList tmpIds = new ArrayList ();
+
+			// We can't use Gtk.Stock.ListIds, because that returns different
+			// values depending on what version of libgtk you have installed...
+			foreach (PropertyInfo info in typeof (Gtk.Stock).GetProperties (BindingFlags.Public | BindingFlags.Static)) {
+				if (info.CanRead && info.PropertyType == typeof (string))
+					tmpIds.Add (info.GetValue (null, null));
+			}
+			foreach (PropertyInfo info in typeof (Gnome.Stock).GetProperties (BindingFlags.Public | BindingFlags.Static)) {
+				if (info.CanRead && info.PropertyType == typeof (string))
+					tmpIds.Add (info.GetValue (null, null));
+			}
+
 			ArrayList items = new ArrayList (), nonItems = new ArrayList ();
-			foreach (string id in Gtk.Stock.ListIds ()) {
+			foreach (string id in tmpIds) {
 				Gtk.StockItem item = Gtk.Stock.Lookup (id);
 				if (item.StockId == null)
 					nonItems.Add (id);
@@ -75,8 +89,13 @@ namespace Stetic.Editor {
 				combo.PackStart (iconRenderer, false);
 				combo.Reorder (iconRenderer, 0);
 				combo.AddAttribute (iconRenderer, "stock-id", IconColumn);
-				PackStart (combo, true, true, 0);
 				combo.Changed += combo_Changed;
+
+				// Pack the combo non-expandily into a VBox so it doesn't
+				// get stretched to the file button's height
+				Gtk.VBox vbox = new Gtk.VBox (false, 0);
+				vbox.PackStart (combo, true, false, 0);
+				PackStart (vbox, true, true, 0);
 
 				entry = (Gtk.Entry)combo.Child;
 				entry.Changed += entry_Changed;

@@ -82,9 +82,6 @@ namespace Stetic.Wrapper {
 			children = table.Children;
 			grid = new Gtk.Widget[NRows,NColumns];
 
-			foreach (Gtk.Widget child in children)
-				child.FreezeChildNotify ();
-
 			// First fill in the placeholders in the grid. If we find any
 			// placeholders covering more than one grid square, remove them.
 			// (New ones will be created below.)
@@ -124,7 +121,7 @@ namespace Stetic.Wrapper {
 						w = grid[row,col];
 						if (w is Placeholder)
 							table.Remove (grid[row,col]);
-                                                grid[row,col] = w;
+                                                grid[row,col] = child;
                                         }
                                 }
                         }
@@ -144,7 +141,6 @@ namespace Stetic.Wrapper {
 					w = grid[row,col];
 					if (w == null) {
 						w = CreatePlaceholder ();
-						w.FreezeChildNotify ();
 						table.Attach (w, col, col + 1, row, row + 1);
 						grid[row,col] = w;
 						addedPlaceholders = true;
@@ -157,7 +153,9 @@ namespace Stetic.Wrapper {
 					if (!AutoSize[w])
 						continue;
 					tc = table[w] as Gtk.Table.TableChild;
-					tc.YOptions = allPlaceholders ? expandOpts : fillOpts;
+					Gtk.AttachOptions opts = allPlaceholders ? expandOpts : fillOpts;
+					if (tc.YOptions != opts)
+						tc.YOptions = opts;
 				}
 
 				if (allPlaceholders)
@@ -183,15 +181,14 @@ namespace Stetic.Wrapper {
 					if (!AutoSize[w])
 						continue;
 					tc = table[w] as Gtk.Table.TableChild;
-					tc.XOptions = allPlaceholders ? expandOpts : fillOpts;
+					Gtk.AttachOptions opts = allPlaceholders ? expandOpts : fillOpts;
+					if (tc.XOptions != opts)
+						tc.XOptions = opts;
 				}
 
 				if (allPlaceholders)
 					hexpandable = true;
 			}
-
-                        foreach (Gtk.Widget child in table.Children)
-				child.ThawChildNotify ();
 
 			if (addedPlaceholders)
 				EmitContentsChanged ();

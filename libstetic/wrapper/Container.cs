@@ -291,7 +291,7 @@ namespace Stetic.Wrapper {
 		Gtk.Widget selection;
 		HandleWindow handles;
 
-		public void Select (Stetic.Wrapper.Widget wrapper)
+		public virtual void Select (Stetic.Wrapper.Widget wrapper)
 		{
 			if (wrapper == null)
 				Select (null, false);
@@ -300,13 +300,13 @@ namespace Stetic.Wrapper {
 			stetic.Selection = wrapper;
 		}
 
-		public void UnSelect (Stetic.Wrapper.Widget wrapper)
+		public virtual void UnSelect (Stetic.Wrapper.Widget wrapper)
 		{
 			if (selection == wrapper.Wrapped)
 				Select (null, false);
 		}
 
-		public void Select (Placeholder ph)
+		public virtual void Select (Placeholder ph)
 		{
 			Select (ph, false);
 			stetic.Selection = null;
@@ -347,6 +347,14 @@ namespace Stetic.Wrapper {
 		{
 			if (handles != null)
 				handles.Shape ();
+		}
+
+		public void Delete (Stetic.Wrapper.Widget wrapper)
+		{
+			if (wrapper.Wrapped == selection)
+				Select (null, false);
+			ReplaceChild (wrapper.Wrapped, CreatePlaceholder ());
+			wrapper.Wrapped.Destroy ();
 		}
 
 		protected bool ChildHExpandable (Gtk.Widget child)

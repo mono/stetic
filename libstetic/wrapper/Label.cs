@@ -24,7 +24,7 @@ namespace Stetic.Wrapper {
 
 		public Label (string text)
 		{
-			Wrap (new Gtk.Label (text), false);
+			Wrap (new Gtk.Label (text), true);
 		}
 
 		public override void Wrap (object obj, bool initialized)

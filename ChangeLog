@@ -1,5 +1,44 @@
 2005-03-29  Dan Winship  <danw@novell.com>
 
+	* libstetic/HandleWindow.cs (SelectionEvent): simplify for gdk#
+	changes
+
+	* libstetic/editor/Image.cs: Use reflection to get the list of
+	stock IDs rather than Gtk.Stock.ListIds, since the latter will
+	return 2.6-specific IDs if you have libgtk 2.6.
+	(Image): pack the combobox into a vbox so it won't expand
+	incorrectly.
+	
+	* libstetic/wrapper/ButtonBox.cs (GladeImportChild): fix
+	ResponseId handling.
+
+	* libstetic/wrapper/Container.cs (Select, UnSelect): virtualize
+	(Delete): new method to delete a widget and replace it with a
+	Placeholder.
+
+	* libstetic/wrapper/Label.cs (Label (string)): pass "true" to Wrap
+	so it doesn't bash the passed-in label string
+
+	* libstetic/wrapper/Notebook.cs (GladeImportChild, InsertPage):
+	Remove FIXMEs.
+	(GladeExportChild): fix a leftover WidgetSiteism.
+	(Select): override this; if a tab is selected, switch to its page.
+	(ReplaceChild): allow tabs to be replaced, and don't muck things
+	up when pages get replaced
+
+	* libstetic/wrapper/Table.cs (Sync): fix to not get caught in
+	infinite loops again.
+
+	* libstetic/wrapper/Widget.cs (WidgetEvent): simply for gdk#
+	changes.
+	(FindWrapper): search all children (not just non-internal ones)
+	(Delete): new method to delete a widget (by calling
+	ParentWrapper.Delete)
+
+	* stetic/ContextMenu.cs (DoDelete): use Wrapper.Widget.Delete()
+
+2005-03-29  Dan Winship  <danw@novell.com>
+
 	* libstetic/WidgetBox.cs:
 	* libstetic/WidgetSite.cs: GONE!
 

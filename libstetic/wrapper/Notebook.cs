@@ -47,8 +47,6 @@ namespace Stetic.Wrapper {
 			if (childprops.Count == 1 && ((string)childprops["type"]) == "tab") {
 				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
 				Gtk.Widget widget = (Gtk.Widget)wrapper.Wrapped;
-// FIXME				widget.Selected += LabelSelected;
-
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), widget);
 				tabs.Add (widget);
 				return (Widget)wrapper;
@@ -62,7 +60,7 @@ namespace Stetic.Wrapper {
 						       out Hashtable childprops)
 		{
 			Gtk.Widget widget = wrapper.Wrapped as Gtk.Widget;
-			if (!tabs.Contains (widget.Parent)) {
+			if (!tabs.Contains (widget)) {
 				base.GladeExportChild (wrapper, out className, out internalId,
 						       out id, out props, out childprops);
 				return;
@@ -80,13 +78,36 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		public override void Select (Stetic.Wrapper.Widget wrapper)
+		{
+			int index = tabs.IndexOf (wrapper.Wrapped);
+			if (index != -1 && index != notebook.CurrentPage)
+				notebook.CurrentPage = index;
+			base.Select (wrapper);
+		}
+
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		{
+			int index = tabs.IndexOf (oldChild);
+			if (index != -1) {
+				tabs[index] = newChild;
+				Gtk.Widget page = notebook.GetNthPage (index);
+				notebook.SetTabLabel (page, newChild);
+			} else {
+				Gtk.Widget tab = notebook.GetTabLabel (oldChild);
+				int current = notebook.CurrentPage;
+				base.ReplaceChild (oldChild, newChild);
+				notebook.CurrentPage = current;
+				notebook.SetTabLabel (newChild, tab);
+			}
+		}
+
 		int InsertPage (int position)
 		{
 			Gtk.Widget widget;
 
 			Stetic.Wrapper.Label label = new Stetic.Wrapper.Label ("page" + (notebook.NPages + 1).ToString ());
-			widget = (Gtk.Widget)label.Wrapped;
-// FIXME			widget.Selected += LabelSelected;
+			widget = label.Wrapped;
 			tabs.Insert (position, widget);
 
 			return notebook.InsertPage (CreatePlaceholder (), widget, position);
@@ -162,16 +183,6 @@ namespace Stetic.Wrapper {
 						return true;
 				}
 				return false;
-			}
-		}
-
-		void LabelSelected (object obj, EventArgs args)
-		{
-			Gtk.Widget label = obj as Gtk.Widget;
-			int index = tabs.IndexOf (label);
-			if (index != -1 && index != notebook.CurrentPage) {
-				notebook.CurrentPage = index;
-				label.GrabFocus ();
 			}
 		}
 

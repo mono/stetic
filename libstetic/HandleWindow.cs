@@ -122,7 +122,7 @@ namespace Stetic {
 
 			switch (args.Event.Type) {
 			case Gdk.EventType.ButtonPress:
-				Gdk.EventButton evb = new Gdk.EventButton (args.Event.Handle);
+				Gdk.EventButton evb = (Gdk.EventButton)args.Event;
 				args.RetVal = true;
 
 				if (evb.Type == Gdk.EventType.ButtonPress && evb.Button == 1) {
@@ -132,7 +132,7 @@ namespace Stetic {
 				return;
 
 			case Gdk.EventType.MotionNotify:
-				Gdk.EventMotion evm = new Gdk.EventMotion (args.Event.Handle);
+				Gdk.EventMotion evm = (Gdk.EventMotion)args.Event;
 				args.RetVal = true;
 
 				if (!dragHandles)

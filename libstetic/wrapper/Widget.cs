@@ -63,7 +63,7 @@ namespace Stetic.Wrapper {
 			if (args.Event.Type != Gdk.EventType.ButtonPress)
 				return;
 
-			Gdk.EventButton evb = new Gdk.EventButton (args.Event.Handle);
+			Gdk.EventButton evb = (Gdk.EventButton)args.Event;
 			int x = (int)evb.X, y = (int)evb.Y;
 			int erx, ery, wrx, wry;
 
@@ -87,13 +87,33 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		class ChildEnumerator : IEnumerable {
+			public ChildEnumerator (Gtk.Container container)
+			{
+				children = new ArrayList ();
+				container.Forall (Add);
+			}
+
+			ArrayList children;
+
+			public void Add (Gtk.Widget widget)
+			{
+				children.Add (widget);
+			}
+
+			public IEnumerator GetEnumerator ()
+			{
+				return children.GetEnumerator ();
+			}
+		}
+
 		Widget FindWrapper (Gtk.Widget top, int x, int y)
 		{
 			Gtk.Container container = top as Gtk.Container;
 			if (container == null)
 				return Lookup (top);
 
-			foreach (Gtk.Widget child in container.Children) {
+			foreach (Gtk.Widget child in new ChildEnumerator (container)) {
 				Gdk.Rectangle alloc = child.Allocation;
 				if (alloc.Contains (x, y)) {
 					Widget wrapper;
@@ -128,6 +148,14 @@ namespace Stetic.Wrapper {
 				ParentWrapper.UnSelect (this);
 			else if (this is Stetic.Wrapper.Container)
 				((Container)this).UnSelect (this);
+		}
+
+		public void Delete ()
+		{
+			if (ParentWrapper != null)
+				ParentWrapper.Delete (this);
+			else
+				Wrapped.Destroy ();
 		}
 
 		protected virtual void GladeImport (string className, string id, Hashtable props)

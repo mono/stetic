@@ -117,7 +117,7 @@ namespace Stetic {
 
 		void DoDelete (object obj, EventArgs args)
 		{
-			wrapper.Wrapped.Destroy ();
+			wrapper.Delete ();
 		}
 
 		static MenuItem LabelItem (string labelString)
