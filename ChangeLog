@@ -1,3 +1,53 @@
+2005-03-17  Dan Winship  <danw@novell.com>
+
+	* libstetic/WidgetBox.cs (Internal): new property saying that the
+	box represents an internal object.
+	(ShapeHandles): if the box is Internal, don't add corner handles.
+
+	* libstetic/WidgetSite.cs (InternalChildId): set the "Internal"
+	property according to whether or not the child id is null, and
+	call DND.SourceUnset if marking something internal, so it can't be
+	dragged anywhere.
+
+	* libstetic/DND.cs (SourceUnset): new.
+	(SourceButtonPress, CanDrag): make sure that CanDrag always
+	returns false if the widget isn't a source.
+
+	* stetic/ContextMenu.cs (ContextMenu): disable Cut and Delete on
+	"Internal" widgetsites.
+
+	* libstetic/ItemDescriptor.cs (VisibleIf, InvisibleIf): mark a
+	property visible if/unless another property is set
+	(VisibleFor): Check if the property should be visible on a given
+	object.
+
+	* stetic/PropertyGrid.cs (AppendProperty): skip properties that
+	shouldn't be visible on this wrapper. 
+
+	* libstetic/wrapper/Button.cs (Register): add a "ResponseId"
+	property, and a "HasResponseId" property saying whether or not it
+	should be visible.
+	(HasResponseId): Check if the button's site's parentsite has an
+	InternalChildId of "action_area"
+
+	* libstetic/editor/ResponseId.cs: ComboBoxEntry for dialog button
+	Response IDs.
+
+	* libstetic/wrapper/Dialog.cs (Register): add Buttons and
+	HelpButton properties.
+	(Wrap): set HasSeparator false. Give the internal children sane
+	names. Create a button by default.
+	(Buttons): Allow the user to pick default buttons via a menu
+	(HelpButton): Toggle a "Help" button on/off.
+
+	* libstetic/wrapper/Box.cs: Fix some minor autoexpand problems,
+	make it work right with buttonboxes.
+
+	* libstetic/wrapper/Widget.cs (HasDefault): instead of marking
+	this "LateImport", if it's set when the widget doesn't have a
+	Toplevel, connect to "HierarchyChanged". (That way things other
+	than glade import can set it at inappropriate times as well.)
+
 2005-03-15  Dan Winship  <danw@novell.com>
 
 	* libstetic/editor/StockItem.cs: fix sorting again. (ignore "_")

@@ -53,13 +53,13 @@ namespace Stetic.Wrapper {
 
 			foreach (Gtk.Widget child in children) {
 				WidgetSite childsite = child as WidgetSite;
-				if (childsite == null || !childsite.Occupied)
+				if (childsite == null || childsite.Child == null)
 					continue;
 				Gtk.Box.BoxChild bc = box[child] as Gtk.Box.BoxChild;
 				sorted[bc.Position] = childsite;
 			}
 
-			if (this is HBox) {
+			if (this is HBox || this is HButtonBox) {
 				if (sorted[0] != null)
 					site.AddVFault (0, null, sorted[0]);
 				if (sorted[sorted.Length - 1] != null)
@@ -73,7 +73,7 @@ namespace Stetic.Wrapper {
 
 			for (int i = 1; i < sorted.Length; i++) {
 				if (sorted[i - 1] != null && sorted[i] != null) {
-					if (this is HBox)
+					if (this is HBox || this is HButtonBox)
 						site.AddVFault (i, sorted[i - 1], sorted[i]);
 					else
 						site.AddHFault (i, sorted[i - 1], sorted[i]);

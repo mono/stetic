@@ -5,7 +5,7 @@ namespace Stetic {
 
 	public abstract class ItemDescriptor {
 
-		ArrayList dependencies = new ArrayList (), inverseDependencies = new ArrayList ();
+		Hashtable deps, visdeps;
 
 		// The property's display name
 		public abstract string Name { get; }
@@ -15,7 +15,9 @@ namespace Stetic {
 		// sensitive in the PropertyGrid when master is true.
 		public void DependsOn (ItemDescriptor master)
 		{
-			dependencies.Add (master);
+			if (deps == null)
+				deps = new Hashtable ();
+			deps[master] = true;
 		}
 
 		// Marks the property as depending inversely on master
@@ -23,24 +25,51 @@ namespace Stetic {
 		// sensitive in the PropertyGrid when master is false.
 		public void DependsInverselyOn (ItemDescriptor master)
 		{
-			inverseDependencies.Add (master);
+			if (deps == null)
+				deps = new Hashtable ();
+			deps[master] = false;
 		}
 
 		public bool HasDependencies {
 			get {
-				return dependencies.Count > 0 || inverseDependencies.Count > 0;
+				return deps != null;
 			}
 		}
 
 		public bool EnabledFor (ObjectWrapper wrapper)
 		{
-			foreach (PropertyDescriptor dep in dependencies) {
-				if (!(bool)dep.GetValue (wrapper))
-					return false;
+			if (deps != null) {
+				foreach (PropertyDescriptor dep in deps.Keys) {
+					if ((bool)dep.GetValue (wrapper) != (bool)deps[dep])
+						return false;
+				}
 			}
-			foreach (PropertyDescriptor dep in inverseDependencies) {
-				if ((bool)dep.GetValue (wrapper))
-					return false;
+			return true;
+		}
+
+		// As above, but the property will not even be visible if the
+		// master property is false.
+		public void VisibleIf (ItemDescriptor master)
+		{
+			if (visdeps == null)
+				visdeps = new Hashtable ();
+			visdeps[master] = true;
+		}
+
+		public void InvisibleIf (ItemDescriptor master)
+		{
+			if (visdeps == null)
+				visdeps = new Hashtable ();
+			visdeps[master] = false;
+		}
+
+		public bool VisibleFor (ObjectWrapper wrapper)
+		{
+			if (visdeps != null) {
+				foreach (PropertyDescriptor dep in visdeps.Keys) {
+					if ((bool)dep.GetValue (wrapper) != (bool)visdeps[dep])
+						return false;
+				}
 			}
 			return true;
 		}

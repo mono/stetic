@@ -15,6 +15,7 @@ namespace Stetic.Wrapper {
 								"UseStock",
 								"StockId",
 								"Label",
+								"ResponseId",
 								"RemoveContents",
 								"RestoreLabel");
 
@@ -34,6 +35,12 @@ namespace Stetic.Wrapper {
 				props["Label"].DependsInverselyOn (props["UseStock"]);
 				props["RestoreLabel"].DependsInverselyOn (hasLabel);
 				props["RemoveContents"].DependsOn (hasContents);
+
+				PropertyDescriptor hasResponseId =
+					new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
+								typeof (Gtk.Button),
+								"HasResponseId");
+				props["ResponseId"].VisibleIf (hasResponseId);
 
 				props = AddContextMenuItems (type,
 							     "RemoveContents",
@@ -164,6 +171,32 @@ namespace Stetic.Wrapper {
 				label = value;
 				if (!UseStock)
 					button.Label = value;
+			}
+		}
+
+		public bool HasResponseId {
+			get {
+				WidgetSite site = button.Parent as WidgetSite;
+				if (site == null)
+					return false;
+				site = site.ParentSite as WidgetSite;
+				if (site == null)
+					return false;
+				return site.InternalChildId == "action_area";
+			}
+		}
+
+		int responseId;
+
+		[GladeProperty (Name = "response_id")]
+		[Editor (typeof (Stetic.Editor.ResponseId))]
+		[Description ("Response Id", "The response ID to emit when this button is clicked.")]
+		public int ResponseId {
+			get {
+				return responseId;
+			}
+			set {
+				responseId = value;
 			}
 		}
 	}

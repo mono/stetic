@@ -9,6 +9,8 @@ namespace Stetic {
 
 		bool Occupied { get; }
 
+		bool Internal { get; }
+
 		void Select ();
 		void UnSelect ();
 

@@ -40,7 +40,7 @@ namespace Stetic {
 			}
 
 			item = new MenuItem ("Cu_t");
-			if (!site.Occupied)
+			if (!site.Occupied || site.Internal)
 				item.Sensitive = false;
 			Add (item);
 			item = new MenuItem ("_Copy");
@@ -52,7 +52,7 @@ namespace Stetic {
 				item.Sensitive = false;
 			Add (item);
 			item = new MenuItem ("_Delete");
-			if (site.Occupied)
+			if (site.Occupied && !site.Internal)
 				item.Activated += DoDelete;
 			else
 				item.Sensitive = false;

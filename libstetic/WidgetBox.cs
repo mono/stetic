@@ -71,6 +71,21 @@ namespace Stetic {
 			}
 		}
 
+		bool isInternal;
+		protected bool Internal {
+			get { return isInternal; }
+			set {
+				if (value == isInternal)
+					return;
+				isInternal = value;
+
+				if (ShowHandles) {
+					ShowHandles = false;
+					ShowHandles = true;
+				}
+			}
+		}
+
 		protected override void OnAdded (Widget child)
 		{
 			child.ButtonPressEvent += InterceptButtonPress;
@@ -247,7 +262,7 @@ namespace Stetic {
 			pixmap.DrawRectangle (gc, false, handleSize / 2, handleSize / 2,
 					      width - handleSize, height - handleSize);
 
-			if (!ShowPlaceholder) {
+			if (!ShowPlaceholder && !Internal) {
 				// Draw corner handles
 				pixmap.DrawRectangle (gc, true, 0, 0, handleSize, handleSize);
 				pixmap.DrawRectangle (gc, true, 0, height - handleSize, handleSize, handleSize);

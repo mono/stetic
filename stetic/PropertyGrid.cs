@@ -32,6 +32,9 @@ namespace Stetic {
 
 		void AppendProperty (PropertyDescriptor prop, ObjectWrapper wrapper)
 		{
+			if (!prop.VisibleFor (wrapper))
+				return;
+
 			PropertyEditor rep = PropertyEditor.MakeEditor (prop, wrapper);
 			editors[prop.Name] = rep;
 			if (prop.ParamSpec != null)

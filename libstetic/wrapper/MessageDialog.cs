@@ -131,7 +131,7 @@ namespace Stetic.Wrapper {
 		Gtk.ButtonsType buttons;
 
 		[Description ("Buttons", "The buttons to offer")]
-		public Gtk.ButtonsType Buttons {
+		public new Gtk.ButtonsType Buttons {
 			get {
 				return buttons;
 			}

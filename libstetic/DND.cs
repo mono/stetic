@@ -27,6 +27,12 @@ namespace Stetic {
 				source.ButtonPressEvent += SourceButtonPress;
 		}
 
+		public static void SourceUnset (Gtk.Widget source)
+		{
+			Gtk.Drag.SourceUnset (source);
+			source.ButtonPressEvent -= SourceButtonPress;
+		}
+
 		public static void DestSet (Gtk.Widget dest, bool automatic)
 		{
 			Gtk.Drag.DestSet (dest, automatic ? Gtk.DestDefaults.All : 0,
@@ -38,22 +44,27 @@ namespace Stetic {
 			Gtk.Drag.DestUnset (dest);
 		}
 
+		static Gtk.Widget clickWidget;
 		static int clickX, clickY;
 
+		[GLib.ConnectBefore]
 		static void SourceButtonPress (object obj, Gtk.ButtonPressEventArgs args)
 		{
 			Gdk.EventButton evt = args.Event;
 			if (evt.Button == 1 && evt.Type == Gdk.EventType.ButtonPress) {
+				clickWidget = obj as Gtk.Widget;
 				clickX = (int)evt.XRoot;
 				clickY = (int)evt.YRoot;
 			}
 		}
 
-		// Non-automaticl drag sources should call this on any MotionEvent
+		// Non-automatic drag sources should call this on any MotionEvent
 		// to see if that motion can start a drag
 		public static bool CanDrag (Gtk.Widget source, Gdk.EventMotion evt)
 		{
 			if ((evt.State & Gdk.ModifierType.Button1Mask) == 0)
+				return false;
+			if (source != clickWidget)
 				return false;
 			return Gtk.Drag.CheckThreshold (source, clickX, clickY, (int)evt.XRoot, (int)evt.YRoot);
 		}

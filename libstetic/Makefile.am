@@ -34,6 +34,7 @@ libstetic_dll_sources =			\
 	editor/FloatRange.cs		\
 	editor/IntRange.cs		\
 	editor/OptIntRange.cs		\
+	editor/ResponseId.cs		\
 	editor/StockItem.cs		\
 	editor/String.cs		\
 	editor/Text.cs			\

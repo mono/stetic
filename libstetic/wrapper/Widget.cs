@@ -85,13 +85,30 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty (GladeProperty.LateImport)]
+		bool hasDefault;
+		[GladeProperty]
 		public bool HasDefault {
 			get {
-				return ((Gtk.Widget)Wrapped).HasDefault;
+				return hasDefault;
 			}
 			set {
-				((Gtk.Widget)Wrapped).HasDefault = value;
+				hasDefault = value;
+
+				Gtk.Widget widget = (Gtk.Widget)Wrapped;
+				if (widget.Toplevel != null)
+					widget.HasDefault = hasDefault;
+				else
+					widget.HierarchyChanged += HierarchyChanged;
+			}
+		}
+
+		void HierarchyChanged (object obj, Gtk.HierarchyChangedArgs args)
+		{
+			Gtk.Widget widget = (Gtk.Widget)Wrapped;
+
+			if (widget.Toplevel != null) {
+				widget.HasDefault = hasDefault;
+				widget.HierarchyChanged -= HierarchyChanged;
 			}
 		}
 	}

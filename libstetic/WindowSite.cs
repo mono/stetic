@@ -80,6 +80,12 @@ namespace Stetic {
 			}
 		}
 
+		public bool Internal {
+			get {
+				return false;
+			}
+		}
+
 		public void Delete ()
 		{
 			contents.Destroy ();

@@ -87,6 +87,13 @@ namespace Stetic {
 				return internalChildId;
 			}
 			set {
+				if (internalChildId == null && value != null) {
+					DND.SourceUnset (this);
+					Internal = true;
+				} else if (internalChildId != null && value == null) {
+					DND.SourceSet (this, false);
+					Internal = false;
+				}
 				internalChildId = value;
 			}
 		}

@@ -24,6 +24,9 @@ UI-Designing UI:
           does, and needs to implement insert/remove commands
 
 	- Dialog
+		- "Buttons" should automatically switch to "Custom" if
+		  you add/remove them.
+		- "Buttons" menu labels need to be better
 
 	- Notebook has a bunch of problems:
 		- tab labels start out with WidgetSites, but lose them
