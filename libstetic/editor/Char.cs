@@ -1,31 +1,26 @@
-using Gtk;
-using Gdk;
-using GLib;
 using System;
 
 namespace Stetic.Editor {
 
 	public class Char : Gtk.Entry {
 
-		char initial;
-
-		public Char (char initial)
+		public Char ()
 		{
 			MaxLength = 1;
-
-			this.initial = initial;
-			Text = initial.ToString ();
 		}
+
+		char last;
 
 		public char Value {
 			get {
 				if (Text.Length == 0)
-					return initial;
+					return last;
 				else
 					return Text[0];
 			}
 			set {
 				Text = value.ToString ();
+				last = value;
 			}
 		}
 

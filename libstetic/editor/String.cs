@@ -1,6 +1,3 @@
-using Gtk;
-using Gdk;
-using GLib;
 using System;
 
 namespace Stetic.Editor {
@@ -8,10 +5,16 @@ namespace Stetic.Editor {
 	[PropertyEditor ("Text", "Changed")]
 	public class String : Gtk.Entry {
 
-		public String (string value)
-		{
-			if (value != null)
-				Text = value;
+		public new string Text {
+			get {
+				return base.Text;
+			}
+			set {
+				if (value == null)
+					base.Text = "";
+				else
+					base.Text = value;
+			}
 		}
 	}
 }

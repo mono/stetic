@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.ComponentModel;
 
 namespace Stetic.Wrapper {
 
@@ -30,7 +29,7 @@ namespace Stetic.Wrapper {
 
 		string filename = "";
 
-		[Editor (typeof (Stetic.Editor.File), typeof (Gtk.Widget))]
+		[Editor (typeof (Stetic.Editor.File))]
 		public string File {
 			get {
 				return filename;

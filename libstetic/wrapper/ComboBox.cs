@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 
 namespace Stetic.Wrapper {
 
@@ -41,7 +40,7 @@ namespace Stetic.Wrapper {
 		string items;
 		string[] item;
 
-		[Editor (typeof (Stetic.Editor.Text), typeof (Gtk.Widget))]
+		[Editor (typeof (Stetic.Editor.Text))]
 		public string Items {
 			get {
 				return items;

@@ -1,3 +1,56 @@
+2005-02-14  Dan Winship  <danw@novell.com>
+
+	* libstetic/RangeAttribute.cs: new attribute for specifying the
+	range of a property.
+
+	* libstetic/EditorAttribute.cs: local replacement for
+	System.ComponentModel.EditorAttribute
+
+	* libstetic/PropertyDescriptor.cs: update to look for
+	Stetic.EditorAttribute rather than
+	System.ComponentModel.EditorAttribute, and handle
+	Stetic.RangeAttribute too.
+	(PropertyInfo): property to return the underlying PropertyInfo
+	(Minimum, Maximum): new, set from RangeAttribute
+	(CanRead): Gone. We never really supported write-only properties.
+
+	* stetic/PropertyEditor.cs (MakeEditor): use the
+	PropertyDescriptor's Minimum and Maximum if available.
+	(BasicEditor.BasicEditor): Use the property's PropertyInfo rather
+	than its type as the "special" constructor used for enumerations,
+	etc. This will let us have a few more special editor types. Don't
+	bother trying to find a ctor that takes an initial value; it's
+	easy enough to just set it post-construction.
+
+	* libstetic/editor/Enumeration.cs: Change the Type ctor to take a
+	PropertyInfo instead.
+
+	* libstetic/editor/Text.cs: Use a PropertyInfo ctor, and check if
+	there's an EditorAttribute with an EditorSize specified, and use
+	that to set the textview's size if so.
+
+	* libstetic/editor/Boolean.cs: 
+	* libstetic/editor/Char.cs: 
+	* libstetic/editor/Color.cs: 
+	* libstetic/editor/File.cs: 
+	* libstetic/editor/FloatRange.cs: 
+	* libstetic/editor/IntRange.cs: 
+	* libstetic/editor/OptIntRange.cs: 
+	* libstetic/editor/StockItem.cs: 
+	* libstetic/editor/String.cs: Remove "initial" arg from ctor.
+
+	* libstetic/wrapper/ComboBox.cs (Items):
+	* libstetic/wrapper/Icon.cs (Stock):
+	* libstetic/wrapper/Image.cs (File):
+	* libstetic/wrapper/TextView.cs (Text): use new EditorAttribute
+
+	* libstetic/wrapper/Button.cs (StockId): use new EditorAttribute.
+	Remove unused DefaultValueAttribute.
+
+	* libstetic/wrapper/ColorButton.cs (Alpha): Use RangeAttribute to
+	create a new Alpha property that combines the underlying UseAlpha
+	and Alpha properties into a single "optional int range".
+
 2005-02-13  Dan Winship  <danw@novell.com>
 
 	* libstetic/CommandDescriptor.cs: like PropertyDescriptor, but

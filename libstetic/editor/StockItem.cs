@@ -1,9 +1,5 @@
-using Gtk;
-using Gdk;
-using GLib;
 using System;
 using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace Stetic.Editor {
 
@@ -17,7 +13,7 @@ namespace Stetic.Editor {
 
 		public StockItem ()
 		{
-			ListStore store = new ListStore (typeof (string), typeof (string));
+			Gtk.ListStore store = new Gtk.ListStore (typeof (string), typeof (string));
 
 			stockIds = new ArrayList ();
 
@@ -43,19 +39,14 @@ namespace Stetic.Editor {
 
 			Model = store;
 
-			CellRendererPixbuf iconRenderer = new Gtk.CellRendererPixbuf ();
-			iconRenderer.StockSize = (uint)IconSize.Menu;
+			Gtk.CellRendererPixbuf iconRenderer = new Gtk.CellRendererPixbuf ();
+			iconRenderer.StockSize = (uint)Gtk.IconSize.Menu;
 			PackStart (iconRenderer, false);
 			AddAttribute (iconRenderer, "stock-id", IconColumn);
 
-			CellRendererText labelRenderer = new Gtk.CellRendererText ();
+			Gtk.CellRendererText labelRenderer = new Gtk.CellRendererText ();
 			PackStart (labelRenderer, true);
 			AddAttribute (labelRenderer, "markup", LabelColumn);
-		}
-
-		public StockItem (string stockId) : this ()
-		{
-			StockId = stockId;
 		}
 
 		public string StockId {

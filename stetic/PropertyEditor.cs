@@ -35,23 +35,18 @@ namespace Stetic {
 		static public PropertyEditor MakeEditor (PropertyDescriptor prop, ParamSpec pspec, object obj)
 		{
 			Type editorType;
-			object min, max, initial;
+			object min, max;
 
 			Stetic.Wrapper.Object wrapper = Stetic.Wrapper.Object.Lookup (obj as GLib.Object);
 			if (wrapper != null)
 				obj = wrapper;
 
-			if (pspec != null) {
+			min = prop.Minimum;
+			max = prop.Maximum;
+			if (min == null && max == null && pspec != null) {
 				min = pspec.Minimum;
 				max = pspec.Maximum;
-				initial = pspec.Default;
-			} else {
-				min = max = null;
-				initial = prop.Default;
 			}
-
-			if (prop.CanRead)
-				initial = prop.GetValue (obj);
 
 			editorType = prop.EditorType;
 			if (editorType == null) {
@@ -69,9 +64,9 @@ namespace Stetic {
 			}
 
 			if (min != null && max != null)
-				return new RangeEditor (editorType, min, max, initial, obj, prop);
+				return new RangeEditor (editorType, min, max, obj, prop);
 			else
-				return new BasicEditor (editorType, initial, obj, prop);
+				return new BasicEditor (editorType, obj, prop);
 		}
 
 		protected static PropertyInfo EditorValueProperty (Type editorType)
@@ -109,8 +104,7 @@ namespace Stetic {
 		PropertyInfo editorProp;
 		EventInfo editorEvent;
 
-		public BasicEditor (Type editorType, object value,
-				    object obj, PropertyDescriptor prop)
+		public BasicEditor (Type editorType, object obj, PropertyDescriptor prop)
 		{
 			this.obj = obj;
 			this.prop = prop;
@@ -118,32 +112,20 @@ namespace Stetic {
 			editorProp = EditorValueProperty (editorType);
 			editorEvent = EditorValueEvent (editorType);
 
-			// Find a constructor. First we look for a constructor that takes
-			// just an object of the editor's Value type (ie, a default
-			// value). If that fails, we look for a no-arg constructor. If
-			// there's no no-arg constructor, we look for a constructor that
-			// takes a System.Type arg and call that with the type of the
-			// property (this is used by the enum editor, which needs to know
-			// specifically what kind of enum it's editing).
+			// Find a constructor.
 
-			ConstructorInfo ctor = editorType.GetConstructor (new Type[] { editorProp.PropertyType });
+			ConstructorInfo ctor = editorType.GetConstructor (new Type[] { typeof (PropertyInfo) });
 			if (ctor != null)
-				editor = (Widget)ctor.Invoke (new object[] { value });
+				editor = (Widget)ctor.Invoke (new object[] { prop.PropertyInfo });
 			else {
 				ctor = editorType.GetConstructor (new Type[0]);
-				if (ctor != null)
-					editor = (Widget)ctor.Invoke (new object[0]);
-				else {
-					ctor = editorType.GetConstructor (new Type[] { typeof (Type) });
-					if (ctor == null)
-						throw new ApplicationException ("No constructor for editor type " + editorType.ToString () + " for " + prop.Name);;
-					editor = (Widget)ctor.Invoke (new object[] { prop.PropertyType });
-				}
-
-				// Set the default value
-				if (editorProp.CanWrite)
-					editorProp.SetValue (editor, value, null);
+				if (ctor == null)
+					throw new ApplicationException ("No constructor for editor type " + editorType.ToString () + " for " + prop.Name);;
+				editor = (Widget)ctor.Invoke (new object[0]);
 			}
+
+			if (editorProp.CanWrite)
+				editorProp.SetValue (editor, prop.GetValue (obj), null);
 
 			editor.ShowAll ();
 
@@ -185,7 +167,7 @@ namespace Stetic {
 		PropertyInfo editorProp;
 		EventInfo editorEvent;
 
-		public RangeEditor (Type editorType, object min, object max, object initial,
+		public RangeEditor (Type editorType, object min, object max,
 				    object obj, PropertyDescriptor prop)
 		{
 			this.obj = obj;
@@ -193,6 +175,8 @@ namespace Stetic {
 
 			editorProp = EditorValueProperty (editorType);
 			editorEvent = EditorValueEvent (editorType);
+
+			object initial = prop.GetValue (obj);
 
 			// If the passed in values aren't the same type as used by the
 			// editor, convert them.

@@ -1,27 +1,25 @@
-using Gtk;
-using Gdk;
-using GLib;
 using System;
 using System.Collections;
+using System.Reflection;
 
 namespace Stetic.Editor {
 
 	public class Enumeration : Gtk.HBox {
 
-		ComboBox combo;
+		Gtk.ComboBox combo;
 		ArrayList values;
 
-		public Enumeration (Type type) : base (false, 0)
+		public Enumeration (PropertyInfo info) : base (false, 0)
 		{
-			combo = ComboBox.NewText ();
+			combo = Gtk.ComboBox.NewText ();
 			combo.Changed += combo_Changed;
 			combo.Show ();
 			PackStart (combo, true, true, 0);
 
 			values = new ArrayList ();
-			foreach (int i in Enum.GetValues (type)) {
-				Enum value = (Enum)Enum.ToObject (type, i);
-				string name = Enum.GetName (type, value);
+			foreach (int i in Enum.GetValues (info.PropertyType)) {
+				Enum value = (Enum)Enum.ToObject (info.PropertyType, i);
+				string name = Enum.GetName (info.PropertyType, value);
 
 				combo.AppendText (name);
 				values.Add (value);

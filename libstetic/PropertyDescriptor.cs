@@ -2,7 +2,6 @@ using GLib;
 using Gtk;
 using System;
 using System.Collections;
-using System.ComponentModel;
 using System.Reflection;
 
 namespace Stetic {
@@ -13,7 +12,7 @@ namespace Stetic {
 		bool isWrapperProperty;
 		ParamSpec pspec;
 		Type editorType;
-		object defaultValue;
+		object minimum, maximum;
 
 		public PropertyDescriptor (Type objectType, string propertyName) : this (null, objectType, propertyName) {}
 
@@ -53,25 +52,23 @@ namespace Stetic {
 			if (wrapperType != null) {
 				try {
 					PropertyDescriptor baseProp = new PropertyDescriptor (objectType, propertyName);
-					if (baseProp != null) {
-						editorType = baseProp.editorType;
-						defaultValue = baseProp.defaultValue;
+					if (baseProp != null)
 						pspec = baseProp.pspec;
-					}
 				} catch {
 					;
 				}
 			}
 
 			foreach (object attr in propertyInfo.GetCustomAttributes (false)) {
-				if (attr is System.ComponentModel.EditorAttribute) {
+				if (attr is Stetic.EditorAttribute) {
 					EditorAttribute eattr = (EditorAttribute)attr;
-					editorType = Type.GetType (eattr.EditorTypeName);
+					editorType = eattr.EditorType;
 				}
 
-				if (attr is System.ComponentModel.DefaultValueAttribute) {
-					DefaultValueAttribute dvattr = (DefaultValueAttribute)attr;
-					defaultValue = dvattr.Value;
+				if (attr is Stetic.RangeAttribute) {
+					RangeAttribute rattr = (RangeAttribute)attr;
+					minimum = rattr.Minimum;
+					maximum = rattr.Maximum;
 				}
 
 				if (attr is GLib.PropertyAttribute) {
@@ -86,45 +83,45 @@ namespace Stetic {
 			}
 		}
 
-		// The property's internal name
 		public override string Name {
 			get {
 				return propertyInfo.Name;
 			}
 		}
 
-		// The property's type
 		public Type PropertyType {
 			get {
 				return propertyInfo.PropertyType;
 			}
 		}
 
-		// The property's ParamSpec
+		public PropertyInfo PropertyInfo {
+			get {
+				return propertyInfo;
+			}
+		}
+
 		public ParamSpec ParamSpec {
 			get {
 				return pspec;
 			}
 		}
 
-		// The type of editor to use in the PropertyGrid
 		public Type EditorType {
 			get {
 				return editorType;
 			}
 		}
 
-		// The property's default value
-		public object Default {
+		public object Minimum {
 			get {
-				return defaultValue;
+				return minimum;
 			}
 		}
 
-		// Whether or not the property is readable
-		public bool CanRead {
+		public object Maximum {
 			get {
-				return propertyInfo.CanRead;
+				return maximum;
 			}
 		}
 
@@ -142,7 +139,6 @@ namespace Stetic {
 			return propertyInfo.GetValue (obj, null);
 		}
 
-		// Whether or not the property is writable
 		public bool CanWrite {
 			get {
 				return propertyInfo.CanWrite;

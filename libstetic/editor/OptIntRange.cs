@@ -1,16 +1,13 @@
-using Gtk;
-using Gdk;
-using GLib;
 using System;
 
 namespace Stetic.Editor {
 
 	public class OptIntRange : Gtk.HBox {
 
-		CheckButton check;
-		SpinButton spin;
+		Gtk.CheckButton check;
+		Gtk.SpinButton spin;
 
-		public OptIntRange (int min, int max, int initial) : base (false, 6)
+		public OptIntRange (int min, int max) : base (false, 6)
 		{
 			check = new Gtk.CheckButton ();
 			check.Show ();
@@ -21,8 +18,6 @@ namespace Stetic.Editor {
 			spin.Show ();
 			spin.ValueChanged += spin_ValueChanged;
 			PackStart (spin, true, true, 0);
-
-			Value = initial;
 		}
 
 		void check_Toggled (object o, EventArgs args)

@@ -1,6 +1,5 @@
-using Gtk;
-using GLib;
 using System;
+using System.Reflection;
 
 namespace Stetic.Editor {
 
@@ -9,7 +8,7 @@ namespace Stetic.Editor {
 
 		Gtk.TextView textview;
 
-		public Text (string value)
+		public Text (PropertyInfo info)
 		{
 			ShadowType = Gtk.ShadowType.In;
 			SetPolicy (Gtk.PolicyType.Never, Gtk.PolicyType.Automatic);
@@ -19,17 +18,17 @@ namespace Stetic.Editor {
 			textview.Show ();
 			Add (textview);
 
+			int nlines = 6;
+			foreach (EditorAttribute eattr in info.GetCustomAttributes (typeof (Stetic.EditorAttribute), false)) {
+				if (eattr.EditorSize != -1)
+					nlines = eattr.EditorSize;
+			}
+
 			Pango.Context ctx = textview.PangoContext;
 			Pango.FontMetrics metrics = ctx.GetMetrics (textview.Style.FontDescription,
 								    ctx.Language);
-
 			int lineHeight = (metrics.Ascent + metrics.Descent) / (int)Pango.Scale.PangoScale;
-
-			// FIXME: make # of lines adjustable
-			SetSizeRequest (-1, lineHeight * 6);
-
-			if (value != null)
-				textview.Buffer.Text = value;
+			SetSizeRequest (-1, lineHeight * nlines);
 
 			textview.Buffer.Changed += Buffer_Changed;
 		}

@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.ComponentModel;
 
 namespace Stetic.Wrapper {
 
@@ -29,7 +28,7 @@ namespace Stetic.Wrapper {
 		static ItemGroup[] groups;
 		public override ItemGroup[] ItemGroups { get { return groups; } }
 
-		[Editor (typeof (Stetic.Editor.StockItem), typeof (Gtk.Widget))]
+		[Editor (typeof (Stetic.Editor.StockItem))]
 		public string Stock {
 			get {
 				return ((Gtk.Image)Wrapped).Stock;

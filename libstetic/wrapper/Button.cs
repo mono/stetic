@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.ComponentModel;
 
 namespace Stetic.Wrapper {
 
@@ -145,8 +144,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[Editor (typeof (Stetic.Editor.StockItem), typeof (Gtk.Widget))]
-		[DefaultValue ("gtk-ok")]
+		[Editor (typeof (Stetic.Editor.StockItem))]
 		public string StockId {
 			get {
 				return stockId;

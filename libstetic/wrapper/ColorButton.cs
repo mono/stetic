@@ -8,15 +8,12 @@ namespace Stetic.Wrapper {
 		public static ItemGroup ColorButtonProperties;
 
 		static ColorButton () {
-			// FIXME: we should merge UseAlpha and Alpha into an OptIntRange
-
 			ColorButtonProperties = new ItemGroup ("Color Button Properties",
+							       typeof (Stetic.Wrapper.ColorButton),
 							       typeof (Gtk.ColorButton),
 							       "Title",
 							       "Color",
-							       "UseAlpha",
 							       "Alpha");
-			ColorButtonProperties["Alpha"].DependsOn (ColorButtonProperties["UseAlpha"]);
 
 			groups = new ItemGroup[] {
 				ColorButtonProperties,
@@ -30,5 +27,27 @@ namespace Stetic.Wrapper {
 
 		static ItemGroup[] groups;
 		public override ItemGroup[] ItemGroups { get { return groups; } }
+
+		[Range (-1, 65535)]
+		public int Alpha {
+			get {
+				Gtk.ColorButton cb = (Gtk.ColorButton)Wrapped;
+
+				if (cb.UseAlpha)
+					return cb.Alpha;
+				else
+					return -1;
+			}
+			set {
+				Gtk.ColorButton cb = (Gtk.ColorButton)Wrapped;
+
+				if (value == -1)
+					cb.UseAlpha = false;
+				else {
+					cb.UseAlpha = true;
+					cb.Alpha = (ushort)value;
+				}
+			}
+		}
 	}
 }
