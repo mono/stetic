@@ -4,6 +4,7 @@ noinst_SCRIPTS = stetic
 stetic_exe_SOURCES =		\
 	FrameWrapper.cs		\
 	HBoxWrapper.cs		\
+	HButtonBoxWrapper.cs	\
 	HPanedWrapper.cs	\
 	Palette.cs		\
 	ParamFlags.cs		\
@@ -13,6 +14,7 @@ stetic_exe_SOURCES =		\
 	Stetic.cs		\
 	TableWrapper.cs		\
 	VBoxWrapper.cs		\
+	VButtonBoxWrapper.cs	\
 	VPanedWrapper.cs	\
 	WidgetBox.cs		\
 	WidgetFactory.cs	\
@@ -24,7 +26,7 @@ STETIC_RESOURCE_FILES = $(wildcard $(top_srcdir)/pixmaps/*.png)
 STETIC_RESOURCES = $(foreach file,$(STETIC_RESOURCE_FILES),-resource:$(file)$(comma)$(notdir $(file)))
 
 stetic.exe: $(stetic_exe_SOURCES) $(STETIC_RESOURCE_FILES)
-	$(MCS) -g $(STETIC_LIBS) -o stetic.exe $(stetic_exe_SOURCES) $(STETIC_RESOURCES)
+	$(MCS) -g -pkg:gtk-sharp-2.0 -o stetic.exe $(stetic_exe_SOURCES) $(STETIC_RESOURCES)
 
 stetic: stetic.in
 	sed -e "s:\@MONO\@:$(MONO):" $< > $@

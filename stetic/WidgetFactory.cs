@@ -220,6 +220,18 @@ namespace Stetic {
 			return new VBoxWrapper (false, 0);
 		}
 
+		[WidgetFactory ("HButtonBox", "hbuttonbox.png", WidgetType.Container)]
+		static Widget newHButtonBox ()
+		{
+			return new HButtonBoxWrapper ();
+		}
+
+		[WidgetFactory ("VButtonBox", "vbuttonbox.png", WidgetType.Container)]
+		static Widget newVButtonBox ()
+		{
+			return new VButtonBoxWrapper ();
+		}
+
 		[WidgetFactory ("HPaned", "hpaned.png", WidgetType.Container)]
 		static Widget newHPaned ()
 		{

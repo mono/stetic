@@ -9,6 +9,7 @@ namespace Stetic {
 
 		public WidgetBox ()
 		{
+			Flags &= ~(int)WidgetFlags.NoWindow;
 			ShowPlaceholder = true;
 		}
 
@@ -20,23 +21,16 @@ namespace Stetic {
 					return;
 				showPlaceholder = value;
 
-				bool wasMapped = IsMapped;
-				bool wasRealized = IsRealized;
+				if (IsRealized) {
+					bool wasMapped = IsMapped;
 
-				if (wasMapped)
-					Hide ();
-				if (wasRealized)
+					if (wasMapped)
+						Hide ();
 					Unrealize ();
-
-				if (showPlaceholder)
-					Flags &= ~(int)WidgetFlags.NoWindow;
-				else
-					Flags |= (int)WidgetFlags.NoWindow;
-
-				if (wasRealized)
 					Realize ();
-				if (wasMapped)
-					Show ();
+					if (wasMapped)
+						Show ();
+				}
 			}
 		}
 
@@ -103,8 +97,10 @@ namespace Stetic {
 		{
 			Allocation = allocation;
 
-			HandleAllocation.X = allocation.X - handleSize / 2;
-			HandleAllocation.Y = allocation.Y - handleSize / 2;
+			int tlx, tly;
+			TranslateCoordinates (Toplevel, 0, 0, out tlx, out tly);
+			HandleAllocation.X = tlx - handleSize / 2;
+			HandleAllocation.Y = tly - handleSize / 2;
 			HandleAllocation.Width = allocation.Width + handleSize;
 			HandleAllocation.Height = allocation.Height + handleSize;
 
@@ -115,8 +111,10 @@ namespace Stetic {
 			if (HandleWindow != null)
 				ShapeHandles (HandleAllocation);
 
-			if (Child != null)
+			if (Child != null) {
+				allocation.X = allocation.Y = 0;
 				Child.SizeAllocate (allocation);
+			}
 		}
 
 		static private string[] placeholder_xpm = {
@@ -175,13 +173,14 @@ namespace Stetic {
 		{
 			Flags |= (int)WidgetFlags.Realized;
 
+			GdkWindow = NewWindow (ParentWindow, Gdk.WindowClass.InputOutput);
+
 			if (ShowPlaceholder) {
-				GdkWindow = NewWindow (ParentWindow, Gdk.WindowClass.InputOutput);
 				Gdk.Pixmap pixmap, mask;
 				pixmap = Gdk.Pixmap.CreateFromXpmD (GdkWindow, out mask, new Gdk.Color (99, 99, 99), placeholder_xpm);
 				GdkWindow.SetBackPixmap (pixmap, false);
 			} else
-				GdkWindow = ParentWindow;
+				Style.SetBackground (GdkWindow, StateType.Normal);
 
 			if (InterceptEvents)
 				EventWindow = NewWindow (ParentWindow, Gdk.WindowClass.InputOnly);
