@@ -1,3 +1,56 @@
+2005-01-05  Dan Winship  <danw@novell.com>
+
+	* stetic/IObjectWrapper.cs (IPropertySensitizer): interface for
+	wrapper classes that want to be able to tweak the sensitivity of
+	their editors.
+
+	* stetic/Notify.cs: static helper class for the GObject "notify"
+	signal, which isn't currently bound by glib-sharp.
+
+	* stetic/PropertyDescriptor.cs (EventInfo, ParamSpec, EditorType):
+	Make these be properties of the PropertyDescriptor rather than
+	being figured out in PropertyEditors.
+
+	* stetic/PropertyEditor.cs: Renamed from PropertyEditors.cs and
+	made into an abstract widget class rather than a static class.
+	(MakeEditor): Now returns a PropertyEditor rather than just a
+	Widget.
+	(BasicEditor, RangeEditor, NoEditor): Now subclasses of
+	PropertyEditor, and they implement an Update() method to force the
+	editor to sync with the underlying property.
+
+	* stetic/PropertyGrid.cs: Tweak for PropertyDescriptor and
+	PropertyEditor changes. Use IPropertySensitizer if the displayed
+	widget supports it. Use Stetic.Notify to notice when the user
+	interacts with the displayed widget (eg, toggling a checkbox) and
+	force the relevant property editor to update itself.
+
+	* stetic/ParamSpec.cs (ParamSpecTypeHack): add an unused private
+	subclass of GLib.Object so we can access the static protected
+	LookupGType method. (This wouldn't be needed if ParamSpec was in
+	glib-sharp, because there's an internal method we could use.)
+	(LookupObjectProperty, LookupChildProperty): Take a Type rather
+	than a GLib.Object, so we can look up a type's properties without
+	needing an instatiated object.
+
+	* stetic/wrapper/Button.cs: Make the UI for the "Stock ID" and
+	"Label" properties work more nicely by wrapping both of them at
+	the Stetic.Wrapper.Button level, and watching for notifications on
+	the UseStock property, and setting the wrapper Label to the stock
+	item's Label rather than its Name when setting a stock item (eg,
+	"_OK" rather than "gtk-ok"). Also add the UseStock property, and
+	implement the IPropertySensitizer interface so that only one of
+	Stock ID and Label is sensitive at any time.
+
+	* stetic/editor/StockItem.cs: Remove the "None" option; the editor
+	should be desensitized if no stock item is being used.
+
+	* glue/notify.c: glue for Stetic.Notify
+
+	* glue/paramspec.c (stetic_param_spec_for_property,
+	stetic_param_spec_for_child_property): Take a GType rather than a
+	GObject.
+
 2004-12-20  Dan Winship  <danw@novell.com>
 
 	* stetic/IObjectWrapper.cs: interface for Stetic.Wrapper objects

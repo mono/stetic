@@ -10,20 +10,27 @@ namespace Stetic {
 	public class PropertyDescriptor {
 
 		PropertyInfo memberInfo, propertyInfo;
+		ParamSpec pspec;
+		EventInfo eventInfo;
 		Type editorType;
 		object defaultValue;
 
 		public PropertyDescriptor (Type objectType, string propertyName)
 		{
+			Type parentType;
+
 			int dot = propertyName.IndexOf ('.');
 
 			if (dot == -1) {
+				parentType = objectType;
 				memberInfo = null;
 				propertyInfo = objectType.GetProperty (propertyName);
 			} else {
+				parentType = memberInfo.PropertyType;
 				memberInfo = objectType.GetProperty (propertyName.Substring (0, dot));
-				propertyInfo = memberInfo.PropertyType.GetProperty (propertyName.Substring (dot + 1));
+				propertyInfo = parentType.GetProperty (propertyName.Substring (dot + 1));
 			}
+			eventInfo = parentType.GetEvent (propertyInfo.Name + "Changed");
 
 			foreach (object attr in propertyInfo.GetCustomAttributes (false)) {
 				if (attr is System.ComponentModel.EditorAttribute) {
@@ -34,6 +41,16 @@ namespace Stetic {
 				if (attr is System.ComponentModel.DefaultValueAttribute) {
 					DefaultValueAttribute dvattr = (DefaultValueAttribute)attr;
 					defaultValue = dvattr.Value;
+				}
+
+				if (attr is GLib.PropertyAttribute) {
+					PropertyAttribute pattr = (PropertyAttribute)attr;
+					pspec = ParamSpec.LookupObjectProperty (parentType, pattr.Name);
+				}
+
+				if (attr is Gtk.ChildPropertyAttribute) {
+					ChildPropertyAttribute cpattr = (ChildPropertyAttribute)attr;
+					pspec = ParamSpec.LookupChildProperty (parentType.DeclaringType, cpattr.Name);
 				}
 			}
 		}
@@ -53,6 +70,18 @@ namespace Stetic {
 		public Type PropertyType {
 			get {
 				return propertyInfo.PropertyType;
+			}
+		}
+
+		public EventInfo EventInfo {
+			get {
+				return eventInfo;
+			}
+		}
+
+		public ParamSpec ParamSpec {
+			get {
+				return pspec;
 			}
 		}
 

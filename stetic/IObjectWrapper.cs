@@ -2,6 +2,7 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
+using System.Collections;
 using System.Reflection;
 
 namespace Stetic {
@@ -16,12 +17,16 @@ namespace Stetic {
 		}
 	}
 
-	public delegate void SensitivityChangedDelegate (string property, bool sensitivity);
-
 	public interface IObjectWrapper {
 		PropertyGroup[] PropertyGroups { get; }
-
-//		event SensitivityChangedDelegate SensitivityChanged;
 	}
 
+
+	public delegate void SensitivityChangedDelegate (string property, bool sensitivity);
+
+	public interface IPropertySensitizer {
+		IEnumerable InsensitiveProperties ();
+
+		event SensitivityChangedDelegate SensitivityChanged;
+	}
 }

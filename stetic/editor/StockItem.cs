@@ -19,8 +19,6 @@ namespace Stetic.Editor {
 		{
 			ListStore store = new ListStore (typeof (string), typeof (string));
 
-			store.AppendValues ("", "None");
-
 			stockIds = new ArrayList ();
 
 			string[] allIds = Gtk.Stock.ListIds ();
@@ -62,11 +60,12 @@ namespace Stetic.Editor {
 
 		public string StockId {
 			get {
-				return (string)stockIds[Active - 1];
+				return (string)stockIds[Active];
 			}
 			set {
 				int id = stockIds.IndexOf (value);
-				Active = id + 1;
+				if (id != -1)
+					Active = id;
 			}
 		}
 	}

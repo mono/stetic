@@ -163,12 +163,21 @@ namespace Stetic {
 				return new ParamSpec (raw);
 		}
 
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_for_property (IntPtr obj, string property_name);
+		private class ParamSpecTypeHack : GLib.Object {
+			private ParamSpecTypeHack () : base (IntPtr.Zero) {}
 
-		static public ParamSpec LookupObjectProperty (GLib.Object obj, string property)
+			public static new GType LookupGType (System.Type t)
+			{
+				return GLib.Object.LookupGType (t);
+			}
+		}
+
+		[DllImport("libsteticglue")]
+		static extern IntPtr stetic_param_spec_for_property (GLib.GType type, string property_name);
+
+		static public ParamSpec LookupObjectProperty (Type type, string property)
 		{
-			IntPtr raw_ret = stetic_param_spec_for_property (obj.Handle, property);
+			IntPtr raw_ret = stetic_param_spec_for_property (ParamSpecTypeHack.LookupGType (type), property);
 			if (raw_ret == IntPtr.Zero)
 				return null;
 			else
@@ -176,11 +185,11 @@ namespace Stetic {
 		}
 
 		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_for_child_property (IntPtr obj, string property_name);
+		static extern IntPtr stetic_param_spec_for_child_property (GLib.GType type, string property_name);
 
-		static public ParamSpec LookupChildProperty (GLib.Object obj, string property)
+		static public ParamSpec LookupChildProperty (Type type, string property)
 		{
-			IntPtr raw_ret = stetic_param_spec_for_child_property (obj.Handle, property);
+			IntPtr raw_ret = stetic_param_spec_for_child_property (ParamSpecTypeHack.LookupGType (type), property);
 			if (raw_ret == IntPtr.Zero)
 				return null;
 			else

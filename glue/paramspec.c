@@ -3,20 +3,29 @@
 #include <glib-object.h>
 #include <gtk/gtkcontainer.h>
 
-GParamSpec *stetic_param_spec_for_property (GObject *obj, const char *property_name);
-GParamSpec *stetic_param_spec_for_child_property (GObject *obj, const char *property_name);
+GParamSpec *stetic_param_spec_for_property (GType type, const char *property_name);
+GParamSpec *stetic_param_spec_for_child_property (GType type, const char *property_name);
 
 GParamSpec *
-stetic_param_spec_for_property (GObject *obj, const char *property_name)
+stetic_param_spec_for_property (GType type, const char *property_name)
 {
-	
-	return g_object_class_find_property (G_OBJECT_GET_CLASS (obj), property_name);
+	GObjectClass *klass = g_type_class_ref (type);
+	GParamSpec *pspec;
+
+	pspec = g_object_class_find_property (klass, property_name);
+	g_type_class_unref (klass);
+	return pspec;
 }
 
 GParamSpec *
-stetic_param_spec_for_child_property (GObject *obj, const char *property_name)
+stetic_param_spec_for_child_property (GType type, const char *property_name)
 {
-	return gtk_container_class_find_child_property (G_OBJECT_GET_CLASS (obj), property_name);
+	GtkContainerClass *klass = g_type_class_ref (type);
+	GParamSpec *pspec;
+
+	pspec = gtk_container_class_find_child_property (g_type_class_peek (type), property_name);
+	g_type_class_unref (klass);
+	return pspec;
 }
 
 GParamFlags stetic_param_spec_get_flags (GParamSpec *pspec);

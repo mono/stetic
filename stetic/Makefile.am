@@ -3,12 +3,13 @@ noinst_SCRIPTS = stetic
 
 stetic_exe_SOURCES =			\
 	IObjectWrapper.cs		\
+	Notify.cs			\
 	Palette.cs			\
 	ParamFlags.cs			\
 	ParamSpec.cs			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
-	PropertyEditors.cs		\
+	PropertyEditor.cs		\
 	PropertyGrid.cs			\
 	Stetic.cs			\
 	WidgetBox.cs			\
