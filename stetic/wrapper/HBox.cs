@@ -34,18 +34,17 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public IEnumerable ContextMenuItems {
-			get {
-				ContextMenuItem[] items;
+		public IEnumerable ContextMenuItems (IWidgetSite context)
+		{
+			ContextMenuItem[] items;
 
-				// FIXME; I'm only assigning to a variable rather than
-				// returning it directly to make emacs indentation happy
-				items = new ContextMenuItem[] {
-					new ContextMenuItem ("Insert Before", new ContextMenuItemDelegate (InsertBefore)),
-					new ContextMenuItem ("Insert After", new ContextMenuItemDelegate (InsertAfter)),
-				};
-				return items;
-			}
+			// FIXME; I'm only assigning to a variable rather than
+			// returning it directly to make emacs indentation happy
+			items = new ContextMenuItem[] {
+				new ContextMenuItem ("Insert Before", new ContextMenuItemDelegate (InsertBefore)),
+				new ContextMenuItem ("Insert After", new ContextMenuItemDelegate (InsertAfter)),
+			};
+			return items;
 		}
 
 		void InsertBefore (IWidgetSite context)

@@ -62,23 +62,23 @@ namespace Stetic.Wrapper {
 			AppendPage (site, new Label ("page"));
 		}
 
-		public IEnumerable ContextMenuItems {
-			get {
-				ContextMenuItem[] items;
+		public IEnumerable ContextMenuItems (IWidgetSite context)
+		{
+			ContextMenuItem[] items;
+			int page = PageNum ((Gtk.Widget)context);
 
-				// FIXME; I'm only assigning to a variable rather than
-				// returning it directly to make emacs indentation happy
-				items = new ContextMenuItem[] {
-					new ContextMenuItem ("Go to Previous Page", new ContextMenuItemDelegate (PreviousPage)),
-					new ContextMenuItem ("Go to Next Page", new ContextMenuItemDelegate (NextPage)),
-					new ContextMenuItem ("Delete Page", new ContextMenuItemDelegate (DeletePage)),
-					new ContextMenuItem ("Swap with Previous Page", new ContextMenuItemDelegate (SwapPrevious)),
-					new ContextMenuItem ("Swap with Next Page", new ContextMenuItemDelegate (SwapNext)),
-					new ContextMenuItem ("Insert Page Before", new ContextMenuItemDelegate (InsertBefore)),
-					new ContextMenuItem ("Insert Page After", new ContextMenuItemDelegate (InsertAfter)),
-				};
-				return items;
-			}
+			// FIXME; I'm only assigning to a variable rather than
+			// returning it directly to make emacs indentation happy
+			items = new ContextMenuItem[] {
+				new ContextMenuItem ("Go to Previous Page", new ContextMenuItemDelegate (PreviousPage), page > 0),
+				new ContextMenuItem ("Go to Next Page", new ContextMenuItemDelegate (NextPage), page < NPages - 1),
+				new ContextMenuItem ("Delete Page", new ContextMenuItemDelegate (DeletePage)),
+				new ContextMenuItem ("Swap with Previous Page", new ContextMenuItemDelegate (SwapPrevious), page > 0),
+				new ContextMenuItem ("Swap with Next Page", new ContextMenuItemDelegate (SwapNext), page < NPages - 1),
+				new ContextMenuItem ("Insert Page Before", new ContextMenuItemDelegate (InsertBefore)),
+				new ContextMenuItem ("Insert Page After", new ContextMenuItemDelegate (InsertAfter)),
+			};
+			return items;
 		}
 
 		void PreviousPage (IWidgetSite context)

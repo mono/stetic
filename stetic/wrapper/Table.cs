@@ -347,22 +347,21 @@ namespace Stetic.Wrapper {
 			Thaw ();
 		}
 
-		public IEnumerable ContextMenuItems {
-			get {
-				ContextMenuItem[] items;
+		public IEnumerable ContextMenuItems (IWidgetSite context)
+		{
+			ContextMenuItem[] items;
 
-				// FIXME; I'm only assigning to a variable rather than
-				// returning it directly to make emacs indentation happy
-				items = new ContextMenuItem[] {
-					new ContextMenuItem ("Insert Row Before", new ContextMenuItemDelegate (InsertRowBefore)),
-					new ContextMenuItem ("Insert Row After", new ContextMenuItemDelegate (InsertRowAfter)),
-					new ContextMenuItem ("Insert Column Before", new ContextMenuItemDelegate (InsertColumnBefore)),
-					new ContextMenuItem ("Insert Column After", new ContextMenuItemDelegate (InsertColumnAfter)),
-					new ContextMenuItem ("Delete Row", new ContextMenuItemDelegate (DeleteRow)),
-					new ContextMenuItem ("Delete Column", new ContextMenuItemDelegate (DeleteColumn)),
-				};
-				return items;
-			}
+			// FIXME; I'm only assigning to a variable rather than
+			// returning it directly to make emacs indentation happy
+			items = new ContextMenuItem[] {
+				new ContextMenuItem ("Insert Row Before", new ContextMenuItemDelegate (InsertRowBefore)),
+				new ContextMenuItem ("Insert Row After", new ContextMenuItemDelegate (InsertRowAfter)),
+				new ContextMenuItem ("Insert Column Before", new ContextMenuItemDelegate (InsertColumnBefore)),
+				new ContextMenuItem ("Insert Column After", new ContextMenuItemDelegate (InsertColumnAfter)),
+				new ContextMenuItem ("Delete Row", new ContextMenuItemDelegate (DeleteRow)),
+				new ContextMenuItem ("Delete Column", new ContextMenuItemDelegate (DeleteColumn)),
+			};
+			return items;
 		}
 
 		void InsertRowBefore (IWidgetSite context)

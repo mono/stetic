@@ -1,5 +1,21 @@
 2005-01-13  Dan Winship  <danw@novell.com>
 
+	* stetic/ContextMenu.cs (ContextMenuItem): add an "Enabled" field
+	and a ctor to set it
+	(ContextMenu): obey the "Enabled" field on IContextMenuProvider
+	items
+	(IContextMenuProvider): Turn ContextMenuItems from a property to a
+	procedure, so we can pass the context item to it
+
+	* stetic/wrapper/Notebook.cs: update for IContextMenuProvider
+	change. Disable items (eg, "Go To Previous Page") as appropriate.
+
+	* stetic/wrapper/HBox.cs:
+	* stetic/wrapper/VBox.cs:
+	* stetic/wrapper/Table.cs: update for IContextMenuProvider change
+
+2005-01-13  Dan Winship  <danw@novell.com>
+
 	* stetic/WidgetSite.cs (EmptySize): new property to set the site's
 	size when empty
 	(set_Occupancy): Use that rather than hardcoding 10x10

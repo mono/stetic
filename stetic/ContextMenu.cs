@@ -30,9 +30,12 @@ namespace Stetic {
 			Add (item);
 
 			if (site.Occupied && site.Contents is IContextMenuProvider) {
-				foreach (ContextMenuItem cmi in ((IContextMenuProvider)site.Contents).ContextMenuItems) {
+				foreach (ContextMenuItem cmi in ((IContextMenuProvider)site.Contents).ContextMenuItems (top)) {
 					item = new MenuItem (cmi.Label);
-					item.Activated += new Stupid69614Workaround (top, cmi.Callback).Activate;
+					if (cmi.Enabled)
+						item.Activated += new Stupid69614Workaround (top, cmi.Callback).Activate;
+					else
+						item.Sensitive = false;
 					Add (item);
 				}
 			}
@@ -113,15 +116,19 @@ namespace Stetic {
 	public struct ContextMenuItem {
 		public string Label;
 		public ContextMenuItemDelegate Callback;
+		public bool Enabled;
 
-		public ContextMenuItem (string label, ContextMenuItemDelegate callback)
+		public ContextMenuItem (string label, ContextMenuItemDelegate callback) : this (label, callback, true) {}
+
+		public ContextMenuItem (string label, ContextMenuItemDelegate callback, bool enabled)
 		{
 			Label = label;
 			Callback = callback;
+			Enabled = enabled;
 		}
 	}
 
 	public interface IContextMenuProvider {
-		IEnumerable ContextMenuItems { get; }
+		IEnumerable ContextMenuItems (IWidgetSite context);
 	}
 }
