@@ -35,15 +35,15 @@ namespace Stetic {
 			TargetList.Add (SteticWidgetType, 0, 0);
 		}
 
-		public WidgetSite ()
+		public WidgetSite () : this (10, 10) {}
+
+		public WidgetSite (int emptyWidth, int emptyHeight)
 		{
 			WidgetFlags |= WidgetFlags.CanFocus;
-			Occupancy = SiteOccupancy.Empty;
-		}
 
-		public WidgetSite (Widget w)
-		{
-			Add (w);
+			emptySize.Width = emptyWidth;
+			emptySize.Height = emptyHeight;
+			Occupancy = SiteOccupancy.Empty;
 		}
 
 		public Widget Contents {
@@ -93,6 +93,18 @@ namespace Stetic {
 			base.OnRemoved (w);
 		}
 
+		Requisition emptySize;
+		public Requisition EmptySize {
+			get {
+				return emptySize;
+			}
+			set {
+				emptySize = value;
+				if (Occupancy == SiteOccupancy.Empty)
+					SetSizeRequest (emptySize.Width, emptySize.Height);
+			}
+		}
+
 		public enum SiteOccupancy { Empty, Occupied, PseudoOccupied };
 
 		private SiteOccupancy state;
@@ -102,7 +114,7 @@ namespace Stetic {
 				state = value;
 				switch (state) {
 				case SiteOccupancy.Empty:
-					SetSizeRequest (10, 10);
+					SetSizeRequest (emptySize.Width, emptySize.Height);
 					Gtk.Drag.DestSet (this, DestDefaults.All,
 							  Targets, DragAction.Move);
 					if (OccupancyChanged != null)

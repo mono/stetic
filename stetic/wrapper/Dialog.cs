@@ -37,7 +37,7 @@ namespace Stetic.Wrapper {
 
 		public Dialog () : base ()
 		{
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = new WidgetSite (200, 200);
 			site.Show ();
 			VBox.Add (site);
 		}

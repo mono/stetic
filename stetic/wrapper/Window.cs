@@ -61,19 +61,9 @@ namespace Stetic.Wrapper {
 
 		public Window () : base ("Window")
 		{
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = new WidgetSite (200, 200);
 			site.Show ();
 			Add (site);
-		}
-
-		protected override void OnSizeRequested (ref Requisition req)
-		{
-			WidgetSite site = (WidgetSite)Child;
-
-			if (site.Occupied)
-				req = site.SizeRequest ();
-			else
-				req.Width = req.Height = 200;
 		}
 
 		public bool HExpandable { get { return true; } }
