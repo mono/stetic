@@ -25,9 +25,12 @@ namespace Stetic.Wrapper {
 			childgroups = new ItemGroup[0];
 		}
 
-		public Frame (IStetic stetic) : this (stetic, new Gtk.Frame ("Frame")) {}
+		public Frame (IStetic stetic) : this (stetic, new Gtk.Frame ()) {}
 
-		public Frame (IStetic stetic, Gtk.Frame frame) : base (stetic, frame) {}
+		public Frame (IStetic stetic, Gtk.Frame frame) : base (stetic, frame)
+		{
+			frame.Label = frame.Name;
+		}
 
 		static ItemGroup[] groups;
 		public override ItemGroup[] ItemGroups { get { return groups; } }

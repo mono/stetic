@@ -62,9 +62,9 @@ namespace Stetic.Wrapper {
 		{
 			if (button.UseStock) {
 				stockId = button.Label;
-				label = "";
+				label = button.Name;
 			} else {
-				label = button.Label;
+				label = button.Name;
 				stockId = Gtk.Stock.Ok;
 			}
 		}

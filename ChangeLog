@@ -1,5 +1,28 @@
 2005-02-14  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/Widget.cs (Widget): Set the Name property
+	(based on the class name and a per-class counter).
+
+	* libstetic/wrapper/Button.cs: 
+	* libstetic/wrapper/CheckButton.cs: 
+	* libstetic/wrapper/Expander.cs: 
+	* libstetic/wrapper/Frame.cs: 
+	* libstetic/wrapper/Label.cs: 
+	* libstetic/wrapper/RadioButton.cs: 
+	* libstetic/wrapper/ToggleButton.cs: 
+	* libstetic/wrapper/Window.cs: use the widget name for the default
+	label/title
+
+	* libstetic/wrapper/Notebook.cs: Use real
+	wrapped-labels-in-WidgetSites for the notebook tabs.
+
+	* stetic/WidgetFactory.cs: remove widget naming stuff from here
+
+	* stetic/Grid.cs (OnSizeRequested, OnSizeAllocated): fix layout of
+	misc widgets (ie, command buttons)
+
+2005-02-14  Dan Winship  <danw@novell.com>
+
 	* libstetic/wrapper/Range.cs: 
 	* libstetic/wrapper/Scale.cs: proxy notifications from the
 	Adjustment so that the PropertyGrid will reflect manual changes to

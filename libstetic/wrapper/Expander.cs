@@ -25,10 +25,11 @@ namespace Stetic.Wrapper {
 			childgroups = new ItemGroup[0];
 		}
 
-		public Expander (IStetic stetic) : this (stetic, new Gtk.Expander ("Expander")) {}
+		public Expander (IStetic stetic) : this (stetic, new Gtk.Expander ("")) {}
 
 		public Expander (IStetic stetic, Gtk.Expander expander) : base (stetic, expander)
 		{
+			expander.Label = expander.Name;
 			expander.Activated += delegate (object obj, EventArgs args) {
 				EmitContentsChanged ();
 			};

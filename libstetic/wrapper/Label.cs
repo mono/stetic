@@ -24,11 +24,12 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Label (IStetic stetic) : this (stetic, new Gtk.Label ("Label:")) {}
+		public Label (IStetic stetic) : this (stetic, new Gtk.Label ()) {}
 
-		public Label (IStetic stetic, Gtk.Label label) : base (stetic, label) {}
-
-		public Label (IStetic stetic, string label) : base (stetic, new Gtk.Label (label)) {}
+		public Label (IStetic stetic, Gtk.Label label) : base (stetic, label)
+		{
+			label.LabelProp = label.Name;
+		}
 
 		static ItemGroup[] groups;
 		public override ItemGroup[] ItemGroups { get { return groups; } }

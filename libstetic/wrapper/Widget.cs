@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 namespace Stetic.Wrapper {
 
@@ -20,7 +21,20 @@ namespace Stetic.Wrapper {
 								"ExtensionEvents");
 		}
 
-		protected Widget (IStetic stetic, Gtk.Widget widget) : base (stetic, widget) {}
+		static Hashtable counters = new Hashtable ();
+
+		protected Widget (IStetic stetic, Gtk.Widget widget) : base (stetic, widget)
+		{
+			if (!(widget is Gtk.Window))
+				widget.ShowAll ();
+
+			Type type = GetType ();
+			if (!counters.Contains (type))
+				counters[type] = 1;
+
+			widget.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
+			counters[type] = (int)counters[type] + 1;
+		}
 
 		public static new Widget Lookup (GLib.Object obj)
 		{

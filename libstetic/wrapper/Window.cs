@@ -45,10 +45,11 @@ namespace Stetic.Wrapper {
 			childgroups = new ItemGroup[0];
 		}
 
-		public Window (IStetic stetic) : this (stetic, new Gtk.Window ("Window")) {}
+		public Window (IStetic stetic) : this (stetic, new Gtk.Window (Gtk.WindowType.Toplevel)) {}
 
 		public Window (IStetic stetic, Gtk.Window window) : base (stetic, window)
 		{
+			window.Title = window.Name;
 			window.Add (CreateWidgetSite (200, 200));
 			window.DeleteEvent += DeleteEvent;
 		}

@@ -60,7 +60,7 @@ namespace Stetic.Wrapper {
 
 		public Notebook (IStetic stetic, Gtk.Notebook notebook) : base (stetic, notebook)
 		{
-			notebook.AppendPage (CreateWidgetSite (), new Gtk.Label ("page"));
+			InsertPage (0);
 		}
 
 		static ItemGroup[] groups;
@@ -76,6 +76,16 @@ namespace Stetic.Wrapper {
 			get {
 				return (Gtk.Notebook)Wrapped;
 			}
+		}
+
+		int InsertPage (int position)
+		{
+			WidgetSite pageSite, labelSite;
+
+			pageSite = CreateWidgetSite ();
+			labelSite = CreateWidgetSite ();
+			labelSite.Add (new Stetic.Wrapper.Label (stetic).Wrapped as Gtk.Widget);
+			return notebook.InsertPage (pageSite, labelSite, position);
 		}
 
 		[Command ("Go to Previous Page", "CheckPreviousPage")]
@@ -121,13 +131,13 @@ namespace Stetic.Wrapper {
 		[Command ("Insert Page Before")]
 		void InsertBefore ()
 		{
-			notebook.CurrentPage = notebook.InsertPage (CreateWidgetSite (), new Gtk.Label ("page"), notebook.CurrentPage);
+			notebook.CurrentPage = InsertPage (notebook.CurrentPage);
 		}
 
 		[Command ("Insert Page After")]
 		void InsertAfter ()
 		{
-			notebook.CurrentPage = notebook.InsertPage (CreateWidgetSite (), new Gtk.Label ("page"), notebook.CurrentPage + 1);
+			notebook.CurrentPage = InsertPage (notebook.CurrentPage + 1);
 		}
 
 		public override bool HExpandable {

@@ -21,9 +21,12 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public CheckButton (IStetic stetic) : this (stetic, new Gtk.CheckButton ("Check Box")) {}
+		public CheckButton (IStetic stetic) : this (stetic, new Gtk.CheckButton ()) {}
 
-		public CheckButton (IStetic stetic, Gtk.CheckButton checkbutton) : base (stetic, checkbutton) {}
+		public CheckButton (IStetic stetic, Gtk.CheckButton checkbutton) : base (stetic, checkbutton)
+		{
+			checkbutton.Label = checkbutton.Name;
+		}
 
 		static ItemGroup[] groups;
 		public override ItemGroup[] ItemGroups { get { return groups; } }

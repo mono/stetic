@@ -26,9 +26,12 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public ToggleButton (IStetic stetic) : this (stetic, new Gtk.ToggleButton ("Toggle")) {}
+		public ToggleButton (IStetic stetic) : this (stetic, new Gtk.ToggleButton ()) {}
 
-		public ToggleButton (IStetic stetic, Gtk.ToggleButton button) : base (stetic, button) {}
+		public ToggleButton (IStetic stetic, Gtk.ToggleButton button) : base (stetic, button)
+		{
+			button.Label = button.Name;
+		}
 
 		static ItemGroup[] groups;
 		public override ItemGroup[] ItemGroups { get { return groups; } }

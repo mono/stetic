@@ -22,9 +22,12 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public RadioButton (IStetic stetic) : this (stetic, new Gtk.RadioButton ("Radio Button")) {}
+		public RadioButton (IStetic stetic) : this (stetic, new Gtk.RadioButton ("")) {}
 
-		public RadioButton (IStetic stetic, Gtk.RadioButton radiobutton) : base (stetic, radiobutton) {}
+		public RadioButton (IStetic stetic, Gtk.RadioButton radiobutton) : base (stetic, radiobutton)
+		{
+			radiobutton.Label = radiobutton.Name;
+		}
 
 		static ItemGroup[] groups;
 		public override ItemGroup[] ItemGroups { get { return groups; } }

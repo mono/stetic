@@ -195,7 +195,7 @@ namespace Stetic {
 					if (lwidth < childreq.Width)
 						lwidth = childreq.Width;
 					if (visible)
-						req.Height += groupPad + childreq.Height;
+						req.Height += linePad + childreq.Height;
 				} else if (obj is Pair) {
 					Pair p = (Pair)obj;
 					Gtk.Requisition lreq, ereq;
@@ -241,19 +241,23 @@ namespace Stetic {
 					Gdk.Rectangle childalloc;
 					Gtk.Requisition childreq;
 
-					y += groupPad;
-
 					childreq = w.ChildRequisition;
-					childalloc.X = xbase;
+
+					if (obj is Expander) {
+						childalloc.X = xbase;
+						childalloc.Width = alloc.Width - 2 * (int)BorderWidth;
+						visible = ((Gtk.Expander)obj).Expanded;
+						y += groupPad;
+					} else {
+						childalloc.X = xbase + indent;
+						childalloc.Width = lwidth;
+						y += linePad;
+					}
 					childalloc.Y = y;
-					childalloc.Width = (obj is Expander) ? alloc.Width - 2 * (int)BorderWidth : lwidth;
 					childalloc.Height = childreq.Height;
 					w.SizeAllocate (childalloc);
 
 					y += childalloc.Height;
-
-					if (obj is Expander)
-						visible = ((Gtk.Expander)obj).Expanded;
 				} else if (obj is Pair) {
 					Pair p = (Pair)obj;
 
