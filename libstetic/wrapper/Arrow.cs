@@ -13,10 +13,5 @@ namespace Stetic.Wrapper {
 				      "ArrowType",
 				      "ShadowType");
 		}
-
-		public static new Gtk.Arrow CreateInstance ()
-		{
-			return new Gtk.Arrow (Gtk.ArrowType.Left, Gtk.ShadowType.None);
-		}
 	}
 }

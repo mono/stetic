@@ -21,10 +21,5 @@ namespace Stetic.Wrapper {
 				      "BottomPadding",
 				      "BorderWidth");
 		}
-
-		public static new Gtk.Alignment CreateInstance ()
-		{
-			return new Gtk.Alignment (0.5f, 0.5f, 1.0f, 1.0f);
-		}
 	}
 }

@@ -37,11 +37,6 @@ namespace Stetic.Wrapper {
 				      "SkipTaskbarHint");
 		}
 
-		public static new Gtk.Window CreateInstance ()
-		{
-			return new Gtk.Window (Gtk.WindowType.Toplevel);
-		}
-
 		public override void Wrap (object obj, bool initialized)
 		{
 			Gtk.Window window = (Gtk.Window)obj;

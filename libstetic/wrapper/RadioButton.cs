@@ -22,11 +22,6 @@ namespace Stetic.Wrapper {
 				      "DrawIndicator");
 		}
 
-		public static new Gtk.RadioButton CreateInstance ()
-		{
-			return new Gtk.RadioButton ("");
-		}
-
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);

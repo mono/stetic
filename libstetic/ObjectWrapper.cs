@@ -22,7 +22,7 @@ namespace Stetic {
 
 		static Hashtable wrappers = new Hashtable ();
 		static Hashtable wrapperTypes = new Hashtable ();
-		static Hashtable instanceCtors = new Hashtable ();
+		static Hashtable factories = new Hashtable ();
 
 		static Type WrappedType (Type type)
 		{
@@ -35,17 +35,59 @@ namespace Stetic {
 			}
 		}
 
+		static IntPtr LookupGType (Type gtkSharpType)
+		{
+			PropertyInfo pinfo = gtkSharpType.GetProperty ("GType", BindingFlags.Static | BindingFlags.Public);
+			if (pinfo == null)
+				return IntPtr.Zero;
+
+			return ((GLib.GType)pinfo.GetValue (null, null)).Val;
+		}
+
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_name (IntPtr gtype);
 
 		static string NativeTypeName (Type gtkSharpType)
 		{
-			PropertyInfo pinfo = gtkSharpType.GetProperty ("GType", BindingFlags.Static | BindingFlags.Public);
-			if (pinfo == null)
-				return null;
+			IntPtr gtype = LookupGType (gtkSharpType);
+			return gtype == IntPtr.Zero ? null : Marshal.PtrToStringAnsi (g_type_name (gtype));
+		}
 
-			GLib.GType gtype = (GLib.GType)pinfo.GetValue (null, null);
-			return Marshal.PtrToStringAnsi (g_type_name (gtype.Val));
+		class ObjectFactory {
+			MethodInfo minfo;
+			ConstructorInfo cinfo;
+			IntPtr gtype;
+
+			public ObjectFactory (Type wrapperType, Type wrappedType)
+			{
+				minfo = wrapperType.GetMethod ("CreateInstance",
+							       BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
+							       null, new Type[0], null);
+				if (minfo != null)
+					return;
+
+				cinfo = wrappedType.GetConstructor (new Type[0]);
+				if (cinfo != null)
+					return;
+
+				cinfo = wrappedType.GetConstructor (new Type[] { typeof (IntPtr) });
+				gtype = LookupGType (wrappedType);
+			}
+
+			[DllImport("libgobject-2.0-0.dll")]
+			static extern IntPtr g_object_new (IntPtr gtype, IntPtr dummy);
+
+			public object New ()
+			{
+				if (minfo != null)
+					return minfo.Invoke (null, new object[0]);
+				else if (gtype == IntPtr.Zero)
+					return cinfo.Invoke (null, new object[0]);
+				else {
+					IntPtr raw = g_object_new (gtype, IntPtr.Zero);
+					return cinfo.Invoke (new object[] { raw });
+				}
+			}
 		}
 
 		public static void Register (Type type)
@@ -55,12 +97,7 @@ namespace Stetic {
 			if (className != null)
 				wrapperTypes[className] = type;
 
-			MethodBase instanceCtor = type.GetMethod ("CreateInstance",
-								  BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
-								  null, new Type[0], null);
-			if (instanceCtor == null)
-				instanceCtor = wrappedType.GetConstructor (new Type[0]);
-			instanceCtors[type] = instanceCtor;
+			factories[type] = new ObjectFactory (type, wrappedType);
 
 			// Run wrapper registration methods
 			Type regType = type;
@@ -81,8 +118,8 @@ namespace Stetic {
 				return null;
 			wrapper.stetic = stetic;
 
-			MethodBase instanceCtor = instanceCtors[type] as MethodBase;
-			wrapper.Wrap (instanceCtor.Invoke (null, new object[0]), false);
+			ObjectFactory factory = factories[type] as ObjectFactory;
+			wrapper.Wrap (factory.New (), false);
 			return wrapper;
 		}
 

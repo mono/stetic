@@ -7,11 +7,6 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.HBox);
 
-		public static new Gtk.HBox CreateInstance ()
-		{
-			return new Gtk.HBox (false, 0);
-		}
-
 		public override bool HExpandable {
 			get {
 				foreach (WidgetSite site in Sites) {
