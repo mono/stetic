@@ -29,6 +29,19 @@ namespace Stetic.Wrapper {
 			} while (type != typeof (Stetic.Wrapper.Container));
 		}
 
+		public override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
+			container.Removed += SiteRemoved;
+			container.SizeAllocated += SizeAllocated;
+		}
+
+		Gtk.Container container {
+			get {
+				return (Gtk.Container)Wrapped;
+			}
+		}
+
 		int freeze;
 		protected void Freeze ()
 		{
@@ -53,18 +66,6 @@ namespace Stetic.Wrapper {
 			freeze = 1;
 			DoSync ();
 			freeze = 0;
-		}
-
-		Gtk.Container container {
-			get {
-				return (Gtk.Container)Wrapped;
-			}
-		}
-
-		public override void Wrap (object obj, bool initialized)
-		{
-			base.Wrap (obj, initialized);
-			container.Removed += SiteRemoved;
 		}
 
 		public virtual Widget GladeImportChild (string className, string id,
@@ -189,10 +190,13 @@ namespace Stetic.Wrapper {
 
 		protected Set AutoSize = new Set ();
 
-		protected override WidgetSite CreateWidgetSite (Gtk.Widget w)
+		protected virtual WidgetSite CreateWidgetSite (Gtk.Widget w)
 		{
-			WidgetSite site = base.CreateWidgetSite (w);
+			WidgetSite site = stetic.CreateWidgetSite (w);
+			site.Show ();
 			site.MotionNotifyEvent += SiteMotionNotify;
+			site.ButtonPressEvent += SiteButtonPress;
+			w.ButtonPressEvent += SiteButtonPress;
 			DND.SourceSet (site, false);
 
 			Container childWrapper = Lookup (w);
@@ -202,15 +206,49 @@ namespace Stetic.Wrapper {
 			return site;
 		}
 
+		[GLib.ConnectBefore]
+		void SiteButtonPress (object obj, Gtk.ButtonPressEventArgs args)
+		{
+			if (args.Event.Type != Gdk.EventType.ButtonPress)
+				return;
+
+			Gtk.Widget w;
+			WidgetSite site = obj as WidgetSite;
+			if (site == null) {
+				w = (Gtk.Widget)obj;
+				site = w.Parent as WidgetSite;
+			} else
+				w = site.Child;
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (w);
+			if (wrapper == null || site == null)
+				return;
+
+			if (args.Event.Button == 1) {
+				if (w == selection) {
+					if (args.Event.Window == handles.Window)
+						args.RetVal = true;
+					return;
+				}
+				wrapper.Select ();
+				args.RetVal = true;
+			} else if (args.Event.Button == 3) {
+				site.EmitPopupContextMenu ();
+				args.RetVal = true;
+			}
+		}
+
 		void SiteMotionNotify (object obj, Gtk.MotionNotifyEventArgs args)
 		{
 			WidgetSite site = obj as WidgetSite;
 
-			if (args.Event.Window != site.HandleWindow ||
+			if (handles == null ||
+			    args.Event.Window != handles.Window ||
 			    !DND.CanDrag (site, args.Event)) {
 				args.RetVal = true;
 				return;
 			}
+
+			Select ((Stetic.Wrapper.Widget)null);
 
 			Placeholder ph = CreatePlaceholder ();
 			ph.Mimic (site);
@@ -222,13 +260,31 @@ namespace Stetic.Wrapper {
 			DND.Drag (ph, args.Event, dragWidget);
 		}
 
-		protected override Placeholder CreatePlaceholder ()
+		protected virtual Placeholder CreatePlaceholder ()
 		{
-			Placeholder ph = base.CreatePlaceholder ();
+			Placeholder ph = stetic.CreatePlaceholder ();
+			ph.Show ();
 			ph.Drop += PlaceholderDrop;
 			ph.DragEnd += PlaceholderDragEnd;
+			ph.ButtonPressEvent += PlaceholderButtonPress;
 			AutoSize[ph] = true;
 			return ph;
+		}
+
+		void PlaceholderButtonPress (object obj, Gtk.ButtonPressEventArgs args)
+		{
+			if (args.Event.Type != Gdk.EventType.ButtonPress)
+				return;
+
+			Placeholder ph = obj as Placeholder;
+
+			if (args.Event.Button == 1) {
+				Select (ph);
+				args.RetVal = true;
+			} else if (args.Event.Button == 3) {
+				ph.EmitPopupContextMenu ();
+				args.RetVal = true;
+			}
 		}
 
 		void PlaceholderDrop (Placeholder ph, Gtk.Widget dropped)
@@ -314,6 +370,51 @@ namespace Stetic.Wrapper {
 				pinfo.SetValue (cc, props[pinfo], null);
 
 			Sync ();
+		}
+
+		Gtk.Widget selection;
+		HandleWindow handles;
+
+		public void Select (Stetic.Wrapper.Widget wrapper)
+		{
+			if (wrapper == null)
+				Select ((Gtk.Widget)null);
+			else
+				Select (wrapper.Wrapped);
+			stetic.Select (wrapper);
+		}
+
+		public void UnSelect (Stetic.Wrapper.Widget wrapper)
+		{
+			if (selection == wrapper.Wrapped)
+				Select ((Gtk.Widget)null);
+		}
+
+		public void Select (Placeholder ph)
+		{
+			Select ((Gtk.Widget)ph);
+			stetic.Select (null);
+		}
+
+		void Select (Gtk.Widget widget)
+		{
+			if (widget == selection)
+				return;
+			selection = widget;
+
+			if (handles != null)
+				handles.Dispose ();
+
+			if (selection != null)
+				handles = new HandleWindow (selection, !(widget is Placeholder));
+			else 
+				handles = null;
+		}
+
+		void SizeAllocated (object obj, Gtk.SizeAllocatedArgs args)
+		{
+			if (handles != null)
+				handles.Shape ();
 		}
 
 		public class ContainerChild : Stetic.ObjectWrapper {

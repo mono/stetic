@@ -47,7 +47,7 @@ namespace Stetic.Wrapper {
 			if (childprops.Count == 1 && ((string)childprops["type"]) == "tab") {
 				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
 				WidgetSite site = CreateWidgetSite ((Gtk.Widget)wrapper.Wrapped);
-				site.Selected += LabelSelected;
+// FIXME				site.Selected += LabelSelected;
 
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), site);
 				tabs.Add (site);
@@ -86,7 +86,7 @@ namespace Stetic.Wrapper {
 
 			Stetic.Wrapper.Label label = new Stetic.Wrapper.Label ("page" + (notebook.NPages + 1).ToString ());
 			labelSite = CreateWidgetSite ((Gtk.Widget)label.Wrapped);
-			labelSite.Selected += LabelSelected;
+// FIXME			labelSite.Selected += LabelSelected;
 			tabs.Insert (position, labelSite);
 
 			return notebook.InsertPage (CreatePlaceholder (), labelSite, position);

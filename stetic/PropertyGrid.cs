@@ -93,19 +93,16 @@ namespace Stetic {
 			}
 		}
 
-		void Selected (WidgetBox box, ProjectNode node)
+		void Selected (Stetic.Wrapper.Widget selection, ProjectNode node)
 		{
 			Clear ();
 
-			WidgetSite site = box as WidgetSite;
-			if (site == null) {
+			this.selection = selection;
+			if (selection == null) {
 				AppendLabel ("<i>No selection</i>");
 				return;
 			}
 
-			selection = Stetic.Wrapper.Widget.Lookup (site.Child);
-			if (selection == null)
-				return;
 			selection.Notify += Notified;
 
 			AppendProperty (new PropertyDescriptor (typeof (Stetic.Wrapper.Widget), typeof (Gtk.Widget), "Name"), selection);

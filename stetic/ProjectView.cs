@@ -52,7 +52,7 @@ namespace Stetic {
 			}
 		}
 
-		void WidgetSelected (WidgetBox box, ProjectNode node)
+		void WidgetSelected (Stetic.Wrapper.Widget selection, ProjectNode node)
 		{
 			if (!syncing) {
 				syncing = true;

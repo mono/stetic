@@ -47,6 +47,31 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		public Stetic.Wrapper.Container ParentWrapper {
+			get {
+				Gtk.Widget p = Wrapped.Parent;
+				while (p != null && (p is WidgetSite))
+					p = p.Parent;
+				return Stetic.Wrapper.Container.Lookup (p);
+			}
+		}
+
+		public void Select ()
+		{
+			if (ParentWrapper != null)
+				ParentWrapper.Select (this);
+			else if (this is Stetic.Wrapper.Container)
+				((Container)this).Select (this);
+		}
+
+		public void UnSelect ()
+		{
+			if (ParentWrapper != null)
+				ParentWrapper.UnSelect (this);
+			else if (this is Stetic.Wrapper.Container)
+				((Container)this).UnSelect (this);
+		}
+
 		protected virtual void GladeImport (string className, string id, Hashtable props)
 		{
 			GladeUtils.ImportWidget (stetic, this, className, id, props);
@@ -63,29 +88,6 @@ namespace Stetic.Wrapper {
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Widget;
 		}
 
-		protected virtual WidgetSite CreateWidgetSite (Gtk.Widget w)
-		{
-			WidgetSite site = stetic.CreateWidgetSite (w);
-			site.Show ();
-			return site;
-		}
-
-		protected virtual Placeholder CreatePlaceholder ()
-		{
-			Placeholder ph = stetic.CreatePlaceholder ();
-			ph.Show ();
-			return ph;
-		}
-
-		public Stetic.Wrapper.Container ParentWrapper {
-			get {
-				Gtk.Widget p = Wrapped.Parent;
-				while (p != null && (p is WidgetSite))
-					p = p.Parent;
-				return Stetic.Wrapper.Container.Lookup (p);
-			}
-		}
-
 		string internalChildId;
 		public string InternalChildId {
 			get {
@@ -100,14 +102,6 @@ namespace Stetic.Wrapper {
 						site.Internal = (value != null);
 				}
 			}
-		}
-
-		public virtual void Select ()
-		{
-			Gtk.Widget w = Wrapped;
-			if (!w.CanFocus && w.Parent is WidgetSite)
-				w = w.Parent;
-			w.GrabFocus ();
 		}
 
 		public virtual void Drop (Gtk.Widget widget, object faultId)

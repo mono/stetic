@@ -21,11 +21,9 @@ namespace Stetic {
 
 		public void AddWindow (Stetic.Wrapper.Window window, bool select)
 		{
-			window.FocusChanged += WindowFocusChanged;
 			AddWidget (window.Wrapped, null, -1);
-
 			if (select)
-				WindowFocusChanged (window, null);
+				Select (window);
 		}
 
 		void AddWidget (Widget widget, ProjectNode parent)
@@ -155,20 +153,27 @@ namespace Stetic {
 			store = new NodeStore (typeof (ProjectNode));
 		}
 
-		public delegate void SelectedHandler (WidgetBox box, ProjectNode node);
+		public delegate void SelectedHandler (Stetic.Wrapper.Widget focus, ProjectNode node);
 		public event SelectedHandler Selected;
 
-		void WindowFocusChanged (Stetic.Wrapper.Window window, WidgetBox focus)
+		Stetic.Wrapper.Widget selection;
+
+		public void Select (Stetic.Wrapper.Widget selection)
 		{
+			if (this.selection == selection)
+				return;
+
+			if (this.selection != null)
+				this.selection.UnSelect ();
+			this.selection = selection;
+
 			if (Selected == null)
 				return;
 
-			if (focus == null)
+			if (selection == null)
 				Selected (null, null);
-			else if (focus.Child == null)
-				Selected (focus, null);
 			else
-				Selected (focus, nodes[focus.Child] as ProjectNode);
+				Selected (selection, nodes[selection.Wrapped] as ProjectNode);
 		}
 
 		// IStetic

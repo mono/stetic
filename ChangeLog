@@ -1,3 +1,39 @@
+2005-03-28  Dan Winship  <danw@novell.com>
+
+	* libstetic/HandleWindow.cs: new class to implement selection handles.
+
+	* libstetic/WidgetBox.cs: Remove all handle-related code
+
+	* libstetic/IStetic.cs (Select): new, to tell the main program to
+	select a widget (rather than having the it listen for an event on
+	all toplevel windows).
+
+	* libstetic/wrapper/Widget.cs (Select, UnSelect): tell the parent
+	container (if any) to select this widget
+	(CreateWidgetSite, CreatePlaceholder): remove these; anything that
+	is a container needs to be subclassing Container, not Widget.
+
+	* libstetic/wrapper/Container.cs (CreateWidgetSite,
+	CreatePlaceholder): catch ButtonPressEvents
+	(SiteButtonPress, PlaceholderButtonPress): handle
+	selection/context menus
+	(Select, UnSelect): update handles, call stetic.Select()
+
+	* libstetic/wrapper/Notebook.cs: FIXME out a few bits for now...
+
+	* libstetic/wrapper/Table.cs (OnButtonPressEvent): remove this
+	code, which has been commented-out forever.
+
+	* libstetic/wrapper/Window.cs (SetFocus, Select): gone; selection
+	is handled at the Container level now.
+
+	* stetic/Project.cs (WindowFocusChanged): gone
+	(IStetic.Select): handle selection here
+	(SelectedHandler): change the WidgetBox arg to a Wrapper.Widget
+
+	* stetic/ProjectView.cs (WidgetSelected):
+	* stetic/PropertyGrid.cs (Selected): update signature
+
 2005-03-24  Dan Winship  <danw@novell.com>
 
 	* libstetic/DND.cs: move the drag-and-drop "fault" code from

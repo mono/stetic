@@ -9,6 +9,7 @@ libstetic_dll_sources =			\
 	GladeException.cs		\
 	GladePropertyAttribute.cs	\
 	GladeUtils.cs			\
+	HandleWindow.cs			\
 	ItemDescriptor.cs		\
 	ItemGroup.cs			\
 	IStetic.cs			\

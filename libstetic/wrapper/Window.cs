@@ -52,43 +52,6 @@ namespace Stetic.Wrapper {
 			}
 
 			window.DeleteEvent += DeleteEvent;
-			window.SetFocus += SetFocus;
-		}
-
-		public delegate void FocusChangedHandler (Stetic.Wrapper.Window wrapper, WidgetBox focus);
-		public event FocusChangedHandler FocusChanged;
-
-		[ConnectBefore] // otherwise contents.Focus will be the new focus, not the old
-		void SetFocus (object obj, Gtk.SetFocusArgs args)
-		{
-			Gtk.Widget w;
-
-			w = ((Gtk.Window)Wrapped).Focus;
-			while (w != null && !(w is WidgetBox))
-				w = w.Parent;
-			WidgetBox oldf = (WidgetBox)w;
-
-			w = args.Focus;
-			while (w != null && !(w is WidgetBox))
-				w = w.Parent;
-			WidgetBox newf = (WidgetBox)w;
-
-			if (oldf == newf)
-				return;
-
-			if (oldf != null)
-				oldf.UnFocus ();
-			if (newf != null)
-				newf.Focus ();
-
-			if (FocusChanged != null)
-				FocusChanged (this, newf);
-		}
-
-		public override void Select ()
-		{
-			Wrapped.Show ();
-			((Gtk.Window)Wrapped).Focus = null;
 		}
 
 		[ConnectBefore]
@@ -97,8 +60,7 @@ namespace Stetic.Wrapper {
 			Wrapped.Hide ();
 			args.RetVal = true;
 
-			if (FocusChanged != null)
-				FocusChanged (this, null);
+			Select (this);
 		}
 
 		public override bool HExpandable { get { return true; } }
