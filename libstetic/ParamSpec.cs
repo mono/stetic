@@ -149,7 +149,7 @@ namespace Stetic {
 
 		static Hashtable typemap;
 
-		[DllImport("libglibsharpglue-2.0.dll")]
+		[DllImport("libglibsharpglue-2.dll")]
 		static extern int gtksharp_get_type_id (IntPtr raw);
 
 		static public ParamSpec Wrap (IntPtr raw)

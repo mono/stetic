@@ -1,3 +1,8 @@
+2005-02-13  Dan Winship  <danw@novell.com>
+
+	* libstetic/ParamSpec.cs (gtksharp_get_type_id): Fix the library
+	name in the DllImport attribute
+
 2005-02-11  Dan Winship  <danw@novell.com>
 
 	* stetic/Grid.cs: new base class for PropertyGrid. Instead of
