@@ -17,6 +17,8 @@ namespace Stetic {
 
 			program = new Gnome.Program ("Stetic", "0.0", Modules.UI, args);
 
+			Project = new Project ();
+
 			win = new Gtk.Window ("Stetic");
 			win.DeleteEvent += Window_Delete;
 
@@ -36,7 +38,7 @@ namespace Stetic {
 			hbox = new Gtk.HBox (false, 6);
 			vbox.PackStart (hbox, true, true, 0);
 
-			Stetic.Palette palette = new Stetic.Palette ();
+			Stetic.Palette palette = new Stetic.Palette (Project);
 			AssemblyName an = new AssemblyName ();
 			an.Name = "libstetic";
 			palette.AddWidgets (System.Reflection.Assembly.Load (an));
@@ -45,7 +47,6 @@ namespace Stetic {
 			vpaned = new Gtk.VPaned ();
 			hbox.PackStart (vpaned, true, true, 0);
 			
-			Project = new Project ();
 			ProjectView = new ProjectView (Project);
 			scwin = new Gtk.ScrolledWindow ();
 			scwin.Add (ProjectView);

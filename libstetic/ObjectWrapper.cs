@@ -72,7 +72,7 @@ namespace Stetic {
 			}
 		}
 
-		public static ObjectWrapper Create (Type type, IStetic stetic)
+		public static ObjectWrapper Create (IStetic stetic, Type type)
 		{
 			ObjectWrapper wrapper = Activator.CreateInstance (type) as ObjectWrapper;
 			if (wrapper == null)
@@ -84,7 +84,7 @@ namespace Stetic {
 			return wrapper;
 		}
 
-		public static ObjectWrapper Create (Type type, IStetic stetic, object wrapped)
+		public static ObjectWrapper Create (IStetic stetic, Type type, object wrapped)
 		{
 			ObjectWrapper wrapper = Activator.CreateInstance (type) as ObjectWrapper;
 			if (wrapper == null)

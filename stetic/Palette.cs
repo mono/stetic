@@ -8,8 +8,9 @@ namespace Stetic {
 
 	public class Palette : Gtk.ScrolledWindow {
 
-		private Gtk.VBox main;
-		private Hashtable groups;
+		Gtk.VBox main;
+		Hashtable groups;
+		Project project;
 
 		class Group : Gtk.Expander {
 		
@@ -35,8 +36,10 @@ namespace Stetic {
 			} 
 		}
 		
-		public Palette () : base ()
+		public Palette (Project project)
 		{
+			this.project = project;
+
 			HscrollbarPolicy = Gtk.PolicyType.Never;
 			VscrollbarPolicy = Gtk.PolicyType.Automatic;
 			ShadowType = ShadowType.None;
@@ -89,15 +92,15 @@ namespace Stetic {
 
 				switch (owattr.Type) {
 				case ObjectWrapperType.Container:
-					AddOrGetGroup("Containers").Append (new WidgetFactory (owattr.Name, icon, type));
+					AddOrGetGroup("Containers").Append (new WidgetFactory (project, owattr.Name, icon, type));
 					break;
 
 				case ObjectWrapperType.Window:
-					AddOrGetGroup("Windows").Append (new WindowFactory (owattr.Name, icon, type));
+					AddOrGetGroup("Windows").Append (new WindowFactory (project, owattr.Name, icon, type));
 					break;
 
 				default:
-					AddOrGetGroup("Widgets").Append (new WidgetFactory (owattr.Name, icon, type));
+					AddOrGetGroup("Widgets").Append (new WidgetFactory (project, owattr.Name, icon, type));
 					break;
 				}
 			}

@@ -4,8 +4,7 @@ using System.Collections;
 
 namespace Stetic {
 
-	// FIXME 71749
-	public class Project {
+	public class Project : IStetic {
 		Hashtable nodes;
 		NodeStore store;
 
@@ -90,6 +89,18 @@ namespace Stetic {
 		{
 			nodes.Clear ();
 			store = new NodeStore (typeof (ProjectNode));
+		}
+
+		// IStetic
+
+		public WidgetSite CreateWidgetSite ()
+		{
+			WidgetSite site = new WidgetSite ();
+			site.PopupContextMenu += delegate (object obj, EventArgs args) {
+				Menu m = new ContextMenu ((WidgetSite)site);
+				m.Popup ();
+			};
+			return site;
 		}
 	}
 

@@ -56,7 +56,7 @@ namespace Stetic.Wrapper {
 				return null;
 
 			Gtk.Container.ContainerChild cc = parent[sitew];
-			return Stetic.ObjectWrapper.Create (ct, pwrap.stetic, cc) as ContainerChild;
+			return Stetic.ObjectWrapper.Create (pwrap.stetic, ct, cc) as ContainerChild;
 		}
 
 		public delegate void ContentsChangedHandler (Container container);

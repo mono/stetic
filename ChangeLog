@@ -1,3 +1,25 @@
+2005-02-25  Dan Winship  <danw@novell.com>
+
+	* stetic/Project.cs: implement IStetic
+
+	* stetic/GladeImport.cs: pass the Project down into CreateWidget
+	and AddChildren so they can eventually pass it to
+	ObjectWrapper.Create as an IStetic. One more FIXME down.
+
+	* stetic/Palette.cs: take a Project at construct time and pass it
+	on to WidgetFactories
+
+	* stetic/WidgetFactory.cs: take a Project at construct time and
+	pass that to new wrappers rather than implementing IStetic here.
+
+	* stetic/Stetic.cs: pass Project to the Palette
+
+	* libstetic/ObjectWrapper.cs (Create): swap the order of the
+	arguments
+
+	* libstetic/wrapper/Container.cs (ChildWrapper): update for
+	ObjectWrapper.Create change
+
 2005-02-24  Dan Winship  <danw@novell.com>
 
 	* libstetic/ObjectWrapper.cs: remove the protected (IStetic,

@@ -6,12 +6,14 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class WidgetFactory : WidgetSite, IStetic {
+	public class WidgetFactory : WidgetSite {
 
+		protected Project project;
 		protected Type wrapperType;
 
-		public WidgetFactory (string name, Pixbuf icon, Type wrapperType)
+		public WidgetFactory (Project project, string name, Pixbuf icon, Type wrapperType)
 		{
+			this.project = project;
 			this.wrapperType = wrapperType;
 
 			CanFocus = false;
@@ -32,29 +34,19 @@ namespace Stetic {
 
 		protected override bool StartDrag (Gdk.EventMotion evt)
 		{
-			Stetic.Wrapper.Widget wrapper = Stetic.ObjectWrapper.Create (wrapperType, this) as Stetic.Wrapper.Widget;
+			Stetic.Wrapper.Widget wrapper = Stetic.ObjectWrapper.Create (project, wrapperType) as Stetic.Wrapper.Widget;
 			dragWidget = wrapper.Wrapped as Widget;
 			return true;
-		}
-
-		public WidgetSite CreateWidgetSite ()
-		{
-			WidgetSite site = new WidgetSite ();
-			site.PopupContextMenu += delegate (object obj, EventArgs args) {
-				Menu m = new ContextMenu ((WidgetSite)site);
-				m.Popup ();
-			};
-			return site;
 		}
 	}
 
 	public class WindowFactory : WidgetFactory {
-		public WindowFactory (string name, Pixbuf icon, Type wrapperType) :
-			base (name, icon, wrapperType) {}
+		public WindowFactory (Project project, string name, Pixbuf icon, Type wrapperType) :
+			base (project, name, icon, wrapperType) {}
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
-			Stetic.Wrapper.Widget wrapper = Stetic.ObjectWrapper.Create (wrapperType, this) as Stetic.Wrapper.Widget;
+			Stetic.Wrapper.Widget wrapper = Stetic.ObjectWrapper.Create (project, wrapperType) as Stetic.Wrapper.Widget;
 
 			Gtk.Window win = wrapper.Wrapped as Gtk.Window;
 			win.Present ();

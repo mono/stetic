@@ -40,12 +40,12 @@ namespace Stetic {
 
 			XmlNode node;
 
-			node = doc.SelectSingleNode ("//glade-interface");
-			if (node == null || node.Name != "glade-interface")
+			node = doc.SelectSingleNode ("/glade-interface");
+			if (node == null)
 				throw new ApplicationException ("Not a glade file according to node name");
 
 			foreach (XmlNode toplevel in node.SelectNodes ("widget")) {
-				Widget w = CreateWidget (toplevel);
+				Widget w = CreateWidget (project, toplevel);
 				if (w == null)
 					continue;
 				project.AddWindow (w);
@@ -74,7 +74,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern bool stetic_g_value_hydrate (ref GLib.Value value, string data);
 
-		static Widget CreateWidget (XmlNode wnode)
+		static Widget CreateWidget (Project project, XmlNode wnode)
 		{
 			string className = wnode.Attributes["class"].InnerText;
 			IntPtr gtype = g_type_from_name (className);
@@ -104,7 +104,7 @@ namespace Stetic {
 			}
 			widget.Name = wnode.Attributes["id"].InnerText;
 
-			ObjectWrapper wrapper = CreateWrapperType (widget);
+			ObjectWrapper wrapper = CreateWrapperType (project, widget);
 			if (wrapper == null) {
 				Console.WriteLine ("Could not create stetic wrapper for type {0}", className);
 				return null;
@@ -114,12 +114,12 @@ namespace Stetic {
 				return widget;
 
 			Gtk.Container container = (Gtk.Container)widget;
-			AddChildren (container, (Stetic.Wrapper.Container)wrapper, className, wnode.SelectNodes ("child"));
+			AddChildren (project, container, (Stetic.Wrapper.Container)wrapper, className, wnode.SelectNodes ("child"));
 
 			return widget;
 		}
 
-		static void AddChildren (Gtk.Container container, Stetic.Wrapper.Container wrapper, string className, XmlNodeList children)
+		static void AddChildren (Project project, Gtk.Container container, Stetic.Wrapper.Container wrapper, string className, XmlNodeList children)
 		{
 			foreach (XmlNode node in children) {
 				Widget childw = null;
@@ -142,7 +142,7 @@ namespace Stetic {
 					}
 
 					if (childw is Gtk.Container) { 
-						AddChildren ((Gtk.Container)childw, (Stetic.Wrapper.Container)CreateWrapperType (childw), node.SelectSingleNode("widget").Attributes["class"].InnerText, node.SelectNodes ("widget/child"));
+						AddChildren (project, (Gtk.Container)childw, (Stetic.Wrapper.Container)CreateWrapperType (project, childw), node.SelectSingleNode("widget").Attributes["class"].InnerText, node.SelectNodes ("widget/child"));
 
 					}
 
@@ -150,7 +150,7 @@ namespace Stetic {
 				} else {
 					XmlNode child = node.SelectSingleNode ("widget");
 					if (child != null)
-						childw = CreateWidget (child);
+						childw = CreateWidget (project, child);
 					else
 						wrapper.AddSite ();
 				}
@@ -247,7 +247,7 @@ namespace Stetic {
 			return null;
 		}
 
-		static ObjectWrapper CreateWrapperType (Widget widget)
+		static ObjectWrapper CreateWrapperType (Project project, Widget widget)
 		{
 			Type[] wrapper_types = ObjectWrapper.LookupWrapperTypes (widget);
 			if (wrapper_types == null) {
@@ -266,13 +266,7 @@ namespace Stetic {
 				}
 			}
 
-			// FIXME: This is needed because the only thing that
-			// implements the IStetic interface is a WidgetFactory.
-			if (empty_istetic == null) {
-				empty_istetic = new WidgetFactory ("null", Gdk.Pixbuf.LoadFromResource ("missing.png"), typeof (Stetic.Wrapper.Label));
-			}
-
-			return Stetic.ObjectWrapper.Create (final_wrapper_type, empty_istetic, widget);
+			return Stetic.ObjectWrapper.Create (project, final_wrapper_type, widget);
 		}
 	}
 }
