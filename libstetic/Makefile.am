@@ -21,6 +21,7 @@ libstetic_dll_sources =			\
 	editor/Char.cs			\
 	editor/Color.cs			\
 	editor/Enumeration.cs		\
+	editor/GroupPicker.cs		\
 	editor/File.cs			\
 	editor/FloatRange.cs		\
 	editor/IntRange.cs		\

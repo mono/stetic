@@ -1,5 +1,13 @@
 2005-02-14  Dan Winship  <danw@novell.com>
 
+	* libstetic/editor/GroupPicker.cs: property editor for a
+	user-extensible list of strings
+
+	* libstetic/wrapper/RadioButton.cs: use GroupPicker for the Group,
+	and translate that into Gtk's terms.
+
+2005-02-14  Dan Winship  <danw@novell.com>
+
 	* libstetic/wrapper/Widget.cs (Widget): Set the Name property
 	(based on the class name and a per-class counter).
 
