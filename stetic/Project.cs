@@ -166,6 +166,8 @@ namespace Stetic {
 
 			if (focus == null)
 				Selected (null, null);
+			else if (focus.Contents == null)
+				Selected (focus, null);
 			else
 				Selected (focus, nodes[focus.Contents] as ProjectNode);
 		}
