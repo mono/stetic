@@ -190,6 +190,7 @@ namespace Stetic {
 
 			if (ShowHandles) {
 				HandleWindow = NewWindow (Toplevel.GdkWindow, Gdk.WindowClass.InputOutput);
+				HandleWindow.Background = black;
 				ShapeHandles ();
 			}
 		}
@@ -283,11 +284,6 @@ namespace Stetic {
 				GdkWindow.DrawLine (dark, 0, height - 1, width - 1, height - 1);
 				GdkWindow.DrawLine (dark, width - 1, 0, width - 1, height - 1);
 			}
-
-//			if (ShowHandles) {
-//				Gdk.GC fg = Style.ForegroundGC (StateType.Normal);
-//				HandleWindow.DrawRectangle (fg, true, 0, 0, HandleAllocation.Width, HandleAllocation.Height);
-//			}
 
 			return base.OnExposeEvent (evt);
 		}
