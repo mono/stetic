@@ -72,15 +72,31 @@ namespace Stetic {
 			return true;
 		}
 
+		public void Mimic (WidgetSite site)
+		{
+			Gdk.Rectangle alloc = site.Allocation;
+			SetSizeRequest (alloc.Width, alloc.Height);
+			hexpandable = site.HExpandable;
+			vexpandable = site.VExpandable;
+		}
+
+		public void UnMimic ()
+		{
+			SetSizeRequest (-1, -1);
+			hexpandable = vexpandable = true;
+		}
+
+		bool hexpandable = true;
 		public override bool HExpandable {
 			get {
-				return true;
+				return hexpandable;
 			}
 		}
 
+		bool vexpandable = true;
 		public override bool VExpandable {
 			get {
-				return true;
+				return vexpandable;
 			}
 		}
 	}

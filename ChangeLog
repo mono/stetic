@@ -1,3 +1,40 @@
+2005-03-24  Dan Winship  <danw@novell.com>
+
+	More code migration out of WidgetSite
+
+	* libstetic/DND.cs (DragWidget): public accessor for dragWidget
+
+	* libstetic/Placeholder.cs (Mimic, UnMimic): makes a Placeholder
+	mimic the size and expandability of a given WidgetSite. (Replaces
+	the old "PseudoOccupied" mode of WidgetSite).
+
+	* libstetic/WidgetSite.cs (Contents): killed, was redundant with
+	"Child".
+	(ShapeChanged): gone, replaced by ChildContentsChanged on
+	Wrapper.Container.
+	(Occupancy, Empty): gone. pseudo-occupancy is now handled by
+	Placeholder; all WidgetSites are now always actually occupied.
+	(OnMotionNotifyEvent, OnDragDataDelete, OnDragEnd): handled by
+	Wrapper.Container now
+	
+	* libstetic/wrapper/Button.cs: s/site.Contents/site.Child/
+
+	* libstetic/wrapper/Box.cs (DoSync): do autosizing here
+	(ReplaceChild): kill off the empty-placeholder-killing code for now
+
+	* libstetic/wrapper/Container.cs (Freeze, Thaw, Sync, DoSync):
+	move Freeze/Thaw here from Table, change the overridable method to
+	"DoSync" and make Sync check frozenness and then call DoSync.
+	(CreateWidgetSite): Set up DND on the site and if it contains a
+	container, connect to its ContentsChanged method (to replace the
+	old WidgetSite.ShapeChanged method).
+	(SiteMotionNotify, PlaceholderDragEnd): handle DND.
+	(ChildContentsChanged): Replaces SiteShapeChanged;
+	
+	* stetic/Glade.cs: 
+	* stetic/Project.cs: 
+	* stetic/PropertyGrid.cs: s/site.Contents/site.Child/
+
 2005-03-23  Dan Winship  <danw@novell.com>
 
 	Move IWidgetSite and WindowSite interfaces to

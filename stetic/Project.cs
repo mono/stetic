@@ -60,7 +60,7 @@ namespace Stetic {
 			if (container != null) {
 				container.ContentsChanged += ContentsChanged;
 				foreach (WidgetSite site in container.Sites)
-					AddWidget (site.Contents, parent);
+					AddWidget (site.Child, parent);
 			}
 		}
 
@@ -98,8 +98,8 @@ namespace Stetic {
 
 			ArrayList children = new ArrayList ();
 			foreach (WidgetSite site in cwrap.Sites) {
-				if (site.Contents != null)
-					children.Add (site.Contents);
+				if (site.Child != null)
+					children.Add (site.Child);
 			}
 
 			int i = 0;
@@ -180,7 +180,7 @@ namespace Stetic {
 			WidgetSite site = new WidgetSite (w);
 			site.PopupContextMenu += delegate (object obj, EventArgs args) {
 				if (m == null)
-					m = new ContextMenu (Stetic.Wrapper.Widget.Lookup (site.Contents));
+					m = new ContextMenu (Stetic.Wrapper.Widget.Lookup (site.Child));
 				m.Popup ();
 			};
 			site.Destroyed += delegate (object obj, EventArgs args) {

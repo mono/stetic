@@ -44,7 +44,7 @@ namespace Stetic {
 			Gtk.Drag.DestUnset (dest);
 		}
 
-		static Gtk.Widget clickWidget;
+		static Gtk.Widget dragWidget;
 		static int clickX, clickY;
 
 		[GLib.ConnectBefore]
@@ -52,7 +52,7 @@ namespace Stetic {
 		{
 			Gdk.EventButton evt = args.Event;
 			if (evt.Button == 1 && evt.Type == Gdk.EventType.ButtonPress) {
-				clickWidget = obj as Gtk.Widget;
+				dragWidget = obj as Gtk.Widget;
 				clickX = (int)evt.XRoot;
 				clickY = (int)evt.YRoot;
 			}
@@ -64,12 +64,10 @@ namespace Stetic {
 		{
 			if ((evt.State & Gdk.ModifierType.Button1Mask) == 0)
 				return false;
-			if (source != clickWidget)
+			if (source != dragWidget)
 				return false;
 			return Gtk.Drag.CheckThreshold (source, clickX, clickY, (int)evt.XRoot, (int)evt.YRoot);
 		}
-
-		static Gtk.Widget dragWidget;
 
 		// Drag function for non-automatic sources, called from MotionNotifyEvent
 		public static void Drag (Gtk.Widget source, Gdk.EventMotion evt, Gtk.Widget dragWidget)
@@ -113,6 +111,12 @@ namespace Stetic {
 			Gtk.Drag.SetIconWidget (ctx, dragWin, 0, 0);
 
 			source.DragEnd += DragEnded;
+		}
+
+		public static Gtk.Widget DragWidget {
+			get {
+				return dragWidget;
+			}
 		}
 
 		// Call this from a DragDrop event to receive the dragged widget

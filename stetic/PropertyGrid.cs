@@ -103,7 +103,7 @@ namespace Stetic {
 				return;
 			}
 
-			selection = Stetic.Wrapper.Widget.Lookup (site.Contents);
+			selection = Stetic.Wrapper.Widget.Lookup (site.Child);
 			if (selection == null)
 				return;
 			selection.Notify += Notified;

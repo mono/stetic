@@ -174,7 +174,7 @@ namespace Stetic {
 					}
 #endif
 
-					child = ExportWidget (project, doc, container, site.Contents);
+					child = ExportWidget (project, doc, container, site.Child);
 					if (child != null)
 						widget.AppendChild (child);
 				}

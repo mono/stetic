@@ -26,7 +26,7 @@ namespace Stetic {
 		public abstract bool HExpandable { get; }
 		public abstract bool VExpandable { get; }
 
-		protected Gdk.Window HandleWindow;
+		public Gdk.Window HandleWindow;
 		bool showHandles;
 		protected bool ShowHandles {
 			get { return showHandles; }
@@ -123,7 +123,7 @@ namespace Stetic {
 		protected override void OnSizeRequested (ref Requisition req)
 		{
 			if (Child == null)
-				req.Width = req.Height = 0;
+				req.Width = req.Height = 10;
 			else
 				req = Child.SizeRequest ();
 		}
@@ -142,20 +142,6 @@ namespace Stetic {
 				Child.SizeAllocate (allocation);
 			}
 		}
-
-		static private string[] placeholder_xpm = {
-			"8 8 2 1",
-			"  c #bbbbbb",
-			". c #d6d6d6",
-			"   ..   ",
-			"  .  .  ",
-			" .    . ",
-			".      .",
-			".      .",
-			" .    . ",
-			"  .  .  ",
-			"   ..   "
-		};
 
 		protected Gdk.Window NewWindow (Gdk.Window parent, Gdk.WindowClass wclass)
 		{

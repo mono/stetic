@@ -37,7 +37,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override void Sync ()
+		protected override void DoSync ()
 		{
 			WidgetSite site = box.Parent as WidgetSite;
 			if (site == null)
@@ -52,11 +52,22 @@ namespace Stetic.Wrapper {
 			WidgetSite[] sorted = new WidgetSite[children.Length];
 
 			foreach (Gtk.Widget child in children) {
-				WidgetSite childsite = child as WidgetSite;
-				if (childsite == null || childsite.Child == null)
+				WidgetBox wbox = child as WidgetBox;
+				if (wbox == null)
 					continue;
+
 				Gtk.Box.BoxChild bc = box[child] as Gtk.Box.BoxChild;
-				sorted[bc.Position] = childsite;
+				if (AutoSize[wbox]) {
+					bool exp = (this is HBox) ? wbox.HExpandable : wbox.VExpandable;
+					if (bc.Expand != exp)
+						bc.Expand = exp;
+					if (bc.Fill != exp)
+						bc.Fill = exp;
+				}
+
+				WidgetSite childsite = child as WidgetSite;
+				if (childsite != null)
+					sorted[bc.Position] = childsite;
 			}
 
 			if (this is HBox || this is HButtonBox) {
@@ -111,23 +122,26 @@ namespace Stetic.Wrapper {
 			EmitContentsChanged ();
 		}
 
-		protected override void SiteShapeChanged (WidgetSite site) {
-			if (AutoSize[site]) {
-				Gtk.Box.BoxChild bc = ((Gtk.Box)Wrapped)[site] as Gtk.Box.BoxChild;
+		protected override void ChildContentsChanged (Container child) {
+			WidgetSite site = child.Wrapped.Parent as WidgetSite;
+
+			if (site != null && AutoSize[site]) {
+				Gtk.Box.BoxChild bc = box[site] as Gtk.Box.BoxChild;
 				bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
 			}
-			base.SiteShapeChanged (site);
+			base.ChildContentsChanged (child);
 		}
 
 		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
-			if (newChild is Placeholder)
-				newChild.Destroy ();
-			else
-				base.ReplaceChild (oldChild, newChild);
+			base.ReplaceChild (oldChild, newChild);
 
-			if (newChild is WidgetSite)
-				SiteShapeChanged ((WidgetSite)newChild);
+			WidgetSite newSite = newChild as WidgetSite;
+			if (newSite != null) {
+				Container container = Stetic.Wrapper.Container.Lookup (newSite.Child);
+				if (container != null)
+					ChildContentsChanged (container);
+			}
 		}
 
 		void box_ParentSet (object obj, Gtk.ParentSetArgs args)
@@ -147,6 +161,7 @@ namespace Stetic.Wrapper {
 		void DropOn (Gtk.Widget w, object faultId)
 		{
 			WidgetSite site = CreateWidgetSite (w);
+			AutoSize[site] = true;
 			box.PackStart (site);
 			box.ReorderChild (site, (int)faultId);
 			EmitContentsChanged ();

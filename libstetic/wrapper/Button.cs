@@ -89,12 +89,12 @@ namespace Stetic.Wrapper {
 			stetic.GladeImportComplete -= FixupGladeChildren;
 
 			WidgetSite site = button.Child as WidgetSite;
-			Gtk.Alignment alignment = (site == null) ? null : site.Contents as Gtk.Alignment;
+			Gtk.Alignment alignment = (site == null) ? null : site.Child as Gtk.Alignment;
 			if (alignment == null)
 				return;
 
 			site = alignment.Child as WidgetSite;
-			Gtk.HBox box = (site == null) ? null : site.Contents as Gtk.HBox;
+			Gtk.HBox box = (site == null) ? null : site.Child as Gtk.HBox;
 			if (box == null)
 				return;
 
@@ -103,9 +103,9 @@ namespace Stetic.Wrapper {
 				return;
 
 			site = children[0] as WidgetSite;
-			Gtk.Image image = (site == null) ? null : site.Contents as Gtk.Image;
+			Gtk.Image image = (site == null) ? null : site.Child as Gtk.Image;
 			site = children[1] as WidgetSite;
-			Gtk.Label label = (site == null) ? null : site.Contents as Gtk.Label;
+			Gtk.Label label = (site == null) ? null : site.Child as Gtk.Label;
 			if (image == null || label == null)
 				return;
 			Stetic.Wrapper.Image iwrap = Stetic.ObjectWrapper.Lookup (image) as Stetic.Wrapper.Image;

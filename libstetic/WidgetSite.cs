@@ -5,50 +5,11 @@ using System.Collections;
 
 namespace Stetic {
 
-	public delegate void ChangedHandler (WidgetSite site);
-
 	public class WidgetSite : WidgetBox {
 
 		public WidgetSite (Widget child)
 		{
-			DND.SourceSet (this, false);
-
 			Add (child);
-		}
-
-		public Widget Contents {
-			get {
-				return Child;
-			}
-		}
-
-		public event ChangedHandler ShapeChanged;
-
-		private void ChildContentsChanged (Stetic.Wrapper.Container container)
-		{
-			if (ShapeChanged != null)
-				ShapeChanged (this);
-		}
-
-		protected override void OnAdded (Widget child)
-		{
-			base.OnAdded (child);
-			Occupancy = SiteOccupancy.Occupied;
-
-			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (child);
-			if (container != null)
-				container.ContentsChanged += ChildContentsChanged;
-		}
-
-		protected override void OnRemoved (Widget w)
-		{
-			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (w);
-			if (container != null)
-				container.ContentsChanged -= ChildContentsChanged;
-
-			base.OnRemoved (w);
-			if (Occupancy == SiteOccupancy.Occupied)
-				EmitEmpty ();
 		}
 
 		public override bool Internal {
@@ -64,66 +25,17 @@ namespace Stetic {
 			}
 		}
 
-		public enum SiteOccupancy { Occupied, PseudoOccupied };
-
-		private SiteOccupancy state;
-		private SiteOccupancy Occupancy {
-			get { return state; }
-			set {
-				state = value;
-				switch (state) {
-				case SiteOccupancy.Occupied:
-					SetSizeRequest (-1, -1);
-					if (faults != null && faults.Count > 0)
-						DND.DestSet (this, false);
-					else
-						DND.DestUnset (this);
-					break;
-
-				case SiteOccupancy.PseudoOccupied:
-					SetSizeRequest (Child.ChildRequisition.Width,
-							Child.ChildRequisition.Height);
-					DND.DestSet (this, true);
-					break;
-				}
-			}
-		}
-
-		public event ChangedHandler Empty;
-
-		void EmitEmpty ()
-		{
-			if (Empty != null)
-				Empty (this);
-		}
-
 		public override bool HExpandable {
 			get {
-				Stetic.Wrapper.Widget child;
-				if (Occupancy == SiteOccupancy.PseudoOccupied)
-					child = Stetic.Wrapper.Widget.Lookup (dragWidget);
-				else
-					child = Stetic.Wrapper.Widget.Lookup (Child);
-
-				if (child != null)
-					return child.HExpandable;
-				else
-					return false;
+				Stetic.Wrapper.Widget child = Stetic.Wrapper.Widget.Lookup (Child);
+				return child.HExpandable;
 			}
 		}
 
 		public override bool VExpandable {
 			get {
-				Stetic.Wrapper.Widget child;
-				if (Occupancy == SiteOccupancy.PseudoOccupied)
-					child = Stetic.Wrapper.Widget.Lookup (dragWidget);
-				else
-					child = Stetic.Wrapper.Widget.Lookup (Child);
-
-				if (child != null)
-					return child.VExpandable;
-				else
-					return false;
+				Stetic.Wrapper.Widget child = Stetic.Wrapper.Widget.Lookup (Child);
+				return child.VExpandable;
 			}
 		}
 
@@ -152,8 +64,7 @@ namespace Stetic {
 					DND.DragBegin += ShowFaults;
 					DND.DragEnd += HideFaults;
 				}
-				if (Occupancy == SiteOccupancy.Occupied)
-					DND.DestSet (this, false);
+				DND.DestSet (this, false);
 			}
 
 			faults[id] = win;
@@ -251,8 +162,7 @@ namespace Stetic {
 				faults.Clear ();
 				hfaults.Clear ();
 			}
-			if (Occupancy == SiteOccupancy.Occupied)
-				DND.DestUnset (this);
+			DND.DestUnset (this);
 		}
 
 		void ShowFaults ()
@@ -343,26 +253,6 @@ namespace Stetic {
 			}
 		}
 
-		Widget dragWidget;
-
-		protected override bool OnMotionNotifyEvent (Gdk.EventMotion evt)
-		{
-			if (evt.Window != HandleWindow)
-				return true;
-			if (!DND.CanDrag (this, evt))
-				return true;
-
-			dragWidget = Child;
-			if (dragWidget == null)
-				return true;
-
-			Occupancy = SiteOccupancy.PseudoOccupied;
-			Remove (dragWidget);
-
-			DND.Drag (this, evt, dragWidget);
-			return false;
-		}
-
 		public delegate void DropOnHandler (Widget w, object faultId);
 		public event DropOnHandler DropOn;
 
@@ -391,42 +281,9 @@ namespace Stetic {
 			return true;
 		}
 
-		protected override void OnDragDataDelete (DragContext ctx)
-		{
-			dragWidget = null;
-		}
-
-		protected override void OnDragEnd (DragContext ctx)
-		{
-			if (dragWidget != null) {
-				Container parent;
-
-				parent = dragWidget.Parent as Container;
-				if (parent != null)
-					parent.Remove (dragWidget);
-				Drop (dragWidget, -1, -1);
-				dragWidget = null;
-			} else if (Child == null)
-				EmitEmpty ();
-		}
-
-		protected override bool OnKeyReleaseEvent (Gdk.EventKey evt)
-		{
-			if (evt.Key == Gdk.Key.Delete) {
-				if (Child != null) {
-					Child.Destroy ();
-					EmitEmpty ();
-				}
-				return true;
-			}
-			return false;
-		}
-
 		public override string ToString ()
 		{
-			if (Child == null)
-				return "[Empty WidgetSite " + GetHashCode().ToString() + "]";
-			else if (Child.Name == null)
+			if (Child.Name == null)
 				return "[WidgetSite " + GetHashCode().ToString() + ": " + Child.ToString() + " " + Child.GetHashCode().ToString() + "]";
 			else
 				return "[WidgetSite " + GetHashCode().ToString() + ": " + Child.ToString() + " '" + Child.Name + "' " + Child.GetHashCode().ToString() + "]";

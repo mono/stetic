@@ -29,9 +29,30 @@ namespace Stetic.Wrapper {
 			} while (type != typeof (Stetic.Wrapper.Container));
 		}
 
-		protected virtual void Sync ()
+		int freeze;
+		protected void Freeze ()
+		{
+			freeze++;
+		}
+
+		protected void Thaw ()
+		{
+			if (--freeze == 0)
+				Sync ();
+		}
+
+		protected virtual void DoSync ()
 		{
 			;
+		}
+
+		protected void Sync ()
+		{
+			if (freeze > 0)
+				return;
+			freeze = 1;
+			DoSync ();
+			freeze = 0;
 		}
 
 		Gtk.Container container {
@@ -171,24 +192,43 @@ namespace Stetic.Wrapper {
 		protected override WidgetSite CreateWidgetSite (Gtk.Widget w)
 		{
 			WidgetSite site = base.CreateWidgetSite (w);
-			site.ShapeChanged += SiteShapeChanged;
-			site.Empty += SiteEmpty;
+			site.MotionNotifyEvent += SiteMotionNotify;
+			DND.SourceSet (site, false);
+
+			Container childWrapper = Lookup (w);
+			if (childWrapper != null)
+				childWrapper.ContentsChanged += ChildContentsChanged;
+
 			return site;
+		}
+
+		void SiteMotionNotify (object obj, Gtk.MotionNotifyEventArgs args)
+		{
+			WidgetSite site = obj as WidgetSite;
+
+			if (args.Event.Window != site.HandleWindow ||
+			    !DND.CanDrag (site, args.Event)) {
+				args.RetVal = true;
+				return;
+			}
+
+			Placeholder ph = CreatePlaceholder ();
+			ph.Mimic (site);
+			ReplaceChild (site, ph);
+
+			Gtk.Widget dragWidget = site.Child;
+			site.Remove (dragWidget);
+			site.Destroy ();
+			DND.Drag (ph, args.Event, dragWidget);
 		}
 
 		protected override Placeholder CreatePlaceholder ()
 		{
 			Placeholder ph = base.CreatePlaceholder ();
 			ph.Drop += PlaceholderDrop;
+			ph.DragEnd += PlaceholderDragEnd;
 			AutoSize[ph] = true;
 			return ph;
-		}
-
-		void SiteEmpty (WidgetSite site)
-		{
-			ReplaceChild (site, CreatePlaceholder ());
-			site.Destroy ();
-			EmitContentsChanged ();
 		}
 
 		void PlaceholderDrop (Placeholder ph, Gtk.Widget dropped)
@@ -202,7 +242,18 @@ namespace Stetic.Wrapper {
 			EmitContentsChanged ();
 		}
 
-		protected virtual void SiteShapeChanged (WidgetSite site) {
+		void PlaceholderDragEnd (object obj, Gtk.DragEndArgs args)
+		{
+			Placeholder ph = obj as Placeholder;
+
+			if (DND.DragWidget == null) {
+				ph.UnMimic ();
+				Sync ();
+			} else
+				ReplaceChild (ph, CreateWidgetSite (DND.DragWidget));
+		}
+
+		protected virtual void ChildContentsChanged (Container child) {
 			;
 		}
 
@@ -210,8 +261,10 @@ namespace Stetic.Wrapper {
 		{
 			WidgetSite site = args.Widget as WidgetSite;
 			if (site != null) {
-				site.Empty -= SiteEmpty;
-				site.ShapeChanged -= SiteShapeChanged;
+				Container childWrapper = Lookup (site.Child);
+				if (childWrapper != null)
+					childWrapper.ContentsChanged -= ChildContentsChanged;
+
 				SiteRemoved (site);
 			}
 		}

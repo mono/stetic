@@ -43,7 +43,7 @@ namespace Stetic.Wrapper {
 
 		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			stetic.GladeImportComplete += DoSync;
+			stetic.GladeImportComplete += PostGladeSync;
 			base.GladeImport (className, id, props);
 		}
 
@@ -57,10 +57,10 @@ namespace Stetic.Wrapper {
 			return base.GladeImportChild (className, id, props, childprops);
 		}
 
-		void DoSync ()
+		void PostGladeSync ()
 		{
 			Sync ();
-			stetic.GladeImportComplete -= DoSync;
+			stetic.GladeImportComplete -= PostGladeSync;
 		}
 
 		private Gtk.Table table {
@@ -69,19 +69,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		int freeze;
-		void Freeze ()
-		{
-			freeze++;
-		}
-
-		void Thaw ()
-		{
-			if (--freeze == 0)
-				Sync ();
-		}
-
-		protected override void Sync ()
+		protected override void DoSync ()
 		{
 			uint left, right, top, bottom;
 			uint row, col;
@@ -90,10 +78,6 @@ namespace Stetic.Wrapper {
 			Gtk.Table.TableChild tc;
 			Gtk.Widget[] children;
 			bool addedPlaceholders = false;
-
-			if (freeze > 0)
-				return;
-			freeze = 1;
 
 			children = table.Children;
 			grid = new WidgetBox[NRows,NColumns];
@@ -208,7 +192,6 @@ namespace Stetic.Wrapper {
 
                         foreach (Gtk.Widget child in table.Children)
 				child.ThawChildNotify ();
-			freeze = 0;
 
 			if (addedPlaceholders)
 				EmitContentsChanged ();
@@ -366,16 +349,19 @@ namespace Stetic.Wrapper {
 		public override bool HExpandable { get { return hexpandable; } }
 		public override bool VExpandable { get { return vexpandable; } }
 
-		protected override void SiteShapeChanged (WidgetSite site)
+		protected override void ChildContentsChanged (Container child)
 		{
-			Freeze ();
-			if (AutoSize[site]) {
-				Gtk.Table.TableChild tc = table[site] as Gtk.Table.TableChild;
-				tc.XOptions = 0;
-				tc.YOptions = 0;
+			WidgetSite site = child.Wrapped.Parent as WidgetSite;
+			if (site != null) {
+				Freeze ();
+				if (AutoSize[site]) {
+					Gtk.Table.TableChild tc = table[site] as Gtk.Table.TableChild;
+					tc.XOptions = 0;
+					tc.YOptions = 0;
+				}
+				Thaw ();
 			}
-			Thaw ();
-			base.SiteShapeChanged (site);
+			base.ChildContentsChanged (child);
 		}
 
 #if NOT
