@@ -5,6 +5,9 @@
 
 	* stetic/PropertyEditor.cs: Use it
 
+	* stetic/PropertyGrid.cs: 
+	* stetic/Stetic.cs: re-enable child packing property page
+
 2005-02-09  Dan Winship  <danw@novell.com>
 
 	* Major reorg again... Now instead of having the widget wrappers

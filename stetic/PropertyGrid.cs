@@ -185,7 +185,6 @@ namespace Stetic {
 		}
 	}
 
-#if NO
 	public class ChildPropertyGrid : PropertyGrid {
 
 		public new void Select (IWidgetSite site)
@@ -205,9 +204,9 @@ namespace Stetic {
 
 			ContainerChild cc = parent[(Widget)site];
 			selection = cc;
-			wrapper = Stetic.WidgetFactory.GetWrapper (parent) as IContainerWrapper;
+			wrapper = Stetic.Wrapper.Container.Lookup (parent) as Stetic.Wrapper.Container;
 			if (wrapper != null)
-				AddObjectWrapperProperties (cc, ((IContainerWrapper)wrapper).ChildPropertyGroups);
+				AddObjectWrapperProperties (cc, ((Stetic.Wrapper.Container)wrapper).ChildPropertyGroups);
 			else
 				AddParamSpecProperties (cc, parent);
 
@@ -223,5 +222,4 @@ namespace Stetic {
 			return null;
 		}
 	}
-#endif
 }

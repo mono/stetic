@@ -35,11 +35,9 @@ namespace Stetic {
 			Properties = new Stetic.PropertyGrid ();
 			Properties.Show ();
 			notebook.AppendPage (Properties, new Label ("Properties"));
-#if NO
 			ChildProperties = new Stetic.ChildPropertyGrid ();
 			ChildProperties.Show ();
 			notebook.AppendPage (ChildProperties, new Label ("Packing"));
-#endif
 			win.ShowAll ();
 
 			win = new Gtk.Window ("Project");
@@ -62,18 +60,18 @@ namespace Stetic {
 		static Stetic.ProjectView ProjectView;
 
 		static Stetic.PropertyGrid Properties;
-//		static Stetic.ChildPropertyGrid ChildProperties;
+		static Stetic.ChildPropertyGrid ChildProperties;
 
 		public static void NoSelection ()
 		{
 			Properties.NoSelection ();
-//			ChildProperties.NoSelection ();
+			ChildProperties.NoSelection ();
 		}
 
 		public static void Select (IWidgetSite site)
 		{
 			Properties.Select (site);
-//			ChildProperties.Select (site);
+			ChildProperties.Select (site);
 		}
 
 	}
