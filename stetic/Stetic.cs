@@ -16,36 +16,30 @@ namespace Stetic {
 
 			program = new Gnome.Program ("Stetic", "0.0", Modules.UI, args);
 
-			win = new Gtk.Window ("Palette");
-			win.AllowGrow = false;
-			win.DeleteEvent += Window_Delete;
-			palette = new Stetic.Palette ();
-
-			AssemblyName an = new AssemblyName ();
-			an.Name = "libstetic";
-			palette.AddWidgets (System.Reflection.Assembly.Load (an));
-
-			win.Add (palette);
-			win.ShowAll ();
-
-			win = new Gtk.Window ("Properties");
+			win = new Gtk.Window ("Stetic");
 			win.DeleteEvent += Window_Delete;
 			notebook = new Gtk.Notebook ();
 			win.Add (notebook);
+
+			palette = new Stetic.Palette ();
+			AssemblyName an = new AssemblyName ();
+			an.Name = "libstetic";
+			palette.AddWidgets (System.Reflection.Assembly.Load (an));
+			notebook.AppendPage (palette, new Label ("Palette"));
+
+			Project = new Project ();
+			ProjectView = new ProjectView (Project);
+			notebook.AppendPage (ProjectView, new Label ("Project"));
+
 			Properties = new Stetic.PropertyGrid ();
 			Properties.Show ();
 			notebook.AppendPage (Properties, new Label ("Properties"));
+
 			ChildProperties = new Stetic.ChildPropertyGrid ();
 			ChildProperties.Show ();
 			notebook.AppendPage (ChildProperties, new Label ("Packing"));
-			Stetic.Grid.Connect (Properties, ChildProperties);
-			win.ShowAll ();
 
-			win = new Gtk.Window ("Project");
-			win.DeleteEvent += Window_Delete;
-			Project = new Project ();
-			ProjectView = new ProjectView (Project);
-			win.Add (ProjectView);
+			Stetic.Grid.Connect (Properties, ChildProperties);
 			win.ShowAll ();
 
 			program.Run ();
