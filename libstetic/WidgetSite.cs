@@ -9,26 +9,12 @@ namespace Stetic {
 
 	public class WidgetSite : WidgetBox, IWidgetSite {
 
-		static TargetEntry[] Targets;
-		static TargetList TargetList;
-		static Gdk.Atom SteticWidgetType;
-
-		static WidgetSite ()
-		{
-			SteticWidgetType = Gdk.Atom.Intern ("application/x-stetic-widget", false);
-
-			Targets = new TargetEntry[1];
-			Targets[0] = new TargetEntry ("application/x-stetic-widget", 0, 0);
-
-			TargetList = new TargetList ();
-			TargetList.Add (SteticWidgetType, 0, 0);
-		}
-
 		IStetic stetic;
 
 		public WidgetSite (IStetic stetic)
 		{
 			WidgetFlags |= WidgetFlags.CanFocus;
+			DND.SourceSet (this, false);
 
 			this.stetic = stetic;
 			emptySize.Width = emptySize.Height = 10;
@@ -103,8 +89,7 @@ namespace Stetic {
 				switch (state) {
 				case SiteOccupancy.Empty:
 					SetSizeRequest (emptySize.Width, emptySize.Height);
-					Gtk.Drag.DestSet (this, DestDefaults.All,
-							  Targets, DragAction.Move);
+					DND.DestSet (this, true);
 					if (OccupancyChanged != null)
 						OccupancyChanged (this);
 					break;
@@ -112,9 +97,9 @@ namespace Stetic {
 				case SiteOccupancy.Occupied:
 					SetSizeRequest (-1, -1);
 					if (faults != null && faults.Count > 0)
-						Gtk.Drag.DestSet (this, 0, Targets, DragAction.Move);
+						DND.DestSet (this, false);
 					else
-						Gtk.Drag.DestUnset (this);
+						DND.DestUnset (this);
 					if (OccupancyChanged != null)
 						OccupancyChanged (this);
 					break;
@@ -122,8 +107,7 @@ namespace Stetic {
 				case SiteOccupancy.PseudoOccupied:
 					SetSizeRequest (Child.ChildRequisition.Width,
 							Child.ChildRequisition.Height);
-					Gtk.Drag.DestSet (this, DestDefaults.All,
-							  Targets, DragAction.Move);
+					DND.DestSet (this, true);
 					break;
 				}
 			}
@@ -177,11 +161,11 @@ namespace Stetic {
 		{
 			if (faults == null) {
 				faults = new Hashtable ();
-				stetic.DragBegin += ShowFaults;
-				stetic.DragEnd += HideFaults;
+				DND.DragBegin += ShowFaults;
+				DND.DragEnd += HideFaults;
 			}
 			if (Occupancy == SiteOccupancy.Occupied)
-				Gtk.Drag.DestSet (this, 0, Targets, DragAction.Move);
+				DND.DestSet (this, true);
 		}
 
 		public void AddHFault (object id, int y, int x1, int x2)
@@ -210,7 +194,7 @@ namespace Stetic {
 				faults.Clear ();
 			}
 			if (Occupancy == SiteOccupancy.Occupied)
-				Gtk.Drag.DestUnset (this);
+				DND.DestUnset (this);
 		}
 
 		void ShowFaults ()
@@ -294,71 +278,30 @@ namespace Stetic {
 			}
 		}
 
-		protected int clickX, clickY;
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
-			if (base.OnButtonPressEvent (evt))
-				return true;
-
-			clickX = (int)evt.XRoot;
-			clickY = (int)evt.YRoot;
-			GrabFocus ();
+			if (!base.OnButtonPressEvent (evt))
+				GrabFocus ();
 			return true;
 		}
 
-		protected Widget dragWidget;
-
-		protected virtual bool StartDrag (Gdk.EventMotion evt)
-		{
-			if (evt.Window != HandleWindow)
-				return false;
-
-			dragWidget = Child;
-			if (dragWidget == null)
-				return false;
-
-			Occupancy = SiteOccupancy.PseudoOccupied;
-			Remove (dragWidget);
-			return true;
-		}
+		Widget dragWidget;
 
 		protected override bool OnMotionNotifyEvent (Gdk.EventMotion evt)
 		{
-			Gtk.Window dragWin;
-			DragContext ctx;
-			int mx, my;
-			Requisition req;
-
-			if ((evt.State & ModifierType.Button1Mask) == 0)
+			if (evt.Window != HandleWindow)
 				return true;
-			if (!Gtk.Drag.CheckThreshold (this, clickX, clickY, (int)evt.XRoot, (int)evt.YRoot))
+			if (!DND.CanDrag (this, evt))
 				return true;
 
-			if (!StartDrag (evt))
+			dragWidget = Child;
+			if (dragWidget == null)
 				return true;
 
-			stetic.DragBegun ();
+			Occupancy = SiteOccupancy.PseudoOccupied;
+			Remove (dragWidget);
 
-			mx = (int)evt.XRoot;
-			my = (int)evt.YRoot;
-
-			dragWin = new Gtk.Window (Gtk.WindowType.Popup);
-			dragWin.Add (dragWidget);
-
-			req = dragWidget.SizeRequest ();
-			if (req.Width < 20 && req.Height < 20)
-				dragWin.SetSizeRequest (20, 20);
-			else if (req.Width < 20)
-				dragWin.SetSizeRequest (20, -1);
-			else if (req.Height < 20)
-				dragWin.SetSizeRequest (-1, 20);
-
-			dragWin.Move (mx, my);
-			dragWin.Show ();
-
-			ctx = Gtk.Drag.Begin (this, TargetList, DragAction.Move, 1, evt);
-			Gtk.Drag.SetIconWidget (ctx, dragWin, 0, 0);
-
+			DND.Drag (this, evt, dragWidget);
 			return false;
 		}
 
@@ -374,36 +317,22 @@ namespace Stetic {
 				DropOn (w, faultId);
 			} else
 				Add (w);
+			GrabFocus ();
 		}
 
-		protected override bool OnDragDrop (DragContext ctx,
-						    int x, int y, uint time)
+		protected override bool OnDragDrop (DragContext ctx, int x, int y, uint time)
 		{
-			WidgetSite source;
-			Widget dragged;
-			Container parent;
-
-			source = Gtk.Drag.GetSourceWidget (ctx) as WidgetSite;
-			if (source == null) {
-				Gtk.Drag.Finish (ctx, false, false, time);
+			Widget dragged = DND.Drop (ctx, time);
+			if (dragged == null)
 				return false;
-			}
-
-			dragged = source.dragWidget;
-			source.dragWidget = null;
-			if (dragged == null) {
-				Gtk.Drag.Finish (ctx, false, false, time);
-				return false;
-			}
-
-			parent = dragged.Parent as Container;
-			if (parent != null)
-				parent.Remove (dragged);
 
 			Drop (dragged, x, y);
-			GrabFocus ();
-			Gtk.Drag.Finish (ctx, true, false, time);
 			return true;
+		}
+
+		protected override void OnDragDataDelete (DragContext ctx)
+		{
+			dragWidget = null;
 		}
 
 		protected override void OnDragEnd (DragContext ctx)
@@ -415,11 +344,9 @@ namespace Stetic {
 				if (parent != null)
 					parent.Remove (dragWidget);
 				Drop (dragWidget, -1, -1);
+				dragWidget = null;
 			} else if (Child == null)
 				Occupancy = SiteOccupancy.Empty;
-
-			dragWidget = null;
-			stetic.DragEnded ();
 		}
 
 		protected override bool OnKeyReleaseEvent (Gdk.EventKey evt)

@@ -1,3 +1,36 @@
+2005-03-03  Dan Winship  <danw@novell.com>
+
+	* libstetic/DND.cs: static class to handle various
+	drag-and-drop-related stuff, so WidgetFactory doesn't need to
+	subclass WidgetSite, which is nice since they're not really very
+	related.
+	(SourceSet): wrapper for Gtk.Drag.SourceSet that can also set up
+	drag tracking for widgets that can't use SourceSet.
+	(DestSet, DestUnset): more wrappers
+	(CanDrag): for non automatic sources, checks if a
+	MotionNotifyEvent counts as a drag start
+	(Drag): starts a drag
+	(Drop): receives the dropped widget
+	(DragBegin, DragEnd): moved here from IStetic
+
+	* libstetic/WidgetSite.cs: remove static DND-related fields
+	(various): use DND methods rather than Gtk.Drag or IStetic ones
+	(OnButtonPressEvent): don't need to track click locations any
+	more; DND does it.
+	(OnMotionNotify): use DND.CanDrag and DND.Drag
+	(OnDragDrop): use DND.Drop
+	(OnDropEnd): don't need to call DragEnded() from here any more;
+	DND does it.
+	
+	* libstetic/IStetic.cs: 
+	* stetic/Project.cs: kill off the dnd-related events; they're on
+	DND now.
+
+	* stetic/WidgetFactory.cs: now a subclass of EventBox
+	(ctor): set AboveChild, call DND.SourceSet
+	(OnDragBegin): Call DND.Drag
+	(Drop): dead code since WidgetFactory isn't a drag destination any more.
+
 2005-03-02  Dan Winship  <danw@novell.com>
 
 	"Autoexpand" for boxes (but not yet tables, and not 100% right

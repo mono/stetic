@@ -123,21 +123,6 @@ namespace Stetic {
 			if (GladeImportComplete != null)
 				GladeImportComplete ();
 		}
-
-		public event ISteticDelegate DragBegin;
-		public event ISteticDelegate DragEnd;
-
-		public void DragBegun ()
-		{
-			if (DragBegin != null)
-				DragBegin ();
-		}
-
-		public void DragEnded ()
-		{
-			if (DragEnd != null)
-				DragEnd ();
-		}
 	}
 
 	[TreeNode (ColumnCount=2)]

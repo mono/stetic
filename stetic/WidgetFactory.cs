@@ -6,17 +6,18 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class WidgetFactory : WidgetSite {
+	public class WidgetFactory : EventBox {
 
 		protected Project project;
 		protected Type wrapperType;
 
-		public WidgetFactory (Project project, string name, Pixbuf icon, Type wrapperType) : base (project)
+		public WidgetFactory (Project project, string name, Pixbuf icon, Type wrapperType)
 		{
 			this.project = project;
 			this.wrapperType = wrapperType;
+			DND.SourceSet (this, true);
 
-			CanFocus = false;
+			AboveChild = true;
 
 			Gtk.HBox hbox = new HBox (false, 6);
 
@@ -32,16 +33,10 @@ namespace Stetic {
 			Add (hbox);
 		}
 
-		protected override bool StartDrag (Gdk.EventMotion evt)
+		protected override void OnDragBegin (Gdk.DragContext ctx)
 		{
 			Stetic.Wrapper.Widget wrapper = Stetic.ObjectWrapper.Create (project, wrapperType) as Stetic.Wrapper.Widget;
-			dragWidget = wrapper.Wrapped as Widget;
-			return true;
-		}
-
-		protected override void Drop (Widget w, int x, int y)
-		{
-			;
+			DND.Drag (this, ctx, wrapper.Wrapped as Widget);
 		}
 	}
 

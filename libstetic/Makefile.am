@@ -4,6 +4,7 @@ libstetic_dll_sources =			\
 	CommandAttribute.cs		\
 	CommandDescriptor.cs		\
 	DescriptionAttribute.cs		\
+	DND.cs				\
 	EditorAttribute.cs		\
 	GladeUtils.cs			\
 	ItemDescriptor.cs		\
