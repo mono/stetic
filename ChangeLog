@@ -1,12 +1,12 @@
 2005-03-18  Dan Winship  <danw@novell.com>
 
-	* libstetic/editor/StockItem.cs: now a subclass of Image
-
 	* libstetic/editor/Image.cs: editor that allows selecting a stock
 	image or a file
 
 	* libstetic/editor/ImageFile.cs: subclass of Stetic.Editor.Image
 	that only allows picking a file
+
+	* libstetic/editor/StockItem.cs: now a subclass of Image
 
 	* libstetic/editor/File.cs: gone
 
