@@ -5,7 +5,16 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class VBox : Gtk.VBox, IDesignTimeContainer {
+	public class VBox : Gtk.VBox, Stetic.IObjectWrapper, Stetic.IDesignTimeContainer {
+		static PropertyGroup[] groups;
+		public PropertyGroup[] PropertyGroups { get { return groups; } }
+
+		static VBox () {
+			groups = new PropertyGroup[] {
+				Box.BoxProperties,
+				Widget.CommonWidgetProperties
+			};
+		}
 
 		public VBox (bool homogeneous, int spacing) : base (homogeneous, spacing)
 		{

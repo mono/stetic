@@ -32,7 +32,7 @@ namespace Stetic.Wrapper {
 		[WidgetFactory ("Spin Button", "spinbutton.png")]
 		static Gtk.Widget newSpinButton ()
 		{
-			return new Gtk.SpinButton (null, 1.0, 2);
+			return new Stetic.Wrapper.SpinButton ();
 		}
 
 		[WidgetFactory ("Label", "label.png")]
@@ -86,7 +86,13 @@ namespace Stetic.Wrapper {
 		[WidgetFactory ("Image", "image.png")]
 		static Gtk.Widget newImage ()
 		{
-			return new Gtk.Image ();
+			return new Stetic.Wrapper.Image ();
+		}
+
+		[WidgetFactory ("Stock Icon", "image.png")]
+		static Gtk.Widget newIcon ()
+		{
+			return new Stetic.Wrapper.Icon ();
 		}
 
 		[WidgetFactory ("Text View", "textview.png")]
@@ -95,7 +101,7 @@ namespace Stetic.Wrapper {
 			return new Gtk.TextView ();
 		}
 
-		[WidgetFactory ("ToggleButton", "togglebutton.png")]
+		[WidgetFactory ("Toggle Button", "togglebutton.png")]
 		static Gtk.Widget newToggleButton ()
 		{
 			return new Gtk.ToggleButton ("Toggle");

@@ -5,7 +5,30 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class Table : Gtk.Table, IDesignTimeContainer {
+	public class Table : Gtk.Table, Stetic.IObjectWrapper, Stetic.IDesignTimeContainer {
+		static PropertyGroup[] groups;
+		public PropertyGroup[] PropertyGroups { get { return groups; } }
+
+		public static PropertyGroup TableProperties;
+
+		static Table () {
+			PropertyDescriptor[] props;
+
+			props = new PropertyDescriptor[] {
+				new PropertyDescriptor (typeof (Gtk.Table), "NRows"),
+				new PropertyDescriptor (typeof (Gtk.Table), "NColumns"),
+				new PropertyDescriptor (typeof (Gtk.Table), "Homogeneous"),
+				new PropertyDescriptor (typeof (Gtk.Table), "RowSpacing"),
+				new PropertyDescriptor (typeof (Gtk.Table), "ColumnSpacing"),
+				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth"),
+			};				
+			TableProperties = new PropertyGroup ("Table Properties", props);
+
+			groups = new PropertyGroup[] {
+				TableProperties,
+				Widget.CommonWidgetProperties
+			};
+		}
 
 		const AttachOptions expandOpts = AttachOptions.Expand | AttachOptions.Fill;
 		const AttachOptions fillOpts = AttachOptions.Fill;

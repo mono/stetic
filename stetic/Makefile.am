@@ -3,8 +3,8 @@ noinst_SCRIPTS = stetic
 
 stetic_exe_SOURCES =			\
 	ContextMenu.cs			\
-	IObjectWrapper.cs		\
 	IDesignTimeContainer.cs		\
+	IObjectWrapper.cs		\
 	Notify.cs			\
 	Palette.cs			\
 	ParamFlags.cs			\
@@ -20,13 +20,16 @@ stetic_exe_SOURCES =			\
 	editor/Boolean.cs		\
 	editor/Char.cs			\
 	editor/Enumeration.cs		\
+	editor/File.cs			\
 	editor/FloatRange.cs		\
 	editor/IntRange.cs		\
 	editor/OptIntRange.cs		\
 	editor/StockItem.cs		\
 	editor/String.cs		\
 	wrapper/Arrow.cs		\
+	wrapper/Box.cs			\
 	wrapper/Button.cs		\
+	wrapper/ButtonBox.cs		\
 	wrapper/CheckButton.cs		\
 	wrapper/ComboBox.cs		\
 	wrapper/DefaultWidgets.cs	\
@@ -38,10 +41,14 @@ stetic_exe_SOURCES =			\
 	wrapper/HPaned.cs		\
 	wrapper/HScrollbar.cs		\
 	wrapper/HSeparator.cs		\
+	wrapper/Icon.cs			\
+	wrapper/Image.cs		\
 	wrapper/Label.cs		\
 	wrapper/Misc.cs			\
+	wrapper/Paned.cs		\
 	wrapper/RadioButton.cs		\
 	wrapper/Range.cs		\
+	wrapper/SpinButton.cs		\
 	wrapper/Table.cs		\
 	wrapper/VBox.cs			\
 	wrapper/VButtonBox.cs		\
@@ -56,7 +63,7 @@ STETIC_RESOURCE_FILES = $(wildcard $(top_srcdir)/pixmaps/*.png)
 STETIC_RESOURCES = $(foreach file,$(STETIC_RESOURCE_FILES),-resource:$(file)$(comma)$(notdir $(file)))
 
 stetic.exe: $(stetic_exe_SOURCES) $(STETIC_RESOURCE_FILES)
-	$(MCS) -g -pkg:gtk-sharp-2.0 -o stetic.exe $(stetic_exe_SOURCES) $(STETIC_RESOURCES)
+	$(MCS) -g -pkg:gtk-sharp-2.0 -pkg:gnome-sharp-2.0 -o stetic.exe $(stetic_exe_SOURCES) $(STETIC_RESOURCES)
 
 stetic: stetic.in
 	sed -e "s:\@MONO\@:$(MONO):" $< > $@

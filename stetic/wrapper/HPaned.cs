@@ -5,7 +5,18 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class HPaned : Gtk.HPaned, IDesignTimeContainer {
+	public class HPaned : Gtk.HPaned, Stetic.IObjectWrapper, Stetic.IDesignTimeContainer {
+		static PropertyGroup[] groups;
+		public PropertyGroup[] PropertyGroups { get { return groups; } }
+
+		public static PropertyGroup HPanedProperties;
+
+		static HPaned () {
+			groups = new PropertyGroup[] {
+				Paned.PanedProperties,
+				Widget.CommonWidgetProperties
+			};
+		}
 
 		public HPaned ()
 		{

@@ -1,3 +1,34 @@
+2005-01-07  Dan Winship  <danw@novell.com>
+
+	* stetic/wrapper/Image.cs: wrapper for Gtk.Images that show files
+
+	* stetic/wrapper/Icon.cs: wrapper for Gtk.Images that show stock icons
+
+	* stetic/wrapper/SpinButton.cs: wrapper for Gtk.SpinButton
+	
+	* stetic/wrapper/Frame.cs: 
+	* stetic/wrapper/HBox.cs: 
+	* stetic/wrapper/HButtonBox.cs: 
+	* stetic/wrapper/HPaned.cs: 
+	* stetic/wrapper/VBox.cs: 
+	* stetic/wrapper/VButtonBox.cs: 
+	* stetic/wrapper/VPaned.cs: 
+	* stetic/wrapper/Table.cs: 
+	* stetic/wrapper/Window.cs: Implement IObjectWrapper on these
+	(previously they just implemented IDesignTimeContainer)
+
+	* stetic/wrapper/Box.cs: 
+	* stetic/wrapper/ButtonBox.cs: 
+	* stetic/wrapper/Paned.cs: static classes that define
+	PropertyDescriptors used by their subclasses
+
+	* stetic/wrapper/DefaultWidgets.cs: Update for new wrappers
+
+	* stetic/editor/File.cs: editor for strings that represent filenames
+
+	* stetic/Stetic.cs: Use Gnome.Program rather than Gtk.Application
+	now, since we're using Gnome.FileEntry.
+
 2005-01-06  Dan Winship  <danw@novell.com>
 
 	* stetic/IDesignTimeContainer.cs: New name for the old

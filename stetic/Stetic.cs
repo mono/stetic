@@ -1,17 +1,19 @@
 using Gtk;
-using Gdk;
+using Gnome;
 using System;
 
 namespace Stetic {
 
 	public class Stetic  {
 
+		static Gnome.Program program;
+
 		public static int Main (string[] args) {
 			Gtk.Window win;
 			Gtk.Notebook notebook;
 			Stetic.Palette palette;
 
-			Application.Init ("Stetic", ref args);
+			program = new Gnome.Program ("Stetic", "0.0", Modules.UI, args);
 
 			win = new Gtk.Window ("Palette");
 			win.AllowGrow = false;
@@ -33,12 +35,12 @@ namespace Stetic {
 			notebook.AppendPage (ChildProperties, new Label ("Packing"));
 			win.ShowAll ();
 
-			Application.Run ();
+			program.Run ();
 			return 0;
 		}
 
 		static void Window_Delete (object obj, DeleteEventArgs args) {
-			Application.Quit ();
+			program.Quit ();
 			args.RetVal = true;
 		}
 

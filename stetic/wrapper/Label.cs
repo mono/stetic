@@ -10,7 +10,6 @@ namespace Stetic.Wrapper {
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
 		public static PropertyGroup LabelProperties;
-		public static PropertyGroup MiscProperties;
 
 		static Label () {
 			PropertyDescriptor[] props;

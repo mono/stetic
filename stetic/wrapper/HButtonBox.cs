@@ -5,7 +5,16 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class HButtonBox : Gtk.HButtonBox, IDesignTimeContainer {
+	public class HButtonBox : Gtk.HButtonBox, Stetic.IObjectWrapper, Stetic.IDesignTimeContainer {
+		static PropertyGroup[] groups;
+		public PropertyGroup[] PropertyGroups { get { return groups; } }
+
+		static HButtonBox () {
+			groups = new PropertyGroup[] {
+				ButtonBox.ButtonBoxProperties,
+				Widget.CommonWidgetProperties
+			};
+		}
 
 		public HButtonBox ()
 		{
