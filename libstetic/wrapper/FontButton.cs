@@ -5,21 +5,21 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Font Button", "fontbutton.png", ObjectWrapperType.Widget)]
 	public class FontButton : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup FontButtonProperties;
+		public static ItemGroup FontButtonProperties;
 
 		static FontButton () {
-			FontButtonProperties = new PropertyGroup ("Font Button Properties",
-								  typeof (Stetic.Wrapper.FontButton),
-								  typeof (Gtk.FontButton),
-								  "Title",
-								  "FontName",
-								  "ShowSize",
-								  "ShowStyle",
-								  "UseFont",
-								  "UseSize");
+			FontButtonProperties = new ItemGroup ("Font Button Properties",
+							      typeof (Stetic.Wrapper.FontButton),
+							      typeof (Gtk.FontButton),
+							      "Title",
+							      "FontName",
+							      "ShowSize",
+							      "ShowStyle",
+							      "UseFont",
+							      "UseSize");
 			FontButtonProperties["UseSize"].DependsOn (FontButtonProperties["UseFont"]);
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				FontButtonProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -29,8 +29,8 @@ namespace Stetic.Wrapper {
 
 		public FontButton (IStetic stetic, Gtk.FontButton fontbutton) : base (stetic, fontbutton) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		public bool UseFont {
 			get {

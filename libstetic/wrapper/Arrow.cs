@@ -5,15 +5,15 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Arrow", "arrow.png", ObjectWrapperType.Widget)]
 	public class Arrow : Misc {
 
-		public static PropertyGroup ArrowProperties;
+		public static ItemGroup ArrowProperties;
 
 		static Arrow () {
-			ArrowProperties = new PropertyGroup ("Arrow Properties",
-							     typeof (Gtk.Arrow),
-							     "ArrowType",
-							     "ShadowType");
+			ArrowProperties = new ItemGroup ("Arrow Properties",
+							 typeof (Gtk.Arrow),
+							 "ArrowType",
+							 "ShadowType");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				ArrowProperties, Misc.MiscProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -23,7 +23,7 @@ namespace Stetic.Wrapper {
 
 		public Arrow (IStetic stetic, Gtk.Arrow arrow) : base (stetic, arrow) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

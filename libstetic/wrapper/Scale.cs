@@ -3,22 +3,22 @@ using System;
 namespace Stetic.Wrapper {
 
 	public abstract class Scale : Stetic.Wrapper.Widget {
-		public static PropertyGroup ScaleProperties;
+		public static ItemGroup ScaleProperties;
 
 		static Scale () {
-			ScaleProperties = new PropertyGroup ("Scale Properties",
-							     typeof (Gtk.Scale),
-							     "Adjustment.Lower",
-							     "Adjustment.Upper",
-							     "Adjustment.Value",
-							     "DrawValue",
-							     "Digits",
-							     "ValuePos",
-							     "Inverted");
+			ScaleProperties = new ItemGroup ("Scale Properties",
+							 typeof (Gtk.Scale),
+							 "Adjustment.Lower",
+							 "Adjustment.Upper",
+							 "Adjustment.Value",
+							 "DrawValue",
+							 "Digits",
+							 "ValuePos",
+							 "Inverted");
 			ScaleProperties["Digits"].DependsOn (ScaleProperties["DrawValue"]);
 			ScaleProperties["ValuePos"].DependsOn (ScaleProperties["DrawValue"]);
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				Scale.ScaleProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -26,7 +26,7 @@ namespace Stetic.Wrapper {
 
 		protected Scale (IStetic stetic, Gtk.Scale scale) : base (stetic, scale) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

@@ -6,7 +6,7 @@ namespace Stetic.Wrapper {
 	public class HSeparator : Stetic.Wrapper.Widget {
 
 		static HSeparator () {
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 		}
@@ -15,7 +15,7 @@ namespace Stetic.Wrapper {
 
 		public HSeparator (IStetic stetic, Gtk.HSeparator hseparator) : base (stetic, hseparator) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

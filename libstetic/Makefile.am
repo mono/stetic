@@ -1,7 +1,10 @@
 noinst_DATA = libstetic.dll
 
 libstetic_dll_sources =			\
-	IContextMenuProvider.cs		\
+	CommandAttribute.cs		\
+	CommandDescriptor.cs		\
+	ItemDescriptor.cs		\
+	ItemGroup.cs			\
 	IStetic.cs			\
 	IWidgetSite.cs			\
 	ObjectWrapperAttribute.cs	\
@@ -9,7 +12,6 @@ libstetic_dll_sources =			\
 	ParamSpec.cs			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
-	PropertyGroup.cs		\
 	SiteContentEnumerator.cs	\
 	WidgetBox.cs			\
 	WidgetSite.cs			\
@@ -34,6 +36,7 @@ libstetic_dll_sources =			\
 	wrapper/CheckButton.cs		\
 	wrapper/ColorButton.cs		\
 	wrapper/ComboBox.cs		\
+	wrapper/ComboBoxEntry.cs	\
 	wrapper/Container.cs		\
 	wrapper/Dialog.cs		\
 	wrapper/DrawingArea.cs		\

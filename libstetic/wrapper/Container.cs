@@ -13,7 +13,7 @@ namespace Stetic.Wrapper {
 			return Object.Lookup (obj) as Stetic.Wrapper.Container;
 		}
 
-		public abstract PropertyGroup[] ChildPropertyGroups { get; }
+		public abstract ItemGroup[] ChildItemGroups { get; }
 
 		public abstract bool HExpandable { get; }
 		public abstract bool VExpandable { get; }

@@ -3,27 +3,27 @@ using System;
 namespace Stetic.Wrapper {
 
 	public abstract class Paned : Stetic.Wrapper.Container {
-		public static PropertyGroup PanedProperties;
-		public static PropertyGroup PanedChildProperties;
+		public static ItemGroup PanedProperties;
+		public static ItemGroup PanedChildProperties;
 
 		static Paned () {
-			PanedProperties = new PropertyGroup ("Pane Properties",
-							     typeof (Gtk.Paned),
-							     "MinPosition",
-							     "MaxPosition",
-							     "BorderWidth");
+			PanedProperties = new ItemGroup ("Pane Properties",
+							 typeof (Gtk.Paned),
+							 "MinPosition",
+							 "MaxPosition",
+							 "BorderWidth");
+			
+			PanedChildProperties = new ItemGroup ("Pane Child Layout",
+							      typeof (Gtk.Paned.PanedChild),
+							      "Resize",
+							      "Shrink");
 
-			PanedChildProperties = new PropertyGroup ("Pane Child Layout",
-								  typeof (Gtk.Paned.PanedChild),
-								  "Resize",
-								  "Shrink");
-
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				Paned.PanedProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 
-			childgroups = new PropertyGroup[] {
+			childgroups = new ItemGroup[] {
 				Paned.PanedChildProperties
 			};
 		}
@@ -34,10 +34,10 @@ namespace Stetic.Wrapper {
 			paned.Pack2 (CreateWidgetSite (), true, false);
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
-		static PropertyGroup[] childgroups;
-		public override PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+		static ItemGroup[] childgroups;
+		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 	}
 }

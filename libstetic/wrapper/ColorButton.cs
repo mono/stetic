@@ -5,17 +5,20 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Color Button", "colorbutton.png", ObjectWrapperType.Widget)]
 	public class ColorButton : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup ColorButtonProperties;
+		public static ItemGroup ColorButtonProperties;
 
 		static ColorButton () {
-			ColorButtonProperties = new PropertyGroup ("Color Button Properties",
-								   typeof (Gtk.ColorButton),
-								   "Alpha",
-								   "Color",
-								   "Title",
-								   "UseAlpha");
+			// FIXME: we should merge UseAlpha and Alpha into an OptIntRange
 
-			groups = new PropertyGroup[] {
+			ColorButtonProperties = new ItemGroup ("Color Button Properties",
+							       typeof (Gtk.ColorButton),
+							       "Title",
+							       "Color",
+							       "UseAlpha",
+							       "Alpha");
+			ColorButtonProperties["Alpha"].DependsOn (ColorButtonProperties["UseAlpha"]);
+
+			groups = new ItemGroup[] {
 				ColorButtonProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -25,7 +28,7 @@ namespace Stetic.Wrapper {
 
 		public ColorButton (IStetic stetic, Gtk.ColorButton colorbutton) : base (stetic, colorbutton) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

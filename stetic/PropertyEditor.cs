@@ -155,19 +155,24 @@ namespace Stetic {
 			Add (editor);
 		}
 
-		bool updating = false;
+		bool syncing = false;
 
 		void EditorValueChanged (object o, EventArgs args)
 		{
-			if (!updating)
+			if (!syncing) {
+				syncing = true;
 				prop.SetValue (obj, editorProp.GetValue (editor, null));
+				syncing = false;
+			}
 		}
 
 		public override void Update (object o, EventArgs args)
 		{
-			updating = true;
-			editorProp.SetValue (editor, prop.GetValue (obj), null);
-			updating = false;
+			if (!syncing) {
+				syncing = true;
+				editorProp.SetValue (editor, prop.GetValue (obj), null);
+				syncing = false;
+			}
 		}
 	}
 

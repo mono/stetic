@@ -1,5 +1,62 @@
 2005-02-13  Dan Winship  <danw@novell.com>
 
+	* libstetic/CommandDescriptor.cs: like PropertyDescriptor, but
+	describes commands implemented by the widget wrapper (which, like
+	properties, can become sensitive and insensitive depending on
+	other properties)
+
+	* libstetic/CommandAttribute.cs: attribute for marking methods
+	that will be referred to via CommandDescriptors
+
+	* libstetic/IContextMenuProvider.cs: Gone, this functionality is
+	part of CommandDescriptor now.
+
+	* libstetic/ItemDescriptor.cs: abstract subclass for
+	PropertyDescriptor and CommandDescriptor
+
+	* libstetic/PropertyDescriptor.cs: make this a subclass of
+	ItemDescriptor
+
+	* libstetic/ItemGroup.cs: formerly PropertyGroup, but now can hold
+	any ItemDescriptor.
+	
+	* libstetic/wrapper/Object.cs: add a ContextMenuItems property,
+	empty by default.
+
+	* libstetic/wrapper/*.cs: update for Item changes
+
+	* libstetic/wrapper/Button.cs: implement "Remove Button Contents"
+	and "Restore Button Label" as Commands. Add dummy properties
+	HasLabel and HasContents for them to depend on.
+
+	* libstetic/wrapper/Box.cs: 
+	* libstetic/wrapper/Notebook.cs: 
+	* libstetic/wrapper/Table.cs: change IContextMenuItemProvider
+	stuff to use the new Command stuff
+
+	* libstetic/wrapper/ComboBox.cs: replace Model property with a
+	multi-line-text Items property
+
+	* libstetic/wrapper/ComboBoxEntry.cs: new wrapper
+
+	* libstetic/wrapper/Window.cs: on a DeleteEvent, just hide the window
+
+	* stetic/Grid.cs: Allow adding of arbitrary widgets in addition to
+	the property name/editor pairs.
+
+	* stetic/PropertyGrid.cs: Implement CommandDescriptors by adding
+	buttons to the Grid.
+
+	* stetic/ContextMenu.cs: update for CommandDescriptor stuff
+
+	* stetic/PropertyEditor.cs (EditorValueChanged, Update): Fix this
+	again to avoid updating loops
+
+	* stetic/WidgetSite.cs (WindowSite.Select): Show() the window, in
+	case it was hidden
+
+2005-02-13  Dan Winship  <danw@novell.com>
+
 	* libstetic/ParamSpec.cs (gtksharp_get_type_id): Fix the library
 	name in the DllImport attribute
 

@@ -5,25 +5,25 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Entry", "entry.png", ObjectWrapperType.Widget)]
 	public class Entry : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup EntryProperties;
-		public static PropertyGroup EntryExtraProperties;
+		public static ItemGroup EntryProperties;
+		public static ItemGroup EntryExtraProperties;
 
 		static Entry () {
-			EntryProperties = new PropertyGroup ("Entry Properties",
-							     typeof (Gtk.Entry),
-							     "Text",
-							     "Editable",
-							     "WidthChars",
-							     "MaxLength",
-							     "HasFrame",
-							     "ActivatesDefault",
-							     "Visibility");
-			EntryExtraProperties = new PropertyGroup ("Extra Entry Properties",
-								  typeof (Gtk.Entry),
-								  "InvisibleChar",
-								  "Xalign");
+			EntryProperties = new ItemGroup ("Entry Properties",
+							 typeof (Gtk.Entry),
+							 "Text",
+							 "Editable",
+							 "WidthChars",
+							 "MaxLength",
+							 "HasFrame",
+							 "ActivatesDefault",
+							 "Visibility");
+			EntryExtraProperties = new ItemGroup ("Extra Entry Properties",
+							      typeof (Gtk.Entry),
+							      "InvisibleChar",
+							      "Xalign");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				EntryProperties, EntryExtraProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -33,7 +33,7 @@ namespace Stetic.Wrapper {
 
 		public Entry (IStetic stetic, Gtk.Entry entry) : base (stetic, entry) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

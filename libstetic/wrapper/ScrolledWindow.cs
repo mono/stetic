@@ -6,22 +6,22 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("ScrolledWindow", "scrolledwindow.png", ObjectWrapperType.Container)]
 	public class ScrolledWindow : Stetic.Wrapper.Container {
 
-		public static PropertyGroup ScrolledWindowProperties;
+		public static ItemGroup ScrolledWindowProperties;
 
 		static ScrolledWindow () {
-			ScrolledWindowProperties = new PropertyGroup ("ScrolledWindow Properties",
-								      typeof (Gtk.ScrolledWindow),
-								      "VscrollbarPolicy",
-								      "HscrollbarPolicy",
-								      "ShadowType",
-								      "WindowPlacement",
-								      "BorderWidth");
-			groups = new PropertyGroup[] {
+			ScrolledWindowProperties = new ItemGroup ("ScrolledWindow Properties",
+								  typeof (Gtk.ScrolledWindow),
+								  "VscrollbarPolicy",
+								  "HscrollbarPolicy",
+								  "ShadowType",
+								  "WindowPlacement",
+								  "BorderWidth");
+			groups = new ItemGroup[] {
 				ScrolledWindowProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 
-			childgroups = new PropertyGroup[0];
+			childgroups = new ItemGroup[0];
 		}
 
 		public ScrolledWindow (IStetic stetic) : this (stetic, new Gtk.ScrolledWindow ()) {}
@@ -32,11 +32,11 @@ namespace Stetic.Wrapper {
 			scrolledwindow.AddWithViewport (CreateWidgetSite ());
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
-		static PropertyGroup[] childgroups;
-		public override PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+		static ItemGroup[] childgroups;
+		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable { get { return true; } }

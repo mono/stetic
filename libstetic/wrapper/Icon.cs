@@ -7,16 +7,16 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Stock Icon", "image.png", ObjectWrapperType.Widget)]
 	public class Icon : Misc {
 
-		public static PropertyGroup IconProperties;
+		public static ItemGroup IconProperties;
 
 		static Icon () {
-			IconProperties = new PropertyGroup ("Stock Icon Properties",
-							    typeof (Stetic.Wrapper.Icon),
-							    typeof (Gtk.Image),
-							    "Stock",
-							    "IconSize");
+			IconProperties = new ItemGroup ("Stock Icon Properties",
+							typeof (Stetic.Wrapper.Icon),
+							typeof (Gtk.Image),
+							"Stock",
+							"IconSize");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				IconProperties, Misc.MiscProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -26,8 +26,8 @@ namespace Stetic.Wrapper {
 
 		public Icon (IStetic stetic, Gtk.Image icon) : base (stetic, icon) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		[Editor (typeof (Stetic.Editor.StockItem), typeof (Gtk.Widget))]
 		public string Stock {

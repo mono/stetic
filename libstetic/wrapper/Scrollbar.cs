@@ -4,7 +4,7 @@ namespace Stetic.Wrapper {
 
 	public abstract class Scrollbar : Range {
 		static Scrollbar () {
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				Range.RangeAdjustmentProperties,
 				Range.RangeProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
@@ -13,7 +13,7 @@ namespace Stetic.Wrapper {
 
 		protected Scrollbar (IStetic stetic, Gtk.Scrollbar scrollbar) : base (stetic, scrollbar) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

@@ -5,18 +5,18 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Radio Button", "radiobutton.png", ObjectWrapperType.Widget)]
 	public class RadioButton : ToggleButton {
 
-		public static PropertyGroup RadioButtonProperties;
-		public static PropertyGroup RadioButtonExtraProperties;
+		public static ItemGroup RadioButtonProperties;
+		public static ItemGroup RadioButtonExtraProperties;
 
 		static RadioButton () {
-			RadioButtonProperties = new PropertyGroup ("Radio Button Properties",
-								   typeof (Gtk.RadioButton),
-								   "Label",
-								   "Active",
-								   "Inconsistent",
-								   "DrawIndicator");
+			RadioButtonProperties = new ItemGroup ("Radio Button Properties",
+							       typeof (Gtk.RadioButton),
+							       "Label",
+							       "Active",
+							       "Inconsistent",
+							       "DrawIndicator");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				RadioButtonProperties, Button.ButtonExtraProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -26,7 +26,7 @@ namespace Stetic.Wrapper {
 
 		public RadioButton (IStetic stetic, Gtk.RadioButton radiobutton) : base (stetic, radiobutton) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

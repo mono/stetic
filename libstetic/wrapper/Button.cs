@@ -5,33 +5,56 @@ using System.ComponentModel;
 namespace Stetic.Wrapper {
 
 	[ObjectWrapper ("Button", "button.png", ObjectWrapperType.Widget)]
-	public class Button : Stetic.Wrapper.Widget, Stetic.IContextMenuProvider {
+	public class Button : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup ButtonProperties;
-		public static PropertyGroup ButtonExtraProperties;
+		public static ItemGroup ButtonProperties;
+		public static ItemGroup ButtonExtraProperties;
 
 		static Button () {
-			ButtonProperties = new PropertyGroup ("Button Properties",
-							      typeof (Stetic.Wrapper.Button),
-							      typeof (Gtk.Button),
-							      "UseStock",
-							      "StockId",
-							      "Label");
+			ButtonProperties = new ItemGroup ("Button Properties",
+							  typeof (Stetic.Wrapper.Button),
+							  typeof (Gtk.Button),
+							  "UseStock",
+							  "StockId",
+							  "Label",
+							  "RemoveContents",
+							  "RestoreLabel");
 			ButtonProperties["StockId"].DependsOn (ButtonProperties["UseStock"]);
 			ButtonProperties["Label"].DependsInverselyOn (ButtonProperties["UseStock"]);
 
-			ButtonExtraProperties = new PropertyGroup ("Extra Button Properties",
-								   typeof (Gtk.Button),
-								   "FocusOnClick",
-								   "UseUnderline",
-								   "Relief",
-								   "Xalign",
-								   "Yalign");
+			PropertyDescriptor hasLabel = new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
+									      typeof (Gtk.Button),
+									      "HasLabel");
+			ButtonProperties["UseStock"].DependsOn (hasLabel);
+			ButtonProperties["StockId"].DependsOn (hasLabel);
+			ButtonProperties["Label"].DependsOn (hasLabel);
+			ButtonProperties["RestoreLabel"].DependsInverselyOn (hasLabel);
 
-			groups = new PropertyGroup[] {
+			PropertyDescriptor hasContents = new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
+										 typeof (Gtk.Button),
+										 "HasContents");
+			ButtonProperties["RemoveContents"].DependsOn (hasContents);
+
+			ButtonExtraProperties = new ItemGroup ("Extra Button Properties",
+							       typeof (Gtk.Button),
+							       "FocusOnClick",
+							       "UseUnderline",
+							       "Relief",
+							       "Xalign",
+							       "Yalign");
+
+			groups = new ItemGroup[] {
 				ButtonProperties, ButtonExtraProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
+
+			contextItems = new ItemGroup (null,
+						      typeof (Stetic.Wrapper.Button),
+						      typeof (Gtk.Button),
+						      "RemoveContents",
+						      "RestoreLabel");
+			contextItems["RemoveContents"].DependsOn (hasContents);
+			contextItems["RestoreLabel"].DependsInverselyOn (hasLabel);
 		}
 
 		public Button (IStetic stetic) : this (stetic, new Gtk.Button (Gtk.Stock.Ok)) {}
@@ -47,8 +70,11 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
+
+		static ItemGroup contextItems;
+		public override ItemGroup ContextMenuItems { get { return contextItems; } }
 
 		private Gtk.Button button {
 			get {
@@ -56,34 +82,40 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public IEnumerable ContextMenuItems (IWidgetSite context)
-		{
-			ContextMenuItem[] items;
-			WidgetSite site = button.Child as WidgetSite;
-
-			bool hasLabel = (site == null);
-			bool isEmpty = (site != null) && !site.Occupied;
-
-			// FIXME; I'm only assigning to a variable rather than
-			// returning it directly to make emacs indentation happy
-			items = new ContextMenuItem[] {
-				new ContextMenuItem ("Remove Button Contents", new ContextMenuItemDelegate (RemoveContents), !isEmpty),
-				new ContextMenuItem ("Restore Button Label", new ContextMenuItemDelegate (RestoreLabel), !hasLabel)
-			};
-			return items;
+		// true if the button has a label rather than custom contents
+		public bool HasLabel {
+			get {
+				return (button.Child as WidgetSite) == null;
+			}
 		}
 
-		void RemoveContents (IWidgetSite context)
+		// true if the button has *anything* in it
+		public bool HasContents {
+			get {
+				WidgetSite site = button.Child as WidgetSite;
+				return (site == null) || site.Occupied;
+			}
+		}
+
+		[Command ("Remove Button Contents")]
+		void RemoveContents ()
 		{
 			if (button.Child != null)
 				button.Remove (button.Child);
 
 			WidgetSite site = stetic.CreateWidgetSite ();
 			site.Show ();
+			site.OccupancyChanged += delegate (WidgetSite site) {
+				EmitNotify ("HasContents");
+			};
 			button.Add (site);
+
+			EmitNotify ("HasContents");
+			EmitNotify ("HasLabel");
 		}
 
-		void RestoreLabel (IWidgetSite context)
+		[Command ("Restore Button Label")]
+		void RestoreLabel ()
 		{
 			if (button.Child != null)
 				button.Remove (button.Child);
@@ -92,6 +124,9 @@ namespace Stetic.Wrapper {
 				button.Label = stockId;
 			else
 				button.Label = label;
+
+			EmitNotify ("HasContents");
+			EmitNotify ("HasLabel");
 		}
 
 		string stockId;

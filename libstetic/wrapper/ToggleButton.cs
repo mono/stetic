@@ -5,21 +5,21 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Toggle Button", "togglebutton.png", ObjectWrapperType.Widget)]
 	public class ToggleButton : Button {
 
-		public static PropertyGroup ToggleButtonProperties;
+		public static ItemGroup ToggleButtonProperties;
 
 		static ToggleButton () {
-			ToggleButtonProperties = new PropertyGroup ("Toggle Button Properties",
-								    typeof (Stetic.Wrapper.ToggleButton),
-								    typeof (Gtk.ToggleButton),
-								    "UseStock",
-								    "StockId",
-								    "Label",
-								    "Active",
-								    "Inconsistent");
+			ToggleButtonProperties = new ItemGroup ("Toggle Button Properties",
+								typeof (Stetic.Wrapper.ToggleButton),
+								typeof (Gtk.ToggleButton),
+								"UseStock",
+								"StockId",
+								"Label",
+								"Active",
+								"Inconsistent");
 			ToggleButtonProperties["StockId"].DependsOn (ToggleButtonProperties["UseStock"]);
 			ToggleButtonProperties["Label"].DependsInverselyOn (ToggleButtonProperties["UseStock"]);
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				ToggleButtonProperties,
 				Button.ButtonExtraProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
@@ -30,7 +30,7 @@ namespace Stetic.Wrapper {
 
 		public ToggleButton (IStetic stetic, Gtk.ToggleButton button) : base (stetic, button) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

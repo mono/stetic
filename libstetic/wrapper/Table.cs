@@ -4,44 +4,54 @@ using System.Collections;
 namespace Stetic.Wrapper {
 
 	[ObjectWrapper ("Table", "table.png", ObjectWrapperType.Container)]
-	public class Table : Stetic.Wrapper.Container, Stetic.IContextMenuProvider {
+	public class Table : Stetic.Wrapper.Container {
 
-		public static PropertyGroup TableProperties;
-		public static PropertyGroup TableChildProperties;
+		public static ItemGroup TableProperties;
+		public static ItemGroup TableChildProperties;
 
 		static Table () {
-			TableProperties = new PropertyGroup ("Table Properties",
-							     typeof (Stetic.Wrapper.Table),
-							     typeof (Gtk.Table),
-							     "NRows",
-							     "NColumns",
-							     "Homogeneous",
-							     "RowSpacing",
-							     "ColumnSpacing",
-							     "BorderWidth");
+			TableProperties = new ItemGroup ("Table Properties",
+							 typeof (Stetic.Wrapper.Table),
+							 typeof (Gtk.Table),
+							 "NRows",
+							 "NColumns",
+							 "Homogeneous",
+							 "RowSpacing",
+							 "ColumnSpacing",
+							 "BorderWidth");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				TableProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 
-			TableChildProperties = new PropertyGroup ("Table Child Layout",
-								  typeof (Gtk.Table.TableChild),
-								  "TopAttach",
-								  "BottomAttach",
-								  "LeftAttach",
-								  "RightAttach",
-								  "XPadding",
-								  "YPadding",
-//								  "AutoSize",
-								  "XOptions",
-								  "YOptions");
+			TableChildProperties = new ItemGroup ("Table Child Layout",
+							      typeof (Gtk.Table.TableChild),
+							      "TopAttach",
+							      "BottomAttach",
+							      "LeftAttach",
+							      "RightAttach",
+							      "XPadding",
+							      "YPadding",
+//							      "AutoSize",
+							      "XOptions",
+							      "YOptions");
 //			TableChildProperties["XOptions"].DependsOn (TableChildProperties["AutoSize"]);
 //			TableChildProperties["YOptions"].DependsOn (TableChildProperties["AutoSize"]);
 
-			childgroups = new PropertyGroup[] {
+			childgroups = new ItemGroup[] {
 				TableChildProperties
 			};
+
+			contextItems = new ItemGroup (null,
+							  typeof (Stetic.Wrapper.Table),
+							  typeof (Gtk.Table),
+							  "InsertRowBefore",
+							  "InsertRowAfter",
+							  "InsertColumnBefore",
+							  "InsertColumnAfter",
+							  "DeleteRow",
+							  "DeleteColumn");
 		}
 
 		const Gtk.AttachOptions expandOpts = Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill;
@@ -55,11 +65,14 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
-		static PropertyGroup[] childgroups;
-		public override PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+		static ItemGroup[] childgroups;
+		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
+
+		static ItemGroup contextItems;
+		public override ItemGroup ContextMenuItems { get { return contextItems; } }
 
 		private Gtk.Table table {
 			get {
@@ -308,53 +321,42 @@ namespace Stetic.Wrapper {
 			Thaw ();
 		}
 
-		public IEnumerable ContextMenuItems (IWidgetSite context)
-		{
-			ContextMenuItem[] items;
-
-			// FIXME; I'm only assigning to a variable rather than
-			// returning it directly to make emacs indentation happy
-			items = new ContextMenuItem[] {
-				new ContextMenuItem ("Insert Row Before", new ContextMenuItemDelegate (InsertRowBefore)),
-				new ContextMenuItem ("Insert Row After", new ContextMenuItemDelegate (InsertRowAfter)),
-				new ContextMenuItem ("Insert Column Before", new ContextMenuItemDelegate (InsertColumnBefore)),
-				new ContextMenuItem ("Insert Column After", new ContextMenuItemDelegate (InsertColumnAfter)),
-				new ContextMenuItem ("Delete Row", new ContextMenuItemDelegate (DeleteRow)),
-				new ContextMenuItem ("Delete Column", new ContextMenuItemDelegate (DeleteColumn)),
-			};
-			return items;
-		}
-
+		[Command ("Insert Row Before")]
 		void InsertRowBefore (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			AddRow (tc.TopAttach);
 		}
 
+		[Command ("Insert Row After")]
 		void InsertRowAfter (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			AddRow (tc.BottomAttach);
 		}
 
+		[Command ("Insert Column Before")]
 		void InsertColumnBefore (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			AddColumn (tc.LeftAttach);
 		}
 
+		[Command ("Insert Column After")]
 		void InsertColumnAfter (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			AddColumn (tc.RightAttach);
 		}
 
+		[Command ("Delete Row")]
 		void DeleteRow (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			DeleteRow (tc.TopAttach);
 		}
 
+		[Command ("Delete Column")]
 		void DeleteColumn (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;

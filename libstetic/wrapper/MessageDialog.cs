@@ -5,29 +5,29 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Message Dialog", "messagedialog.png", ObjectWrapperType.Window)]
 	public class MessageDialog : Dialog {
 
-		public static PropertyGroup MessageDialogProperties;
+		public static ItemGroup MessageDialogProperties;
 
 		static MessageDialog () {
-			MessageDialogProperties = new PropertyGroup ("Message Dialog Properties",
-								     typeof (Stetic.Wrapper.MessageDialog),
-								     typeof (Gtk.MessageDialog),
-								     "Title",
-								     "MessageType",
-								     "PrimaryText",
-								     "SecondaryText",
-								     "Buttons",
-								     "Icon",
-								     "WindowPosition",
-								     "Modal",
-								     "BorderWidth");
-			groups = new PropertyGroup[] {
+			MessageDialogProperties = new ItemGroup ("Message Dialog Properties",
+								 typeof (Stetic.Wrapper.MessageDialog),
+								 typeof (Gtk.MessageDialog),
+								 "Title",
+								 "MessageType",
+								 "PrimaryText",
+								 "SecondaryText",
+								 "Buttons",
+								 "Icon",
+								 "WindowPosition",
+								 "Modal",
+								 "BorderWidth");
+			groups = new ItemGroup[] {
 				MessageDialogProperties,
 				Dialog.DialogMiscProperties,
 				Window.WindowSizeProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 
-			childgroups = new PropertyGroup[0];
+			childgroups = new ItemGroup[0];
 		}
 
 		Gtk.Label label, secondaryLabel;
@@ -70,11 +70,11 @@ namespace Stetic.Wrapper {
 			Buttons = Gtk.ButtonsType.OkCancel;
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
-		static PropertyGroup[] childgroups;
-		public override PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+		static ItemGroup[] childgroups;
+		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 
 		private Gtk.Dialog dialog {
 			get {

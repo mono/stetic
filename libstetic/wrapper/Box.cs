@@ -3,32 +3,38 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Box : Stetic.Wrapper.Container, Stetic.IContextMenuProvider {
-		public static PropertyGroup BoxProperties;
-		public static PropertyGroup BoxChildProperties;
+	public abstract class Box : Stetic.Wrapper.Container {
+		public static ItemGroup BoxProperties;
+		public static ItemGroup BoxChildProperties;
 
 		static Box () {
-			BoxProperties = new PropertyGroup ("Box Properties",
-							   typeof (Gtk.Box),
-							   "Homogeneous",
-							   "Spacing",
-							   "BorderWidth");
-			BoxChildProperties = new PropertyGroup ("Box Child Layout",
-								typeof (Gtk.Box.BoxChild),
-								"PackType",
-								"Position",
-								"Expand",
-								"Fill",
-								"Padding");
+			BoxProperties = new ItemGroup ("Box Properties",
+						       typeof (Gtk.Box),
+						       "Homogeneous",
+						       "Spacing",
+						       "BorderWidth");
+			BoxChildProperties = new ItemGroup ("Box Child Layout",
+							    typeof (Gtk.Box.BoxChild),
+							    "PackType",
+							    "Position",
+							    "Expand",
+							    "Fill",
+							    "Padding");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				Box.BoxProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 
-			childgroups = new PropertyGroup[] {
+			childgroups = new ItemGroup[] {
 				Box.BoxChildProperties
 			};
+
+			contextItems = new ItemGroup (null,
+						      typeof (Stetic.Wrapper.Box),
+						      typeof (Gtk.Box),
+						      "InsertBefore",
+						      "InsertAfter");
 		}
 
 		protected Box (IStetic stetic, Gtk.Box box) : base (stetic, box)
@@ -37,25 +43,16 @@ namespace Stetic.Wrapper {
 				box.PackStart (CreateWidgetSite ());
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
-		static PropertyGroup[] childgroups;
-		public override PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+		static ItemGroup[] childgroups;
+		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 
-		public IEnumerable ContextMenuItems (IWidgetSite context)
-		{
-			ContextMenuItem[] items;
+		static ItemGroup contextItems;
+		public override ItemGroup ContextMenuItems { get { return contextItems; } }
 
-			// FIXME; I'm only assigning to a variable rather than
-			// returning it directly to make emacs indentation happy
-			items = new ContextMenuItem[] {
-				new ContextMenuItem ("Insert Before", new ContextMenuItemDelegate (InsertBefore)),
-				new ContextMenuItem ("Insert After", new ContextMenuItemDelegate (InsertAfter)),
-			};
-			return items;
-		}
-
+		[Command ("Insert Before")]
 		void InsertBefore (IWidgetSite context)
 		{
 			Gtk.Box box = (Gtk.Box)Wrapped;
@@ -70,6 +67,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		[Command ("Insert After")]
 		void InsertAfter (IWidgetSite context)
 		{
 			Gtk.Box box = (Gtk.Box)Wrapped;

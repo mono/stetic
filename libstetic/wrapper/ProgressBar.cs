@@ -5,15 +5,15 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("ProgressBar", "progressbar.png", ObjectWrapperType.Widget)]
 	public class ProgressBar : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup ProgressBarProperties;
+		public static ItemGroup ProgressBarProperties;
 
 		static ProgressBar () {
-			ProgressBarProperties = new PropertyGroup ("Progress Bar Properties",
-								   typeof (Gtk.ProgressBar),
-								   "Orientation",
-								   "Text",
-								   "PulseStep");
-			groups = new PropertyGroup[] {
+			ProgressBarProperties = new ItemGroup ("Progress Bar Properties",
+							       typeof (Gtk.ProgressBar),
+							       "Orientation",
+							       "Text",
+							       "PulseStep");
+			groups = new ItemGroup[] {
 				ProgressBarProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -23,7 +23,7 @@ namespace Stetic.Wrapper {
 
 		public ProgressBar (IStetic stetic, Gtk.ProgressBar progressbar) : base (stetic, progressbar) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

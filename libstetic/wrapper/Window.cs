@@ -1,3 +1,4 @@
+using GLib;
 using System;
 
 namespace Stetic.Wrapper {
@@ -5,43 +6,43 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Window", "window.png", ObjectWrapperType.Window)]
 	public class Window : Stetic.Wrapper.Container {
 
-		public static PropertyGroup WindowProperties;
-		public static PropertyGroup WindowSizeProperties;
-		public static PropertyGroup WindowMiscProperties;
+		public static ItemGroup WindowProperties;
+		public static ItemGroup WindowSizeProperties;
+		public static ItemGroup WindowMiscProperties;
 
 		static Window () {
-			WindowProperties = new PropertyGroup ("Window Properties",
+			WindowProperties = new ItemGroup ("Window Properties",
+							  typeof (Gtk.Window),
+							  "Title",
+							  "Icon",
+							  "Type",
+							  "TypeHint",
+							  "WindowPosition",
+							  "Modal",
+							  "BorderWidth");
+			WindowSizeProperties = new ItemGroup ("Window Size Properties",
 							      typeof (Gtk.Window),
-							      "Title",
-							      "Icon",
-							      "Type",
-							      "TypeHint",
-							      "WindowPosition",
-							      "Modal",
-							      "BorderWidth");
-			WindowSizeProperties = new PropertyGroup ("Window Size Properties",
-								  typeof (Gtk.Window),
-								  "Resizable",
-								  "AllowGrow",
-								  "AllowShrink",
-								  "DefaultWidth",
-								  "DefaultHeight");
-			WindowMiscProperties = new PropertyGroup ("Miscellaneous Window Properties",
-								  typeof (Gtk.Window),
-								  "AcceptFocus",
-								  "Decorated",
-								  "DestroyWithParent",
-								  "Gravity",
-								  "Role",
-								  "SkipPagerHint",
-								  "SkipTaskbarHint");
+							      "Resizable",
+							      "AllowGrow",
+							      "AllowShrink",
+							      "DefaultWidth",
+							      "DefaultHeight");
+			WindowMiscProperties = new ItemGroup ("Miscellaneous Window Properties",
+							      typeof (Gtk.Window),
+							      "AcceptFocus",
+							      "Decorated",
+							      "DestroyWithParent",
+							      "Gravity",
+							      "Role",
+							      "SkipPagerHint",
+							      "SkipTaskbarHint");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				WindowProperties, WindowSizeProperties, WindowMiscProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 
-			childgroups = new PropertyGroup[0];
+			childgroups = new ItemGroup[0];
 		}
 
 		public Window (IStetic stetic) : this (stetic, new Gtk.Window ("Window")) {}
@@ -49,13 +50,21 @@ namespace Stetic.Wrapper {
 		public Window (IStetic stetic, Gtk.Window window) : base (stetic, window)
 		{
 			window.Add (CreateWidgetSite (200, 200));
+			window.DeleteEvent += DeleteEvent;
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		[ConnectBefore]
+		void DeleteEvent (object obj, Gtk.DeleteEventArgs args)
+		{
+			((Gtk.Widget)Wrapped).Hide ();
+			args.RetVal = true;
+		}
 
-		static PropertyGroup[] childgroups;
-		public override PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
+
+		static ItemGroup[] childgroups;
+		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable { get { return true; } }

@@ -5,34 +5,34 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Dialog Box", "dialog.png", ObjectWrapperType.Window)]
 	public class Dialog : Window {
 
-		public static PropertyGroup DialogProperties;
-		public static PropertyGroup DialogMiscProperties;
+		public static ItemGroup DialogProperties;
+		public static ItemGroup DialogMiscProperties;
 
 		static Dialog () {
-			DialogProperties = new PropertyGroup ("Dialog Properties",
+			DialogProperties = new ItemGroup ("Dialog Properties",
+							  typeof (Gtk.Dialog),
+							  "Title",
+							  "Icon",
+							  "WindowPosition",
+							  "Modal",
+							  "BorderWidth");
+			DialogMiscProperties = new ItemGroup ("Miscellaneous Dialog Properties",
 							      typeof (Gtk.Dialog),
-							      "Title",
-							      "Icon",
-							      "WindowPosition",
-							      "Modal",
-							      "BorderWidth");
-			DialogMiscProperties = new PropertyGroup ("Miscellaneous Dialog Properties",
-								  typeof (Gtk.Dialog),
-								  "HasSeparator",
-								  "AcceptFocus",
-								  "Decorated",
-								  "DestroyWithParent",
-								  "Gravity",
-								  "Role",
-								  "SkipPagerHint",
-								  "SkipTaskbarHint");
-			groups = new PropertyGroup[] {
+							      "HasSeparator",
+							      "AcceptFocus",
+							      "Decorated",
+							      "DestroyWithParent",
+							      "Gravity",
+							      "Role",
+							      "SkipPagerHint",
+							      "SkipTaskbarHint");
+			groups = new ItemGroup[] {
 				DialogProperties, DialogMiscProperties,
 				Window.WindowSizeProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 
-			childgroups = new PropertyGroup[0];
+			childgroups = new ItemGroup[0];
 		}
 
 		public Dialog (IStetic stetic) : this (stetic, new Gtk.Dialog ()) {}
@@ -42,10 +42,10 @@ namespace Stetic.Wrapper {
 			dialog.VBox.Add (CreateWidgetSite (200, 200));
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
-		static PropertyGroup[] childgroups;
-		public override PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+		static ItemGroup[] childgroups;
+		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 	}
 }

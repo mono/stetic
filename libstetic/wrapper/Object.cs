@@ -39,10 +39,15 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public abstract PropertyGroup[] PropertyGroups { get; }
+		public abstract ItemGroup[] ItemGroups { get; }
+
+		public virtual ItemGroup ContextMenuItems {
+			get {
+				return ItemGroup.Empty;
+			}
+		}
 
 		public delegate void WrapperNotificationDelegate (Object obj, string propertyName);
-
 		public event WrapperNotificationDelegate Notify;
 
 		protected void EmitNotify (string propertyName)

@@ -4,42 +4,56 @@ using System.Collections;
 namespace Stetic.Wrapper {
 
 	[ObjectWrapper ("Notebook", "notebook.png", ObjectWrapperType.Container)]
-	public class Notebook : Stetic.Wrapper.Container, Stetic.IContextMenuProvider {
+	public class Notebook : Stetic.Wrapper.Container {
 
-		public static PropertyGroup NotebookProperties;
-		public static PropertyGroup NotebookChildProperties;
+		public static ItemGroup NotebookProperties;
+		public static ItemGroup NotebookChildProperties;
 
 		static Notebook () {
-			NotebookProperties = new PropertyGroup ("Notebook Properties",
-								typeof (Gtk.Notebook),
-								"EnablePopup",
-								"Homogeneous",
-								"TabPos",
-								"TabBorder",
-								"TabHborder",
-								"TabVborder",
-								"ShowBorder",
-								"ShowTabs",
-								"Scrollable",
-								"BorderWidth");
+			NotebookProperties = new ItemGroup ("Notebook Properties",
+							    typeof (Stetic.Wrapper.Notebook),
+							    typeof (Gtk.Notebook),
+							    "EnablePopup",
+							    "Homogeneous",
+							    "TabPos",
+							    "TabBorder",
+							    "TabHborder",
+							    "TabVborder",
+							    "ShowBorder",
+							    "ShowTabs",
+							    "Scrollable",
+							    "BorderWidth",
+							    "InsertBefore",
+							    "InsertAfter");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				NotebookProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 
-			NotebookChildProperties = new PropertyGroup ("Notebook Child Layout",
-								     typeof (Gtk.Notebook.NotebookChild),
-								     "TabLabel",
-								     "Position",
-								     "TabPack",
-								     "TabExpand",
-								     "TabFill",
-								     "MenuLabel");
+			NotebookChildProperties = new ItemGroup ("Notebook Child Layout",
+								 typeof (Gtk.Notebook.NotebookChild),
+								 "TabLabel",
+								 "Position",
+								 "TabPack",
+								 "TabExpand",
+								 "TabFill",
+								 "MenuLabel");
 
-			childgroups = new PropertyGroup[] {
+			childgroups = new ItemGroup[] {
 				NotebookChildProperties
 			};
+
+			contextItems = new ItemGroup (null,
+						      typeof (Stetic.Wrapper.Notebook),
+						      typeof (Gtk.Notebook),
+						      "PreviousPage",
+						      "NextPage",
+						      "DeletePage",
+						      "SwapPrevious",
+						      "SwapNext",
+						      "InsertBefore",
+						      "InsertAfter");
 		}
 
 		public Notebook (IStetic stetic) : this (stetic, new Gtk.Notebook ()) {}
@@ -49,11 +63,14 @@ namespace Stetic.Wrapper {
 			notebook.AppendPage (CreateWidgetSite (), new Gtk.Label ("page"));
 		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 
-		static PropertyGroup[] childgroups;
-		public override PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+		static ItemGroup[] childgroups;
+		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
+
+		static ItemGroup contextItems;
+		public override ItemGroup ContextMenuItems { get { return contextItems; } }
 
 		private Gtk.Notebook notebook {
 			get {
@@ -61,56 +78,54 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public IEnumerable ContextMenuItems (IWidgetSite context)
-		{
-			ContextMenuItem[] items;
-			int page = notebook.PageNum ((Gtk.Widget)context);
-
-			// FIXME; I'm only assigning to a variable rather than
-			// returning it directly to make emacs indentation happy
-			items = new ContextMenuItem[] {
-				new ContextMenuItem ("Go to Previous Page", new ContextMenuItemDelegate (PreviousPage), page > 0),
-				new ContextMenuItem ("Go to Next Page", new ContextMenuItemDelegate (NextPage), page < notebook.NPages - 1),
-				new ContextMenuItem ("Delete Page", new ContextMenuItemDelegate (DeletePage)),
-				new ContextMenuItem ("Swap with Previous Page", new ContextMenuItemDelegate (SwapPrevious), page > 0),
-				new ContextMenuItem ("Swap with Next Page", new ContextMenuItemDelegate (SwapNext), page < notebook.NPages - 1),
-				new ContextMenuItem ("Insert Page Before", new ContextMenuItemDelegate (InsertBefore)),
-				new ContextMenuItem ("Insert Page After", new ContextMenuItemDelegate (InsertAfter)),
-			};
-			return items;
-		}
-
-		void PreviousPage (IWidgetSite context)
+		[Command ("Go to Previous Page", "CheckPreviousPage")]
+		void PreviousPage ()
 		{
 			notebook.PrevPage ();
 		}
 
-		void NextPage (IWidgetSite context)
+		bool CheckPreviousPage ()
+		{
+			return notebook.CurrentPage > 0;
+		}
+
+		[Command ("Go to Next Page", "CheckNextPage")]
+		void NextPage ()
 		{
 			notebook.NextPage ();
 		}
 
-		void DeletePage (IWidgetSite context)
+		bool CheckNextPage ()
+		{
+			return notebook.CurrentPage < notebook.NPages - 1;
+		}
+
+		[Command ("Delete Page")]
+		void DeletePage ()
 		{
 			notebook.RemovePage (notebook.CurrentPage);
 		}
 
-		void SwapPrevious (IWidgetSite context)
+		[Command ("Swap with Previous Page", "CheckPreviousPage")]
+		void SwapPrevious ()
 		{
 			// FIXME
 		}
 
-		void SwapNext (IWidgetSite context)
+		[Command ("Swap with Next Page", "CheckNextPage")]
+		void SwapNext ()
 		{
 			// FIXME
 		}
 
-		void InsertBefore (IWidgetSite context)
+		[Command ("Insert Page Before")]
+		void InsertBefore ()
 		{
 			notebook.CurrentPage = notebook.InsertPage (CreateWidgetSite (), new Gtk.Label ("page"), notebook.CurrentPage);
 		}
 
-		void InsertAfter (IWidgetSite context)
+		[Command ("Insert Page After")]
+		void InsertAfter ()
 		{
 			notebook.CurrentPage = notebook.InsertPage (CreateWidgetSite (), new Gtk.Label ("page"), notebook.CurrentPage + 1);
 		}

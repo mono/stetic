@@ -3,21 +3,21 @@ using System;
 namespace Stetic.Wrapper {
 
 	public abstract class Widget : Stetic.Wrapper.Object {
-		public static PropertyGroup CommonWidgetProperties;
+		public static ItemGroup CommonWidgetProperties;
 
 		static Widget () {
-			CommonWidgetProperties = new PropertyGroup ("Common Widget Properties",
-								    typeof (Gtk.Widget),
-								    "WidthRequest",
-								    "HeightRequest",
-								    "Visible",
-								    "Sensitive",
-								    "CanDefault",
-								    "HasDefault",
-								    "CanFocus",
-								    "HasFocus",
-								    "Events",
-								    "ExtensionEvents");
+			CommonWidgetProperties = new ItemGroup ("Common Widget Properties",
+								typeof (Gtk.Widget),
+								"WidthRequest",
+								"HeightRequest",
+								"Visible",
+								"Sensitive",
+								"CanDefault",
+								"HasDefault",
+								"CanFocus",
+								"HasFocus",
+								"Events",
+								"ExtensionEvents");
 		}
 
 		protected Widget (IStetic stetic, Gtk.Widget widget) : base (stetic, widget) {}

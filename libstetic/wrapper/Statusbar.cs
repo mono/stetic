@@ -5,14 +5,14 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Statusbar", "statusbar.png", ObjectWrapperType.Widget)]
 	public class Statusbar : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup StatusbarProperties;
+		public static ItemGroup StatusbarProperties;
 
 		static Statusbar () {
-			StatusbarProperties = new PropertyGroup ("Status Bar Properties",
-								 typeof (Gtk.Statusbar),
-								 "HasResizeGrip");
+			StatusbarProperties = new ItemGroup ("Status Bar Properties",
+							     typeof (Gtk.Statusbar),
+							     "HasResizeGrip");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				StatusbarProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -22,7 +22,7 @@ namespace Stetic.Wrapper {
 
 		public Statusbar (IStetic stetic, Gtk.Statusbar statusbar) : base (stetic, statusbar) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

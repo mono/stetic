@@ -28,11 +28,11 @@ namespace Stetic {
 			Add (item);
 
 			Stetic.Wrapper.Object wrapper = Stetic.Wrapper.Object.Lookup (site.Contents);
-			if (wrapper is IContextMenuProvider) {
-				foreach (ContextMenuItem cmi in ((IContextMenuProvider)wrapper).ContextMenuItems (top)) {
-					item = new MenuItem (cmi.Label);
-					if (cmi.Enabled)
-						item.Activated += new Stupid69614Workaround (top, cmi.Callback).Activate;
+			if (wrapper != null) {
+				foreach (CommandDescriptor cmd in wrapper.ContextMenuItems.Items) {
+					item = new MenuItem (cmd.Label);
+					if (cmd.Enabled (wrapper, top))
+						item.Activated += new Stupid69614Workaround (cmd, wrapper, top).Activate;
 					else
 						item.Sensitive = false;
 					Add (item);
@@ -72,16 +72,19 @@ namespace Stetic {
 		}
 
 		private class Stupid69614Workaround {
+			CommandDescriptor cmd;
+			object obj;
 			IWidgetSite top;
-			ContextMenuItemDelegate callback;
 
-			public Stupid69614Workaround (IWidgetSite top, ContextMenuItemDelegate callback) {
+			public Stupid69614Workaround (CommandDescriptor cmd, object obj, IWidgetSite top)
+			{
+				this.cmd = cmd;
+				this.obj = obj;
 				this.top = top;
-				this.callback = callback;
 			}
 
-			public void Activate (object obj, EventArgs args) {
-				callback (top);
+			public void Activate (object o, EventArgs args) {
+				cmd.Run (obj, top);
 			}
 		}
 

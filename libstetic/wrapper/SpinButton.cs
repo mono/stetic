@@ -5,28 +5,28 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Spin Button", "spinbutton.png", ObjectWrapperType.Widget)]
 	public class SpinButton : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup SpinButtonProperties;
-		public static PropertyGroup SpinButtonAdjustmentProperties;
+		public static ItemGroup SpinButtonProperties;
+		public static ItemGroup SpinButtonAdjustmentProperties;
 
 		static SpinButton () {
-			SpinButtonAdjustmentProperties = new PropertyGroup ("Range Properties",
-									    typeof (Gtk.SpinButton),
-									    "Adjustment.Lower",
-									    "Adjustment.Upper",
-									    "Adjustment.PageIncrement",
-									    "Adjustment.PageSize",
-									    "Adjustment.StepIncrement");
-			SpinButtonProperties = new PropertyGroup ("Spin Button Properties",
-								  typeof (Gtk.SpinButton),
-								  "ClimbRate",
-								  "Digits",
-								  "Numeric",
-								  "SnapToTicks",
-								  "UpdatePolicy",
-								  "Value",
-								  "Wrap");
+			SpinButtonAdjustmentProperties = new ItemGroup ("Range Properties",
+									typeof (Gtk.SpinButton),
+									"Adjustment.Lower",
+									"Adjustment.Upper",
+									"Adjustment.PageIncrement",
+									"Adjustment.PageSize",
+									"Adjustment.StepIncrement");
+			SpinButtonProperties = new ItemGroup ("Spin Button Properties",
+							      typeof (Gtk.SpinButton),
+							      "ClimbRate",
+							      "Digits",
+							      "Numeric",
+							      "SnapToTicks",
+							      "UpdatePolicy",
+							      "Value",
+							      "Wrap");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				SpinButtonProperties, SpinButtonAdjustmentProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -36,7 +36,7 @@ namespace Stetic.Wrapper {
 
 		public SpinButton (IStetic stetic, Gtk.SpinButton spinbutton) : base (stetic, spinbutton) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

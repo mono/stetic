@@ -5,20 +5,20 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Label", "label.png", ObjectWrapperType.Widget)]
 	public class Label : Misc {
 
-		public static PropertyGroup LabelProperties;
+		public static ItemGroup LabelProperties;
 
 		static Label () {
-			LabelProperties = new PropertyGroup ("Label Properties",
-							     typeof (Gtk.Label),
-							     "LabelProp",
-							     "UseMarkup",
-							     "UseUnderline",
-							     "Wrap",
-							     "MnemonicWidget",
-							     "Justify",
-							     "Selectable");
+			LabelProperties = new ItemGroup ("Label Properties",
+							 typeof (Gtk.Label),
+							 "LabelProp",
+							 "UseMarkup",
+							 "UseUnderline",
+							 "Wrap",
+							 "MnemonicWidget",
+							 "Justify",
+							 "Selectable");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				LabelProperties, Misc.MiscProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -30,7 +30,7 @@ namespace Stetic.Wrapper {
 
 		public Label (IStetic stetic, string label) : base (stetic, new Gtk.Label (label)) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

@@ -1,35 +1,89 @@
 using System;
+using System.ComponentModel;
 
 namespace Stetic.Wrapper {
 
 	[ObjectWrapper ("Combo Box", "combo.png", ObjectWrapperType.Widget)]
 	public class ComboBox : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup ComboBoxProperties;
-		public static PropertyGroup ComboBoxExtraProperties;
+		public static ItemGroup ComboBoxProperties;
+		public static ItemGroup ComboBoxExtraProperties;
 
 		static ComboBox () {
-			ComboBoxProperties = new PropertyGroup ("Combo Box Properties",
-								typeof (Gtk.ComboBox),
-								"Model",
-								"Active");
-			ComboBoxExtraProperties = new PropertyGroup ("Extra ComboBox Properties",
-								     typeof (Gtk.ComboBox),
-								     "WrapWidth",
-								     "ColumnSpanColumn",
-								     "RowSpanColumn");
+			ComboBoxProperties = new ItemGroup ("Combo Box Properties",
+							    typeof (Stetic.Wrapper.ComboBox),
+							    typeof (Gtk.ComboBox),
+							    "Items",
+							    "Active");
+			ComboBoxExtraProperties = new ItemGroup ("Extra ComboBox Properties",
+								 typeof (Gtk.ComboBox),
+								 "WrapWidth",
+								 "ColumnSpanColumn",
+								 "RowSpanColumn");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				ComboBoxProperties, ComboBoxExtraProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 		}
 
-		public ComboBox (IStetic stetic) : this (stetic, new Gtk.ComboBox ()) {}
+		public ComboBox (IStetic stetic) : this (stetic, Gtk.ComboBox.NewText ()) {}
 
-		public ComboBox (IStetic stetic, Gtk.ComboBox combobox) : base (stetic, combobox) {}
+		public ComboBox (IStetic stetic, Gtk.ComboBox combobox) : base (stetic, combobox)
+		{
+			items = "";
+			item = new string[0];
+		}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
+
+		string items;
+		string[] item;
+
+		[Editor (typeof (Stetic.Editor.Text), typeof (Gtk.Widget))]
+		public string Items {
+			get {
+				return items;
+			}
+			set {
+				Gtk.ComboBox combobox = (Gtk.ComboBox)Wrapped;
+				string[] newitem = value.Split ('\n');
+				int active = combobox.Active;
+
+				int row = 0, oi = 0, ni = 0;
+				while (oi < item.Length && ni < newitem.Length) {
+					if (item[oi] == newitem[ni]) {
+						oi++;
+						ni++;
+						row++;
+					} else if (ni < newitem.Length - 1 &&
+						   item[oi] == newitem[ni + 1]) {
+						combobox.InsertText (row++, newitem[ni++]);
+						if (active > row)
+							active++;
+					} else {
+						combobox.RemoveText (row);
+						if (active > row)
+							active--;
+						oi++;
+					}
+				}
+
+				while (oi < item.Length) {
+					combobox.RemoveText (row);
+					oi++;
+				}
+
+				while (ni < newitem.Length)
+					combobox.InsertText (row++, newitem[ni++]);
+
+				items = value;
+				item = newitem;
+				combobox.Active = active;
+
+				EmitNotify ("Items");
+			}
+		}
 	}
 }

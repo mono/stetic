@@ -7,14 +7,13 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class PropertyDescriptor {
+	public class PropertyDescriptor : ItemDescriptor {
 
 		PropertyInfo memberInfo, propertyInfo;
 		bool isWrapperProperty;
 		ParamSpec pspec;
 		Type editorType;
 		object defaultValue;
-		ArrayList dependencies = new ArrayList (), inverseDependencies = new ArrayList ();
 
 		public PropertyDescriptor (Type objectType, string propertyName) : this (null, objectType, propertyName) {}
 
@@ -87,8 +86,8 @@ namespace Stetic {
 			}
 		}
 
-		// The property's display name
-		public string Name {
+		// The property's internal name
+		public override string Name {
 			get {
 				return propertyInfo.Name;
 			}
@@ -161,36 +160,5 @@ namespace Stetic {
 				obj = memberInfo.GetValue (obj, null);
 			propertyInfo.SetValue (obj, value, null);
 		}
-
-		// Marks the property as depending on master (which
-		// must have Type bool). The property will be
-		// sensitive in the PropertyGrid when master is true.
-		public void DependsOn (PropertyDescriptor master)
-		{
-			dependencies.Add (master);
-		}
-
-		// Marks the property as depending inversely on master
-		// (which must have Type bool). The property will be
-		// sensitive in the PropertyGrid when master is false.
-		public void DependsInverselyOn (PropertyDescriptor master)
-		{
-			inverseDependencies.Add (master);
-		}
-
-		// The property's (forward) dependencies
-		public IList Dependencies {
-			get {
-				return dependencies;
-			}
-		}
-
-		// The property's reverse dependencies
-		public IList InverseDependencies {
-			get {
-				return inverseDependencies;
-			}
-		}
-
 	}
 }

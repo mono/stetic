@@ -5,17 +5,17 @@ namespace Stetic.Wrapper {
 	[ObjectWrapper ("Calendar", "calendar.png", ObjectWrapperType.Widget)]
 	public class Calendar : Stetic.Wrapper.Widget {
 
-		public static PropertyGroup CalendarProperties;
+		public static ItemGroup CalendarProperties;
 
 		static Calendar () {
-			CalendarProperties = new PropertyGroup ("Calendar Properties",
-								typeof (Gtk.Calendar),
-								"ShowHeading",
-								"ShowDayNames",
-								"ShowWeekNumbers",
-								"NoMonthChange");
+			CalendarProperties = new ItemGroup ("Calendar Properties",
+							    typeof (Gtk.Calendar),
+							    "ShowHeading",
+							    "ShowDayNames",
+							    "ShowWeekNumbers",
+							    "NoMonthChange");
 
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				CalendarProperties,
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
@@ -25,7 +25,7 @@ namespace Stetic.Wrapper {
 
 		public Calendar (IStetic stetic, Gtk.Calendar calendar) : base (stetic, calendar) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

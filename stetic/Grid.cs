@@ -10,110 +10,133 @@ namespace Stetic {
 		{
 			BorderWidth = 2;
 			WidgetFlags |= WidgetFlags.NoWindow;
-			groups = new ArrayList ();
+			lines = new ArrayList ();
 		}
 
 		const int groupPad = 6;
 		const int hPad = 6;
 		const int linePad = 3;
 
-		protected ArrayList groups;
+		public class Pair {
+			Gtk.Label label;
+			Gtk.Widget editor;
 
-		public class Group {
-			Stetic.Grid parent;
-			Gtk.Expander expander;
-			ArrayList names, editors;
-
-			public Group (Grid parent, string name) {
-				this.parent = parent;
-
-				expander = new Gtk.Expander ("<b>" + name + "</b>");
-				expander.UseMarkup = true;
-				expander.Show ();
-				expander.AddNotification ("expanded", Expanded);
-
-				names = new ArrayList ();
-				editors = new ArrayList ();
-			}
-
-			void Expanded (object o, GLib.NotifyArgs args)
+			public Pair (string name, Widget editor)
 			{
-				foreach (Widget w in names) {
-					if (expander.Expanded)
-						w.Show ();
-					else
-						w.Hide ();
-				}
-				foreach (Widget w in editors) {
-					if (expander.Expanded)
-						w.Show ();
-					else
-						w.Hide ();
-				}
-
-				parent.QueueDraw ();
-			}
-
-			public void Add (string name, Widget editor)
-			{
-				Label label = new Label (name);
+				label = new Label (name);
 				label.UseMarkup = true;
 				label.Justify = Justification.Left;
 				label.Xalign = 0;
-				label.Parent = parent;
 				label.Show ();
-				names.Add (label);
 
-				editor.Parent = parent;
-				editors.Add (editor);
-
-				parent.QueueDraw ();
+				this.editor = editor;
+				editor.Show ();
 			}
 
-			public Gtk.Expander Expander {
+			public Label Label {
 				get {
-					return expander;
+					return label;
 				}
 			}
 
-			public ArrayList Names {
+			public Widget Editor {
 				get {
-					return names;
-				}
-			}
-
-			public ArrayList Editors {
-				get {
-					return editors;
+					return editor;
 				}
 			}
 		}
 
-		public Group AddGroup (string name, bool expanded)
+		// list of widgets and Stetic.Grid.Pairs
+		ArrayList lines;
+
+		public void Append (Widget w)
 		{
-			Group g = new Group (this, name);
-			groups.Add (g);
-			g.Expander.Parent = this;
-			g.Expander.Expanded = expanded;
+			w.Parent = this;
+			w.Show ();
+
+			lines.Add (w);
 			QueueDraw ();
-			return g;
 		}
 
-		public void RemoveGroup (Group g)
+		public void AppendLabel (string text)
 		{
-			foreach (Label l in g.Names)
-				l.Unparent ();
-			foreach (Widget e in g.Editors)
-				e.Unparent ();
-			g.Expander.Unparent ();
-			groups.Remove (g);
+			Gtk.Label label = new Label (text);
+			label.UseMarkup = true;
+			label.Justify = Justification.Left;
+			label.Xalign = 0;
+			Append (label);
+		}
+
+		public void AppendGroup (string name, bool expanded)
+		{
+			Gtk.Expander exp = new Expander ("<b>" + name + "</b>");
+			exp.UseMarkup = true;
+			exp.Expanded = expanded;
+			exp.AddNotification ("expanded", ExpansionChanged);
+			Append (exp);
+		}
+
+		public void AppendPair (string label, Widget editor)
+		{
+			Stetic.Grid.Pair pair = new Pair (label, editor);
+
+			pair.Label.Parent = this;
+			pair.Editor.Parent = this;
+
+			lines.Add (pair);
+			QueueDraw ();
+		}
+
+		protected override void OnRemoved (Widget w)
+		{
+			w.Unparent ();
+		}
+
+		void ExpansionChanged (object obj, GLib.NotifyArgs args)
+		{
+			Gtk.Expander exp = obj as Gtk.Expander;
+
+			int ind = lines.IndexOf (exp);
+			if (ind == -1)
+				return;
+
+			ind++;
+			while (ind < lines.Count && !(lines[ind] is Gtk.Expander)) {
+				if (lines[ind] is Widget) {
+					Widget w = (Widget)lines[ind];
+					if (exp.Expanded)
+						w.Show ();
+					else
+						w.Hide ();
+				} else if (lines[ind] is Pair) {
+					Pair p = (Pair)lines[ind];
+					if (exp.Expanded) {
+						p.Label.Show ();
+						p.Editor.Show ();
+					} else {
+						p.Label.Hide ();
+						p.Editor.Hide ();
+					}
+				}
+				ind++;
+			}
+
 			QueueDraw ();
 		}
 
 		protected void Clear ()
 		{
-			while (groups.Count > 0)
-				RemoveGroup (groups[0] as Group);
+			foreach (object obj in lines) {
+				if (obj is Widget)
+					((Widget)obj).Destroy ();
+				else if (obj is Pair) {
+					Pair p = (Pair)obj;
+					p.Label.Destroy ();
+					p.Editor.Destroy ();
+				}
+			}
+
+			lines.Clear ();
 		}
 
 		protected override void ForAll (bool include_internals, CallbackInvoker invoker)
@@ -121,79 +144,79 @@ namespace Stetic {
 			if (!include_internals)
 				return;
 
-			foreach (Group g in groups) {
-				invoker.Invoke (g.Expander);
-				for (int i = 0; i < g.Names.Count; i++) {
-					invoker.Invoke (g.Names[i] as Widget);
-					invoker.Invoke (g.Editors[i] as Widget);
+			foreach (object obj in lines) {
+				if (obj is Widget)
+					invoker.Invoke ((Widget)obj);
+				else if (obj is Pair) {
+					Pair p = (Pair)obj;
+					invoker.Invoke (p.Label);
+					invoker.Invoke (p.Editor);
 				}
 			}
 		}
 
 		// These are figured out at requisition time and used again at
 		// allocation time.
-		int nwidth, ewidth;
+		int lwidth, ewidth;
 		int indent, lineHeight;
 
 		protected override void OnSizeRequested (ref Gtk.Requisition req)
 		{
-			if (groups.Count == 0) {
-				req.Height = 2 * (int)BorderWidth;
-				req.Width = 2 * (int)BorderWidth;
-				return;
-			}
+			bool visible = true;
 
 			req.Width = req.Height = 0;
-			nwidth = ewidth = 0;
+			lwidth = ewidth = indent = lineHeight = 0;
 
-			// Requisition the expanders themselves
-			Gtk.Requisition exreq, lreq;
-			foreach (Group group in groups) {
-				exreq = group.Expander.SizeRequest ();
-				req.Height += exreq.Height;
-				if (req.Width < exreq.Width)
-					req.Width = exreq.Width;
-			}
-			req.Height += (groups.Count - 1) * groupPad;
+			foreach (object obj in lines) {
+				if (obj is Expander) {
+					Gtk.Widget w = (Gtk.Widget)obj;
+					Gtk.Requisition childreq;
 
-			// Figure out the indent and lineHeight from the first expander.
-			// (Seems like there should be an easier way to find the indent...)
-			Expander exp = ((Group)groups[0]).Expander;
+					childreq = w.SizeRequest ();
+					if (req.Width < childreq.Width)
+						req.Width = childreq.Width;
+					req.Height += groupPad + childreq.Height;
 
-			int focusWidth = (int)exp.StyleGetProperty ("focus-line-width");
-			int focusPad = (int)exp.StyleGetProperty ("focus-padding");
-			int expanderSize = (int)exp.StyleGetProperty ("expander-size");
-			int expanderSpacing = (int)exp.StyleGetProperty ("expander-spacing");
-			indent = (int)exp.BorderWidth + focusWidth + focusPad +
-				expanderSize + 2 * expanderSpacing;
+					visible = ((Gtk.Expander)obj).Expanded;
 
-			lreq = ((Group)groups[0]).Expander.LabelWidget.ChildRequisition;
-			lineHeight = (int)(1.5 * lreq.Height);
+					if (indent == 0) {
+						// Seems like there should be an easier way...
+						int focusWidth = (int)w.StyleGetProperty ("focus-line-width");
+						int focusPad = (int)w.StyleGetProperty ("focus-padding");
+						int expanderSize = (int)w.StyleGetProperty ("expander-size");
+						int expanderSpacing = (int)w.StyleGetProperty ("expander-spacing");
+						indent = focusWidth + focusPad + expanderSize + 2 * expanderSpacing;
+					}
+				} else if (obj is Widget) {
+					Gtk.Widget w = (Gtk.Widget)obj;
+					Gtk.Requisition childreq;
 
-			// Now requisition the contents of the groups. (We have to do
-			// all of them, even if they're not expanded, so that the
-			// column widths don't change when groups are expanded or
-			// contracted.)
-			foreach (Group group in groups) {
-				for (int i = 0; i < group.Names.Count; i++) {
-					Gtk.Widget name = group.Names[i] as Widget;
-					Gtk.Widget editor = group.Editors[i] as Widget;
-					Gtk.Requisition nreq, ereq;
+					childreq = w.SizeRequest ();
+					if (lwidth < childreq.Width)
+						lwidth = childreq.Width;
+					if (visible)
+						req.Height += groupPad + childreq.Height;
+				} else if (obj is Pair) {
+					Pair p = (Pair)obj;
+					Gtk.Requisition lreq, ereq;
 
-					nreq = name.SizeRequest ();
-					ereq = editor.SizeRequest ();
+					lreq = p.Label.SizeRequest ();
+					ereq = p.Editor.SizeRequest ();
 
-					if (nreq.Width > nwidth)
-						nwidth = nreq.Width;
+					if (lineHeight == 0)
+						lineHeight = (int)(1.5 * lreq.Height);
+
+					if (lreq.Width > lwidth)
+						lwidth = lreq.Width;
 					if (ereq.Width > ewidth)
 						ewidth = ereq.Width;
 
-					if (group.Expander.Expanded)
+					if (visible)
 						req.Height += Math.Max (lineHeight, ereq.Height) + linePad;
 				}
 			}
 
-			req.Width = Math.Max (req.Width, indent + nwidth + hPad + ewidth);
+			req.Width = Math.Max (req.Width, indent + lwidth + hPad + ewidth);
 
 			req.Height += 2 * (int)BorderWidth;
 			req.Width += 2 * (int)BorderWidth;
@@ -207,47 +230,53 @@ namespace Stetic {
 			base.OnSizeAllocated (alloc);
 
 			int y = ybase;
+			bool visible = true;
 
-			foreach (Group group in groups) {
-				Gdk.Rectangle exalloc;
-				Gtk.Requisition exreq;
+			foreach (object obj in lines) {
+				if (!visible && !(obj is Expander))
+					continue;
 
-				exreq = group.Expander.ChildRequisition;
-				exalloc.X = xbase;
-				exalloc.Y = y;
-				exalloc.Width = exreq.Width;
-				exalloc.Height = exreq.Height;
-				group.Expander.SizeAllocate (exalloc);
+				if (obj is Widget) {
+					Gtk.Widget w = (Gtk.Widget)obj;
+					Gdk.Rectangle childalloc;
+					Gtk.Requisition childreq;
 
-				y += exalloc.Height;
+					y += groupPad;
 
-				if (group.Expander.Expanded) {
-					for (int i = 0; i < group.Names.Count; i++) {
-						Gtk.Widget name = group.Names[i] as Widget;
-						Gtk.Widget editor = group.Editors[i] as Widget;
-						Gtk.Requisition nreq, ereq;
-						Gdk.Rectangle nalloc, ealloc;
+					childreq = w.ChildRequisition;
+					childalloc.X = xbase;
+					childalloc.Y = y;
+					childalloc.Width = (obj is Expander) ? alloc.Width - 2 * (int)BorderWidth : lwidth;
+					childalloc.Height = childreq.Height;
+					w.SizeAllocate (childalloc);
 
-						nreq = name.ChildRequisition;
-						ereq = editor.ChildRequisition;
+					y += childalloc.Height;
 
-						nalloc.X = xbase + indent;
-						nalloc.Y = y + (lineHeight - nreq.Height) / 2;
-						nalloc.Width = nwidth;
-						nalloc.Height = nreq.Height;
-						name.SizeAllocate (nalloc);
+					if (obj is Expander)
+						visible = ((Gtk.Expander)obj).Expanded;
+				} else if (obj is Pair) {
+					Pair p = (Pair)obj;
 
-						ealloc.X = nalloc.X + nwidth + hPad;
-						ealloc.Y = y + Math.Max (0, (lineHeight - ereq.Height) / 2);
-						ealloc.Width = Math.Max (ewidth, alloc.Width - 2 * (int)BorderWidth - ealloc.X);
-						ealloc.Height = ereq.Height;
-						editor.SizeAllocate (ealloc);
+					Gtk.Requisition lreq, ereq;
+					Gdk.Rectangle lalloc, ealloc;
 
-						y += Math.Max (ereq.Height, lineHeight) + linePad;
-					}
+					lreq = p.Label.ChildRequisition;
+					ereq = p.Editor.ChildRequisition;
+
+					lalloc.X = xbase + indent;
+					lalloc.Y = y + (Math.Max (lineHeight, ereq.Height) - lreq.Height) / 2;
+					lalloc.Width = lwidth;
+					lalloc.Height = lreq.Height;
+					p.Label.SizeAllocate (lalloc);
+
+					ealloc.X = lalloc.X + lwidth + hPad;
+					ealloc.Y = y + Math.Max (0, (lineHeight - ereq.Height) / 2);
+					ealloc.Width = Math.Max (ewidth, alloc.Width - 2 * (int)BorderWidth - ealloc.X);
+					ealloc.Height = ereq.Height;
+					p.Editor.SizeAllocate (ealloc);
+
+					y += Math.Max (ereq.Height, lineHeight) + linePad;
 				}
-
-				y += groupPad;
 			}
 		}
 	}

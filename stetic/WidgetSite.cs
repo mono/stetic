@@ -422,6 +422,7 @@ namespace Stetic {
 
 		public void Select ()
 		{
+			contents.Show ();
 			contents.Focus = null;
 		}
 

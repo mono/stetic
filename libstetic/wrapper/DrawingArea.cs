@@ -6,7 +6,7 @@ namespace Stetic.Wrapper {
 	public class DrawingArea : Stetic.Wrapper.Widget {
 
 		static DrawingArea () {
-			groups = new PropertyGroup[] {
+			groups = new ItemGroup[] {
 				Stetic.Wrapper.Widget.CommonWidgetProperties
 			};
 		}
@@ -15,7 +15,7 @@ namespace Stetic.Wrapper {
 
 		public DrawingArea (IStetic stetic, Gtk.DrawingArea drawingarea) : base (stetic, drawingarea) {}
 
-		static PropertyGroup[] groups;
-		public override PropertyGroup[] PropertyGroups { get { return groups; } }
+		static ItemGroup[] groups;
+		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

@@ -31,12 +31,7 @@ namespace Stetic {
 			sensitives = new ArrayList ();
 		}
 
-		protected Stetic.Grid.Group AddGroup (string name)
-		{
-			return AddGroup (name, groups.Count == 0);
-		}
-
-		protected void AddToGroup (Stetic.Grid.Group group, PropertyDescriptor prop, object obj)
+		protected void AppendProperty (PropertyDescriptor prop, object obj)
 		{
 			string label = prop.ParamSpec != null ? prop.ParamSpec.Nick : prop.Name;
 
@@ -46,16 +41,44 @@ namespace Stetic {
 				editors[prop.ParamSpec.Name] = rep;
 			rep.ShowAll ();
 
-			group.Add (label, rep);
+			AppendPair (label, rep);
 
-			if (prop.Dependencies.Count > 0 || prop.InverseDependencies.Count > 0)
+			if (prop.HasDependencies)
 				sensitives.Add (prop);
+		}
+
+		private class Stupid69614Workaround {
+			CommandDescriptor cmd;
+			object obj;
+
+			public Stupid69614Workaround (CommandDescriptor cmd, object obj)
+			{
+				this.cmd = cmd;
+				this.obj = obj;
+			}
+
+			public void Activate (object o, EventArgs args) {
+				cmd.Run (obj);
+			}
+		}
+
+		protected void AppendCommand (CommandDescriptor cmd, object obj)
+		{
+			Gtk.Button button = new Gtk.Button (cmd.Label);
+			button.Clicked += new Stupid69614Workaround (cmd, wrapper).Activate;
+			button.Show ();
+			Append (button);
+
+			if (cmd.HasDependencies) {
+				editors[cmd.Name] = button;
+				sensitives.Add (cmd);
+			}
 		}
 
 		public void NoSelection ()
 		{
 			Clear ();
-			AddGroup ("<i>No selection</i>", false);
+			AppendLabel ("<i>No selection</i>");
 		}
 
 		void Notified (Stetic.Wrapper.Object wrapper, string propertyName)
@@ -68,27 +91,10 @@ namespace Stetic {
 
 		protected void UpdateSensitivity ()
 		{
-			foreach (PropertyDescriptor prop in sensitives) {
-				Widget w = editors[prop.Name] as Widget;
-				if (w == null)
-					continue;
-
-				foreach (PropertyDescriptor dep in prop.Dependencies) {
-					if (!(bool)dep.GetValue (wrapper)) {
-						w.Sensitive = false;
-						goto next;
-					}
-				}
-				foreach (PropertyDescriptor dep in prop.InverseDependencies) {
-					if ((bool)dep.GetValue (wrapper)) {
-						w.Sensitive = false;
-						goto next;
-					}
-				}
-				w.Sensitive = true;
-
-			next:
-				;
+			foreach (ItemDescriptor item in sensitives) {
+				Widget w = editors[item.Name] as Widget;
+				if (w != null)
+					w.Sensitive = item.EnabledFor (wrapper);
 			}
 		}
 
@@ -108,11 +114,13 @@ namespace Stetic {
 			selection = w;
 			wrapper = Stetic.Wrapper.Object.Lookup (w);
 
+			AppendProperty (new PropertyDescriptor (typeof (Gtk.Widget), "Name"), w); 
+
 			if (wrapper != null) {
 				wrapper.Notify += Notified;
-				AddObjectWrapperProperties (w, wrapper.PropertyGroups);
+				AddObjectWrapperItems (w, wrapper.ItemGroups);
 			} else
-				AddParamSpecProperties (w, w);
+				AddParamSpecItems (w, w);
 
 			UpdateSensitivity ();
 		}
@@ -126,23 +134,30 @@ namespace Stetic {
 			return null;
 		}
 
-		protected void AddParamSpecProperties (object obj, GLib.Object pspecObj)
+		protected void AddParamSpecItems (object obj, GLib.Object pspecObj)
 		{
-			Stetic.Grid.Group group = AddGroup ("Properties");
+			AppendGroup ("Properties", true);
 
 			foreach (PropertyInfo info in obj.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
 				ParamSpec pspec = LookupParamSpec (pspecObj, info);
 				if (pspec != null)
-					AddToGroup (group, new PropertyDescriptor (obj.GetType(), info.Name), obj);
+					AppendProperty (new PropertyDescriptor (obj.GetType(), info.Name), obj);
 			}
 		}
 
-		protected void AddObjectWrapperProperties (object obj, PropertyGroup[] groups)
+		protected void AddObjectWrapperItems (object obj, ItemGroup[] groups)
 		{
-			foreach (PropertyGroup pgroup in groups) {
-				Stetic.Grid.Group group = AddGroup (pgroup.Name);
-				foreach (PropertyDescriptor prop in pgroup.Properties)
-					AddToGroup (group, prop, obj);
+			bool first = true;
+
+			foreach (ItemGroup igroup in groups) {
+				AppendGroup (igroup.Name, first);
+				foreach (ItemDescriptor item in igroup.Items) {
+					if (item is PropertyDescriptor)
+						AppendProperty ((PropertyDescriptor)item, obj);
+					else if (item is CommandDescriptor)
+						AppendCommand ((CommandDescriptor)item, obj);
+				}
+				first = false;
 			}
 		}
 	}
@@ -168,9 +183,9 @@ namespace Stetic {
 			selection = cc;
 			wrapper = Stetic.Wrapper.Container.Lookup (parent) as Stetic.Wrapper.Container;
 			if (wrapper != null)
-				AddObjectWrapperProperties (cc, ((Stetic.Wrapper.Container)wrapper).ChildPropertyGroups);
+				AddObjectWrapperItems (cc, ((Stetic.Wrapper.Container)wrapper).ChildItemGroups);
 			else
-				AddParamSpecProperties (cc, parent);
+				AddParamSpecItems (cc, parent);
 
 		       UpdateSensitivity ();
 		}
