@@ -23,8 +23,8 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
-				for (int i = 0; i < 3; i++)
-					box.PackStart (CreateWidgetSite ());
+				box.PackStart (CreateWidgetSite ());
+				box.PackStart (CreateWidgetSite ());
 			}
 			box.SizeAllocated += box_SizeAllocated;
 			box.ParentSet += box_ParentSet;
@@ -122,6 +122,14 @@ namespace Stetic.Wrapper {
 				bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
 			}
 			base.SiteShapeChanged (site);
+		}
+
+		protected override void SiteOccupancyChanged (WidgetSite site) {
+			if (!site.Occupied) {
+				site.Destroy ();
+				return;
+			}
+			base.SiteOccupancyChanged (site);
 		}
 
 		void box_ParentSet (object obj, Gtk.ParentSetArgs args)

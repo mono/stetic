@@ -4,7 +4,7 @@ using System.Collections;
 namespace Stetic.Editor {
 
 	[PropertyEditor ("StockId", "Changed")]
-	public class StockItem : Gtk.ComboBox {
+	public class StockItem : Gtk.ComboBox, IComparer {
 
 		const int IconColumn = 0;
 		const int LabelColumn = 1;
@@ -15,19 +15,20 @@ namespace Stetic.Editor {
 		{
 			Gtk.ListStore store = new Gtk.ListStore (typeof (string), typeof (string));
 
-			stockIds = new ArrayList ();
-
-			string[] allIds = Gtk.Stock.ListIds ();
-			Array.Sort (allIds);
-
-			foreach (string id in allIds) {
-				Gtk.StockItem item;
-				string markup;
-
-				item = Gtk.Stock.Lookup (id);
+			ArrayList stockItems = new ArrayList ();
+			foreach (string id in Gtk.Stock.ListIds ()) {
+				Gtk.StockItem item = Gtk.Stock.Lookup (id);
 				if (item.StockId == null)
 					continue;
-				stockIds.Add (id);
+				stockItems.Add (item);
+			}
+			stockItems.Sort (this);
+
+			stockIds = new ArrayList ();
+			foreach (Gtk.StockItem item in stockItems) {
+				string markup;
+
+				stockIds.Add (item.StockId);
 
 				int uline = item.Label.IndexOf ('_');
 				if (uline != -1 && uline < item.Label.Length - 2)
@@ -47,6 +48,14 @@ namespace Stetic.Editor {
 			Gtk.CellRendererText labelRenderer = new Gtk.CellRendererText ();
 			PackStart (labelRenderer, true);
 			AddAttribute (labelRenderer, "markup", LabelColumn);
+		}
+
+		public int Compare (object itemx, object itemy)
+		{
+			Gtk.StockItem x = (Gtk.StockItem)itemx;
+			Gtk.StockItem y = (Gtk.StockItem)itemy;
+
+			return string.Compare (x.Label, y.Label);
 		}
 
 		public string StockId {

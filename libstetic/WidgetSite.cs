@@ -284,7 +284,8 @@ namespace Stetic {
 				splitter.MoveResize (wx, wy, width, height);
 				splitter.ShowUnraised ();
 				GdkWindow.Lower ();
-			}
+			} else if (dragFault == null)
+				return false;
 
 			Gdk.Drag.Status (ctx, Gdk.DragAction.Move, time);
 			return true;
@@ -337,9 +338,12 @@ namespace Stetic {
 				Gdk.Window win;
 				FindFault (x, y, out faultId, out win);
 				DropOn (w, faultId);
-			} else
+				if (w.Parent is WidgetSite)
+					((WidgetSite)w.Parent).Select ();
+			} else {
 				Add (w);
-			GrabFocus ();
+				Select ();
+			}
 		}
 
 		protected override bool OnDragDrop (DragContext ctx, int x, int y, uint time)

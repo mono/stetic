@@ -1,5 +1,20 @@
 2005-03-14  Dan Winship  <danw@novell.com>
 
+	* libstetic/WidgetSite.cs (FindFault): fix another autoexpand
+	buglet
+	(Drop): fix the focus in the autoexpand case
+
+	* libstetic/editor/StockItem.cs: sort the buttons by their Label,
+	not their StockId
+
+	* libstetic/wrapper/Box.cs (Wrap): Add 2 children to start out,
+	rather than 3.
+	(SiteOccupancyChanged): If a site is emptied, destroy it rather
+	than leaving an empty site behind (since you can still drag a new
+	widget there even without the empty site).
+
+2005-03-14  Dan Winship  <danw@novell.com>
+
 	* libstetic/WidgetSite.cs: Make OccupancyChanged mean only
 	"Occupancy changed", and add a new ShapeChanged event for when
 	something else happens that may affect AutoSizing in its parent.
