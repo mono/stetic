@@ -47,6 +47,12 @@ namespace Stetic.Wrapper {
 			GladeUtils.ImportWidget (stetic, this, className, id, props);
 		}
 
+		public virtual void GladeExport (out string className, out string id, out Hashtable props)
+		{
+			GladeUtils.ExportWidget (stetic, this, out className, out id, out props);
+			GladeUtils.ExtractProperty ("name", props);
+		}
+
 		public static new Widget Lookup (GLib.Object obj)
 		{
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Widget;

@@ -32,18 +32,13 @@ namespace Stetic {
 			editors[typeof (Gdk.Color)] = typeof (Stetic.Editor.Color);
 		}
 
-		static public PropertyEditor MakeEditor (PropertyDescriptor prop, ParamSpec pspec, ObjectWrapper wrapper)
+		static public PropertyEditor MakeEditor (PropertyDescriptor prop, ObjectWrapper wrapper)
 		{
 			Type editorType;
 			object min, max;
 
 			min = prop.Minimum;
 			max = prop.Maximum;
-			if (min == null && max == null && pspec != null) {
-				min = pspec.Minimum;
-				max = pspec.Maximum;
-			}
-
 			editorType = prop.EditorType;
 			if (editorType == null) {
 				if (prop.PropertyType.IsEnum) {

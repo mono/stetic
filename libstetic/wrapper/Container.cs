@@ -64,6 +64,31 @@ namespace Stetic.Wrapper {
 			return (Widget)wrapper;
 		}
 
+		public virtual void GladeExportChild (Widget wrapper, out string className,
+						      out string internalId, out string id,
+						      out Hashtable props,
+						      out Hashtable childprops)
+		{
+			internalId = null;
+			childprops = null;
+			wrapper.GladeExport (out className, out id, out props);
+
+			Gtk.Widget child = wrapper.Wrapped as Gtk.Widget;
+			while (child != null && !(child is WidgetSite))
+				child = child.Parent;
+
+			WidgetSite site = child as WidgetSite;
+			if (site != null) {
+				if (site.InternalChildId != null)
+					internalId = site.InternalChildId;
+				else {
+					ObjectWrapper childwrapper = ChildWrapper (site);
+					if (childwrapper != null)
+						GladeUtils.GetProps (childwrapper, out childprops);
+				}
+			}
+		}
+
 		public virtual WidgetSite AddPlaceholder ()
 		{
 			WidgetSite site = CreateWidgetSite ();
@@ -71,37 +96,24 @@ namespace Stetic.Wrapper {
 			return site;
 		}
 
-		Gtk.Widget FindInternalChild (string childName, Gtk.Container container)
+		Gtk.Widget FindInternalChild (string childId)
 		{
-			Type type = container.GetType ();
-			PropertyInfo pinfo = type.GetProperty (childName.Replace ("_", ""), BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.Instance);
-			if (pinfo != null &&
-			    (pinfo.PropertyType == typeof (Gtk.Widget) ||
-			     pinfo.PropertyType.IsSubclassOf (typeof (Gtk.Widget))))
-				return pinfo.GetValue (container, null) as Gtk.Widget;
-			return null;
-		}
-
-		protected virtual Gtk.Widget FindInternalChild (string childName)
-		{
-			// The fact that this tends to work does not mean it is not an
-			// awful kludge
-
-			Gtk.Container ancestor = container;
+			Container ancestor = this;
 			while (ancestor != null) {
-				Gtk.Widget child = FindInternalChild (childName, ancestor);
-				if (child != null)
-					return child;
-				ancestor = ancestor.Parent as Gtk.Container;
+				foreach (WidgetSite site in ancestor.Sites) {
+					if (site.InternalChildId == childId)
+						return site.Contents;
+				}
+				ancestor = Lookup (ancestor.container.Parent);
 			}
 			return null;
 		}
 
-		public virtual Widget GladeSetInternalChild (string childName, string className, string id, Hashtable props)
+		public virtual Widget GladeSetInternalChild (string childId, string className, string id, Hashtable props)
 		{
-			Gtk.Widget widget = FindInternalChild (childName);
+			Gtk.Widget widget = FindInternalChild (childId);
 			if (widget == null)
-				throw new GladeException ("Unrecognized internal child name", className, false, "internal-child", childName);
+				throw new GladeException ("Unrecognized internal child name", className, false, "internal-child", childId);
 
 			ObjectWrapper wrapper = Stetic.ObjectWrapper.Create (stetic, className);
 			GladeUtils.ImportWidget (stetic, wrapper, widget, id, props);
@@ -177,9 +189,20 @@ namespace Stetic.Wrapper {
 			AutoSize[site] = false;
 		}
 
+		class SiteEnumerator {
+			public ArrayList Sites = new ArrayList ();
+			public void Add (Gtk.Widget widget)
+			{
+				if (widget is WidgetSite)
+					Sites.Add (widget);
+			}
+		}
+
 		public IEnumerable Sites {
 			get {
-				return container.Children;
+				SiteEnumerator se = new SiteEnumerator ();
+				container.Forall (se.Add);
+				return se.Sites;
 			}
 		}
 

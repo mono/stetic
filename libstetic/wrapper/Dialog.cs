@@ -35,10 +35,12 @@ namespace Stetic.Wrapper {
 			Gtk.Dialog dialog = (Gtk.Dialog)Wrapped;
 
 			site = CreateWidgetSite ();
+			site.InternalChildId = "vbox";
 			dialog.VBox.Reparent (site);
 			dialog.Add (site);
 
 			site = CreateWidgetSite ();
+			site.InternalChildId = "action_area";
 			dialog.ActionArea.Reparent (site);
 			dialog.VBox.PackEnd (site, false, true, 0);
 

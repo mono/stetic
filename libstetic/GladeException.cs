@@ -6,13 +6,23 @@ namespace Stetic {
 
 		public GladeException (string message) : base (message) { }
 
-		public GladeException (string message, string className) : this (message)
+		public GladeException (string message, string className) :
+			this (message + " (class " + className + ")")
 		{
 			this.className = className;
 		}
 
 		public GladeException (string message, string className,
-				       bool childprop, string propName, string propVal) : this (message, className)
+				       bool childprop, string propName) :
+			this (message + " (class " + className + ", " + (childprop ? "child " : "") + "property " + propName + ")")
+		{
+			this.childprop = childprop;
+			this.propName = propName;
+		}
+
+		public GladeException (string message, string className,
+				       bool childprop, string propName, string propVal) :
+			this (message + " (class " + className + ", " + (childprop ? "child " : "") + "property " + propName + ", value " + propVal + ")")
 		{
 			this.childprop = childprop;
 			this.propName = propName;
@@ -26,17 +36,11 @@ namespace Stetic {
 			get {
 				return className;
 			}
-			set {
-				className = value;
-			}
 		}
 
 		public bool ChildProp {
 			get {
 				return childprop;
-			}
-			set {
-				childprop = value;
 			}
 		}
 
@@ -44,30 +48,12 @@ namespace Stetic {
 			get {
 				return propName;
 			}
-			set {
-				propName = value;
-			}
 		}
 
 		public string PropVal {
 			get {
 				return propVal;
 			}
-			set {
-				propVal = value;
-			}
-		}
-
-		public override string ToString ()
-		{
-			if (className == null)
-				return Message;
-			else if (propName == null)
-				return Message + " (class " + className + ")";
-			else if (propVal == null)
-				return Message + " (class " + className + ", " + (childprop ? "child " : "") + "property " + propName + ")";
-			else
-				return Message + " (class " + className + ", " + (childprop ? "child " : "") + "property " + propName + ", value " + propVal + ")";
 		}
 	}
 }

@@ -130,18 +130,18 @@ namespace Stetic {
 		}
 
 		[DllImport("libsteticglue")]
-		static extern GType stetic_param_spec_get_value_type (IntPtr obj);
+		static extern IntPtr stetic_param_spec_get_value_type (IntPtr obj);
 
-		public GType ValueType {
+		public IntPtr ValueType {
 			get {
 				return stetic_param_spec_get_value_type (_obj);
 			}
 		}
 
 		[DllImport("libsteticglue")]
-		static extern GType stetic_param_spec_get_owner_type (IntPtr obj);
+		static extern IntPtr stetic_param_spec_get_owner_type (IntPtr obj);
 
-		public GType OwnerType {
+		public IntPtr OwnerType {
 			get {
 				return stetic_param_spec_get_owner_type (_obj);
 			}

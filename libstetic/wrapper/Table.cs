@@ -457,12 +457,12 @@ namespace Stetic.Wrapper {
 								"XPadding",
 								"YPadding",
 								"AutoSize",
-								"XExpand",
-								"XFill",
-								"XShrink",
-								"YExpand",
-								"YFill",
-								"YShrink");
+								"XOptions/XExpand",
+								"XOptions/XFill",
+								"XOptions/XShrink",
+								"YOptions/YExpand",
+								"YOptions/YFill",
+								"YOptions/YShrink");
 				props["XExpand"].DependsInverselyOn (props["AutoSize"]);
 				props["XFill"].DependsInverselyOn (props["AutoSize"]);
 				props["XFill"].DependsOn (props["XExpand"]);

@@ -155,6 +155,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		[GladeProperty (GladeProperty.UseUnderlying)]
 		public string Label {
 			get {
 				return label;

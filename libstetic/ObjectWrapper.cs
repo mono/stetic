@@ -24,7 +24,7 @@ namespace Stetic {
 		static Hashtable wrapperTypes = new Hashtable ();
 		static Hashtable factories = new Hashtable ();
 
-		static Type WrappedType (Type type)
+		public static Type WrappedType (Type type)
 		{
 			FieldInfo finfo = type.GetField ("WrappedType", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 			if (finfo != null)
@@ -47,7 +47,7 @@ namespace Stetic {
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_name (IntPtr gtype);
 
-		static string NativeTypeName (Type gtkSharpType)
+		public static string NativeTypeName (Type gtkSharpType)
 		{
 			IntPtr gtype = LookupGType (gtkSharpType);
 			return gtype == IntPtr.Zero ? null : Marshal.PtrToStringAnsi (g_type_name (gtype));

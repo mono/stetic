@@ -1,5 +1,91 @@
 2005-03-11  Dan Winship  <danw@novell.com>
 
+	First draft of Glade export.
+
+	* libstetic/GladeException.cs: simplify/fix
+
+	* libstetic/GladePropertyAttribute.cs: add "UseUnderlying", to
+	specify that export should use the underlying GObject property
+	rather than the stetic wrapper's version.
+
+	* libstetic/GladeUtils.cs (ExtractWrapperProperty): don't extract
+	properties with the "UseUnderlying" flag set.
+	(ParseGladeProperty): deal with the various new kinds of
+	PropertyDescriptor confusion.
+	(ExportWidget): base glade export method
+	(GetProps): utility method to fill in a Hashtable from a wrapper
+
+	* libstetic/ItemGroup.cs (ItemGroup): deal with '/'s in property
+	names.
+
+	* libstetic/ObjectWrapper.cs (WrappedType, NativeTypeName): make
+	these public so GladeUtils can use them.
+
+	* libstetic/ParamSpec.cs (ValueType, OwnerType): fix the return
+	type
+
+	* libstetic/PropertyDescriptor.cs (PropertyDescriptor): Allow
+	property names to have '/'s like "XOptions/XExpand", meaning that
+	the real property is XOptions, but it's being split up into other
+	properties (including XExpand) in stetic. For split properties
+	like that, and sub-properties like "Adjustment.Value", create a
+	PropertyDescriptor representing the intermediate property too.
+	(GladeProperty): returns the PropertyDescriptor to use for glade
+	export (when that's not the same as the PropertyDescriptor itself)
+	(GladeGetValue, GladeSetValue): renamed to not have "proxy" in the
+	name. Handle all getting/setting of properties for glade.
+
+	* libstetic/SiteContentEnumerator.cs: gone;
+	Stetic.Wrapper.Container.Sites handles this by itself now.
+
+	* libstetic/WidgetSite.cs (InternalChildId): property to mark a
+	WidgetSite as containing an "internal child" of the widget.
+
+	* glue/value.c: reorg a bunch
+	(stetic_g_value_child_property_to_string,
+	stetic_g_value_property_to_string, stetic_g_value_to_string): new
+	functions for glade export
+
+	* libstetic/wrapper/Widget.cs (GladeExport): implement
+
+	* libstetic/wrapper/Container.cs (GladeExportChild): implement
+	(FindInternalChild): make this less gross by expecting the
+	container's wrapper class to have set the InternalChildId on the
+	relevant WidgetSite.
+	(Sites): use Gtk.Container.Forall so that internal sites get
+	returned too.
+
+	* libstetic/wrapper/Button.cs (Label): set UseUnderlying
+
+	* libstetic/wrapper/Dialog.cs (Wrap): set InternalChildId on the
+	internal children.
+
+	* libstetic/wrapper/Image.cs (IconSize): set UseUnderlying
+
+	* libstetic/wrapper/Notebook.cs (GladeExportChild): do the inverse
+	of the GladeImportChild hackery to represent notebook tabs
+	correctly.
+
+	* libstetic/wrapper/RadioButton.cs (GladeExport): fake the "group"
+	property.
+
+	* libstetic/wrapper/Table.cs (TableChild): rewrite the property
+	names as, eg, "XOptions/XExpand", so they will be exported
+	correctly.
+
+	* stetic/Glade.cs (Export): Implement
+
+	* stetic/Project.cs (AddWidget, ContentsChanged): Use
+	Stetic.Wrapper.Container.Sites directly rather than using
+	SiteContentEnumerator.
+	(Toplevels): add an enumerator exposing this, for Glade.Export
+
+	* stetic/PropertyEditor.cs: Fix for PropertyDescriptor changes
+
+	* stetic/Stetic.cs: add an "Export" command to the menu.
+
+2005-03-11  Dan Winship  <danw@novell.com>
+
 	* libstetic/ObjectWrapper.cs (Register, Create): if the wrapper
 	type doesn't have a CreateInstance method and the wrapped type
 	doesn't have a no-arg constructor, use g_object_new and the IntPtr

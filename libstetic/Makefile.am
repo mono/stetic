@@ -21,7 +21,6 @@ libstetic_dll_sources =			\
 	PropertyEditorAttribute.cs	\
 	RangeAttribute.cs		\
 	Set.cs				\
-	SiteContentEnumerator.cs	\
 	TranslatableAttribute.cs	\
 	WidgetBox.cs			\
 	WidgetSite.cs			\

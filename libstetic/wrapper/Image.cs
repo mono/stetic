@@ -77,6 +77,7 @@ namespace Stetic.Wrapper {
 		}
 
 		Gtk.IconSize iconSize;
+		[GladeProperty (GladeProperty.UseUnderlying)]
 		public Gtk.IconSize IconSize {
 			get {
 				return (Gtk.IconSize)image.IconSize;

@@ -22,27 +22,38 @@ namespace Stetic {
 
 		void AddWidget (Widget widget, ProjectNode parent)
 		{
-			if (Stetic.Wrapper.Widget.Lookup (widget) != null) {
-				ProjectNode node = new ProjectNode (widget);
-				nodes[widget] = node;
-				if (parent == null)
-					store.AddNode (node);
-				else
-					parent.AddChild (node);
-
-				parent = node;
-
-				Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (widget);
-				if (container != null)
-					container.ContentsChanged += ContentsChanged;
-			}
+			if (Stetic.Wrapper.Widget.Lookup (widget) == null)
+				return;
 
 			widgets[widget.Name] = widget;
 
-			if (widget is Container) {
-				Container container = (Container)widget;
-				foreach (Widget child in new SiteContentEnumerator (container))
-					AddWidget (child, parent);
+			ProjectNode node = new ProjectNode (widget);
+			nodes[widget] = node;
+			if (parent == null)
+				store.AddNode (node);
+			else
+				parent.AddChild (node);
+
+			parent = node;
+
+			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (widget);
+			if (container != null) {
+				container.ContentsChanged += ContentsChanged;
+				foreach (WidgetSite site in container.Sites) {
+					if (site.Occupied)
+						AddWidget (site.Contents, parent);
+				}
+			}
+		}
+
+		public IEnumerable Toplevels {
+			get {
+				ArrayList list = new ArrayList ();
+				foreach (Widget w in nodes.Keys) {
+					if (w is Gtk.Window)
+						list.Add (w);
+				}
+				return list;
 			}
 		}
 
@@ -63,7 +74,11 @@ namespace Stetic {
 				node.RemoveChild (child);
 			}
 
-			foreach (Widget w in new SiteContentEnumerator (container)) {
+			foreach (WidgetSite site in cwrap.Sites) {
+				if (!site.Occupied)
+					continue;
+
+				Widget w = site.Contents;
 				child = childNodes[w] as ProjectNode;
 				if (child != null) {
 					childNodes.Remove (w);

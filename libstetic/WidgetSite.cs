@@ -79,6 +79,16 @@ namespace Stetic {
 			}
 		}
 
+		string internalChildId;
+		public string InternalChildId {
+			get {
+				return internalChildId;
+			}
+			set {
+				internalChildId = value;
+			}
+		}
+
 		public enum SiteOccupancy { Empty, Occupied, PseudoOccupied };
 
 		private SiteOccupancy state;

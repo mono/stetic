@@ -57,6 +57,24 @@ namespace Stetic.Wrapper {
 				return base.GladeImportChild (className, id, props, childprops);
 		}
 
+		public override void GladeExportChild (Widget wrapper, out string className,
+						       out string internalId, out string id,
+						       out Hashtable props,
+						       out Hashtable childprops)
+		{
+			Gtk.Widget widget = wrapper.Wrapped as Gtk.Widget;
+			if (!tabs.Contains (widget.Parent)) {
+				base.GladeExportChild (wrapper, out className, out internalId,
+						       out id, out props, out childprops);
+				return;
+			}
+
+			internalId = null;
+			childprops = new Hashtable ();
+			childprops["type"] = "tab";
+			wrapper.GladeExport (out className, out id, out props);
+		}
+
 		private Gtk.Notebook notebook {
 			get {
 				return (Gtk.Notebook)Wrapped;

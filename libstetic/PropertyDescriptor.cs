@@ -8,58 +8,52 @@ namespace Stetic {
 
 	public class PropertyDescriptor : ItemDescriptor {
 
-		PropertyInfo memberInfo, propertyInfo, gladeProxyInfo;
+		PropertyInfo memberInfo, propertyInfo, baseInfo;
 		bool isWrapperProperty;
 		ParamSpec pspec;
 		Type editorType;
 		string label, description;
 		object minimum, maximum;
-		GladePropertyAttribute gladeProperty;
+		GladePropertyAttribute gladeAttribute;
+		PropertyDescriptor gladeProperty;
 
-		public PropertyDescriptor (Type objectType, string propertyName) : this (null, objectType, propertyName) {}
+		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
 		public PropertyDescriptor (Type wrapperType, Type objectType, string propertyName)
 		{
-			Type trueObjectType;
-			BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
-
 			int dot = propertyName.IndexOf ('.');
+			int slash = propertyName.IndexOf ('/');
 
-			if (dot == -1) {
-				trueObjectType = objectType;
-				memberInfo = null;
-				if (wrapperType != null)
-					propertyInfo = wrapperType.GetProperty (propertyName, flags);
-				if (propertyInfo == null)
-					propertyInfo = objectType.GetProperty (propertyName, flags);
-				else
-					isWrapperProperty = true;
+			if (dot != -1) {
+				// Sub-property (eg, "Alignment.Value")
+				memberInfo = FindProperty (objectType, propertyName.Substring (0, dot));
+				gladeProperty = new PropertyDescriptor (wrapperType, objectType, memberInfo.Name);
+				propertyInfo = FindProperty (memberInfo.PropertyType, propertyName.Substring (dot + 1));
+			} else if (slash != -1) {
+				// Split-up property (eg, "XOptions/XExpand")
+				gladeProperty = new PropertyDescriptor (wrapperType, objectType, propertyName.Substring (0, slash));
+				propertyInfo = FindProperty (wrapperType, objectType, propertyName.Substring (slash + 1));
+				isWrapperProperty = true;
 			} else {
-				if (wrapperType != null)
-					memberInfo = wrapperType.GetProperty (propertyName.Substring (0, dot), flags);
-				if (memberInfo == null)
-					memberInfo = objectType.GetProperty (propertyName.Substring (0, dot), flags);
-				else
-					isWrapperProperty = true;
-				if (memberInfo == null)
-					throw new ArgumentException ("Invalid property name " + objectType.Name + "." + propertyName);
-				trueObjectType = memberInfo.PropertyType;
-				propertyInfo = trueObjectType.GetProperty (propertyName.Substring (dot + 1), flags);
+				// Basic simple property
+				propertyInfo = FindProperty (wrapperType, objectType, propertyName);
+				isWrapperProperty = propertyInfo.DeclaringType.IsSubclassOf (typeof (ObjectWrapper));
 			}
-			if (propertyInfo == null)
-				throw new ArgumentException ("Invalid property name " + objectType.Name + "." + propertyName);
 
-			// FIXME, this is sort of left over from the old code. We should
-			// do it nicer.
-			if (wrapperType != null) {
-				try {
-					PropertyDescriptor baseProp = new PropertyDescriptor (objectType, propertyName);
-					if (baseProp != null)
-						pspec = baseProp.pspec;
-				} catch {
-					;
-				}
+			pspec = FindPSpec (propertyInfo);
+			if (isWrapperProperty && pspec == null) {
+				PropertyInfo pinfo = objectType.GetProperty (propertyInfo.Name, flags);
+				if (pinfo != null)
+					pspec = FindPSpec (pinfo);
 			}
+
+			if (pspec != null) {
+				label = pspec.Nick;
+				description = pspec.Blurb;
+				minimum = pspec.Minimum;
+				maximum = pspec.Maximum;
+			} else
+				label = propertyInfo.Name;
 
 			foreach (object attr in propertyInfo.GetCustomAttributes (false)) {
 				if (attr is Stetic.DescriptionAttribute) {
@@ -79,87 +73,115 @@ namespace Stetic {
 					maximum = rattr.Maximum;
 				}
 
+				if (attr is Stetic.GladePropertyAttribute) {
+					gladeAttribute = (GladePropertyAttribute)attr;
+					if (gladeAttribute.Proxy != null)
+						gladeProperty = new PropertyDescriptor (wrapperType, objectType, gladeAttribute.Proxy);
+				}
+			}
+		}
+
+		static PropertyInfo FindProperty (Type type, string propertyName) {
+			return FindProperty (null, type, propertyName);
+		}
+
+		static PropertyInfo FindProperty (Type wrapperType, Type objectType, string propertyName)
+		{
+			PropertyInfo info;
+
+			if (wrapperType != null) {
+				info = wrapperType.GetProperty (propertyName, flags);
+				if (info != null)
+					return info;
+			}
+
+			info = objectType.GetProperty (propertyName, flags);
+			if (info != null)
+				return info;
+
+			throw new ArgumentException ("Invalid property name " + objectType.Name + "." + propertyName);
+		}
+
+		ParamSpec FindPSpec (PropertyInfo pinfo)
+		{
+			foreach (object attr in pinfo.GetCustomAttributes (false)) {
 				if (attr is GLib.PropertyAttribute) {
 					PropertyAttribute pattr = (PropertyAttribute)attr;
-					pspec = ParamSpec.LookupObjectProperty (trueObjectType, pattr.Name);
+					return ParamSpec.LookupObjectProperty (pinfo.DeclaringType, pattr.Name);
 				}
 
 				if (attr is Gtk.ChildPropertyAttribute) {
 					ChildPropertyAttribute cpattr = (ChildPropertyAttribute)attr;
-					pspec = ParamSpec.LookupChildProperty (trueObjectType.DeclaringType, cpattr.Name);
-				}
-
-				if (attr is Stetic.GladePropertyAttribute) {
-					gladeProperty = (GladePropertyAttribute)attr;
-					if (gladeProperty.Proxy != null)
-						gladeProxyInfo = wrapperType.GetProperty (gladeProperty.Proxy, flags | BindingFlags.NonPublic);
+					return ParamSpec.LookupChildProperty (pinfo.DeclaringType.DeclaringType, cpattr.Name);
 				}
 			}
-
-			if (label == null) {
-				if (pspec != null)
-					label = pspec.Nick;
-				else
-					label = propertyInfo.Name;
-			}
-			if (description == null && pspec != null)
-				description = pspec.Blurb;
+			return null;
 		}
 
+		// The property's internal name
 		public override string Name {
 			get {
 				return propertyInfo.Name;
 			}
 		}
 
+		// The property's user-visible name
 		public string Label {
 			get {
 				return label;
 			}
 		}
 
+		// The property's user-visible description
 		public string Description {
 			get {
 				return description;
 			}
 		}
 
+		// The property's type
 		public Type PropertyType {
 			get {
 				return propertyInfo.PropertyType;
 			}
 		}
 
+		// The property's PropertyInfo
 		public PropertyInfo PropertyInfo {
 			get {
 				return propertyInfo;
 			}
 		}
 
+		// The property's ParamSpec
 		public ParamSpec ParamSpec {
 			get {
 				return pspec;
 			}
 		}
 
+		// The property's GUI editor type, if overridden
 		public Type EditorType {
 			get {
 				return editorType;
 			}
 		}
 
+		// The property's minimum value, if declared
 		public object Minimum {
 			get {
 				return minimum;
 			}
 		}
 
+		// The property's maximum value, if declared
 		public object Maximum {
 			get {
 				return maximum;
 			}
 		}
 
+		// Gets the value of the property on @wrapper
 		public object GetValue (ObjectWrapper wrapper)
 		{
 			object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
@@ -168,12 +190,14 @@ namespace Stetic {
 			return propertyInfo.GetValue (obj, null);
 		}
 
+		// Whether or not the property is writable
 		public bool CanWrite {
 			get {
 				return propertyInfo.CanWrite;
 			}
 		}
 
+		// Sets the value of the property on @wrapper
 		public void SetValue (ObjectWrapper wrapper, object value)
 		{
 			object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
@@ -184,16 +208,22 @@ namespace Stetic {
 
 		public GladeProperty GladeFlags {
 			get {
-				return gladeProperty != null ? gladeProperty.Flags : 0;
+				return gladeAttribute != null ? gladeAttribute.Flags : 0;
+			}
+		}
+
+		public PropertyDescriptor GladeProperty {
+			get {
+				return gladeProperty;
 			}
 		}
 
 		public string GladeName {
 			get {
-				if (gladeProperty == null)
-					return null;
-				if (gladeProperty.Name != null)
-					return gladeProperty.Name;
+				if (gladeAttribute != null && gladeAttribute.Name != null)
+					return gladeAttribute.Name;
+				else if (gladeProperty != null)
+					return gladeProperty.GladeName;
 				else if (pspec != null)
 					return pspec.Name.Replace ('-', '_');
 				else
@@ -201,14 +231,30 @@ namespace Stetic {
 			}
 		}
 
-		public string GladeProxyGetValue (ObjectWrapper wrapper)
+		public object GladeGetValue (ObjectWrapper wrapper)
 		{
-			return (string)gladeProxyInfo.GetValue (wrapper, null);
+			if (gladeProperty != null)
+				return gladeProperty.GetValue (wrapper);
+			else {
+				object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
+				if (memberInfo != null)
+					return memberInfo.GetValue (obj, null);
+				else
+					return propertyInfo.GetValue (obj, null);
+			}
 		}
 
-		public void GladeProxySetValue (ObjectWrapper wrapper, string value)
+		public void GladeSetValue (ObjectWrapper wrapper, object value)
 		{
-			gladeProxyInfo.SetValue (wrapper, value, null);
+			if (gladeProperty != null)
+				gladeProperty.SetValue (wrapper, value);
+			else {
+				object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
+				if (memberInfo != null)
+					memberInfo.SetValue (obj, value, null);
+				else
+					propertyInfo.SetValue (obj, value, null);
+			}
 		}
 	}
 }

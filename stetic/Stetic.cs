@@ -26,13 +26,16 @@ namespace Stetic {
 			win.Add (vbox);
 
 			Gtk.MenuBar menu_bar = new Gtk.MenuBar ();
-			Gtk.MenuItem file_menu_item = new Gtk.MenuItem ("File");
-			menu_bar.Append (file_menu_item);
+			Gtk.MenuItem item = new Gtk.MenuItem ("File");
+			menu_bar.Append (item);
 			Gtk.Menu file_menu = new Gtk.Menu ();
-			file_menu_item.Submenu = file_menu;
-			Gtk.MenuItem load_glade_menu_item = new Gtk.MenuItem ("Load Glade...");
-			load_glade_menu_item.Activated += new EventHandler (OnLoadActivated);
-			file_menu.Append (load_glade_menu_item);
+			item.Submenu = file_menu;
+			item = new Gtk.MenuItem ("Import from Glade File...");
+			item.Activated += ImportGlade;
+			file_menu.Append (item);
+			item = new Gtk.MenuItem ("Export to Glade File...");
+			item.Activated += ExportGlade;
+			file_menu.Append (item);
 			vbox.PackStart (menu_bar, false, false, 0);
 
 			hbox = new Gtk.HBox (false, 6);
@@ -70,13 +73,27 @@ namespace Stetic {
 			return 0;
 		}
 
-		static void OnLoadActivated (object obj, EventArgs e)
+		static void ImportGlade (object obj, EventArgs e)
 		{
-			FileChooserDialog dialog = new FileChooserDialog ("Load glade file", null, FileChooserAction.Open, Gtk.Stock.Cancel, Gtk.ResponseType.Cancel, Gtk.Stock.Open, Gtk.ResponseType.Ok);
+			FileChooserDialog dialog =
+				new FileChooserDialog ("Import from Glade File", null, FileChooserAction.Open,
+						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
+						       Gtk.Stock.Open, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();
-			if (response == (int)Gtk.ResponseType.Ok) {
-				Glade.Import (dialog.Filename, Project);
-			}
+			if (response == (int)Gtk.ResponseType.Ok)
+				Glade.Import (Project, dialog.Filename);
+			dialog.Hide ();
+		}
+
+		static void ExportGlade (object obj, EventArgs e)
+		{
+			FileChooserDialog dialog =
+				new FileChooserDialog ("Export to Glade File", null, FileChooserAction.Save,
+						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
+						       Gtk.Stock.Save, Gtk.ResponseType.Ok);
+			int response = dialog.Run ();
+			if (response == (int)Gtk.ResponseType.Ok)
+				Glade.Export (Project, dialog.Filename);
 			dialog.Hide ();
 		}
 

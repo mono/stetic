@@ -64,6 +64,15 @@ namespace Stetic.Wrapper {
 			stetic.GladeImportComplete -= SetGroup;
 		}
 
+		public override void GladeExport (out string className, out string id, out Hashtable props)
+		{
+			base.GladeExport (out className, out id, out props);
+
+			Gtk.RadioButton leader = (Gtk.RadioButton)GroupLeaders[Group];
+			if (leader != (Gtk.RadioButton)Wrapped)
+				props["group"] = leader.Name;
+		}
+
 		[Editor (typeof (Stetic.Editor.GroupPicker))]
 		[Description ("Group", "The name of the radio button group that this button belongs to")]
 		public int Group {

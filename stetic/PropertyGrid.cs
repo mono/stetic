@@ -31,7 +31,7 @@ namespace Stetic {
 
 		protected void AppendProperty (PropertyDescriptor prop, ObjectWrapper wrapper)
 		{
-			PropertyEditor rep = PropertyEditor.MakeEditor (prop, prop.ParamSpec, wrapper);
+			PropertyEditor rep = PropertyEditor.MakeEditor (prop, wrapper);
 			editors[prop.Name] = rep;
 			if (prop.ParamSpec != null)
 				editors[prop.ParamSpec.Name] = rep;
@@ -98,7 +98,7 @@ namespace Stetic {
 			selection.Notify += Notified;
 
 			if (selection is Stetic.Wrapper.Widget)
-				AppendProperty (new PropertyDescriptor (typeof (Gtk.Widget), "Name"), selection);
+				AppendProperty (new PropertyDescriptor (typeof (Stetic.Wrapper.Widget), typeof (Gtk.Widget), "Name"), selection);
 			AppendWrapperGroups (selection);
 
 			packingSelection = Stetic.Wrapper.Container.ChildWrapper (site);

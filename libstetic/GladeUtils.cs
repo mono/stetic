@@ -24,6 +24,9 @@ namespace Stetic {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null || prop.GladeName == null)
 						continue;
+					if (prop.GladeFlags == 0 ||
+					    (prop.GladeFlags & GladeProperty.UseUnderlying) != 0)
+						continue;
 
 					string val = ExtractProperty (prop.GladeName, props);
 					if (val != null) {
@@ -35,19 +38,8 @@ namespace Stetic {
 			}
 		}
 
-		static void Hydrate (IntPtr klass, bool childprop, string name, string strval, out GLib.Value value)
+		static void ParseProperty (IntPtr klass, bool childprop, string name, string strval, out GLib.Value value)
 		{
-			value = new GLib.Value ();
-			bool inited;
-
-			if (childprop)
-				inited = stetic_g_value_init_for_child_property (ref value, klass, name);
-			else
-				inited = stetic_g_value_init_for_property (ref value, klass, name);
-
-			if (!inited)
-				throw new GladeException ("Unrecognized property name", null, childprop, name, strval);
-
 			if (name == "adjustment") {
 				try {
 					string[] vals = strval.Split (' ');
@@ -60,19 +52,27 @@ namespace Stetic {
 					page_inc = Double.Parse (vals[4]);
 					page_size = Double.Parse (vals[5]);
 
-					value.Val = new Gtk.Adjustment (deflt, min, max, step, page_inc, page_size);
+					value = new GLib.Value (new Gtk.Adjustment (deflt, min, max, step, page_inc, page_size));
 					return;
 				} catch {
 					;
 				}
 			}
 
-			if (!stetic_g_value_hydrate (ref value, strval))
-				throw new GladeException ("Could not hydrate property", null, childprop, name, strval);
+			value = new GLib.Value ();
+			bool parsed;
+
+			if (childprop)
+				parsed = stetic_g_value_parse_child_property (ref value, klass, name, strval);
+			else
+				parsed = stetic_g_value_parse_property (ref value, klass, name, strval);
+
+			if (!parsed)
+				throw new GladeException ("Could not parse property", GTypeNameFromClass (klass), childprop, name, strval);
 		}
 
-		static void HydrateProperties (IntPtr gtype, bool childprops, Hashtable props,
-					       out string[] propNames, out GLib.Value[] propVals)
+		static void ParseProperties (IntPtr gtype, bool childprops, Hashtable props,
+					     out string[] propNames, out GLib.Value[] propVals)
 		{
 			IntPtr klass = g_type_class_ref (gtype);
 
@@ -84,12 +84,11 @@ namespace Stetic {
 
 				GLib.Value value;
 				try {
-					Hydrate (klass, childprops, name, strval, out value);
+					ParseProperty (klass, childprops, name, strval, out value);
 					names.Add (name);
 					values.Add (value);
 				} catch (GladeException ge) {
-					ge.ClassName = Marshal.PtrToStringAnsi (g_type_name (gtype));
-					Console.Error.WriteLine (ge);
+					Console.Error.WriteLine (ge.Message);
 				}
 			}
 
@@ -109,7 +108,7 @@ namespace Stetic {
 
 			string[] propNames;
 			GLib.Value[] propVals;
-			HydrateProperties (gtype, false, props, out propNames, out propVals);
+			ParseProperties (gtype, false, props, out propNames, out propVals);
 
 			IntPtr raw = gtksharp_object_newv (gtype, propNames.Length, propNames, propVals);
 			if (raw == IntPtr.Zero)
@@ -132,7 +131,7 @@ namespace Stetic {
 
 			string[] propNames;
 			GLib.Value[] propVals;
-			HydrateProperties (gtksharp_get_type_id (widget.Handle), false, props,
+			ParseProperties (gtksharp_get_type_id (widget.Handle), false, props,
 					   out propNames, out propVals);
 
 			for (int i = 0; i < propNames.Length; i++)
@@ -161,7 +160,7 @@ namespace Stetic {
 					}
 					helper.Props[prop] = wProps[prop];
 				} else
-					HydrateGladeProp (wrapper, klass, false, prop, wProps[prop] as string);
+					ParseGladeProperty (wrapper, klass, false, prop, wProps[prop] as string);
 			}
 
 			if (helper == null)
@@ -185,29 +184,27 @@ namespace Stetic {
 
 			public void LateImport () {
 				foreach (PropertyDescriptor prop in Props.Keys) {
-					HydrateGladeProp (wrapper, klass, childprop,
-							  prop, Props[prop] as string);
+					ParseGladeProperty (wrapper, klass, childprop,
+							    prop, Props[prop] as string);
 				}
 				g_type_class_unref (klass);
 				stetic.GladeImportComplete -= LateImport;
 			}
 		}
 
-		static void HydrateGladeProp (ObjectWrapper wrapper, IntPtr klass, bool childprop,
-					      PropertyDescriptor prop, string strval)
+		static void ParseGladeProperty (ObjectWrapper wrapper, IntPtr klass, bool childprop,
+						PropertyDescriptor prop, string strval)
 		{
 			if ((prop.GladeFlags & GladeProperty.Proxied) != 0)
-				prop.GladeProxySetValue (wrapper, strval);
-			else if (prop.ParamSpec == null && prop.PropertyType == typeof (string))
-				prop.SetValue (wrapper, strval);
+				prop.GladeSetValue (wrapper, strval);
 			else {
 				GLib.Value value;
-				Hydrate (klass, childprop, prop.GladeName, strval, out value);
+				ParseProperty (klass, childprop, prop.GladeName, strval, out value);
 				if (prop.PropertyType.IsEnum) {
 					GLib.EnumWrapper wrap = (GLib.EnumWrapper)value;
-					prop.SetValue (wrapper, Enum.ToObject (prop.PropertyType, (int)wrap));
+					prop.GladeSetValue (wrapper, Enum.ToObject (prop.PropertyType, (int)wrap));
 				} else
-					prop.SetValue (wrapper, value.Val);
+					prop.GladeSetValue (wrapper, value.Val);
 			}
 		}
 
@@ -215,24 +212,136 @@ namespace Stetic {
 		{
 			string[] propNames;
 			GLib.Value[] propVals;
-			HydrateProperties (gtksharp_get_type_id (parent.Handle), true, childprops,
-					   out propNames, out propVals);
+			ParseProperties (gtksharp_get_type_id (parent.Handle), true, childprops,
+					 out propNames, out propVals);
 
 			for (int i = 0; i < propNames.Length; i++)
 				parent.ChildSetProperty (child, propNames[i], propVals[i]);
 		}
 
-		[DllImport("libsteticglue")]
-		static extern bool stetic_g_value_init_for_property (ref GLib.Value value, IntPtr klass, string propertyName);
+		static string PropToString (ObjectWrapper wrapper, PropertyDescriptor prop)
+		{
+			GLib.Value gvalue;
+			IntPtr raw;
+
+			// If we're supposed to use the underlying property, just use that
+			if ((prop.GladeFlags & GladeProperty.UseUnderlying) != 0) {
+				Stetic.Wrapper.Container.ContainerChild ccwrap = wrapper as Stetic.Wrapper.Container.ContainerChild;
+				if (ccwrap != null) {
+					Gtk.Container.ContainerChild cc = (Gtk.Container.ContainerChild)ccwrap.Wrapped;
+					raw = stetic_g_value_child_property_to_string (cc.Parent.Handle, cc.Child.Handle, prop.GladeName);
+				} else {
+					Gtk.Widget widget = wrapper.Wrapped as Gtk.Widget;
+					raw = stetic_g_value_property_to_string (widget.Handle, prop.GladeName);
+				}
+				if (raw == IntPtr.Zero)
+					return null;
+				return GLib.Marshaller.PtrToStringGFree (raw);
+			}
+
+			// Otherwise, if this is a stetic-only property, skip it
+			if (prop.GladeName == null && prop.GladeFlags == 0)
+				return null;
+
+			object value = prop.GladeGetValue (wrapper);
+			if (value == null)
+				return null;
+
+			if (prop.GladeProperty != null)
+				prop = prop.GladeProperty;
+
+			// If there's no underlying property, just return the property
+			// as a string. (This only works for some data types...)
+			if (prop.ParamSpec == null)
+				return value.ToString ();
+
+			// If the property has its default value, we don't need to write it
+			if (value.Equals (prop.ParamSpec.Default))
+				return null;
+
+			// Special handling for Adjustments
+			if (value is Gtk.Adjustment) {
+				Gtk.Adjustment adj = value as Gtk.Adjustment;
+				return String.Format ("{0:G} {1:G} {2:G} {3:G} {4:G} {5:G}",
+						      adj.Value, adj.Lower, adj.Upper,
+						      adj.StepIncrement, adj.PageIncrement,
+						      adj.PageSize);
+			}
+
+			if (prop.PropertyType.IsEnum) {
+				string nativeEnumName = GTypeName (prop.ParamSpec.ValueType);
+				GLib.EnumWrapper wrap = new GLib.EnumWrapper ((int)value, prop.PropertyType.IsDefined (typeof (FlagsAttribute), false));
+				gvalue = new GLib.Value (wrap, nativeEnumName);
+			} else
+				gvalue = new GLib.Value (value);
+
+			raw = stetic_g_value_to_string (ref gvalue);
+			if (raw == IntPtr.Zero)
+				throw new GladeException ("Could not convert property to string", ObjectWrapper.NativeTypeName (wrapper.GetType ()), false, prop.GladeName);
+
+			return GLib.Marshaller.PtrToStringGFree (raw);
+		}
+
+		static public void ExportWidget (IStetic stetic, ObjectWrapper wrapper,
+						 out string className, out string id, out Hashtable props)
+		{
+			Type wrappedType = ObjectWrapper.WrappedType (wrapper.GetType ());
+			if (wrappedType == null)
+				throw new GladeException ("Unrecognized wrapper type", wrapper.GetType ().ToString ());
+			className = ObjectWrapper.NativeTypeName (wrappedType);
+
+			id = ((Gtk.Widget)wrapper.Wrapped).Name;
+
+			GetProps (wrapper, out props);
+		}
+
+		static public void GetProps (ObjectWrapper wrapper, out Hashtable props)
+		{
+			props = new Hashtable ();
+
+			foreach (ItemGroup group in wrapper.ItemGroups) {
+				foreach (ItemDescriptor item in group.Items) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop == null || prop.GladeName == null)
+						continue;
+
+					string val = PropToString (wrapper, prop);
+					if (val != null)
+						props[prop.GladeName] = val;
+				}
+			}
+		}
+
+		static string GTypeName (IntPtr gtype)
+		{
+			return Marshal.PtrToStringAnsi (g_type_name (gtype));
+		}
+
+		static string GTypeNameFromClass (IntPtr klass)
+		{
+			return Marshal.PtrToStringAnsi (g_type_name_from_class (klass));
+		}
 
 		[DllImport("libsteticglue")]
-		static extern bool stetic_g_value_init_for_child_property (ref GLib.Value value, IntPtr klass, string propertyName);
+		static extern bool stetic_g_value_parse_property (ref GLib.Value value, IntPtr klass, string propertyName, string data);
 
 		[DllImport("libsteticglue")]
-		static extern bool stetic_g_value_hydrate (ref GLib.Value value, string data);
+		static extern bool stetic_g_value_parse_child_property (ref GLib.Value value, IntPtr klass, string propertyName, string data);
+
+		[DllImport("libsteticglue")]
+		static extern IntPtr stetic_g_value_child_property_to_string (IntPtr parent, IntPtr child, string property_name);
+
+		[DllImport("libsteticglue")]
+		static extern IntPtr stetic_g_value_property_to_string (IntPtr widget, string property_name);
+
+		[DllImport("libsteticglue")]
+		static extern IntPtr stetic_g_value_to_string (ref GLib.Value value);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_name (IntPtr gtype);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_type_name_from_class (IntPtr klass);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_from_name (string name);

@@ -4,9 +4,10 @@ namespace Stetic {
 
 	[Flags]
 	public enum GladeProperty {
-		Wrapped    = (1 << 0),
-		Proxied    = (1 << 1),
-		LateImport = (1 << 2)
+		Wrapped       = (1 << 0),
+		Proxied       = (1 << 1),
+		LateImport    = (1 << 2),
+		UseUnderlying = (1 << 3)
 	}
 
 	[AttributeUsage (AttributeTargets.Property)]
