@@ -26,8 +26,8 @@ namespace Stetic {
 				memberInfo = null;
 				propertyInfo = objectType.GetProperty (propertyName);
 			} else {
-				parentType = memberInfo.PropertyType;
 				memberInfo = objectType.GetProperty (propertyName.Substring (0, dot));
+				parentType = memberInfo.PropertyType;
 				propertyInfo = parentType.GetProperty (propertyName.Substring (dot + 1));
 			}
 			eventInfo = parentType.GetEvent (propertyInfo.Name + "Changed");

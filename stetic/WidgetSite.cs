@@ -155,6 +155,9 @@ namespace Stetic {
 			if (base.OnButtonPressEvent (evt))
 				return true;
 
+			if (evt.Button == 3 && evt.Type == EventType.ButtonPress)
+				return OnPopupMenu ();
+
 			clickX = (int)evt.XRoot;
 			clickY = (int)evt.YRoot;
 			GrabFocus ();
@@ -268,12 +271,18 @@ namespace Stetic {
 
 		protected override bool OnKeyReleaseEvent (Gdk.EventKey evt)
 		{
-			if (Child != null && evt.Key == Gdk.Key.Delete) {
-				Remove (Child);
-				if (OccupancyChanged != null)
-					OccupancyChanged (this);
+			if (evt.Key == Gdk.Key.Delete) {
+				Delete ();
+				return true;
 			}
 			return false;
+		}
+
+		protected override bool OnPopupMenu ()
+		{
+			Menu m = new ContextMenu (this, true);
+			m.Popup ();
+			return true;
 		}
 
 		public void Focus ()
@@ -286,6 +295,15 @@ namespace Stetic {
 			ShowHandles = false;
 			if (Child != null && !(Child is IWidgetSite))
 				InterceptEvents = true;
+		}
+
+		public void Delete ()
+		{
+			if (Child != null) {
+				Remove (Child);
+				if (OccupancyChanged != null)
+					OccupancyChanged (this);
+			}
 		}
 	}
 }

@@ -1,5 +1,21 @@
 2005-01-05  Dan Winship  <danw@novell.com>
 
+	* stetic/ContextMenu.cs: Menu subclass to use as a WidgetSite's
+	context menu. Currently a clone of Glade's context menu, but with
+	no widget-specific content, and it doesn't actually implement Cut,
+	Copy, or Paste. (Meaning you can do Select or Delete.)
+
+	* stetic/WidgetSite.cs (OnPopupMenu): create a ContextMenu and pop
+	it up.
+	(OnButtonPressEvent): Call OnPopupMenu() on a right-click.
+	(OnKeyReleaseEvent): hand off Delete key handling to Delete()
+	(Delete): new public method to delete the site's child.
+
+	* stetic/PropertyDescriptor.cs (PropertyDescriptor): fix a bug in
+	the sub-property case
+
+2005-01-05  Dan Winship  <danw@novell.com>
+
 	* stetic/IObjectWrapper.cs (IPropertySensitizer): interface for
 	wrapper classes that want to be able to tweak the sensitivity of
 	their editors.

@@ -2,6 +2,7 @@ noinst_PROGRAMS = stetic.exe
 noinst_SCRIPTS = stetic
 
 stetic_exe_SOURCES =			\
+	ContextMenu.cs			\
 	IObjectWrapper.cs		\
 	Notify.cs			\
 	Palette.cs			\
