@@ -298,42 +298,42 @@ namespace Stetic.Wrapper {
 			Thaw ();
 		}
 
-		[Command ("Insert Row Before")]
+		[Command ("Insert Row Before", "Insert an empty row above the selected row")]
 		void InsertRowBefore (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			AddRow (tc.TopAttach);
 		}
 
-		[Command ("Insert Row After")]
+		[Command ("Insert Row After", "Insert an empty row below the selected row")]
 		void InsertRowAfter (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			AddRow (tc.BottomAttach);
 		}
 
-		[Command ("Insert Column Before")]
+		[Command ("Insert Column Before", "Insert an empty column before the selected column")]
 		void InsertColumnBefore (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			AddColumn (tc.LeftAttach);
 		}
 
-		[Command ("Insert Column After")]
+		[Command ("Insert Column After", "Insert an empty column after the selected column")]
 		void InsertColumnAfter (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			AddColumn (tc.RightAttach);
 		}
 
-		[Command ("Delete Row")]
+		[Command ("Delete Row", "Delete the selected row")]
 		void DeleteRow (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
 			DeleteRow (tc.TopAttach);
 		}
 
-		[Command ("Delete Column")]
+		[Command ("Delete Column", "Delete the selected column")]
 		void DeleteColumn (IWidgetSite context)
 		{
 			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
@@ -475,6 +475,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 
+			[Description ("Auto Size", "If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the table")]
 			public bool AutoSize {
 				get {
 					return parent.AutoSize[tc.Child];
@@ -485,6 +486,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 
+			[Description ("Expand Horizontally", "Whether or not the table cell should expand horizontally")]
 			public bool XExpand {
 				get {
 					return (tc.XOptions & Gtk.AttachOptions.Expand) != 0;
@@ -498,6 +500,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 
+			[Description ("Fill Horizontally", "Whether or not the widget should expand to fill its cell horizontally")]
 			public bool XFill {
 				get {
 					return (tc.XOptions & Gtk.AttachOptions.Fill) != 0;
@@ -511,6 +514,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 
+			[Description ("Shrink Horizontally", "Whether or not the table cell should shrink horizontally")]
 			public bool XShrink {
 				get {
 					return (tc.XOptions & Gtk.AttachOptions.Shrink) != 0;
@@ -524,6 +528,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 
+			[Description ("Expand Vertically", "Whether or not the table cell should expand vertically")]
 			public bool YExpand {
 				get {
 					return (tc.YOptions & Gtk.AttachOptions.Expand) != 0;
@@ -537,6 +542,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 
+			[Description ("Fill Vertically", "Whether or not the widget should expand to fill its cell vertically")]
 			public bool YFill {
 				get {
 					return (tc.YOptions & Gtk.AttachOptions.Fill) != 0;
@@ -550,6 +556,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 
+			[Description ("Shrink Vertically", "Whether or not the table cell should shrink vertically")]
 			public bool YShrink {
 				get {
 					return (tc.YOptions & Gtk.AttachOptions.Shrink) != 0;

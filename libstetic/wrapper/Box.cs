@@ -30,7 +30,7 @@ namespace Stetic.Wrapper {
 				box.PackStart (CreateWidgetSite ());
 		}
 
-		[Command ("Insert Before")]
+		[Command ("Insert Before", "Insert an empty row/column before the selected one")]
 		void InsertBefore (IWidgetSite context)
 		{
 			Gtk.Box box = (Gtk.Box)Wrapped;
@@ -45,7 +45,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[Command ("Insert After")]
+		[Command ("Insert After", "Insert an empty row/column after the selected one")]
 		void InsertAfter (IWidgetSite context)
 		{
 			Gtk.Box box = (Gtk.Box)Wrapped;

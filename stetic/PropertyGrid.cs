@@ -31,15 +31,13 @@ namespace Stetic {
 
 		protected void AppendProperty (PropertyDescriptor prop)
 		{
-			string label = prop.ParamSpec != null ? prop.ParamSpec.Nick : prop.Name;
-
 			PropertyEditor rep = PropertyEditor.MakeEditor (prop, prop.ParamSpec, selection);
 			editors[prop.Name] = rep;
 			if (prop.ParamSpec != null)
 				editors[prop.ParamSpec.Name] = rep;
 			rep.ShowAll ();
 
-			AppendPair (label, rep);
+			AppendPair (prop.Label, rep, prop.Description);
 
 			if (prop.HasDependencies)
 				sensitives.Add (prop);
@@ -65,7 +63,7 @@ namespace Stetic {
 			Gtk.Button button = new Gtk.Button (cmd.Label);
 			button.Clicked += new Stupid69614Workaround (cmd, selection).Activate;
 			button.Show ();
-			Append (button);
+			Append (button, cmd.Description);
 
 			if (cmd.HasDependencies) {
 				editors[cmd.Name] = button;

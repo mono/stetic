@@ -7,7 +7,7 @@ namespace Stetic {
 
 	public class CommandDescriptor : ItemDescriptor {
 
-		string name, label;
+		string name, label, description;
 		bool needsContext;
 		MethodInfo checkInfo, doInfo;
 
@@ -26,7 +26,8 @@ namespace Stetic {
 				throw new ArgumentException ("Invalid command name " + wrapperType.Name + "." + commandName);
 
 			foreach (CommandAttribute cattr in doInfo.GetCustomAttributes (typeof (CommandAttribute), false)) {
-				label = cattr.Label;
+				label = cattr.Name;
+				description = cattr.Description;
 				if (cattr.Checker != null) {
 					checkInfo = wrapperType.GetMethod (cattr.Checker, flags, null, needsContext ? new Type[] { typeof (Stetic.IWidgetSite) } : new Type[0], null);
 					if (checkInfo == null)
@@ -45,6 +46,12 @@ namespace Stetic {
 		public string Label {
 			get {
 				return label;
+			}
+		}
+
+		public string Description {
+			get {
+				return description;
 			}
 		}
 

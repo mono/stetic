@@ -24,6 +24,7 @@ namespace Stetic.Wrapper {
 		public Icon (IStetic stetic, Gtk.Image icon) : base (stetic, icon) {}
 
 		[Editor (typeof (Stetic.Editor.StockItem))]
+		[Description ("Stock Icon", "The stock icon to display")]
 		public string Stock {
 			get {
 				return ((Gtk.Image)Wrapped).Stock;

@@ -1,3 +1,42 @@
+2005-02-18  Dan Winship  <danw@novell.com>
+
+	* libstetic/TranslatableAttribute.cs: new attribute to mark a
+	string property of an attribute as being translatable.
+
+	* libstetic/ObjectWrapperAttribute.cs (Name): add
+	TranslatableAttribute to this property
+
+	* libstetic/CommandAttribute.cs: add a Description field, and mark
+	the Label and Description as Translatable.
+
+	* libstetic/CommandDescriptor.cs: extract description from
+	CommandAttribute and make it available via the Description field
+
+	* libstetic/DescriptionAttribute.cs: new attribute to give a
+	translatable label and description for a property.
+
+	* libstetic/PropertyDescriptor.cs: extract label and description
+	info from ParamSpecs or DescriptionAttributes, and make them
+	available via the Label and Description fields
+
+	* libstetic/wrapper/Box.cs: 
+	* libstetic/wrapper/Button.cs:
+	* libstetic/wrapper/ComboBox.cs: 
+	* libstetic/wrapper/Icon.cs: 
+	* libstetic/wrapper/MessageDialog.cs: 
+	* libstetic/wrapper/Notebook.cs: 
+	* libstetic/wrapper/RadioButton.cs: 
+	* libstetic/wrapper/Table.cs: 
+	* libstetic/wrapper/TextView.cs: add descriptions to commands and
+	properties
+
+	* stetic/Grid.cs (AppendPair, Append): add overloads that take a
+	"description" arg, and set up tooltips.
+
+	* stetic/PropertyGrid.cs (AppendProperty, AppendCommand): Pass the
+	descriptions from the ItemDescriptors to the underlying Grid
+	methods
+
 2005-02-17  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/Container.cs (RegisterWrapper): override the

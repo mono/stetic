@@ -91,7 +91,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[Command ("Remove Button Contents")]
+		[Command ("Remove Button Contents", "Remove the current contents of the button")]
 		void RemoveContents ()
 		{
 			if (button.Child != null)
@@ -107,7 +107,7 @@ namespace Stetic.Wrapper {
 			EmitNotify ("HasLabel");
 		}
 
-		[Command ("Restore Button Label")]
+		[Command ("Restore Button Label", "Restore the button's label")]
 		void RestoreLabel ()
 		{
 			if (button.Child != null)
@@ -139,6 +139,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[Editor (typeof (Stetic.Editor.StockItem))]
+		[Description ("Stock Item", "The stock icon and label to display in the button")]
 		public string StockId {
 			get {
 				return stockId;

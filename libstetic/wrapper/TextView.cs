@@ -39,6 +39,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[Editor (typeof (Stetic.Editor.Text))]
+		[Description ("Text", "The initial text to display in the Text View")]
 		public string Text {
 			get {
 				return ((Gtk.TextView)Wrapped).Buffer.Text;

@@ -11,8 +11,11 @@ namespace Stetic {
 			BorderWidth = 2;
 			WidgetFlags |= WidgetFlags.NoWindow;
 			lines = new ArrayList ();
+			tips = new Gtk.Tooltips ();
 			group = null;
 		}
+
+		Gtk.Tooltips tips;
 
 		// Padding constants
 		const int groupPad = 6;
@@ -34,22 +37,36 @@ namespace Stetic {
 		}
 
 		class Pair {
-			Gtk.Label label;
+			Gtk.Widget label;
 			Gtk.Widget editor;
 
-			public Pair (string name, Widget editor)
+			public Pair (Grid grid, string name, Widget editor) : this (grid, name, editor, null) {}
+
+			public Pair (Grid grid, string name, Widget editor, string description)
 			{
-				label = new Label (name);
-				label.UseMarkup = true;
-				label.Justify = Justification.Left;
-				label.Xalign = 0;
-				label.Show ();
+				Gtk.Label l = new Label (name);
+				l.UseMarkup = true;
+				l.Justify = Justification.Left;
+				l.Xalign = 0;
+				l.Show ();
+
+				if (description == null)
+					label = l;
+				else {
+					Gtk.EventBox ebox = new Gtk.EventBox ();
+					ebox.Add (l);
+					ebox.Show ();
+					grid.tips.SetTip (ebox, description, null);
+					label = ebox;
+				}
+				label.Parent = grid;
 
 				this.editor = editor;
+				editor.Parent = grid;
 				editor.Show ();
 			}
 
-			public Label Label {
+			public Widget Label {
 				get {
 					return label;
 				}
@@ -74,6 +91,23 @@ namespace Stetic {
 			QueueDraw ();
 		}
 
+		public void Append (Widget w, string description)
+		{
+			if ((w.WidgetFlags & WidgetFlags.NoWindow) != 0) {
+				Gtk.EventBox ebox = new Gtk.EventBox ();
+				ebox.Add (w);
+				ebox.Show ();
+				w = ebox;
+			}
+			w.Parent = this;
+			w.Show ();
+
+			tips.SetTip (w, description, null);
+
+			lines.Add (w);
+			QueueDraw ();
+		}
+
 		public void AppendLabel (string text)
 		{
 			Gtk.Label label = new Label (text);
@@ -92,13 +126,9 @@ namespace Stetic {
 			Append (exp);
 		}
 
-		public void AppendPair (string label, Widget editor)
+		public void AppendPair (string label, Widget editor, string description)
 		{
-			Stetic.Grid.Pair pair = new Pair (label, editor);
-
-			pair.Label.Parent = this;
-			pair.Editor.Parent = this;
-
+			Stetic.Grid.Pair pair = new Pair (this, label, editor, description);
 			lines.Add (pair);
 			QueueDraw ();
 		}
@@ -153,6 +183,7 @@ namespace Stetic {
 			}
 
 			lines.Clear ();
+			tips = new Gtk.Tooltips ();
 		}
 
 		protected override void ForAll (bool include_internals, CallbackInvoker invoker)

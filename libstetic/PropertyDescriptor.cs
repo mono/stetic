@@ -12,6 +12,7 @@ namespace Stetic {
 		bool isWrapperProperty;
 		ParamSpec pspec;
 		Type editorType;
+		string label, description;
 		object minimum, maximum;
 
 		public PropertyDescriptor (Type objectType, string propertyName) : this (null, objectType, propertyName) {}
@@ -60,6 +61,12 @@ namespace Stetic {
 			}
 
 			foreach (object attr in propertyInfo.GetCustomAttributes (false)) {
+				if (attr is Stetic.DescriptionAttribute) {
+					DescriptionAttribute dattr = (DescriptionAttribute)attr;
+					label = dattr.Name;
+					description = dattr.Description;
+				}
+
 				if (attr is Stetic.EditorAttribute) {
 					EditorAttribute eattr = (EditorAttribute)attr;
 					editorType = eattr.EditorType;
@@ -81,11 +88,32 @@ namespace Stetic {
 					pspec = ParamSpec.LookupChildProperty (trueObjectType.DeclaringType, cpattr.Name);
 				}
 			}
+
+			if (label == null) {
+				if (pspec != null)
+					label = pspec.Nick;
+				else
+					label = propertyInfo.Name;
+			}
+			if (description == null && pspec != null)
+				description = pspec.Blurb;
 		}
 
 		public override string Name {
 			get {
 				return propertyInfo.Name;
+			}
+		}
+
+		public string Label {
+			get {
+				return label;
+			}
+		}
+
+		public string Description {
+			get {
+				return description;
 			}
 		}
 

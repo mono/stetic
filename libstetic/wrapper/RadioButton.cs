@@ -45,6 +45,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[Editor (typeof (Stetic.Editor.GroupPicker))]
+		[Description ("Group", "The name of the radio button group that this button belongs to")]
 		public int Group {
 			get {
 				// We can't store this in an instance variable

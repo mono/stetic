@@ -63,7 +63,7 @@ namespace Stetic.Wrapper {
 			return notebook.InsertPage (pageSite, labelSite, position);
 		}
 
-		[Command ("Go to Previous Page", "CheckPreviousPage")]
+		[Command ("Go to Previous Page", "Show the previous page", "CheckPreviousPage")]
 		void PreviousPage ()
 		{
 			notebook.PrevPage ();
@@ -74,7 +74,7 @@ namespace Stetic.Wrapper {
 			return notebook.CurrentPage > 0;
 		}
 
-		[Command ("Go to Next Page", "CheckNextPage")]
+		[Command ("Go to Next Page", "Show the next page", "CheckNextPage")]
 		void NextPage ()
 		{
 			notebook.NextPage ();
@@ -85,31 +85,31 @@ namespace Stetic.Wrapper {
 			return notebook.CurrentPage < notebook.NPages - 1;
 		}
 
-		[Command ("Delete Page")]
+		[Command ("Delete Page", "Delete the current page")]
 		void DeletePage ()
 		{
 			notebook.RemovePage (notebook.CurrentPage);
 		}
 
-		[Command ("Swap with Previous Page", "CheckPreviousPage")]
+		[Command ("Swap with Previous Page", "Swap the contents of this page with the contents of the previous page", "CheckPreviousPage")]
 		void SwapPrevious ()
 		{
 			// FIXME
 		}
 
-		[Command ("Swap with Next Page", "CheckNextPage")]
+		[Command ("Swap with Next Page", "Swap the contents of this page with the contents of the next page", "CheckNextPage")]
 		void SwapNext ()
 		{
 			// FIXME
 		}
 
-		[Command ("Insert Page Before")]
+		[Command ("Insert Page Before", "Insert a blank page before this one")]
 		void InsertBefore ()
 		{
 			notebook.CurrentPage = InsertPage (notebook.CurrentPage);
 		}
 
-		[Command ("Insert Page After")]
+		[Command ("Insert Page After", "Insert a blank page after this one")]
 		void InsertAfter ()
 		{
 			notebook.CurrentPage = InsertPage (notebook.CurrentPage + 1);

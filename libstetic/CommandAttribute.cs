@@ -2,23 +2,33 @@ using System;
 
 namespace Stetic {
 
-	public class CommandAttribute : Attribute {
-		string label, checker;
+	[AttributeUsage (AttributeTargets.Method)]
+	public sealed class CommandAttribute : Attribute {
+		string name, description, checker;
 
-		public CommandAttribute (string label)
+		public CommandAttribute (string name, string description)
 		{
-			this.label = label;
+			this.name = name;
+			this.description = description;
 		}
 
-		public CommandAttribute (string label, string checker)
+		public CommandAttribute (string name, string description, string checker)
 		{
-			this.label = label;
+			this.name = name;
+			this.description = description;
 			this.checker = checker;
 		}
 
-		public string Label {
-			get { return label; }
-			set { label = value; }
+		[Translatable]
+		public string Name {
+			get { return name; }
+			set { name = value; }
+		}
+
+		[Translatable]
+		public string Description {
+			get { return description; }
+			set { description = value; }
 		}
 
 		public string Checker {

@@ -73,6 +73,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		[Description ("Message Type", "The type of message dialog this is")]
 		public Gtk.MessageType MessageType {
 			get {
 				if (icon.Stock == Gtk.Stock.DialogInfo)
@@ -105,6 +106,8 @@ namespace Stetic.Wrapper {
 		}
 
 		public string primaryText;
+
+		[Description ("Primary Text", "The primary message text")]
 		public string PrimaryText {
 			get {
 				return primaryText;
@@ -115,6 +118,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		[Description ("Secondary Text", "The secondary message text")]
 		public string SecondaryText {
 			get {
 				return secondaryLabel.Text;
@@ -125,6 +129,8 @@ namespace Stetic.Wrapper {
 		}
 
 		Gtk.ButtonsType buttons;
+
+		[Description ("Buttons", "The buttons to offer")]
 		public Gtk.ButtonsType Buttons {
 			get {
 				return buttons;

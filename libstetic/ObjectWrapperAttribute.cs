@@ -9,10 +9,12 @@ namespace Stetic {
 		Window
 	};
 
-	public class ObjectWrapperAttribute : Attribute {
+	[AttributeUsage (AttributeTargets.Class)]
+	public sealed class ObjectWrapperAttribute : Attribute {
 		string name, iconName;
 		ObjectWrapperType type;
 
+		[Translatable]
 		public string Name {
 			get { return name; }
 			set { name = value; }

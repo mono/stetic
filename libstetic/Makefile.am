@@ -3,6 +3,7 @@ noinst_DATA = libstetic.dll
 libstetic_dll_sources =			\
 	CommandAttribute.cs		\
 	CommandDescriptor.cs		\
+	DescriptionAttribute.cs		\
 	EditorAttribute.cs		\
 	ItemDescriptor.cs		\
 	ItemGroup.cs			\
@@ -17,6 +18,7 @@ libstetic_dll_sources =			\
 	RangeAttribute.cs		\
 	Set.cs				\
 	SiteContentEnumerator.cs	\
+	TranslatableAttribute.cs	\
 	WidgetBox.cs			\
 	WidgetSite.cs			\
 	editor/Boolean.cs		\
