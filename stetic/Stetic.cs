@@ -11,15 +11,18 @@ namespace Stetic {
 
 		public static int Main (string[] args) {
 			Gtk.Window win;
-			Gtk.Notebook notebook;
-			Stetic.Palette palette;
+			Gtk.Box vbox, hbox;
+			Gtk.Paned vpaned;
+			Gtk.ScrolledWindow scwin;
 
 			program = new Gnome.Program ("Stetic", "0.0", Modules.UI, args);
 
 			win = new Gtk.Window ("Stetic");
 			win.DeleteEvent += Window_Delete;
 
-			Gtk.VBox vbox = new Gtk.VBox (false, 0);
+			vbox = new Gtk.VBox (false, 6);
+			win.Add (vbox);
+
 			Gtk.MenuBar menu_bar = new Gtk.MenuBar ();
 			Gtk.MenuItem file_menu_item = new Gtk.MenuItem ("File");
 			menu_bar.Append (file_menu_item);
@@ -30,45 +33,36 @@ namespace Stetic {
 			file_menu.Append (load_glade_menu_item);
 			vbox.PackStart (menu_bar, false, false, 0);
 
-			Gtk.VPaned vpaned = new Gtk.VPaned ();
-			Gtk.HBox hbox = new Gtk.HBox (false, 2);
-			
-			vbox.PackStart (vpaned, true, true, 0);
-			
-			notebook = new Gtk.Notebook ();
-			win.Add (vbox);
+			hbox = new Gtk.HBox (false, 6);
+			vbox.PackStart (hbox, true, true, 0);
 
-			palette = new Stetic.Palette ();
+			Stetic.Palette palette = new Stetic.Palette ();
 			AssemblyName an = new AssemblyName ();
 			an.Name = "libstetic";
 			palette.AddWidgets (System.Reflection.Assembly.Load (an));
-			hbox.PackStart (palette, false, true, 2);
+			hbox.PackStart (palette, false, true, 0);
 
+			vpaned = new Gtk.VPaned ();
+			hbox.PackStart (vpaned, true, true, 0);
+			
 			Project = new Project ();
 			ProjectView = new ProjectView (Project);
-			Gtk.ScrolledWindow project_scroller = new Gtk.ScrolledWindow ();
-			project_scroller.Add (ProjectView);
-			vpaned.Pack1 (project_scroller, true, true);
+			scwin = new Gtk.ScrolledWindow ();
+			scwin.Add (ProjectView);
+			vpaned.Pack1 (scwin, false, false);
 
-			Gtk.ScrolledWindow property_scroller = new Gtk.ScrolledWindow ();
+			scwin = new Gtk.ScrolledWindow ();
+			scwin.SetPolicy (Gtk.PolicyType.Never, Gtk.PolicyType.Automatic);
 			Properties = new Stetic.PropertyGrid ();
 			Properties.Show ();
-			property_scroller.AddWithViewport (Properties);
-			notebook.AppendPage (property_scroller, new Label ("Properties"));
+			scwin.AddWithViewport (Properties);
+			Gtk.Viewport vp = (Gtk.Viewport)scwin.Child;
+			vp.ShadowType = Gtk.ShadowType.None;
+			vpaned.Pack2 (scwin, true, false);
 
-			ChildProperties = new Stetic.ChildPropertyGrid ();
-			ChildProperties.Show ();
-			notebook.AppendPage (ChildProperties, new Label ("Packing"));
-
-			hbox.PackStart (notebook, true, true, 2);
-			vpaned.Pack2 (hbox, true, true);
-
-			Stetic.Grid.Connect (Properties, ChildProperties);
 			win.DefaultHeight = 480;
 			win.DefaultWidth = 640;
 			win.ShowAll ();
-
-			notebook.Page = 0;
 
 			program.Run ();
 			return 0;
@@ -93,18 +87,15 @@ namespace Stetic {
 		static Stetic.ProjectView ProjectView;
 
 		static Stetic.PropertyGrid Properties;
-		static Stetic.ChildPropertyGrid ChildProperties;
 
 		public static void NoSelection ()
 		{
 			Properties.NoSelection ();
-			ChildProperties.NoSelection ();
 		}
 
 		public static void Select (IWidgetSite site)
 		{
 			Properties.Select (site);
-			ChildProperties.Select (site);
 		}
 
 	}

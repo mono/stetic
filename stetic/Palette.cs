@@ -18,15 +18,15 @@ namespace Stetic {
 			
 			public Group (string name) : base ("<b>" + name + "</b>")
 			{
-				vbox  = new VBox (false, 5);
+				vbox = new VBox (false, 5);
 				
 				align = new Gtk.Alignment (0, 0, 0, 0);
 				align.SetPadding (0, 0, 20, 0);
 				align.Child = vbox;
 
 				UseMarkup = true;
-				Expanded  = true;
-				Child     = align;
+				Expanded = true;
+				Child = align;
 			}
 			
 			public void Append (Widget w)
@@ -39,12 +39,16 @@ namespace Stetic {
 		{
 			HscrollbarPolicy = Gtk.PolicyType.Never;
 			VscrollbarPolicy = Gtk.PolicyType.Automatic;
-			ShadowType       = ShadowType.None;
+			ShadowType = ShadowType.None;
 			
-			groups = new Hashtable(); 
+			groups = new Hashtable ();
 			
-			main = new VBox (false, 0);
+			main = new VBox (false, 2);
 			AddWithViewport (main);
+
+			AddOrGetGroup ("Widgets");
+			AddOrGetGroup ("Containers");
+			AddOrGetGroup ("Windows");
 		}
 		
 		private Group AddOrGetGroup(string name)
@@ -52,9 +56,9 @@ namespace Stetic {
 			Group group = (Group) groups[name];
 			
 			if (group == null) {
-				group = new Group(name); 
+				group = new Group (name); 
 				main.PackStart (group, false, false, 0);
-				groups.Add(name, group);
+				groups.Add (name, group);
 			}
 			
 			return group; 
@@ -79,16 +83,8 @@ namespace Stetic {
 			foreach (object attr in type.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)) {
 				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
 				ObjectWrapper.RegisterWrapperType (type, owattr.WrappedType);
-				
+
 				Pixbuf icon = Palette.IconForType (type);
-				
-				/*try {
-					icon = new Gdk.Pixbuf (assem, owattr.IconName);
-				} catch {
-					icon = Gdk.Pixbuf.LoadFromResource ("missing.png");
-				}*/
-				
-				
 
 				switch (owattr.Type) {
 				case ObjectWrapperType.Container:

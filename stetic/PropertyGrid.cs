@@ -9,9 +9,9 @@ namespace Stetic {
 	public class PropertyGrid : Stetic.Grid {
 
 		Hashtable editors;
-		ArrayList sensitives;
+		Hashtable sensitives;
 
-		ObjectWrapper selection;
+		ObjectWrapper selection, packingSelection;
 
 		public PropertyGrid ()
 		{
@@ -26,12 +26,12 @@ namespace Stetic {
 				selection = null;
 			}
 			editors = new Hashtable ();
-			sensitives = new ArrayList ();
+			sensitives = new Hashtable ();
 		}
 
-		protected void AppendProperty (PropertyDescriptor prop)
+		protected void AppendProperty (PropertyDescriptor prop, ObjectWrapper wrapper)
 		{
-			PropertyEditor rep = PropertyEditor.MakeEditor (prop, prop.ParamSpec, selection);
+			PropertyEditor rep = PropertyEditor.MakeEditor (prop, prop.ParamSpec, wrapper);
 			editors[prop.Name] = rep;
 			if (prop.ParamSpec != null)
 				editors[prop.ParamSpec.Name] = rep;
@@ -40,7 +40,7 @@ namespace Stetic {
 			AppendPair (prop.Label, rep, prop.Description);
 
 			if (prop.HasDependencies)
-				sensitives.Add (prop);
+				sensitives[prop] = wrapper;
 		}
 
 		private class Stupid69614Workaround {
@@ -58,16 +58,16 @@ namespace Stetic {
 			}
 		}
 
-		protected void AppendCommand (CommandDescriptor cmd)
+		protected void AppendCommand (CommandDescriptor cmd, ObjectWrapper wrapper)
 		{
 			Gtk.Button button = new Gtk.Button (cmd.Label);
-			button.Clicked += new Stupid69614Workaround (cmd, selection).Activate;
+			button.Clicked += new Stupid69614Workaround (cmd, wrapper).Activate;
 			button.Show ();
 			Append (button, cmd.Description);
 
 			if (cmd.HasDependencies) {
 				editors[cmd.Name] = button;
-				sensitives.Add (cmd);
+				sensitives[cmd] = wrapper;
 			}
 		}
 
@@ -81,56 +81,55 @@ namespace Stetic {
 
 		protected void UpdateSensitivity ()
 		{
-			foreach (ItemDescriptor item in sensitives) {
+			foreach (ItemDescriptor item in sensitives.Keys) {
 				Widget w = editors[item.Name] as Widget;
 				if (w != null)
-					w.Sensitive = item.EnabledFor (selection);
+					w.Sensitive = item.EnabledFor (sensitives[item] as ObjectWrapper);
 			}
-		}
-
-		public virtual ObjectWrapper GetWrapperForSite (IWidgetSite site)
-		{
-			return Stetic.ObjectWrapper.Lookup (site.Contents);
 		}
 
 		public void Select (IWidgetSite site)
 		{
 			Clear ();
 
-			selection = GetWrapperForSite (site);
+			selection = Stetic.ObjectWrapper.Lookup (site.Contents);
 			if (selection == null)
 				return;
 			selection.Notify += Notified;
 
 			if (selection is Stetic.Wrapper.Widget)
-				AppendProperty (new PropertyDescriptor (typeof (Gtk.Widget), "Name"));
+				AppendProperty (new PropertyDescriptor (typeof (Gtk.Widget), "Name"), selection);
+			AppendWrapperGroups (selection);
 
+			packingSelection = Stetic.Wrapper.Container.ChildWrapper (site);
+			if (packingSelection != null && packingSelection.ItemGroups.Length > 0) {
+				AppendWrapperGroups (packingSelection);
+				packingSelection.Notify += Notified;
+			}
+
+			UpdateSensitivity ();
+		}
+
+		void
+		AppendWrapperGroups (ObjectWrapper wrapper)
+		{
 			bool first = true;
-			foreach (ItemGroup igroup in selection.ItemGroups) {
+			foreach (ItemGroup igroup in wrapper.ItemGroups) {
 				AppendGroup (igroup.Name, first);
 				foreach (ItemDescriptor item in igroup.Items) {
 					if (item is PropertyDescriptor)
-						AppendProperty ((PropertyDescriptor)item);
+						AppendProperty ((PropertyDescriptor)item, wrapper);
 					else if (item is CommandDescriptor)
-						AppendCommand ((CommandDescriptor)item);
+						AppendCommand ((CommandDescriptor)item, wrapper);
 				}
 				first = false;
 			}
-			UpdateSensitivity ();
 		}
 
 		public void NoSelection ()
 		{
 			Clear ();
 			AppendLabel ("<i>No selection</i>");
-		}
-	}
-
-	public class ChildPropertyGrid : PropertyGrid {
-
-		public override ObjectWrapper GetWrapperForSite (IWidgetSite site)
-		{
-			return Stetic.Wrapper.Container.ChildWrapper (site);
 		}
 	}
 }

@@ -1,3 +1,16 @@
+2005-02-22  Dan Winship  <danw@novell.com>
+
+	* stetic/PropertyGrid.cs: Kill ChildPropertyGrid and make the
+	child properties appear as just another property group in the main
+	Properties window.
+
+	* stetic/Stetic.cs (Main): clean this up a little, and reorganize
+	(palette on the left, project + properties on the right). Also
+	update for PropertyGrid changes.
+
+	* stetic/Palette.cs: fix up code style, make "Widgets" appear
+	before "Containers", remove some commented out code
+
 2005-02-22  Everaldo Canuto  <everaldo_canuto@yahoo.com.br>
 
 	* stetic/Palette.cs: New palette GUI.
