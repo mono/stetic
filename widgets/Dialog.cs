@@ -3,8 +3,8 @@ using System;
 
 namespace Stetic.Widget {
 
-	[WidgetWrapper ("Dialog Box", "dialog.png", WidgetType.Window)]
-	public class Dialog : Gtk.Dialog, Stetic.IContainerWrapper {
+	[WidgetWrapper ("Dialog Box", "dialog.png")]
+	public class Dialog : Gtk.Dialog, Stetic.IWindowWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -19,8 +19,6 @@ namespace Stetic.Widget {
 							      typeof (Stetic.Widget.Dialog),
 							      "Title",
 							      "Icon",
-							      "Type",
-							      "TypeHint",
 							      "WindowPosition",
 							      "Modal",
 							      "BorderWidth");
@@ -49,10 +47,5 @@ namespace Stetic.Widget {
 			site.Show ();
 			VBox.Add (site);
 		}
-
-		public bool HExpandable { get { return true; } }
-		public bool VExpandable { get { return true; } }
-
-		public event ExpandabilityChangedHandler ExpandabilityChanged;
 	}
 }

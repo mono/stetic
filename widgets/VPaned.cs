@@ -3,7 +3,7 @@ using System;
 
 namespace Stetic.Widget {
 
-	[WidgetWrapper ("VPaned", "vpaned.png", WidgetType.Container)]
+	[WidgetWrapper ("VPaned", "vpaned.png")]
 	public class VPaned : Gtk.VPaned, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

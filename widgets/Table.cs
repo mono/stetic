@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace Stetic.Widget {
 
-	[WidgetWrapper ("Table", "table.png", WidgetType.Container)]
+	[WidgetWrapper ("Table", "table.png")]
 	public class Table : Gtk.Table, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

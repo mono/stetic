@@ -3,7 +3,7 @@ using System;
 
 namespace Stetic.Widget {
 
-	[WidgetWrapper ("Frame", "frame.png", WidgetType.Container)]
+	[WidgetWrapper ("Frame", "frame.png")]
 	public class Frame : Gtk.Frame, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

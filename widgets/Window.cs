@@ -3,8 +3,8 @@ using System;
 
 namespace Stetic.Widget {
 
-	[WidgetWrapper ("Window", "window.png", WidgetType.Window)]
-	public class Window : Gtk.Window, Stetic.IContainerWrapper {
+	[WidgetWrapper ("Window", "window.png")]
+	public class Window : Gtk.Window, Stetic.IWindowWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -56,10 +56,5 @@ namespace Stetic.Widget {
 			site.Show ();
 			Add (site);
 		}
-
-		public bool HExpandable { get { return true; } }
-		public bool VExpandable { get { return true; } }
-
-		public event ExpandabilityChangedHandler ExpandabilityChanged;
 	}
 }

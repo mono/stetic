@@ -3,7 +3,7 @@ using System;
 
 namespace Stetic.Widget {
 
-	[WidgetWrapper ("HButtonBox", "hbuttonbox.png", WidgetType.Container)]
+	[WidgetWrapper ("HButtonBox", "hbuttonbox.png")]
 	public class HButtonBox : Gtk.HButtonBox, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }

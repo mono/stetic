@@ -1,5 +1,35 @@
 2005-01-20  Dan Winship  <danw@novell.com>
 
+	* libstetic/IWindowWrapper.cs: new (empty) interface
+
+	* libstetic/WidgetWrapperAttribute.cs (WidgetType): gone; we can
+	distinguish widget wrappers based on whether they implement
+	IWindowWrapper, IContainerWrapper, or just IObjectWrapper.
+
+	* widgets/*.cs: remove WidgetType declarations from containers and
+	windows.
+
+	* widgets/Dialog.cs: 
+	* widgets/Window.cs: Remove IContainerWrapper junk that wasn't
+	being used anyway.
+
+	* widgets/Calendar.cs: 
+	* widgets/FontButton.cs: 
+	* widgets/MessageDialog.cs: new wrappers
+
+	* widgets/pixmaps/curve.png:
+	* widgets/pixmaps/gammacurve.png:
+	* widgets/pixmaps/hruler.png:
+	* widgets/pixmaps/inputdialog.png:
+	* widgets/pixmaps/selector.png:
+	* widgets/pixmaps/vruler.png: Kill off some glade icons we won't
+	be using
+
+	* stetic/Palette.cs: Update for WidgetType going away, and
+	reorganize into two columns
+
+2005-01-20  Dan Winship  <danw@novell.com>
+
 	* Move 90% of the files in the repository somewhere else.
 
 	* libstetic/: classes needed by both Stetic itself and widget

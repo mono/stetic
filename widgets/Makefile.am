@@ -7,12 +7,14 @@ libsteticwidgets_dll_sources =		\
 	Box.cs				\
 	Button.cs			\
 	ButtonBox.cs			\
+	Calendar.cs			\
 	CheckButton.cs			\
 	ColorButton.cs			\
 	ComboBox.cs			\
 	Dialog.cs			\
 	DrawingArea.cs			\
 	Entry.cs			\
+	FontButton.cs			\
 	Frame.cs			\
 	HBox.cs				\
 	HButtonBox.cs			\
@@ -23,6 +25,7 @@ libsteticwidgets_dll_sources =		\
 	Icon.cs				\
 	Image.cs			\
 	Label.cs			\
+	MessageDialog.cs		\
 	Misc.cs				\
 	Notebook.cs			\
 	Paned.cs			\

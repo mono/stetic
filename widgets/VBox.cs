@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Stetic.Widget {
 
-	[WidgetWrapper ("VBox", "vbox.png", WidgetType.Container)]
+	[WidgetWrapper ("VBox", "vbox.png")]
 	public class VBox : Gtk.VBox, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
