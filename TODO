@@ -1,18 +1,12 @@
-Core functionality needed to make it minimally usable as a Glade
-replacement:
+Application UI:
 
     - A real main window, with menus and a toolbar and all that.
-
-    - Glade Export.
-
-
-Application UI:
 
     - Figure out how to organize the various windows
 
     - L10n/I18n
 	- Show translated property names/descriptions
-	- Make sure other UI stuff is translated
+	- Make sure other UI stuff is translated (enum values)
 	- Make Grid and other custom widgets right-to-left-able
 
 
@@ -53,8 +47,9 @@ UI-Designing UI:
 	- Layout/Fixed
 
 	- Menubar, Toolbar. (Mike Kestner has some code here.) Use the
-          new GtkAction-based stuff. Should also support the old stuff as well
-	  as far as creation/editing (Toolbar, ToolbarItem, etc)
+          new GtkAction-based stuff (?). Should also support the old
+          stuff as well as far as creation/editing (Toolbar,
+          ToolbarItem, etc)
 
 	- Gnome widgets (the not-yet-deprecated ones anyway)
 		- Not in a separate "Gnome widgets" group.
@@ -121,7 +116,7 @@ Misc functionality:
 	- X's Foo property contains the value of GConf key Y
 	- Connect X's Foo method to Y's Bar signal
 
-    - Signal support (maybe just via the "wiring" above?)
+    - Signal support
 
     - Templates (build something and then save it in a way that you or
       other people can have it as a pre-built thing in your Palette)
