@@ -1,5 +1,23 @@
 2005-03-24  Dan Winship  <danw@novell.com>
 
+	* libstetic/DND.cs: move the drag-and-drop "fault" code from
+	WidgetSite to here. Remove the DragBegin and DragEnd events since
+	nothing needs them any more.
+
+	* libstetic/WidgetSite.cs (AddFault, AddVFault, AddHFault,
+	ClearFaults, ShowFaults, HideFaults, OnDragMotion, OnDragLeave,
+	OnDragDrop): all moved into DND now.
+	(Internal): gone; does nothing WidgetBox.Internal doesn't do now
+
+	* libstetic/wrapper/Widget.cs (Drop): dummy virtual implementation
+	that just destroys the dropped widget
+
+	* libstetic/wrapper/Box.cs (Sync): s/site/DND/ for all the fault
+	stuff
+	(Drop): override to dtrt
+
+2005-03-24  Dan Winship  <danw@novell.com>
+
 	More code migration out of WidgetSite
 
 	* libstetic/DND.cs (DragWidget): public accessor for dragWidget

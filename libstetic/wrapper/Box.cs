@@ -43,7 +43,7 @@ namespace Stetic.Wrapper {
 			if (site == null)
 				return;
 
-			site.ClearFaults ();
+			DND.ClearFaults (this);
 
 			Gtk.Widget[] children = box.Children;
 			if (children.Length == 0)
@@ -72,22 +72,22 @@ namespace Stetic.Wrapper {
 
 			if (this is HBox || this is HButtonBox) {
 				if (sorted[0] != null)
-					site.AddVFault (0, null, sorted[0]);
+					DND.AddVFault (this, 0, null, sorted[0]);
 				if (sorted[sorted.Length - 1] != null)
-					site.AddVFault (sorted.Length, sorted[sorted.Length - 1], null);
+					DND.AddVFault (this, sorted.Length, sorted[sorted.Length - 1], null);
 			} else {
 				if (sorted[0] != null)
-					site.AddHFault (0, null, sorted[0]);
+					DND.AddHFault (this, 0, null, sorted[0]);
 				if (sorted[sorted.Length - 1] != null)
-					site.AddHFault (sorted.Length, sorted[sorted.Length - 1], null);
+					DND.AddHFault (this, sorted.Length, sorted[sorted.Length - 1], null);
 			}
 
 			for (int i = 1; i < sorted.Length; i++) {
 				if (sorted[i - 1] != null && sorted[i] != null) {
 					if (this is HBox || this is HButtonBox)
-						site.AddVFault (i, sorted[i - 1], sorted[i]);
+						DND.AddVFault (this, i, sorted[i - 1], sorted[i]);
 					else
-						site.AddHFault (i, sorted[i - 1], sorted[i]);
+						DND.AddHFault (this, i, sorted[i - 1], sorted[i]);
 				}
 			}
 		}
@@ -149,8 +149,6 @@ namespace Stetic.Wrapper {
 			WidgetSite site = box.Parent as WidgetSite;
 			if (site == null)
 				return;
-
-			site.DropOn += DropOn;
 		}
 
 		void box_SizeAllocated (object obj, Gtk.SizeAllocatedArgs args)
@@ -158,7 +156,7 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
-		void DropOn (Gtk.Widget w, object faultId)
+		public override void Drop (Gtk.Widget w, object faultId)
 		{
 			WidgetSite site = CreateWidgetSite (w);
 			AutoSize[site] = true;

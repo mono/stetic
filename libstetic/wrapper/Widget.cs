@@ -110,6 +110,11 @@ namespace Stetic.Wrapper {
 			w.GrabFocus ();
 		}
 
+		public virtual void Drop (Gtk.Widget widget, object faultId)
+		{
+			widget.Destroy ();
+		}
+
 		public virtual bool HExpandable { get { return false; } }
 		public virtual bool VExpandable { get { return false; } }
 
