@@ -17,6 +17,7 @@ namespace Stetic.Wrapper {
 			PropertyDescriptor[] props;
 
 			props = new PropertyDescriptor[] {
+				new PropertyDescriptor (typeof (Gtk.Button), "Label"),
 				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Active"),
 				new PropertyDescriptor (typeof (Gtk.ToggleButton), "Inconsistent"),
 				new PropertyDescriptor (typeof (Gtk.ToggleButton), "DrawIndicator"),
@@ -24,7 +25,8 @@ namespace Stetic.Wrapper {
 			RadioButtonProperties = new PropertyGroup ("Radio Button Properties", props);
 
 			groups = new PropertyGroup[] {
-				RadioButtonProperties, Widget.CommonWidgetProperties
+				RadioButtonProperties, Button.ButtonExtraProperties,
+				Widget.CommonWidgetProperties
 			};
 		}
 

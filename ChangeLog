@@ -1,5 +1,31 @@
 2005-01-14  Dan Winship  <danw@novell.com>
 
+	* stetic/PropertyEditor.cs (BasicEditor.EditorValueChanged,
+	BasicEditor.Update, RangeEditor.EditorValueChanged,
+	RangeEditor.Update): Ignore EditorValueChanged if we're inside an
+	Update, since it's just reflecting the change we're already
+	making. Indirectly fixes a problem with deleting characters in an
+	Entry.
+
+	* stetic/wrapper/Arrow.cs: Add Misc.MiscProperties
+
+	* stetic/wrapper/Button.cs: Implement IContextMenuProvider.
+	(ContextMenuItems): Return a context menu with "Remove Button
+	Contents" and "Restore Button Label" items, properly sensitized.
+	(RemoveContents, RestoreLabel): Implement those.
+	(InsensitiveProperties): Update to deal with RemoveContents
+
+	* stetic/wrapper/CheckButton.cs: 
+	* stetic/wrapper/RadioButton.cs: Add missing "Label" property plus
+	Button.ButtonExtraProperties
+
+	* stetic/editor/Enumeration.cs: Don't show the enumeration values
+	in the menu.
+
+	* stetic/editor/FloatRange.cs: Show 2 decimal digits
+
+2005-01-14  Dan Winship  <danw@novell.com>
+
 	* stetic/WidgetBox.cs: Remove InterceptEvents property and
 	EventWindow. Instead, ConnectBefore to the child's
 	ButtonPressEvent. (This should help to deal with

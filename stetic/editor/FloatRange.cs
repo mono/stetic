@@ -9,6 +9,7 @@ namespace Stetic.Editor {
 
 		public FloatRange (double min, double max, double initial) : base (min, max, 0.01)
 		{
+			Digits = 2;
 			Value = initial;
 		}
 	}

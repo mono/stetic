@@ -23,7 +23,7 @@ namespace Stetic.Editor {
 				Enum value = (Enum)Enum.ToObject (type, i);
 				string name = Enum.GetName (type, value);
 
-				combo.AppendText (name + " (" + i.ToString() + ")");
+				combo.AppendText (name);
 				values.Add (value);
 			}
 		}

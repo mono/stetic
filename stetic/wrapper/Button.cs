@@ -8,7 +8,7 @@ using System.ComponentModel;
 namespace Stetic.Wrapper {
 
 	[WidgetWrapper ("Button", "button.png")]
-	public class Button : Gtk.Button, Stetic.IObjectWrapper, Stetic.IPropertySensitizer {
+	public class Button : Gtk.Button, Stetic.IObjectWrapper, Stetic.IPropertySensitizer, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -22,7 +22,6 @@ namespace Stetic.Wrapper {
 				new PropertyDescriptor (typeof (Gtk.Button), "UseStock"),
 				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "StockId"),
 				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), typeof (Gtk.Button), "Label"),
-//				new PropertyDescriptor (typeof (Stetic.Wrapper.Button), "Icon")
 			};				
 			ButtonProperties = new PropertyGroup ("Button Properties", props);
 
@@ -32,7 +31,6 @@ namespace Stetic.Wrapper {
 				new PropertyDescriptor (typeof (Gtk.Button), "Relief"),
 				new PropertyDescriptor (typeof (Gtk.Button), "Xalign"),
 				new PropertyDescriptor (typeof (Gtk.Button), "Yalign"),
-				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth")
 			};
 			ButtonExtraProperties = new PropertyGroup ("Extra Button Properties", props);
 
@@ -47,6 +45,52 @@ namespace Stetic.Wrapper {
 			UseStock = UseUnderline = true;
 			StockId = Gtk.Stock.Ok;
 			Notify.Add (this, new NotifyDelegate (Notified));
+		}
+
+		public IEnumerable ContextMenuItems (IWidgetSite context)
+		{
+			ContextMenuItem[] items;
+			WidgetSite site = Child as WidgetSite;
+
+			bool hasLabel = (site == null);
+			bool isEmpty = (site != null) && !site.Occupied;
+
+			// FIXME; I'm only assigning to a variable rather than
+			// returning it directly to make emacs indentation happy
+			items = new ContextMenuItem[] {
+				new ContextMenuItem ("Remove Button Contents", new ContextMenuItemDelegate (RemoveContents), !isEmpty),
+				new ContextMenuItem ("Restore Button Label", new ContextMenuItemDelegate (RestoreLabel), !hasLabel)
+			};
+			return items;
+		}
+
+		void RemoveContents (IWidgetSite context)
+		{
+			if (Child != null)
+				Remove (Child);
+
+			WidgetSite site = new WidgetSite ();
+			site.Show ();
+			Add (site);
+
+			EmitSensitivityChanged ("UseStock", false);
+			EmitSensitivityChanged ("StockId", false);
+			EmitSensitivityChanged ("Label", false);
+		}
+
+		void RestoreLabel (IWidgetSite context)
+		{
+			if (Child != null)
+				Remove (Child);
+
+			if (UseStock)
+				base.Label = stockId;
+			else
+				base.Label = label;
+
+			EmitSensitivityChanged ("UseStock", true);
+			EmitSensitivityChanged ("StockId", true);
+			EmitSensitivityChanged ("Label", true);
 		}
 
 		void Notified (ParamSpec pspec)
@@ -99,7 +143,9 @@ namespace Stetic.Wrapper {
 
 		public IEnumerable InsensitiveProperties {
 			get {
-				if (UseStock)
+				if (Child is WidgetBox)
+					return new string[] { "UseStock", "StockId", "Label" };
+				else if (UseStock)
 					return new string[] { "Label" };
 				else
 					return new string[0];

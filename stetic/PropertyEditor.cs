@@ -133,7 +133,7 @@ namespace Stetic {
 				else {
 					ctor = editorType.GetConstructor (new Type[] { typeof (Type) });
 					if (ctor == null)
-						throw new ApplicationException ("No constructor for editor type " + editorType.ToString ());;
+						throw new ApplicationException ("No constructor for editor type " + editorType.ToString () + " for " + prop.Name);;
 					editor = (Widget)ctor.Invoke (new object[] { prop.PropertyType });
 				}
 
@@ -152,14 +152,19 @@ namespace Stetic {
 			Add (editor);
 		}
 
+		bool updating = false;
+
 		void EditorValueChanged (object o, EventArgs args)
 		{
-			prop.SetValue (obj, editorProp.GetValue (editor, null));
+			if (!updating)
+				prop.SetValue (obj, editorProp.GetValue (editor, null));
 		}
 
 		public override void Update (object o, EventArgs args)
 		{
+			updating = true;
 			editorProp.SetValue (editor, prop.GetValue (obj), null);
+			updating = false;
 		}
 	}
 
@@ -216,14 +221,19 @@ namespace Stetic {
 			Add (editor);
 		}
 
+		bool updating = false;
+
 		void EditorValueChanged (object o, EventArgs args)
 		{
-			prop.SetValue (obj, Convert.ChangeType (editorProp.GetValue (editor, null), prop.PropertyType));
+			if (!updating)
+				prop.SetValue (obj, Convert.ChangeType (editorProp.GetValue (editor, null), prop.PropertyType));
 		}
 
 		public override void Update (object o, EventArgs args)
 		{
+			updating = true;
 			editorProp.SetValue (editor, Convert.ChangeType (prop.GetValue (obj), editorProp.PropertyType), null);
+			updating = false;
 		}
 	}
 

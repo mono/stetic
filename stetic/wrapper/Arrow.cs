@@ -23,7 +23,8 @@ namespace Stetic.Wrapper {
 			ArrowProperties = new PropertyGroup ("Arrow Properties", props);
 
 			groups = new PropertyGroup[] {
-				ArrowProperties, Widget.CommonWidgetProperties
+				ArrowProperties, Misc.MiscProperties,
+				Widget.CommonWidgetProperties
 			};
 		}
 
