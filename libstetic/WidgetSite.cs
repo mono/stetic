@@ -1,6 +1,7 @@
 using Gtk;
 using Gdk;
 using System;
+using System.Collections;
 
 namespace Stetic {
 
@@ -23,10 +24,13 @@ namespace Stetic {
 			TargetList.Add (SteticWidgetType, 0, 0);
 		}
 
-		public WidgetSite ()
+		IStetic stetic;
+
+		public WidgetSite (IStetic stetic)
 		{
 			WidgetFlags |= WidgetFlags.CanFocus;
 
+			this.stetic = stetic;
 			emptySize.Width = emptySize.Height = 10;
 			Occupancy = SiteOccupancy.Empty;
 		}
@@ -107,7 +111,10 @@ namespace Stetic {
 
 				case SiteOccupancy.Occupied:
 					SetSizeRequest (-1, -1);
-					Gtk.Drag.DestUnset (this);
+					if (faults != null && faults.Count > 0)
+						Gtk.Drag.DestSet (this, 0, Targets, DragAction.Move);
+					else
+						Gtk.Drag.DestUnset (this);
 					if (OccupancyChanged != null)
 						OccupancyChanged (this);
 					break;
@@ -164,6 +171,129 @@ namespace Stetic {
 			}
 		}
 
+		Hashtable faults;
+
+		void SetupFaults ()
+		{
+			if (faults == null) {
+				faults = new Hashtable ();
+				stetic.DragBegin += ShowFaults;
+				stetic.DragEnd += HideFaults;
+			}
+			if (Occupancy == SiteOccupancy.Occupied)
+				Gtk.Drag.DestSet (this, 0, Targets, DragAction.Move);
+		}
+
+		public void AddHFault (object id, int y, int x1, int x2)
+		{
+			Gdk.Window win = NewWindow (GdkWindow, Gdk.WindowClass.InputOnly);
+			win.MoveResize (x1, y - 2, x2 - x1 , 5);
+			if (faults == null || faults.Count == 0)
+				SetupFaults ();
+			faults[id] = win;
+		}
+
+		public void AddVFault (object id, int x, int y1, int y2)
+		{
+			Gdk.Window win = NewWindow (GdkWindow, Gdk.WindowClass.InputOnly);
+			win.MoveResize (x - 2, y1, 5, y2 - y1);
+			if (faults == null || faults.Count == 0)
+				SetupFaults ();
+			faults[id] = win;
+		}
+
+		public void ClearFaults ()
+		{
+			if (faults != null) {
+				foreach (Gdk.Window win in faults.Values)
+					win.Destroy ();
+				faults.Clear ();
+			}
+			if (Occupancy == SiteOccupancy.Occupied)
+				Gtk.Drag.DestUnset (this);
+		}
+
+		void ShowFaults ()
+		{
+			foreach (Gdk.Window win in faults.Values)
+				win.Show ();
+		}
+
+		void HideFaults ()
+		{
+			foreach (Gdk.Window win in faults.Values)
+				win.Hide ();
+			OnDragLeave (null, 0);
+		}
+
+		object dragFault;
+		Gdk.Window splitter;
+
+		void FindFault (int x, int y, out object fault, out Gdk.Window win)
+		{
+			int wx, wy, width, height, depth;
+
+			fault = null;
+			win = null;
+			wx = wy = width = height = 0;
+
+			foreach (object id in faults.Keys) {
+				win = faults[id] as Gdk.Window;
+				win.GetGeometry (out wx, out wy, out width, out height, out depth);
+				if (x >= wx && y >= wy && x <= wx + width && y <= wy + height) {
+					fault = id;
+					return;
+				}
+			}
+		}
+
+		// This is only called when dragging in fault mode, not in
+		// placeholder mode.
+		protected override bool OnDragMotion (Gdk.DragContext ctx, int x, int y, uint time)
+		{
+			if (faults == null || faults.Count == 0)
+				return false;
+
+			int wx, wy, width, height, depth;
+			object match;
+			Gdk.Window matchWin;
+			
+			FindFault (x, y, out match, out matchWin);
+
+			// If there's a splitter visible, and we're not currently dragging
+			// in the fault that owns that splitter, hide it
+			if (splitter != null && dragFault != match) {
+				splitter.Hide ();
+				splitter.Destroy ();
+				splitter = null;
+			}
+
+			if (dragFault != match) {
+				dragFault = match;
+				if (dragFault == null)
+					return false;
+
+				splitter = NewWindow (GdkWindow, Gdk.WindowClass.InputOutput);
+				matchWin.GetGeometry (out wx, out wy, out width, out height, out depth);
+				splitter.MoveResize (wx, wy, width, height);
+				splitter.ShowUnraised ();
+				GdkWindow.Lower ();
+			}
+
+			Gdk.Drag.Status (ctx, Gdk.DragAction.Move, time);
+			return true;
+		}
+
+		protected override void OnDragLeave (Gdk.DragContext ctx, uint time)
+		{
+			if (splitter != null) {
+				splitter.Hide ();
+				splitter.Destroy ();
+				splitter = null;
+				dragFault = null;
+			}
+		}
+
 		protected int clickX, clickY;
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
@@ -207,6 +337,8 @@ namespace Stetic {
 			if (!StartDrag (evt))
 				return true;
 
+			stetic.DragBegun ();
+
 			mx = (int)evt.XRoot;
 			my = (int)evt.YRoot;
 
@@ -228,6 +360,20 @@ namespace Stetic {
 			Gtk.Drag.SetIconWidget (ctx, dragWin, 0, 0);
 
 			return false;
+		}
+
+		public delegate void DropOnHandler (Widget w, object faultId);
+		public event DropOnHandler DropOn;
+
+		protected virtual void Drop (Widget w, int x, int y)
+		{
+			if (faults != null && DropOn != null) {
+				object faultId = null;
+				Gdk.Window win;
+				FindFault (x, y, out faultId, out win);
+				DropOn (w, faultId);
+			} else
+				Add (w);
 		}
 
 		protected override bool OnDragDrop (DragContext ctx,
@@ -254,7 +400,7 @@ namespace Stetic {
 			if (parent != null)
 				parent.Remove (dragged);
 
-			Add (dragged);
+			Drop (dragged, x, y);
 			GrabFocus ();
 			Gtk.Drag.Finish (ctx, true, false, time);
 			return true;
@@ -268,11 +414,12 @@ namespace Stetic {
 				parent = dragWidget.Parent as Container;
 				if (parent != null)
 					parent.Remove (dragWidget);
-				Add (dragWidget);
+				Drop (dragWidget, -1, -1);
 			} else if (Child == null)
 				Occupancy = SiteOccupancy.Empty;
 
 			dragWidget = null;
+			stetic.DragEnded ();
 		}
 
 		protected override bool OnKeyReleaseEvent (Gdk.EventKey evt)

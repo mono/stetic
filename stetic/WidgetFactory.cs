@@ -11,7 +11,7 @@ namespace Stetic {
 		protected Project project;
 		protected Type wrapperType;
 
-		public WidgetFactory (Project project, string name, Pixbuf icon, Type wrapperType)
+		public WidgetFactory (Project project, string name, Pixbuf icon, Type wrapperType) : base (project)
 		{
 			this.project = project;
 			this.wrapperType = wrapperType;
@@ -37,6 +37,11 @@ namespace Stetic {
 			Stetic.Wrapper.Widget wrapper = Stetic.ObjectWrapper.Create (project, wrapperType) as Stetic.Wrapper.Widget;
 			dragWidget = wrapper.Wrapped as Widget;
 			return true;
+		}
+
+		protected override void Drop (Widget w, int x, int y)
+		{
+			;
 		}
 	}
 

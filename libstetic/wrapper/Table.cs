@@ -89,7 +89,7 @@ namespace Stetic.Wrapper {
 				Sync ();
 		}
 
-		void Sync ()
+		protected override void Sync ()
 		{
 			uint left, right, top, bottom;
 			uint row, col;
@@ -590,7 +590,6 @@ namespace Stetic.Wrapper {
 					base.EmitNotify ("YShrink");
 				}
 				base.EmitNotify (propertyName);
-				parent.Sync ();
 			}
 		}
 	}

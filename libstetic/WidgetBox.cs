@@ -161,7 +161,7 @@ namespace Stetic {
 			"   ..   "
 		};
 
-		Gdk.Window NewWindow (Gdk.Window parent, Gdk.WindowClass wclass)
+		protected Gdk.Window NewWindow (Gdk.Window parent, Gdk.WindowClass wclass)
 		{
 			WindowAttr attributes;
 			WindowAttributesType attributesMask;

@@ -1,3 +1,49 @@
+2005-03-02  Dan Winship  <danw@novell.com>
+
+	"Autoexpand" for boxes (but not yet tables, and not 100% right
+	yet.)
+	
+	* libstetic/WidgetSite.cs (AddHFault, AddVFault): allow the site
+	occupant to add "fault lines" inside the widget where it can split
+	apart to fit additional widgets
+	(ShowFaults, HideFaults): connected to the IStetic's DragBegin and
+	DragEnd signals, to show/hide the (invisible) fault line windows
+	as needed.
+	(OnDragMotion): if the user drags into a fault line, draw a
+	splitter.
+	(OnDragDrop): if the user dropped onto a fault line, emit the
+	"DropOn" event to let the child handle placing the widget.
+
+	* libstetic/WidgetBox.cs (NewWindow): make this protected so
+	WidgetSite can use it
+
+	* libstetic/IStetic.cs (DragBegin, DragEnd): new events, to
+	indicate that something somewhere is being dragged
+
+	* libstetic/wrapper/Container.cs (Sync): make this a virtual
+	method on Container
+	(ContainerChild.EmitNotify): Sync the parent
+
+	* libstetic/wrapper/Box.cs (Wrap): connect to the box's
+	SizeAllocated and ParentSet handlers
+	(Sync): add fault lines
+	(box_ParentSet): connect to the parent site's DropOn event
+	(box_SizeAllocated): Sync()
+	(DropOn): Insert the child in the right place
+
+	* libstetic/wrapper/Table.cs (Sync): add "override"
+	(TableChild.EmitNotify): don't need to call Sync from here;
+	Container does it
+
+	* stetic/Project.cs: implement the new IStetic bits
+
+	* stetic/WidgetFactory.cs (ctor): pass the project (IStetic) to
+	the WidgetSite ctor
+	(Drop): override this to get rid of the warning message when you
+	drag something from the palette but then cancel the drag
+	
+	* TODO: update
+
 2005-02-28  Dan Winship  <danw@novell.com>
 
 	* libstetic/GladeUtils.cs (HydrateProperties): Handle "adjustment"

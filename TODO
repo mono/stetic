@@ -20,11 +20,11 @@ UI-Designing UI:
 
     - Fix up not-fully-functional wrappers:
 
-	- If you remove the label in a Button and replace it with
-	  something else, the something else doesn't show up in the
-	  Project window
-
 	- Does PackStart/PackEnd actually do anything in Box?
+		- In glade, you can't have gaps between two PackEnd
+		  children. So you can have a box with a single
+		  PackStart child in Positition 3, but if you change
+		  it to PackEnd, it has to be in the last position.
 
 	- ButtonBox should fill itself in with buttons, like glade
           does, and needs to implement insert/remove commands
@@ -39,11 +39,12 @@ UI-Designing UI:
 		  different properties?
 		- Switch with Prev/Next isn't implemented
 
-	- Window.Visible, Window.Modal, Widget.Sensitive cause
-          interaction problems and need to represented as shadow
-          properties. (Would be nice if we could trick "insensitive"
-          widgets into drawing that way even if they did still respond
-          to clicks.)
+	- Widget.Sensitive needs special handling. Ideally we'd make
+          the widget insensitive, but have its site intercept clicks
+          anyway.
+
+	- Widget.Visible: glade treats this as a shadow property.
+          Should we?
 
 	- ... ?
 
@@ -79,8 +80,7 @@ UI-Designing UI:
 	- Containers should try to automatically set Padding/Spacing
           and BorderWidth
 
-	- Boxes and Tables should autoexpand if you drop widgets on
-          their edges or between other widgets
+	- Fix up Box autoexpand, add it to Table.
 
 	- If you drag a non-expandable widget into a Bin, it could add
           a table

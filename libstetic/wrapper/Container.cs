@@ -29,6 +29,11 @@ namespace Stetic.Wrapper {
 			} while (type != typeof (Stetic.Wrapper.Container));
 		}
 
+		protected virtual void Sync ()
+		{
+			;
+		}
+
 		Gtk.Container container {
 			get {
 				return (Gtk.Container)Wrapped;
@@ -213,6 +218,12 @@ namespace Stetic.Wrapper {
 			{
 				ParamSpec pspec = ParamSpec.Wrap (args.Pspec);
 				EmitNotify (pspec.Name);
+			}
+
+			protected override void EmitNotify (string propertyName)
+			{
+				base.EmitNotify (propertyName);
+				ParentWrapper.Sync ();
 			}
 
 			Gtk.Container.ContainerChild cc {

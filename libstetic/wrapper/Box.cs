@@ -26,11 +26,59 @@ namespace Stetic.Wrapper {
 				for (int i = 0; i < 3; i++)
 					box.PackStart (CreateWidgetSite ());
 			}
+			box.SizeAllocated += box_SizeAllocated;
+			box.ParentSet += box_ParentSet;
 		}
 
 		Gtk.Box box {
 			get {
 				return (Gtk.Box)Wrapped;
+			}
+		}
+
+		protected override void Sync ()
+		{
+			WidgetSite site = box.Parent as WidgetSite;
+			if (site == null)
+				return;
+
+			Gtk.Widget[] children = box.Children;
+			WidgetSite[] sorted = new WidgetSite[children.Length];
+
+			foreach (Gtk.Widget child in children) {
+				WidgetSite childsite = child as WidgetSite;
+				if (childsite == null || !childsite.Occupied)
+					continue;
+				Gtk.Box.BoxChild bc = box[child] as Gtk.Box.BoxChild;
+				sorted[bc.Position] = childsite;
+			}
+
+			Gdk.Rectangle alloc = box.Allocation;
+
+			site.ClearFaults ();
+
+			if (this is HBox) {
+				if (sorted[0] != null)
+					site.AddVFault (0, 0, 0, alloc.Height);
+				if (sorted[sorted.Length - 1] != null)
+					site.AddVFault (sorted.Length, alloc.Width, 0, alloc.Height);
+			} else {
+				if (sorted[0] != null)
+					site.AddHFault (0, 0, 0, alloc.Width);
+				if (sorted[sorted.Length - 1] != null)
+					site.AddHFault (sorted.Length, alloc.Height, 0, alloc.Width);
+			}
+
+			for (int i = 1; i < sorted.Length; i++) {
+				if (sorted[i - 1] != null && sorted[i] != null) {
+					Gdk.Rectangle alloc1 = sorted[i - 1].Allocation;
+					Gdk.Rectangle alloc2 = sorted[i].Allocation;
+
+					if (this is HBox)
+						site.AddVFault (i, (alloc1.X + alloc1.Width + alloc2.X) / 2, 0, alloc.Height);
+					else
+						site.AddHFault (i, (alloc1.Y + alloc1.Height + alloc2.Y) / 2, 0, alloc.Width);
+				}
 			}
 		}
 
@@ -70,6 +118,29 @@ namespace Stetic.Wrapper {
 			base.SiteOccupancyChanged (site);
 		}
 
+		void box_ParentSet (object obj, Gtk.ParentSetArgs args)
+		{
+			WidgetSite site = box.Parent as WidgetSite;
+			if (site == null)
+				return;
+
+			site.DropOn += DropOn;
+		}
+
+		void box_SizeAllocated (object obj, Gtk.SizeAllocatedArgs args)
+		{
+			Sync ();
+		}
+
+		void DropOn (Gtk.Widget w, object faultId)
+		{
+			WidgetSite site = CreateWidgetSite ();
+			box.PackStart (site);
+			site.Add (w);
+			box.ReorderChild (site, (int)faultId);
+
+			Sync ();
+		}
 
 		public class BoxChild : Container.ContainerChild {
 

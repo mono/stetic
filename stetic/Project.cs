@@ -98,7 +98,7 @@ namespace Stetic {
 
 		public WidgetSite CreateWidgetSite ()
 		{
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = new WidgetSite (this);
 			site.PopupContextMenu += delegate (object obj, EventArgs args) {
 				Menu m = new ContextMenu ((WidgetSite)site);
 				m.Popup ();
@@ -111,7 +111,7 @@ namespace Stetic {
 			return widgets[id] as Gtk.Widget;
 		}
 
-		public event GladeImportCompleteDelegate GladeImportComplete;
+		public event ISteticDelegate GladeImportComplete;
 
 		public void BeginGladeImport ()
 		{
@@ -122,6 +122,21 @@ namespace Stetic {
 		{
 			if (GladeImportComplete != null)
 				GladeImportComplete ();
+		}
+
+		public event ISteticDelegate DragBegin;
+		public event ISteticDelegate DragEnd;
+
+		public void DragBegun ()
+		{
+			if (DragBegin != null)
+				DragBegin ();
+		}
+
+		public void DragEnded ()
+		{
+			if (DragEnd != null)
+				DragEnd ();
 		}
 	}
 
