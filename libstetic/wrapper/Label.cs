@@ -33,13 +33,9 @@ namespace Stetic.Wrapper {
 
 		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
 		{
-			int index = propNames.IndexOf ("mnemonic_widget");
-			if (index != -1) {
-				mnemonic_widget = propVals[index] as string;
-				propNames.RemoveAt (index);
-				propVals.RemoveAt (index);
+			mnemonic_widget = GladeUtils.ExtractProperty ("mnemonic_widget", propNames, propVals);
+			if (mnemonic_widget != null)
 				stetic.GladeImportComplete += SetMnemonicWidget;
-			}
 			base.GladeImport (className, id, propNames, propVals);
 		}
 

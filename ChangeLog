@@ -1,3 +1,35 @@
+2005-02-27  Dan Winship  <danw@novell.com>
+
+	* libstetic/GladeUtils.cs (ExtractProperty): utility to remove a
+	property from the propNames/propVals lists.
+	(HydrateProperties): add some debug messages here
+
+	* libstetic/wrapper/Label.cs (GladeImport): simplify using
+	ExtractProperty
+
+	* libstetic/wrapper/RadioButton.cs (GladeImport): handle "group"
+
+	* libstetic/wrapper/Table.cs (GladeImport): force a Sync after
+	import
+	(Sync): don't knock out conflicting sites if they're full (which
+	will happen temporarily during glade import, since table.Add(foo)
+	will always put it at 0,0).
+
+	* libstetic/wrapper/TextView.cs (GladeImport): handle "text"
+
+	* libstetic/wrapper/Widget.cs (GladeImport): extract "visible" and
+	"has_default"; fake out "visible", hold off on setting
+	"has_default" until the import is complete (since it requires a
+	parent window).
+
+	* libstetic/wrapper/Window.cs (Wrap): force TypeHint to "Normal"
+	so the WM doesn't do annoying things to us 
+	(GladeImport): extract "modal" and "type_hint"
+	(TypeHint): add a shadow property for this
+	
+	* stetic/GladeImport.cs (CreateWidget, AddChildren): merge these
+	together and reduce redundant code.
+
 2005-02-25  Dan Winship  <danw@novell.com>
 
 	Reorganize the glade import code; put all the wacky exceptions

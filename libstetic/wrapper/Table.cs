@@ -41,6 +41,18 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
+		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		{
+			stetic.GladeImportComplete += DoSync;
+			base.GladeImport (className, id, propNames, propVals);
+		}
+
+		void DoSync ()
+		{
+			Sync ();
+			stetic.GladeImportComplete -= DoSync;
+		}
+
 		private Gtk.Table table {
 			get {
 				return (Gtk.Table)Wrapped;
@@ -96,10 +108,13 @@ namespace Stetic.Wrapper {
 					grid[top,left] = child as WidgetSite;
 				else
 					table.Remove (child);
-                        }
+			}
 
 			// Now fill in the real widgets, knocking out any placeholders
-			// they overlap.
+			// they overlap. (If there are real widgets that overlap
+			// placeholders, neither will be knocked out, and the layout
+			// will probably end up wrong as well. But this situation
+			// happens at least temporarily during glade import.)
                         foreach (Gtk.Widget child in children) {
 				site = (WidgetSite) child;
 				if (!site.Occupied)
@@ -113,7 +128,8 @@ namespace Stetic.Wrapper {
 
                                 for (row = top; row < bottom; row++) {
                                         for (col = left; col < right; col++) {
-						if (grid[row,col] != null)
+						site = grid[row,col];
+						if (site != null && !site.Occupied)
 							table.Remove (grid[row,col]);
                                                 grid[row,col] = child as WidgetSite;
                                         }

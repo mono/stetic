@@ -43,6 +43,32 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		string group;
+
+		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		{
+			group = GladeUtils.ExtractProperty ("group", propNames, propVals);
+			base.GladeImport (className, id, propNames, propVals);
+
+			if (group != null)
+				stetic.GladeImportComplete += SetGroup;
+			else {
+				GroupList.Add (((Gtk.Widget)Wrapped).Name);
+				GroupLeaders.Add (Wrapped);
+			}
+		}
+
+		void SetGroup ()
+		{
+			Gtk.Widget leader = stetic.LookupWidgetById (group);
+			if (leader != null) {
+				int index = GroupLeaders.IndexOf (leader);
+				if (index != -1)
+					Group = index;
+			}
+			stetic.GladeImportComplete -= SetGroup;
+		}
+
 		[Editor (typeof (Stetic.Editor.GroupPicker))]
 		[Description ("Group", "The name of the radio button group that this button belongs to")]
 		public int Group {

@@ -77,14 +77,31 @@ stetic_g_value_hydrate (GValue *value, const char *data)
 		break;
 	default:
 		if (G_TYPE_IS_ENUM (G_VALUE_TYPE (value))) {
-			GEnumClass *enum_class = g_type_class_ref (G_VALUE_TYPE(value));
+			GEnumClass *enum_class = g_type_class_ref (G_VALUE_TYPE (value));
 			GEnumValue *enum_value = g_enum_get_value_by_name (enum_class, data);
 			g_type_class_unref (enum_class);
 			if (enum_value) {
 				g_value_set_enum (value, enum_value->value);
 				return TRUE;
 			}
+		} else if (G_TYPE_IS_FLAGS (G_VALUE_TYPE (value))) {
+			GFlagsClass *flags_class = g_type_class_ref (G_VALUE_TYPE (value));
+			char **flags;
+			guint i, fval = 0;
+
+			flags = g_strsplit (data, "|", 0);
+			for (i = 0; flags[i]; i++) {
+				GFlagsValue *flags_value = g_flags_get_value_by_nick (flags_class, flags[i]);
+				if (flags_value)
+					fval |= flags_value->value;
+			}
+			g_strfreev (flags);
+
+			g_value_set_flags (value, fval);
+			g_type_class_unref (flags_class);
+			return TRUE;
 		}
+
 		return FALSE;
 	}
 

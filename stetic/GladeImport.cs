@@ -46,7 +46,7 @@ namespace Stetic {
 
 			project.BeginGladeImport ();
 			foreach (XmlNode toplevel in node.SelectNodes ("widget")) {
-				Widget w = CreateWidget (project, toplevel);
+				Widget w = CreateWidget (project, null, null, toplevel);
 				if (w == null)
 					continue;
 				project.AddWindow (w);
@@ -64,61 +64,48 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern bool stetic_g_value_init_for_child_property (ref GLib.Value value, string className, string propertyName);
 
-		static Widget CreateWidget (Project project, XmlNode wnode)
+		static Widget CreateWidget (Project project, Stetic.Wrapper.Container parent, XmlNode thischild, XmlNode widget)
 		{
-			string className = wnode.Attributes["class"].Value;
-			string id = wnode.Attributes["id"].Value;
+			string className = widget.Attributes["class"].Value;
+			string id = widget.Attributes["id"].Value;
 
 			ArrayList propNames, propVals;
-			ExtractProperties (wnode.SelectNodes ("property"), out propNames, out propVals);
+			ExtractProperties (widget.SelectNodes ("property"), out propNames, out propVals);
 
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (project, className, id, propNames, propVals);
+			ObjectWrapper wrapper;
+			if (thischild == null) {
+				wrapper = Stetic.ObjectWrapper.GladeImport (project, className, id, propNames, propVals);
+			} else if (thischild.Attributes["internal-child"] != null) {
+				wrapper = parent.GladeSetInternalChild (thischild.Attributes["internal-child"].Value,
+									className, id,
+									propNames, propVals);
+			} else {
+				ArrayList packingNames, packingVals;
+				ExtractProperties (thischild.SelectNodes ("packing/property"),
+						   out packingNames, out packingVals);
+				wrapper = parent.GladeImportChild (className, id,
+								   propNames, propVals,
+								   packingNames, packingVals);
+			}
+
 			if (wrapper == null) {
 				Console.WriteLine ("Could not create stetic wrapper for type {0}", className);
 				return null;
 			}
 
-			if (wrapper is Stetic.Wrapper.Container) {
-				AddChildren (project, (Stetic.Wrapper.Container)wrapper, wnode.SelectNodes ("child"));
+			Stetic.Wrapper.Container container = wrapper as Stetic.Wrapper.Container;
+			if (container != null) {
+				foreach (XmlNode child in widget.SelectNodes ("child")) {
+					widget = child.SelectSingleNode ("widget");
+
+					if (widget == null)
+						container.AddPlaceholder ();
+					else
+						CreateWidget (project, container, child, widget);
+				}
 			}
 
 			return (Gtk.Widget)wrapper.Wrapped;
-		}
-
-		static void AddChildren (Project project, Stetic.Wrapper.Container wrapper, XmlNodeList children)
-		{
-			foreach (XmlNode child in children) {
-				XmlNode wnode = child.SelectSingleNode ("widget");
-
-				if (wnode == null) {
-					wrapper.AddPlaceholder ();
-					continue;
-				}
-
-				string className = wnode.Attributes["class"].Value;
-				string id = wnode.Attributes["id"].Value;
-
-				ArrayList propNames, propVals;
-				ExtractProperties (wnode.SelectNodes ("property"),
-						   out propNames, out propVals);
-
-				ObjectWrapper childWrapper;
-				if (child.Attributes["internal-child"] != null) {
-					childWrapper = wrapper.GladeSetInternalChild (child.Attributes["internal-child"].Value,
-										      className, id,
-										      propNames, propVals);
-				} else {
-					ArrayList packingNames, packingVals;
-					ExtractProperties (child.SelectNodes ("packing/property"),
-							   out packingNames, out packingVals);
-					childWrapper = wrapper.GladeImportChild (className, id,
-										 propNames, propVals,
-										 packingNames, packingVals);
-				}
-
-				if (childWrapper is Stetic.Wrapper.Container)
-					AddChildren (project, (Stetic.Wrapper.Container)childWrapper, wnode.SelectNodes ("child"));
-			}
 		}
 
 		static void ExtractProperties (XmlNodeList nodes, out ArrayList names, out ArrayList values)

@@ -6,11 +6,17 @@ namespace Stetic {
 
 	public static class GladeUtils {
 
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_type_from_name (string name);
+		public static string ExtractProperty (string name, ArrayList propNames, ArrayList propVals)
+		{
+			int index = propNames.IndexOf (name);
+			if (index == -1)
+				return null;
 
-		[DllImport("glibsharpglue-2")]
-		static extern IntPtr gtksharp_get_type_id (IntPtr obj);
+			string value = propVals[index] as string;
+			propNames.RemoveAt (index);
+			propVals.RemoveAt (index);
+			return value;
+		}
 
 		[DllImport("libsteticglue")]
 		static extern bool stetic_g_value_init_for_property (ref GLib.Value value, IntPtr gtype, string propertyName);
@@ -38,15 +44,27 @@ namespace Stetic {
 				else
 					inited = stetic_g_value_init_for_property (ref value, gtype, name);
 
-				if (!inited || !stetic_g_value_hydrate (ref value, strval)) {
+				if (!inited) {
+					Console.WriteLine ("Unrecognized {0}property name '{1}'",
+							   childprops ? "child " : "", name);
 					names.RemoveAt (i);
 					strvals.RemoveAt (i);
-				} else {
-					values.Add (value);
-					i++;
+					continue;
 				}
+				if (!stetic_g_value_hydrate (ref value, strval)) {
+					Console.WriteLine ("Could not hydrate {0}property '{1}' with value '{2}'",
+							   childprops ? "child " : "", name, strval);
+					names.RemoveAt (i);
+					strvals.RemoveAt (i);
+				}
+
+				values.Add (value);
+				i++;
 			}
 		}
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_type_from_name (string name);
 
 		[DllImport("glibsharpglue-2")]
 		static extern IntPtr gtksharp_object_newv (IntPtr gtype, int n_params, string[] names, GLib.Value[] vals);
@@ -78,6 +96,9 @@ namespace Stetic {
 
 			return widget;
 		}
+
+		[DllImport("glibsharpglue-2")]
+		static extern IntPtr gtksharp_get_type_id (IntPtr obj);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern void g_object_set_property (IntPtr obj, string name, ref GLib.Value val);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 namespace Stetic.Wrapper {
 
@@ -30,6 +31,13 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 			((Gtk.TextView)Wrapped).Buffer.Changed += Buffer_Changed;
+		}
+
+		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		{
+			string text = GladeUtils.ExtractProperty ("text", propNames, propVals);
+			base.GladeImport (className, id, propNames, propVals);
+			Text = text;
 		}
 
 		[Editor (typeof (Stetic.Editor.Text))]

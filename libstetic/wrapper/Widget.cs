@@ -44,9 +44,21 @@ namespace Stetic.Wrapper {
 
 		protected virtual void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
 		{
+			string visible = GladeUtils.ExtractProperty ("visible", propNames, propVals);
+			string has_default = GladeUtils.ExtractProperty ("has_default", propNames, propVals);
 			Gtk.Widget widget = GladeUtils.CreateWidget (className, propNames, propVals);
 			widget.Name = id;
 			Wrap (widget, true);
+
+			Visible = (visible == "True");
+			if (has_default == "True")
+				stetic.GladeImportComplete += SetDefault;
+		}
+
+		void SetDefault ()
+		{
+			((Gtk.Widget)Wrapped).HasDefault = true;
+			stetic.GladeImportComplete -= SetDefault;
 		}
 
 		public static new Widget Lookup (GLib.Object obj)

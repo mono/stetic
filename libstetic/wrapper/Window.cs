@@ -1,5 +1,6 @@
 using GLib;
 using System;
+using System.Collections;
 
 namespace Stetic.Wrapper {
 
@@ -43,9 +44,11 @@ namespace Stetic.Wrapper {
 
 		protected override void Wrap (object obj, bool initialized)
 		{
+			Gtk.Window window = (Gtk.Window)obj;
+
+			window.TypeHint = Gdk.WindowTypeHint.Normal;
 			base.Wrap (obj, initialized);
 
-			Gtk.Window window = (Gtk.Window)Wrapped;
 			if (!initialized) {
 				window.Title = window.Name;
 
@@ -58,6 +61,17 @@ namespace Stetic.Wrapper {
 			window.DeleteEvent += DeleteEvent;
 		}
 
+		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		{
+			string modal = GladeUtils.ExtractProperty ("modal", propNames, propVals);
+			string type_hint = GladeUtils.ExtractProperty ("type_hint", propNames, propVals);
+			base.GladeImport (className, id, propNames, propVals);
+			Modal = (modal == "True");
+
+			if (type_hint != null && type_hint.StartsWith ("GDK_WINDOW_TYPE_HINT_"))
+				TypeHint = (Gdk.WindowTypeHint) Enum.Parse (typeof (Gdk.WindowTypeHint), type_hint.Substring (21), true);
+		}
+
 		[ConnectBefore]
 		void DeleteEvent (object obj, Gtk.DeleteEventArgs args)
 		{
@@ -68,7 +82,7 @@ namespace Stetic.Wrapper {
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable { get { return true; } }
 
-		// We don't want to actually set the underlying "modal" property;
+		// We don't want to actually set the underlying properties for these;
 		// that would be annoying to interact with.
 		bool modal;
 		public bool Modal {
@@ -76,7 +90,17 @@ namespace Stetic.Wrapper {
 				return modal;
 			}
 			set {
-				modal = Modal;
+				modal = value;
+			}
+		}
+
+		Gdk.WindowTypeHint typeHint;
+		public Gdk.WindowTypeHint TypeHint {
+			get {
+				return typeHint;
+			}
+			set {
+				typeHint = value;
 			}
 		}
 	}
