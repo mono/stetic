@@ -88,6 +88,7 @@ namespace Stetic.Wrapper {
 		string filename = "";
 
 		[Editor (typeof (Stetic.Editor.ImageFile))]
+		[GladeProperty (Name = "pixbuf")]
 		public string File {
 			get {
 				return filename;

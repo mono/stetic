@@ -195,7 +195,8 @@ namespace Stetic {
 		static void ParseGladeProperty (ObjectWrapper wrapper, IntPtr klass, bool childprop,
 						PropertyDescriptor prop, string strval)
 		{
-			if ((prop.GladeFlags & GladeProperty.Proxied) != 0)
+			if (((prop.GladeFlags & GladeProperty.Proxied) != 0) ||
+			    prop.PropertyType == typeof (string))
 				prop.GladeSetValue (wrapper, strval);
 			else {
 				GLib.Value value;

@@ -143,12 +143,11 @@ namespace Stetic.Wrapper {
 
 			button = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Button)) as Stetic.Wrapper.Button;
 			widget = (Gtk.Button)button.Wrapped;
-			if (stockId != null) {
-				button.StockId = stockId;
-				button.UseStock = true;
-			} else {
+			if (stockId != null)
+				button.Icon = "stock:" + stockId;
+			else {
+				button.Icon = null;
 				button.Label = widget.Name;
-				button.UseStock = false;
 			}
 			button.ResponseId = (int)response;
 

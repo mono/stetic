@@ -3,6 +3,7 @@ using System.Collections;
 
 namespace Stetic.Editor {
 
+	[PropertyEditor ("Value", "Changed")]
 	public class Image : Gtk.HBox {
 		Gtk.Image image;
 		Gtk.ComboBoxEntry combo;
@@ -206,13 +207,22 @@ namespace Stetic.Editor {
 
 		public string Value {
 			get {
-				if (useStock)
-					return "stock:" + StockId;
-				else
-					return "file:" + File;
+				if (useStock) {
+					if (StockId != null)
+						return "stock:" + StockId;
+					else
+						return null;
+				} else {
+					if (File != null)
+						return "file:" + File;
+					else
+						return null;
+				}
 			}
 			set {
-				if (value.StartsWith ("stock:"))
+				if (value == null)
+					File = null;
+				else if (value.StartsWith ("stock:"))
 					StockId = value.Substring (6);
 				else if (value.StartsWith ("file:"))
 					File = value.Substring (5);

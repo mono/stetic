@@ -1,5 +1,25 @@
 2005-03-21  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/Button.cs: Remove "UseStock" property and just
+	use a Stetic.Editor.Image to select either a stock icon or a file.
+	Also allow stock icon (or file) with non-stock label.
+	(GladeImportChild, FixupGladeChildren): import correctly
+
+	* libstetic/wrapper/ToggleButton.cs: likewise
+
+	* libstetic/wrapper/Dialog.cs (AddButton): update for Button changes
+
+	* libstetic/wrapper/Image.cs (File): This is equivalent to the
+	GladeProperty "pixbuf".
+
+	* libstetic/editor/Image.cs: fixes
+
+	* libstetic/GladeUtils.cs (ParseGladeProperty): don't try to parse
+	string properties, since they don't need to be (and might not
+	correspond to underlying properties anyway).
+
+2005-03-21  Dan Winship  <danw@novell.com>
+
 	* glue/paramspec.c: 
 	* libstetic/ParamSpec.cs: Simplify based on the latest version of
 	the patch in #70061.
