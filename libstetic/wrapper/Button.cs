@@ -97,8 +97,7 @@ namespace Stetic.Wrapper {
 			if (button.Child != null)
 				button.Remove (button.Child);
 
-			WidgetSite site = stetic.CreateWidgetSite ();
-			site.Show ();
+			WidgetSite site = CreateWidgetSite ();
 			site.OccupancyChanged += delegate (WidgetSite site) {
 				EmitNotify ("HasContents");
 			};

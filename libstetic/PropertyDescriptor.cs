@@ -125,15 +125,9 @@ namespace Stetic {
 			}
 		}
 
-		// Gets the value of the property on obj
-		public object GetValue (object obj)
+		public object GetValue (ObjectWrapper wrapper)
 		{
-			Stetic.Wrapper.Object wrapper = obj as Stetic.Wrapper.Object;
-			if (wrapper != null && !isWrapperProperty)
-				obj = wrapper.Wrapped;
-			else if (wrapper == null && isWrapperProperty)
-				throw new ApplicationException ("Requested wrapper property " + propertyInfo.Name + " on non-wrapper object " + obj.ToString ());
-
+			object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
 			if (memberInfo != null)
 				obj = memberInfo.GetValue (obj, null);
 			return propertyInfo.GetValue (obj, null);
@@ -145,13 +139,9 @@ namespace Stetic {
 			}
 		}
 
-		// Sets the value of the property on obj to value
-		public void SetValue (object obj, object value)
+		public void SetValue (ObjectWrapper wrapper, object value)
 		{
-			Stetic.Wrapper.Object wrapper = obj as Stetic.Wrapper.Object;
-			if (wrapper != null && !isWrapperProperty)
-				obj = wrapper.Wrapped;
-
+			object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
 			if (memberInfo != null)
 				obj = memberInfo.GetValue (obj, null);
 			propertyInfo.SetValue (obj, value, null);

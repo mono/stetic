@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Wrapper {
 
 	[ObjectWrapper ("Window", "window.png", ObjectWrapperType.Window)]
-	public class Window : Stetic.Wrapper.Container {
+	public class Window : Bin {
 
 		public static ItemGroup WindowProperties;
 		public static ItemGroup WindowSizeProperties;
@@ -48,8 +48,11 @@ namespace Stetic.Wrapper {
 		public Window (IStetic stetic, Gtk.Window window) : base (stetic, window)
 		{
 			window.Title = window.Name;
-			window.Add (CreateWidgetSite (200, 200));
 			window.DeleteEvent += DeleteEvent;
+
+			Gtk.Requisition req;
+			req.Width = req.Height = 200;
+			site.EmptySize = req;
 		}
 
 		[ConnectBefore]

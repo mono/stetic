@@ -40,7 +40,17 @@ namespace Stetic.Wrapper {
 
 		public static new Widget Lookup (GLib.Object obj)
 		{
-			return Object.Lookup (obj) as Stetic.Wrapper.Widget;
+			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Widget;
 		}
+
+		protected virtual WidgetSite CreateWidgetSite ()
+		{
+			WidgetSite site = stetic.CreateWidgetSite ();
+			site.Show ();
+			return site;
+		}
+
+		public virtual bool HExpandable { get { return false; } }
+		public virtual bool VExpandable { get { return false; } }
 	}
 }

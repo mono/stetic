@@ -1,5 +1,71 @@
 2005-02-17  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/Container.cs (RegisterWrapper): override the
+	base RegisterWrapper method and scan the type for a
+	Stetic.Wrapper.Container.ContainerChild subclass, and if found,
+	remember it as the class's child wrapper class.
+	(RegisterChildItems, ChildItemGroups): Gone now
+	(ChildWrapper): Creates a child property wrapper for a WidgetSite
+	(class ContainerChild): ObjectWrapper implementation for wrapping
+	Gtk.Container.ContainerChild
+	(CreateWidgetSite): Now an override of Widget's
+	(HExpandable, VExpandable): moved to Widget
+
+	* libstetic/wrapper/Widget.cs (CreateWidgetSite, HExpandable,
+	VExpandable): moved here from Container, with non-Container base
+	implementations.
+
+	* libstetic/wrapper/Table.cs: implement a ContainerChild subclass
+	and use it to implement AutoSize again. Also, split XOptions and
+	YOptions into multiple bools.
+
+	* libstetic/wrapper/Box.cs: implement a ContainerChild subclass.
+	(SiteOccupancyChanged): when adding a new widget, set Expand and
+	Fill correctly according to its expandability
+
+	* libstetic/wrapper/ButtonBox.cs:
+	* libstetic/wrapper/Notebook.cs:
+	* libstetic/wrapper/Paned.cs: implement a ContainerChild subclass.
+
+	* libstetic/wrapper/Bin.cs: 
+	* libstetic/wrapper/Dialog.cs: 
+	* libstetic/wrapper/ScrolledWindow.cs: 
+	* libstetic/wrapper/Window.cs: make Bin better able to deal with
+	subclasses that create their own WidgetSites.
+
+	* libstetic/wrapper/Scrollbar.cs: kill this. HScrollbar and
+	VScrollbar can inherit directly from Range.
+
+	* libstetic/wrapper/HScale.cs (HExpandable):
+	* libstetic/wrapper/HScrollbar.cs (HExpandable):
+	* libstetic/wrapper/HSeparator.cs (HExpandable):
+	* libstetic/wrapper/VScale.cs (VExpandable):
+	* libstetic/wrapper/VScrollbar.cs (VExpandable):
+	* libstetic/wrapper/VSeparator.cs (VExpandable): return true
+
+	* libstetic/CommandDescriptor.cs:
+	* libstetic/ItemDescriptor.cs:
+	* libstetic/PropertyDescriptor.cs: s/object/ObjectWrapper/ in
+	several parts of the API now that ContainerChildren have
+	ObjectWrappers.
+
+	* stetic/ContextMenu.cs
+	* stetic/PropertyGrid.cs: 
+	* stetic/PropertyEditor.cs: update for that
+
+	* libstetic/IStetic.cs:
+	* libstetic/WidgetSite.cs: remove the 2-arg CreateWidgetSite
+	method from IStetic and add an "EmptySize" property to WidgetSite
+	instead.
+
+	* stetic/WidgetFactory.cs: 
+	* stetic/WidgetSite.cs: update for CreateWidgetSite/EmptySize
+	changes
+
+	* libstetic/Set.cs: convenience class used by Table.
+
+2005-02-17  Dan Winship  <danw@novell.com>
+
 	* libstetic/ObjectWrapper.cs (RegisterWrapper): Renamed from
 	RegisterItems.
 

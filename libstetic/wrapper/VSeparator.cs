@@ -7,5 +7,7 @@ namespace Stetic.Wrapper {
 
 		public VSeparator (IStetic stetic) : this (stetic, new Gtk.VSeparator ()) {}
 		public VSeparator (IStetic stetic, Gtk.VSeparator vseparator) : base (stetic, vseparator) {}
+
+		public override bool VExpandable { get { return true; } }
 	}
 }

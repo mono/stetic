@@ -4,7 +4,7 @@ using System.Collections;
 namespace Stetic.Wrapper {
 
 	[ObjectWrapper ("ScrolledWindow", "scrolledwindow.png", ObjectWrapperType.Container)]
-	public class ScrolledWindow : Stetic.Wrapper.Container {
+	public class ScrolledWindow : Bin {
 
 		public static ItemGroup ScrolledWindowProperties;
 

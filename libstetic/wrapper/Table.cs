@@ -7,7 +7,6 @@ namespace Stetic.Wrapper {
 	public class Table : Stetic.Wrapper.Container {
 
 		public static ItemGroup TableProperties;
-		public static ItemGroup TableChildProperties;
 
 		static Table () {
 			TableProperties = new ItemGroup ("Table Properties",
@@ -22,23 +21,6 @@ namespace Stetic.Wrapper {
 			RegisterWrapper (typeof (Stetic.Wrapper.Table),
 					 TableProperties,
 					 Widget.CommonWidgetProperties);
-
-			TableChildProperties = new ItemGroup ("Table Child Layout",
-							      typeof (Gtk.Table.TableChild),
-							      "TopAttach",
-							      "BottomAttach",
-							      "LeftAttach",
-							      "RightAttach",
-							      "XPadding",
-							      "YPadding",
-//							      "AutoSize",
-							      "XOptions",
-							      "YOptions");
-//			TableChildProperties["XOptions"].DependsOn (TableChildProperties["AutoSize"]);
-//			TableChildProperties["YOptions"].DependsOn (TableChildProperties["AutoSize"]);
-
-			RegisterChildItems (typeof (Stetic.Wrapper.Table),
-					    TableChildProperties);
 
 			ItemGroup contextMenu = new ItemGroup (null,
 							       typeof (Stetic.Wrapper.Table),
@@ -59,7 +41,7 @@ namespace Stetic.Wrapper {
 
 		public Table (IStetic stetic, Gtk.Table table) : base (stetic, table)
 		{
-			table.Removed += SiteRemoved;
+			AutoSize = new Set ();
 			Sync ();
 		}
 
@@ -68,6 +50,8 @@ namespace Stetic.Wrapper {
 				return (Gtk.Table)Wrapped;
 			}
 		}
+
+		Set AutoSize;
 
 		int freeze;
 		void Freeze ()
@@ -95,8 +79,10 @@ namespace Stetic.Wrapper {
 			freeze = 1;
 
 			children = table.Children;
-
 			grid = new WidgetSite[NRows,NColumns];
+
+			foreach (Gtk.Widget child in children)
+				child.FreezeChildNotify ();
 
 			// First fill in the placeholders in the grid. If we find any
 			// placeholders covering more than one grid square, remove them.
@@ -154,8 +140,8 @@ namespace Stetic.Wrapper {
 				for (col = 0; col < NColumns; col++) {
 					if (grid[row,col] == null) {
 						site = CreateWidgetSite ();
-						site.ChildNotified += ChildNotification;
-						site.Show ();
+						site.FreezeChildNotify ();
+						AutoSize[site] = true;
 						table.Attach (site, col, col + 1, row, row + 1);
 						grid[row,col] = site;
 					} else if (!grid[row,col].VExpandable)
@@ -164,9 +150,9 @@ namespace Stetic.Wrapper {
 
 				for (col = 0; col < NColumns; col++) {
 					site = grid[row,col];
+					if (!AutoSize[site])
+						continue;
 					tc = table[site] as Gtk.Table.TableChild;
-//					if (!tc.AutoSize)
-//						continue;
 					tc.YOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
@@ -189,9 +175,9 @@ namespace Stetic.Wrapper {
 
 				for (row = 0; row < NRows; row++) {
 					site = grid[row,col];
+					if (!AutoSize[site])
+						continue;
 					tc = table[site] as Gtk.Table.TableChild;
-//					if (!tc.AutoSize)
-//						continue;
 					tc.XOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
@@ -199,6 +185,8 @@ namespace Stetic.Wrapper {
 					hexpandable = true;
 			}
 
+                        foreach (Gtk.Widget child in table.Children)
+				child.ThawChildNotify ();
 			freeze = 0;
 
 			EmitContentsChanged ();
@@ -356,14 +344,6 @@ namespace Stetic.Wrapper {
 		public override bool HExpandable { get { return hexpandable; } }
 		public override bool VExpandable { get { return vexpandable; } }
 
-		void SiteRemoved (object obj, Gtk.RemovedArgs args)
-		{
-			WidgetSite site = args.Widget as WidgetSite;
-
-			if (site != null)
-				site.ChildNotified -= ChildNotification;
-		}
-
 		protected override void SiteOccupancyChanged (WidgetSite site)
 		{
 			Freeze ();
@@ -371,22 +351,20 @@ namespace Stetic.Wrapper {
 				Gtk.Table.TableChild tc = table[site] as Gtk.Table.TableChild;
 				tc.XOptions = 0;
 				tc.YOptions = 0;
-			}
+			} else
+				AutoSize[site] = true;
 			Thaw ();
 			base.SiteOccupancyChanged (site);
 		}
 
-		private void ChildNotification (object o, Gtk.ChildNotifiedArgs args)
+		protected override void SiteRemoved (WidgetSite site)
 		{
-//			if (!(args.Pspec is ParamSpecUInt))
-//				return;
-
-			Sync ();
+			AutoSize[site] = false;
 		}
 
+#if NOT
 		private const int delta = 4;
 
-#if NOT
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
 			int diff, closest;
@@ -449,5 +427,157 @@ namespace Stetic.Wrapper {
 			return true;
 		}
 #endif
+
+		public class TableChild : Stetic.Wrapper.Container.ContainerChild {
+			public static ItemGroup TableChildProperties;
+
+			static TableChild ()
+			{
+				TableChildProperties = new ItemGroup ("Table Child Layout",
+								      typeof (Stetic.Wrapper.Table.TableChild),
+								      typeof (Gtk.Table.TableChild),
+								      "TopAttach",
+								      "BottomAttach",
+								      "LeftAttach",
+								      "RightAttach",
+								      "XPadding",
+								      "YPadding",
+								      "AutoSize",
+								      "XExpand",
+								      "XFill",
+								      "XShrink",
+								      "YExpand",
+								      "YFill",
+								      "YShrink");
+				TableChildProperties["XExpand"].DependsInverselyOn (TableChildProperties["AutoSize"]);
+				TableChildProperties["XFill"].DependsInverselyOn (TableChildProperties["AutoSize"]);
+				TableChildProperties["XFill"].DependsOn (TableChildProperties["XExpand"]);
+				TableChildProperties["XShrink"].DependsInverselyOn (TableChildProperties["AutoSize"]);
+				TableChildProperties["YExpand"].DependsInverselyOn (TableChildProperties["AutoSize"]);
+				TableChildProperties["YFill"].DependsInverselyOn (TableChildProperties["AutoSize"]);
+				TableChildProperties["YFill"].DependsOn (TableChildProperties["YExpand"]);
+				TableChildProperties["YShrink"].DependsInverselyOn (TableChildProperties["AutoSize"]);
+				RegisterWrapper (typeof (Stetic.Wrapper.Table.TableChild),
+						 TableChildProperties);
+			}
+
+			public TableChild (IStetic stetic, Gtk.Table.TableChild tc) : base (stetic, tc) {}
+
+			Gtk.Table.TableChild tc {
+				get {
+					return (Gtk.Table.TableChild)Wrapped;
+				}
+			}
+
+			Stetic.Wrapper.Table parent {
+				get {
+					return (Stetic.Wrapper.Table)ParentWrapper;
+				}
+			}
+
+			public bool AutoSize {
+				get {
+					return parent.AutoSize[tc.Child];
+				}
+				set {
+					parent.AutoSize[tc.Child] = value;
+					EmitNotify ("AutoSize");
+				}
+			}
+
+			public bool XExpand {
+				get {
+					return (tc.XOptions & Gtk.AttachOptions.Expand) != 0;
+				}
+				set {
+					if (value)
+						tc.XOptions |= Gtk.AttachOptions.Expand;
+					else
+						tc.XOptions &= ~Gtk.AttachOptions.Expand;
+					EmitNotify ("XExpand");
+				}
+			}
+
+			public bool XFill {
+				get {
+					return (tc.XOptions & Gtk.AttachOptions.Fill) != 0;
+				}
+				set {
+					if (value)
+						tc.XOptions |= Gtk.AttachOptions.Fill;
+					else
+						tc.XOptions &= ~Gtk.AttachOptions.Fill;
+					EmitNotify ("XFill");
+				}
+			}
+
+			public bool XShrink {
+				get {
+					return (tc.XOptions & Gtk.AttachOptions.Shrink) != 0;
+				}
+				set {
+					if (value)
+						tc.XOptions |= Gtk.AttachOptions.Shrink;
+					else
+						tc.XOptions &= ~Gtk.AttachOptions.Shrink;
+					EmitNotify ("XShrink");
+				}
+			}
+
+			public bool YExpand {
+				get {
+					return (tc.YOptions & Gtk.AttachOptions.Expand) != 0;
+				}
+				set {
+					if (value)
+						tc.YOptions |= Gtk.AttachOptions.Expand;
+					else
+						tc.YOptions &= ~Gtk.AttachOptions.Expand;
+					EmitNotify ("YExpand");
+				}
+			}
+
+			public bool YFill {
+				get {
+					return (tc.YOptions & Gtk.AttachOptions.Fill) != 0;
+				}
+				set {
+					if (value)
+						tc.YOptions |= Gtk.AttachOptions.Fill;
+					else
+						tc.YOptions &= ~Gtk.AttachOptions.Fill;
+					EmitNotify ("YFill");
+				}
+			}
+
+			public bool YShrink {
+				get {
+					return (tc.YOptions & Gtk.AttachOptions.Shrink) != 0;
+				}
+				set {
+					if (value)
+						tc.YOptions |= Gtk.AttachOptions.Shrink;
+					else
+						tc.YOptions &= ~Gtk.AttachOptions.Shrink;
+					EmitNotify ("YShrink");
+				}
+			}
+
+			protected override void EmitNotify (string propertyName)
+			{
+				if (propertyName == "x-options" || propertyName == "AutoSize") {
+					base.EmitNotify ("XExpand");
+					base.EmitNotify ("XFill");
+					base.EmitNotify ("XShrink");
+				}
+				if (propertyName == "y-options" || propertyName == "AutoSize") {
+					base.EmitNotify ("YExpand");
+					base.EmitNotify ("YFill");
+					base.EmitNotify ("YShrink");
+				}
+				base.EmitNotify (propertyName);
+				parent.Sync ();
+			}
+		}
 	}
 }

@@ -32,14 +32,10 @@ namespace Stetic {
 			editors[typeof (Gdk.Color)] = typeof (Stetic.Editor.Color);
 		}
 
-		static public PropertyEditor MakeEditor (PropertyDescriptor prop, ParamSpec pspec, object obj)
+		static public PropertyEditor MakeEditor (PropertyDescriptor prop, ParamSpec pspec, ObjectWrapper wrapper)
 		{
 			Type editorType;
 			object min, max;
-
-			Stetic.Wrapper.Object wrapper = Stetic.Wrapper.Object.Lookup (obj as GLib.Object);
-			if (wrapper != null)
-				obj = wrapper;
 
 			min = prop.Minimum;
 			max = prop.Maximum;
@@ -64,9 +60,9 @@ namespace Stetic {
 			}
 
 			if (min != null && max != null)
-				return new RangeEditor (editorType, min, max, obj, prop);
+				return new RangeEditor (editorType, min, max, wrapper, prop);
 			else
-				return new BasicEditor (editorType, obj, prop);
+				return new BasicEditor (editorType, wrapper, prop);
 		}
 
 		protected static PropertyInfo EditorValueProperty (Type editorType)
@@ -98,15 +94,15 @@ namespace Stetic {
 	class BasicEditor : PropertyEditor {
 
 		Widget editor;
-		object obj;
+		ObjectWrapper wrapper;
 		PropertyDescriptor prop;
 
 		PropertyInfo editorProp;
 		EventInfo editorEvent;
 
-		public BasicEditor (Type editorType, object obj, PropertyDescriptor prop)
+		public BasicEditor (Type editorType, ObjectWrapper wrapper, PropertyDescriptor prop)
 		{
-			this.obj = obj;
+			this.wrapper = wrapper;
 			this.prop = prop;
 
 			editorProp = EditorValueProperty (editorType);
@@ -125,7 +121,7 @@ namespace Stetic {
 			}
 
 			if (editorProp.CanWrite)
-				editorProp.SetValue (editor, prop.GetValue (obj), null);
+				editorProp.SetValue (editor, prop.GetValue (wrapper), null);
 
 			editor.ShowAll ();
 
@@ -143,7 +139,7 @@ namespace Stetic {
 		{
 			if (!syncing) {
 				syncing = true;
-				prop.SetValue (obj, editorProp.GetValue (editor, null));
+				prop.SetValue (wrapper, editorProp.GetValue (editor, null));
 				syncing = false;
 			}
 		}
@@ -152,7 +148,7 @@ namespace Stetic {
 		{
 			if (!syncing) {
 				syncing = true;
-				editorProp.SetValue (editor, prop.GetValue (obj), null);
+				editorProp.SetValue (editor, prop.GetValue (wrapper), null);
 				syncing = false;
 			}
 		}
@@ -161,22 +157,22 @@ namespace Stetic {
 	class RangeEditor : PropertyEditor {
 
 		Widget editor;
-		object obj;
+		ObjectWrapper wrapper;
 		PropertyDescriptor prop;
 
 		PropertyInfo editorProp;
 		EventInfo editorEvent;
 
 		public RangeEditor (Type editorType, object min, object max,
-				    object obj, PropertyDescriptor prop)
+				    ObjectWrapper wrapper, PropertyDescriptor prop)
 		{
-			this.obj = obj;
+			this.wrapper = wrapper;
 			this.prop = prop;
 
 			editorProp = EditorValueProperty (editorType);
 			editorEvent = EditorValueEvent (editorType);
 
-			object initial = prop.GetValue (obj);
+			object initial = prop.GetValue (wrapper);
 
 			// If the passed in values aren't the same type as used by the
 			// editor, convert them.
@@ -218,13 +214,13 @@ namespace Stetic {
 		void EditorValueChanged (object o, EventArgs args)
 		{
 			if (!updating)
-				prop.SetValue (obj, Convert.ChangeType (editorProp.GetValue (editor, null), prop.PropertyType));
+				prop.SetValue (wrapper, Convert.ChangeType (editorProp.GetValue (editor, null), prop.PropertyType));
 		}
 
 		public override void Update (object o, EventArgs args)
 		{
 			updating = true;
-			editorProp.SetValue (editor, Convert.ChangeType (prop.GetValue (obj), editorProp.PropertyType), null);
+			editorProp.SetValue (editor, Convert.ChangeType (prop.GetValue (wrapper), editorProp.PropertyType), null);
 			updating = false;
 		}
 	}

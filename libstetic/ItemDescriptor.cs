@@ -32,14 +32,14 @@ namespace Stetic {
 			}
 		}
 
-		public bool EnabledFor (object obj)
+		public bool EnabledFor (ObjectWrapper wrapper)
 		{
 			foreach (PropertyDescriptor dep in dependencies) {
-				if (!(bool)dep.GetValue (obj))
+				if (!(bool)dep.GetValue (wrapper))
 					return false;
 			}
 			foreach (PropertyDescriptor dep in inverseDependencies) {
-				if ((bool)dep.GetValue (obj))
+				if ((bool)dep.GetValue (wrapper))
 					return false;
 			}
 			return true;

@@ -16,14 +16,28 @@ namespace Stetic.Wrapper {
 			RegisterWrapper (typeof (Stetic.Wrapper.ButtonBox),
 					 ButtonBoxProperties,
 					 Widget.CommonWidgetProperties);
-
-			ButtonBoxChildProperties = new ItemGroup ("Button Box Child Layout",
-								  typeof (Gtk.ButtonBox.ButtonBoxChild),
-								  "Secondary");
-			RegisterChildItems (typeof (Stetic.Wrapper.ButtonBox),
-					    ButtonBoxChildProperties);
 		}
 
 		protected ButtonBox (IStetic stetic, Gtk.ButtonBox bbox) : base (stetic, bbox) {}
+
+		public class ButtonBoxChild : Stetic.Wrapper.Box.BoxChild {
+			public static ItemGroup ButtonBoxChildProperties;
+
+			static ButtonBoxChild ()
+			{
+				ButtonBoxChildProperties = new ItemGroup ("Button Box Child Layout",
+									  typeof (Gtk.ButtonBox.ButtonBoxChild),
+									  "PackType",
+									  "Secondary",
+									  "Position",
+									  "Expand",
+									  "Fill",
+									  "Padding");
+				RegisterWrapper (typeof (Stetic.Wrapper.ButtonBox.ButtonBoxChild),
+						 ButtonBoxChildProperties);
+			}
+
+			public ButtonBoxChild (IStetic stetic, Gtk.ButtonBox.ButtonBoxChild bbc) : base (stetic, bbc) {}
+		}
 	}
 }

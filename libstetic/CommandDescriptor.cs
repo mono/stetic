@@ -54,35 +54,35 @@ namespace Stetic {
 			}
 		}
 
-		public bool Enabled (object obj)
+		public bool Enabled (ObjectWrapper wrapper)
 		{
 			if (checkInfo == null)
-				return EnabledFor (obj);
+				return EnabledFor (wrapper);
 			else
-				return (bool)checkInfo.Invoke (obj, new object[0]);
+				return (bool)checkInfo.Invoke (wrapper, new object[0]);
 		}
 
-		public bool Enabled (object obj, IWidgetSite context)
+		public bool Enabled (ObjectWrapper wrapper, IWidgetSite context)
 		{
 			if (checkInfo == null)
-				return EnabledFor (obj);
+				return EnabledFor (wrapper);
 			else if (needsContext)
-				return (bool)checkInfo.Invoke (obj, new object[] { context });
+				return (bool)checkInfo.Invoke (wrapper, new object[] { context });
 			else
-				return (bool)checkInfo.Invoke (obj, new object[0]);
+				return (bool)checkInfo.Invoke (wrapper, new object[0]);
 		}
 
-		public void Run (object obj)
+		public void Run (ObjectWrapper wrapper)
 		{
-			doInfo.Invoke (obj, new object[0]);
+			doInfo.Invoke (wrapper, new object[0]);
 		}
 
-		public void Run (object obj, IWidgetSite context)
+		public void Run (ObjectWrapper wrapper, IWidgetSite context)
 		{
 			if (needsContext)
-				doInfo.Invoke (obj, new object[] { context });
+				doInfo.Invoke (wrapper, new object[] { context });
 			else
-				doInfo.Invoke (obj, new object[0]);
+				doInfo.Invoke (wrapper, new object[0]);
 		}
 	}
 }

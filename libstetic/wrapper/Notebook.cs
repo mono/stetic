@@ -7,7 +7,6 @@ namespace Stetic.Wrapper {
 	public class Notebook : Stetic.Wrapper.Container {
 
 		public static ItemGroup NotebookProperties;
-		public static ItemGroup NotebookChildProperties;
 
 		static Notebook () {
 			NotebookProperties = new ItemGroup ("Notebook Properties",
@@ -16,7 +15,6 @@ namespace Stetic.Wrapper {
 							    "EnablePopup",
 							    "Homogeneous",
 							    "TabPos",
-							    "TabBorder",
 							    "TabHborder",
 							    "TabVborder",
 							    "ShowBorder",
@@ -28,17 +26,6 @@ namespace Stetic.Wrapper {
 			RegisterWrapper (typeof (Stetic.Wrapper.Notebook),
 					 NotebookProperties,
 					 Widget.CommonWidgetProperties);
-
-			NotebookChildProperties = new ItemGroup ("Notebook Child Layout",
-								 typeof (Gtk.Notebook.NotebookChild),
-								 "TabLabel",
-								 "Position",
-								 "TabPack",
-								 "TabExpand",
-								 "TabFill",
-								 "MenuLabel");
-			RegisterChildItems (typeof (Stetic.Wrapper.Notebook),
-					    NotebookChildProperties);
 
 			ItemGroup contextMenu = new ItemGroup (null,
 							       typeof (Stetic.Wrapper.Notebook),
@@ -146,6 +133,26 @@ namespace Stetic.Wrapper {
 				}
 				return false;
 			}
+		}
+
+		public class NotebookChild : Stetic.Wrapper.Container.ContainerChild {
+			public static ItemGroup NotebookChildProperties;
+
+			static NotebookChild ()
+			{
+				NotebookChildProperties = new ItemGroup ("Notebook Child Layout",
+									 typeof (Gtk.Notebook.NotebookChild),
+									 "TabLabel",
+									 "Position",
+									 "TabPack",
+									 "TabExpand",
+									 "TabFill",
+									 "MenuLabel");
+				RegisterWrapper (typeof (Stetic.Wrapper.Notebook.NotebookChild),
+						 NotebookChildProperties);
+			}
+
+			public NotebookChild (IStetic stetic, Gtk.Notebook.NotebookChild nc) : base (stetic, nc) {}
 		}
 	}
 }

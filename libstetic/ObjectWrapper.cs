@@ -77,7 +77,7 @@ namespace Stetic {
 		public delegate void WrapperNotificationDelegate (object obj, string propertyName);
 		public event WrapperNotificationDelegate Notify;
 
-		protected void EmitNotify (string propertyName)
+		protected virtual void EmitNotify (string propertyName)
 		{
 			if (Notify != null)
 				Notify (this, propertyName);

@@ -23,14 +23,11 @@ namespace Stetic {
 			TargetList.Add (SteticWidgetType, 0, 0);
 		}
 
-		public WidgetSiteImpl () : this (10, 10) {}
-
-		public WidgetSiteImpl (int emptyWidth, int emptyHeight)
+		public WidgetSiteImpl ()
 		{
 			WidgetFlags |= WidgetFlags.CanFocus;
 
-			emptySize.Width = emptyWidth;
-			emptySize.Height = emptyHeight;
+			emptySize.Width = emptySize.Height = 10;
 			Occupancy = SiteOccupancy.Empty;
 		}
 
@@ -81,7 +78,7 @@ namespace Stetic {
 		}
 
 		Requisition emptySize;
-		public Requisition EmptySize {
+		public override Requisition EmptySize {
 			get {
 				return emptySize;
 			}
@@ -136,11 +133,11 @@ namespace Stetic {
 				if (Occupancy == SiteOccupancy.Empty)
 					return true;
 
-				Stetic.Wrapper.Container child;
+				Stetic.Wrapper.Widget child;
 				if (Occupancy == SiteOccupancy.PseudoOccupied)
-					child = Stetic.Wrapper.Container.Lookup (dragWidget);
+					child = Stetic.Wrapper.Widget.Lookup (dragWidget);
 				else
-					child = Stetic.Wrapper.Container.Lookup (Child);
+					child = Stetic.Wrapper.Widget.Lookup (Child);
 
 				if (child != null)
 					return child.HExpandable;
@@ -154,11 +151,11 @@ namespace Stetic {
 				if (Occupancy == SiteOccupancy.Empty)
 					return true;
 
-				Stetic.Wrapper.Container child;
+				Stetic.Wrapper.Widget child;
 				if (Occupancy == SiteOccupancy.PseudoOccupied)
-					child = Stetic.Wrapper.Container.Lookup (dragWidget);
+					child = Stetic.Wrapper.Widget.Lookup (dragWidget);
 				else
-					child = Stetic.Wrapper.Container.Lookup (Child);
+					child = Stetic.Wrapper.Widget.Lookup (Child);
 
 				if (child != null)
 					return child.VExpandable;

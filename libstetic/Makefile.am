@@ -15,6 +15,7 @@ libstetic_dll_sources =			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
 	RangeAttribute.cs		\
+	Set.cs				\
 	SiteContentEnumerator.cs	\
 	WidgetBox.cs			\
 	WidgetSite.cs			\
@@ -67,7 +68,6 @@ libstetic_dll_sources =			\
 	wrapper/RadioButton.cs		\
 	wrapper/Range.cs		\
 	wrapper/Scale.cs		\
-	wrapper/Scrollbar.cs		\
 	wrapper/ScrolledWindow.cs	\
 	wrapper/SpinButton.cs		\
 	wrapper/Statusbar.cs		\

@@ -37,7 +37,12 @@ namespace Stetic.Wrapper {
 
 		public Dialog (IStetic stetic, Gtk.Dialog dialog) : base (stetic, dialog)
 		{
-			dialog.VBox.Add (CreateWidgetSite (200, 200));
+			WidgetSite site = CreateWidgetSite ();
+			Gtk.Requisition req;
+			req.Width = req.Height = 200;
+			site.EmptySize = req;
+
+			dialog.VBox.Add (site);
 		}
 	}
 }

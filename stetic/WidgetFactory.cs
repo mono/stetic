@@ -46,11 +46,6 @@ namespace Stetic {
 		{
 			return new WidgetSiteImpl ();
 		}
-
-		public WidgetSite CreateWidgetSite (int emptyWidth, int emptyHeight)
-		{
-			return new WidgetSiteImpl (emptyWidth, emptyHeight);
-		}
 	}
 
 	public class WindowFactory : WidgetFactory {

@@ -8,7 +8,6 @@ namespace Stetic.Wrapper {
 		public VButtonBox (IStetic stetic) : this (stetic, new Gtk.VButtonBox ()) {}
 		public VButtonBox (IStetic stetic, Gtk.VButtonBox vbuttonbox) : base (stetic, vbuttonbox) {}
 
-		public override bool HExpandable { get { return false; } }
 		public override bool VExpandable { get { return true; } }
 	}
 }

@@ -73,18 +73,18 @@ namespace Stetic {
 
 		private class Stupid69614Workaround {
 			CommandDescriptor cmd;
-			object obj;
+			ObjectWrapper wrapper;
 			IWidgetSite top;
 
-			public Stupid69614Workaround (CommandDescriptor cmd, object obj, IWidgetSite top)
+			public Stupid69614Workaround (CommandDescriptor cmd, ObjectWrapper wrapper, IWidgetSite top)
 			{
 				this.cmd = cmd;
-				this.obj = obj;
+				this.wrapper = wrapper;
 				this.top = top;
 			}
 
 			public void Activate (object o, EventArgs args) {
-				cmd.Run (obj, top);
+				cmd.Run (wrapper, top);
 			}
 		}
 

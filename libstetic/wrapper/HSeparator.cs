@@ -7,5 +7,7 @@ namespace Stetic.Wrapper {
 
 		public HSeparator (IStetic stetic) : this (stetic, new Gtk.HSeparator ()) {}
 		public HSeparator (IStetic stetic, Gtk.HSeparator hseparator) : base (stetic, hseparator) {}
+
+		public override bool HExpandable { get { return true; } }
 	}
 }

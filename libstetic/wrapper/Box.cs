@@ -5,7 +5,6 @@ namespace Stetic.Wrapper {
 
 	public abstract class Box : Stetic.Wrapper.Container {
 		public static ItemGroup BoxProperties;
-		public static ItemGroup BoxChildProperties;
 
 		static Box () {
 			BoxProperties = new ItemGroup ("Box Properties",
@@ -16,16 +15,6 @@ namespace Stetic.Wrapper {
 			RegisterWrapper (typeof (Stetic.Wrapper.Box),
 					 BoxProperties,
 					 Widget.CommonWidgetProperties);
-
-			BoxChildProperties = new ItemGroup ("Box Child Layout",
-							    typeof (Gtk.Box.BoxChild),
-							    "PackType",
-							    "Position",
-							    "Expand",
-							    "Fill",
-							    "Padding");
-			RegisterChildItems (typeof (Stetic.Wrapper.Box),
-					    BoxChildProperties);
 
 			ItemGroup contextMenu = new ItemGroup (null,
 							       typeof (Stetic.Wrapper.Box),
@@ -69,6 +58,33 @@ namespace Stetic.Wrapper {
 				box.PackEnd (site);
 				box.ReorderChild (site, bc.Position);
 			}
+		}
+
+		protected override void SiteOccupancyChanged (WidgetSite site) {
+			Gtk.Box.BoxChild bc = ((Gtk.Box)Wrapped)[site] as Gtk.Box.BoxChild;
+			bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
+			base.SiteOccupancyChanged (site);
+		}
+
+
+		public class BoxChild : Stetic.Wrapper.Container.ContainerChild {
+			public static ItemGroup BoxChildProperties;
+
+			static BoxChild ()
+			{
+				BoxChildProperties = new ItemGroup ("Box Child Layout",
+								    typeof (Gtk.Box.BoxChild),
+								    "PackType",
+								    "Position",
+								    "Expand",
+								    "Fill",
+								    "Padding");
+				BoxChildProperties["Fill"].DependsOn (BoxChildProperties["Expand"]);
+				RegisterWrapper (typeof (Stetic.Wrapper.Box.BoxChild),
+						 BoxChildProperties);
+			}
+
+			public BoxChild (IStetic stetic, Gtk.Box.BoxChild bc) : base (stetic, bc) {}
 		}
 	}
 }

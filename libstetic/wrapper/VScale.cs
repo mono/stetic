@@ -7,5 +7,7 @@ namespace Stetic.Wrapper {
 
 		public VScale (IStetic stetic) : this (stetic, new Gtk.VScale (0.0, 100.0, 1.0)) {}
 		public VScale (IStetic stetic, Gtk.VScale vscale) : base (stetic, vscale) {}
+
+		public override bool VExpandable { get { return true; } }
 	}
 }

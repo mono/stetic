@@ -11,8 +11,7 @@ namespace Stetic {
 		Hashtable editors;
 		ArrayList sensitives;
 
-		protected object selection;
-		protected Stetic.Wrapper.Object wrapper;
+		ObjectWrapper selection;
 
 		public PropertyGrid ()
 		{
@@ -22,20 +21,19 @@ namespace Stetic {
 		protected new void Clear ()
 		{
 			base.Clear ();
-			selection = null;
-			if (wrapper != null) {
-				wrapper.Notify -= Notified;
-				wrapper = null;
+			if (selection != null) {
+				selection.Notify -= Notified;
+				selection = null;
 			}
 			editors = new Hashtable ();
 			sensitives = new ArrayList ();
 		}
 
-		protected void AppendProperty (PropertyDescriptor prop, object obj)
+		protected void AppendProperty (PropertyDescriptor prop)
 		{
 			string label = prop.ParamSpec != null ? prop.ParamSpec.Nick : prop.Name;
 
-			PropertyEditor rep = PropertyEditor.MakeEditor (prop, prop.ParamSpec, obj);
+			PropertyEditor rep = PropertyEditor.MakeEditor (prop, prop.ParamSpec, selection);
 			editors[prop.Name] = rep;
 			if (prop.ParamSpec != null)
 				editors[prop.ParamSpec.Name] = rep;
@@ -49,23 +47,23 @@ namespace Stetic {
 
 		private class Stupid69614Workaround {
 			CommandDescriptor cmd;
-			object obj;
+			ObjectWrapper wrapper;
 
-			public Stupid69614Workaround (CommandDescriptor cmd, object obj)
+			public Stupid69614Workaround (CommandDescriptor cmd, ObjectWrapper wrapper)
 			{
 				this.cmd = cmd;
-				this.obj = obj;
+				this.wrapper = wrapper;
 			}
 
 			public void Activate (object o, EventArgs args) {
-				cmd.Run (obj);
+				cmd.Run (wrapper);
 			}
 		}
 
-		protected void AppendCommand (CommandDescriptor cmd, object obj)
+		protected void AppendCommand (CommandDescriptor cmd)
 		{
 			Gtk.Button button = new Gtk.Button (cmd.Label);
-			button.Clicked += new Stupid69614Workaround (cmd, wrapper).Activate;
+			button.Clicked += new Stupid69614Workaround (cmd, selection).Activate;
 			button.Show ();
 			Append (button);
 
@@ -73,12 +71,6 @@ namespace Stetic {
 				editors[cmd.Name] = button;
 				sensitives.Add (cmd);
 			}
-		}
-
-		public void NoSelection ()
-		{
-			Clear ();
-			AppendLabel ("<i>No selection</i>");
 		}
 
 		void Notified (object wrapper, string propertyName)
@@ -94,109 +86,53 @@ namespace Stetic {
 			foreach (ItemDescriptor item in sensitives) {
 				Widget w = editors[item.Name] as Widget;
 				if (w != null)
-					w.Sensitive = item.EnabledFor (wrapper);
+					w.Sensitive = item.EnabledFor (selection);
 			}
 		}
 
-		protected void UpdateSensitivity (object obj, EventArgs args)
+		public virtual ObjectWrapper GetWrapperForSite (IWidgetSite site)
 		{
-			UpdateSensitivity ();
+			return Stetic.ObjectWrapper.Lookup (site.Contents);
 		}
 
 		public void Select (IWidgetSite site)
 		{
 			Clear ();
 
-			Widget w = site.Contents;
-			if (w == null)
+			selection = GetWrapperForSite (site);
+			if (selection == null)
 				return;
+			selection.Notify += Notified;
 
-			selection = w;
-			wrapper = Stetic.Wrapper.Object.Lookup (w);
+			if (selection is Stetic.Wrapper.Widget)
+				AppendProperty (new PropertyDescriptor (typeof (Gtk.Widget), "Name"));
 
-			AppendProperty (new PropertyDescriptor (typeof (Gtk.Widget), "Name"), w); 
-
-			if (wrapper != null) {
-				wrapper.Notify += Notified;
-				AddObjectWrapperItems (w, wrapper.ItemGroups);
-			} else
-				AddParamSpecItems (w, w);
-
-			UpdateSensitivity ();
-		}
-
-		public virtual ParamSpec LookupParamSpec (object obj, PropertyInfo info)
-		{
-			foreach (object attr in info.GetCustomAttributes (typeof (GLib.PropertyAttribute), false)) {
-				PropertyAttribute pattr = (PropertyAttribute)attr;
-				return ParamSpec.LookupObjectProperty (obj.GetType(), pattr.Name);
-			}
-			return null;
-		}
-
-		protected void AddParamSpecItems (object obj, GLib.Object pspecObj)
-		{
-			AppendGroup ("Properties", true);
-
-			foreach (PropertyInfo info in obj.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
-				ParamSpec pspec = LookupParamSpec (pspecObj, info);
-				if (pspec != null)
-					AppendProperty (new PropertyDescriptor (obj.GetType(), info.Name), obj);
-			}
-		}
-
-		protected void AddObjectWrapperItems (object obj, ItemGroup[] groups)
-		{
 			bool first = true;
-
-			foreach (ItemGroup igroup in groups) {
+			foreach (ItemGroup igroup in selection.ItemGroups) {
 				AppendGroup (igroup.Name, first);
 				foreach (ItemDescriptor item in igroup.Items) {
 					if (item is PropertyDescriptor)
-						AppendProperty ((PropertyDescriptor)item, obj);
+						AppendProperty ((PropertyDescriptor)item);
 					else if (item is CommandDescriptor)
-						AppendCommand ((CommandDescriptor)item, obj);
+						AppendCommand ((CommandDescriptor)item);
 				}
 				first = false;
 			}
+			UpdateSensitivity ();
+		}
+
+		public void NoSelection ()
+		{
+			Clear ();
+			AppendLabel ("<i>No selection</i>");
 		}
 	}
 
 	public class ChildPropertyGrid : PropertyGrid {
 
-		public new void Select (IWidgetSite site)
+		public override ObjectWrapper GetWrapperForSite (IWidgetSite site)
 		{
-			Clear ();
-
-			if (!(site is Widget) || (site.ParentSite == null))
-				return;
-
-			Widget w = site.Contents;
-			if (w == null)
-				return;
-
-			Container parent = site.ParentSite.Contents as Container;
-			if (parent == null)
-				return;
-
-			ContainerChild cc = parent[(Widget)site];
-			selection = cc;
-			wrapper = Stetic.Wrapper.Container.Lookup (parent) as Stetic.Wrapper.Container;
-			if (wrapper != null)
-				AddObjectWrapperItems (cc, ((Stetic.Wrapper.Container)wrapper).ChildItemGroups);
-			else
-				AddParamSpecItems (cc, parent);
-
-		       UpdateSensitivity ();
-		}
-
-		public override ParamSpec LookupParamSpec (object obj, PropertyInfo info)
-		{
-			foreach (object attr in info.GetCustomAttributes (typeof (Gtk.ChildPropertyAttribute), false)) {
-				ChildPropertyAttribute cpattr = (ChildPropertyAttribute)attr;
-				return ParamSpec.LookupChildProperty (obj.GetType(), cpattr.Name);
-			}
-			return null;
+			return Stetic.Wrapper.Container.ChildWrapper (site);
 		}
 	}
 }
