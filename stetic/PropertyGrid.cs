@@ -92,10 +92,11 @@ namespace Stetic {
 			}
 		}
 
-		void Selected (IWidgetSite site, ProjectNode node)
+		void Selected (WidgetBox box, ProjectNode node)
 		{
 			Clear ();
 
+			WidgetSite site = box as WidgetSite;
 			if (site == null) {
 				AppendLabel ("<i>No selection</i>");
 				return;

@@ -60,7 +60,7 @@ namespace Stetic {
 			}
 		}
 
-		void WidgetSelected (IWidgetSite site, ProjectNode node)
+		void WidgetSelected (WidgetBox box, ProjectNode node)
 		{
 			if (!syncing) {
 				syncing = true;

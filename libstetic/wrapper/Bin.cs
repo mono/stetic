@@ -6,37 +6,32 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Bin);
 
-		protected WidgetSite site;
-		protected WidgetSite Site {
-			get {
-				if (site == null)
-					site = ((Gtk.Bin)Wrapped).Child as WidgetSite;
-				return site;
-			}
-		}
-		
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
+			if (!initialized && bin.Child == null)
+				bin.Add (CreatePlaceholder ());
+		}
 
-			Gtk.Bin bin = (Gtk.Bin)obj;
-			if (!initialized && bin.Child == null) {
-				site = CreateWidgetSite ();
-				bin.Add (site);
+		Gtk.Bin bin {
+			get {
+				return (Gtk.Bin)Wrapped;
 			}
 		}
 
 		public override bool HExpandable {
 			get { 
-				if (Site != null)
-					return Site.HExpandable;
+				WidgetBox child = bin.Child as WidgetBox;
+				if (child != null)
+					return child.HExpandable;
 				return false;
 			}
 		}
 		public override bool VExpandable {
 			get {
-				if (Site != null)
-					return Site.VExpandable;
+				WidgetBox child = bin.Child as WidgetBox;
+				if (child != null)
+					return child.VExpandable;
 				return false;
 			}
 		}

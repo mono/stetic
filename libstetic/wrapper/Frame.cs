@@ -32,8 +32,7 @@ namespace Stetic.Wrapper {
 		{
 			if (childprops.Count == 1 && ((string)childprops["type"]) == "label_item") {
 				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
-				WidgetSite site = CreateWidgetSite ();
-				site.Add ((Gtk.Widget)wrapper.Wrapped);
+				WidgetSite site = CreateWidgetSite ((Gtk.Widget)wrapper.Wrapped);
 
 				Gtk.Frame frame = (Gtk.Frame)Wrapped;
 				frame.LabelWidget = site;

@@ -16,6 +16,7 @@ libstetic_dll_sources =			\
 	ObjectWrapper.cs		\
 	ObjectWrapperAttribute.cs	\
 	ParamSpec.cs			\
+	Placeholder.cs			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
 	RangeAttribute.cs		\

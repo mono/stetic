@@ -9,19 +9,40 @@ namespace Stetic {
 
 		IWidgetSite site;
 
-		public ContextMenu (IWidgetSite site) : this (site, site) {}
+		public ContextMenu (Placeholder ph)
+		{
+			MenuItem item;
 
-		public ContextMenu (IWidgetSite site, IWidgetSite top)
+			this.site = null;
+
+			item = LabelItem ("Placeholder");
+			item.Sensitive = false;
+			Add (item);
+
+			item = new MenuItem ("_Select");
+			item.Sensitive = false;
+			Add (item);
+
+			Widget w = ph;
+			while (w.Parent != null && !(w is WidgetSite))
+				w = w.Parent;
+			if (w is WidgetSite)
+				BuildContextMenu ((WidgetSite)w, false, false, ph);
+			else
+				BuildContextMenu (WindowSite.LookupSite (w), false, false, ph);
+		}
+
+		public ContextMenu (IWidgetSite site) : this (site, site as Gtk.Widget) {}
+
+		public ContextMenu (IWidgetSite site, Gtk.Widget context)
 		{
 			MenuItem item;
 
 			this.site = site;
 
-			if (top == site) {
-				item = LabelItem (site.Occupied ? site.Contents.Name : "Placeholder");
-				item.Sensitive = false;
-				Add (item);
-			}
+			item = LabelItem (site.Contents.Name);
+			item.Sensitive = false;
+			Add (item);
 
 			item = new MenuItem ("_Select");
 			item.Activated += DoSelect;
@@ -31,41 +52,46 @@ namespace Stetic {
 			if (wrapper != null) {
 				foreach (CommandDescriptor cmd in wrapper.ContextMenuItems.Items) {
 					item = new MenuItem (cmd.Label);
-					if (cmd.Enabled (wrapper, top))
-						item.Activated += new Stupid69614Workaround (cmd, wrapper, top).Activate;
+					if (cmd.Enabled (wrapper, context))
+						item.Activated += new Stupid69614Workaround (cmd, wrapper, context).Activate;
 					else
 						item.Sensitive = false;
 					Add (item);
 				}
 			}
 
+			BuildContextMenu (site.ParentSite, true, site.Internal, context);
+		}
+
+		void BuildContextMenu (IWidgetSite parentSite, bool occupied, bool isInternal, Widget context)
+		{
+			MenuItem item;
+
 			item = new MenuItem ("Cu_t");
-			if (!site.Occupied || site.Internal)
+			if (!occupied || isInternal)
 				item.Sensitive = false;
 			Add (item);
 			item = new MenuItem ("_Copy");
-			if (!site.Occupied)
+			if (!occupied)
 				item.Sensitive = false;
 			Add (item);
 			item = new MenuItem ("_Paste");
-			if (site.Occupied)
+			if (occupied)
 				item.Sensitive = false;
 			Add (item);
 			item = new MenuItem ("_Delete");
-			if (site.Occupied && !site.Internal)
+			if (occupied && !isInternal)
 				item.Activated += DoDelete;
 			else
 				item.Sensitive = false;
 			Add (item);
 
-			if (site == top) {
-				for (site = site.ParentSite; site != null; site = site.ParentSite) {
-					Add (new SeparatorMenuItem ());
+			for (; parentSite != null; parentSite = parentSite.ParentSite) {
+				Add (new SeparatorMenuItem ());
 
-					item = LabelItem (site.Contents.Name);
-					item.Submenu = new ContextMenu (site, top);
-					Add (item);
-				}
+				item = LabelItem (parentSite.Contents.Name);
+				item.Submenu = new ContextMenu (parentSite, context);
+				Add (item);
 			}
 
 			ShowAll ();
@@ -74,17 +100,17 @@ namespace Stetic {
 		private class Stupid69614Workaround {
 			CommandDescriptor cmd;
 			ObjectWrapper wrapper;
-			IWidgetSite top;
+			Widget context;
 
-			public Stupid69614Workaround (CommandDescriptor cmd, ObjectWrapper wrapper, IWidgetSite top)
+			public Stupid69614Workaround (CommandDescriptor cmd, ObjectWrapper wrapper, Widget context)
 			{
 				this.cmd = cmd;
 				this.wrapper = wrapper;
-				this.top = top;
+				this.context = context;
 			}
 
 			public void Activate (object o, EventArgs args) {
-				cmd.Run (wrapper, top);
+				cmd.Run (wrapper, context);
 			}
 		}
 

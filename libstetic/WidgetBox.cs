@@ -5,7 +5,7 @@ using System;
 
 namespace Stetic {
 
-	public class WidgetBox : Gtk.Bin {
+	public abstract class WidgetBox : Gtk.Bin {
 
 		static Color black, white;
 
@@ -19,30 +19,12 @@ namespace Stetic {
 
 		public WidgetBox ()
 		{
+			WidgetFlags |= WidgetFlags.CanFocus;
 			WidgetFlags &= ~WidgetFlags.NoWindow;
-			ShowPlaceholder = true;
 		}
 
-		bool showPlaceholder;
-		protected bool ShowPlaceholder {
-			get { return showPlaceholder; }
-			set {
-				if (value == showPlaceholder)
-					return;
-				showPlaceholder = value;
-
-				if (IsRealized) {
-					bool wasMapped = IsMapped;
-
-					if (wasMapped)
-						Hide ();
-					Unrealize ();
-					Realize ();
-					if (wasMapped)
-						Show ();
-				}
-			}
-		}
+		public abstract bool HExpandable { get; }
+		public abstract bool VExpandable { get; }
 
 		protected Gdk.Window HandleWindow;
 		bool showHandles;
@@ -89,14 +71,12 @@ namespace Stetic {
 		protected override void OnAdded (Widget child)
 		{
 			child.ButtonPressEvent += InterceptButtonPress;
-			ShowPlaceholder = false;
 			base.OnAdded (child);
 		}
 
 		protected override void OnRemoved (Widget child)
 		{
 			child.ButtonPressEvent -= InterceptButtonPress;
-			ShowPlaceholder = true;
 			ShowHandles = false;
 			base.OnRemoved (child);
 		}
@@ -126,11 +106,12 @@ namespace Stetic {
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
-			if (evt.Button == 3 && evt.Type == EventType.ButtonPress) {
+
+			if (evt.Button == 3 && evt.Type == EventType.ButtonPress)
 				EmitPopupContextMenu ();
-				return true;
-			}
-			return false;
+			else
+				GrabFocus ();
+			return true;
 		}
 
 		protected override bool OnPopupMenu ()
@@ -219,13 +200,7 @@ namespace Stetic {
 			WidgetFlags |= WidgetFlags.Realized;
 
 			GdkWindow = NewWindow (ParentWindow, Gdk.WindowClass.InputOutput);
-
-			if (ShowPlaceholder) {
-				Gdk.Pixmap pixmap, mask;
-				pixmap = Gdk.Pixmap.CreateFromXpmD (GdkWindow, out mask, new Gdk.Color (99, 99, 99), placeholder_xpm);
-				GdkWindow.SetBackPixmap (pixmap, false);
-			} else
-				Style.SetBackground (GdkWindow, StateType.Normal);
+			Style.SetBackground (GdkWindow, StateType.Normal);
 
 			if (ShowHandles) {
 				HandleWindow = NewWindow (Toplevel.GdkWindow, Gdk.WindowClass.InputOutput);
@@ -262,7 +237,7 @@ namespace Stetic {
 			pixmap.DrawRectangle (gc, false, handleSize / 2, handleSize / 2,
 					      width - handleSize, height - handleSize);
 
-			if (!ShowPlaceholder && !Internal) {
+			if (!Internal) {
 				// Draw corner handles
 				pixmap.DrawRectangle (gc, true, 0, 0, handleSize, handleSize);
 				pixmap.DrawRectangle (gc, true, 0, height - handleSize, handleSize, handleSize);
@@ -297,32 +272,24 @@ namespace Stetic {
 			base.OnUnrealized ();
 		}
 
-		protected override bool OnExposeEvent (Gdk.EventExpose evt)
-		{
-			if (!IsDrawable)
-				return false;
-
-			if (ShowPlaceholder) {
-				int width, height;
-				GdkWindow.GetSize (out width, out height);
-
-				Gdk.GC light, dark;
-				light = Style.LightGC (StateType.Normal);
-				dark = Style.DarkGC (StateType.Normal);
-
-				GdkWindow.DrawLine (light, 0, 0, width - 1, 0);
-				GdkWindow.DrawLine (light, 0, 0, 0, height - 1);
-				GdkWindow.DrawLine (dark, 0, height - 1, width - 1, height - 1);
-				GdkWindow.DrawLine (dark, width - 1, 0, width - 1, height - 1);
-			}
-
-			return base.OnExposeEvent (evt);
-		}
-
 		protected override void OnSetScrollAdjustments (Gtk.Adjustment hadj, Gtk.Adjustment vadj)
 		{
 			if (Child != null)
 				Child.SetScrollAdjustments (hadj, vadj);
+		}
+
+		public event EventHandler Selected;
+
+		public void Focus ()
+		{
+			ShowHandles = true;
+			if (Selected != null)
+				Selected (this, EventArgs.Empty);
+		}
+
+		public void UnFocus ()
+		{
+			ShowHandles = false;
 		}
 	}
 }

@@ -1,3 +1,59 @@
+2005-03-23  Dan Winship  <danw@novell.com>
+
+	Split apart placeholders and WidgetSites. This is an intermediate
+	step on the road to killing off WidgetSite, and several wrappers
+	are broken in this check-in because it doesn't make much sense to
+	fix them twice.
+
+	* libstetic/Placeholder.cs: New subclass of WidgetBox to represent
+	a placeholder (which can accept drops, but can't actually hold
+	widgets).
+
+	* libstetic/WidgetSite.cs: Mostly remove support for empty
+	WidgetSites (though not pseudo-occupied ones).
+
+	* libstetic/WidgetBox.cs: Move some stuff here from WidgetSite
+	that both WidgetSite and Placeholder will need. Move out some (but
+	not all) stuff that they don't both need.
+
+	* libstetic/WindowSite.cs (FocusChangedHandler, FocusChanged):
+	make the focus be a WidgetBox rather than an IWidgetSite
+
+	* libstetic/CommandDescriptor.cs: 
+	* libstetic/ItemDescriptor.cs: Update commands to take a Widget
+	context rather than an IWidgetSite.
+
+	* libstetic/wrapper/Bin.cs: 
+	* libstetic/wrapper/Box.cs: 
+	* libstetic/wrapper/Dialog.cs: 
+	* libstetic/wrapper/Expander.cs: 
+	* libstetic/wrapper/Frame.cs: 
+	* libstetic/wrapper/Notebook.cs: 
+	* libstetic/wrapper/Paned.cs: 
+	* libstetic/wrapper/ScrolledWindow.cs: 
+	* libstetic/wrapper/Table.cs: 
+	* libstetic/wrapper/Window.cs: update for site/placeholder changes
+
+	* libstetic/wrapper/Widget.cs (CreateWidgetSite): Make this take a
+	widget to put in the WidgetSite.
+	(CreatePlaceholder): like the old CreateWidgetSite, but creates a
+	Placeholder.
+
+	* libstetic/wrapper/Container.cs: update for site/placeholder
+	changes
+	(ReplaceChild): new virtual method to replace one child widget
+	with another
+	(SiteEmpty): replace the site with a placeholder
+	(PlaceholderDrop): replace the placeholder with a WidgetSite
+	containing the dropped widget.
+
+	* libstetic/wrapper/Button.cs: update for site/placeholder changes
+	(Wrap): fix this so we don't get blank buttons
+	(ConstructChild): fix this to work around a maybe-bug in gtk
+	2.4.12 and earlier.
+
+	* stetic/*.cs: Misc updates for WidgetSite/Placeholder changes
+
 2005-03-21  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/Button.cs: Remove "UseStock" property and just

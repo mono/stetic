@@ -85,18 +85,18 @@ namespace Stetic.Wrapper {
 		{
 			uint left, right, top, bottom;
 			uint row, col;
-			WidgetSite site;
-			WidgetSite[,] grid;
+			WidgetBox wbox;
+			WidgetBox[,] grid;
 			Gtk.Table.TableChild tc;
 			Gtk.Widget[] children;
-			bool addedSites = false;
+			bool addedPlaceholders = false;
 
 			if (freeze > 0)
 				return;
 			freeze = 1;
 
 			children = table.Children;
-			grid = new WidgetSite[NRows,NColumns];
+			grid = new WidgetBox[NRows,NColumns];
 
 			foreach (Gtk.Widget child in children)
 				child.FreezeChildNotify ();
@@ -105,8 +105,7 @@ namespace Stetic.Wrapper {
 			// placeholders covering more than one grid square, remove them.
 			// (New ones will be created below.)
                         foreach (Gtk.Widget child in children) {
-				site = (WidgetSite) child;
-				if (site.Occupied)
+				if (!(child is Placeholder))
 					continue;
 
                                 tc = table[child] as Gtk.Table.TableChild;
@@ -116,7 +115,7 @@ namespace Stetic.Wrapper {
                                 bottom = tc.BottomAttach;
 
 				if (right == left + 1 && bottom == top + 1)
-					grid[top,left] = child as WidgetSite;
+					grid[top,left] = (WidgetBox)child;
 				else
 					table.Remove (child);
 			}
@@ -127,8 +126,7 @@ namespace Stetic.Wrapper {
 			// will probably end up wrong as well. But this situation
 			// happens at least temporarily during glade import.)
                         foreach (Gtk.Widget child in children) {
-				site = (WidgetSite) child;
-				if (!site.Occupied)
+				if (child is Placeholder)
 					continue;
 
                                 tc = table[child] as Gtk.Table.TableChild;
@@ -139,10 +137,10 @@ namespace Stetic.Wrapper {
 
                                 for (row = top; row < bottom; row++) {
                                         for (col = left; col < right; col++) {
-						site = grid[row,col];
-						if (site != null && !site.Occupied)
+						wbox = grid[row,col];
+						if (wbox is Placeholder)
 							table.Remove (grid[row,col]);
-                                                grid[row,col] = child as WidgetSite;
+                                                grid[row,col] = (WidgetBox)child;
                                         }
                                 }
                         }
@@ -159,22 +157,22 @@ namespace Stetic.Wrapper {
 				bool allPlaceholders = true;
 
 				for (col = 0; col < NColumns; col++) {
-					site = grid[row,col];
-					if (site == null) {
-						site = CreateWidgetSite ();
-						site.FreezeChildNotify ();
-						table.Attach (site, col, col + 1, row, row + 1);
-						grid[row,col] = site;
-						addedSites = true;
-					} else if (!site.VExpandable || !AutoSize[site])
+					wbox = grid[row,col];
+					if (wbox == null) {
+						wbox = CreatePlaceholder ();
+						wbox.FreezeChildNotify ();
+						table.Attach (wbox, col, col + 1, row, row + 1);
+						grid[row,col] = wbox;
+						addedPlaceholders = true;
+					} else if (!wbox.VExpandable || !AutoSize[wbox])
 						allPlaceholders = false;
 				}
 
 				for (col = 0; col < NColumns; col++) {
-					site = grid[row,col];
-					if (!AutoSize[site])
+					wbox = grid[row,col];
+					if (!AutoSize[wbox])
 						continue;
-					tc = table[site] as Gtk.Table.TableChild;
+					tc = table[wbox] as Gtk.Table.TableChild;
 					tc.YOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
@@ -189,18 +187,18 @@ namespace Stetic.Wrapper {
 				bool allPlaceholders = true;
 
 				for (row = 0; row < NRows; row++) {
-					site = grid[row,col];
-					if (!site.HExpandable || !AutoSize[site]) {
+					wbox = grid[row,col];
+					if (!wbox.HExpandable || !AutoSize[wbox]) {
 						allPlaceholders = false;
 						break;
 					}
 				}
 
 				for (row = 0; row < NRows; row++) {
-					site = grid[row,col];
-					if (!AutoSize[site])
+					wbox = grid[row,col];
+					if (!AutoSize[wbox])
 						continue;
-					tc = table[site] as Gtk.Table.TableChild;
+					tc = table[wbox] as Gtk.Table.TableChild;
 					tc.XOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
@@ -212,7 +210,7 @@ namespace Stetic.Wrapper {
 				child.ThawChildNotify ();
 			freeze = 0;
 
-			if (addedSites)
+			if (addedPlaceholders)
 				EmitContentsChanged ();
 		}
 
@@ -323,44 +321,44 @@ namespace Stetic.Wrapper {
 		}
 
 		[Command ("Insert Row Before", "Insert an empty row above the selected row")]
-		void InsertRowBefore (IWidgetSite context)
+		void InsertRowBefore (Gtk.Widget context)
 		{
-			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
+			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			AddRow (tc.TopAttach);
 		}
 
 		[Command ("Insert Row After", "Insert an empty row below the selected row")]
-		void InsertRowAfter (IWidgetSite context)
+		void InsertRowAfter (Gtk.Widget context)
 		{
-			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
+			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			AddRow (tc.BottomAttach);
 		}
 
 		[Command ("Insert Column Before", "Insert an empty column before the selected column")]
-		void InsertColumnBefore (IWidgetSite context)
+		void InsertColumnBefore (Gtk.Widget context)
 		{
-			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
+			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			AddColumn (tc.LeftAttach);
 		}
 
 		[Command ("Insert Column After", "Insert an empty column after the selected column")]
-		void InsertColumnAfter (IWidgetSite context)
+		void InsertColumnAfter (Gtk.Widget context)
 		{
-			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
+			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			AddColumn (tc.RightAttach);
 		}
 
 		[Command ("Delete Row", "Delete the selected row")]
-		void DeleteRow (IWidgetSite context)
+		void DeleteRow (Gtk.Widget context)
 		{
-			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
+			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			DeleteRow (tc.TopAttach);
 		}
 
 		[Command ("Delete Column", "Delete the selected column")]
-		void DeleteColumn (IWidgetSite context)
+		void DeleteColumn (Gtk.Widget context)
 		{
-			Gtk.Table.TableChild tc = table[(Gtk.Widget)context] as Gtk.Table.TableChild;
+			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			DeleteColumn (tc.LeftAttach);
 		}
 
@@ -371,7 +369,7 @@ namespace Stetic.Wrapper {
 		protected override void SiteShapeChanged (WidgetSite site)
 		{
 			Freeze ();
-			if (site.Occupied && AutoSize[site]) {
+			if (AutoSize[site]) {
 				Gtk.Table.TableChild tc = table[site] as Gtk.Table.TableChild;
 				tc.XOptions = 0;
 				tc.YOptions = 0;

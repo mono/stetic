@@ -27,7 +27,7 @@ namespace Stetic {
 			windowSites.Remove (contents);
 		}
 
-		public delegate void FocusChangedHandler (WindowSite site, IWidgetSite focus);
+		public delegate void FocusChangedHandler (WindowSite site, WidgetBox focus);
 		public event FocusChangedHandler FocusChanged;
 
 		[ConnectBefore] // otherwise contents.Focus will be the new focus, not the old
@@ -36,14 +36,14 @@ namespace Stetic {
 			Widget w;
 
 			w = contents.Focus;
-			while (w != null && !(w is WidgetSite))
+			while (w != null && !(w is WidgetBox))
 				w = w.Parent;
-			WidgetSite oldf = (WidgetSite)w;
+			WidgetBox oldf = (WidgetBox)w;
 
 			w = args.Focus;
-			while (w != null && !(w is WidgetSite))
+			while (w != null && !(w is WidgetBox))
 				w = w.Parent;
-			WidgetSite newf = (WidgetSite)w;
+			WidgetBox newf = (WidgetBox)w;
 
 			if (oldf == newf)
 				return;
@@ -54,7 +54,7 @@ namespace Stetic {
 				newf.Focus ();
 
 			if (FocusChanged != null)
-				FocusChanged (this, newf != null ? (IWidgetSite)newf : (IWidgetSite)this);
+				FocusChanged (this, newf);
 		}
 
 		public static IWidgetSite LookupSite (Widget window)
@@ -71,12 +71,6 @@ namespace Stetic {
 		public IWidgetSite ParentSite {
 			get {
 				return null;
-			}
-		}
-
-		public bool Occupied {
-			get {
-				return true;
 			}
 		}
 

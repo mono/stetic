@@ -58,11 +58,18 @@ namespace Stetic.Wrapper {
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Widget;
 		}
 
-		protected virtual WidgetSite CreateWidgetSite ()
+		protected virtual WidgetSite CreateWidgetSite (Gtk.Widget w)
 		{
-			WidgetSite site = stetic.CreateWidgetSite ();
+			WidgetSite site = stetic.CreateWidgetSite (w);
 			site.Show ();
 			return site;
+		}
+
+		protected virtual Placeholder CreatePlaceholder ()
+		{
+			Placeholder ph = stetic.CreatePlaceholder ();
+			ph.Show ();
+			return ph;
 		}
 
 		public virtual bool HExpandable { get { return false; } }

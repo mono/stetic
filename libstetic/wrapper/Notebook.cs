@@ -46,9 +46,8 @@ namespace Stetic.Wrapper {
 		{
 			if (childprops.Count == 1 && ((string)childprops["type"]) == "tab") {
 				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
-				WidgetSite site = CreateWidgetSite ();
+				WidgetSite site = CreateWidgetSite ((Gtk.Widget)wrapper.Wrapped);
 				site.Selected += LabelSelected;
-				site.Add ((Gtk.Widget)wrapper.Wrapped);
 
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), site);
 				tabs.Add (site);
@@ -83,16 +82,14 @@ namespace Stetic.Wrapper {
 
 		int InsertPage (int position)
 		{
-			WidgetSite labelSite, pageSite;
+			WidgetSite labelSite;
 
-			labelSite = CreateWidgetSite ();
-			labelSite.Selected += LabelSelected;
 			Stetic.Wrapper.Label label = new Stetic.Wrapper.Label ("page" + (notebook.NPages + 1).ToString ());
-			labelSite.Add ((Gtk.Widget)label.Wrapped);
+			labelSite = CreateWidgetSite ((Gtk.Widget)label.Wrapped);
+			labelSite.Selected += LabelSelected;
 			tabs.Insert (position, labelSite);
 
-			pageSite = CreateWidgetSite ();
-			return notebook.InsertPage (pageSite, labelSite, position);
+			return notebook.InsertPage (CreatePlaceholder (), labelSite, position);
 		}
 
 		[Command ("Go to Previous Page", "Show the previous page", "CheckPreviousPage")]

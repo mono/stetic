@@ -35,28 +35,26 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 			dialog.HasSeparator = false;
 
-			site = CreateWidgetSite ();
+			dialog.VBox.Unparent ();
+			site = CreateWidgetSite (dialog.VBox);
 			site.InternalChildId = "vbox";
-			dialog.VBox.Reparent (site);
 			dialog.Add (site);
 			ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.VBox), dialog.VBox);
 			if (dialog.VBox.Name == "GtkVBox")
 				dialog.VBox.Name = dialog.Name + "_vbox";
 
-			site = CreateWidgetSite ();
+			dialog.ActionArea.Unparent ();
+			site = CreateWidgetSite (dialog.ActionArea);
 			site.InternalChildId = "action_area";
-			dialog.ActionArea.Reparent (site);
 			dialog.VBox.PackEnd (site, false, true, 0);
 			ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.HButtonBox), dialog.ActionArea);
 			if (dialog.ActionArea.Name == "GtkHButtonBox")
 				dialog.ActionArea.Name = dialog.Name + "_action_area";
 
 			if (!initialized) {
-				site = CreateWidgetSite ();
-				Gtk.Requisition req;
-				req.Width = req.Height = 200;
-				site.EmptySize = req;
-				dialog.VBox.Add (site);
+				Placeholder ph = CreatePlaceholder ();
+				ph.SetSizeRequest (200, 200);
+				dialog.VBox.Add (ph);
 				Buttons = StandardButtons.Close;
 			}
 		}
@@ -152,8 +150,7 @@ namespace Stetic.Wrapper {
 			button.ResponseId = (int)response;
 
 			Stetic.Wrapper.Container actionArea = Stetic.Wrapper.Container.Lookup (dialog.ActionArea);
-			WidgetSite site = actionArea.AddPlaceholder ();
-			site.Add (widget);
+			WidgetSite site = actionArea.AddWidgetSite (widget);
 
 			widget.CanDefault = true;
 			button.HasDefault = hasDefault;

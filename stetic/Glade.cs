@@ -166,14 +166,14 @@ namespace Stetic {
 				XmlElement child;
 
 				foreach (WidgetSite site in container.Sites) {
-					if (!site.Occupied) {
 #if FIXME
+					if (!site.Occupied) {
 						child = doc.CreateElement ("child");
 						child.AppendChild (doc.CreateElement ("placeholder"));
 						widget.AppendChild (child);
-#endif
 						continue;
 					}
+#endif
 
 					child = ExportWidget (project, doc, container, site.Contents);
 					if (child != null)

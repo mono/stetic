@@ -9,16 +9,11 @@ namespace Stetic {
 
 	public class WidgetSite : WidgetBox, IWidgetSite {
 
-		IStetic stetic;
-
-		public WidgetSite (IStetic stetic)
+		public WidgetSite (Widget child)
 		{
-			WidgetFlags |= WidgetFlags.CanFocus;
 			DND.SourceSet (this, false);
 
-			this.stetic = stetic;
-			emptySize.Width = emptySize.Height = 10;
-			Occupancy = SiteOccupancy.Empty;
+			Add (child);
 		}
 
 		public Widget Contents {
@@ -64,21 +59,9 @@ namespace Stetic {
 			if (container != null)
 				container.ContentsChanged -= ChildContentsChanged;
 
-			if (Occupancy == SiteOccupancy.Occupied)
-				Occupancy = SiteOccupancy.Empty;
 			base.OnRemoved (w);
-		}
-
-		Requisition emptySize;
-		public Requisition EmptySize {
-			get {
-				return emptySize;
-			}
-			set {
-				emptySize = value;
-				if (Occupancy == SiteOccupancy.Empty)
-					SetSizeRequest (emptySize.Width, emptySize.Height);
-			}
+			if (Occupancy == SiteOccupancy.Occupied)
+				EmitEmpty ();
 		}
 
 		string internalChildId;
@@ -98,7 +81,7 @@ namespace Stetic {
 			}
 		}
 
-		public enum SiteOccupancy { Empty, Occupied, PseudoOccupied };
+		public enum SiteOccupancy { Occupied, PseudoOccupied };
 
 		private SiteOccupancy state;
 		private SiteOccupancy Occupancy {
@@ -106,19 +89,12 @@ namespace Stetic {
 			set {
 				state = value;
 				switch (state) {
-				case SiteOccupancy.Empty:
-					SetSizeRequest (emptySize.Width, emptySize.Height);
-					DND.DestSet (this, true);
-					EmitOccupancyChanged ();
-					break;
-
 				case SiteOccupancy.Occupied:
 					SetSizeRequest (-1, -1);
 					if (faults != null && faults.Count > 0)
 						DND.DestSet (this, false);
 					else
 						DND.DestUnset (this);
-					EmitOccupancyChanged ();
 					break;
 
 				case SiteOccupancy.PseudoOccupied:
@@ -130,25 +106,16 @@ namespace Stetic {
 			}
 		}
 
-		public event ChangedHandler OccupancyChanged;
+		public event ChangedHandler Empty;
 
-		void EmitOccupancyChanged ()
+		void EmitEmpty ()
 		{
-			if (OccupancyChanged != null)
-				OccupancyChanged (this);
-			if (ShapeChanged != null)
-				ShapeChanged (this);
+			if (Empty != null)
+				Empty (this);
 		}
 
-		public bool Occupied {
-			get { return (Occupancy != SiteOccupancy.Empty); }
-		}
-
-		public bool HExpandable {
+		public override bool HExpandable {
 			get {
-				if (Occupancy == SiteOccupancy.Empty)
-					return true;
-
 				Stetic.Wrapper.Widget child;
 				if (Occupancy == SiteOccupancy.PseudoOccupied)
 					child = Stetic.Wrapper.Widget.Lookup (dragWidget);
@@ -162,11 +129,8 @@ namespace Stetic {
 			}
 		}
 
-		public bool VExpandable {
+		public override bool VExpandable {
 			get {
-				if (Occupancy == SiteOccupancy.Empty)
-					return true;
-
 				Stetic.Wrapper.Widget child;
 				if (Occupancy == SiteOccupancy.PseudoOccupied)
 					child = Stetic.Wrapper.Widget.Lookup (dragWidget);
@@ -396,13 +360,6 @@ namespace Stetic {
 			}
 		}
 
-		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
-		{
-			if (!base.OnButtonPressEvent (evt))
-				GrabFocus ();
-			return true;
-		}
-
 		Widget dragWidget;
 
 		protected override bool OnMotionNotifyEvent (Gdk.EventMotion evt)
@@ -467,7 +424,7 @@ namespace Stetic {
 				Drop (dragWidget, -1, -1);
 				dragWidget = null;
 			} else if (Child == null)
-				Occupancy = SiteOccupancy.Empty;
+				EmitEmpty ();
 		}
 
 		protected override bool OnKeyReleaseEvent (Gdk.EventKey evt)
@@ -477,20 +434,6 @@ namespace Stetic {
 				return true;
 			}
 			return false;
-		}
-
-		public event EventHandler Selected;
-
-		public void Focus ()
-		{
-			ShowHandles = true;
-			if (Selected != null)
-				Selected (this, EventArgs.Empty);
-		}
-
-		public void UnFocus ()
-		{
-			ShowHandles = false;
 		}
 
 		public void Select ()
@@ -507,7 +450,7 @@ namespace Stetic {
 		{
 			if (Child != null) {
 				Child.Destroy ();
-				EmitOccupancyChanged ();
+				EmitEmpty ();
 			}
 		}
 

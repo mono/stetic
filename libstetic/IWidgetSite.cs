@@ -7,8 +7,6 @@ namespace Stetic {
 		Widget Contents { get; }
 		IWidgetSite ParentSite { get; }
 
-		bool Occupied { get; }
-
 		bool Internal { get; }
 
 		void Select ();

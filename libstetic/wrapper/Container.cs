@@ -53,12 +53,10 @@ namespace Stetic.Wrapper {
 			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
 			if (container.ChildType () == Gtk.Widget.GType) {
-				WidgetSite site = AddPlaceholder ();
-				AutoSize[site] = false;
-				site.Add (child);
-				child = site;
-			} else
-				container.Add (child);
+				child = CreateWidgetSite (child);
+				AutoSize[child] = false;
+			}
+			container.Add (child);
 
 			GladeUtils.SetPacking (container, child, childprops);
 			return (Widget)wrapper;
@@ -89,9 +87,16 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public virtual WidgetSite AddPlaceholder ()
+		public virtual Placeholder AddPlaceholder ()
 		{
-			WidgetSite site = CreateWidgetSite ();
+			Placeholder ph = CreatePlaceholder ();
+			container.Add (ph);
+			return ph;
+		}
+
+		public virtual WidgetSite AddWidgetSite (Gtk.Widget child)
+		{
+			WidgetSite site = CreateWidgetSite (child);
 			container.Add (site);
 			return site;
 		}
@@ -163,18 +168,35 @@ namespace Stetic.Wrapper {
 
 		protected Set AutoSize = new Set ();
 
-		protected override WidgetSite CreateWidgetSite ()
+		protected override WidgetSite CreateWidgetSite (Gtk.Widget w)
 		{
-			WidgetSite site = base.CreateWidgetSite ();
-			site.OccupancyChanged += SiteOccupancyChanged;
+			WidgetSite site = base.CreateWidgetSite (w);
 			site.ShapeChanged += SiteShapeChanged;
-			AutoSize[site] = true;
+			site.Empty += SiteEmpty;
 			return site;
 		}
 
-		protected virtual void SiteOccupancyChanged (WidgetSite site) {
-			if (!site.Occupied)
-				AutoSize[site] = true;
+		protected override Placeholder CreatePlaceholder ()
+		{
+			Placeholder ph = base.CreatePlaceholder ();
+			ph.Drop += PlaceholderDrop;
+			AutoSize[ph] = true;
+			return ph;
+		}
+
+		void SiteEmpty (WidgetSite site)
+		{
+			ReplaceChild (site, CreatePlaceholder ());
+			site.Destroy ();
+			EmitContentsChanged ();
+		}
+
+		void PlaceholderDrop (Placeholder ph, Gtk.Widget dropped)
+		{
+			WidgetSite site = CreateWidgetSite (dropped);
+			ReplaceChild (ph, site);
+			ph.Destroy ();
+			site.Select ();
 			EmitContentsChanged ();
 		}
 
@@ -186,7 +208,7 @@ namespace Stetic.Wrapper {
 		{
 			WidgetSite site = args.Widget as WidgetSite;
 			if (site != null) {
-				site.OccupancyChanged -= SiteOccupancyChanged;
+				site.Empty -= SiteEmpty;
 				site.ShapeChanged -= SiteShapeChanged;
 				SiteRemoved (site);
 			}
@@ -213,6 +235,30 @@ namespace Stetic.Wrapper {
 				container.Forall (se.Add);
 				return se.Sites;
 			}
+		}
+
+		protected virtual void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		{
+			Gtk.Container.ContainerChild cc;
+			Hashtable props = new Hashtable ();
+
+			cc = container[oldChild];
+			foreach (PropertyInfo pinfo in cc.GetType ().GetProperties ()) {
+				if (!pinfo.IsDefined (typeof (Gtk.ChildPropertyAttribute), true))
+					continue;
+				props[pinfo] = pinfo.GetValue (cc, null);
+			}
+
+			container.Remove (oldChild);
+			AutoSize[oldChild] = false;
+			AutoSize[newChild] = true;
+			container.Add (newChild);
+
+			cc = container[newChild];
+			foreach (PropertyInfo pinfo in props.Keys)
+				pinfo.SetValue (cc, props[pinfo], null);
+
+			Sync ();
 		}
 
 		public class ContainerChild : Stetic.ObjectWrapper {

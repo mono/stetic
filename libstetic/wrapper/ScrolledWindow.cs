@@ -25,35 +25,22 @@ namespace Stetic.Wrapper {
 				Gtk.ScrolledWindow scrolled = (Gtk.ScrolledWindow)Wrapped;
 				scrolled.SetPolicy (Gtk.PolicyType.Always, Gtk.PolicyType.Always);
 				if (scrolled.Child == null)
-					scrolled.AddWithViewport (CreateWidgetSite ());
+					scrolled.AddWithViewport (CreatePlaceholder ());
 			}
 		}
 
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable { get { return true; } }
 
-		protected override void SiteOccupancyChanged (WidgetSite site)
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			Gtk.ScrolledWindow scwin = (Gtk.ScrolledWindow)Wrapped;
 
-			if (scwin.Child == null)
-				return;
-
-			if (site.Occupied &&
-			    site.Contents.SetScrollAdjustments (null, null)) {
-				if (scwin.Child is Gtk.Viewport) {
-					((Gtk.Viewport)scwin.Child).Remove (site);
-					scwin.Remove (scwin.Child);
-					scwin.Add (site);
-				}
-			} else {
-				if (!(scwin.Child is Gtk.Viewport)) {
-					scwin.Remove (scwin.Child);
-					scwin.AddWithViewport (site);
-				}
-			}
-
-			base.SiteOccupancyChanged (site);
+			scwin.Remove (scwin.Child);
+			if (newChild.SetScrollAdjustments (null, null))
+				scwin.Add (newChild);
+			else
+				scwin.AddWithViewport (newChild);
 		}
 	}
 }

@@ -62,14 +62,15 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-			if (!initialized)
-				button.Label = button.Name;
 
 			if (button.UseStock)
 				Icon = "stock:" + button.Label;
 			else {
 				Icon = null;
-				Label = button.Label;
+				if (initialized)
+					Label = button.Label;
+				else
+					Label = button.Name;
 			}
 		}
 
@@ -134,8 +135,7 @@ namespace Stetic.Wrapper {
 		// true if the button has *anything* in it
 		public bool HasContents {
 			get {
-				WidgetSite site = button.Child as WidgetSite;
-				return (site == null) || site.Occupied;
+				return !(button.Child is Placeholder);
 			}
 		}
 
@@ -145,11 +145,7 @@ namespace Stetic.Wrapper {
 			if (button.Child != null)
 				button.Remove (button.Child);
 
-			WidgetSite site = CreateWidgetSite ();
-			site.OccupancyChanged += delegate (WidgetSite site) {
-				EmitNotify ("HasContents");
-			};
-			button.Add (site);
+			button.Add (CreatePlaceholder ());
 
 			EmitNotify ("HasContents");
 			EmitNotify ("HasLabel");
@@ -163,6 +159,12 @@ namespace Stetic.Wrapper {
 			EmitNotify ("HasLabel");
 		}
 
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		{
+			base.ReplaceChild (oldChild, newChild);
+			EmitNotify ("HasContents");
+		}
+
 		Gtk.Image iconWidget;
 		Gtk.Label labelWidget;
 		string icon;
@@ -170,6 +172,7 @@ namespace Stetic.Wrapper {
 
 		void ConstructChild ()
 		{
+			button.UseStock = false;
 			if (button.Child != null)
 				button.Remove (button.Child);
 			iconWidget = null;

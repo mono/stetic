@@ -25,7 +25,7 @@ namespace Stetic {
 			AddWidget (site.Contents, null, -1);
 
 			if (select)
-				WindowFocusChanged (site, site);
+				WindowFocusChanged (site, null);
 		}
 
 		void AddWidget (Widget widget, ProjectNode parent)
@@ -58,10 +58,8 @@ namespace Stetic {
 			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (widget);
 			if (container != null) {
 				container.ContentsChanged += ContentsChanged;
-				foreach (WidgetSite site in container.Sites) {
-					if (site.Occupied)
-						AddWidget (site.Contents, parent);
-				}
+				foreach (WidgetSite site in container.Sites)
+					AddWidget (site.Contents, parent);
 			}
 		}
 
@@ -156,32 +154,56 @@ namespace Stetic {
 			store = new NodeStore (typeof (ProjectNode));
 		}
 
-		public delegate void SelectedHandler (IWidgetSite site, ProjectNode node);
+		public delegate void SelectedHandler (WidgetBox box, ProjectNode node);
 		public event SelectedHandler Selected;
 
-		void WindowFocusChanged (WindowSite site, IWidgetSite focus)
+		void WindowFocusChanged (WindowSite site, WidgetBox focus)
 		{
 			if (Selected == null)
 				return;
 
 			if (focus == null)
 				Selected (null, null);
-			else if (focus.Contents == null)
+			else if (focus.Child == null)
 				Selected (focus, null);
 			else
-				Selected (focus, nodes[focus.Contents] as ProjectNode);
+				Selected (focus, nodes[focus.Child] as ProjectNode);
 		}
 
 		// IStetic
 
-		public WidgetSite CreateWidgetSite ()
+		public WidgetSite CreateWidgetSite (Widget w)
 		{
-			WidgetSite site = new WidgetSite (this);
+			Menu m = null;
+
+			WidgetSite site = new WidgetSite (w);
 			site.PopupContextMenu += delegate (object obj, EventArgs args) {
-				Menu m = new ContextMenu ((WidgetSite)site);
+				if (m == null)
+					m = new ContextMenu (site);
 				m.Popup ();
 			};
+			site.Destroyed += delegate (object obj, EventArgs args) {
+				if (m != null)
+					m.Destroy ();
+			};
 			return site;
+		}
+
+		public Placeholder CreatePlaceholder ()
+		{
+			Menu m = null;
+
+			Placeholder ph = new Placeholder ();
+			ph.PopupContextMenu += delegate (object obj, EventArgs args) {
+				if (m == null)
+					m = new ContextMenu (ph);
+				m.Popup ();
+			};
+			ph.Destroyed += delegate (object obj, EventArgs args) {
+				if (m != null)
+					m.Destroy ();
+			};
+			return ph;
 		}
 
 		public Gtk.Widget LookupWidgetById (string id)

@@ -23,8 +23,8 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
-				box.PackStart (CreateWidgetSite ());
-				box.PackStart (CreateWidgetSite ());
+				box.PackStart (CreatePlaceholder ());
+				box.PackStart (CreatePlaceholder ());
 			}
 			box.SizeAllocated += box_SizeAllocated;
 			box.ParentSet += box_ParentSet;
@@ -82,31 +82,31 @@ namespace Stetic.Wrapper {
 		}
 
 		[Command ("Insert Before", "Insert an empty row/column before the selected one")]
-		void InsertBefore (IWidgetSite context)
+		void InsertBefore (Gtk.Widget context)
 		{
-			Gtk.Box.BoxChild bc = box[(Gtk.Widget)context] as Gtk.Box.BoxChild;
-			WidgetSite site = CreateWidgetSite ();
+			Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
+			Placeholder ph = CreatePlaceholder ();
 			if (bc.PackType == Gtk.PackType.Start) {
-				box.PackStart (site);
-				box.ReorderChild (site, bc.Position);
+				box.PackStart (ph);
+				box.ReorderChild (ph, bc.Position);
 			} else {
-				box.PackEnd (site);
-				box.ReorderChild (site, bc.Position + 1);
+				box.PackEnd (ph);
+				box.ReorderChild (ph, bc.Position + 1);
 			}
 			EmitContentsChanged ();
 		}
 
 		[Command ("Insert After", "Insert an empty row/column after the selected one")]
-		void InsertAfter (IWidgetSite context)
+		void InsertAfter (Gtk.Widget context)
 		{
-			Gtk.Box.BoxChild bc = box[(Gtk.Widget)context] as Gtk.Box.BoxChild;
-			WidgetSite site = CreateWidgetSite ();
+			Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
+			Placeholder ph = CreatePlaceholder ();
 			if (bc.PackType == Gtk.PackType.Start) {
-				box.PackStart (site);
-				box.ReorderChild (site, bc.Position + 1);
+				box.PackStart (ph);
+				box.ReorderChild (ph, bc.Position + 1);
 			} else {
-				box.PackEnd (site);
-				box.ReorderChild (site, bc.Position);
+				box.PackEnd (ph);
+				box.ReorderChild (ph, bc.Position);
 			}
 			EmitContentsChanged ();
 		}
@@ -119,12 +119,15 @@ namespace Stetic.Wrapper {
 			base.SiteShapeChanged (site);
 		}
 
-		protected override void SiteOccupancyChanged (WidgetSite site) {
-			if (!site.Occupied) {
-				site.Destroy ();
-				return;
-			}
-			base.SiteOccupancyChanged (site);
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		{
+			if (newChild is Placeholder)
+				newChild.Destroy ();
+			else
+				base.ReplaceChild (oldChild, newChild);
+
+			if (newChild is WidgetSite)
+				SiteShapeChanged ((WidgetSite)newChild);
 		}
 
 		void box_ParentSet (object obj, Gtk.ParentSetArgs args)
@@ -143,9 +146,8 @@ namespace Stetic.Wrapper {
 
 		void DropOn (Gtk.Widget w, object faultId)
 		{
-			WidgetSite site = CreateWidgetSite ();
+			WidgetSite site = CreateWidgetSite (w);
 			box.PackStart (site);
-			site.Add (w);
 			box.ReorderChild (site, (int)faultId);
 			EmitContentsChanged ();
 

@@ -17,7 +17,7 @@ namespace Stetic {
 
 			name = commandName;
 
-			doInfo = wrapperType.GetMethod (commandName, flags, null, new Type[] { typeof (Stetic.IWidgetSite) }, null);
+			doInfo = wrapperType.GetMethod (commandName, flags, null, new Type[] { typeof (Gtk.Widget) }, null);
 			if (doInfo != null)
 				needsContext = true;
 			else
@@ -29,7 +29,7 @@ namespace Stetic {
 				label = cattr.Name;
 				description = cattr.Description;
 				if (cattr.Checker != null) {
-					checkInfo = wrapperType.GetMethod (cattr.Checker, flags, null, needsContext ? new Type[] { typeof (Stetic.IWidgetSite) } : new Type[0], null);
+					checkInfo = wrapperType.GetMethod (cattr.Checker, flags, null, needsContext ? new Type[] { typeof (Gtk.Widget) } : new Type[0], null);
 					if (checkInfo == null)
 						throw new ArgumentException ("Invalid checker name " + cattr.Checker + " for command " + wrapperType.Name + "." + commandName);
 				}
@@ -69,7 +69,7 @@ namespace Stetic {
 				return (bool)checkInfo.Invoke (wrapper, new object[0]);
 		}
 
-		public bool Enabled (ObjectWrapper wrapper, IWidgetSite context)
+		public bool Enabled (ObjectWrapper wrapper, Gtk.Widget context)
 		{
 			if (checkInfo == null)
 				return EnabledFor (wrapper);
@@ -84,7 +84,7 @@ namespace Stetic {
 			doInfo.Invoke (wrapper, new object[0]);
 		}
 
-		public void Run (ObjectWrapper wrapper, IWidgetSite context)
+		public void Run (ObjectWrapper wrapper, Gtk.Widget context)
 		{
 			if (needsContext)
 				doInfo.Invoke (wrapper, new object[] { context });

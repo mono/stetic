@@ -19,7 +19,7 @@ namespace Stetic {
 					Items[i] = new PropertyDescriptor (wrapperType, objectType, names[i]);
 				else if (wrapperType.GetMethod (names[i], flags, null, new Type[0], null) != null)
 					Items[i] = new CommandDescriptor (wrapperType, names[i]);
-				else if (wrapperType.GetMethod (names[i], flags, null, new Type[] { typeof (Stetic.IWidgetSite) }, null) != null)
+				else if (wrapperType.GetMethod (names[i], flags, null, new Type[] { typeof (Gtk.Widget) }, null) != null)
 					Items[i] = new CommandDescriptor (wrapperType, names[i]);
 				else
 					throw new ApplicationException ("Bad item name " + names[i] + " in " + wrapperType.Name);

@@ -47,11 +47,8 @@ namespace Stetic.Wrapper {
 			if (!initialized) {
 				window.Title = window.Name;
 
-				if (Site != null) {
-					Gtk.Requisition req;
-					req.Width = req.Height = 200;
-					Site.EmptySize = req;
-				}
+				if (window.Child is Placeholder)
+					window.Child.SetSizeRequest (200, 200);
 			}
 			window.DeleteEvent += DeleteEvent;
 		}
