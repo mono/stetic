@@ -49,7 +49,7 @@ namespace Stetic {
 								  BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
 								  null, new Type[0], null);
 			if (instanceCtor == null)
-				instanceCtor = type.GetConstructor (new Type[0]);
+				instanceCtor = wrappedType.GetConstructor (new Type[0]);
 			instanceCtors[type] = instanceCtor;
 
 			// Run wrapper registration methods

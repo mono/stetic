@@ -11,15 +11,20 @@ namespace Stetic.Wrapper {
 
 		static new void Register (Type type)
 		{
-			// Check if the type declares a
+			// Check if the type or one of its ancestors declares a
 			// Stetic.Wrapper.Container.ContainerChild subtype
 			Type childType = typeof (Stetic.Wrapper.Container.ContainerChild);
-			foreach (Type ct in type.GetNestedTypes (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)) {
-				if (ct.IsSubclassOf (childType)) {
-					childTypes[type] = ct;
-					Stetic.ObjectWrapper.Register (ct);
+
+			do {
+				foreach (Type ct in type.GetNestedTypes (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)) {
+					if (ct.IsSubclassOf (childType)) {
+						childTypes[type] = ct;
+						Stetic.ObjectWrapper.Register (ct);
+						return;
+					}
 				}
-			}
+				type = type.BaseType;
+			} while (type != typeof (Stetic.Wrapper.Container));
 		}
 
 		protected override void Wrap (object obj, bool initialized)

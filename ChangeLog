@@ -1,5 +1,13 @@
 2005-02-25  Dan Winship  <danw@novell.com>
 
+	* libstetic/ObjectWrapper.cs (Register): Fix the no-CreateInstance
+	case to use the *wrapped* type's ctor, not the wrapper type.
+
+	* libstetic/wrapper/Container.cs (Register): Make types whose
+	containerchild types are declared by a superclass work again.
+
+2005-02-25  Dan Winship  <danw@novell.com>
+
 	* libstetic/wrapper/Icon.cs: 
 	* libstetic/wrapper/Image.cs: Merge these two together, with a
 	bool property to switch between stock icon and pixmap behavior.
