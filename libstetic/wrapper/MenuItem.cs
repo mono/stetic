@@ -8,11 +8,11 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.MenuItem);
 
-		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			string label = GladeUtils.ExtractProperty ("label", propNames, propVals);
-			string use_underline = GladeUtils.ExtractProperty ("use_underline", propNames, propVals);
-			base.GladeImport (className, id, propNames, propVals);
+			string label = GladeUtils.ExtractProperty ("label", props);
+			string use_underline = GladeUtils.ExtractProperty ("use_underline", props);
+			base.GladeImport (className, id, props);
 
 			if (label != null) {
 				Gtk.MenuItem item = (Gtk.MenuItem)Wrapped;

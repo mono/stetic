@@ -4,7 +4,7 @@ using System.Collections;
 namespace Stetic.Wrapper {
 	public abstract class Object : Stetic.ObjectWrapper {
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			((GLib.Object)Wrapped).AddNotification (NotifyHandler);

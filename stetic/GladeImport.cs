@@ -69,23 +69,19 @@ namespace Stetic {
 			string className = widget.Attributes["class"].Value;
 			string id = widget.Attributes["id"].Value;
 
-			ArrayList propNames, propVals;
-			ExtractProperties (widget.SelectNodes ("property"), out propNames, out propVals);
+			Hashtable props;
+			ExtractProperties (widget.SelectNodes ("property"), out props);
 
 			ObjectWrapper wrapper;
 			if (thischild == null) {
-				wrapper = Stetic.ObjectWrapper.GladeImport (project, className, id, propNames, propVals);
+				wrapper = Stetic.ObjectWrapper.GladeImport (project, className, id, props);
 			} else if (thischild.Attributes["internal-child"] != null) {
 				wrapper = parent.GladeSetInternalChild (thischild.Attributes["internal-child"].Value,
-									className, id,
-									propNames, propVals);
+									className, id, props);
 			} else {
-				ArrayList packingNames, packingVals;
-				ExtractProperties (thischild.SelectNodes ("packing/property"),
-						   out packingNames, out packingVals);
-				wrapper = parent.GladeImportChild (className, id,
-								   propNames, propVals,
-								   packingNames, packingVals);
+				Hashtable childprops;
+				ExtractProperties (thischild.SelectNodes ("packing/property"), out childprops);
+				wrapper = parent.GladeImportChild (className, id, props, childprops);
 			}
 
 			if (wrapper == null) {
@@ -108,14 +104,11 @@ namespace Stetic {
 			return (Gtk.Widget)wrapper.Wrapped;
 		}
 
-		static void ExtractProperties (XmlNodeList nodes, out ArrayList names, out ArrayList values)
+		static void ExtractProperties (XmlNodeList nodes, out Hashtable props)
 		{
-			names = new ArrayList ();
-			values = new ArrayList ();
-			foreach (XmlNode prop in nodes) {
-				names.Add (prop.Attributes["name"].Value);
-				values.Add (prop.InnerText);
-			}
+			props = new Hashtable ();
+			foreach (XmlNode prop in nodes)
+				props[prop.Attributes["name"].Value] = prop.InnerText;
 		}
 	}
 }

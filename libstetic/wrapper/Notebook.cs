@@ -35,21 +35,17 @@ namespace Stetic.Wrapper {
 
 		ArrayList tabs = new ArrayList ();
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized)
 				InsertPage (0);
 		}
 
-		public override Widget GladeImportChild (string className, string id,
-							 ArrayList propNames, ArrayList propVals,
-							 ArrayList packingNames, ArrayList packingVals)
+		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
 		{
-			if (packingNames.Count == 1 &&
-			    (string)packingNames[0] == "type" &&
-			    (string)packingVals[0] == "tab") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, propNames, propVals);
+			if (childprops.Count == 1 && ((string)childprops["type"]) == "tab") {
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
 				WidgetSite site = CreateWidgetSite ();
 				site.Selected += LabelSelected;
 				site.Add ((Gtk.Widget)wrapper.Wrapped);
@@ -57,11 +53,8 @@ namespace Stetic.Wrapper {
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), site);
 				tabs.Add (site);
 				return (Widget)wrapper;
-			} else {
-				return base.GladeImportChild (className, id,
-							      propNames, propVals,
-							      packingNames, packingVals);
-			}
+			} else
+				return base.GladeImportChild (className, id, props, childprops);
 		}
 
 		private Gtk.Notebook notebook {

@@ -15,7 +15,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 

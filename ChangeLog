@@ -1,3 +1,15 @@
+2005-03-08  Dan Winship  <danw@novell.com>
+
+	* libstetic/GladeUtils.cs (ExtractProperty, CreateWidget,
+	SetProps, SetPacking): Make these all take a Hashtable of
+	propname->value rather than a pair of ArrayLists.
+
+	* libstetic/ObjectWrapper.cs (Wrap): make this public
+	(GladeImport): take a Hashtable rather than ArrayLists
+	
+	* libstetic/wrapper/*.cs:
+	* stetic/GladeImport.cs: update for those
+
 2005-03-03  Todd Berman  <tberman@off.net>
 
 	* stetic/Stetic.cs: Add a ShadowType.In to the widget TreeView.

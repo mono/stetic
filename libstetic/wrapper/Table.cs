@@ -35,34 +35,27 @@ namespace Stetic.Wrapper {
 			return new Gtk.Table (3, 3, false);
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			Sync ();
 		}
 
-		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected override void GladeImport (string className, string id, Hashtable props)
 		{
 			stetic.GladeImportComplete += DoSync;
-			base.GladeImport (className, id, propNames, propVals);
+			base.GladeImport (className, id, props);
 		}
 
 		public override Widget GladeImportChild (string className, string id,
-							 ArrayList propNames, ArrayList propVals,
-							 ArrayList packingNames, ArrayList packingVals)
+							 Hashtable props, Hashtable childprops)
 		{
-			if (packingNames.IndexOf ("x_options") == -1) {
-				packingNames.Add ("x_options");
-				packingVals.Add ("expand|fill");
-			}
-			if (packingNames.IndexOf ("y_options") == -1) {
-				packingNames.Add ("y_options");
-				packingVals.Add ("expand|fill");
-			}
+			if (childprops["x_options"] == null)
+				childprops["x_options"] = "expand|fill";
+			if (childprops["y_options"] == null)
+				childprops["y_options"] = "expand|fill";
 
-			return base.GladeImportChild (className, id,
-						      propNames, propVals,
-						      packingNames, packingVals);
+			return base.GladeImportChild (className, id, props, childprops);
 		}
 
 		void DoSync ()

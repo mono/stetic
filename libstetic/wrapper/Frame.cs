@@ -19,7 +19,7 @@ namespace Stetic.Wrapper {
 				      "BorderWidth");
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
@@ -28,25 +28,18 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override Widget GladeImportChild (string className, string id,
-							 ArrayList propNames, ArrayList propVals,
-							 ArrayList packingNames, ArrayList packingVals)
+		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
 		{
-			if (packingNames.Count == 1 &&
-			    (string)packingNames[0] == "type" &&
-			    (string)packingVals[0] == "label_item") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, propNames, propVals);
+			if (childprops.Count == 1 && ((string)childprops["type"]) == "label_item") {
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
 				WidgetSite site = CreateWidgetSite ();
 				site.Add ((Gtk.Widget)wrapper.Wrapped);
 
 				Gtk.Frame frame = (Gtk.Frame)Wrapped;
 				frame.LabelWidget = site;
 				return (Widget)wrapper;
-			} else {
-				return base.GladeImportChild (className, id,
-							      propNames, propVals,
-							      packingNames, packingVals);
-			}
+			} else
+				return base.GladeImportChild (className, id, props, childprops);
 		}
 	}
 }

@@ -27,16 +27,16 @@ namespace Stetic.Wrapper {
 				      "Indent");
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			((Gtk.TextView)Wrapped).Buffer.Changed += Buffer_Changed;
 		}
 
-		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			string text = GladeUtils.ExtractProperty ("text", propNames, propVals);
-			base.GladeImport (className, id, propNames, propVals);
+			string text = GladeUtils.ExtractProperty ("text", props);
+			base.GladeImport (className, id, props);
 			Text = text;
 		}
 

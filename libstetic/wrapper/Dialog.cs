@@ -27,7 +27,7 @@ namespace Stetic.Wrapper {
 				      "SkipTaskbarHint");
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			WidgetSite site;
 

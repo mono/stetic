@@ -40,17 +40,16 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			container.Removed += SiteRemoved;
 		}
 
 		public virtual Widget GladeImportChild (string className, string id,
-							ArrayList propNames, ArrayList propVals,
-							ArrayList packingNames, ArrayList packingVals)
+							Hashtable props, Hashtable childprops)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, propNames, propVals);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
 			if (wrapper == null)
 				return null;
 
@@ -64,7 +63,7 @@ namespace Stetic.Wrapper {
 			} else
 				container.Add (child);
 
-			GladeUtils.SetPacking (container, child, packingNames, packingVals);
+			GladeUtils.SetPacking (container, child, childprops);
 			return (Widget)wrapper;
 		}
 
@@ -105,14 +104,14 @@ namespace Stetic.Wrapper {
 		}
 
 		public virtual Widget GladeSetInternalChild (string childName, string className, string id,
-							     ArrayList propNames, ArrayList propVals)
+							     Hashtable props)
 		{
 			Gtk.Widget widget = FindInternalChild (childName);
 			if (widget == null)
 				return null;
 
 			widget.Name = id;
-			GladeUtils.SetProps (widget, propNames, propVals);
+			GladeUtils.SetProps (widget, props);
 
 			return (Widget) Stetic.ObjectWrapper.Create (stetic, className, widget);
 		}
@@ -200,7 +199,7 @@ namespace Stetic.Wrapper {
 				// FIXME?
 			}
 
-			protected override void Wrap (object obj, bool initialized)
+			public override void Wrap (object obj, bool initialized)
 			{
 				base.Wrap (obj, initialized);
 				cc.Child.ChildNotified += ChildNotifyHandler;

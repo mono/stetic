@@ -9,7 +9,7 @@ namespace Stetic {
 		protected IStetic stetic;
 		protected object wrapped;
 
-		protected virtual void Wrap (object obj, bool initialized)
+		public virtual void Wrap (object obj, bool initialized)
 		{
 			this.wrapped = obj;
 			wrappers[obj] = this;
@@ -105,7 +105,7 @@ namespace Stetic {
 			return Create (stetic, type, wrapped);
 		}
 
-		public static ObjectWrapper GladeImport (IStetic stetic, string className, string id, ArrayList propNames, ArrayList propVals)
+		public static ObjectWrapper GladeImport (IStetic stetic, string className, string id, Hashtable props)
 		{
 			Type type = (Type)wrapperTypes[className];
 			if (type == null)
@@ -119,7 +119,7 @@ namespace Stetic {
 			if (wrapper == null)
 				return null;
 			wrapper.stetic = stetic;
-			info.Invoke (wrapper, new object[] { className, id, propNames, propVals });
+			info.Invoke (wrapper, new object[] { className, id, props });
 			return wrapper;
 		}
 

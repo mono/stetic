@@ -14,7 +14,7 @@ namespace Stetic.Wrapper {
 				      "BorderWidth");
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {

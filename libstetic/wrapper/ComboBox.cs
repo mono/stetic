@@ -24,11 +24,11 @@ namespace Stetic.Wrapper {
 			return Gtk.ComboBox.NewText ();
 		}
 
-		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected override void GladeImport (string className, string id, Hashtable props)
 		{
 			Gtk.ComboBox combobox = CreateInstance ();
-			string items = GladeUtils.ExtractProperty ("items", propNames, propVals);
-			GladeUtils.SetProps (combobox, propNames, propVals);
+			string items = GladeUtils.ExtractProperty ("items", props);
+			GladeUtils.SetProps (combobox, props);
 			combobox.Name = id;
 			Wrap (combobox, true);
 			Items = items;

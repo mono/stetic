@@ -33,24 +33,17 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override Widget GladeImportChild (string className, string id,
-							 ArrayList propNames, ArrayList propVals,
-							 ArrayList packingNames, ArrayList packingVals)
+		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
 		{
 			Gtk.ResponseType response = 0;
 
-			int index = propNames.IndexOf ("response_id");
-			if (index != -1) {
-				string response_id = propVals[index] as string;
-				propNames.RemoveAt (index);
-				propVals.RemoveAt (index);
-
+			string response_id = props["response_id"] as string;
+			if (response_id != null) {
+				props.Remove ("response_id");
 				response = (Gtk.ResponseType)Int32.Parse (response_id);
 			}
 
-			Widget wrapper = base.GladeImportChild (className, id,
-								propNames, propVals,
-								packingNames, packingVals);
+			Widget wrapper = base.GladeImportChild (className, id, props, childprops);
 
 			if (response == Gtk.ResponseType.Help) {
 				Gtk.ButtonBox.ButtonBoxChild bbc = ((Gtk.Container)Wrapped)[((Gtk.Widget)wrapper.Wrapped).Parent] as Gtk.ButtonBox.ButtonBoxChild;

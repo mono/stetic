@@ -27,7 +27,7 @@ namespace Stetic.Wrapper {
 			Wrap (new Gtk.Label (text), false);
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
@@ -38,12 +38,12 @@ namespace Stetic.Wrapper {
 
 		string mnemonic_widget;
 
-		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			mnemonic_widget = GladeUtils.ExtractProperty ("mnemonic_widget", propNames, propVals);
+			mnemonic_widget = GladeUtils.ExtractProperty ("mnemonic_widget", props);
 			if (mnemonic_widget != null)
 				stetic.GladeImportComplete += SetMnemonicWidget;
-			base.GladeImport (className, id, propNames, propVals);
+			base.GladeImport (className, id, props);
 		}
 
 		void SetMnemonicWidget ()

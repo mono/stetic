@@ -20,7 +20,7 @@ namespace Stetic.Wrapper {
 				      "Adjustment.Value");
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			((Gtk.Range)Wrapped).Adjustment.AddNotification (AdjustmentNotifyHandler);

@@ -27,7 +27,7 @@ namespace Stetic.Wrapper {
 
 		static Gdk.Pixbuf missing = Gdk.Pixbuf.LoadFromResource ("missing.png");
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			useStock = (image.StorageType == Gtk.ImageType.Stock);

@@ -6,15 +6,11 @@ namespace Stetic {
 
 	public static class GladeUtils {
 
-		public static string ExtractProperty (string name, ArrayList propNames, ArrayList propVals)
+		public static string ExtractProperty (string name, Hashtable props)
 		{
-			int index = propNames.IndexOf (name);
-			if (index == -1)
-				return null;
-
-			string value = propVals[index] as string;
-			propNames.RemoveAt (index);
-			propVals.RemoveAt (index);
+			string value = props[name] as string;
+			if (value != null)
+				props.Remove (name);
 			return value;
 		}
 
@@ -71,22 +67,24 @@ namespace Stetic {
 			return true;
 		}
 
-		static void HydrateProperties (IntPtr gtype, bool childprops, ArrayList names, ArrayList strvals, out ArrayList values)
+		static void HydrateProperties (IntPtr gtype, bool childprops, Hashtable props,
+					       out string[] propNames, out GLib.Value[] propVals)
 		{
-			values = new ArrayList ();
+			ArrayList names = new ArrayList ();
+			ArrayList values = new ArrayList ();
 
-			int i = 0;
-			while (i < names.Count) {
+			foreach (string name in props.Keys) {
+				string strval = props[name] as string;
+
 				GLib.Value value;
-
-				if (Hydrate (gtype, childprops, names[i] as string, strvals[i] as string, out value)) {
+				if (Hydrate (gtype, childprops, name, strval, out value)) {
+					names.Add (name);
 					values.Add (value);
-					i++;
-				} else {
-					names.RemoveAt (i);
-					strvals.RemoveAt (i);
 				}
 			}
+
+			propNames = (string[])names.ToArray (typeof (string));
+			propVals = (GLib.Value[])values.ToArray (typeof (GLib.Value));
 		}
 
 		[DllImport("libgobject-2.0-0.dll")]
@@ -98,17 +96,15 @@ namespace Stetic {
 		[DllImport("libgtk-win32-2.0-0.dll")]
 		static extern void gtk_object_sink (IntPtr raw);
 
-		static public Gtk.Widget CreateWidget (string className, ArrayList propNames, ArrayList propStrVals)
+		static public Gtk.Widget CreateWidget (string className, Hashtable props)
 		{
 			IntPtr gtype = g_type_from_name (className);
 
-			ArrayList propVals;
-			HydrateProperties (gtype, false, propNames, propStrVals, out propVals);
+			string[] propNames;
+			GLib.Value[] propVals;
+			HydrateProperties (gtype, false, props, out propNames, out propVals);
 
-			string[] propNamesArray = (string[])propNames.ToArray (typeof (string));
-			GLib.Value[] propValsArray = (GLib.Value[])propVals.ToArray (typeof (GLib.Value));
-
-			IntPtr raw = gtksharp_object_newv (gtype, propNamesArray.Length, propNamesArray, propValsArray);
+			IntPtr raw = gtksharp_object_newv (gtype, propNames.Length, propNames, propVals);
 			if (raw == IntPtr.Zero) {
 				Console.WriteLine ("Could not create widget of type {0}", className);
 				return null;
@@ -129,25 +125,26 @@ namespace Stetic {
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern void g_object_set_property (IntPtr obj, string name, ref GLib.Value val);
 
-		static public void SetProps (Gtk.Widget widget, ArrayList propNames, ArrayList propStrVals)
+		static public void SetProps (Gtk.Widget widget, Hashtable props)
 		{
-			ArrayList propVals;
-			HydrateProperties (gtksharp_get_type_id (widget.Handle), false, propNames, propStrVals, out propVals);
+			string[] propNames;
+			GLib.Value[] propVals;
+			HydrateProperties (gtksharp_get_type_id (widget.Handle), false, props,
+					   out propNames, out propVals);
 
-			for (int i = 0; i < propNames.Count; i++) {
-				GLib.Value value = (GLib.Value)propVals[i];
-				g_object_set_property (widget.Handle, (string)propNames[i], ref value);
-			}
+			for (int i = 0; i < propNames.Length; i++)
+				g_object_set_property (widget.Handle, propNames[i], ref propVals[i]);
 		}
 
-		static public void SetPacking (Gtk.Container parent, Gtk.Widget child,
-					       ArrayList propNames, ArrayList propStrVals)
+		static public void SetPacking (Gtk.Container parent, Gtk.Widget child, Hashtable childprops)
 		{
-			ArrayList propVals;
-			HydrateProperties (gtksharp_get_type_id (parent.Handle), true, propNames, propStrVals, out propVals);
+			string[] propNames;
+			GLib.Value[] propVals;
+			HydrateProperties (gtksharp_get_type_id (parent.Handle), true, childprops,
+					   out propNames, out propVals);
 
-			for (int i = 0; i < propNames.Count; i++)
-				parent.ChildSetProperty (child, (string)propNames[i], (GLib.Value)propVals[i]);
+			for (int i = 0; i < propNames.Length; i++)
+				parent.ChildSetProperty (child, propNames[i], propVals[i]);
 		}
 	}
 }

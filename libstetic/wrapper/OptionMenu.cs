@@ -18,7 +18,7 @@ namespace Stetic.Wrapper {
 				      "Active");
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			if (optionmenu.Menu == null) {
@@ -28,18 +28,18 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			GladeUtils.ExtractProperty ("history", propNames, propVals);
-			base.GladeImport (className, id, propNames, propVals);
+			GladeUtils.ExtractProperty ("history", props);
+			base.GladeImport (className, id, props);
 			stetic.GladeImportComplete += FlattenMenu;
 		}
 
 		public override Widget GladeImportChild (string className, string id,
-							 ArrayList propNames, ArrayList propVals,
-							 ArrayList packingNames, ArrayList packingVals)
+							 Hashtable props,
+							 Hashtable childprops)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, propNames, propVals);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
 			if (wrapper == null)
 				return null;
 

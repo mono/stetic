@@ -42,7 +42,7 @@ namespace Stetic.Wrapper {
 			return new Gtk.Window (Gtk.WindowType.Toplevel);
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			Gtk.Window window = (Gtk.Window)obj;
 
@@ -61,12 +61,12 @@ namespace Stetic.Wrapper {
 			window.DeleteEvent += DeleteEvent;
 		}
 
-		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			string modal = GladeUtils.ExtractProperty ("modal", propNames, propVals);
-			string type_hint = GladeUtils.ExtractProperty ("type_hint", propNames, propVals);
-			string type = GladeUtils.ExtractProperty ("type", propNames, propVals);
-			base.GladeImport (className, id, propNames, propVals);
+			string modal = GladeUtils.ExtractProperty ("modal", props);
+			string type_hint = GladeUtils.ExtractProperty ("type_hint", props);
+			string type = GladeUtils.ExtractProperty ("type", props);
+			base.GladeImport (className, id, props);
 			Modal = (modal == "True");
 
 			if (type_hint != null && type_hint.StartsWith ("GDK_WINDOW_TYPE_HINT_"))

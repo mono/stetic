@@ -27,7 +27,7 @@ namespace Stetic.Wrapper {
 			return new Gtk.RadioButton ("");
 		}
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
@@ -45,10 +45,10 @@ namespace Stetic.Wrapper {
 
 		string group;
 
-		protected override void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			group = GladeUtils.ExtractProperty ("group", propNames, propVals);
-			base.GladeImport (className, id, propNames, propVals);
+			group = GladeUtils.ExtractProperty ("group", props);
+			base.GladeImport (className, id, props);
 
 			if (group != null)
 				stetic.GladeImportComplete += SetGroup;

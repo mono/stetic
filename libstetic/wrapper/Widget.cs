@@ -25,7 +25,7 @@ namespace Stetic.Wrapper {
 
 		static Hashtable counters = new Hashtable ();
 
-		protected override void Wrap (object obj, bool initialized)
+		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 
@@ -42,11 +42,11 @@ namespace Stetic.Wrapper {
 			counters[type] = (int)counters[type] + 1;
 		}
 
-		protected virtual void GladeImport (string className, string id, ArrayList propNames, ArrayList propVals)
+		protected virtual void GladeImport (string className, string id, Hashtable props)
 		{
-			string visible = GladeUtils.ExtractProperty ("visible", propNames, propVals);
-			string has_default = GladeUtils.ExtractProperty ("has_default", propNames, propVals);
-			Gtk.Widget widget = GladeUtils.CreateWidget (className, propNames, propVals);
+			string visible = GladeUtils.ExtractProperty ("visible", props);
+			string has_default = GladeUtils.ExtractProperty ("has_default", props);
+			Gtk.Widget widget = GladeUtils.CreateWidget (className, props);
 			widget.Name = id;
 			Wrap (widget, true);
 
