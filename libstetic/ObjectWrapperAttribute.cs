@@ -13,6 +13,7 @@ namespace Stetic {
 	public sealed class ObjectWrapperAttribute : Attribute {
 		string name, iconName;
 		ObjectWrapperType type;
+		bool deprecated;
 
 		[Translatable]
 		public string Name {
@@ -28,6 +29,11 @@ namespace Stetic {
 		public ObjectWrapperType Type {
 			get { return type; }
 			set { type = value; }
+		}
+
+		public bool Deprecated {
+			get { return deprecated; }
+			set { deprecated = value; }
 		}
 
 		public ObjectWrapperAttribute (string name, string iconName, ObjectWrapperType type)

@@ -49,11 +49,17 @@ namespace Stetic.Wrapper {
 			if (wrapper == null)
 				return null;
 
-			WidgetSite site = AddPlaceholder ();
-			AutoSize[site] = false;
-			site.Add ((Gtk.Widget)wrapper.Wrapped);
+			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
-			GladeUtils.SetPacking (container, site, packingNames, packingVals);
+			if (container.ChildType () == Gtk.Widget.GType) {
+				WidgetSite site = AddPlaceholder ();
+				AutoSize[site] = false;
+				site.Add (child);
+				child = site;
+			} else
+				container.Add (child);
+
+			GladeUtils.SetPacking (container, child, packingNames, packingVals);
 			return (Widget)wrapper;
 		}
 

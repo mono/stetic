@@ -63,9 +63,12 @@ libstetic_dll_sources =			\
 	wrapper/Image.cs		\
 	wrapper/Label.cs		\
 	wrapper/MessageDialog.cs	\
+	wrapper/Menu.cs			\
+	wrapper/MenuItem.cs		\
 	wrapper/Misc.cs			\
 	wrapper/Notebook.cs		\
 	wrapper/Object.cs		\
+	wrapper/OptionMenu.cs		\
 	wrapper/Paned.cs		\
 	wrapper/ProgressBar.cs		\
 	wrapper/RadioButton.cs		\

@@ -1,3 +1,26 @@
+2005-02-28  Dan Winship  <danw@novell.com>
+
+	* libstetic/ObjectWrapperAttribute.cs: add a "Deprecated" flag
+
+	* libstetic/wrapper/OptionMenu.cs: New, wrap Gtk.OptionMenu, but
+	mark it with the "Deprecated" ObjectWrapperAttribute flag. Also,
+	since we don't have a menu editor yet, we just wrap it the same
+	way as ComboBox, with a multiline text entry to specify the menu
+	items.
+
+	* libstetic/wrapper/Menu.cs: 
+	* libstetic/wrapper/MenuItem.cs: Wrap these just enough for
+	importing OptionMenus from glade
+
+	* libstetic/wrapper/Container.cs (GladeImportChild): if the
+	container does not accept arbitrary GtkWidget children (according
+	to Gtk.Container.ChildType()), then don't interpose a WidgetSite
+	between parent and child.
+
+	* stetic/Palette.cs (AddWidget): skip widgets with "Deprecated"
+	set on their ObjectWrapperAttribute. (Meaning that for now, they
+	can be imported, but not created by hand.)
+
 2005-02-27  Dan Winship  <danw@novell.com>
 
 	* libstetic/GladeUtils.cs (ExtractProperty): utility to remove a

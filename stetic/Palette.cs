@@ -87,6 +87,8 @@ namespace Stetic {
 				Stetic.ObjectWrapper.Register (type);
 
 				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
+				if (owattr.Deprecated)
+					return;
 
 				Pixbuf icon = Palette.IconForType (type);
 
