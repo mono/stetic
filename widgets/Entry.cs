@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Entry", "entry.png")]
 	public class Entry : Gtk.Entry, Stetic.IObjectWrapper {
@@ -15,7 +13,7 @@ namespace Stetic.Wrapper {
 
 		static Entry () {
 			EntryProperties = new PropertyGroup ("Entry Properties",
-							     typeof (Stetic.Wrapper.Entry),
+							     typeof (Stetic.Widget.Entry),
 							     "Text",
 							     "Editable",
 							     "WidthChars",
@@ -24,7 +22,7 @@ namespace Stetic.Wrapper {
 							     "ActivatesDefault",
 							     "Visibility");
 			EntryExtraProperties = new PropertyGroup ("Extra Entry Properties",
-								  typeof (Stetic.Wrapper.Entry),
+								  typeof (Stetic.Widget.Entry),
 								  "InvisibleChar",
 								  "Xalign");
 
@@ -34,6 +32,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Entry () : base () {}
+		public Entry (IStetic stetic) : base () {}
 	}
 }

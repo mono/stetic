@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Window", "window.png", WidgetType.Window)]
 	public class Window : Gtk.Window, Stetic.IContainerWrapper {
@@ -19,7 +17,7 @@ namespace Stetic.Wrapper {
 
 		static Window () {
 			WindowProperties = new PropertyGroup ("Window Properties",
-							      typeof (Stetic.Wrapper.Window),
+							      typeof (Stetic.Widget.Window),
 							      "Title",
 							      "Icon",
 							      "Type",
@@ -28,14 +26,14 @@ namespace Stetic.Wrapper {
 							      "Modal",
 							      "BorderWidth");
 			WindowSizeProperties = new PropertyGroup ("Window Size Properties",
-								  typeof (Stetic.Wrapper.Window),
+								  typeof (Stetic.Widget.Window),
 								  "Resizable",
 								  "AllowGrow",
 								  "AllowShrink",
 								  "DefaultWidth",
 								  "DefaultHeight");
 			WindowMiscProperties = new PropertyGroup ("Miscellaneous Window Properties",
-								  typeof (Stetic.Wrapper.Window),
+								  typeof (Stetic.Widget.Window),
 								  "AcceptFocus",
 								  "Decorated",
 								  "DestroyWithParent",
@@ -52,9 +50,9 @@ namespace Stetic.Wrapper {
 			childgroups = new PropertyGroup[0];
 		}
 
-		public Window () : base ("Window")
+		public Window (IStetic stetic) : base ("Window")
 		{
-			WidgetSite site = new WidgetSite (200, 200);
+			WidgetSite site = stetic.CreateWidgetSite (200, 200);
 			site.Show ();
 			Add (site);
 		}

@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("VButtonBox", "vbuttonbox.png", WidgetType.Container)]
 	public class VButtonBox : Gtk.VButtonBox, Stetic.IContainerWrapper {
@@ -24,10 +22,13 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public VButtonBox ()
+		IStetic stetic;
+
+		public VButtonBox (IStetic stetic)
 		{
+			this.stetic = stetic;
 			for (int i = 0; i < 3; i++) {
-				WidgetSite site = new WidgetSite ();
+				WidgetSite site = stetic.CreateWidgetSite ();
 				site.OccupancyChanged += SiteOccupancyChanged;
 				PackStart (site);
 			}

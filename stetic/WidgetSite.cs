@@ -6,25 +6,13 @@ using System.Collections;
 
 namespace Stetic {
 
-	public interface IWidgetSite {
-		Widget Contents { get; }
-		IWidgetSite ParentSite { get; }
-
-		bool Occupied { get; }
-
-		void Select ();
-		void UnSelect ();
-
-		void Delete ();
-	}
-
-	public class WidgetSite : WidgetBox, IWidgetSite {
+	public class WidgetSiteImpl : WidgetSite {
 
 		static TargetEntry[] Targets;
 		static TargetList TargetList;
 		static Gdk.Atom SteticWidgetType;
 
-		static WidgetSite ()
+		static WidgetSiteImpl ()
 		{
 			SteticWidgetType = Gdk.Atom.Intern ("application/x-stetic-widget", false);
 
@@ -35,9 +23,9 @@ namespace Stetic {
 			TargetList.Add (SteticWidgetType, 0, 0);
 		}
 
-		public WidgetSite () : this (10, 10) {}
+		public WidgetSiteImpl () : this (10, 10) {}
 
-		public WidgetSite (int emptyWidth, int emptyHeight)
+		public WidgetSiteImpl (int emptyWidth, int emptyHeight)
 		{
 			WidgetFlags |= WidgetFlags.CanFocus;
 
@@ -46,13 +34,13 @@ namespace Stetic {
 			Occupancy = SiteOccupancy.Empty;
 		}
 
-		public Widget Contents {
+		public override Widget Contents {
 			get {
 				return Child;
 			}
 		}
 
-		public IWidgetSite ParentSite {
+		public override IWidgetSite ParentSite {
 			get {
 				Widget w = Parent;
 				if (w == null)
@@ -133,14 +121,13 @@ namespace Stetic {
 			}
 		}
 
-		public delegate void OccupancyChangedHandler (WidgetSite site);
-		public event OccupancyChangedHandler OccupancyChanged;
+		public override event OccupancyChangedHandler OccupancyChanged;
 
-		public bool Occupied {
+		public override bool Occupied {
 			get { return (Occupancy != SiteOccupancy.Empty); }
 		}
 
-		public bool HExpandable {
+		public override bool HExpandable {
 			get {
 				if (Occupancy == SiteOccupancy.Empty)
 					return true;
@@ -158,7 +145,7 @@ namespace Stetic {
 			}
 		}
 
-		public bool VExpandable {
+		public override bool VExpandable {
 			get {
 				if (Occupancy == SiteOccupancy.Empty)
 					return true;
@@ -262,11 +249,11 @@ namespace Stetic {
 		protected override bool OnDragDrop (DragContext ctx,
 						    int x, int y, uint time)
 		{
-			WidgetSite source;
+			WidgetSiteImpl source;
 			Widget dragged;
 			Container parent;
 
-			source = Gtk.Drag.GetSourceWidget (ctx) as WidgetSite;
+			source = Gtk.Drag.GetSourceWidget (ctx) as WidgetSiteImpl;
 			if (source == null) {
 				Gtk.Drag.Finish (ctx, false, false, time);
 				return false;
@@ -330,17 +317,17 @@ namespace Stetic {
 			ShowHandles = false;
 		}
 
-		public void Select ()
+		public override void Select ()
 		{
 			GrabFocus ();
 		}
 
-		public void UnSelect ()
+		public override void UnSelect ()
 		{
 			UnFocus ();
 		}
 
-		public void Delete ()
+		public override void Delete ()
 		{
 			if (Child != null) {
 				Remove (Child);
@@ -382,14 +369,14 @@ namespace Stetic {
 			Widget w;
 
 			w = contents.Focus;
-			while (w != null && !(w is WidgetSite))
+			while (w != null && !(w is WidgetSiteImpl))
 				w = w.Parent;
-			WidgetSite oldf = (WidgetSite)w;
+			WidgetSiteImpl oldf = (WidgetSiteImpl)w;
 
 			w = args.Focus;
-			while (w != null && !(w is WidgetSite))
+			while (w != null && !(w is WidgetSiteImpl))
 				w = w.Parent;
-			WidgetSite newf = (WidgetSite)w;
+			WidgetSiteImpl newf = (WidgetSiteImpl)w;
 
 			if (oldf == newf)
 				return;

@@ -1,11 +1,9 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 using System.Collections;
 using System.ComponentModel;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Stock Icon", "image.png")]
 	public class Icon : Gtk.Image, Stetic.IObjectWrapper {
@@ -16,7 +14,7 @@ namespace Stetic.Wrapper {
 
 		static Icon () {
 			IconProperties = new PropertyGroup ("Stock Icon Properties",
-							    typeof (Stetic.Wrapper.Icon),
+							    typeof (Stetic.Widget.Icon),
 							    "Stock",
 							    "IconSize");
 
@@ -26,7 +24,7 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Icon () : base (Gtk.Stock.Execute, Gtk.IconSize.Dialog) {}
+		public Icon (IStetic stetic) : base (Gtk.Stock.Execute, Gtk.IconSize.Dialog) {}
 
 		[Editor (typeof (Stetic.Editor.StockItem), typeof (Gtk.Widget))]
 		public new string Stock {

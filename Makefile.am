@@ -1,1 +1,1 @@
-SUBDIRS = pixmaps glue stetic
+SUBDIRS = glue libstetic widgets stetic

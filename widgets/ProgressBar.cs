@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("ProgressBar", "progressbar.png")]
 	public class ProgressBar : Gtk.ProgressBar, Stetic.IObjectWrapper {
@@ -14,7 +12,7 @@ namespace Stetic.Wrapper {
 
 		static ProgressBar () {
 			ProgressBarProperties = new PropertyGroup ("Progress Bar Properties",
-								   typeof (Stetic.Wrapper.ProgressBar),
+								   typeof (Stetic.Widget.ProgressBar),
 								   "Orientation",
 								   "Text",
 								   "PulseStep");
@@ -24,6 +22,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public ProgressBar () {}
+		public ProgressBar (IStetic stetic) {}
 	}
 }

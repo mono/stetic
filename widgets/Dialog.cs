@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Dialog Box", "dialog.png", WidgetType.Window)]
 	public class Dialog : Gtk.Dialog, Stetic.IContainerWrapper {
@@ -18,7 +16,7 @@ namespace Stetic.Wrapper {
 
 		static Dialog () {
 			DialogProperties = new PropertyGroup ("Dialog Properties",
-							      typeof (Stetic.Wrapper.Dialog),
+							      typeof (Stetic.Widget.Dialog),
 							      "Title",
 							      "Icon",
 							      "Type",
@@ -27,7 +25,7 @@ namespace Stetic.Wrapper {
 							      "Modal",
 							      "BorderWidth");
 			DialogMiscProperties = new PropertyGroup ("Miscellaneous Dialog Properties",
-								  typeof (Stetic.Wrapper.Dialog),
+								  typeof (Stetic.Widget.Dialog),
 								  "HasSeparator",
 								  "AcceptFocus",
 								  "Decorated",
@@ -45,9 +43,9 @@ namespace Stetic.Wrapper {
 			childgroups = new PropertyGroup[0];
 		}
 
-		public Dialog () : base ()
+		public Dialog (IStetic stetic) : base ()
 		{
-			WidgetSite site = new WidgetSite (200, 200);
+			WidgetSite site = stetic.CreateWidgetSite (200, 200);
 			site.Show ();
 			VBox.Add (site);
 		}

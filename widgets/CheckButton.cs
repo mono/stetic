@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Check Box", "checkbutton.png")]
 	public class CheckButton : Gtk.CheckButton, Stetic.IObjectWrapper {
@@ -14,7 +12,7 @@ namespace Stetic.Wrapper {
 
 		static CheckButton () {
 			CheckButtonProperties = new PropertyGroup ("Check Box Properties",
-								   typeof (Stetic.Wrapper.CheckButton),
+								   typeof (Stetic.Widget.CheckButton),
 								   "Label",
 								   "Active",
 								   "Inconsistent",
@@ -26,6 +24,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public CheckButton () : base ("Check Box") {}
+		public CheckButton (IStetic stetic) : base ("Check Box") {}
 	}
 }

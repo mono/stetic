@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Drawing Area", "drawingarea.png")]
 	public class DrawingArea : Gtk.DrawingArea, Stetic.IObjectWrapper {
@@ -16,6 +14,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public DrawingArea () : base () {}
+		public DrawingArea (IStetic stetic) : base () {}
 	}
 }

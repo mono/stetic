@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Color Button", "colorbutton.png")]
 	public class ColorButton : Gtk.ColorButton, Stetic.IObjectWrapper {
@@ -14,7 +12,7 @@ namespace Stetic.Wrapper {
 
 		static ColorButton () {
 			ColorButtonProperties = new PropertyGroup ("Color Button Properties",
-								   typeof (Stetic.Wrapper.ColorButton),
+								   typeof (Stetic.Widget.ColorButton),
 								   "Alpha",
 								   "Color",
 								   "Title",
@@ -26,6 +24,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public ColorButton () : base () {}
+		public ColorButton (IStetic stetic) : base () {}
 	}
 }

@@ -1,11 +1,9 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 using System.Collections;
 using System.ComponentModel;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Button", "button.png")]
 	public class Button : Gtk.Button, Stetic.IObjectWrapper, Stetic.IContextMenuProvider {
@@ -17,7 +15,7 @@ namespace Stetic.Wrapper {
 
 		static Button () {
 			ButtonProperties = new PropertyGroup ("Button Properties",
-							      typeof (Stetic.Wrapper.Button),
+							      typeof (Stetic.Widget.Button),
 							      "UseStock",
 							      "StockId",
 							      "Label");
@@ -25,7 +23,7 @@ namespace Stetic.Wrapper {
 			ButtonProperties["Label"].DependsInverselyOn (ButtonProperties["UseStock"]);
 
 			ButtonExtraProperties = new PropertyGroup ("Extra Button Properties",
-								   typeof (Stetic.Wrapper.Button),
+								   typeof (Stetic.Widget.Button),
 								   "FocusOnClick",
 								   "UseUnderline",
 								   "Relief",
@@ -38,8 +36,11 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Button ()
+		IStetic stetic;
+
+		public Button (IStetic stetic)
 		{
+			this.stetic = stetic;
 			UseStock = UseUnderline = true;
 			StockId = Gtk.Stock.Ok;
 		}
@@ -66,7 +67,7 @@ namespace Stetic.Wrapper {
 			if (Child != null)
 				Remove (Child);
 
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = stetic.CreateWidgetSite ();
 			site.Show ();
 			Add (site);
 		}

@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Statusbar", "statusbar.png")]
 	public class Statusbar : Gtk.Statusbar, Stetic.IObjectWrapper {
@@ -14,7 +12,7 @@ namespace Stetic.Wrapper {
 
 		static Statusbar () {
 			StatusbarProperties = new PropertyGroup ("Status Bar Properties",
-								 typeof (Stetic.Wrapper.Statusbar),
+								 typeof (Stetic.Widget.Statusbar),
 								 "HasResizeGrip");
 
 			groups = new PropertyGroup[] {
@@ -23,6 +21,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Statusbar () {}
+		public Statusbar (IStetic stetic) {}
 	}
 }

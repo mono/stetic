@@ -1,6 +1,5 @@
-using Gtk;
-using Gdk;
 using GLib;
+using Gtk;
 using System;
 using System.Collections;
 using System.ComponentModel;

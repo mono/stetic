@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Spin Button", "spinbutton.png")]
 	public class SpinButton : Gtk.SpinButton, Stetic.IObjectWrapper {
@@ -22,7 +20,7 @@ namespace Stetic.Wrapper {
 									    "Adjustment.PageSize",
 									    "Adjustment.StepIncrement");
 			SpinButtonProperties = new PropertyGroup ("Spin Button Properties",
-								  typeof (Stetic.Wrapper.SpinButton),
+								  typeof (Stetic.Widget.SpinButton),
 								  "ClimbRate",
 								  "Digits",
 								  "Numeric",
@@ -37,6 +35,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public SpinButton () : base (0.0, 100.0, 1.0) {}
+		public SpinButton (IStetic stetic) : base (0.0, 100.0, 1.0) {}
 	}
 }

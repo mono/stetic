@@ -1,10 +1,9 @@
 using Gtk;
 using Gdk;
-using GLib;
 using System;
 using System.Collections;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Table", "table.png", WidgetType.Container)]
 	public class Table : Gtk.Table, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
@@ -20,7 +19,7 @@ namespace Stetic.Wrapper {
 
 		static Table () {
 			TableProperties = new PropertyGroup ("Table Properties",
-							     typeof (Stetic.Wrapper.Table),
+							     typeof (Stetic.Widget.Table),
 							     "NRows",
 							     "NColumns",
 							     "Homogeneous",
@@ -34,7 +33,7 @@ namespace Stetic.Wrapper {
 			};
 
 			TableChildProperties = new PropertyGroup ("Table Child Layout",
-								  typeof (Stetic.Wrapper.Table.TableChild),
+								  typeof (Stetic.Widget.Table.TableChild),
 								  "TopAttach",
 								  "BottomAttach",
 								  "LeftAttach",
@@ -55,8 +54,11 @@ namespace Stetic.Wrapper {
 		const AttachOptions expandOpts = AttachOptions.Expand | AttachOptions.Fill;
 		const AttachOptions fillOpts = AttachOptions.Fill;
 
-		public Table () : base (3, 3, false)
+		IStetic stetic;
+
+		public Table (IStetic stetic) : base (3, 3, false)
 		{
+			this.stetic = stetic;
 			Sync ();
 		}
 
@@ -75,7 +77,7 @@ namespace Stetic.Wrapper {
 				set {
 					autosize = value;
 					Child.ChildNotify ("AutoSize");
-					((Stetic.Wrapper.Table)parent).Sync ();
+					((Stetic.Widget.Table)parent).Sync ();
 				}
 			}
 		}
@@ -171,7 +173,7 @@ namespace Stetic.Wrapper {
 
 				for (col = 0; col < NColumns; col++) {
 					if (grid[row,col] == null) {
-						site = new WidgetSite ();
+						site = stetic.CreateWidgetSite ();
 						site.OccupancyChanged += SiteOccupancyChanged;
 						site.ChildNotified += ChildNotification;
 						site.Show ();
@@ -404,10 +406,8 @@ namespace Stetic.Wrapper {
 			base.OnRemoved (w);
 		}
 
-		private void SiteOccupancyChanged (WidgetSite isite)
+		private void SiteOccupancyChanged (WidgetSite site)
 		{
-			WidgetSite site = (WidgetSite)isite;
-
 			Freeze ();
 			if (site.Occupied) {
 				Table.TableChild tc = this[site] as Table.TableChild;

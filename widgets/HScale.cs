@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Horizontal Scale", "hscale.png")]
 	public class HScale : Gtk.HScale, Stetic.IObjectWrapper {
@@ -17,6 +15,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public HScale () : base (0.0, 100.0, 1.0) {}
+		public HScale (IStetic stetic) : base (0.0, 100.0, 1.0) {}
 	}
 }

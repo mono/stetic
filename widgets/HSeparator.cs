@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("HSeparator", "hseparator.png")]
 	public class HSeparator : Gtk.HSeparator, Stetic.IObjectWrapper {
@@ -16,6 +14,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public HSeparator () : base () {}
+		public HSeparator (IStetic stetic) : base () {}
 	}
 }

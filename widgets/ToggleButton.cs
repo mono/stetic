@@ -1,14 +1,12 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 using System.Collections;
 using System.ComponentModel;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Toggle Button", "togglebutton.png")]
-	public class ToggleButton : Gtk.ToggleButton, Stetic.IObjectWrapper, Stetic.IPropertySensitizer {
+	public class ToggleButton : Gtk.ToggleButton, Stetic.IObjectWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -16,12 +14,14 @@ namespace Stetic.Wrapper {
 
 		static ToggleButton () {
 			ToggleButtonProperties = new PropertyGroup ("Toggle Button Properties",
-								    typeof (Stetic.Wrapper.ToggleButton),
+								    typeof (Stetic.Widget.ToggleButton),
 								    "UseStock",
 								    "StockId",
 								    "Label",
 								    "Active",
 								    "Inconsistent");
+			ToggleButtonProperties["StockId"].DependsOn (ToggleButtonProperties["UseStock"]);
+			ToggleButtonProperties["Label"].DependsInverselyOn (ToggleButtonProperties["UseStock"]);
 
 			groups = new PropertyGroup[] {
 				ToggleButtonProperties,
@@ -30,27 +30,27 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public ToggleButton () : base ("Toggle")
+		public ToggleButton (IStetic stetic) : base ("Toggle")
 		{
 			UseStock = false;
 			UseUnderline = true;
-			Notify.Add (this, new NotifyDelegate (Notified));
-		}
-
-		void Notified (ParamSpec pspec)
-		{
-			if (pspec.Name == "use-stock") {
-				EmitSensitivityChanged ("StockId", UseStock);
-				EmitSensitivityChanged ("Label", !UseStock);
-				if (UseStock)
-					base.Label = stockId;
-				else
-					base.Label = label;
-			}
 		}
 
 		string stockId;
 		string label;
+
+		public new bool UseStock {
+			get {
+				return base.UseStock;
+			}
+			set {
+				if (value)
+					base.Label = stockId;
+				else
+					base.Label = label;
+				base.UseStock = value;
+			}
+		}
 
 		[Editor (typeof (Stetic.Editor.StockItem), typeof (Gtk.Widget))]
 		[DefaultValue ("gtk-ok")]
@@ -77,29 +77,7 @@ namespace Stetic.Wrapper {
 				label = value;
 				if (!UseStock)
 					base.Label = value;
-
-				if (LabelChanged != null)
-					LabelChanged (this, EventArgs.Empty);
 			}
-		}
-
-		public event EventHandler LabelChanged;
-
-		public IEnumerable InsensitiveProperties {
-			get {
-				if (UseStock)
-					return new string[] { "Label" };
-				else
-					return new string[0];
-			}
-		}
-
-		public event SensitivityChangedDelegate SensitivityChanged;
-
-		void EmitSensitivityChanged (string property, bool sensitivity)
-		{
-			if (SensitivityChanged != null)
-				SensitivityChanged (property, sensitivity);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 using Gtk;
 using Gnome;
 using System;
+using System.Reflection;
 
 namespace Stetic {
 
@@ -19,7 +20,11 @@ namespace Stetic {
 			win.AllowGrow = false;
 			win.DeleteEvent += Window_Delete;
 			palette = new Stetic.Palette ();
-			palette.AddWidgets (System.Reflection.Assembly.GetCallingAssembly ());
+
+			AssemblyName an = new AssemblyName ();
+			an.Name = "libsteticwidgets";
+			palette.AddWidgets (System.Reflection.Assembly.Load (an));
+
 			win.Add (palette);
 			win.ShowAll ();
 

@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Arrow", "arrow.png")]
 	public class Arrow : Gtk.Arrow, Stetic.IObjectWrapper {
@@ -24,6 +22,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Arrow () : base (ArrowType.Left, ShadowType.None) {}
+		public Arrow (IStetic stetic) : base (ArrowType.Left, ShadowType.None) {}
 	}
 }

@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Frame", "frame.png", WidgetType.Container)]
 	public class Frame : Gtk.Frame, Stetic.IContainerWrapper {
@@ -17,7 +15,7 @@ namespace Stetic.Wrapper {
 
 		static Frame () {
 			FrameProperties = new PropertyGroup ("Frame Properties",
-							     typeof (Stetic.Wrapper.Frame),
+							     typeof (Stetic.Widget.Frame),
 							     "Shadow",
 							     "ShadowType",
 							     "Label",
@@ -33,9 +31,9 @@ namespace Stetic.Wrapper {
 			childgroups = new PropertyGroup[0];
 		}
 
-		public Frame () : base ("Frame")
+		public Frame (IStetic stetic) : base ("Frame")
 		{
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = stetic.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
 			Add (site);
 		}

@@ -31,8 +31,7 @@ namespace Stetic {
 		public void AddWidgets (Assembly assem, WidgetType wtype, VBox box)
 		{
 			foreach (Type type in assem.GetExportedTypes ()) {
-				if (!type.IsSubclassOf (typeof (Gtk.Widget)) ||
-				    type.GetConstructor (Type.EmptyTypes) == null)
+				if (type.GetInterface ("Stetic.IObjectWrapper") == null)
 					continue;
 
 				foreach (object attr in type.GetCustomAttributes (typeof (WidgetWrapperAttribute), false)) {

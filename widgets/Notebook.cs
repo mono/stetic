@@ -1,10 +1,8 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 using System.Collections;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Notebook", "notebook.png", WidgetType.Container)]
 	public class Notebook : Gtk.Notebook, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
@@ -20,7 +18,7 @@ namespace Stetic.Wrapper {
 
 		static Notebook () {
 			NotebookProperties = new PropertyGroup ("Notebook Properties",
-								typeof (Stetic.Wrapper.Notebook),
+								typeof (Stetic.Widget.Notebook),
 								"EnablePopup",
 								"Homogeneous",
 								"TabPos",
@@ -51,9 +49,12 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Notebook ()
+		IStetic stetic;
+
+		public Notebook (IStetic stetic)
 		{
-			WidgetSite site = new WidgetSite ();
+			this.stetic = stetic;
+			WidgetSite site = stetic.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
 			AppendPage (site, new Label ("page"));
 		}
@@ -104,7 +105,7 @@ namespace Stetic.Wrapper {
 
 		void InsertBefore (IWidgetSite context)
 		{
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = stetic.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
 			site.Show ();
 			CurrentPage = InsertPage (site, new Label ("page"), CurrentPage);
@@ -112,7 +113,7 @@ namespace Stetic.Wrapper {
 
 		void InsertAfter (IWidgetSite context)
 		{
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = stetic.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
 			site.Show ();
 			CurrentPage = InsertPage (site, new Label ("page"), CurrentPage + 1);

@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("VPaned", "vpaned.png", WidgetType.Container)]
 	public class VPaned : Gtk.VPaned, Stetic.IContainerWrapper {
@@ -24,15 +22,15 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public VPaned ()
+		public VPaned (IStetic stetic)
 		{
 			WidgetSite site;
 
-			site = new WidgetSite ();
+			site = stetic.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
 			Pack1 (site, true, false);
 
-			site = new WidgetSite ();
+			site = stetic.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
 			Pack2 (site, true, false);
 		}

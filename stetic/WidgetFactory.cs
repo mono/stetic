@@ -2,12 +2,14 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
+using System.Reflection;
 
 namespace Stetic {
 
-	public class WidgetFactory : WidgetSite {
+	public class WidgetFactory : WidgetSiteImpl, IStetic {
 
 		protected Type widgetType;
+		protected ConstructorInfo ctor;
 
 		public WidgetFactory (string name, Pixbuf icon, Type widgetType)
 		{
@@ -29,13 +31,27 @@ namespace Stetic {
 
 			Add (hbox);
 			this.widgetType = widgetType;
+
+			this.ctor = widgetType.GetConstructor (new Type[] { typeof (IStetic) });
+			if (this.ctor == null)
+				throw new ApplicationException ("No constructor for widget type " + widgetType.ToString ());
 		}
 
 		protected override bool StartDrag (Gdk.EventMotion evt)
 		{
-			dragWidget = System.Activator.CreateInstance (widgetType) as Widget;
+			dragWidget = ctor.Invoke (new object[] { this }) as Widget;
 			dragWidget.ShowAll ();
 			return true;
+		}
+
+		public WidgetSite CreateWidgetSite ()
+		{
+			return new WidgetSiteImpl ();
+		}
+
+		public WidgetSite CreateWidgetSite (int emptyWidth, int emptyHeight)
+		{
+			return new WidgetSiteImpl (emptyWidth, emptyHeight);
 		}
 	}
 
@@ -45,7 +61,7 @@ namespace Stetic {
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
-			Gtk.Window win = System.Activator.CreateInstance (widgetType) as Gtk.Window;
+			Gtk.Window win = ctor.Invoke (new object[] { this }) as Gtk.Window;
 			win.Present ();
 
 			WindowSite site = new WindowSite (win);

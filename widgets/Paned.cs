@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	public static class Paned {
 		public static PropertyGroup PanedProperties;
@@ -11,7 +9,7 @@ namespace Stetic.Wrapper {
 
 		static Paned () {
 			PanedProperties = new PropertyGroup ("Pane Properties",
-							     typeof (Stetic.Wrapper.Paned),
+							     typeof (Stetic.Widget.Paned),
 							     "MinPosition",
 							     "MaxPosition",
 							     "BorderWidth");

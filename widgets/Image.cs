@@ -1,11 +1,9 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 using System.Collections;
 using System.ComponentModel;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Image", "image.png")]
 	public class Image : Gtk.Image, Stetic.IObjectWrapper {
@@ -16,7 +14,7 @@ namespace Stetic.Wrapper {
 
 		static Image () {
 			ImageProperties = new PropertyGroup ("Image Properties",
-							     typeof (Stetic.Wrapper.Image),
+							     typeof (Stetic.Widget.Image),
 							     "File");
 
 			groups = new PropertyGroup[] {
@@ -25,9 +23,10 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Image () : base ("") {}
+		public Image (IStetic stetic) : base ("") {}
 
 		string filename = "";
+
 		[Editor (typeof (Stetic.Editor.File), typeof (Gtk.Widget))]
 		public new string File {
 			get {

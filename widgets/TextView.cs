@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Text View", "textview.png")]
 	public class TextView : Gtk.TextView, Stetic.IObjectWrapper {
@@ -15,7 +13,7 @@ namespace Stetic.Wrapper {
 
 		static TextView () {
 			TextViewProperties = new PropertyGroup ("Text View Properties",
-								typeof (Stetic.Wrapper.TextView),
+								typeof (Stetic.Widget.TextView),
 								"Editable",
 								"CursorVisible",
 								"Overwrite",
@@ -37,6 +35,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public TextView () : base () {}
+		public TextView (IStetic stetic) : base () {}
 	}
 }

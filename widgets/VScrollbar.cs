@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Vertical Scrollbar", "vscrollbar.png")]
 	public class VScrollbar : Gtk.VScrollbar, Stetic.IObjectWrapper {
@@ -18,6 +16,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public VScrollbar () : base (new Gtk.Adjustment (0.0, 0.0, 100.0, 1.0, 10.0, 10.0)) {}
+		public VScrollbar (IStetic stetic) : base (new Gtk.Adjustment (0.0, 0.0, 100.0, 1.0, 10.0, 10.0)) {}
 	}
 }

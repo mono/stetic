@@ -1,10 +1,8 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 using System.Collections;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("VBox", "vbox.png", WidgetType.Container)]
 	public class VBox : Gtk.VBox, Stetic.IContainerWrapper, Stetic.IContextMenuProvider {
@@ -13,7 +11,6 @@ namespace Stetic.Wrapper {
 
 		static PropertyGroup[] childgroups;
 		public PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
-
 
 		static VBox () {
 			groups = new PropertyGroup[] {
@@ -26,10 +23,13 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public VBox () : base (false, 0)
+		IStetic stetic;
+
+		public VBox (IStetic stetic) : base (false, 0)
 		{
+			this.stetic = stetic;
 			for (int i = 0; i < 3; i++) {
-				WidgetSite site = new WidgetSite ();
+				WidgetSite site = stetic.CreateWidgetSite ();
 				site.OccupancyChanged += SiteOccupancyChanged;
 				PackStart (site);
 			}
@@ -51,7 +51,7 @@ namespace Stetic.Wrapper {
 		void InsertBefore (IWidgetSite context)
 		{
 			Gtk.Box.BoxChild bc = this[(Gtk.Widget)context] as Gtk.Box.BoxChild;
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = stetic.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
 			if (bc.PackType == PackType.Start) {
 				PackStart (site);
@@ -65,7 +65,7 @@ namespace Stetic.Wrapper {
 		void InsertAfter (IWidgetSite context)
 		{
 			Gtk.Box.BoxChild bc = this[(Gtk.Widget)context] as Gtk.Box.BoxChild;
-			WidgetSite site = new WidgetSite ();
+			WidgetSite site = stetic.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
 			if (bc.PackType == PackType.Start) {
 				PackStart (site);

@@ -41,7 +41,9 @@ AC_SUBST(STETIC_LIBS)
 
 AC_OUTPUT([
 Makefile
-pixmaps/Makefile
 glue/Makefile
+libstetic/Makefile
+widgets/Makefile
+widgets/pixmaps/Makefile
 stetic/Makefile
 ])

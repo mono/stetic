@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Label", "label.png")]
 	public class Label : Gtk.Label, Stetic.IObjectWrapper {
@@ -14,7 +12,7 @@ namespace Stetic.Wrapper {
 
 		static Label () {
 			LabelProperties = new PropertyGroup ("Label Properties",
-							     typeof (Stetic.Wrapper.Label),
+							     typeof (Stetic.Widget.Label),
 							     "LabelProp",
 							     "UseMarkup",
 							     "UseUnderline",
@@ -29,7 +27,7 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public Label () : base ("Label:") {}
+		public Label (IStetic stetic) : base ("Label:") {}
 
 		public Label (string label) : base (label) {}
 	}

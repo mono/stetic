@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Combo Box", "combo.png")]
 	public class ComboBox : Gtk.ComboBox, Stetic.IObjectWrapper {
@@ -15,11 +13,11 @@ namespace Stetic.Wrapper {
 
 		static ComboBox () {
 			ComboBoxProperties = new PropertyGroup ("Combo Box Properties",
-								typeof (Stetic.Wrapper.ComboBox),
+								typeof (Stetic.Widget.ComboBox),
 								"Model",
 								"Active");
 			ComboBoxExtraProperties = new PropertyGroup ("Extra ComboBox Properties",
-								     typeof (Stetic.Wrapper.ComboBox),
+								     typeof (Stetic.Widget.ComboBox),
 								     "WrapWidth",
 								     "ColumnSpanColumn",
 								     "RowSpanColumn");
@@ -30,6 +28,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public ComboBox () : base () {}
+		public ComboBox (IStetic stetic) : base () {}
 	}
 }

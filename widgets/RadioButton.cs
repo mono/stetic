@@ -1,9 +1,7 @@
 using Gtk;
-using Gdk;
-using GLib;
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic.Widget {
 
 	[WidgetWrapper ("Radio Button", "radiobutton.png")]
 	public class RadioButton : Gtk.RadioButton, Stetic.IObjectWrapper {
@@ -15,7 +13,7 @@ namespace Stetic.Wrapper {
 
 		static RadioButton () {
 			RadioButtonProperties = new PropertyGroup ("Radio Button Properties",
-								   typeof (Stetic.Wrapper.RadioButton),
+								   typeof (Stetic.Widget.RadioButton),
 								   "Label",
 								   "Active",
 								   "Inconsistent",
@@ -27,6 +25,6 @@ namespace Stetic.Wrapper {
 			};
 		}
 
-		public RadioButton () : base ("Radio Button") {}
+		public RadioButton (IStetic stetic) : base ("Radio Button") {}
 	}
 }
