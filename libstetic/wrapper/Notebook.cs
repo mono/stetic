@@ -46,11 +46,11 @@ namespace Stetic.Wrapper {
 		{
 			if (childprops.Count == 1 && ((string)childprops["type"]) == "tab") {
 				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
-				WidgetSite site = CreateWidgetSite ((Gtk.Widget)wrapper.Wrapped);
-// FIXME				site.Selected += LabelSelected;
+				Gtk.Widget widget = (Gtk.Widget)wrapper.Wrapped;
+// FIXME				widget.Selected += LabelSelected;
 
-				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), site);
-				tabs.Add (site);
+				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), widget);
+				tabs.Add (widget);
 				return (Widget)wrapper;
 			} else
 				return base.GladeImportChild (className, id, props, childprops);
@@ -82,14 +82,14 @@ namespace Stetic.Wrapper {
 
 		int InsertPage (int position)
 		{
-			WidgetSite labelSite;
+			Gtk.Widget widget;
 
 			Stetic.Wrapper.Label label = new Stetic.Wrapper.Label ("page" + (notebook.NPages + 1).ToString ());
-			labelSite = CreateWidgetSite ((Gtk.Widget)label.Wrapped);
-// FIXME			labelSite.Selected += LabelSelected;
-			tabs.Insert (position, labelSite);
+			widget = (Gtk.Widget)label.Wrapped;
+// FIXME			widget.Selected += LabelSelected;
+			tabs.Insert (position, widget);
 
-			return notebook.InsertPage (CreatePlaceholder (), labelSite, position);
+			return notebook.InsertPage (CreatePlaceholder (), widget, position);
 		}
 
 		[Command ("Go to Previous Page", "Show the previous page", "CheckPreviousPage")]
@@ -147,8 +147,8 @@ namespace Stetic.Wrapper {
 
 		public override bool HExpandable {
 			get {
-				foreach (WidgetSite site in Sites) {
-					if (site.HExpandable) 
+				foreach (Gtk.Widget w in notebook.Children) {
+					if (ChildHExpandable (w)) 
 						return true;
 				}
 				return false;
@@ -157,8 +157,8 @@ namespace Stetic.Wrapper {
 
 		public override bool VExpandable {
 			get {
-				foreach (WidgetSite site in Sites) {
-					if (site.VExpandable)
+				foreach (Gtk.Widget w in notebook.Children) {
+					if (ChildVExpandable (w))
 						return true;
 				}
 				return false;
@@ -167,11 +167,11 @@ namespace Stetic.Wrapper {
 
 		void LabelSelected (object obj, EventArgs args)
 		{
-			WidgetSite site = obj as WidgetSite;
-			int index = tabs.IndexOf (site);
+			Gtk.Widget label = obj as Gtk.Widget;
+			int index = tabs.IndexOf (label);
 			if (index != -1 && index != notebook.CurrentPage) {
 				notebook.CurrentPage = index;
-				site.GrabFocus ();
+				label.GrabFocus ();
 			}
 		}
 

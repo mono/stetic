@@ -73,14 +73,14 @@ namespace Stetic.Wrapper {
 		{
 			uint left, right, top, bottom;
 			uint row, col;
-			WidgetBox wbox;
-			WidgetBox[,] grid;
+			Gtk.Widget w;
+			Gtk.Widget[,] grid;
 			Gtk.Table.TableChild tc;
 			Gtk.Widget[] children;
 			bool addedPlaceholders = false;
 
 			children = table.Children;
-			grid = new WidgetBox[NRows,NColumns];
+			grid = new Gtk.Widget[NRows,NColumns];
 
 			foreach (Gtk.Widget child in children)
 				child.FreezeChildNotify ();
@@ -99,7 +99,7 @@ namespace Stetic.Wrapper {
                                 bottom = tc.BottomAttach;
 
 				if (right == left + 1 && bottom == top + 1)
-					grid[top,left] = (WidgetBox)child;
+					grid[top,left] = child;
 				else
 					table.Remove (child);
 			}
@@ -121,10 +121,10 @@ namespace Stetic.Wrapper {
 
                                 for (row = top; row < bottom; row++) {
                                         for (col = left; col < right; col++) {
-						wbox = grid[row,col];
-						if (wbox is Placeholder)
+						w = grid[row,col];
+						if (w is Placeholder)
 							table.Remove (grid[row,col]);
-                                                grid[row,col] = (WidgetBox)child;
+                                                grid[row,col] = w;
                                         }
                                 }
                         }
@@ -141,22 +141,22 @@ namespace Stetic.Wrapper {
 				bool allPlaceholders = true;
 
 				for (col = 0; col < NColumns; col++) {
-					wbox = grid[row,col];
-					if (wbox == null) {
-						wbox = CreatePlaceholder ();
-						wbox.FreezeChildNotify ();
-						table.Attach (wbox, col, col + 1, row, row + 1);
-						grid[row,col] = wbox;
+					w = grid[row,col];
+					if (w == null) {
+						w = CreatePlaceholder ();
+						w.FreezeChildNotify ();
+						table.Attach (w, col, col + 1, row, row + 1);
+						grid[row,col] = w;
 						addedPlaceholders = true;
-					} else if (!wbox.VExpandable || !AutoSize[wbox])
+					} else if (!ChildVExpandable (w) || !AutoSize[w])
 						allPlaceholders = false;
 				}
 
 				for (col = 0; col < NColumns; col++) {
-					wbox = grid[row,col];
-					if (!AutoSize[wbox])
+					w = grid[row,col];
+					if (!AutoSize[w])
 						continue;
-					tc = table[wbox] as Gtk.Table.TableChild;
+					tc = table[w] as Gtk.Table.TableChild;
 					tc.YOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
@@ -171,18 +171,18 @@ namespace Stetic.Wrapper {
 				bool allPlaceholders = true;
 
 				for (row = 0; row < NRows; row++) {
-					wbox = grid[row,col];
-					if (!wbox.HExpandable || !AutoSize[wbox]) {
+					w = grid[row,col];
+					if (!ChildHExpandable (w) || !AutoSize[w]) {
 						allPlaceholders = false;
 						break;
 					}
 				}
 
 				for (row = 0; row < NRows; row++) {
-					wbox = grid[row,col];
-					if (!AutoSize[wbox])
+					w = grid[row,col];
+					if (!AutoSize[w])
 						continue;
-					tc = table[wbox] as Gtk.Table.TableChild;
+					tc = table[w] as Gtk.Table.TableChild;
 					tc.XOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
@@ -351,16 +351,15 @@ namespace Stetic.Wrapper {
 
 		protected override void ChildContentsChanged (Container child)
 		{
-			WidgetSite site = child.Wrapped.Parent as WidgetSite;
-			if (site != null) {
-				Freeze ();
-				if (AutoSize[site]) {
-					Gtk.Table.TableChild tc = table[site] as Gtk.Table.TableChild;
-					tc.XOptions = 0;
-					tc.YOptions = 0;
-				}
-				Thaw ();
+			Gtk.Widget widget = child.Wrapped;
+			Freeze ();
+			if (AutoSize[widget]) {
+				Gtk.Table.TableChild tc = table[widget] as Gtk.Table.TableChild;
+				tc.XOptions = 0;
+				tc.YOptions = 0;
 			}
+			Thaw ();
+
 			base.ChildContentsChanged (child);
 		}
 

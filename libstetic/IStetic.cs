@@ -4,10 +4,10 @@ namespace Stetic {
 	public delegate void ISteticDelegate ();
 
 	public interface IStetic {
-		WidgetSite CreateWidgetSite (Gtk.Widget w);
-		Placeholder CreatePlaceholder ();
+		Stetic.Wrapper.Widget Selection { get; set; }
 
-		void Select (Stetic.Wrapper.Widget wrapper);
+		void PopupContextMenu (Stetic.Wrapper.Widget wrapper);
+		void PopupContextMenu (Placeholder ph);
 
 		Gtk.Widget LookupWidgetById (string id);
 

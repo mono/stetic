@@ -22,8 +22,6 @@ libstetic_dll_sources =			\
 	RangeAttribute.cs		\
 	Set.cs				\
 	TranslatableAttribute.cs	\
-	WidgetBox.cs			\
-	WidgetSite.cs			\
 	editor/Boolean.cs		\
 	editor/Char.cs			\
 	editor/Color.cs			\

@@ -21,18 +21,12 @@ namespace Stetic.Wrapper {
 
 		public override bool HExpandable {
 			get { 
-				WidgetBox child = bin.Child as WidgetBox;
-				if (child != null)
-					return child.HExpandable;
-				return false;
+				return ChildHExpandable (bin.Child);
 			}
 		}
 		public override bool VExpandable {
 			get {
-				WidgetBox child = bin.Child as WidgetBox;
-				if (child != null)
-					return child.VExpandable;
-				return false;
+				return ChildVExpandable (bin.Child);
 			}
 		}
 	}

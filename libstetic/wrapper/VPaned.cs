@@ -9,8 +9,8 @@ namespace Stetic.Wrapper {
 
 		public override bool HExpandable {
 			get {
-				foreach (WidgetSite site in Sites) {
-					if (!site.HExpandable)
+				foreach (Gtk.Widget w in paned.Children) {
+					if (!ChildHExpandable (w))
 						return false;
 				}
 				return true;

@@ -88,6 +88,11 @@ namespace Stetic {
 			ShowAll ();
 		}
 
+		protected override void OnSelectionDone ()
+		{
+			Destroy ();
+		}
+
 		private class Stupid69614Workaround {
 			CommandDescriptor cmd;
 			ObjectWrapper wrapper;

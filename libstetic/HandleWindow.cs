@@ -16,14 +16,13 @@ namespace Stetic {
 			white.Pixel = 0;
 		}
 
-		public HandleWindow (Gtk.Widget selection, bool showHandles)
+		public HandleWindow (Gtk.Widget selection, bool dragHandles)
 		{
-			if (selection.Parent is WidgetBox)
-				selection = selection.Parent;
 			this.selection = selection;
-			this.showHandles = showHandles;
+			this.dragHandles = dragHandles;
 
 			selection.SizeAllocated += SelectionResized;
+			selection.WidgetEvent += SelectionEvent;
 
 			Gdk.WindowAttr attributes = new Gdk.WindowAttr ();
 			attributes.WindowType = Gdk.WindowType.Child;
@@ -57,7 +56,7 @@ namespace Stetic {
 		}
 
 		Gtk.Widget selection;
-		bool showHandles;
+		bool dragHandles;
 
 		Gdk.Window window;
 		public Gdk.Window Window {
@@ -95,7 +94,7 @@ namespace Stetic {
 			pixmap.DrawRectangle (gc, false, handleSize / 2, handleSize / 2,
 					      width - handleSize, height - handleSize);
 
-			if (showHandles) {
+			if (dragHandles) {
 				pixmap.DrawRectangle (gc, true, 0, 0, handleSize, handleSize);
 				pixmap.DrawRectangle (gc, true, 0, height - handleSize, handleSize, handleSize);
 				pixmap.DrawRectangle (gc, true, width - handleSize, 0, handleSize, handleSize);
@@ -112,5 +111,48 @@ namespace Stetic {
 		{
 			Shape ();
 		}
+
+		int clickX, clickY;
+
+		[GLib.ConnectBefore]
+		void SelectionEvent (object obj, Gtk.WidgetEventArgs args)
+		{
+			if (args.Event.Window != window)
+				return;
+
+			switch (args.Event.Type) {
+			case Gdk.EventType.ButtonPress:
+				Gdk.EventButton evb = new Gdk.EventButton (args.Event.Handle);
+				args.RetVal = true;
+
+				if (evb.Type == Gdk.EventType.ButtonPress && evb.Button == 1) {
+					clickX = (int)evb.XRoot;
+					clickY = (int)evb.YRoot;
+				}
+				return;
+
+			case Gdk.EventType.MotionNotify:
+				Gdk.EventMotion evm = new Gdk.EventMotion (args.Event.Handle);
+				args.RetVal = true;
+
+				if (!dragHandles)
+					return;
+				if ((evm.State & Gdk.ModifierType.Button1Mask) == 0)
+					return;
+				if (!Gtk.Drag.CheckThreshold (selection, clickX, clickY, (int)evm.XRoot, (int)evm.YRoot))
+					return;
+
+				if (Drag != null)
+					Drag (evm);
+				return;
+
+			default:
+				return;
+			}
+		}
+
+		public delegate void DragDelegate (Gdk.EventMotion evt);
+		public event DragDelegate Drag;
 	}
 }
+

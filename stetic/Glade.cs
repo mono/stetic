@@ -162,9 +162,9 @@ namespace Stetic {
 
 			Stetic.Wrapper.Container container = wrapper as Stetic.Wrapper.Container;
 			if (container != null) {
-				XmlElement child;
+				XmlElement elt;
 
-				foreach (WidgetSite site in container.Sites) {
+				foreach (Gtk.Widget child in container.RealChildren) {
 #if FIXME
 					if (!site.Occupied) {
 						child = doc.CreateElement ("child");
@@ -174,9 +174,9 @@ namespace Stetic {
 					}
 #endif
 
-					child = ExportWidget (project, doc, container, site.Child);
-					if (child != null)
-						widget.AppendChild (child);
+					elt = ExportWidget (project, doc, container, child);
+					if (elt != null)
+						widget.AppendChild (elt);
 				}
 			}
 

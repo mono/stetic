@@ -87,14 +87,12 @@ namespace Stetic.Wrapper {
 		void FixupGladeChildren ()
 		{
 			stetic.GladeImportComplete -= FixupGladeChildren;
+			hasLabel = false;
 
-			WidgetSite site = button.Child as WidgetSite;
-			Gtk.Alignment alignment = (site == null) ? null : site.Child as Gtk.Alignment;
+			Gtk.Alignment alignment = button.Child as Gtk.Alignment;
 			if (alignment == null)
 				return;
-
-			site = alignment.Child as WidgetSite;
-			Gtk.HBox box = (site == null) ? null : site.Child as Gtk.HBox;
+			Gtk.HBox box = alignment.Child as Gtk.HBox;
 			if (box == null)
 				return;
 
@@ -102,10 +100,8 @@ namespace Stetic.Wrapper {
 			if (children == null || children.Length != 2)
 				return;
 
-			site = children[0] as WidgetSite;
-			Gtk.Image image = (site == null) ? null : site.Child as Gtk.Image;
-			site = children[1] as WidgetSite;
-			Gtk.Label label = (site == null) ? null : site.Child as Gtk.Label;
+			Gtk.Image image = children[0] as Gtk.Image;
+			Gtk.Label label = children[1] as Gtk.Label;
 			if (image == null || label == null)
 				return;
 			Stetic.Wrapper.Image iwrap = Stetic.ObjectWrapper.Lookup (image) as Stetic.Wrapper.Image;
@@ -117,6 +113,7 @@ namespace Stetic.Wrapper {
 			else
 				Icon = "file:" + iwrap.File;
 			Label = label.LabelProp;
+			hasLabel = true;
 		}
 
 		private Gtk.Button button {
@@ -126,9 +123,10 @@ namespace Stetic.Wrapper {
 		}
 
 		// true if the button has an icon+label rather than custom contents
+		bool hasLabel;
 		public bool HasLabel {
 			get {
-				return (button.Child as WidgetSite) == null;
+				return hasLabel;
 			}
 		}
 
@@ -146,6 +144,7 @@ namespace Stetic.Wrapper {
 				button.Remove (button.Child);
 
 			button.Add (CreatePlaceholder ());
+			hasLabel = false;
 
 			EmitNotify ("HasContents");
 			EmitNotify ("HasLabel");
@@ -177,6 +176,7 @@ namespace Stetic.Wrapper {
 				button.Remove (button.Child);
 			iconWidget = null;
 			labelWidget = null;
+			hasLabel = true;
 
 			if (button.UseUnderline) {
 				labelWidget = new Gtk.Label (label);

@@ -30,23 +30,16 @@ namespace Stetic.Wrapper {
 
 		public override void Wrap (object obj, bool initialized)
 		{
-			WidgetSite site;
 			Stetic.Wrapper.Widget wrapper;
 
 			base.Wrap (obj, initialized);
 			dialog.HasSeparator = false;
 
-			dialog.VBox.Unparent ();
-			site = CreateWidgetSite (dialog.VBox);
-			dialog.Add (site);
 			wrapper = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.VBox), dialog.VBox) as Stetic.Wrapper.Widget;
 			wrapper.InternalChildId = "vbox";
 			if (dialog.VBox.Name == "GtkVBox")
 				dialog.VBox.Name = dialog.Name + "_vbox";
 
-			dialog.ActionArea.Unparent ();
-			site = CreateWidgetSite (dialog.ActionArea);
-			dialog.VBox.PackEnd (site, false, true, 0);
 			wrapper = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.HButtonBox), dialog.ActionArea) as Stetic.Wrapper.Widget;
 			wrapper.InternalChildId = "action_area";
 			if (dialog.ActionArea.Name == "GtkHButtonBox")
@@ -115,7 +108,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		WidgetSite helpButton;
+		Gtk.Button helpButton;
 
 		[Description ("Help Button", "Whether or not to display a \"Help\" button")]
 		public bool HelpButton {
@@ -135,31 +128,31 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		WidgetSite AddButton (string stockId, Gtk.ResponseType response, bool hasDefault)
+		Gtk.Button AddButton (string stockId, Gtk.ResponseType response, bool hasDefault)
 		{
-			Stetic.Wrapper.Button button;
-			Gtk.Button widget;
+			Stetic.Wrapper.Button wrapper;
+			Gtk.Button button;
 
-			button = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Button)) as Stetic.Wrapper.Button;
-			widget = (Gtk.Button)button.Wrapped;
+			wrapper = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Button)) as Stetic.Wrapper.Button;
+			button = (Gtk.Button)wrapper.Wrapped;
 			if (stockId != null)
-				button.Icon = "stock:" + stockId;
+				wrapper.Icon = "stock:" + stockId;
 			else {
-				button.Icon = null;
-				button.Label = widget.Name;
+				wrapper.Icon = null;
+				wrapper.Label = button.Name;
 			}
-			button.ResponseId = (int)response;
+			wrapper.ResponseId = (int)response;
 
 			Stetic.Wrapper.Container actionArea = Stetic.Wrapper.Container.Lookup (dialog.ActionArea);
-			WidgetSite site = actionArea.AddWidgetSite (widget);
+			actionArea.Add (button);
 
-			widget.CanDefault = true;
-			button.HasDefault = hasDefault;
+			button.CanDefault = true;
+			wrapper.HasDefault = hasDefault;
 
 			if (stockId == Gtk.Stock.Help)
-				((Gtk.ButtonBox)actionArea.Wrapped).SetChildSecondary (site, true);
+				((Gtk.ButtonBox)actionArea.Wrapped).SetChildSecondary (button, true);
 
-			return site;
+			return button;
 		}
 	}
 }

@@ -1,3 +1,58 @@
+2005-03-29  Dan Winship  <danw@novell.com>
+
+	* libstetic/WidgetBox.cs:
+	* libstetic/WidgetSite.cs: GONE!
+
+	* libstetic/Placeholder.cs: inherit from DrawingArea rather than
+	WidgetBox now.
+	(NewWindow): Gone. The DrawingArea creates the window for us now.
+	(Mimic, UnMimic): kill; Wrapper.Container watches out for this now
+
+	* libstetic/HandleWindow.cs (SelectionEvent): intercept
+	ButtonPress and Motion events and signal to the parent container
+	when to start dragging.
+
+	* libstetic/DND.cs (SourceSet, SourceUnset, SourceButtonPress,
+	CanDrag): Remove "non-automatic" drag sources; HandleWindow
+	handles that now.
+	(AddFault, etc): update/rename stuff for WidgetSite removal
+
+	* libstetic/IStetic.cs (CreateWidgetSite, CreatePlaceholder): gone
+	(PopupContextMenu): new, to make the app pop up a context menu
+	(Selection): new read/write property to replace old Select() method
+
+	* libstetic/wrapper/Widget.cs (Wrap): add ButtonPressMask to the
+	widget eventmask, and connect to WidgetEvent and PopupMenu
+	(ParentWrapper): simplify for lack of WidgetSites
+	(WidgetEvent): intercept button presses and walk through the
+	widget's children to find the deepest wrapped widget that the
+	click was inside (since NoWindow widgets will no longer be able to
+	report their own clicks). Handle selection and context menus.
+
+	* libstetic/wrapper/Container.cs (GladeImportChild,
+	GladeExportChild): remove WidgetSite handling
+	(Add): replaces AddWidgetSite
+	(CreateWidgetSite, SiteButtonPress, SiteMotionNotify): gone
+	(CreatePlaceholder): create the Placeholder directly rather than
+	needing stetic.CreatePlaceholder.
+	(PlaceholderDrop, PlaceholderDragEnd): don't create a WidgetSite
+	(RealChildren): replaces Sites
+	(HandleWindowDrag): initiate drag and drop from here.
+	(ChildHExpandable, ChildVExpandable): checks the expandability of
+	a child (which might be a Placeholder, or not)
+
+	* libstetic/wrapper/*.cs: Update for WidgetSite removal, and
+	ChildHExpandable/ChildVExpandable.
+
+	* stetic/ContextMenu.cs (OnSelectionDone): be self-destroying
+
+	* stetic/Glade.cs (ExportWidget): no more WidgetSites
+
+	* stetic/Project.cs (Selection): change from method to property
+	(CreateWidgetSite, CreatePlaceholder): Kill
+	(PopupContextMenu): Implement
+	(AddWidget, ContentsChanged): s/foo.Sites/foo.RealChildren/
+
 2005-03-28  Dan Winship  <danw@novell.com>
 
 	* libstetic/HandleWindow.cs: new class to implement selection handles.

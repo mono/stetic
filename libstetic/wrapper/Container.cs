@@ -32,7 +32,7 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-			container.Removed += SiteRemoved;
+			container.Removed += ChildRemoved;
 			container.SizeAllocated += SizeAllocated;
 		}
 
@@ -74,10 +74,7 @@ namespace Stetic.Wrapper {
 			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
 			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
-			if (container.ChildType () == Gtk.Widget.GType) {
-				child = CreateWidgetSite (child);
-				AutoSize[child] = false;
-			}
+			AutoSize[child] = false;
 			container.Add (child);
 
 			GladeUtils.SetPacking (container, child, childprops);
@@ -92,10 +89,6 @@ namespace Stetic.Wrapper {
 			internalId = null;
 			childprops = null;
 			wrapper.GladeExport (out className, out id, out props);
-
-			Gtk.Widget child = wrapper.Wrapped as Gtk.Widget;
-			while (child != null && !(child is WidgetSite))
-				child = child.Parent;
 
 			if (InternalChildId != null)
 				internalId = InternalChildId;
@@ -113,11 +106,9 @@ namespace Stetic.Wrapper {
 			return ph;
 		}
 
-		public virtual WidgetSite AddWidgetSite (Gtk.Widget child)
+		public virtual void Add (Gtk.Widget child)
 		{
-			WidgetSite site = CreateWidgetSite (child);
-			container.Add (site);
-			return site;
+			container.Add (child);
 		}
 
 		Gtk.Widget FindInternalChild (string childId)
@@ -186,83 +177,15 @@ namespace Stetic.Wrapper {
 		{
 			if (ContentsChanged != null)
 				ContentsChanged (this);
+			if (ParentWrapper != null)
+				ParentWrapper.ChildContentsChanged (this);
 		}
 
 		protected Set AutoSize = new Set ();
 
-		protected virtual WidgetSite CreateWidgetSite (Gtk.Widget w)
-		{
-			WidgetSite site = stetic.CreateWidgetSite (w);
-			site.Show ();
-			site.MotionNotifyEvent += SiteMotionNotify;
-			site.ButtonPressEvent += SiteButtonPress;
-			w.ButtonPressEvent += SiteButtonPress;
-			DND.SourceSet (site, false);
-
-			Container childWrapper = Lookup (w);
-			if (childWrapper != null)
-				childWrapper.ContentsChanged += ChildContentsChanged;
-
-			return site;
-		}
-
-		[GLib.ConnectBefore]
-		void SiteButtonPress (object obj, Gtk.ButtonPressEventArgs args)
-		{
-			if (args.Event.Type != Gdk.EventType.ButtonPress)
-				return;
-
-			Gtk.Widget w;
-			WidgetSite site = obj as WidgetSite;
-			if (site == null) {
-				w = (Gtk.Widget)obj;
-				site = w.Parent as WidgetSite;
-			} else
-				w = site.Child;
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (w);
-			if (wrapper == null || site == null)
-				return;
-
-			if (args.Event.Button == 1) {
-				if (w == selection) {
-					if (args.Event.Window == handles.Window)
-						args.RetVal = true;
-					return;
-				}
-				wrapper.Select ();
-				args.RetVal = true;
-			} else if (args.Event.Button == 3) {
-				site.EmitPopupContextMenu ();
-				args.RetVal = true;
-			}
-		}
-
-		void SiteMotionNotify (object obj, Gtk.MotionNotifyEventArgs args)
-		{
-			WidgetSite site = obj as WidgetSite;
-
-			if (handles == null ||
-			    args.Event.Window != handles.Window ||
-			    !DND.CanDrag (site, args.Event)) {
-				args.RetVal = true;
-				return;
-			}
-
-			Select ((Stetic.Wrapper.Widget)null);
-
-			Placeholder ph = CreatePlaceholder ();
-			ph.Mimic (site);
-			ReplaceChild (site, ph);
-
-			Gtk.Widget dragWidget = site.Child;
-			site.Remove (dragWidget);
-			site.Destroy ();
-			DND.Drag (ph, args.Event, dragWidget);
-		}
-
 		protected virtual Placeholder CreatePlaceholder ()
 		{
-			Placeholder ph = stetic.CreatePlaceholder ();
+			Placeholder ph = new Placeholder ();
 			ph.Show ();
 			ph.Drop += PlaceholderDrop;
 			ph.DragEnd += PlaceholderDragEnd;
@@ -282,15 +205,14 @@ namespace Stetic.Wrapper {
 				Select (ph);
 				args.RetVal = true;
 			} else if (args.Event.Button == 3) {
-				ph.EmitPopupContextMenu ();
+				stetic.PopupContextMenu (ph);
 				args.RetVal = true;
 			}
 		}
 
 		void PlaceholderDrop (Placeholder ph, Gtk.Widget dropped)
 		{
-			WidgetSite site = CreateWidgetSite (dropped);
-			ReplaceChild (ph, site);
+			ReplaceChild (ph, dropped);
 			ph.Destroy ();
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (dropped);
 			if (wrapper != null)
@@ -302,49 +224,43 @@ namespace Stetic.Wrapper {
 		{
 			Placeholder ph = obj as Placeholder;
 
+			dragSource = null;
 			if (DND.DragWidget == null) {
-				ph.UnMimic ();
+				ph.SetSizeRequest (-1, -1);
 				Sync ();
 			} else
-				ReplaceChild (ph, CreateWidgetSite (DND.DragWidget));
+				ReplaceChild (ph, DND.DragWidget);
 		}
 
 		protected virtual void ChildContentsChanged (Container child) {
 			;
 		}
 
-		void SiteRemoved (object obj, Gtk.RemovedArgs args)
+		void ChildRemoved (object obj, Gtk.RemovedArgs args)
 		{
-			WidgetSite site = args.Widget as WidgetSite;
-			if (site != null) {
-				Container childWrapper = Lookup (site.Child);
-				if (childWrapper != null)
-					childWrapper.ContentsChanged -= ChildContentsChanged;
-
-				SiteRemoved (site);
-			}
+			ChildRemoved (args.Widget);
 		}
 
-		protected virtual void SiteRemoved (WidgetSite site)
+		protected virtual void ChildRemoved (Gtk.Widget w)
 		{
-			AutoSize[site] = false;
+			AutoSize[w] = false;
 			EmitContentsChanged ();
 		}
 
-		class SiteEnumerator {
-			public ArrayList Sites = new ArrayList ();
+		class RealChildEnumerator {
+			public ArrayList Children = new ArrayList ();
 			public void Add (Gtk.Widget widget)
 			{
-				if (widget is WidgetSite)
-					Sites.Add (widget);
+				if (!(widget is Placeholder))
+					Children.Add (widget);
 			}
 		}
 
-		public IEnumerable Sites {
+		public IEnumerable RealChildren {
 			get {
-				SiteEnumerator se = new SiteEnumerator ();
-				container.Forall (se.Add);
-				return se.Sites;
+				RealChildEnumerator rce = new RealChildEnumerator ();
+				container.Forall (rce.Add);
+				return rce.Children;
 			}
 		}
 
@@ -378,25 +294,25 @@ namespace Stetic.Wrapper {
 		public void Select (Stetic.Wrapper.Widget wrapper)
 		{
 			if (wrapper == null)
-				Select ((Gtk.Widget)null);
+				Select (null, false);
 			else
-				Select (wrapper.Wrapped);
-			stetic.Select (wrapper);
+				Select (wrapper.Wrapped, (wrapper.InternalChildId == null));
+			stetic.Selection = wrapper;
 		}
 
 		public void UnSelect (Stetic.Wrapper.Widget wrapper)
 		{
 			if (selection == wrapper.Wrapped)
-				Select ((Gtk.Widget)null);
+				Select (null, false);
 		}
 
 		public void Select (Placeholder ph)
 		{
-			Select ((Gtk.Widget)ph);
-			stetic.Select (null);
+			Select (ph, false);
+			stetic.Selection = null;
 		}
 
-		void Select (Gtk.Widget widget)
+		void Select (Gtk.Widget widget, bool dragHandles)
 		{
 			if (widget == selection)
 				return;
@@ -405,16 +321,60 @@ namespace Stetic.Wrapper {
 			if (handles != null)
 				handles.Dispose ();
 
-			if (selection != null)
-				handles = new HandleWindow (selection, !(widget is Placeholder));
-			else 
+			if (selection != null) {
+				handles = new HandleWindow (selection, dragHandles);
+				handles.Drag += HandleWindowDrag;
+			} else 
 				handles = null;
+		}
+
+		Gtk.Widget dragSource;
+
+		void HandleWindowDrag (Gdk.EventMotion evt)
+		{
+			Gtk.Widget dragWidget = selection;
+			Gdk.Rectangle alloc = dragWidget.Allocation;
+
+			Select ((Stetic.Wrapper.Widget)null);
+
+			dragSource = CreatePlaceholder ();
+			dragSource.SetSizeRequest (alloc.Width, alloc.Height);
+			ReplaceChild (dragWidget, dragSource);
+			DND.Drag (dragSource, evt, dragWidget);
 		}
 
 		void SizeAllocated (object obj, Gtk.SizeAllocatedArgs args)
 		{
 			if (handles != null)
 				handles.Shape ();
+		}
+
+		protected bool ChildHExpandable (Gtk.Widget child)
+		{
+			if (child == dragSource)
+				child = DND.DragWidget;
+			else if (child is Placeholder)
+				return true;
+
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (child);
+			if (wrapper != null)
+				return wrapper.HExpandable;
+			else
+				return false;
+		}
+
+		protected bool ChildVExpandable (Gtk.Widget child)
+		{
+			if (child == dragSource)
+				child = DND.DragWidget;
+			else if (child is Placeholder)
+				return true;
+
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (child);
+			if (wrapper != null)
+				return wrapper.VExpandable;
+			else
+				return false;
 		}
 
 		public class ContainerChild : Stetic.ObjectWrapper {

@@ -19,19 +19,15 @@ namespace Stetic {
 			targetList.Add (steticWidgetType, 0, 0);
 		}
 
-		public static void SourceSet (Gtk.Widget source, bool automatic)
+		public static void SourceSet (Gtk.Widget source)
 		{
-			if (automatic) {
-				Gtk.Drag.SourceSet (source, Gdk.ModifierType.Button1Mask,
-						    targets, Gdk.DragAction.Move);
-			} else
-				source.ButtonPressEvent += SourceButtonPress;
+			Gtk.Drag.SourceSet (source, Gdk.ModifierType.Button1Mask,
+					    targets, Gdk.DragAction.Move);
 		}
 
 		public static void SourceUnset (Gtk.Widget source)
 		{
 			Gtk.Drag.SourceUnset (source);
-			source.ButtonPressEvent -= SourceButtonPress;
 		}
 
 		public static void DestSet (Gtk.Widget dest, bool automatic)
@@ -46,29 +42,6 @@ namespace Stetic {
 		}
 
 		static Gtk.Widget dragWidget;
-		static int clickX, clickY;
-
-		[GLib.ConnectBefore]
-		static void SourceButtonPress (object obj, Gtk.ButtonPressEventArgs args)
-		{
-			Gdk.EventButton evt = args.Event;
-			if (evt.Button == 1 && evt.Type == Gdk.EventType.ButtonPress) {
-				dragWidget = obj as Gtk.Widget;
-				clickX = (int)evt.XRoot;
-				clickY = (int)evt.YRoot;
-			}
-		}
-
-		// Non-automatic drag sources should call this on any MotionEvent
-		// to see if that motion can start a drag
-		public static bool CanDrag (Gtk.Widget source, Gdk.EventMotion evt)
-		{
-			if ((evt.State & Gdk.ModifierType.Button1Mask) == 0)
-				return false;
-			if (source != dragWidget)
-				return false;
-			return Gtk.Drag.CheckThreshold (source, clickX, clickY, (int)evt.XRoot, (int)evt.YRoot);
-		}
 
 		// Drag function for non-automatic sources, called from MotionNotifyEvent
 		public static void Drag (Gtk.Widget source, Gdk.EventMotion evt, Gtk.Widget dragWidget)
@@ -180,30 +153,30 @@ namespace Stetic {
 					     Gtk.Orientation orientation,
 					     int x, int y, int width, int height)
 		{
-			WidgetSite site = owner.Wrapped.Parent as WidgetSite;
-			if (site == null || !site.IsRealized)
+			Gtk.Widget widget = owner.Wrapped;
+			if (!widget.IsRealized)
 				return;
 
-			Gdk.Window win = NewWindow (site, Gdk.WindowClass.InputOnly);
+			Gdk.Window win = NewWindow (widget, Gdk.WindowClass.InputOnly);
 			win.MoveResize (x, y, width, height);
 
-			Hashtable siteFaults = faultGroups[site] as Hashtable;
-			if (siteFaults == null) {
-				faultGroups[site] = siteFaults = new Hashtable ();
-				site.Destroyed += SiteDestroyed;
-				site.DragMotion += FaultDragMotion;
-				site.DragLeave += FaultDragLeave;
-				site.DragDrop += FaultDragDrop;
-				DND.DestSet (site, false);
+			Hashtable widgetFaults = faultGroups[widget] as Hashtable;
+			if (widgetFaults == null) {
+				faultGroups[widget] = widgetFaults = new Hashtable ();
+				widget.Destroyed += FaultWidgetDestroyed;
+				widget.DragMotion += FaultDragMotion;
+				widget.DragLeave += FaultDragLeave;
+				widget.DragDrop += FaultDragDrop;
+				DND.DestSet (widget, false);
 			}
-			siteFaults[win] = new Fault (owner, faultId, orientation, win);
+			widgetFaults[win] = new Fault (owner, faultId, orientation, win);
 		}
 
 		public static void AddHFault (Stetic.Wrapper.Widget owner, object faultId,
 					      Gtk.Widget above, Gtk.Widget below)
 		{
-			WidgetSite site = owner.Wrapped.Parent as WidgetSite;
-			if (site == null || !site.IsRealized)
+			Gtk.Widget widget = owner.Wrapped;
+			if (!widget.IsRealized)
 				return;
 
 			Gdk.Rectangle aboveAlloc, belowAlloc;
@@ -234,8 +207,8 @@ namespace Stetic {
 
 				x1 = aboveAlloc.X;
 				x2 = aboveAlloc.X + aboveAlloc.Width;
-				y1 = Math.Min (aboveAlloc.Y + aboveAlloc.Height, site.Allocation.Height - FaultOverlap);
-				y2 = site.Allocation.Height;
+				y1 = Math.Min (aboveAlloc.Y + aboveAlloc.Height, widget.Allocation.Height - FaultOverlap);
+				y2 = widget.Allocation.Height;
 			}
 
 			AddFault (owner, faultId, Gtk.Orientation.Horizontal,
@@ -245,8 +218,8 @@ namespace Stetic {
 		public static void AddVFault (Stetic.Wrapper.Widget owner, object faultId,
 					      Gtk.Widget left, Gtk.Widget right)
 		{
-			WidgetSite site = owner.Wrapped.Parent as WidgetSite;
-			if (site == null || !site.IsRealized)
+			Gtk.Widget widget = owner.Wrapped;
+			if (!widget.IsRealized)
 				return;
 
 			Gdk.Rectangle leftAlloc, rightAlloc;
@@ -277,8 +250,8 @@ namespace Stetic {
 			} else {
 				leftAlloc = left.Allocation;
 
-				x1 = Math.Min (leftAlloc.X + leftAlloc.Width, site.Allocation.Width - FaultOverlap);
-				x2 = site.Allocation.Width;
+				x1 = Math.Min (leftAlloc.X + leftAlloc.Width, widget.Allocation.Width - FaultOverlap);
+				x2 = widget.Allocation.Width;
 
 				y1 = leftAlloc.Y;
 				y2 = leftAlloc.Y + leftAlloc.Height;
@@ -288,43 +261,41 @@ namespace Stetic {
 				  x1, y1, x2 - x1, y2 - y1);
 		}
 
-		static void SiteDestroyed (object site, EventArgs args)
+		static void FaultWidgetDestroyed (object widget, EventArgs args)
 		{
-			ClearFaults ((WidgetSite)site);
+			ClearFaults ((Gtk.Widget)widget);
 		}
 
 		public static void ClearFaults (Stetic.Wrapper.Widget owner)
 		{
-			WidgetSite site = owner.Wrapped.Parent as WidgetSite;
-			if (site != null)
-				ClearFaults (site);
+			ClearFaults (owner.Wrapped);
 		}
 
-		static void ClearFaults (WidgetSite site)
+		static void ClearFaults (Gtk.Widget widget)
 		{
-			Hashtable siteFaults = faultGroups[site] as Hashtable;
-			if (siteFaults == null)
+			Hashtable widgetFaults = faultGroups[widget] as Hashtable;
+			if (widgetFaults == null)
 				return;
-			faultGroups.Remove (site);
+			faultGroups.Remove (widget);
 
-			foreach (Gdk.Window win in siteFaults.Keys)
+			foreach (Gdk.Window win in widgetFaults.Keys)
 				win.Destroy ();
-			siteFaults.Clear ();
-			DND.DestUnset (site);
+			widgetFaults.Clear ();
+			DND.DestUnset (widget);
 		}
 
 		static void ShowFaults ()
 		{
-			foreach (Hashtable siteFaults in faultGroups.Values) {
-				foreach (Gdk.Window win in siteFaults.Keys)
+			foreach (Hashtable widgetFaults in faultGroups.Values) {
+				foreach (Gdk.Window win in widgetFaults.Keys)
 					win.Show ();
 			}
 		}
 
 		static void HideFaults ()
 		{
-			foreach (Hashtable siteFaults in faultGroups.Values) {
-				foreach (Gdk.Window win in siteFaults.Keys)
+			foreach (Hashtable widgetFaults in faultGroups.Values) {
+				foreach (Gdk.Window win in widgetFaults.Keys)
 					win.Hide ();
 			}
 			DestroySplitter ();
@@ -349,8 +320,8 @@ namespace Stetic {
 
 			fault = null;
 
-			foreach (Hashtable siteFaults in faultGroups.Values) {
-				foreach (Fault f in siteFaults.Values) {
+			foreach (Hashtable widgetFaults in faultGroups.Values) {
+				foreach (Fault f in widgetFaults.Values) {
 					f.Window.GetGeometry (out wx, out wy, out width, out height, out depth);
 					if (x >= wx && y >= wy && x <= wx + width && y <= wy + height) {
 						fault = f;
@@ -387,7 +358,7 @@ namespace Stetic {
 							     2 * FaultOverlap, height);
 				}
 				splitter.ShowUnraised ();
-				fault.Window.Parent.Lower ();
+				fault.Window.Lower ();
 			} else if (dragFault == null)
 				return;
 

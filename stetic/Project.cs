@@ -23,7 +23,7 @@ namespace Stetic {
 		{
 			AddWidget (window.Wrapped, null, -1);
 			if (select)
-				Select (window);
+				Selection = window;
 		}
 
 		void AddWidget (Widget widget, ProjectNode parent)
@@ -57,8 +57,8 @@ namespace Stetic {
 			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (widget);
 			if (container != null) {
 				container.ContentsChanged += ContentsChanged;
-				foreach (WidgetSite site in container.Sites)
-					AddWidget (site.Child, parent);
+				foreach (Gtk.Widget w in container.RealChildren)
+					AddWidget (w, parent);
 			}
 		}
 
@@ -95,9 +95,9 @@ namespace Stetic {
 				return;
 
 			ArrayList children = new ArrayList ();
-			foreach (WidgetSite site in cwrap.Sites) {
-				if (site.Child != null)
-					children.Add (site.Child);
+			foreach (Gtk.Widget w in cwrap.RealChildren) {
+				if (w != null)
+					children.Add (w);
 			}
 
 			int i = 0;
@@ -158,58 +158,41 @@ namespace Stetic {
 
 		Stetic.Wrapper.Widget selection;
 
-		public void Select (Stetic.Wrapper.Widget selection)
-		{
-			if (this.selection == selection)
-				return;
-
-			if (this.selection != null)
-				this.selection.UnSelect ();
-			this.selection = selection;
-
-			if (Selected == null)
-				return;
-
-			if (selection == null)
-				Selected (null, null);
-			else
-				Selected (selection, nodes[selection.Wrapped] as ProjectNode);
-		}
-
 		// IStetic
 
-		public WidgetSite CreateWidgetSite (Widget w)
+		public Stetic.Wrapper.Widget Selection
 		{
-			Menu m = null;
+			get {
+				return selection;
+			}
+			set {
+				if (selection == value)
+					return;
 
-			WidgetSite site = new WidgetSite (w);
-			site.PopupContextMenu += delegate (object obj, EventArgs args) {
-				if (m == null)
-					m = new ContextMenu (Stetic.Wrapper.Widget.Lookup (site.Child));
-				m.Popup ();
-			};
-			site.Destroyed += delegate (object obj, EventArgs args) {
-				if (m != null)
-					m.Destroy ();
-			};
-			return site;
+				if (selection != null)
+					selection.UnSelect ();
+				selection = value;
+
+				if (Selected == null)
+					return;
+
+				if (selection == null)
+					Selected (null, null);
+				else
+					Selected (selection, nodes[selection.Wrapped] as ProjectNode);
+			}
 		}
 
-		public Placeholder CreatePlaceholder ()
+		public void PopupContextMenu (Stetic.Wrapper.Widget wrapper)
 		{
-			Menu m = null;
+			Gtk.Menu m = new ContextMenu (wrapper);
+			m.Popup ();
+		}
 
-			Placeholder ph = new Placeholder ();
-			ph.PopupContextMenu += delegate (object obj, EventArgs args) {
-				if (m == null)
-					m = new ContextMenu (ph);
-				m.Popup ();
-			};
-			ph.Destroyed += delegate (object obj, EventArgs args) {
-				if (m != null)
-					m.Destroy ();
-			};
-			return ph;
+		public void PopupContextMenu (Placeholder ph)
+		{
+			Gtk.Menu m = new ContextMenu (ph);
+			m.Popup ();
 		}
 
 		public Gtk.Widget LookupWidgetById (string id)

@@ -3,12 +3,24 @@ using System;
 
 namespace Stetic {
 
-	public class Placeholder : WidgetBox {
+	public class Placeholder : Gtk.DrawingArea {
 
 		public Placeholder ()
 		{
 			DND.DestSet (this, true);
-			Internal = true;
+			Events |= Gdk.EventMask.ButtonPressMask;
+
+		}
+
+		const int minSize = 10;
+
+		protected override void OnSizeRequested (ref Requisition req)
+		{
+			base.OnSizeRequested (ref req);
+			if (req.Width <= 0)
+				req.Width = minSize;
+			if (req.Height <= 0)
+				req.Height = minSize;
 		}
 
 		static private string[] placeholder_xpm = {
@@ -27,9 +39,7 @@ namespace Stetic {
 
 		protected override void OnRealized ()
 		{
-			WidgetFlags |= WidgetFlags.Realized;
-
-			GdkWindow = NewWindow (ParentWindow, Gdk.WindowClass.InputOutput);
+			base.OnRealized ();
 
 			Gdk.Pixmap pixmap, mask;
 			pixmap = Gdk.Pixmap.CreateFromXpmD (GdkWindow, out mask, new Gdk.Color (99, 99, 99), placeholder_xpm);
@@ -70,34 +80,6 @@ namespace Stetic {
 			else
 				dragged.Destroy ();
 			return true;
-		}
-
-		public void Mimic (WidgetSite site)
-		{
-			Gdk.Rectangle alloc = site.Allocation;
-			SetSizeRequest (alloc.Width, alloc.Height);
-			hexpandable = site.HExpandable;
-			vexpandable = site.VExpandable;
-		}
-
-		public void UnMimic ()
-		{
-			SetSizeRequest (-1, -1);
-			hexpandable = vexpandable = true;
-		}
-
-		bool hexpandable = true;
-		public override bool HExpandable {
-			get {
-				return hexpandable;
-			}
-		}
-
-		bool vexpandable = true;
-		public override bool VExpandable {
-			get {
-				return vexpandable;
-			}
 		}
 	}
 }

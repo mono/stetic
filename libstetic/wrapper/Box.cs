@@ -27,11 +27,9 @@ namespace Stetic.Wrapper {
 				box.PackStart (CreatePlaceholder ());
 			}
 			box.SizeAllocated += box_SizeAllocated;
-			box.ParentSet += box_ParentSet;
-			box_ParentSet (this, null);
 		}
 
-		Gtk.Box box {
+		protected Gtk.Box box {
 			get {
 				return (Gtk.Box)Wrapped;
 			}
@@ -39,8 +37,7 @@ namespace Stetic.Wrapper {
 
 		protected override void DoSync ()
 		{
-			WidgetSite site = box.Parent as WidgetSite;
-			if (site == null)
+			if (!box.IsRealized)
 				return;
 
 			DND.ClearFaults (this);
@@ -49,25 +46,20 @@ namespace Stetic.Wrapper {
 			if (children.Length == 0)
 				return;
 
-			WidgetSite[] sorted = new WidgetSite[children.Length];
+			Gtk.Widget[] sorted = new Gtk.Widget[children.Length];
 
 			foreach (Gtk.Widget child in children) {
-				WidgetBox wbox = child as WidgetBox;
-				if (wbox == null)
-					continue;
-
 				Gtk.Box.BoxChild bc = box[child] as Gtk.Box.BoxChild;
-				if (AutoSize[wbox]) {
-					bool exp = (this is HBox) ? wbox.HExpandable : wbox.VExpandable;
+				if (AutoSize[child]) {
+					bool exp = (this is HBox) ? ChildHExpandable (child) : ChildVExpandable (child);
 					if (bc.Expand != exp)
 						bc.Expand = exp;
 					if (bc.Fill != exp)
 						bc.Fill = exp;
 				}
 
-				WidgetSite childsite = child as WidgetSite;
-				if (childsite != null)
-					sorted[bc.Position] = childsite;
+				if (!(child is Placeholder))
+					sorted[bc.Position] = child;
 			}
 
 			if (this is HBox || this is HButtonBox) {
@@ -123,11 +115,11 @@ namespace Stetic.Wrapper {
 		}
 
 		protected override void ChildContentsChanged (Container child) {
-			WidgetSite site = child.Wrapped.Parent as WidgetSite;
+			Gtk.Widget widget = child.Wrapped;
 
-			if (site != null && AutoSize[site]) {
-				Gtk.Box.BoxChild bc = box[site] as Gtk.Box.BoxChild;
-				bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
+			if (widget != null && AutoSize[widget]) {
+				Gtk.Box.BoxChild bc = box[widget] as Gtk.Box.BoxChild;
+				bc.Expand = bc.Fill = (this is HBox) ? ChildHExpandable (widget) : ChildVExpandable (widget);
 			}
 			base.ChildContentsChanged (child);
 		}
@@ -136,19 +128,9 @@ namespace Stetic.Wrapper {
 		{
 			base.ReplaceChild (oldChild, newChild);
 
-			WidgetSite newSite = newChild as WidgetSite;
-			if (newSite != null) {
-				Container container = Stetic.Wrapper.Container.Lookup (newSite.Child);
-				if (container != null)
-					ChildContentsChanged (container);
-			}
-		}
-
-		void box_ParentSet (object obj, Gtk.ParentSetArgs args)
-		{
-			WidgetSite site = box.Parent as WidgetSite;
-			if (site == null)
-				return;
+			Container container = Stetic.Wrapper.Container.Lookup (newChild);
+			if (container != null)
+				ChildContentsChanged (container);
 		}
 
 		void box_SizeAllocated (object obj, Gtk.SizeAllocatedArgs args)
@@ -158,10 +140,9 @@ namespace Stetic.Wrapper {
 
 		public override void Drop (Gtk.Widget w, object faultId)
 		{
-			WidgetSite site = CreateWidgetSite (w);
-			AutoSize[site] = true;
-			box.PackStart (site);
-			box.ReorderChild (site, (int)faultId);
+			AutoSize[w] = true;
+			box.PackStart (w);
+			box.ReorderChild (w, (int)faultId);
 			EmitContentsChanged ();
 
 			Sync ();

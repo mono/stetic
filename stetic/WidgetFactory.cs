@@ -15,7 +15,7 @@ namespace Stetic {
 		{
 			this.project = project;
 			this.wrapperType = wrapperType;
-			DND.SourceSet (this, true);
+			DND.SourceSet (this);
 
 			AboveChild = true;
 

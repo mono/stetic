@@ -39,6 +39,10 @@ namespace Stetic.Wrapper {
 			if (!initialized)
 				Wrapped.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
 			counters[type] = (int)counters[type] + 1;
+
+			Wrapped.Events |= Gdk.EventMask.ButtonPressMask;
+			Wrapped.WidgetEvent += WidgetEvent;
+			Wrapped.PopupMenu += PopupMenu;
 		}
 
 		public new Gtk.Widget Wrapped {
@@ -49,11 +53,65 @@ namespace Stetic.Wrapper {
 
 		public Stetic.Wrapper.Container ParentWrapper {
 			get {
-				Gtk.Widget p = Wrapped.Parent;
-				while (p != null && (p is WidgetSite))
-					p = p.Parent;
-				return Stetic.Wrapper.Container.Lookup (p);
+				return Stetic.Wrapper.Container.Lookup (Wrapped.Parent);
 			}
+		}
+
+		[GLib.ConnectBefore]
+		void WidgetEvent (object obj, Gtk.WidgetEventArgs args)
+		{
+			if (args.Event.Type != Gdk.EventType.ButtonPress)
+				return;
+
+			Gdk.EventButton evb = new Gdk.EventButton (args.Event.Handle);
+			int x = (int)evb.X, y = (int)evb.Y;
+			int erx, ery, wrx, wry;
+
+			// Translate from event window to widget window coords
+			args.Event.Window.GetOrigin (out erx, out ery);
+			Wrapped.GdkWindow.GetOrigin (out wrx, out wry);
+			x += erx - wrx;
+			y += ery - wry;
+
+			Widget wrapper = FindWrapper (Wrapped, x, y);
+			if (wrapper == null)
+				return;
+
+			if (wrapper != stetic.Selection) {
+				wrapper.Select ();
+				args.RetVal = true;
+			}
+			if (evb.Button == 3) {
+				stetic.PopupContextMenu (wrapper);
+				args.RetVal = true;
+			}
+		}
+
+		Widget FindWrapper (Gtk.Widget top, int x, int y)
+		{
+			Gtk.Container container = top as Gtk.Container;
+			if (container == null)
+				return Lookup (top);
+
+			foreach (Gtk.Widget child in container.Children) {
+				Gdk.Rectangle alloc = child.Allocation;
+				if (alloc.Contains (x, y)) {
+					Widget wrapper;
+					if (child.GdkWindow == top.GdkWindow)
+						wrapper = FindWrapper (child, x, y);
+					else
+						wrapper = FindWrapper (child, x - alloc.X, y - alloc.Y);
+					if (wrapper != null)
+						return wrapper;
+				}
+			}
+
+			return Lookup (top);
+		}
+
+		void PopupMenu (object obj, EventArgs args)
+		{
+			stetic.PopupContextMenu (this);
 		}
 
 		public void Select ()
@@ -95,12 +153,6 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				internalChildId = value;
-
-				if (Wrapped != null) {
-					WidgetSite site = Wrapped.Parent as WidgetSite;
-					if (site != null)
-						site.Internal = (value != null);
-				}
 			}
 		}
 
