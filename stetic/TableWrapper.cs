@@ -34,8 +34,8 @@ namespace Stetic {
 
 			grid = new WidgetSite[NRows,NColumns];
 
-			// First fill in the placesites in the grid. If we find any
-			// placesites covering more than one grid square, remove them.
+			// First fill in the placeholders in the grid. If we find any
+			// placeholders covering more than one grid square, remove them.
 			// (New ones will be created below.)
                         foreach (Widget child in children) {
 				site = (WidgetSite) child;
@@ -54,7 +54,7 @@ namespace Stetic {
 					Remove (child);
                         }
 
-			// Now fill in the real widgets, knocking out any placesites
+			// Now fill in the real widgets, knocking out any placeholders
 			// they overlap.
                         foreach (Widget child in children) {
 				site = (WidgetSite) child;
@@ -77,15 +77,15 @@ namespace Stetic {
                         }
 
 			// Scan each row; if there are any empty cells, fill them in
-			// with placesites. If a row contains only placesites, then
+			// with placeholders. If a row contains only placeholders, then
 			// set them all to expand vertically so the row won't collapse.
-			// OTOH, if the row contains any real widget, set any placesites
+			// OTOH, if the row contains any real widget, set any placeholders
 			// in that row to not expand vertically, so they don't force the
 			// real widgets to expand further than they should. If any row
 			// is vertically expandable, then the table as a whole is.
 			vexpandable = false;
 			for (row = 0; row < NRows; row++) {
-				bool allPlacesites = true;
+				bool allPlaceholders = true;
 
 				for (col = 0; col < NColumns; col++) {
 					if (grid[row,col] == null) {
@@ -96,15 +96,18 @@ namespace Stetic {
 						Attach (site, col, col + 1, row, row + 1);
 						grid[row,col] = site;
 					} else if (!grid[row,col].VExpandable)
-						allPlacesites = false;
+						allPlaceholders = false;
 				}
 
 				for (col = 0; col < NColumns; col++) {
-					tc = this[grid[row,col]] as Table.TableChild;
-					tc.YOptions = allPlacesites ? expandOpts : fillOpts;
+					site = grid[row,col];
+					if (site.Occupied)
+						continue;
+					tc = this[site] as Table.TableChild;
+					tc.YOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
-				if (allPlacesites)
+				if (allPlaceholders)
 					vexpandable = true;
 			}
 
@@ -112,21 +115,24 @@ namespace Stetic {
 			// don't have to worry about empty cells this time).
 			hexpandable = false;
 			for (col = 0; col < NColumns; col++) {
-				bool allPlacesites = true;
+				bool allPlaceholders = true;
 
 				for (row = 0; row < NRows; row++) {
 					if (!grid[row,col].HExpandable) {
-						allPlacesites = false;
+						allPlaceholders = false;
 						break;
 					}
 				}
 
 				for (row = 0; row < NRows; row++) {
-					tc = this[grid[row,col]] as Table.TableChild;
-					tc.XOptions = allPlacesites ? expandOpts : fillOpts;
+					site = grid[row,col];
+					if (site.Occupied)
+						continue;
+					tc = this[site] as Table.TableChild;
+					tc.XOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
-				if (allPlacesites)
+				if (allPlaceholders)
 					hexpandable = true;
 			}
 
@@ -155,8 +161,15 @@ namespace Stetic {
 			base.OnRemoved (w);
 		}
 
-		private void ChildOccupancyChanged (IWidgetSite site)
+		private void ChildOccupancyChanged (IWidgetSite isite)
 		{
+			WidgetSite site = (WidgetSite)isite;
+
+			if (site.Occupied) {
+				Table.TableChild tc = this[site] as Table.TableChild;
+				tc.XOptions = 0;
+				tc.YOptions = 0;
+			}
 			Sync ();
 		}
 

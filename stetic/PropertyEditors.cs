@@ -272,11 +272,34 @@ namespace Stetic {
 			return entry;
 		}
 
+		// Can't currently use an anon delegate here because of
+		// bug 69614
+		private class EnumHelper {
+			PropertyInfo info;
+			object obj, value;
+
+			public EnumHelper (PropertyInfo info, object obj, int value)
+			{
+				this.info = info;
+				this.obj = obj;
+				this.value = System.Enum.ToObject (info.PropertyType, value);
+			}
+
+			public void Activated (object item, EventArgs args)
+			{
+				info.SetValue (obj, value, null);
+			}
+		}
+
 		static Widget Enum (ParamSpecEnum pspec, PropertyInfo info, object obj)
 		{
-			OptionMenu om = new OptionMenu ();
-			Menu menu = new Menu ();
+			OptionMenu om;
+			Menu menu;
 			int defaultValue, defaultItem;
+
+			om = new OptionMenu ();
+			menu = new Menu ();
+			om.Menu = menu;
 
 			if (info.CanRead)
 				defaultValue = (int)info.GetValue (obj, null);
@@ -290,11 +313,8 @@ namespace Stetic {
 
 				MenuItem item = new MenuItem (name + " (" + val.ToString() + ")");
 				if (info.CanWrite) {
-#if NOTYET // bug 69614
-					item.Activated += delegate (object o, EventArgs args) {
-						info.SetValue (obj, val, null);
-					};
-#endif
+					EnumHelper eh = new EnumHelper (info, obj, val);
+					item.Activated += eh.Activated;
 				} else
 					item.Sensitive = false;
 				menu.Add (item);
@@ -304,16 +324,44 @@ namespace Stetic {
 				nItems++;
 			}
 
-			om.Menu = menu;
 			return om;
+		}
+
+		// Can't currently use an anon delegate here because of
+		// bug 69614
+		private class FlagsHelper {
+			PropertyInfo info;
+			object obj;
+			uint value;
+
+			public FlagsHelper (PropertyInfo info, object obj, uint value)
+			{
+				this.info = info;
+				this.obj = obj;
+				this.value = value;
+			}
+
+			public void Toggled (object item, EventArgs args)
+			{
+				uint cur = Convert.ToUInt32 (info.GetValue (obj, null));
+				if (((CheckMenuItem)item).Active)
+					cur |= value;
+				else
+					cur &= ~value;
+				info.SetValue (obj, System.Enum.ToObject (info.PropertyType, cur), null);
+			}
 		}
 
 		static Widget Flags (ParamSpecFlags pspec, PropertyInfo info, object obj)
 		{
-			OptionMenu om = new OptionMenu ();
-			Menu menu = new Menu ();
+			OptionMenu om;
+			Menu menu;
 			MenuItem item;
 			uint defaultValue, mask, bit;
+
+			om = new OptionMenu ();
+			menu = new Menu ();
+			om.Menu = menu;
 
 			if (info.CanRead)
 				defaultValue = Convert.ToUInt32 (info.GetValue (obj, null));
@@ -339,11 +387,8 @@ namespace Stetic {
 
 				CheckMenuItem citem = new CheckMenuItem (System.String.Format ("{0} ({1:x})", name, bit));
 				if (info.CanWrite) {
-#if NOTYET
-					citem.Activated += delegate (object o, EventArgs args) {
-						// FIXME;
-					};
-#endif
+					FlagsHelper fh = new FlagsHelper (info, obj, bit);
+					citem.Toggled += fh.Toggled;
 				} else
 					citem.Sensitive = false;
 				menu.Add (citem);
@@ -352,7 +397,7 @@ namespace Stetic {
 					citem.Active = true;
 			}
 
-			om.Menu = menu;
+			om.SetHistory (0);
 			return om;
 		}
 

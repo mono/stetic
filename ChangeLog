@@ -1,3 +1,15 @@
+2004-12-13  Dan Winship  <danw@novell.com>
+
+	* stetic/PropertyEditors.cs (Enum, Flags): implement these by
+	using private classes rather than anonymous delegates, to work
+	around 69614.
+
+	* stetic/TableWrapper.cs: fix a search-and-replace-o ("placesite"
+	instead of "placeholder")
+	(Sync): Don't adjust expand/fill settings of occupied sites.
+	(ChildOccupancyChanged): When a site becomes occupied, reset its
+	attach options.
+
 2004-12-10  Dan Winship  <danw@novell.com>
 
 	* stetic/WidgetBox.cs: Always have a GdkWindow, so that the
