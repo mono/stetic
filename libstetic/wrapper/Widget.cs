@@ -235,5 +235,13 @@ namespace Stetic.Wrapper {
 				Wrapped.HierarchyChanged -= HierarchyChanged;
 			}
 		}
+
+		public override string ToString ()
+		{
+			if (Wrapped.Name != null)
+				return "[" + Wrapped.GetType ().Name + " '" + Wrapped.Name + "' " + Wrapped.GetHashCode ().ToString () + "]";
+			else
+				return "[" + Wrapped.GetType ().Name + " " + Wrapped.GetHashCode ().ToString () + "]";
+		}
 	}
 }

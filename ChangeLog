@@ -1,3 +1,11 @@
+2005-04-05  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/Widget.cs (ToString): override
+
+	* stetic/ContextMenu.cs (ContextMenu): Update for WidgetSite
+	removal; use the right context widget. Also, only include the
+	insensitive "name" label on the top-level menu.
+
 2005-04-04  Dan Winship  <danw@novell.com>
 
 	* libstetic/PropertyDescriptor.cs (GladeName): fix for proxied

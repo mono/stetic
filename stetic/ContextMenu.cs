@@ -26,7 +26,7 @@ namespace Stetic {
 			BuildContextMenu (Stetic.Wrapper.Widget.Lookup (ph.Parent), false, false, ph);
 		}
 
-		public ContextMenu (Stetic.Wrapper.Widget wrapper) : this (wrapper, wrapper.Wrapped.Parent) {}
+		public ContextMenu (Stetic.Wrapper.Widget wrapper) : this (wrapper, wrapper.Wrapped) {}
 
 		public ContextMenu (Stetic.Wrapper.Widget wrapper, Gtk.Widget context)
 		{
@@ -34,9 +34,11 @@ namespace Stetic {
 
 			this.wrapper = wrapper;
 
-			item = LabelItem (wrapper.Wrapped.Name);
-			item.Sensitive = false;
-			Add (item);
+			if (context == wrapper.Wrapped) {
+				item = LabelItem (wrapper.Wrapped.Name);
+				item.Sensitive = false;
+				Add (item);
+			}
 
 			item = new MenuItem ("_Select");
 			item.Activated += DoSelect;
