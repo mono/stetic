@@ -59,29 +59,24 @@ namespace Stetic.Wrapper {
 				sorted[bc.Position] = childsite;
 			}
 
-			Gdk.Rectangle alloc = box.Allocation;
-
 			if (this is HBox) {
 				if (sorted[0] != null)
-					site.AddVFault (0, 0, 0, alloc.Height);
+					site.AddVFault (0, null, sorted[0]);
 				if (sorted[sorted.Length - 1] != null)
-					site.AddVFault (sorted.Length, alloc.Width, 0, alloc.Height);
+					site.AddVFault (sorted.Length, sorted[sorted.Length - 1], null);
 			} else {
 				if (sorted[0] != null)
-					site.AddHFault (0, 0, 0, alloc.Width);
+					site.AddHFault (0, null, sorted[0]);
 				if (sorted[sorted.Length - 1] != null)
-					site.AddHFault (sorted.Length, alloc.Height, 0, alloc.Width);
+					site.AddHFault (sorted.Length, sorted[sorted.Length - 1], null);
 			}
 
 			for (int i = 1; i < sorted.Length; i++) {
 				if (sorted[i - 1] != null && sorted[i] != null) {
-					Gdk.Rectangle alloc1 = sorted[i - 1].Allocation;
-					Gdk.Rectangle alloc2 = sorted[i].Allocation;
-
 					if (this is HBox)
-						site.AddVFault (i, (alloc1.X + alloc1.Width + alloc2.X) / 2, 0, alloc.Height);
+						site.AddVFault (i, sorted[i - 1], sorted[i]);
 					else
-						site.AddHFault (i, (alloc1.Y + alloc1.Height + alloc2.Y) / 2, 0, alloc.Width);
+						site.AddHFault (i, sorted[i - 1], sorted[i]);
 				}
 			}
 		}

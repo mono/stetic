@@ -174,38 +174,119 @@ namespace Stetic {
 		}
 
 		Hashtable faults;
+		Set hfaults;
+		const int FaultOverlap = 3;
 
-		void SetupFaults ()
+		public void AddFault (object id, Gtk.Orientation orientation, Rectangle fault)
 		{
-			if (faults == null) {
-				faults = new Hashtable ();
-				DND.DragBegin += ShowFaults;
-				DND.DragEnd += HideFaults;
+			AddFault (id, orientation, fault.X, fault.Y, fault.Width, fault.Height);
+		}
+
+		public void AddFault (object id, Gtk.Orientation orientation,
+				      int x, int y, int width, int height)
+		{
+			if (!IsRealized)
+				return;
+
+			Gdk.Window win = NewWindow (GdkWindow, Gdk.WindowClass.InputOnly);
+			win.MoveResize (x, y, width, height);
+
+			if (faults == null || faults.Count == 0) {
+				if (faults == null) {
+					faults = new Hashtable ();
+					hfaults = new Set ();
+					DND.DragBegin += ShowFaults;
+					DND.DragEnd += HideFaults;
+				}
+				if (Occupancy == SiteOccupancy.Occupied)
+					DND.DestSet (this, false);
 			}
-			if (Occupancy == SiteOccupancy.Occupied)
-				DND.DestSet (this, false);
+
+			faults[id] = win;
+			hfaults[id] = (orientation == Gtk.Orientation.Horizontal);
 		}
 
-		public void AddHFault (object id, int y, int x1, int x2)
+		public void AddHFault (object id, WidgetSite above, WidgetSite below)
 		{
 			if (!IsRealized)
 				return;
-			Gdk.Window win = NewWindow (GdkWindow, Gdk.WindowClass.InputOnly);
-			win.MoveResize (x1, y - 2, x2 - x1 , 5);
-			if (faults == null || faults.Count == 0)
-				SetupFaults ();
-			faults[id] = win;
+
+			Gdk.Rectangle aboveAlloc, belowAlloc;
+			int x1, y1, x2, y2;
+
+			if (above != null && below != null) {
+				aboveAlloc = above.Allocation;
+				belowAlloc = below.Allocation;
+
+				x1 = Math.Min (aboveAlloc.X, belowAlloc.X);
+				x2 = Math.Max (aboveAlloc.X + aboveAlloc.Width, belowAlloc.X + belowAlloc.Width);
+				y1 = aboveAlloc.Y + aboveAlloc.Height;
+				y2 = belowAlloc.Y;
+
+				while (y2 - y1 < FaultOverlap * 2) {
+					y1--;
+					y2++;
+				}
+			} else if (above == null) {
+				belowAlloc = below.Allocation;
+
+				x1 = belowAlloc.X;
+				x2 = belowAlloc.X + belowAlloc.Width;
+				y1 = 0;
+				y2 = Math.Max (belowAlloc.Y, FaultOverlap);
+			} else {
+				aboveAlloc = above.Allocation;
+
+				x1 = aboveAlloc.X;
+				x2 = aboveAlloc.X + aboveAlloc.Width;
+				y1 = Math.Min (aboveAlloc.Y + aboveAlloc.Height, Allocation.Height - FaultOverlap);
+				y2 = Allocation.Height;
+			}
+
+			AddFault (id, Gtk.Orientation.Horizontal, x1, y1, x2 - x1, y2 - y1);
 		}
 
-		public void AddVFault (object id, int x, int y1, int y2)
+		public void AddVFault (object id, WidgetSite left, WidgetSite right)
 		{
 			if (!IsRealized)
 				return;
-			Gdk.Window win = NewWindow (GdkWindow, Gdk.WindowClass.InputOnly);
-			win.MoveResize (x - 2, y1, 5, y2 - y1);
-			if (faults == null || faults.Count == 0)
-				SetupFaults ();
-			faults[id] = win;
+
+			Gdk.Rectangle leftAlloc, rightAlloc;
+			int x1, y1, x2, y2;
+
+			if (left != null && right != null) {
+				leftAlloc = left.Allocation;
+				rightAlloc = right.Allocation;
+
+				x1 = leftAlloc.X + leftAlloc.Width;
+				x2 = rightAlloc.X;
+
+				y1 = Math.Min (leftAlloc.Y, rightAlloc.Y);
+				y2 = Math.Max (leftAlloc.Y + leftAlloc.Height, rightAlloc.Y + rightAlloc.Height);
+
+				while (x2 - x1 < FaultOverlap * 2) {
+					x1--;
+					x2++;
+				}
+			} else if (left == null) {
+				rightAlloc = right.Allocation;
+
+				x1 = 0;
+				x2 = Math.Max (rightAlloc.X, FaultOverlap);
+
+				y1 = rightAlloc.Y;
+				y2 = rightAlloc.Y + rightAlloc.Height;
+			} else {
+				leftAlloc = left.Allocation;
+
+				x1 = Math.Min (leftAlloc.X + leftAlloc.Width, Allocation.Width - FaultOverlap);
+				x2 = Allocation.Width;
+
+				y1 = leftAlloc.Y;
+				y2 = leftAlloc.Y + leftAlloc.Height;
+			}
+
+			AddFault (id, Gtk.Orientation.Vertical, x1, y1, x2 - x1, y2 - y1);
 		}
 
 		public void ClearFaults ()
@@ -214,6 +295,7 @@ namespace Stetic {
 				foreach (Gdk.Window win in faults.Values)
 					win.Destroy ();
 				faults.Clear ();
+				hfaults.Clear ();
 			}
 			if (Occupancy == SiteOccupancy.Occupied)
 				DND.DestUnset (this);
@@ -281,7 +363,13 @@ namespace Stetic {
 
 				splitter = NewWindow (GdkWindow, Gdk.WindowClass.InputOutput);
 				matchWin.GetGeometry (out wx, out wy, out width, out height, out depth);
-				splitter.MoveResize (wx, wy, width, height);
+				if (hfaults[dragFault]) {
+					splitter.MoveResize (wx, wy + height / 2 - FaultOverlap,
+							     width, 2 * FaultOverlap);
+				} else {
+					splitter.MoveResize (wx + width / 2 - FaultOverlap, wy,
+							     2 * FaultOverlap, height);
+				}
 				splitter.ShowUnraised ();
 				GdkWindow.Lower ();
 			} else if (dragFault == null)

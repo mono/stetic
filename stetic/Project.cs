@@ -99,7 +99,7 @@ namespace Stetic {
 
 			ArrayList children = new ArrayList ();
 			foreach (WidgetSite site in cwrap.Sites) {
-				if (site.Occupied)
+				if (site.Contents != null)
 					children.Add (site.Contents);
 			}
 

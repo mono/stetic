@@ -19,6 +19,11 @@ namespace Stetic {
 			}
 		}
 
+		public void Clear ()
+		{
+			hash.Clear ();
+		}
+
 		public IEnumerator GetEnumerator ()
 		{
 			return this;

@@ -1,3 +1,19 @@
+2005-03-15  Dan Winship  <danw@novell.com>
+
+	* libstetic/WidgetSite.cs (AddFault, AddHFault, AddVFault): Make
+	AddHFault and AddVFault take WidgetSites rather than coordinates,
+	and provide AddFault for fully-generic fault adding. For AddHFault
+	and AddVFault, make the fault windows fill the entire space
+	between the two widgets (or from the widget to the edge of its
+	parent) if the widgets are spread apart.
+	(OnDragMotion): Center the splitter inside its fault since the
+	fault may be very large now.
+
+	* libstetic/wrapper/Box.cs (Sync): update for that
+
+	* stetic/Project.cs (ContentsChanged): fix a crash when dragging a
+	widget from one position to another within the same container
+
 2005-03-14  Dan Winship  <danw@novell.com>
 
 	* libstetic/WidgetSite.cs (FindFault): fix another autoexpand
