@@ -5,13 +5,16 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class Window : Gtk.Window, Stetic.IObjectWrapper {
+	public class Window : Gtk.Window, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
 		public static PropertyGroup WindowProperties;
 		public static PropertyGroup WindowSizeProperties;
 		public static PropertyGroup WindowMiscProperties;
+
+		static PropertyGroup[] childgroups;
+		public PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
 
 		static Window () {
 			PropertyDescriptor[] props;
@@ -51,6 +54,8 @@ namespace Stetic.Wrapper {
 				WindowProperties, WindowSizeProperties, WindowMiscProperties,
 				Widget.CommonWidgetProperties
 			};
+
+			childgroups = new PropertyGroup[0];
 		}
 
 		public Window (string title) : base (title)

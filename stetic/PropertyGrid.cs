@@ -145,7 +145,7 @@ namespace Stetic {
 			return null;
 		}
 
-		public void AddGObjectProperties (Widget w)
+		void AddGObjectProperties (Widget w)
 		{
 			VBox group = AddGroup ("Properties");
 
@@ -156,7 +156,7 @@ namespace Stetic {
 			}
 		}
 
-		public void AddObjectWrapperProperties (object obj)
+		void AddObjectWrapperProperties (object obj)
 		{
 			foreach (PropertyGroup pgroup in ((IObjectWrapper)obj).PropertyGroups) {
 				VBox group = AddGroup (pgroup.Name);
@@ -185,6 +185,14 @@ namespace Stetic {
 
 			ContainerChild cc = parent[(Widget)site];
 
+			if (parent is Stetic.IContainerWrapper)
+				AddContainerWrapperProperties (parent, cc);
+			else
+				AddGtkContainerProperties (parent, cc);
+		}
+
+		void AddGtkContainerProperties (Container parent, ContainerChild cc)
+		{
 			VBox group = AddGroup ("Properties");
 
 			foreach (PropertyInfo info in cc.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
@@ -197,6 +205,15 @@ namespace Stetic {
 					if (pspec != null)
 						AddToGroup (group, new PropertyDescriptor (cc.GetType (), info.Name), cc);
 				}
+			}
+		}
+
+		void AddContainerWrapperProperties (Container parent, ContainerChild cc)
+		{
+			foreach (PropertyGroup pgroup in ((IContainerWrapper)parent).ChildPropertyGroups) {
+				VBox group = AddGroup (pgroup.Name);
+				foreach (PropertyDescriptor prop in pgroup.Properties)
+					AddToGroup (group, prop, cc);
 			}
 		}
 	}

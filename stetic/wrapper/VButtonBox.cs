@@ -5,14 +5,21 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class VButtonBox : Gtk.VButtonBox, Stetic.IObjectWrapper, Stetic.IDesignTimeContainer {
+	public class VButtonBox : Gtk.VButtonBox, Stetic.IContainerWrapper, Stetic.IDesignTimeContainer {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
+
+		static PropertyGroup[] childgroups;
+		public PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
 
 		static VButtonBox () {
 			groups = new PropertyGroup[] {
 				ButtonBox.ButtonBoxProperties,
 				Widget.CommonWidgetProperties
+			};
+
+			childgroups = new PropertyGroup[] {
+				ButtonBox.ButtonBoxChildProperties
 			};
 		}
 

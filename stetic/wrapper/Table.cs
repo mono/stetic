@@ -11,6 +11,11 @@ namespace Stetic.Wrapper {
 
 		public static PropertyGroup TableProperties;
 
+		static PropertyGroup[] childgroups;
+		public PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
+
+		public static PropertyGroup TableChildProperties;
+
 		static Table () {
 			PropertyDescriptor[] props;
 
@@ -27,6 +32,22 @@ namespace Stetic.Wrapper {
 			groups = new PropertyGroup[] {
 				TableProperties,
 				Widget.CommonWidgetProperties
+			};
+
+			props = new PropertyDescriptor[] {
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "TopAttach"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "BottomAttach"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "LeftAttach"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "RightAttach"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "XOptions"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "XPadding"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "YOptions"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "YPadding")
+			};				
+			TableChildProperties = new PropertyGroup ("Table Child Layout", props);
+
+			childgroups = new PropertyGroup[] {
+				TableChildProperties
 			};
 		}
 

@@ -5,11 +5,14 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class Frame : Gtk.Frame, Stetic.IObjectWrapper, Stetic.IDesignTimeContainer {
+	public class Frame : Gtk.Frame, Stetic.IContainerWrapper, Stetic.IDesignTimeContainer {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
 		public static PropertyGroup FrameProperties;
+
+		static PropertyGroup[] childgroups;
+		public PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
 
 		static Frame () {
 			PropertyDescriptor[] props;
@@ -28,6 +31,8 @@ namespace Stetic.Wrapper {
 				FrameProperties,
 				Widget.CommonWidgetProperties
 			};
+
+			childgroups = new PropertyGroup[0];
 		}
 
 		public Frame (string label) : base (label)

@@ -5,14 +5,21 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class HBox : Gtk.HBox, Stetic.IObjectWrapper, Stetic.IDesignTimeContainer {
+	public class HBox : Gtk.HBox, Stetic.IContainerWrapper, Stetic.IDesignTimeContainer {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
+
+		static PropertyGroup[] childgroups;
+		public PropertyGroup[] ChildPropertyGroups { get { return childgroups; } }
 
 		static HBox () {
 			groups = new PropertyGroup[] {
 				Box.BoxProperties,
 				Widget.CommonWidgetProperties
+			};
+
+			childgroups = new PropertyGroup[] {
+				Box.BoxChildProperties
 			};
 		}
 

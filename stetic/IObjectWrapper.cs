@@ -21,6 +21,10 @@ namespace Stetic {
 		PropertyGroup[] PropertyGroups { get; }
 	}
 
+	public interface IContainerWrapper : IObjectWrapper {
+		PropertyGroup[] ChildPropertyGroups { get; }
+	}
+
 
 	public delegate void SensitivityChangedDelegate (string property, bool sensitivity);
 

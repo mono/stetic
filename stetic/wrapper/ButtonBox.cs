@@ -7,6 +7,7 @@ namespace Stetic.Wrapper {
 
 	public static class ButtonBox {
 		public static PropertyGroup ButtonBoxProperties;
+		public static PropertyGroup ButtonBoxChildProperties;
 
 		static ButtonBox () {
 			PropertyDescriptor[] props;
@@ -18,6 +19,11 @@ namespace Stetic.Wrapper {
 				new PropertyDescriptor (typeof (Gtk.Container), "BorderWidth"),
 			};
 			ButtonBoxProperties = new PropertyGroup ("Button Box Properties", props);
+
+			props = new PropertyDescriptor[] {
+				new PropertyDescriptor (typeof (Gtk.ButtonBox.ButtonBoxChild), "Secondary"),
+			};
+			ButtonBoxChildProperties = new PropertyGroup ("Button Box Child Layout", props);
 		}
 	}
 }
