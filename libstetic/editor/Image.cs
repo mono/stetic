@@ -42,7 +42,7 @@ namespace Stetic.Editor {
 				stockLabels[i + items.Count] = nonItems[i] as string;
 			}
 
-			Gtk.IconFactory.LookupIconSize (Gtk.IconSize.Button, out imgWidth, out imgHeight);
+			Gtk.Icon.SizeLookup (Gtk.IconSize.Button, out imgWidth, out imgHeight);
 		}
 
 		class StockItemSorter : IComparer {
