@@ -1,5 +1,31 @@
 2005-01-13  Dan Winship  <danw@novell.com>
 
+	* stetic/WidgetFactory.cs (WidgetFactoryAttribute): gone, turned
+	into WidgetWrapperAttribute
+	(WidgetFactory, WindowFactory): Take a Type directly rather than a
+	WidgetFactoryDelegate.
+
+	* stetic/WidgetWrapperAttribute.cs: replaces
+	WidgetFactoryAttribute, but basically the same thing
+
+	* stetic/Palette.cs (AddWidgets): Take an Assembly rather than a
+	Type, and search for all Types in that Assembly with a
+	WidgetWrapperAttribute.
+
+	* stetic/Stetic.cs (Main): Update call to Palette.AddWidgets
+
+	* stetic/wrapper/DefaultWidgets.cs: Gone
+
+	* stetic/wrapper/Dialog.cs: 
+	* stetic/wrapper/Notebook.cs: 
+	* stetic/wrapper/TextView.cs: 
+	* stetic/wrapper/ToggleButton.cs: wrap these
+
+	* stetic/wrapper/*.cs: add WidgetWrapper attributes, make sure
+	every class has a no-arg constructor
+
+2005-01-13  Dan Winship  <danw@novell.com>
+
 	* stetic/ContextMenu.cs (IContextMenuProvider): New interface for
 	widget wrappers that want to add items to their context menus.
 	(ContextMenu): support IContextMenuProvider.
