@@ -1,5 +1,67 @@
 2004-12-20  Dan Winship  <danw@novell.com>
 
+	* stetic/IObjectWrapper.cs: interface for Stetic.Wrapper objects
+	to use to allow them to define their properties
+
+	* stetic/PropertyDescriptor.cs: a class describing an editable
+	object property
+
+	* stetic/PropertyGrid.cs: Reimplement this using
+	PropertyDescriptors and PropertyGroups for the model, and
+	Gtk.Expanders for the view.
+
+	* stetic/PropertyEditorAttribute.cs: for Stetic.Editors to use to
+	specify the property and/or event to use to interact with them
+
+	* stetic/PropertyEditors.cs: Updated for PropertyDescriptor, the
+	Stetic.Editor namespace, etc
+
+	* stetic/ParamSpec.cs: make Minimum, Maximum, Default virtual
+	methods on ParamSpec itself, overridden by subclasses.
+
+	* stetic/editor/Boolean.cs: 
+	* stetic/editor/Char.cs: 
+	* stetic/editor/Enumeration.cs: 
+	* stetic/editor/FloatRange.cs: 
+	* stetic/editor/IntRange.cs: 
+	* stetic/editor/OptIntRange.cs: 
+	* stetic/editor/StockItem.cs: 
+	* stetic/editor/String.cs: Editors for properties of various types
+
+	* stetic/wrapper/Arrow.cs: 
+	* stetic/wrapper/Button.cs: 
+	* stetic/wrapper/CheckButton.cs: 
+	* stetic/wrapper/ComboBox.cs: 
+	* stetic/wrapper/DrawingArea.cs: 
+	* stetic/wrapper/Entry.cs: 
+	* stetic/wrapper/HScrollbar.cs: 
+	* stetic/wrapper/HSeparator.cs: 
+	* stetic/wrapper/Label.cs: 
+	* stetic/wrapper/RadioButton.cs: 
+	* stetic/wrapper/VScrollbar.cs: 
+	* stetic/wrapper/VSeparator.cs: IObjectWrapper implementations
+
+	* stetic/wrapper/Misc.cs: 
+	* stetic/wrapper/Range.cs: 
+	* stetic/wrapper/Widget.cs: static classes defining certain
+	PropertyGroups
+
+	* stetic/wrapper/HBox.cs:
+	* stetic/wrapper/HPaned.cs:
+	* stetic/wrapper/Table.cs:
+	* stetic/wrapper/VBox.cs:
+	* stetic/wrapper/VPaned.cs:
+	* stetic/wrapper/Window.cs: s/Widget/Gtk.Widget/ since there is
+	now a Stetic.Wrapper.Widget
+
+	* stetic/wrapper/DefaultWidgets.cs: use the new wrappers
+
+	* stetic/Makefile.am (stetic_exe_SOURCES): update
+
+	* stetic/stetic.in: pass --debug to mono
+
+2004-12-20  Dan Winship  <danw@novell.com>
+
 	* stetic/wrapper: Rename "wrappers" dir to "wrapper", to match the
 	namespace
 
