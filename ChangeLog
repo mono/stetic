@@ -1,5 +1,24 @@
 2005-01-20  Dan Winship  <danw@novell.com>
 
+	* Move 90% of the files in the repository somewhere else.
+
+	* libstetic/: classes needed by both Stetic itself and widget
+	wrapper implementations
+
+	* libstetic/editor/: moved from stetic/editor
+
+	* widgets/: moved from stetic/wrapper and modified a bit to only
+	require libstetic. (In particular, all the wrappers now have
+	constructors that take an IStetic object which can be used to
+	create new WidgetSites)
+
+	* widgets/pixmaps: moved from pixmaps/
+
+	* stetic/: now just the app itself, which links to libstetic and
+	dynamically loads libsteticwidgets.
+	
+2005-01-20  Dan Winship  <danw@novell.com>
+
 	* stetic/IObjectWrapper.cs (PropertyGroup): Make this take a
 	varargs list of property names and build the PropertyDescriptors
 	itself, to cut down on the amount of work the wrappers need to do.
