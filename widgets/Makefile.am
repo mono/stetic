@@ -3,6 +3,7 @@ SUBDIRS = pixmaps
 noinst_DATA = libsteticwidgets.dll
 
 libsteticwidgets_dll_sources =		\
+	Alignment.cs			\
 	Arrow.cs			\
 	Box.cs				\
 	Button.cs			\
@@ -14,6 +15,8 @@ libsteticwidgets_dll_sources =		\
 	Dialog.cs			\
 	DrawingArea.cs			\
 	Entry.cs			\
+	EventBox.cs			\
+	Expander.cs			\
 	FontButton.cs			\
 	Frame.cs			\
 	HBox.cs				\
@@ -33,6 +36,7 @@ libsteticwidgets_dll_sources =		\
 	RadioButton.cs			\
 	Range.cs			\
 	Scale.cs			\
+	ScrolledWindow.cs		\
 	SpinButton.cs			\
 	Statusbar.cs			\
 	Table.cs			\

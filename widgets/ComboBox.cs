@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Combo Box", "combo.png")]
-	public class ComboBox : Gtk.ComboBox, Stetic.IObjectWrapper {
+	public class ComboBox : Gtk.ComboBox, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Horizontal Scrollbar", "hscrollbar.png")]
-	public class HScrollbar : Gtk.HScrollbar, Stetic.IObjectWrapper {
+	public class HScrollbar : Gtk.HScrollbar, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

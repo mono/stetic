@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Calendar", "calendar.png")]
-	public class Calendar : Gtk.Calendar, Stetic.IObjectWrapper {
+	public class Calendar : Gtk.Calendar, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

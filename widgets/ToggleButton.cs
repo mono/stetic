@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Toggle Button", "togglebutton.png")]
-	public class ToggleButton : Gtk.ToggleButton, Stetic.IObjectWrapper {
+	public class ToggleButton : Gtk.ToggleButton, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

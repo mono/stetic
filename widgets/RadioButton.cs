@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Radio Button", "radiobutton.png")]
-	public class RadioButton : Gtk.RadioButton, Stetic.IObjectWrapper {
+	public class RadioButton : Gtk.RadioButton, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

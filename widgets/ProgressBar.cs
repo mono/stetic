@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("ProgressBar", "progressbar.png")]
-	public class ProgressBar : Gtk.ProgressBar, Stetic.IObjectWrapper {
+	public class ProgressBar : Gtk.ProgressBar, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

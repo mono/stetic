@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Label", "label.png")]
-	public class Label : Gtk.Label, Stetic.IObjectWrapper {
+	public class Label : Gtk.Label, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

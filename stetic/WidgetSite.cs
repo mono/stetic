@@ -42,14 +42,14 @@ namespace Stetic {
 
 		public override IWidgetSite ParentSite {
 			get {
-				Widget w = Parent;
-				if (w == null)
-					return null;
-				w = w.Parent;
-				if (w == null)
-					return WindowSite.LookupSite (Parent);
-				else
-					return w as IWidgetSite;
+				for (Widget w = Parent; ; w = w.Parent) {
+					if (w == null)
+						return null;
+					if (w is IWidgetSite)
+						return w as IWidgetSite;
+					if (w.Parent == null)
+						return WindowSite.LookupSite (w);
+				}
 			}
 		}
 

@@ -276,5 +276,11 @@ namespace Stetic {
 
 			return base.OnExposeEvent (evt);
 		}
+
+		protected override void OnSetScrollAdjustments (Gtk.Adjustment hadj, Gtk.Adjustment vadj)
+		{
+			if (Child != null)
+				Child.SetScrollAdjustments (hadj, vadj);
+		}
 	}
 }

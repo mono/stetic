@@ -6,6 +6,7 @@ libstetic_dll_sources =			\
 	IObjectWrapper.cs		\
 	IStetic.cs			\
 	IWidgetSite.cs			\
+	IWidgetWrapper.cs		\
 	IWindowWrapper.cs		\
 	ParamFlags.cs			\
 	ParamSpec.cs			\

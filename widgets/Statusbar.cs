@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Statusbar", "statusbar.png")]
-	public class Statusbar : Gtk.Statusbar, Stetic.IObjectWrapper {
+	public class Statusbar : Gtk.Statusbar, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

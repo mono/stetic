@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Button", "button.png")]
-	public class Button : Gtk.Button, Stetic.IObjectWrapper, Stetic.IContextMenuProvider {
+	public class Button : Gtk.Button, Stetic.IWidgetWrapper, Stetic.IContextMenuProvider {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

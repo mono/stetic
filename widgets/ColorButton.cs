@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Color Button", "colorbutton.png")]
-	public class ColorButton : Gtk.ColorButton, Stetic.IObjectWrapper {
+	public class ColorButton : Gtk.ColorButton, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

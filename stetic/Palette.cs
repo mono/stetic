@@ -62,7 +62,7 @@ namespace Stetic {
 					AddWidget (assem, type, windows, true);
 				else if (type.GetInterface ("Stetic.IContainerWrapper") != null)
 					AddWidget (assem, type, containers, false);
-				else if (type.GetInterface ("Stetic.IObjectWrapper") != null)
+				else if (type.GetInterface ("Stetic.IWidgetWrapper") != null)
 					AddWidget (assem, type, normals, false);
 			}
 

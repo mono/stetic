@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Spin Button", "spinbutton.png")]
-	public class SpinButton : Gtk.SpinButton, Stetic.IObjectWrapper {
+	public class SpinButton : Gtk.SpinButton, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

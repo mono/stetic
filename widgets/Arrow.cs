@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Arrow", "arrow.png")]
-	public class Arrow : Gtk.Arrow, Stetic.IObjectWrapper {
+	public class Arrow : Gtk.Arrow, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

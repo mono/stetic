@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("VSeparator", "vseparator.png")]
-	public class VSeparator : Gtk.VSeparator, Stetic.IObjectWrapper {
+	public class VSeparator : Gtk.VSeparator, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

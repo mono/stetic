@@ -1,3 +1,24 @@
+2005-01-25  Dan Winship  <danw@novell.com>
+
+	* libstetic/IWidgetWrapper.cs: New dummy subclass of
+	IObjectWrapper
+
+	* libstetic/WidgetBox.cs: Implement OnSetScrollAdjustments (by
+	passing them on to the child). Needed for ScrolledWindow.
+
+	* widgets/Alignment.cs: 
+	* widgets/EventBox.cs: 
+	* widgets/Expander.cs: 
+	* widgets/ScrolledWindow.cs: Wrap these
+
+	* widgets/*.cs: s/IObjectWrapper/IWidgetWrapper/
+
+	* stetic/WidgetSite.cs (ParentSite): Deal with the fact that the
+	immediate parent won't be a WidgetSite in a few cases.
+
+	* stetic/Palette.cs (AddWidgets): Look for IWidgetWrapper, not
+	IObjectWrapper.
+
 2005-01-20  Dan Winship  <danw@novell.com>
 
 	* libstetic/IWindowWrapper.cs: new (empty) interface

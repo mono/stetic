@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Horizontal Scale", "hscale.png")]
-	public class VScale : Gtk.VScale, Stetic.IObjectWrapper {
+	public class VScale : Gtk.VScale, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 

@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Widget {
 
 	[WidgetWrapper ("Entry", "entry.png")]
-	public class Entry : Gtk.Entry, Stetic.IObjectWrapper {
+	public class Entry : Gtk.Entry, Stetic.IWidgetWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
