@@ -25,15 +25,13 @@ namespace Stetic.Wrapper {
 			return new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog);
 		}
 
-		static Gdk.Pixbuf missing = Gdk.Pixbuf.LoadFromResource ("missing.png");
-
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			useStock = (image.StorageType == Gtk.ImageType.Stock);
 			if (useStock) {
-				stock = Stock;
-				iconSize = IconSize;
+				stock = image.Stock;
+				iconSize = (Gtk.IconSize)image.IconSize;
 			} else
 				File = filename;
 		}
@@ -69,7 +67,7 @@ namespace Stetic.Wrapper {
 		[Description ("Stock Icon", "The stock icon to display")]
 		public string Stock {
 			get {
-				return image.Stock;
+				return stock;
 			}
 			set {
 				image.Stock = stock = value;
@@ -80,7 +78,7 @@ namespace Stetic.Wrapper {
 		[GladeProperty (GladeProperty.UseUnderlying)]
 		public Gtk.IconSize IconSize {
 			get {
-				return (Gtk.IconSize)image.IconSize;
+				return iconSize;
 			}
 			set {
 				image.IconSize = (int)(iconSize = value);
@@ -89,7 +87,7 @@ namespace Stetic.Wrapper {
 
 		string filename = "";
 
-		[Editor (typeof (Stetic.Editor.File))]
+		[Editor (typeof (Stetic.Editor.ImageFile))]
 		public string File {
 			get {
 				return filename;
@@ -97,7 +95,7 @@ namespace Stetic.Wrapper {
 			set {
 				image.File = filename = value;
 				if (value == "")
-					image.Pixbuf = missing;
+					image.Stock = Gtk.Stock.MissingImage;
 			}
 		}
 	}

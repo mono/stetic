@@ -100,5 +100,22 @@ namespace Stetic.Wrapper {
 				type = value;
 			}
 		}
+
+		string icon;
+		[Editor (typeof (Stetic.Editor.ImageFile))]
+		public string Icon {
+			get {
+				return icon;
+			}
+			set {
+				icon = value;
+				Gtk.Window window = (Gtk.Window)Wrapped;
+				try {
+					window.Icon = new Gdk.Pixbuf (icon);
+				} catch {
+					window.Icon = null;
+				}
+			}
+		}
 	}
 }

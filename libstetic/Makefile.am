@@ -30,8 +30,9 @@ libstetic_dll_sources =			\
 	editor/Color.cs			\
 	editor/Enumeration.cs		\
 	editor/GroupPicker.cs		\
-	editor/File.cs			\
 	editor/FloatRange.cs		\
+	editor/Image.cs			\
+	editor/ImageFile.cs		\
 	editor/IntRange.cs		\
 	editor/OptIntRange.cs		\
 	editor/ResponseId.cs		\

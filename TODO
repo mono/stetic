@@ -66,6 +66,7 @@ UI-Designing UI:
 		  implementation should be generic, like how it works
 		  in Visual Studio)
 		- EntryCompletion
+		- Stock items
 
     - Make widgets more HIGalicious
 
