@@ -15,7 +15,6 @@ libstetic_dll_sources =			\
 	IWidgetSite.cs			\
 	ObjectWrapper.cs		\
 	ObjectWrapperAttribute.cs	\
-	ParamFlags.cs			\
 	ParamSpec.cs			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\

@@ -1,35 +1,15 @@
-// GLib.ParamSpec.cs - ParamSpec implementation
-//
-// Copyright (c) 2004 Novell, Inc.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of version 2 of the Lesser GNU General 
-// Public License as published by the Free Software Foundation.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License along with this program; if not, write to the
-// Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-
-
 using GLib;
 using Gtk;
+using System;
+using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace Stetic {
 
-	using System;
-	using System.Collections;
-	using System.Runtime.InteropServices;
-
-	public class ParamSpec : IWrapper, IDisposable {
+	public class ParamSpec : IDisposable {
 		IntPtr _obj;
 
-		protected ParamSpec (IntPtr raw)
+		public ParamSpec (IntPtr raw)
 		{
 			Raw = raw;
 		}
@@ -45,16 +25,7 @@ namespace Stetic {
 			GC.SuppressFinalize (this);
 		}
 
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern void g_param_spec_ref (IntPtr obj);
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern void g_param_spec_unref (IntPtr obj);
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern void g_param_spec_sink (IntPtr obj);
-
-		protected IntPtr Raw {
+		IntPtr Raw {
 			get {
 				return _obj;
 			}
@@ -69,63 +40,62 @@ namespace Stetic {
 			}
 		}
 
-		public IntPtr Handle {
-			get {
-				return _obj;
-			}
-		}
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_param_spec_get_name (IntPtr obj);
-
 		public string Name {
 			get {
-				return Marshal.PtrToStringAnsi (g_param_spec_get_name (_obj));
+				return GLib.Marshaller.Utf8PtrToString (g_param_spec_get_name (_obj));
 			}
 		}
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_param_spec_get_nick (IntPtr obj);
 
 		public string Nick {
 			get {
-				return Marshal.PtrToStringAnsi (g_param_spec_get_nick (_obj));
+				return GLib.Marshaller.Utf8PtrToString (g_param_spec_get_nick (_obj));
 			}
 		}
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_param_spec_get_blurb (IntPtr obj);
 
 		public string Blurb {
 			get {
-				return Marshal.PtrToStringAnsi (g_param_spec_get_blurb (_obj));
-			}
-		}
-
-		public virtual object Minimum {
-			get {
-				return null;
-			}
-		}
-
-		public virtual object Maximum {
-			get {
-				return null;
-			}
-		}
-
-		public virtual object Default {
-			get {
-				return null;
+				return GLib.Marshaller.Utf8PtrToString (g_param_spec_get_blurb (_obj));
 			}
 		}
 
 		[DllImport("libsteticglue")]
-		static extern ParamFlags stetic_param_spec_get_flags (IntPtr obj);
+		static extern bool stetic_param_spec_get_minimum (IntPtr pspec, ref GLib.Value value);
 
-		public ParamFlags Flags {
+		public object Minimum {
 			get {
-				return stetic_param_spec_get_flags (_obj);
+				GLib.Value value = new GLib.Value ();
+
+				if (stetic_param_spec_get_minimum (Raw, ref value))
+					return value.Val;
+				else
+					return null;
+			}
+		}
+
+		[DllImport("libsteticglue")]
+		static extern bool stetic_param_spec_get_maximum (IntPtr pspec, ref GLib.Value value);
+
+		public object Maximum {
+			get {
+				GLib.Value value = new GLib.Value ();
+
+				if (stetic_param_spec_get_maximum (Raw, ref value))
+					return value.Val;
+				else
+					return null;
+			}
+		}
+
+		[DllImport("libsteticglue")]
+		static extern bool stetic_param_spec_get_default (IntPtr pspec, ref GLib.Value value);
+		public object Default {
+			get {
+				GLib.Value value = new GLib.Value ();
+
+				if (stetic_param_spec_get_default (Raw, ref value))
+					return value.Val;
+				else
+					return null;
 			}
 		}
 
@@ -138,588 +108,87 @@ namespace Stetic {
 			}
 		}
 
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_get_owner_type (IntPtr obj);
-
-		public IntPtr OwnerType {
-			get {
-				return stetic_param_spec_get_owner_type (_obj);
-			}
-		}
-
-		static Hashtable typemap;
-
-		[DllImport("libglibsharpglue-2.dll")]
-		static extern int gtksharp_get_type_id (IntPtr raw);
-
-		static public ParamSpec Wrap (IntPtr raw)
-		{
-			Type type = typemap[gtksharp_get_type_id (raw)] as Type;
-
-			if (type != null) {
-				object[] args = { raw };
-				return (ParamSpec) System.Activator.CreateInstance (type, args);
-			} else
-				return new ParamSpec (raw);
-		}
+		static Hashtable props = new Hashtable (), childProps = new Hashtable ();
 
 		private class ParamSpecTypeHack : GLib.Object {
 			private ParamSpecTypeHack () : base (IntPtr.Zero) {}
 
-			public static new GType LookupGType (System.Type t)
+			static Hashtable classes = new Hashtable ();
+
+			public static IntPtr LookupGTypeClass (System.Type t)
 			{
-				return GLib.Object.LookupGType (t);
+				if (classes[t] == null) {
+					GType gtype = GLib.Object.LookupGType (t);
+					classes[t] = g_type_class_ref (gtype.Val);
+				}
+
+				return (IntPtr)classes[t];
 			}
 		}
 
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_for_property (GLib.GType type, string property_name);
-
-		static public ParamSpec LookupObjectProperty (Type type, string property)
+		public static ParamSpec LookupObjectProperty (Type type, string name)
 		{
-			IntPtr raw_ret = stetic_param_spec_for_property (ParamSpecTypeHack.LookupGType (type), property);
-			if (raw_ret == IntPtr.Zero)
+			string key = type.FullName + ":" + name;
+			if (props[key] != null)
+				return (ParamSpec)props[key];
+
+			IntPtr klass = ParamSpecTypeHack.LookupGTypeClass (type);
+			if (klass == IntPtr.Zero)
 				return null;
-			else
-				return ParamSpec.Wrap (raw_ret);
+
+			IntPtr pspec_raw = g_object_class_find_property (klass, name);
+			if (pspec_raw == IntPtr.Zero)
+				return null;
+
+			ParamSpec pspec = new ParamSpec (pspec_raw);
+			props[key] = pspec;
+			return pspec;
 		}
 
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_for_child_property (GLib.GType type, string property_name);
-
-		static public ParamSpec LookupChildProperty (Type type, string property)
+		public static ParamSpec LookupChildProperty (Type type, string name)
 		{
-			IntPtr raw_ret = stetic_param_spec_for_child_property (ParamSpecTypeHack.LookupGType (type), property);
-			if (raw_ret == IntPtr.Zero)
+			string key = type.FullName + ":" + name;
+			if (childProps[key] != null)
+				return (ParamSpec)childProps[key];
+
+			IntPtr klass = ParamSpecTypeHack.LookupGTypeClass (type);
+			if (klass == IntPtr.Zero)
 				return null;
-			else
-				return ParamSpec.Wrap (raw_ret);
+
+			IntPtr pspec_raw = gtk_container_class_find_child_property (klass, name);
+			if (pspec_raw == IntPtr.Zero)
+				return null;
+
+			ParamSpec pspec = new ParamSpec (pspec_raw);
+			childProps[key] = pspec;
+			return pspec;
 		}
 
 		[DllImport("libgobject-2.0-0.dll")]
-		static extern int g_type_from_name (string name);
+		static extern void g_param_spec_ref (IntPtr obj);
 
-		static ParamSpec ()
-		{
-			typemap = new Hashtable ();
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern void g_param_spec_unref (IntPtr obj);
 
-			typemap[g_type_from_name ("GParamChar")] = typeof (ParamSpecChar);
-			typemap[g_type_from_name ("GParamUChar")] = typeof (ParamSpecUChar);
-			typemap[g_type_from_name ("GParamInt")] = typeof (ParamSpecInt);
-			typemap[g_type_from_name ("GParamUInt")] = typeof (ParamSpecUInt);
-			typemap[g_type_from_name ("GParamLong")] = typeof (ParamSpecLong);
-			typemap[g_type_from_name ("GParamULong")] = typeof (ParamSpecULong);
-			typemap[g_type_from_name ("GParamInt64")] = typeof (ParamSpecInt64);
-			typemap[g_type_from_name ("GParamUInt64")] = typeof (ParamSpecUInt64);
-			typemap[g_type_from_name ("GParamFloat")] = typeof (ParamSpecFloat);
-			typemap[g_type_from_name ("GParamDouble")] = typeof (ParamSpecDouble);
-			typemap[g_type_from_name ("GParamBoolean")] = typeof (ParamSpecBoolean);
-			typemap[g_type_from_name ("GParamEnum")] = typeof (ParamSpecEnum);
-			typemap[g_type_from_name ("GParamFlags")] = typeof (ParamSpecFlags);
-			typemap[g_type_from_name ("GParamUnichar")] = typeof (ParamSpecUnichar);
-			typemap[g_type_from_name ("GParamString")] = typeof (ParamSpecString);
-			typemap[g_type_from_name ("GParamParam")] = typeof (ParamSpecParam);
-			typemap[g_type_from_name ("GParamBoxed")] = typeof (ParamSpecBoxed);
-			typemap[g_type_from_name ("GParamPointer")] = typeof (ParamSpecPointer);
-			typemap[g_type_from_name ("GParamValueArray")] = typeof (ParamSpecValueArray);
-			typemap[g_type_from_name ("GParamObject")] = typeof (ParamSpecObject);
-			typemap[g_type_from_name ("GParamOverride")] = typeof (ParamSpecOverride);
-		}
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern void g_param_spec_sink (IntPtr obj);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_param_spec_get_name (IntPtr obj);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_param_spec_get_nick (IntPtr obj);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_param_spec_get_blurb (IntPtr obj);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_type_class_ref (IntPtr gtype);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_object_class_find_property (IntPtr klass, string name);
+
+		[DllImport("libgtk-win32-2.0-0.dll")]
+		static extern IntPtr gtk_container_class_find_child_property (IntPtr klass, string name);
 	}
-
-	public class ParamSpecChar : ParamSpec {
-		public ParamSpecChar (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern sbyte stetic_param_spec_char_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_char_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern sbyte stetic_param_spec_char_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_char_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern sbyte stetic_param_spec_char_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_char_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecUChar : ParamSpec {
-		public ParamSpecUChar (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern byte stetic_param_spec_uchar_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_uchar_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern byte stetic_param_spec_uchar_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_uchar_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern byte stetic_param_spec_uchar_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_uchar_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecBoolean : ParamSpec {
-		public ParamSpecBoolean (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern bool stetic_param_spec_boolean_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_boolean_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecInt : ParamSpec {
-		public ParamSpecInt (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_int_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_int_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_int_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_int_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_int_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_int_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecUInt : ParamSpec {
-		public ParamSpecUInt (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_uint_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_uint_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_uint_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_uint_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_uint_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_uint_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecLong : ParamSpec {
-		public ParamSpecLong (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_long_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_long_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_long_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_long_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_long_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_long_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecULong : ParamSpec {
-		public ParamSpecULong (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_ulong_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_ulong_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_ulong_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_ulong_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_ulong_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_ulong_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecInt64 : ParamSpec {
-		public ParamSpecInt64 (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern long stetic_param_spec_int64_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_int64_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern long stetic_param_spec_int64_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_int64_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern long stetic_param_spec_int64_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_int64_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecUInt64 : ParamSpec {
-		public ParamSpecUInt64 (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern ulong stetic_param_spec_uint64_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_uint64_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern ulong stetic_param_spec_uint64_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_uint64_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern ulong stetic_param_spec_uint64_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_uint64_get_default (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecUnichar : ParamSpec {
-		public ParamSpecUnichar (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_unichar_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return Marshaller.GUnicharToChar (stetic_param_spec_unichar_get_default (Raw));
-			}
-		}
-	}
-
-	public class ParamSpecEnum : ParamSpec {
-		public ParamSpecEnum (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_enum_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_enum_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_enum_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_enum_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern int stetic_param_spec_enum_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_enum_get_default (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_enum_get_value_name (IntPtr obj, int value);
-
-		public string ValueName (int value) {
-			IntPtr raw_ret = stetic_param_spec_enum_get_value_name (Raw, value);
-			if (raw_ret == IntPtr.Zero)
-				return null;
-			else
-				return Marshal.PtrToStringAnsi (raw_ret);
-		}
-	}
-
-	public class ParamSpecFlags : ParamSpec {
-		public ParamSpecFlags (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_flags_get_mask (IntPtr obj);
-
-		public uint Mask {
-			get {
-				return stetic_param_spec_flags_get_mask (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_flags_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_flags_get_default (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_flags_get_value_name (IntPtr obj, uint value);
-
-		public string ValueName (uint value) {
-			IntPtr raw_ret = stetic_param_spec_flags_get_value_name (Raw, value);
-			if (raw_ret == IntPtr.Zero)
-				return null;
-			else
-				return Marshal.PtrToStringAnsi (raw_ret);
-		}
-	}
-
-	public class ParamSpecFloat : ParamSpec {
-		public ParamSpecFloat (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern float stetic_param_spec_float_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_float_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern float stetic_param_spec_float_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_float_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern float stetic_param_spec_float_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_float_get_default (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern float stetic_param_spec_float_get_epsilon (IntPtr obj);
-
-		public float Epsilon {
-			get {
-				return stetic_param_spec_float_get_epsilon (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecDouble : ParamSpec {
-		public ParamSpecDouble (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern double stetic_param_spec_double_get_minimum (IntPtr obj);
-
-		public override object Minimum {
-			get {
-				return stetic_param_spec_double_get_minimum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern double stetic_param_spec_double_get_maximum (IntPtr obj);
-
-		public override object Maximum {
-			get {
-				return stetic_param_spec_double_get_maximum (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern double stetic_param_spec_double_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return stetic_param_spec_double_get_default (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern double stetic_param_spec_double_get_epsilon (IntPtr obj);
-
-		public double Epsilon {
-			get {
-				return stetic_param_spec_double_get_epsilon (Raw);
-			}
-		}
-	}
-
-	public class ParamSpecString : ParamSpec {
-		public ParamSpecString (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_string_get_default (IntPtr obj);
-
-		public override object Default {
-			get {
-				return Marshal.PtrToStringAnsi (stetic_param_spec_string_get_default (Raw));
-			}
-		}
-	}
-
-	public class ParamSpecParam : ParamSpec {
-		public ParamSpecParam (IntPtr raw) : base (raw) {}
-	}
-
-	public class ParamSpecBoxed : ParamSpec {
-		public ParamSpecBoxed (IntPtr raw) : base (raw) {}
-	}
-
-	public class ParamSpecPointer : ParamSpec {
-		public ParamSpecPointer (IntPtr raw) : base (raw) {}
-	}
-
-	public class ParamSpecValueArray : ParamSpec {
-		public ParamSpecValueArray (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern uint stetic_param_spec_value_array_get_fixed_n_elements (IntPtr obj);
-
-		public uint FixedNElements {
-			get {
-				return stetic_param_spec_value_array_get_fixed_n_elements (Raw);
-			}
-		}
-
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_value_array_get_element_spec (IntPtr obj);
-
-		public ParamSpec ElementSpec {
-			get {
-				IntPtr ret_raw = stetic_param_spec_value_array_get_element_spec (Raw);
-				return ParamSpec.Wrap (ret_raw);
-			}
-		}
-	}
-
-	public class ParamSpecObject : ParamSpec {
-		public ParamSpecObject (IntPtr raw) : base (raw) {}
-	}
-
-	public class ParamSpecOverride : ParamSpec {
-		public ParamSpecOverride (IntPtr raw) : base (raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern IntPtr stetic_param_spec_override_get_overridden (IntPtr obj);
-
-		public ParamSpec Overridden {
-			get {
-				IntPtr ret_raw = stetic_param_spec_override_get_overridden (Raw);
-				return ParamSpec.Wrap (ret_raw);
-			}
-		}
-	}
-
 }

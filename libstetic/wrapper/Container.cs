@@ -240,7 +240,7 @@ namespace Stetic.Wrapper {
 
 			protected virtual void ChildNotifyHandler (object obj, Gtk.ChildNotifiedArgs args)
 			{
-				ParamSpec pspec = ParamSpec.Wrap (args.Pspec);
+				ParamSpec pspec = new ParamSpec (args.Pspec);
 				EmitNotify (pspec.Name);
 			}
 

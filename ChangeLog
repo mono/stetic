@@ -1,3 +1,13 @@
+2005-03-21  Dan Winship  <danw@novell.com>
+
+	* glue/paramspec.c: 
+	* libstetic/ParamSpec.cs: Simplify based on the latest version of
+	the patch in #70061.
+
+	* libstetic/ParamFlags.cs: gone; we never used this
+	
+	* libstetic/libstetic.dll.config: add libgtk to the map
+
 2005-03-18  Dan Winship  <danw@novell.com>
 
 	* libstetic/editor/Image.cs: editor that allows selecting a stock
