@@ -2,13 +2,12 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
-using System.Collections;
 
-namespace Stetic {
+namespace Stetic.Wrapper {
 
-	public class VBoxWrapper : Gtk.VBox, IWidgetSite {
+	public class VBox : Gtk.VBox, IWidgetSite {
 
-		public VBoxWrapper (bool homogeneous, int spacing) : base (homogeneous, spacing)
+		public VBox (bool homogeneous, int spacing) : base (homogeneous, spacing)
 		{
 			for (int i = 0; i < 3; i++) {
 				WidgetSite site = new WidgetSite ();

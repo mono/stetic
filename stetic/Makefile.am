@@ -1,25 +1,26 @@
 noinst_PROGRAMS = stetic.exe
 noinst_SCRIPTS = stetic
 
-stetic_exe_SOURCES =		\
-	FrameWrapper.cs		\
-	HBoxWrapper.cs		\
-	HButtonBoxWrapper.cs	\
-	HPanedWrapper.cs	\
-	Palette.cs		\
-	ParamFlags.cs		\
-	ParamSpec.cs		\
-	PropertyEditors.cs	\
-	PropertyGrid.cs		\
-	Stetic.cs		\
-	TableWrapper.cs		\
-	VBoxWrapper.cs		\
-	VButtonBoxWrapper.cs	\
-	VPanedWrapper.cs	\
-	WidgetBox.cs		\
-	WidgetFactory.cs	\
-	WidgetSite.cs		\
-	WindowWrapper.cs
+stetic_exe_SOURCES =			\
+	Palette.cs			\
+	ParamFlags.cs			\
+	ParamSpec.cs			\
+	PropertyEditors.cs		\
+	PropertyGrid.cs			\
+	Stetic.cs			\
+	WidgetBox.cs			\
+	WidgetFactory.cs		\
+	WidgetSite.cs			\
+	wrappers/DefaultWidgets.cs	\
+	wrappers/Frame.cs		\
+	wrappers/HBox.cs		\
+	wrappers/HButtonBox.cs		\
+	wrappers/HPaned.cs		\
+	wrappers/Table.cs		\
+	wrappers/VBox.cs		\
+	wrappers/VButtonBox.cs		\
+	wrappers/VPaned.cs		\
+	wrappers/Window.cs
 
 comma = ,
 STETIC_RESOURCE_FILES = $(wildcard $(top_srcdir)/pixmaps/*.png)

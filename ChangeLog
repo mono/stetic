@@ -1,3 +1,11 @@
+2004-12-14  Dan Winship  <danw@novell.com>
+
+	* stetic/*Wrapper.cs: Move these all to stetic/wrappers and rename
+
+	* stetic/DefaultWidgets.cs: Moved out of stetic/WidgetFactory.cs
+
+	* stetic/Makefile.am (stetic_exe_SOURCES): Update
+
 2004-12-13  Dan Winship  <danw@novell.com>
 
 	* stetic/PropertyEditors.cs (Enum, Flags): implement these by

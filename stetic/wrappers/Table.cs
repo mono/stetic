@@ -2,16 +2,15 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
-using System.Collections;
 
-namespace Stetic {
+namespace Stetic.Wrapper {
 
-	public class TableWrapper : Gtk.Table, IWidgetSite {
+	public class Table : Gtk.Table, IWidgetSite {
 
 		const AttachOptions expandOpts = AttachOptions.Expand | AttachOptions.Fill;
 		const AttachOptions fillOpts = AttachOptions.Fill;
 
-		public TableWrapper (uint rows, uint cols, bool homogeneous) : base (rows, cols, homogeneous)
+		public Table (uint rows, uint cols, bool homogeneous) : base (rows, cols, homogeneous)
 		{
 			Sync ();
 		}

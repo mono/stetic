@@ -2,13 +2,12 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
-using System.Collections;
 
-namespace Stetic {
+namespace Stetic.Wrapper {
 
-	public class WindowWrapper : Gtk.Window {
+	public class Window : Gtk.Window {
 
-		public WindowWrapper (string title) : base (title)
+		public Window (string title) : base (title)
 		{
 			WidgetSite site = new WidgetSite ();
 			site.Show ();

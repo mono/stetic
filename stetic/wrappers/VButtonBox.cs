@@ -2,13 +2,12 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
-using System.Collections;
 
-namespace Stetic {
+namespace Stetic.Wrapper {
 
-	public class VButtonBoxWrapper : Gtk.VButtonBox, IWidgetSite {
+	public class VButtonBox : Gtk.VButtonBox, IWidgetSite {
 
-		public VButtonBoxWrapper ()
+		public VButtonBox ()
 		{
 			for (int i = 0; i < 3; i++) {
 				WidgetSite site = new WidgetSite ();

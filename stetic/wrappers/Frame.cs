@@ -2,13 +2,12 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
-using System.Collections;
 
-namespace Stetic {
+namespace Stetic.Wrapper {
 
-	public class FrameWrapper : Gtk.Frame, IWidgetSite {
+	public class Frame : Gtk.Frame, IWidgetSite {
 
-		public FrameWrapper (string label) : base (label)
+		public Frame (string label) : base (label)
 		{
 			WidgetSite site = new WidgetSite ();
 			site.OccupancyChanged += ChildOccupancyChanged;

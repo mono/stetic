@@ -2,13 +2,12 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
-using System.Collections;
 
-namespace Stetic {
+namespace Stetic.Wrapper {
 
-	public class HBoxWrapper : Gtk.HBox, IWidgetSite {
+	public class HBox : Gtk.HBox, IWidgetSite {
 
-		public HBoxWrapper (bool homogeneous, int spacing) : base (homogeneous, spacing)
+		public HBox (bool homogeneous, int spacing) : base (homogeneous, spacing)
 		{
 			for (int i = 0; i < 3; i++) {
 				WidgetSite site = new WidgetSite ();

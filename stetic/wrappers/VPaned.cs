@@ -2,13 +2,12 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
-using System.Collections;
 
-namespace Stetic {
+namespace Stetic.Wrapper {
 
-	public class HPanedWrapper : Gtk.HPaned, IWidgetSite {
+	public class VPaned : Gtk.VPaned, IWidgetSite {
 
-		public HPanedWrapper ()
+		public VPaned ()
 		{
 			WidgetSite site;
 
@@ -21,18 +20,18 @@ namespace Stetic {
 			Pack2 (site, true, false);
 		}
 
-		public bool HExpandable { get { return true; } }
-		public bool VExpandable {
+		public bool HExpandable {
 			get {
 				foreach (Widget w in Children) {
 					WidgetSite site = (WidgetSite)w;
 
-					if (!site.VExpandable)
+					if (!site.HExpandable)
 						return false;
 				}
 				return true;
 			}
 		}
+		public bool VExpandable { get { return true; } }
 
 		public event OccupancyChangedHandler OccupancyChanged;
 
