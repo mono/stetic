@@ -18,7 +18,7 @@ namespace Stetic {
 		void Delete ();
 	}
 
-	public class WidgetSite : WidgetBox, IWidgetSite, IDesignTimeContainer {
+	public class WidgetSite : WidgetBox, IWidgetSite {
 
 		static TargetEntry[] Targets;
 		static TargetList TargetList;
@@ -65,7 +65,7 @@ namespace Stetic {
 			}
 		}
 
-		private void ChildOccupancyChanged (IDesignTimeContainer container)
+		private void ChildExpandabilityChanged (IContainerWrapper container)
 		{
 			if (OccupancyChanged != null)
 				OccupancyChanged (this);
@@ -75,8 +75,8 @@ namespace Stetic {
 		{
 			base.OnAdded (child);
 			ShowPlaceholder = false;
-			if (child is IDesignTimeContainer)
-				((IDesignTimeContainer)child).OccupancyChanged += ChildOccupancyChanged;
+			if (child is IContainerWrapper)
+				((IContainerWrapper)child).ExpandabilityChanged += ChildExpandabilityChanged;
 			else
 				InterceptEvents = true;
 			Occupancy = SiteOccupancy.Occupied;
@@ -86,8 +86,8 @@ namespace Stetic {
 		{
 			if (Occupancy == SiteOccupancy.Occupied)
 				Occupancy = SiteOccupancy.Empty;
-			if (w is IDesignTimeContainer)
-				((IDesignTimeContainer)w).OccupancyChanged -= ChildOccupancyChanged;
+			if (w is IContainerWrapper)
+				((IContainerWrapper)w).ExpandabilityChanged -= ChildExpandabilityChanged;
 			ShowPlaceholder = true;
 			InterceptEvents = false;
 			base.OnRemoved (w);
@@ -126,6 +126,7 @@ namespace Stetic {
 			}
 		}
 
+		public delegate void OccupancyChangedHandler (WidgetSite site);
 		public event OccupancyChangedHandler OccupancyChanged;
 
 		public bool Occupied {
@@ -137,16 +138,14 @@ namespace Stetic {
 				if (Occupancy == SiteOccupancy.Empty)
 					return true;
 
-				Widget child;
+				IContainerWrapper child;
 				if (Occupancy == SiteOccupancy.PseudoOccupied)
-					child = dragWidget;
+					child = dragWidget as IContainerWrapper;
 				else
-					child = Child;
-				if (child == null)
-					return true;
+					child = Child as IContainerWrapper;
 
-				if (child is IDesignTimeContainer)
-					return ((IDesignTimeContainer)child).HExpandable;
+				if (child != null)
+					return child.HExpandable;
 				else
 					return false;
 			}
@@ -157,16 +156,14 @@ namespace Stetic {
 				if (Occupancy == SiteOccupancy.Empty)
 					return true;
 
-				Widget child;
+				IContainerWrapper child;
 				if (Occupancy == SiteOccupancy.PseudoOccupied)
-					child = dragWidget;
+					child = dragWidget as IContainerWrapper;
 				else
-					child = Child;
-				if (child == null)
-					return true;
+					child = Child as IContainerWrapper;
 
-				if (child is IDesignTimeContainer)
-					return ((IDesignTimeContainer)child).VExpandable;
+				if (child != null)
+					return child.VExpandable;
 				else
 					return false;
 			}
@@ -316,7 +313,7 @@ namespace Stetic {
 		public void UnFocus ()
 		{
 			ShowHandles = false;
-			if (Child != null && !(Child is IDesignTimeContainer))
+			if (Child != null && !(Child is IContainerWrapper))
 				InterceptEvents = true;
 		}
 

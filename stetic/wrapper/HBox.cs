@@ -5,7 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class HBox : Gtk.HBox, Stetic.IContainerWrapper, Stetic.IDesignTimeContainer {
+	public class HBox : Gtk.HBox, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -27,7 +27,7 @@ namespace Stetic.Wrapper {
 		{
 			for (int i = 0; i < 3; i++) {
 				WidgetSite site = new WidgetSite ();
-				site.OccupancyChanged += ChildOccupancyChanged;
+				site.OccupancyChanged += SiteOccupancyChanged;
 				PackStart (site);
 			}
 		}
@@ -37,7 +37,7 @@ namespace Stetic.Wrapper {
 				foreach (Gtk.Widget w in Children) {
 					WidgetSite site = (WidgetSite)w;
 
-					if (site.HExpandable)
+					if (site.HExpandable) 
 						return true;
 				}
 				return false;
@@ -56,12 +56,12 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public event OccupancyChangedHandler OccupancyChanged;
+		public event ExpandabilityChangedHandler ExpandabilityChanged;
 
-		private void ChildOccupancyChanged (IDesignTimeContainer container)
+		private void SiteOccupancyChanged (WidgetSite site)
 		{
-			if (OccupancyChanged != null)
-				OccupancyChanged (this);
+			if (ExpandabilityChanged != null)
+				ExpandabilityChanged (this);
 		}
 	}
 }

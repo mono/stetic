@@ -3,7 +3,6 @@ noinst_SCRIPTS = stetic
 
 stetic_exe_SOURCES =			\
 	ContextMenu.cs			\
-	IDesignTimeContainer.cs		\
 	IObjectWrapper.cs		\
 	Notify.cs			\
 	Palette.cs			\

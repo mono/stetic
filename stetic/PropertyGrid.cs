@@ -108,6 +108,20 @@ namespace Stetic {
 				ed.Update (selection, EventArgs.Empty);
 		}
 
+		protected void SetupSensitivity (object obj)
+		{
+			Stetic.IPropertySensitizer sens = obj as Stetic.IPropertySensitizer;
+			if (sens == null)
+				return;
+
+			foreach (string prop in sens.InsensitiveProperties ()) {
+				Widget w = editors[prop] as Widget;
+				if (w != null)
+					w.Sensitive = false;
+			}
+			sens.SensitivityChanged += SensitivityChanged;
+		}
+
 		public void Select (IWidgetSite site)
 		{
 			Clear ();
@@ -120,20 +134,11 @@ namespace Stetic {
 			notifyId = Notify.Add (selection, new NotifyDelegate (Notified));
 
 			if (w is Stetic.IObjectWrapper)
-				AddObjectWrapperProperties (w);
+				AddObjectWrapperProperties (w, ((IObjectWrapper)w).PropertyGroups);
 			else
-				AddGObjectProperties (w);
+				AddParamSpecProperties (w, w);
 
-			if (w is Stetic.IPropertySensitizer) {
-				IPropertySensitizer sens = w as IPropertySensitizer;
-
-				foreach (string prop in sens.InsensitiveProperties ()) {
-					w = editors[prop] as Widget;
-					if (w != null)
-						w.Sensitive = false;
-				}
-				sens.SensitivityChanged += SensitivityChanged;
-			}
+			SetupSensitivity (w);
 		}
 
 		public virtual ParamSpec LookupParamSpec (object obj, PropertyInfo info)
@@ -145,20 +150,20 @@ namespace Stetic {
 			return null;
 		}
 
-		void AddGObjectProperties (Widget w)
+		protected void AddParamSpecProperties (object obj, GLib.Object pspecObj)
 		{
 			VBox group = AddGroup ("Properties");
 
-			foreach (PropertyInfo info in w.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
-				ParamSpec pspec = LookupParamSpec (w, info);
+			foreach (PropertyInfo info in obj.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
+				ParamSpec pspec = LookupParamSpec (pspecObj, info);
 				if (pspec != null)
-					AddToGroup (group, new PropertyDescriptor (w.GetType(), info.Name), w);
+					AddToGroup (group, new PropertyDescriptor (obj.GetType(), info.Name), obj);
 			}
 		}
 
-		void AddObjectWrapperProperties (object obj)
+		protected void AddObjectWrapperProperties (object obj, PropertyGroup[] groups)
 		{
-			foreach (PropertyGroup pgroup in ((IObjectWrapper)obj).PropertyGroups) {
+			foreach (PropertyGroup pgroup in groups) {
 				VBox group = AddGroup (pgroup.Name);
 				foreach (PropertyDescriptor prop in pgroup.Properties)
 					AddToGroup (group, prop, obj);
@@ -186,35 +191,20 @@ namespace Stetic {
 			ContainerChild cc = parent[(Widget)site];
 
 			if (parent is Stetic.IContainerWrapper)
-				AddContainerWrapperProperties (parent, cc);
+				AddObjectWrapperProperties (cc, ((IContainerWrapper)parent).ChildPropertyGroups);
 			else
-				AddGtkContainerProperties (parent, cc);
+				AddParamSpecProperties (cc, parent);
+
+			SetupSensitivity (cc);
 		}
 
-		void AddGtkContainerProperties (Container parent, ContainerChild cc)
+		public override ParamSpec LookupParamSpec (object obj, PropertyInfo info)
 		{
-			VBox group = AddGroup ("Properties");
-
-			foreach (PropertyInfo info in cc.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
-				foreach (object attr in info.GetCustomAttributes (false)) {
-					ChildPropertyAttribute pattr = attr as ChildPropertyAttribute;
-					if (pattr == null)
-						continue;
-
-					ParamSpec pspec = ParamSpec.LookupChildProperty (parent.GetType(), pattr.Name);
-					if (pspec != null)
-						AddToGroup (group, new PropertyDescriptor (cc.GetType (), info.Name), cc);
-				}
+			foreach (object attr in info.GetCustomAttributes (typeof (Gtk.ChildPropertyAttribute), false)) {
+				ChildPropertyAttribute cpattr = (ChildPropertyAttribute)attr;
+				return ParamSpec.LookupChildProperty (obj.GetType(), cpattr.Name);
 			}
-		}
-
-		void AddContainerWrapperProperties (Container parent, ContainerChild cc)
-		{
-			foreach (PropertyGroup pgroup in ((IContainerWrapper)parent).ChildPropertyGroups) {
-				VBox group = AddGroup (pgroup.Name);
-				foreach (PropertyDescriptor prop in pgroup.Properties)
-					AddToGroup (group, prop, cc);
-			}
+			return null;
 		}
 	}
 }

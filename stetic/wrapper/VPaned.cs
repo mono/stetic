@@ -5,7 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class VPaned : Gtk.VPaned, Stetic.IContainerWrapper, Stetic.IDesignTimeContainer {
+	public class VPaned : Gtk.VPaned, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -28,11 +28,11 @@ namespace Stetic.Wrapper {
 			WidgetSite site;
 
 			site = new WidgetSite ();
-			site.OccupancyChanged += ChildOccupancyChanged;
+			site.OccupancyChanged += SiteOccupancyChanged;
 			Pack1 (site, true, false);
 
 			site = new WidgetSite ();
-			site.OccupancyChanged += ChildOccupancyChanged;
+			site.OccupancyChanged += SiteOccupancyChanged;
 			Pack2 (site, true, false);
 		}
 
@@ -49,12 +49,12 @@ namespace Stetic.Wrapper {
 		}
 		public bool VExpandable { get { return true; } }
 
-		public event OccupancyChangedHandler OccupancyChanged;
+		public event ExpandabilityChangedHandler ExpandabilityChanged;
 
-		private void ChildOccupancyChanged (IDesignTimeContainer container)
+		private void SiteOccupancyChanged (WidgetSite site)
 		{
-			if (OccupancyChanged != null)
-				OccupancyChanged (this);
+			if (ExpandabilityChanged != null)
+				ExpandabilityChanged (this);
 		}
 	}
 }

@@ -2,10 +2,11 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
+using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public class Table : Gtk.Table, Stetic.IObjectWrapper, Stetic.IDesignTimeContainer {
+	public class Table : Gtk.Table, Stetic.IContainerWrapper {
 		static PropertyGroup[] groups;
 		public PropertyGroup[] PropertyGroups { get { return groups; } }
 
@@ -39,10 +40,11 @@ namespace Stetic.Wrapper {
 				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "BottomAttach"),
 				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "LeftAttach"),
 				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "RightAttach"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "XOptions"),
 				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "XPadding"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "YOptions"),
-				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "YPadding")
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "YPadding"),
+				new PropertyDescriptor (typeof (Stetic.Wrapper.Table.TableChild), "AutoSize"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "XOptions"),
+				new PropertyDescriptor (typeof (Gtk.Table.TableChild), "YOptions")
 			};				
 			TableChildProperties = new PropertyGroup ("Table Child Layout", props);
 
@@ -59,19 +61,70 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
-		private bool syncing;
+		public new class TableChild : Gtk.Table.TableChild, Stetic.IPropertySensitizer {
+			protected internal TableChild (Gtk.Container parent, Gtk.Widget child) : base (parent, child)
+			{
+				autosize = (child is WidgetSite);
+			}
+
+			bool autosize;
+
+			public bool AutoSize {
+				get {
+					return autosize;
+				}
+				set {
+					autosize = value;
+					if (SensitivityChanged != null) {
+						SensitivityChanged ("XOptions", !autosize);
+						SensitivityChanged ("YOptions", !autosize);
+					}
+					((Stetic.Wrapper.Table)parent).Sync ();
+				}
+			}
+
+			public IEnumerable InsensitiveProperties ()
+			{
+				if (autosize)
+					return new string[] { "XOptions", "YOptions" };
+				else
+					return new string[0];
+			}
+
+			public event SensitivityChangedDelegate SensitivityChanged;
+		}
+
+		Hashtable children = new Hashtable ();
+		public override Gtk.Container.ContainerChild this [Gtk.Widget child] {
+			get {
+				return children[child] as Gtk.Container.ContainerChild;
+			}
+		}
+
+		int freeze;
+		void Freeze ()
+		{
+			freeze++;
+		}
+
+		void Thaw ()
+		{
+			if (--freeze == 0)
+				Sync ();
+		}
+
 		private void Sync ()
 		{
 			uint left, right, top, bottom;
 			uint row, col;
 			WidgetSite site;
 			WidgetSite[,] grid;
-			Table.TableChild tc;
+			TableChild tc;
 			Gtk.Widget[] children;
 
-			if (syncing)
+			if (freeze > 0)
 				return;
-			syncing = true;
+			freeze = 1;
 
 			children = Children;
 
@@ -85,7 +138,7 @@ namespace Stetic.Wrapper {
 				if (site.Occupied)
 					continue;
 
-                                tc = this[child] as Table.TableChild;
+                                tc = this[child] as TableChild;
                                 left = tc.LeftAttach;
                                 right = tc.RightAttach;
                                 top = tc.TopAttach;
@@ -104,7 +157,7 @@ namespace Stetic.Wrapper {
 				if (!site.Occupied)
 					continue;
 
-                                tc = this[child] as Table.TableChild;
+                                tc = this[child] as TableChild;
                                 left = tc.LeftAttach;
                                 right = tc.RightAttach;
                                 top = tc.TopAttach;
@@ -133,10 +186,11 @@ namespace Stetic.Wrapper {
 				for (col = 0; col < NColumns; col++) {
 					if (grid[row,col] == null) {
 						site = new WidgetSite ();
-						site.OccupancyChanged += ChildOccupancyChanged;
+						site.OccupancyChanged += SiteOccupancyChanged;
 						site.ChildNotified += ChildNotification;
 						site.Show ();
 						Attach (site, col, col + 1, row, row + 1);
+						this.children[site] = new TableChild (this, site);
 						grid[row,col] = site;
 					} else if (!grid[row,col].VExpandable)
 						allPlaceholders = false;
@@ -144,9 +198,9 @@ namespace Stetic.Wrapper {
 
 				for (col = 0; col < NColumns; col++) {
 					site = grid[row,col];
-					if (site.Occupied)
+					tc = this[site] as TableChild;
+					if (!tc.AutoSize)
 						continue;
-					tc = this[site] as Table.TableChild;
 					tc.YOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
@@ -169,9 +223,9 @@ namespace Stetic.Wrapper {
 
 				for (row = 0; row < NRows; row++) {
 					site = grid[row,col];
-					if (site.Occupied)
+					tc = this[site] as TableChild;
+					if (!tc.AutoSize)
 						continue;
-					tc = this[site] as Table.TableChild;
 					tc.XOptions = allPlaceholders ? expandOpts : fillOpts;
 				}
 
@@ -179,17 +233,17 @@ namespace Stetic.Wrapper {
 					hexpandable = true;
 			}
 
-			syncing = false;
+			freeze = 0;
 
-			if (OccupancyChanged != null)
-				OccupancyChanged (this);
+			if (ExpandabilityChanged != null)
+				ExpandabilityChanged (this);
 		}
 
 		private bool hexpandable, vexpandable;
 		public bool HExpandable { get { return hexpandable; } }
 		public bool VExpandable { get { return vexpandable; } }
 
-		public event OccupancyChangedHandler OccupancyChanged;
+		public event ExpandabilityChangedHandler ExpandabilityChanged;
 
 		protected override void OnRemoved (Gtk.Widget w)
 		{
@@ -198,22 +252,24 @@ namespace Stetic.Wrapper {
 			if (site == null)
 				return;
 
-			site.OccupancyChanged -= ChildOccupancyChanged;
+			site.OccupancyChanged -= SiteOccupancyChanged;
 			site.ChildNotified -= ChildNotification;
+			children.Remove (site);
 
 			base.OnRemoved (w);
 		}
 
-		private void ChildOccupancyChanged (IDesignTimeContainer isite)
+		private void SiteOccupancyChanged (WidgetSite isite)
 		{
 			WidgetSite site = (WidgetSite)isite;
 
+			Freeze ();
 			if (site.Occupied) {
 				Table.TableChild tc = this[site] as Table.TableChild;
 				tc.XOptions = 0;
 				tc.YOptions = 0;
 			}
-			Sync ();
+			Thaw ();
 		}
 
 		private void ChildNotification (object o, ChildNotifiedArgs args)

@@ -74,5 +74,10 @@ namespace Stetic.Wrapper {
 			else
 				req.Width = req.Height = 200;
 		}
+
+		public bool HExpandable { get { return true; } }
+		public bool VExpandable { get { return true; } }
+
+		public event ExpandabilityChangedHandler ExpandabilityChanged;
 	}
 }

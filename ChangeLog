@@ -1,5 +1,34 @@
 2005-01-12  Dan Winship  <danw@novell.com>
 
+	* stetic/PropertyGrid.cs: Reorganize stuff so that ContainerChild
+	classes can override properties and implement IPropertySensitizer
+	as well.
+	
+	* stetic/IDesignTimeContainer.cs:
+	* stetic/IObjectWrapper.cs (IContainerWrapper): Move the things
+	that used to be in IDesignTimeContainer to IContainerWrapper. Kill
+	IDesignTimeContainer.
+
+	* stetic/WidgetSite.cs: Update for that
+
+	* stetic/wrapper/Frame.cs:
+	* stetic/wrapper/HBox.cs:
+	* stetic/wrapper/HButtonBox.cs:
+	* stetic/wrapper/HPaned.cs:
+	* stetic/wrapper/VBox.cs:
+	* stetic/wrapper/VButtonBox.cs:
+	* stetic/wrapper/VPaned.cs:
+	* stetic/wrapper/Window.cs: Update
+
+	* stetic/wrapper/Table.cs: Update.
+	(TableChild) Subclass Gtk.Table.TableChild with an "AutoSize"
+	property saying whether or not to automatically adjust the packing
+	of child widgets (defaults to on). Also implement
+	IPropertySensitizer.
+	(Sync): Update for that.
+
+2005-01-12  Dan Winship  <danw@novell.com>
+
 	* stetic/IObjectWrapper.cs (IContainerWrapper): new interface a la
 	IObjectWrapper, but including child properties as well.
 

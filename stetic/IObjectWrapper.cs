@@ -21,8 +21,15 @@ namespace Stetic {
 		PropertyGroup[] PropertyGroups { get; }
 	}
 
+
+	public delegate void ExpandabilityChangedHandler (IContainerWrapper container);
+
 	public interface IContainerWrapper : IObjectWrapper {
 		PropertyGroup[] ChildPropertyGroups { get; }
+
+		bool HExpandable { get; }
+		bool VExpandable { get; }
+		event ExpandabilityChangedHandler ExpandabilityChanged;
 	}
 
 
