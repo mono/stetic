@@ -19,6 +19,7 @@ namespace Stetic {
 		public static void Load (string filename, Project project)
 		{
 			XmlDocument doc = new XmlDocument ();
+			doc.PreserveWhitespace = true;
 
 			XmlTextReader reader = null;
 			try {
@@ -43,19 +44,18 @@ namespace Stetic {
 			if (node == null || node.Name != "glade-interface")
 				throw new ApplicationException ("Not a glade file according to node name");
 
-			for (node = node.FirstChild; node != null; node = node.NextSibling) {
-				if (node.Name == "widget") {
-					Widget w = CreateWidget (node);
-					project.AddWindow (w);
-					WindowSite site = new WindowSite ((Gtk.Window)w);
-					site.FocusChanged += delegate (WindowSite site, IWidgetSite focus) {
-						if (focus == null)
-							SteticMain.NoSelection ();
-						else
-							SteticMain.Select (focus);
-					};
-				} else
-					Console.WriteLine ("Skipping {0} node", node.Name);
+			foreach (XmlNode toplevel in node.SelectNodes ("widget")) {
+				Widget w = CreateWidget (toplevel);
+				if (w == null)
+					continue;
+				project.AddWindow (w);
+				WindowSite site = new WindowSite ((Gtk.Window)w);
+				site.FocusChanged += delegate (WindowSite site, IWidgetSite focus) {
+					if (focus == null)
+						SteticMain.NoSelection ();
+					else
+						SteticMain.Select (focus);
+				};
 			}
 		}
 
@@ -77,33 +77,44 @@ namespace Stetic {
 		static Widget CreateWidget (XmlNode wnode)
 		{
 			string className = wnode.Attributes["class"].InnerText;
+			IntPtr gtype = g_type_from_name (className);
+
+			if (new GLib.GType (gtype) == GLib.GType.Invalid) {
+				Console.WriteLine ("Unrecognized class name {0}", className);
+				return null;
+			}
 
 			string[] propNamesArray;
 			GLib.Value[] propValuesArray;
 
 			HydrateProperties (className, wnode.SelectNodes ("property"), out propNamesArray, out propValuesArray);
 			
-			IntPtr raw = gtksharp_object_newv (g_type_from_name (className), propNamesArray.Length, propNamesArray, propValuesArray);
+			IntPtr raw = gtksharp_object_newv (gtype, propNamesArray.Length, propNamesArray, propValuesArray);
 			
 			if (raw == IntPtr.Zero) {
+				Console.WriteLine ("Could not create widget of type {0}", className);
 				return null;
 			}
 
 			Widget widget = (Widget)GLib.Object.GetObject (raw, true);
 			if (widget == null) {
+				Console.WriteLine ("Could not create gtk# wrapper for type {0}", className);
+				// FIXME, unref raw
+				return null;
+			}
+			widget.Name = wnode.Attributes["id"].InnerText;
+
+			ObjectWrapper wrapper = CreateWrapperType (widget);
+			if (wrapper == null) {
+				Console.WriteLine ("Could not create stetic wrapper for type {0}", className);
 				return null;
 			}
 
-			widget.Name = wnode.Attributes["id"].InnerText;
-
-			if (!(widget is Gtk.Container)) {
-				CreateWrapperType (widget);
+			if (!(widget is Gtk.Container))					
 				return widget;
-			}
-			Gtk.Container container = (Gtk.Container)widget;
 
-			Stetic.Wrapper.Container wrapper = (Stetic.Wrapper.Container) CreateWrapperType (widget);
-			AddChildren (container, wrapper, className, wnode.SelectNodes ("child"));
+			Gtk.Container container = (Gtk.Container)widget;
+			AddChildren (container, (Stetic.Wrapper.Container)wrapper, className, wnode.SelectNodes ("child"));
 
 			return widget;
 		}
@@ -127,9 +138,10 @@ namespace Stetic {
 					childw = (Widget)internalChildWidget;
 					for (int i = 0; i < internalPropNames.Length; i++)
 					{
+						// FIXME, besides being messy, this doesn't warn on bad properties
 						setProperty.Invoke (childw, new object[] { internalPropNames[i], internalValues[i] } );
 					}
-					
+
 					if (childw is Gtk.Container) { 
 						AddChildren ((Gtk.Container)childw, (Stetic.Wrapper.Container)CreateWrapperType (childw), node.SelectSingleNode("widget").Attributes["class"].InnerText, node.SelectNodes ("widget/child"));
 					}
@@ -176,6 +188,17 @@ namespace Stetic {
 				{
 					container.ChildSetProperty (childw, (string)childPropNames[i], (GLib.Value)childPropValues[i]);
 				}
+
+				if (container is Gtk.ButtonBox) {
+					XmlNode response_id = node.SelectSingleNode ("widget/property[@name='response_id']");
+					if (response_id != null) {
+						Gtk.ResponseType response = (Gtk.ResponseType)Int32.Parse (response_id.InnerText);
+						if (response == Gtk.ResponseType.Help) {
+							Gtk.ButtonBox.ButtonBoxChild bbc = container[childw] as Gtk.ButtonBox.ButtonBoxChild;
+							bbc.Secondary = true;
+						}
+					}
+				}
 			}
 		}
 
@@ -185,12 +208,7 @@ namespace Stetic {
 			ArrayList values = new ArrayList ();
 			foreach (XmlNode node in nodes) {
 
-				// FIXME: These need to be masked because they
-				// cause a window to be shown right away
 				string propName = node.Attributes["name"].InnerText;
-				if (propName == "visible" && (className == "GtkWindow" || className == "GtkDialog"))
-					continue;
-
 				string stringValue = node.InnerText;
 
 				// FIXME: invisible_char is a guint, but glade
@@ -225,7 +243,7 @@ namespace Stetic {
 			return null;
 		}
 
-		static object CreateWrapperType (Widget widget)
+		static ObjectWrapper CreateWrapperType (Widget widget)
 		{
 			Type[] wrapper_types = ObjectWrapper.LookupWrapperTypes (widget);
 			if (wrapper_types == null) {
@@ -248,7 +266,7 @@ namespace Stetic {
 			if (empty_istetic == null) {
 				empty_istetic = new WidgetFactory ("null", Gdk.Pixbuf.LoadFromResource ("missing.png"), typeof (Stetic.Wrapper.Label));
 			}
-			return Activator.CreateInstance (final_wrapper_type, new object[] { empty_istetic, widget, true } );
+			return Activator.CreateInstance (final_wrapper_type, new object[] { empty_istetic, widget, true } ) as ObjectWrapper;
 		}
 	}
 }

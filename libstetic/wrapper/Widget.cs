@@ -8,6 +8,7 @@ namespace Stetic.Wrapper {
 
 		static Widget () {
 			CommonWidgetProperties = new ItemGroup ("Common Widget Properties",
+								typeof (Stetic.Wrapper.Widget),
 								typeof (Gtk.Widget),
 								"WidthRequest",
 								"HeightRequest",
@@ -55,5 +56,21 @@ namespace Stetic.Wrapper {
 
 		public virtual bool HExpandable { get { return false; } }
 		public virtual bool VExpandable { get { return false; } }
+
+		bool window_visible;
+		public bool Visible {
+			get {
+				if (Wrapped is Gtk.Window)
+					return window_visible;
+				else
+					return ((Gtk.Widget)Wrapped).Visible;
+			}
+			set {
+				if (Wrapped is Gtk.Window)
+					window_visible = value;
+				else
+					((Gtk.Widget)Wrapped).Visible = value;
+			}
+		}
 	}
 }

@@ -1,3 +1,23 @@
+2005-02-24  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/Dialog.cs: 
+	* libstetic/wrapper/Window.cs (Modal): wrap this and don't set the
+	underlying window property
+
+	* libstetic/wrapper/Widget.cs (Visible): wrap this property and
+	don't set the underlying widget property for Window subclasses.
+
+	* stetic/GladeImport.cs (Load): set doc.PreserveWhitespace so that
+	things like '<property name="label">    </property>' (which is
+	used to indent HIG-style frames) import correctly. Don't crash if
+	CreateWidget returns null.
+	(CreateWidget): Add some debug messages, prevent a g_warning if
+	the glade file uses types we don't wrap.
+	(AddChildren): Add a hack to make "Help" buttons be packed with
+	the "secondary" property in ButtonBoxes, the same as glade does.
+	(HydrateProperties): Don't need to filter out Window.Visible any
+	more.
+
 2005-02-22  Dan Winship  <danw@novell.com>
 
 	* stetic/PropertyGrid.cs: Kill ChildPropertyGrid and make the

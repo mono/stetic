@@ -10,6 +10,7 @@ namespace Stetic.Wrapper {
 
 		static Dialog () {
 			DialogProperties = new ItemGroup ("Dialog Properties",
+							  typeof (Stetic.Wrapper.Dialog),
 							  typeof (Gtk.Dialog),
 							  "Title",
 							  "Icon",

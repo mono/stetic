@@ -12,6 +12,7 @@ namespace Stetic.Wrapper {
 
 		static Window () {
 			WindowProperties = new ItemGroup ("Window Properties",
+							  typeof (Stetic.Wrapper.Window),
 							  typeof (Gtk.Window),
 							  "Title",
 							  "Icon",
@@ -69,5 +70,17 @@ namespace Stetic.Wrapper {
 
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable { get { return true; } }
+
+		// We don't want to actually set the underlying "modal" property;
+		// that would be annoying to interact with.
+		bool modal;
+		public bool Modal {
+			get {
+				return modal;
+			}
+			set {
+				modal = Modal;
+			}
+		}
 	}
 }
