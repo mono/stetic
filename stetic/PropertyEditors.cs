@@ -272,133 +272,65 @@ namespace Stetic {
 			return entry;
 		}
 
-		// Can't currently use an anon delegate here because of
-		// bug 69614
+		// Can't currently use an anon delegate here because of bug 69614
 		private class EnumHelper {
 			PropertyInfo info;
-			object obj, value;
+			object obj;
+			ArrayList values;
 
-			public EnumHelper (PropertyInfo info, object obj, int value)
+			public EnumHelper (PropertyInfo info, object obj, ArrayList values)
 			{
 				this.info = info;
 				this.obj = obj;
-				this.value = System.Enum.ToObject (info.PropertyType, value);
+				this.values = values;
 			}
 
-			public void Activated (object item, EventArgs args)
+			public void Changed (object o, EventArgs args)
 			{
-				info.SetValue (obj, value, null);
+				ComboBox combo = (ComboBox)o;
+				if (combo.Active != -1)
+					info.SetValue (obj, values[combo.Active], null);
 			}
 		}
 
 		static Widget Enum (ParamSpecEnum pspec, PropertyInfo info, object obj)
 		{
-			OptionMenu om;
-			Menu menu;
-			int defaultValue, defaultItem;
+			ComboBox combo;
+			int defaultValue;
+			ArrayList values;
 
-			om = new OptionMenu ();
-			menu = new Menu ();
-			om.Menu = menu;
+			combo = ComboBox.NewText ();
 
 			if (info.CanRead)
 				defaultValue = (int)info.GetValue (obj, null);
 			else
 				defaultValue = pspec.Default;
 
+			values = new ArrayList ();
 			for (int val = pspec.Minimum, nItems = 0; val <= pspec.Maximum; val++) {
 				string name = pspec.ValueName (val);
 				if (name == null)
 					continue;
 
-				MenuItem item = new MenuItem (name + " (" + val.ToString() + ")");
-				if (info.CanWrite) {
-					EnumHelper eh = new EnumHelper (info, obj, val);
-					item.Activated += eh.Activated;
-				} else
-					item.Sensitive = false;
-				menu.Add (item);
+				combo.AppendText (name + " (" + val.ToString() + ")");
+				values.Add (System.Enum.ToObject (info.PropertyType, val));
 
 				if (val == defaultValue)
-					om.SetHistory ((uint) nItems);
+					combo.Active = nItems;
 				nItems++;
 			}
 
-			return om;
-		}
-
-		// Can't currently use an anon delegate here because of
-		// bug 69614
-		private class FlagsHelper {
-			PropertyInfo info;
-			object obj;
-			uint value;
-
-			public FlagsHelper (PropertyInfo info, object obj, uint value)
-			{
-				this.info = info;
-				this.obj = obj;
-				this.value = value;
+			if (info.CanWrite) {
+				EnumHelper eh = new EnumHelper (info, obj, values);
+				combo.Changed += eh.Changed;
 			}
 
-			public void Toggled (object item, EventArgs args)
-			{
-				uint cur = Convert.ToUInt32 (info.GetValue (obj, null));
-				if (((CheckMenuItem)item).Active)
-					cur |= value;
-				else
-					cur &= ~value;
-				info.SetValue (obj, System.Enum.ToObject (info.PropertyType, cur), null);
-			}
+			return combo;
 		}
 
 		static Widget Flags (ParamSpecFlags pspec, PropertyInfo info, object obj)
 		{
-			OptionMenu om;
-			Menu menu;
-			MenuItem item;
-			uint defaultValue, mask, bit;
-
-			om = new OptionMenu ();
-			menu = new Menu ();
-			om.Menu = menu;
-
-			if (info.CanRead)
-				defaultValue = Convert.ToUInt32 (info.GetValue (obj, null));
-			else
-				defaultValue = pspec.Default;
-
-			item = new MenuItem (System.String.Format ("{0:x}...", defaultValue));
-			item.Sensitive = false;
-			menu.Add (item);
-
-			mask = pspec.Mask;
-			bit = 1;
-			while (mask != 0) {
-				while ((mask & 0x1) == 0) {
-					mask = mask >> 1;
-					bit = bit << 1;
-				}
-				mask &= ~1U;
-
-				string name = pspec.ValueName (bit);
-				if (name == null)
-					continue;
-
-				CheckMenuItem citem = new CheckMenuItem (System.String.Format ("{0} ({1:x})", name, bit));
-				if (info.CanWrite) {
-					FlagsHelper fh = new FlagsHelper (info, obj, bit);
-					citem.Toggled += fh.Toggled;
-				} else
-					citem.Sensitive = false;
-				menu.Add (citem);
-
-				if ((defaultValue & bit) == bit)
-					citem.Active = true;
-			}
-
-			om.SetHistory (0);
-			return om;
+			return new Gtk.Label ("(flags)");
 		}
 
 		static Widget Pointer (ParamSpecPointer pspec, PropertyInfo info, object obj)

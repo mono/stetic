@@ -183,7 +183,6 @@ namespace Stetic {
 
 		protected override bool OnMotionNotifyEvent (Gdk.EventMotion evt)
 		{
-			Widget w;
 			Gtk.Window dragWin;
 			DragContext ctx;
 			int mx, my, wx, wy;

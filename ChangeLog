@@ -1,3 +1,14 @@
+2004-12-15  Dan Winship  <danw@novell.com>
+
+	* stetic/Stetic.cs: 
+	* stetic/WidgetSite.cs: 
+	* stetic/wrappers/Table.cs: Clean up new mcs warnings
+
+	* stetic/PropertyEditors.cs (Enum): Redo this using ComboBox to
+	avoid the warning about OptionMenu being deprecated
+	(Flags): Make this a no-op for now. The OptionMenu-based
+	implementation wasn't very useful anyway.
+
 2004-12-14  Dan Winship  <danw@novell.com>
 
 	* stetic/*Wrapper.cs: Move these all to stetic/wrappers and rename

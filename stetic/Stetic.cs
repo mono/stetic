@@ -8,7 +8,6 @@ namespace Stetic {
 
 		public static int Main (string[] args) {
 			Gtk.Window win;
-			Gtk.Widget widget;
 			Gtk.Notebook notebook;
 			Stetic.Palette palette;
 

@@ -247,8 +247,6 @@ namespace Stetic.Wrapper {
 
 		private void AddColumn (uint col)
 		{
-			uint left, right;
-
 			Resize (NRows, NColumns + 1);
 			foreach (Widget w in Children) {
 				Table.TableChild tc = this[w] as Table.TableChild;
@@ -263,8 +261,6 @@ namespace Stetic.Wrapper {
 
 		private void AddRow (uint row)
 		{
-			uint top, bottom;
-
 			Resize (NRows + 1, NColumns);
 			foreach (Widget w in Children) {
 				Table.TableChild tc = this[w] as Table.TableChild;
