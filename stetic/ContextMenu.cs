@@ -27,8 +27,9 @@ namespace Stetic {
 			item.Activated += DoSelect;
 			Add (item);
 
-			if (site.Occupied && site.Contents is IContextMenuProvider) {
-				foreach (ContextMenuItem cmi in ((IContextMenuProvider)site.Contents).ContextMenuItems (top)) {
+			Stetic.Wrapper.Object wrapper = Stetic.Wrapper.Object.Lookup (site.Contents);
+			if (wrapper is IContextMenuProvider) {
+				foreach (ContextMenuItem cmi in ((IContextMenuProvider)wrapper).ContextMenuItems (top)) {
 					item = new MenuItem (cmi.Label);
 					if (cmi.Enabled)
 						item.Activated += new Stupid69614Workaround (top, cmi.Callback).Activate;

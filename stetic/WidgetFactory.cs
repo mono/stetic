@@ -1,6 +1,7 @@
 using Gtk;
 using Gdk;
 using System;
+using System.Collections;
 using System.Reflection;
 
 namespace Stetic {
@@ -11,7 +12,7 @@ namespace Stetic {
 		string basename;
 		int counter;
 
-		public WidgetFactory (string name, Pixbuf icon, Type widgetType)
+		public WidgetFactory (string name, Pixbuf icon, Type wrapperType)
 		{
 			Gtk.HBox hbox;
 			Gtk.Label label;
@@ -31,17 +32,19 @@ namespace Stetic {
 
 			Add (hbox);
 
-			this.ctor = widgetType.GetConstructor (new Type[] { typeof (IStetic) });
+			this.ctor = wrapperType.GetConstructor (new Type[] { typeof (IStetic) });
 			if (this.ctor == null)
-				throw new ApplicationException ("No constructor for widget type " + widgetType.ToString ());
+				throw new ApplicationException ("No constructor for widget type " + wrapperType.ToString ());
 
-			basename = widgetType.Name.ToLower ();
+			basename = wrapperType.Name.ToLower ();
 			counter = 1;
 		}
 
 		protected Widget Create ()
 		{
-			Widget w = ctor.Invoke (new object[] { this }) as Widget;
+			Stetic.Wrapper.Object wrapper = ctor.Invoke (new object[] { this }) as Stetic.Wrapper.Object;
+			Widget w = wrapper.Wrapped as Widget;
+
 			w.Name = basename + (counter++).ToString ();
 			return w;
 		}
@@ -65,8 +68,8 @@ namespace Stetic {
 	}
 
 	public class WindowFactory : WidgetFactory {
-		public WindowFactory (string name, Pixbuf icon, Type widgetType) :
-			base (name, icon, widgetType) {}
+		public WindowFactory (string name, Pixbuf icon, Type wrapperType) :
+			base (name, icon, wrapperType) {}
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{

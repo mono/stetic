@@ -3,7 +3,6 @@ noinst_SCRIPTS = stetic
 
 stetic_exe_SOURCES =			\
 	ContextMenu.cs			\
-	Notify.cs			\
 	Palette.cs			\
 	Project.cs			\
 	ProjectView.cs			\

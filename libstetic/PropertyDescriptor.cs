@@ -10,42 +10,57 @@ namespace Stetic {
 	public class PropertyDescriptor {
 
 		PropertyInfo memberInfo, propertyInfo;
+		bool isWrapperProperty;
 		ParamSpec pspec;
-		EventInfo eventInfo;
 		Type editorType;
 		object defaultValue;
 		ArrayList dependencies = new ArrayList (), inverseDependencies = new ArrayList ();
 
-		public PropertyDescriptor (Type objectType, string propertyName)
+		public PropertyDescriptor (Type objectType, string propertyName) : this (null, objectType, propertyName) {}
+
+		public PropertyDescriptor (Type wrapperType, Type objectType, string propertyName)
 		{
-			Type parentType;
+			Type trueObjectType;
+			BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
 
 			int dot = propertyName.IndexOf ('.');
 
 			if (dot == -1) {
-				parentType = objectType;
+				trueObjectType = objectType;
 				memberInfo = null;
-				propertyInfo = objectType.GetProperty (propertyName, BindingFlags.Public | BindingFlags.Instance);
+				if (wrapperType != null)
+					propertyInfo = wrapperType.GetProperty (propertyName, flags);
+				if (propertyInfo == null)
+					propertyInfo = objectType.GetProperty (propertyName, flags);
+				else
+					isWrapperProperty = true;
 			} else {
-				memberInfo = objectType.GetProperty (propertyName.Substring (0, dot), BindingFlags.Public | BindingFlags.Instance);
+				if (wrapperType != null)
+					memberInfo = wrapperType.GetProperty (propertyName.Substring (0, dot), flags);
+				if (memberInfo == null)
+					memberInfo = objectType.GetProperty (propertyName.Substring (0, dot), flags);
+				else
+					isWrapperProperty = true;
 				if (memberInfo == null)
 					throw new ArgumentException ("Invalid property name " + objectType.Name + "." + propertyName);
-				parentType = memberInfo.PropertyType;
-				propertyInfo = parentType.GetProperty (propertyName.Substring (dot + 1), BindingFlags.Public | BindingFlags.Instance);
+				trueObjectType = memberInfo.PropertyType;
+				propertyInfo = trueObjectType.GetProperty (propertyName.Substring (dot + 1), flags);
 			}
 			if (propertyInfo == null)
 				throw new ArgumentException ("Invalid property name " + objectType.Name + "." + propertyName);
 
-			eventInfo = parentType.GetEvent (propertyInfo.Name + "Changed", BindingFlags.Public | BindingFlags.Instance);
-
-			// FIXME. This is ugly.
-			if (objectType.GetInterface ("Stetic.IObjectWrapper") != null &&
-			    objectType.BaseType.GetProperty (propertyName) != null) {
-				PropertyDescriptor baseProp = new PropertyDescriptor (objectType.BaseType, propertyName);
-				if (baseProp != null) {
-					editorType = baseProp.editorType;
-					defaultValue = baseProp.defaultValue;
-					pspec = baseProp.pspec;
+			// FIXME, this is sort of left over from the old code. We should
+			// do it nicer.
+			if (wrapperType != null) {
+				try {
+					PropertyDescriptor baseProp = new PropertyDescriptor (objectType, propertyName);
+					if (baseProp != null) {
+						editorType = baseProp.editorType;
+						defaultValue = baseProp.defaultValue;
+						pspec = baseProp.pspec;
+					}
+				} catch {
+					;
 				}
 			}
 
@@ -62,105 +77,115 @@ namespace Stetic {
 
 				if (attr is GLib.PropertyAttribute) {
 					PropertyAttribute pattr = (PropertyAttribute)attr;
-					pspec = ParamSpec.LookupObjectProperty (parentType, pattr.Name);
+					pspec = ParamSpec.LookupObjectProperty (trueObjectType, pattr.Name);
 				}
 
 				if (attr is Gtk.ChildPropertyAttribute) {
 					ChildPropertyAttribute cpattr = (ChildPropertyAttribute)attr;
-					pspec = ParamSpec.LookupChildProperty (parentType.DeclaringType, cpattr.Name);
+					pspec = ParamSpec.LookupChildProperty (trueObjectType.DeclaringType, cpattr.Name);
 				}
 			}
 		}
 
+		// The property's display name
 		public string Name {
 			get {
 				return propertyInfo.Name;
 			}
 		}
 
-		public PropertyInfo Info {
-			get {
-				return propertyInfo;
-			}
-		}
-
+		// The property's type
 		public Type PropertyType {
 			get {
 				return propertyInfo.PropertyType;
 			}
 		}
 
-		public EventInfo EventInfo {
-			get {
-				return eventInfo;
-			}
-		}
-
+		// The property's ParamSpec
 		public ParamSpec ParamSpec {
 			get {
 				return pspec;
 			}
 		}
 
+		// The type of editor to use in the PropertyGrid
 		public Type EditorType {
 			get {
 				return editorType;
 			}
 		}
 
+		// The property's default value
 		public object Default {
 			get {
 				return defaultValue;
 			}
 		}
 
-		public object PropertyObject (object obj)
-		{
-			return memberInfo == null ? obj : memberInfo.GetValue (obj, null);
-		}
-
+		// Whether or not the property is readable
 		public bool CanRead {
 			get {
 				return propertyInfo.CanRead;
 			}
 		}
 
+		// Gets the value of the property on obj
 		public object GetValue (object obj)
 		{
+			Stetic.Wrapper.Object wrapper = obj as Stetic.Wrapper.Object;
+			if (wrapper != null && !isWrapperProperty)
+				obj = wrapper.Wrapped;
+			else if (wrapper == null && isWrapperProperty)
+				throw new ApplicationException ("Requested wrapper property " + propertyInfo.Name + " on non-wrapper object " + obj.ToString ());
+
 			if (memberInfo != null)
 				obj = memberInfo.GetValue (obj, null);
 			return propertyInfo.GetValue (obj, null);
 		}
 
+		// Whether or not the property is writable
 		public bool CanWrite {
 			get {
 				return propertyInfo.CanWrite;
 			}
 		}
 
+		// Sets the value of the property on obj to value
 		public void SetValue (object obj, object value)
 		{
+			Stetic.Wrapper.Object wrapper = obj as Stetic.Wrapper.Object;
+			if (wrapper != null && !isWrapperProperty)
+				obj = wrapper.Wrapped;
+
 			if (memberInfo != null)
 				obj = memberInfo.GetValue (obj, null);
 			propertyInfo.SetValue (obj, value, null);
 		}
 
+		// Marks the property as depending on master (which
+		// must have Type bool). The property will be
+		// sensitive in the PropertyGrid when master is true.
 		public void DependsOn (PropertyDescriptor master)
 		{
 			dependencies.Add (master);
 		}
 
+		// Marks the property as depending inversely on master
+		// (which must have Type bool). The property will be
+		// sensitive in the PropertyGrid when master is false.
 		public void DependsInverselyOn (PropertyDescriptor master)
 		{
 			inverseDependencies.Add (master);
 		}
 
+		// The property's (forward) dependencies
 		public IList Dependencies {
 			get {
 				return dependencies;
 			}
 		}
 
+		// The property's reverse dependencies
 		public IList InverseDependencies {
 			get {
 				return inverseDependencies;

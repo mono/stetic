@@ -38,11 +38,11 @@ namespace Stetic {
 
 		public static Pixbuf IconForType (Type type)
 		{
-			foreach (object attr in type.GetCustomAttributes (typeof (WidgetWrapperAttribute), false)) {
-				WidgetWrapperAttribute wwattr = attr as WidgetWrapperAttribute;
+			foreach (object attr in type.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)) {
+				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
 
 				try {
-					return new Gdk.Pixbuf (type.Assembly, wwattr.IconName);
+					return new Gdk.Pixbuf (type.Assembly, owattr.IconName);
 				} catch {
 					;
 				}
@@ -50,35 +50,38 @@ namespace Stetic {
 			return Gdk.Pixbuf.LoadFromResource ("missing.png");
 		}
 
-		public void AddWidget (Assembly assem, Type type, VBox box, bool window)
+		public void AddWidget (Assembly assem, Type type)
 		{
-			foreach (object attr in type.GetCustomAttributes (typeof (WidgetWrapperAttribute), false)) {
-				WidgetWrapperAttribute wwattr = attr as WidgetWrapperAttribute;
+			foreach (object attr in type.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)) {
+				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
 				Pixbuf icon;
 
 				try {
-					icon = new Gdk.Pixbuf (assem, wwattr.IconName);
+					icon = new Gdk.Pixbuf (assem, owattr.IconName);
 				} catch {
 					icon = Gdk.Pixbuf.LoadFromResource ("missing.png");
 				}
 
-				if (window)
-					box.PackStart (new WindowFactory (wwattr.Name, icon, type), false, false, 0);
-				else
-					box.PackStart (new WidgetFactory (wwattr.Name, icon, type), false, false, 0);
+				switch (owattr.Type) {
+				case ObjectWrapperType.Container:
+					containers.PackStart (new WidgetFactory (owattr.Name, icon, type), false, false, 0);
+					break;
+
+				case ObjectWrapperType.Window:
+					windows.PackStart (new WindowFactory (owattr.Name, icon, type), false, false, 0);
+					break;
+
+				default:
+					normals.PackStart (new WidgetFactory (owattr.Name, icon, type), false, false, 0);
+					break;
+				}
 			}
 		}
 
 		public void AddWidgets (Assembly assem)
 		{
-			foreach (Type type in assem.GetExportedTypes ()) {
-				if (type.GetInterface ("Stetic.IWindowWrapper") != null)
-					AddWidget (assem, type, windows, true);
-				else if (type.GetInterface ("Stetic.IContainerWrapper") != null)
-					AddWidget (assem, type, containers, false);
-				else if (type.GetInterface ("Stetic.IWidgetWrapper") != null)
-					AddWidget (assem, type, normals, false);
-			}
+			foreach (Type type in assem.GetExportedTypes ())
+				AddWidget (assem, type);
 
 			ShowAll ();
 		}			

@@ -13,7 +13,7 @@ namespace Stetic {
 		ArrayList sensitives;
 
 		protected object selection;
-		IntPtr notifyId;
+		protected Stetic.Wrapper.Object wrapper;
 
 		public PropertyGrid () : base (false, 6)
 		{
@@ -25,11 +25,11 @@ namespace Stetic {
 
 		protected void Clear ()
 		{
-			if (selection is GLib.Object) {
-				Notify.Remove ((GLib.Object)selection, notifyId);
-				notifyId = IntPtr.Zero;
-			}
 			selection = null;
+			if (wrapper != null) {
+				wrapper.Notify -= Notified;
+				wrapper = null;
+			}
 			foreach (Widget w in Children)
 				Remove (w);
 			editors = new Hashtable ();
@@ -72,8 +72,6 @@ namespace Stetic {
 				editors[prop.Name] = rep;
 				if (prop.ParamSpec != null)
 					editors[prop.ParamSpec.Name] = rep;
-				else if (prop.EventInfo != null)
-					prop.EventInfo.AddEventHandler (obj, new EventHandler (rep.Update));
 				rep.ShowAll ();
 				sgroup.AddWidget (rep);
 				box.PackStart (rep, false, false, 0);
@@ -82,18 +80,8 @@ namespace Stetic {
 			box.ShowAll ();
 			group.PackStart (box, false, false, 0);
 
-			if (prop.Dependencies.Count > 0 || prop.InverseDependencies.Count > 0) {
+			if (prop.Dependencies.Count > 0 || prop.InverseDependencies.Count > 0)
 				sensitives.Add (prop);
-
-				foreach (PropertyDescriptor master in prop.Dependencies) {
-					if (master.ParamSpec == null && master.EventInfo != null)
-						master.EventInfo.AddEventHandler (obj, new EventHandler (UpdateSensitivity));
-				}
-				foreach (PropertyDescriptor master in prop.InverseDependencies) {
-					if (master.ParamSpec == null && master.EventInfo != null)
-						master.EventInfo.AddEventHandler (obj, new EventHandler (UpdateSensitivity));
-				}
-			}
 		}
 
 		public void NoSelection ()
@@ -108,11 +96,11 @@ namespace Stetic {
 			PackStart (label, true, true, 0);
 		}
 
-		void Notified (ParamSpec pspec)
+		void Notified (Stetic.Wrapper.Object wrapper, string propertyName)
 		{
-			PropertyEditor ed = editors[pspec.Name] as PropertyEditor;
+			PropertyEditor ed = editors[propertyName] as PropertyEditor;
 			if (ed != null)
-				ed.Update (selection, EventArgs.Empty);
+				ed.Update (wrapper, EventArgs.Empty);
 			UpdateSensitivity ();
 		}
 
@@ -124,13 +112,13 @@ namespace Stetic {
 					continue;
 
 				foreach (PropertyDescriptor dep in prop.Dependencies) {
-					if (!(bool)dep.GetValue (selection)) {
+					if (!(bool)dep.GetValue (wrapper)) {
 						w.Sensitive = false;
 						goto next;
 					}
 				}
 				foreach (PropertyDescriptor dep in prop.InverseDependencies) {
-					if ((bool)dep.GetValue (selection)) {
+					if ((bool)dep.GetValue (wrapper)) {
 						w.Sensitive = false;
 						goto next;
 					}
@@ -156,11 +144,12 @@ namespace Stetic {
 				return;
 
 			selection = w;
-			notifyId = Notify.Add (w, new NotifyDelegate (Notified));
+			wrapper = Stetic.Wrapper.Object.Lookup (w);
 
-			if (w is Stetic.IObjectWrapper)
-				AddObjectWrapperProperties (w, ((IObjectWrapper)w).PropertyGroups);
-			else
+			if (wrapper != null) {
+				wrapper.Notify += Notified;
+				AddObjectWrapperProperties (w, wrapper.PropertyGroups);
+			} else
 				AddParamSpecProperties (w, w);
 
 			UpdateSensitivity ();
@@ -196,6 +185,7 @@ namespace Stetic {
 		}
 	}
 
+#if NO
 	public class ChildPropertyGrid : PropertyGrid {
 
 		public new void Select (IWidgetSite site)
@@ -215,9 +205,9 @@ namespace Stetic {
 
 			ContainerChild cc = parent[(Widget)site];
 			selection = cc;
-
-			if (parent is Stetic.IContainerWrapper)
-				AddObjectWrapperProperties (cc, ((IContainerWrapper)parent).ChildPropertyGroups);
+			wrapper = Stetic.WidgetFactory.GetWrapper (parent) as IContainerWrapper;
+			if (wrapper != null)
+				AddObjectWrapperProperties (cc, ((IContainerWrapper)wrapper).ChildPropertyGroups);
 			else
 				AddParamSpecProperties (cc, parent);
 
@@ -233,4 +223,5 @@ namespace Stetic {
 			return null;
 		}
 	}
+#endif
 }

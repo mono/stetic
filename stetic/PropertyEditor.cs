@@ -36,6 +36,10 @@ namespace Stetic {
 			Type editorType;
 			object min, max, initial;
 
+			Stetic.Wrapper.Object wrapper = Stetic.Wrapper.Object.Lookup (obj as GLib.Object);
+			if (wrapper != null)
+				obj = wrapper;
+
 			if (pspec != null) {
 				min = pspec.Minimum;
 				max = pspec.Maximum;

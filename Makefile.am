@@ -1,1 +1,1 @@
-SUBDIRS = glue libstetic widgets stetic
+SUBDIRS = glue libstetic stetic

@@ -43,7 +43,5 @@ AC_OUTPUT([
 Makefile
 glue/Makefile
 libstetic/Makefile
-widgets/Makefile
-widgets/pixmaps/Makefile
 stetic/Makefile
 ])

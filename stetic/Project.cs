@@ -22,7 +22,7 @@ namespace Stetic {
 
 		void AddWidget (Widget widget, ProjectNode parent)
 		{
-			if (widget is IWidgetWrapper) {
+			if (Stetic.Wrapper.Widget.Lookup (widget) != null) {
 				ProjectNode node = new ProjectNode (widget);
 				nodes[widget] = node;
 				if (parent == null)
@@ -32,10 +32,9 @@ namespace Stetic {
 
 				parent = node;
 
-				if (widget is IContainerWrapper) {
-					IContainerWrapper cwrap = (IContainerWrapper)widget;
-					cwrap.ContentsChanged += ContentsChanged;
-				}
+				Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (widget);
+				if (container != null)
+					container.ContentsChanged += ContentsChanged;
 			}
 
 			if (widget is Container) {
@@ -45,9 +44,9 @@ namespace Stetic {
 			}
 		}
 
-		void ContentsChanged (IContainerWrapper cwrap)
+		void ContentsChanged (Stetic.Wrapper.Container cwrap)
 		{
-			Container container = (Container)cwrap;
+			Container container = cwrap.Wrapped as Container;
 			ProjectNode node = nodes[container] as ProjectNode, child;
 
 			// Since TreeNode doesn't have an InsertChild method, the
@@ -96,7 +95,8 @@ namespace Stetic {
 		public ProjectNode (Widget widget)
 		{
 			this.widget = widget;
-			icon = Stetic.Palette.IconForType (widget.GetType ());
+			Stetic.Wrapper.Object wrapper = Stetic.Wrapper.Object.Lookup (widget);
+			icon = Stetic.Palette.IconForType (wrapper.GetType ());
 		}
 
 		public Widget Widget {

@@ -1,3 +1,11 @@
+2005-02-09  Dan Winship  <danw@novell.com>
+
+	* Major reorg again... Now instead of having the widget wrappers
+	be subclasses of the types they wrap, they are a parallel set of
+	classes. This lets them share code between each other more easily
+	than before. Touches nearly every file. Also, update to use
+	GLib.Object.AddNotification rather than our own notify hack.
+
 2005-01-27  Dan Winship  <danw@novell.com>
 
 	* stetic/ProjectView.cs: TreeView subclass for displaying the

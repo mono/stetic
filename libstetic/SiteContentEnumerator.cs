@@ -30,7 +30,7 @@ namespace Stetic {
 					current = ((WidgetSite)children[i]).Contents;
 					if (current != null)
 						return true;
-				} else if (children[i] is IWidgetWrapper) {
+				} else if (Stetic.Wrapper.Widget.Lookup (children[i]) != null) {
 					current = children[i];
 					return true;
 				}

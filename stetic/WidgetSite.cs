@@ -53,7 +53,7 @@ namespace Stetic {
 			}
 		}
 
-		private void ChildContentsChanged (IContainerWrapper container)
+		private void ChildContentsChanged (Stetic.Wrapper.Container container)
 		{
 			if (OccupancyChanged != null)
 				OccupancyChanged (this);
@@ -62,17 +62,21 @@ namespace Stetic {
 		protected override void OnAdded (Widget child)
 		{
 			base.OnAdded (child);
-			if (child is IContainerWrapper)
-				((IContainerWrapper)child).ContentsChanged += ChildContentsChanged;
 			Occupancy = SiteOccupancy.Occupied;
+
+			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (child);
+			if (container != null)
+				container.ContentsChanged += ChildContentsChanged;
 		}
 
 		protected override void OnRemoved (Widget w)
 		{
+			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (w);
+			if (container != null)
+				container.ContentsChanged -= ChildContentsChanged;
+
 			if (Occupancy == SiteOccupancy.Occupied)
 				Occupancy = SiteOccupancy.Empty;
-			if (w is IContainerWrapper)
-				((IContainerWrapper)w).ContentsChanged -= ChildContentsChanged;
 			base.OnRemoved (w);
 		}
 
@@ -132,11 +136,11 @@ namespace Stetic {
 				if (Occupancy == SiteOccupancy.Empty)
 					return true;
 
-				IContainerWrapper child;
+				Stetic.Wrapper.Container child;
 				if (Occupancy == SiteOccupancy.PseudoOccupied)
-					child = dragWidget as IContainerWrapper;
+					child = Stetic.Wrapper.Container.Lookup (dragWidget);
 				else
-					child = Child as IContainerWrapper;
+					child = Stetic.Wrapper.Container.Lookup (Child);
 
 				if (child != null)
 					return child.HExpandable;
@@ -150,11 +154,11 @@ namespace Stetic {
 				if (Occupancy == SiteOccupancy.Empty)
 					return true;
 
-				IContainerWrapper child;
+				Stetic.Wrapper.Container child;
 				if (Occupancy == SiteOccupancy.PseudoOccupied)
-					child = dragWidget as IContainerWrapper;
+					child = Stetic.Wrapper.Container.Lookup (dragWidget);
 				else
-					child = Child as IContainerWrapper;
+					child = Stetic.Wrapper.Container.Lookup (Child);
 
 				if (child != null)
 					return child.VExpandable;
@@ -238,9 +242,7 @@ namespace Stetic {
 			dragWin.Move (wx, wy);
 			dragWin.Show ();
 
-			ctx = Gtk.Drag.Begin (this, TargetList,
-					      DragAction.Move,
-					      1, evt);
+			ctx = Gtk.Drag.Begin (this, TargetList, DragAction.Move, 1, evt);
 			Gtk.Drag.SetIconWidget (ctx, dragWin, mx - wx, my - wy);
 
 			return false;
