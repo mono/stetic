@@ -1,3 +1,15 @@
+2005-01-11  Dan Winship  <danw@novell.com>
+
+	* stetic/WidgetBox.cs (WidgetBox, OnRealized): Use WidgetFlags
+	property instead of Obsolete Flags.
+	(ShowHandles, OnRealized, OnExposeEvent): Set the Background of
+	the HandleWindow to black when creating it, rather than filling in
+	the foreground in OnExposeEvent.
+	(OnSizeAllocated): Don't set HandleAllocation here, since the
+	window may not have been realized yet, which would make
+	TranslateCoordinates not work.
+	(ShapeHandles): Figure out HandleAllocation here.
+	
 2005-01-07  Dan Winship  <danw@novell.com>
 
 	* stetic/wrapper/Image.cs: wrapper for Gtk.Images that show files

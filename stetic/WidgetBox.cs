@@ -7,9 +7,19 @@ namespace Stetic {
 
 	public class WidgetBox : Gtk.Bin {
 
+		static Color black, white;
+
+		static WidgetBox ()
+		{
+			black = new Color (0, 0, 0);
+			black.Pixel = 1;
+			white = new Color (255, 255, 255);
+			white.Pixel = 0;
+		}
+
 		public WidgetBox ()
 		{
-			Flags &= ~(int)WidgetFlags.NoWindow;
+			WidgetFlags &= ~WidgetFlags.NoWindow;
 			ShowPlaceholder = true;
 		}
 
@@ -35,7 +45,6 @@ namespace Stetic {
 		}
 
 		Gdk.Window HandleWindow;
-		Rectangle HandleAllocation;
 		bool showHandles;
 		protected bool ShowHandles {
 			get { return showHandles; }
@@ -47,7 +56,8 @@ namespace Stetic {
 				if (showHandles) {
 					if (IsRealized) {
 						HandleWindow = NewWindow (Toplevel.GdkWindow, Gdk.WindowClass.InputOutput);
-						ShapeHandles (HandleAllocation);
+						HandleWindow.Background = black;
+						ShapeHandles ();
 					}
 					if (IsMapped)
 						HandleWindow.Show ();
@@ -97,19 +107,12 @@ namespace Stetic {
 		{
 			Allocation = allocation;
 
-			int tlx, tly;
-			TranslateCoordinates (Toplevel, 0, 0, out tlx, out tly);
-			HandleAllocation.X = tlx - handleSize / 2;
-			HandleAllocation.Y = tly - handleSize / 2;
-			HandleAllocation.Width = allocation.Width + handleSize;
-			HandleAllocation.Height = allocation.Height + handleSize;
-
 			if (EventWindow != null)
 				EventWindow.MoveResize (allocation);
 			if (GdkWindow != null && GdkWindow != ParentWindow)
 				GdkWindow.MoveResize (allocation);
 			if (HandleWindow != null)
-				ShapeHandles (HandleAllocation);
+				ShapeHandles ();
 
 			if (Child != null) {
 				allocation.X = allocation.Y = 0;
@@ -171,7 +174,7 @@ namespace Stetic {
 
 		protected override void OnRealized ()
 		{
-			Flags |= (int)WidgetFlags.Realized;
+			WidgetFlags |= WidgetFlags.Realized;
 
 			GdkWindow = NewWindow (ParentWindow, Gdk.WindowClass.InputOutput);
 
@@ -187,29 +190,33 @@ namespace Stetic {
 
 			if (ShowHandles) {
 				HandleWindow = NewWindow (Toplevel.GdkWindow, Gdk.WindowClass.InputOutput);
-				ShapeHandles (HandleAllocation);
+				ShapeHandles ();
 			}
 		}
 
 		private const int handleSize = 6;
-		void ShapeHandles (Rectangle allocation)
+		void ShapeHandles ()
 		{
 			Gdk.GC gc;
-			Color color;
 			Gdk.Pixmap pixmap;
-			int width = allocation.Width, height = allocation.Height;
+			Rectangle handleAllocation;
+			int tlx, tly;
+
+			TranslateCoordinates (Toplevel, 0, 0, out tlx, out tly);
+			handleAllocation.X = tlx - handleSize / 2;
+			handleAllocation.Y = tly - handleSize / 2;
+			handleAllocation.Width = Allocation.Width + handleSize;
+			handleAllocation.Height = Allocation.Height + handleSize;
+
+			int width = handleAllocation.Width, height = handleAllocation.Height;
 
 			pixmap = new Pixmap (HandleWindow, width, height, 1);
 			gc = new Gdk.GC (pixmap);
-			color = new Color (255, 255, 255);
-			color.Pixel = 0;
-			gc.Background = color;
-			gc.Foreground = color;
+			gc.Background = white;
+			gc.Foreground = white;
 			pixmap.DrawRectangle (gc, true, 0, 0, width, height);
 
-			color = new Color (0, 0, 0);
-			color.Pixel = 1;
-			gc.Foreground = color;
+			gc.Foreground = black;
 
 			// Draw border
 			pixmap.DrawRectangle (gc, false, handleSize / 2, handleSize / 2,
@@ -223,7 +230,7 @@ namespace Stetic {
 				pixmap.DrawRectangle (gc, true, width - handleSize, height - handleSize, handleSize, handleSize);
 			}
 
-			HandleWindow.MoveResize (allocation);
+			HandleWindow.MoveResize (handleAllocation);
 			HandleWindow.ShapeCombineMask (pixmap, 0, 0);
 		}
 
@@ -277,10 +284,10 @@ namespace Stetic {
 				GdkWindow.DrawLine (dark, width - 1, 0, width - 1, height - 1);
 			}
 
-			if (ShowHandles) {
-				Gdk.GC fg = Style.ForegroundGC (StateType.Normal);
-				HandleWindow.DrawRectangle (fg, true, 0, 0, HandleAllocation.Width, HandleAllocation.Height);
-			}
+//			if (ShowHandles) {
+//				Gdk.GC fg = Style.ForegroundGC (StateType.Normal);
+//				HandleWindow.DrawRectangle (fg, true, 0, 0, HandleAllocation.Width, HandleAllocation.Height);
+//			}
 
 			return base.OnExposeEvent (evt);
 		}
