@@ -6,7 +6,6 @@ namespace Stetic.Wrapper {
 	public class HPaned : Paned {
 
 		public HPaned (IStetic stetic) : this (stetic, new Gtk.HPaned ()) {}
-
 		public HPaned (IStetic stetic, Gtk.HPaned hpaned) : base (stetic, hpaned) {}
 
 		public override bool HExpandable { get { return true; } }

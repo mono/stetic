@@ -23,17 +23,13 @@ namespace Stetic.Wrapper {
 							      "InvisibleChar",
 							      "Xalign");
 
-			groups = new ItemGroup[] {
-				EntryProperties, EntryExtraProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Entry),
+				       EntryProperties,
+				       EntryExtraProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Entry (IStetic stetic) : this (stetic, new Gtk.Entry ()) {}
-
 		public Entry (IStetic stetic, Gtk.Entry entry) : base (stetic, entry) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

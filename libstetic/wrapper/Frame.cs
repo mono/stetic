@@ -16,13 +16,9 @@ namespace Stetic.Wrapper {
 							 "LabelXalign",
 							 "LabelYalign",
 							 "BorderWidth");
-
-			groups = new ItemGroup[] {
-				FrameProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[0];
+			RegisterItems (typeof (Stetic.Wrapper.Frame),
+				       FrameProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Frame (IStetic stetic) : this (stetic, new Gtk.Frame ()) {}
@@ -31,11 +27,5 @@ namespace Stetic.Wrapper {
 		{
 			frame.Label = frame.Name;
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 	}
 }

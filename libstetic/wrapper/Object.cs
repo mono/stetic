@@ -2,58 +2,29 @@ using System;
 using System.Collections;
 
 namespace Stetic.Wrapper {
-	public abstract class Object {
+	public abstract class Object : Stetic.ObjectWrapper {
 
-		protected IStetic stetic;
-		protected GLib.Object wrapped;
-
-		protected Object (IStetic stetic, GLib.Object obj)
+		protected Object (IStetic stetic, GLib.Object obj) : base (stetic, obj)
 		{
-			this.stetic = stetic;
-			this.wrapped = obj;
-
 			obj.AddNotification (NotifyHandler);
 
-			// FIXME; cleanup
-			wrappers[obj.Handle] = this;
+			// FIXME; arrange for wrapper disposal?
 		}
 
-		static Hashtable wrappers = new Hashtable ();
+		public override void Dispose ()
+		{
+			((GLib.Object)Wrapped).RemoveNotification (NotifyHandler);
+			base.Dispose ();
+		}
 
 		public static Object Lookup (GLib.Object obj)
 		{
-			if (obj == null)
-				return null;
-			else
-				return wrappers[obj.Handle] as Stetic.Wrapper.Object;
+			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Object;
 		}
 
 		void NotifyHandler (object obj, GLib.NotifyArgs args)
 		{
 			EmitNotify (args.Property);
-		}
-
-		public GLib.Object Wrapped {
-			get {
-				return wrapped;
-			}
-		}
-
-		public abstract ItemGroup[] ItemGroups { get; }
-
-		public virtual ItemGroup ContextMenuItems {
-			get {
-				return ItemGroup.Empty;
-			}
-		}
-
-		public delegate void WrapperNotificationDelegate (Object obj, string propertyName);
-		public event WrapperNotificationDelegate Notify;
-
-		protected void EmitNotify (string propertyName)
-		{
-			if (Notify != null)
-				Notify (this, propertyName);
 		}
 	}
 }

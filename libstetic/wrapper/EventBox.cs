@@ -14,22 +14,12 @@ namespace Stetic.Wrapper {
 							    "AboveChild",
 							    "VisibleWindow",
 							    "BorderWidth");
-			groups = new ItemGroup[] {
-				EventBoxProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[0];
+			RegisterItems (typeof (Stetic.Wrapper.EventBox),
+				       EventBoxProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public EventBox (IStetic stetic) : this (stetic, new Gtk.EventBox ()) {}
-
 		public EventBox (IStetic stetic, Gtk.EventBox eventbox) : base (stetic, eventbox) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 	}
 }

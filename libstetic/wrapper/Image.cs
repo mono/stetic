@@ -13,19 +13,14 @@ namespace Stetic.Wrapper {
 							 typeof (Stetic.Wrapper.Image),
 							 typeof (Gtk.Image),
 							 "File");
-
-			groups = new ItemGroup[] {
-				ImageProperties, Misc.MiscProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Image),
+				       ImageProperties,
+				       Misc.MiscProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Image (IStetic stetic) : this (stetic, new Gtk.Image ("")) {}
-
 		public Image (IStetic stetic, Gtk.Image image) : base (stetic, image) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		string filename = "";
 

@@ -19,22 +19,12 @@ namespace Stetic.Wrapper {
 							     "RightPadding",
 							     "BottomPadding",
 							     "BorderWidth");
-			groups = new ItemGroup[] {
-				AlignmentProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[0];
+			RegisterItems (typeof (Stetic.Wrapper.Alignment),
+				       AlignmentProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Alignment (IStetic stetic) : this (stetic, new Gtk.Alignment (0.5f, 0.5f, 1.0f, 1.0f)) {}
-
 		public Alignment (IStetic stetic, Gtk.Alignment alignment) : base (stetic, alignment) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 	}
 }

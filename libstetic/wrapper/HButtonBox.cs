@@ -6,7 +6,6 @@ namespace Stetic.Wrapper {
 	public class HButtonBox : ButtonBox {
 
 		public HButtonBox (IStetic stetic) : this (stetic, new Gtk.HButtonBox ()) {}
-
 		public HButtonBox (IStetic stetic, Gtk.HButtonBox hbuttonbox) : base (stetic, hbuttonbox) {}
 
 		public override bool HExpandable { get { return true; } }

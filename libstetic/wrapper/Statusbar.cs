@@ -11,18 +11,12 @@ namespace Stetic.Wrapper {
 			StatusbarProperties = new ItemGroup ("Status Bar Properties",
 							     typeof (Gtk.Statusbar),
 							     "HasResizeGrip");
-
-			groups = new ItemGroup[] {
-				StatusbarProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Statusbar),
+				       StatusbarProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Statusbar (IStetic stetic) : this (stetic, new Gtk.Statusbar ()) {}
-
 		public Statusbar (IStetic stetic, Gtk.Statusbar statusbar) : base (stetic, statusbar) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

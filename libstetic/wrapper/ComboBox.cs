@@ -19,11 +19,10 @@ namespace Stetic.Wrapper {
 								 "WrapWidth",
 								 "ColumnSpanColumn",
 								 "RowSpanColumn");
-
-			groups = new ItemGroup[] {
-				ComboBoxProperties, ComboBoxExtraProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.ComboBox),
+				       ComboBoxProperties,
+				       ComboBoxExtraProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public ComboBox (IStetic stetic) : this (stetic, Gtk.ComboBox.NewText ()) {}
@@ -33,9 +32,6 @@ namespace Stetic.Wrapper {
 			items = "";
 			item = new string[0];
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		string items;
 		string[] item;

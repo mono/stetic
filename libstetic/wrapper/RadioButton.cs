@@ -22,11 +22,10 @@ namespace Stetic.Wrapper {
 							       "Active",
 							       "Inconsistent",
 							       "DrawIndicator");
-
-			groups = new ItemGroup[] {
-				RadioButtonProperties, Button.ButtonExtraProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.RadioButton),
+				       RadioButtonProperties,
+				       Button.ButtonExtraProperties,
+				       Widget.CommonWidgetProperties);
 
 			GroupList = new ArrayList ();
 			GroupLeaders = new ArrayList ();
@@ -44,9 +43,6 @@ namespace Stetic.Wrapper {
 			}
 			Group = GroupList.Count - 1;
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		[Editor (typeof (Stetic.Editor.GroupPicker))]
 		public int Group {

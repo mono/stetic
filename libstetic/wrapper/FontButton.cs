@@ -19,18 +19,13 @@ namespace Stetic.Wrapper {
 							      "UseSize");
 			FontButtonProperties["UseSize"].DependsOn (FontButtonProperties["UseFont"]);
 
-			groups = new ItemGroup[] {
-				FontButtonProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.FontButton),
+				       FontButtonProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public FontButton (IStetic stetic) : this (stetic, new Gtk.FontButton ()) {}
-
 		public FontButton (IStetic stetic, Gtk.FontButton fontbutton) : base (stetic, fontbutton) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		public bool UseFont {
 			get {

@@ -19,11 +19,9 @@ namespace Stetic.Wrapper {
 							 "RowSpacing",
 							 "ColumnSpacing",
 							 "BorderWidth");
-
-			groups = new ItemGroup[] {
-				TableProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Table),
+				       TableProperties,
+				       Widget.CommonWidgetProperties);
 
 			TableChildProperties = new ItemGroup ("Table Child Layout",
 							      typeof (Gtk.Table.TableChild),
@@ -39,19 +37,19 @@ namespace Stetic.Wrapper {
 //			TableChildProperties["XOptions"].DependsOn (TableChildProperties["AutoSize"]);
 //			TableChildProperties["YOptions"].DependsOn (TableChildProperties["AutoSize"]);
 
-			childgroups = new ItemGroup[] {
-				TableChildProperties
-			};
+			RegisterChildItems (typeof (Stetic.Wrapper.Table),
+					    TableChildProperties);
 
-			contextItems = new ItemGroup (null,
-							  typeof (Stetic.Wrapper.Table),
-							  typeof (Gtk.Table),
-							  "InsertRowBefore",
-							  "InsertRowAfter",
-							  "InsertColumnBefore",
-							  "InsertColumnAfter",
-							  "DeleteRow",
-							  "DeleteColumn");
+			ItemGroup contextMenu = new ItemGroup (null,
+							       typeof (Stetic.Wrapper.Table),
+							       typeof (Gtk.Table),
+							       "InsertRowBefore",
+							       "InsertRowAfter",
+							       "InsertColumnBefore",
+							       "InsertColumnAfter",
+							       "DeleteRow",
+							       "DeleteColumn");
+			RegisterContextMenu (typeof (Stetic.Wrapper.Table), contextMenu);
 		}
 
 		const Gtk.AttachOptions expandOpts = Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill;
@@ -64,15 +62,6 @@ namespace Stetic.Wrapper {
 			table.Removed += SiteRemoved;
 			Sync ();
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
-
-		static ItemGroup contextItems;
-		public override ItemGroup ContextMenuItems { get { return contextItems; } }
 
 		private Gtk.Table table {
 			get {
@@ -396,7 +385,6 @@ namespace Stetic.Wrapper {
 		}
 
 		private const int delta = 4;
-		private enum Where { None, Above, Below, Left, Right };
 
 #if NOT
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)

@@ -81,7 +81,7 @@ namespace Stetic {
 			AppendLabel ("<i>No selection</i>");
 		}
 
-		void Notified (Stetic.Wrapper.Object wrapper, string propertyName)
+		void Notified (object wrapper, string propertyName)
 		{
 			PropertyEditor ed = editors[propertyName] as PropertyEditor;
 			if (ed != null)

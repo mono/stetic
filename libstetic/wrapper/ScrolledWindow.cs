@@ -16,12 +16,9 @@ namespace Stetic.Wrapper {
 								  "ShadowType",
 								  "WindowPlacement",
 								  "BorderWidth");
-			groups = new ItemGroup[] {
-				ScrolledWindowProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[0];
+			RegisterItems (typeof (Stetic.Wrapper.ScrolledWindow),
+				       ScrolledWindowProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public ScrolledWindow (IStetic stetic) : this (stetic, new Gtk.ScrolledWindow ()) {}
@@ -31,12 +28,6 @@ namespace Stetic.Wrapper {
 			scrolledwindow.SetPolicy (Gtk.PolicyType.Always, Gtk.PolicyType.Always);
 			scrolledwindow.AddWithViewport (CreateWidgetSite ());
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable { get { return true; } }

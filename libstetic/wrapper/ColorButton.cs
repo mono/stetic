@@ -14,19 +14,13 @@ namespace Stetic.Wrapper {
 							       "Title",
 							       "Color",
 							       "Alpha");
-
-			groups = new ItemGroup[] {
-				ColorButtonProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.ColorButton),
+				       ColorButtonProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public ColorButton (IStetic stetic) : this (stetic, new Gtk.ColorButton ()) {}
-
 		public ColorButton (IStetic stetic, Gtk.ColorButton colorbutton) : base (stetic, colorbutton) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		[Range (-1, 65535)]
 		public int Alpha {

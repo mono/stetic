@@ -14,18 +14,12 @@ namespace Stetic.Wrapper {
 							    "ShowDayNames",
 							    "ShowWeekNumbers",
 							    "NoMonthChange");
-
-			groups = new ItemGroup[] {
-				CalendarProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Calendar),
+				       CalendarProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Calendar (IStetic stetic) : this (stetic, new Gtk.Calendar ()) {}
-
 		public Calendar (IStetic stetic, Gtk.Calendar calendar) : base (stetic, calendar) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

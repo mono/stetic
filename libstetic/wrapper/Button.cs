@@ -42,18 +42,19 @@ namespace Stetic.Wrapper {
 							       "Xalign",
 							       "Yalign");
 
-			groups = new ItemGroup[] {
-				ButtonProperties, ButtonExtraProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Button),
+				       ButtonProperties,
+				       ButtonExtraProperties,
+				       Widget.CommonWidgetProperties);
 
-			contextItems = new ItemGroup (null,
-						      typeof (Stetic.Wrapper.Button),
-						      typeof (Gtk.Button),
-						      "RemoveContents",
-						      "RestoreLabel");
-			contextItems["RemoveContents"].DependsOn (hasContents);
-			contextItems["RestoreLabel"].DependsInverselyOn (hasLabel);
+			ItemGroup contextMenu = new ItemGroup (null,
+							       typeof (Stetic.Wrapper.Button),
+							       typeof (Gtk.Button),
+							       "RemoveContents",
+							       "RestoreLabel");
+			contextMenu["RemoveContents"].DependsOn (hasContents);
+			contextMenu["RestoreLabel"].DependsInverselyOn (hasLabel);
+			RegisterContextMenu (typeof (Stetic.Wrapper.Button), contextMenu);
 		}
 
 		public Button (IStetic stetic) : this (stetic, new Gtk.Button (Gtk.Stock.Ok)) {}
@@ -68,12 +69,6 @@ namespace Stetic.Wrapper {
 				stockId = Gtk.Stock.Ok;
 			}
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup contextItems;
-		public override ItemGroup ContextMenuItems { get { return contextItems; } }
 
 		private Gtk.Button button {
 			get {

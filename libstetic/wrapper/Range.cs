@@ -19,6 +19,11 @@ namespace Stetic.Wrapper {
 								   "Adjustment.PageSize",
 								   "Adjustment.StepIncrement",
 								   "Adjustment.Value");
+
+			RegisterItems (typeof (Stetic.Wrapper.Range),
+				       Range.RangeAdjustmentProperties,
+				       Range.RangeProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		protected Range (IStetic stetic, Gtk.Range range) : base (stetic, range)

@@ -26,11 +26,9 @@ namespace Stetic.Wrapper {
 							    "RightMargin",
 							    "LeftMargin",
 							    "Indent");
-
-			groups = new ItemGroup[] {
-				TextViewProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.TextView),
+				       TextViewProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public TextView (IStetic stetic) : this (stetic, new Gtk.TextView ()) {}
@@ -39,9 +37,6 @@ namespace Stetic.Wrapper {
 		{
 			textview.Buffer.Changed += Buffer_Changed;
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		[Editor (typeof (Stetic.Editor.Text))]
 		public string Text {

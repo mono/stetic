@@ -8,6 +8,7 @@ libstetic_dll_sources =			\
 	ItemGroup.cs			\
 	IStetic.cs			\
 	IWidgetSite.cs			\
+	ObjectWrapper.cs		\
 	ObjectWrapperAttribute.cs	\
 	ParamFlags.cs			\
 	ParamSpec.cs			\

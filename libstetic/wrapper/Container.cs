@@ -3,6 +3,12 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 	public abstract class Container : Widget {
+		static Container ()
+		{
+			RegisterChildItems (typeof (Stetic.Wrapper.Container),
+					    new ItemGroup[0]);
+		}
+
 		protected Container (IStetic stetic, Gtk.Container container) : base (stetic, container)
 		{
 			container.Removed += SiteRemoved;
@@ -13,7 +19,28 @@ namespace Stetic.Wrapper {
 			return Object.Lookup (obj) as Stetic.Wrapper.Container;
 		}
 
-		public abstract ItemGroup[] ChildItemGroups { get; }
+		static Hashtable childGroups = new Hashtable ();
+
+		protected static void RegisterChildItems (Type t, params ItemGroup[] items)
+		{
+			childGroups[t] = items;
+		}
+
+		public ItemGroup[] ChildItemGroups {
+			get {
+				ItemGroup[] items = (ItemGroup[])childGroups[GetType ()];
+				if (items == null) {
+					for (Type t = GetType ().BaseType; t != null; t = t.BaseType) {
+						items = (ItemGroup[])childGroups[t];
+						if (items != null) {
+							childGroups[GetType ()] = items;
+							break;
+						}
+					}
+				}
+				return items;
+			}
+		}
 
 		public abstract bool HExpandable { get; }
 		public abstract bool VExpandable { get; }

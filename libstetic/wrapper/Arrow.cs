@@ -12,18 +12,13 @@ namespace Stetic.Wrapper {
 							 typeof (Gtk.Arrow),
 							 "ArrowType",
 							 "ShadowType");
-
-			groups = new ItemGroup[] {
-				ArrowProperties, Misc.MiscProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Arrow),
+				       ArrowProperties,
+				       Misc.MiscProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Arrow (IStetic stetic) : this (stetic, new Gtk.Arrow (Gtk.ArrowType.Left, Gtk.ShadowType.None)) {}
-
 		public Arrow (IStetic stetic, Gtk.Arrow arrow) : base (stetic, arrow) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

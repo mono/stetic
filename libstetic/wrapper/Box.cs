@@ -13,6 +13,10 @@ namespace Stetic.Wrapper {
 						       "Homogeneous",
 						       "Spacing",
 						       "BorderWidth");
+			RegisterItems (typeof (Stetic.Wrapper.Box),
+				       BoxProperties,
+				       Widget.CommonWidgetProperties);
+
 			BoxChildProperties = new ItemGroup ("Box Child Layout",
 							    typeof (Gtk.Box.BoxChild),
 							    "PackType",
@@ -20,21 +24,15 @@ namespace Stetic.Wrapper {
 							    "Expand",
 							    "Fill",
 							    "Padding");
+			RegisterChildItems (typeof (Stetic.Wrapper.Box),
+					    BoxChildProperties);
 
-			groups = new ItemGroup[] {
-				Box.BoxProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[] {
-				Box.BoxChildProperties
-			};
-
-			contextItems = new ItemGroup (null,
-						      typeof (Stetic.Wrapper.Box),
-						      typeof (Gtk.Box),
-						      "InsertBefore",
-						      "InsertAfter");
+			ItemGroup contextMenu = new ItemGroup (null,
+							       typeof (Stetic.Wrapper.Box),
+							       typeof (Gtk.Box),
+							       "InsertBefore",
+							       "InsertAfter");
+			RegisterContextMenu (typeof (Stetic.Wrapper.Box), contextMenu);
 		}
 
 		protected Box (IStetic stetic, Gtk.Box box) : base (stetic, box)
@@ -42,15 +40,6 @@ namespace Stetic.Wrapper {
 			for (int i = 0; i < 3; i++)
 				box.PackStart (CreateWidgetSite ());
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
-
-		static ItemGroup contextItems;
-		public override ItemGroup ContextMenuItems { get { return contextItems; } }
 
 		[Command ("Insert Before")]
 		void InsertBefore (IWidgetSite context)

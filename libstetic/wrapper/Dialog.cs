@@ -26,13 +26,11 @@ namespace Stetic.Wrapper {
 							      "Role",
 							      "SkipPagerHint",
 							      "SkipTaskbarHint");
-			groups = new ItemGroup[] {
-				DialogProperties, DialogMiscProperties,
-				Window.WindowSizeProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[0];
+			RegisterItems (typeof (Stetic.Wrapper.Dialog),
+				       DialogProperties,
+				       DialogMiscProperties,
+				       Window.WindowSizeProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Dialog (IStetic stetic) : this (stetic, new Gtk.Dialog ()) {}
@@ -41,11 +39,5 @@ namespace Stetic.Wrapper {
 		{
 			dialog.VBox.Add (CreateWidgetSite (200, 200));
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 	}
 }

@@ -13,17 +13,12 @@ namespace Stetic.Wrapper {
 							       "Orientation",
 							       "Text",
 							       "PulseStep");
-			groups = new ItemGroup[] {
-				ProgressBarProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.ProgressBar),
+				       ProgressBarProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public ProgressBar (IStetic stetic) : this (stetic, new Gtk.ProgressBar ()) {}
-
 		public ProgressBar (IStetic stetic, Gtk.ProgressBar progressbar) : base (stetic, progressbar) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

@@ -6,7 +6,6 @@ namespace Stetic.Wrapper {
 	public class HScale : Scale {
 
 		public HScale (IStetic stetic) : this (stetic, new Gtk.HScale (0.0, 100.0, 1.0)) {}
-
 		public HScale (IStetic stetic, Gtk.HScale hscale) : base (stetic, hscale) {}
 	}
 }

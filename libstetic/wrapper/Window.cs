@@ -36,13 +36,11 @@ namespace Stetic.Wrapper {
 							      "Role",
 							      "SkipPagerHint",
 							      "SkipTaskbarHint");
-
-			groups = new ItemGroup[] {
-				WindowProperties, WindowSizeProperties, WindowMiscProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[0];
+			RegisterItems (typeof (Stetic.Wrapper.Window),
+				       WindowProperties,
+				       WindowSizeProperties,
+				       WindowMiscProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Window (IStetic stetic) : this (stetic, new Gtk.Window (Gtk.WindowType.Toplevel)) {}
@@ -60,12 +58,6 @@ namespace Stetic.Wrapper {
 			((Gtk.Widget)Wrapped).Hide ();
 			args.RetVal = true;
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable { get { return true; } }

@@ -1,3 +1,24 @@
+2005-02-15  Dan Winship  <danw@novell.com>
+
+	* libstetic/ObjectWrapper.cs: split out parts of
+	libstetic/wrapper/Object.cs into this.
+	(RegisterItems, RegisterContextMenu): static methods to register
+	property grid and context menu items for a wrapper type.
+	(ItemGroups, ContextMenuItems): these can be implemented here now
+	rather than needing to be abstract and then reimplemented by each
+	class.
+
+	* libstetic/wrapper/Object.cs: simplified since most of it is in
+	ObjectWrapper.cs now.
+
+	* libstetic/wrapper/Container.cs: parallel some of the
+	ObjectWrapper stuff for child properties
+
+	* libstetic/wrapper/*: update for new (simplified) itemgroup
+	handling.
+
+	* stetic/PropertyGrid.cs (Notified): update prototype
+
 2005-02-14  Dan Winship  <danw@novell.com>
 
 	* libstetic/editor/GroupPicker.cs: property editor for a

@@ -12,20 +12,16 @@ namespace Stetic.Wrapper {
 							 "MinPosition",
 							 "MaxPosition",
 							 "BorderWidth");
-			
+			RegisterItems (typeof (Stetic.Wrapper.Paned),
+				       PanedProperties,
+				       Widget.CommonWidgetProperties);
+
 			PanedChildProperties = new ItemGroup ("Pane Child Layout",
 							      typeof (Gtk.Paned.PanedChild),
 							      "Resize",
 							      "Shrink");
-
-			groups = new ItemGroup[] {
-				Paned.PanedProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[] {
-				Paned.PanedChildProperties
-			};
+			RegisterChildItems (typeof (Stetic.Wrapper.Paned),
+					    PanedChildProperties);
 		}
 
 		protected Paned (IStetic stetic, Gtk.Paned paned) : base (stetic, paned)
@@ -33,11 +29,5 @@ namespace Stetic.Wrapper {
 			paned.Pack1 (CreateWidgetSite (), true, false);
 			paned.Pack2 (CreateWidgetSite (), true, false);
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 	}
 }

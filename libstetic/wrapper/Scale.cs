@@ -18,10 +18,9 @@ namespace Stetic.Wrapper {
 			ScaleProperties["Digits"].DependsOn (ScaleProperties["DrawValue"]);
 			ScaleProperties["ValuePos"].DependsOn (ScaleProperties["DrawValue"]);
 
-			groups = new ItemGroup[] {
-				Scale.ScaleProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Scale),
+				       Scale.ScaleProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		protected Scale (IStetic stetic, Gtk.Scale scale) : base (stetic, scale)
@@ -33,8 +32,5 @@ namespace Stetic.Wrapper {
 		{
 			EmitNotify (args.Property);
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

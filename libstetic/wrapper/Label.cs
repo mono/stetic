@@ -17,11 +17,10 @@ namespace Stetic.Wrapper {
 							 "MnemonicWidget",
 							 "Justify",
 							 "Selectable");
-
-			groups = new ItemGroup[] {
-				LabelProperties, Misc.MiscProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Label),
+				       LabelProperties,
+				       Misc.MiscProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Label (IStetic stetic) : this (stetic, new Gtk.Label ()) {}
@@ -30,8 +29,5 @@ namespace Stetic.Wrapper {
 		{
 			label.LabelProp = label.Name;
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

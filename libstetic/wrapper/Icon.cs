@@ -14,19 +14,14 @@ namespace Stetic.Wrapper {
 							typeof (Gtk.Image),
 							"Stock",
 							"IconSize");
-
-			groups = new ItemGroup[] {
-				IconProperties, Misc.MiscProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Icon),
+				       IconProperties,
+				       Misc.MiscProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public Icon (IStetic stetic) : this (stetic, new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog)) {}
-
 		public Icon (IStetic stetic, Gtk.Image icon) : base (stetic, icon) {}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 
 		[Editor (typeof (Stetic.Editor.StockItem))]
 		public string Stock {

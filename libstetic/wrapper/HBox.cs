@@ -4,8 +4,8 @@ namespace Stetic.Wrapper {
 
 	[ObjectWrapper ("HBox", "hbox.png", ObjectWrapperType.Container)]
 	public class HBox : Box {
-		public HBox (IStetic stetic) : this (stetic, new Gtk.HBox (false, 0)) {}
 
+		public HBox (IStetic stetic) : this (stetic, new Gtk.HBox (false, 0)) {}
 		public HBox (IStetic stetic, Gtk.HBox hbox) : base (stetic, hbox) {}
 
 		public override bool HExpandable {

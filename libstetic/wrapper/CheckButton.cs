@@ -14,11 +14,10 @@ namespace Stetic.Wrapper {
 							       "Active",
 							       "Inconsistent",
 							       "DrawIndicator");
-
-			groups = new ItemGroup[] {
-				CheckButtonProperties, Button.ButtonExtraProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.CheckButton),
+				       CheckButtonProperties,
+				       Button.ButtonExtraProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		public CheckButton (IStetic stetic) : this (stetic, new Gtk.CheckButton ()) {}
@@ -27,8 +26,5 @@ namespace Stetic.Wrapper {
 		{
 			checkbutton.Label = checkbutton.Name;
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
 	}
 }

@@ -20,14 +20,11 @@ namespace Stetic.Wrapper {
 								 "WindowPosition",
 								 "Modal",
 								 "BorderWidth");
-			groups = new ItemGroup[] {
-				MessageDialogProperties,
-				Dialog.DialogMiscProperties,
-				Window.WindowSizeProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
-
-			childgroups = new ItemGroup[0];
+			RegisterItems (typeof (Stetic.Wrapper.MessageDialog),
+				       MessageDialogProperties,
+				       Dialog.DialogMiscProperties,
+				       Window.WindowSizeProperties,
+				       Widget.CommonWidgetProperties);
 		}
 
 		Gtk.Label label, secondaryLabel;
@@ -69,12 +66,6 @@ namespace Stetic.Wrapper {
 
 			Buttons = Gtk.ButtonsType.OkCancel;
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
 
 		private Gtk.Dialog dialog {
 			get {

@@ -25,11 +25,9 @@ namespace Stetic.Wrapper {
 							    "BorderWidth",
 							    "InsertBefore",
 							    "InsertAfter");
-
-			groups = new ItemGroup[] {
-				NotebookProperties,
-				Stetic.Wrapper.Widget.CommonWidgetProperties
-			};
+			RegisterItems (typeof (Stetic.Wrapper.Notebook),
+				       NotebookProperties,
+				       Widget.CommonWidgetProperties);
 
 			NotebookChildProperties = new ItemGroup ("Notebook Child Layout",
 								 typeof (Gtk.Notebook.NotebookChild),
@@ -39,21 +37,20 @@ namespace Stetic.Wrapper {
 								 "TabExpand",
 								 "TabFill",
 								 "MenuLabel");
+			RegisterChildItems (typeof (Stetic.Wrapper.Notebook),
+					    NotebookChildProperties);
 
-			childgroups = new ItemGroup[] {
-				NotebookChildProperties
-			};
-
-			contextItems = new ItemGroup (null,
-						      typeof (Stetic.Wrapper.Notebook),
-						      typeof (Gtk.Notebook),
-						      "PreviousPage",
-						      "NextPage",
-						      "DeletePage",
-						      "SwapPrevious",
-						      "SwapNext",
-						      "InsertBefore",
-						      "InsertAfter");
+			ItemGroup contextMenu = new ItemGroup (null,
+							       typeof (Stetic.Wrapper.Notebook),
+							       typeof (Gtk.Notebook),
+							       "PreviousPage",
+							       "NextPage",
+							       "DeletePage",
+							       "SwapPrevious",
+							       "SwapNext",
+							       "InsertBefore",
+							       "InsertAfter");
+			RegisterContextMenu (typeof (Stetic.Wrapper.Notebook), contextMenu);
 		}
 
 		public Notebook (IStetic stetic) : this (stetic, new Gtk.Notebook ()) {}
@@ -62,15 +59,6 @@ namespace Stetic.Wrapper {
 		{
 			InsertPage (0);
 		}
-
-		static ItemGroup[] groups;
-		public override ItemGroup[] ItemGroups { get { return groups; } }
-
-		static ItemGroup[] childgroups;
-		public override ItemGroup[] ChildItemGroups { get { return childgroups; } }
-
-		static ItemGroup contextItems;
-		public override ItemGroup ContextMenuItems { get { return contextItems; } }
 
 		private Gtk.Notebook notebook {
 			get {
