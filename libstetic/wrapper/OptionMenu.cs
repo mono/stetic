@@ -35,9 +35,7 @@ namespace Stetic.Wrapper {
 			stetic.GladeImportComplete += FlattenMenu;
 		}
 
-		public override Widget GladeImportChild (string className, string id,
-							 Hashtable props,
-							 Hashtable childprops)
+		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
 		{
 			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
 			if (wrapper == null)

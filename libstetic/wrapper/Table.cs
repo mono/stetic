@@ -47,8 +47,7 @@ namespace Stetic.Wrapper {
 			base.GladeImport (className, id, props);
 		}
 
-		public override Widget GladeImportChild (string className, string id,
-							 Hashtable props, Hashtable childprops)
+		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
 		{
 			if (childprops["x_options"] == null)
 				childprops["x_options"] = "expand|fill";

@@ -97,8 +97,7 @@ namespace Stetic.Wrapper {
 			return null;
 		}
 
-		public virtual Widget GladeSetInternalChild (string childName, string className, string id,
-							     Hashtable props)
+		public virtual Widget GladeSetInternalChild (string childName, string className, string id, Hashtable props)
 		{
 			Gtk.Widget widget = FindInternalChild (childName);
 			if (widget == null)
