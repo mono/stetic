@@ -47,8 +47,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		Set AutoSize = new Set ();
-
 		int freeze;
 		void Freeze ()
 		{
@@ -134,13 +132,13 @@ namespace Stetic.Wrapper {
 				bool allPlaceholders = true;
 
 				for (col = 0; col < NColumns; col++) {
-					if (grid[row,col] == null) {
+					site = grid[row,col];
+					if (site == null) {
 						site = CreateWidgetSite ();
 						site.FreezeChildNotify ();
-						AutoSize[site] = true;
 						table.Attach (site, col, col + 1, row, row + 1);
 						grid[row,col] = site;
-					} else if (!grid[row,col].VExpandable)
+					} else if (!site.VExpandable || !AutoSize[site])
 						allPlaceholders = false;
 				}
 
@@ -163,7 +161,8 @@ namespace Stetic.Wrapper {
 				bool allPlaceholders = true;
 
 				for (row = 0; row < NRows; row++) {
-					if (!grid[row,col].HExpandable) {
+					site = grid[row,col];
+					if (!site.HExpandable || !AutoSize[site]) {
 						allPlaceholders = false;
 						break;
 					}
@@ -351,15 +350,9 @@ namespace Stetic.Wrapper {
 					tc.XOptions = 0;
 					tc.YOptions = 0;
 				}
-			} else
-				AutoSize[site] = true;
+			}
 			Thaw ();
 			base.SiteOccupancyChanged (site);
-		}
-
-		protected override void SiteRemoved (WidgetSite site)
-		{
-			AutoSize[site] = false;
 		}
 
 #if NOT
@@ -470,17 +463,6 @@ namespace Stetic.Wrapper {
 				}
 			}
 
-			[Description ("Auto Size", "If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the table")]
-			public bool AutoSize {
-				get {
-					return parent.AutoSize[tc.Child];
-				}
-				set {
-					parent.AutoSize[tc.Child] = value;
-					EmitNotify ("AutoSize");
-				}
-			}
-
 			[Description ("Expand Horizontally", "Whether or not the table cell should expand horizontally")]
 			public bool XExpand {
 				get {
@@ -580,7 +562,6 @@ namespace Stetic.Wrapper {
 				base.EmitNotify (propertyName);
 				parent.Sync ();
 			}
-
 		}
 	}
 }

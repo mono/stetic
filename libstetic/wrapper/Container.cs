@@ -18,8 +18,9 @@ namespace Stetic.Wrapper {
 			do {
 				foreach (Type ct in type.GetNestedTypes (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)) {
 					if (ct.IsSubclassOf (childType)) {
+						if (!childTypes.ContainsValue (ct))
+							Stetic.ObjectWrapper.Register (ct);
 						childTypes[type] = ct;
-						Stetic.ObjectWrapper.Register (ct);
 						return;
 					}
 				}
@@ -73,10 +74,13 @@ namespace Stetic.Wrapper {
 				ContentsChanged (this);
 		}
 
+		protected Set AutoSize = new Set ();
+
 		protected override WidgetSite CreateWidgetSite ()
 		{
 			WidgetSite site = base.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
+			AutoSize[site] = true;
 			return site;
 		}
 
@@ -96,6 +100,8 @@ namespace Stetic.Wrapper {
 		}
 
 		protected virtual void SiteOccupancyChanged (WidgetSite site) {
+			if (!site.Occupied)
+				AutoSize[site] = true;
 			EmitContentsChanged ();
 		}
 
@@ -110,7 +116,7 @@ namespace Stetic.Wrapper {
 
 		protected virtual void SiteRemoved (WidgetSite site)
 		{
-			;
+			AutoSize[site] = false;
 		}
 
 		public IEnumerable Sites {
@@ -131,14 +137,14 @@ namespace Stetic.Wrapper {
 			protected override void Wrap (object obj, bool initialized)
 			{
 				base.Wrap (obj, initialized);
-				((Gtk.Container.ContainerChild)Wrapped).Child.ChildNotified += ChildNotifyHandler;
+				cc.Child.ChildNotified += ChildNotifyHandler;
 
 				// FIXME; arrange for wrapper disposal?
 			}
 
 			public override void Dispose ()
 			{
-				((Gtk.Container.ContainerChild)Wrapped).Child.ChildNotified -= ChildNotifyHandler;
+				cc.Child.ChildNotified -= ChildNotifyHandler;
 				base.Dispose ();
 			}
 
@@ -148,9 +154,26 @@ namespace Stetic.Wrapper {
 				EmitNotify (pspec.Name);
 			}
 
+			Gtk.Container.ContainerChild cc {
+				get {
+					return (Gtk.Container.ContainerChild)Wrapped;
+				}
+			}
+
 			protected Stetic.Wrapper.Container ParentWrapper {
 				get {
-					return Stetic.Wrapper.Container.Lookup (((Gtk.Container.ContainerChild)Wrapped).Parent);
+					return Stetic.Wrapper.Container.Lookup (cc.Parent);
+				}
+			}
+
+			[Description ("Auto Size", "If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container")]
+			public bool AutoSize {
+				get {
+					return ParentWrapper.AutoSize[cc.Child];
+				}
+				set {
+					ParentWrapper.AutoSize[cc.Child] = value;
+					EmitNotify ("AutoSize");
 				}
 			}
 		}

@@ -64,11 +64,9 @@ namespace Stetic.Wrapper {
 
 		protected override void SiteOccupancyChanged (WidgetSite site) {
 			Gtk.Box.BoxChild bc = ((Gtk.Box)Wrapped)[site] as Gtk.Box.BoxChild;
-			// FIXME: This check is to prevent a weird gtk warning
-			// Something is going wrong.
-			if (bc.Child.Parent == bc.Parent) {
+
+			if (AutoSize[site])
 				bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
-			}
 			base.SiteOccupancyChanged (site);
 		}
 
@@ -82,10 +80,22 @@ namespace Stetic.Wrapper {
 				ItemGroup props = AddItemGroup (type, "Box Child Layout",
 								"PackType",
 								"Position",
+								"AutoSize",
 								"Expand",
 								"Fill",
 								"Padding");
+				props["Expand"].DependsInverselyOn (props["AutoSize"]);
+				props["Fill"].DependsInverselyOn (props["AutoSize"]);
 				props["Fill"].DependsOn (props["Expand"]);
+			}
+
+			protected override void EmitNotify (string propertyName)
+			{
+				if (propertyName == "AutoSize") {
+					base.EmitNotify ("Expand");
+					base.EmitNotify ("Fill");
+				}
+				base.EmitNotify (propertyName);
 			}
 		}
 	}

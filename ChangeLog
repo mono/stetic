@@ -1,5 +1,17 @@
 2005-02-25  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/Table.cs: 
+	* libstetic/wrapper/Container.cs: move the "AutoSize" child
+	property from Table/TableChild to Container/ContainerChild. Also,
+	fix the previous fix.
+
+	* libstetic/wrapper/Box.cs: Add AutoSize child property and update
+	the SiteOccupancyChanged logic accordingly. Also remove the weird
+	code with the FIXME there, since I can't reproduce the bug anyway,
+	so either it's fixed or Todd's going to have to debug it himself.
+
+2005-02-25  Dan Winship  <danw@novell.com>
+
 	* libstetic/ObjectWrapper.cs (Register): Fix the no-CreateInstance
 	case to use the *wrapped* type's ctor, not the wrapper type.
 
