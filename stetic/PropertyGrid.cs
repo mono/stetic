@@ -6,79 +6,47 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class PropertyGrid : Gtk.VBox {
+	public class PropertyGrid : Stetic.Grid {
 
-		SizeGroup sgroup;
 		Hashtable editors;
 		ArrayList sensitives;
 
 		protected object selection;
 		protected Stetic.Wrapper.Object wrapper;
 
-		public PropertyGrid () : base (false, 6)
+		public PropertyGrid ()
 		{
-			BorderWidth = 2;
-
-			sgroup = new SizeGroup (SizeGroupMode.Horizontal);
 			NoSelection ();
 		}
 
-		protected void Clear ()
+		protected new void Clear ()
 		{
+			base.Clear ();
 			selection = null;
 			if (wrapper != null) {
 				wrapper.Notify -= Notified;
 				wrapper = null;
 			}
-			foreach (Widget w in Children)
-				Remove (w);
 			editors = new Hashtable ();
 			sensitives = new ArrayList ();
 		}
 
-		protected VBox AddGroup (string name)
+		protected Stetic.Grid.Group AddGroup (string name)
 		{
-			Expander exp = new Expander ("<b>" + name + "</b>");
-			exp.UseMarkup = true;
-
-			VBox box = new VBox (true, 2);
-			exp.Add (box);
-			exp.ShowAll ();
-
-			if (Children.Length == 0)
-				exp.Expanded = true;
-
-			PackStart (exp, false, false, 0);
-			return box;
+			return AddGroup (name, groups.Count == 0);
 		}
 
-		protected void AddToGroup (VBox group, PropertyDescriptor prop, object obj)
+		protected void AddToGroup (Stetic.Grid.Group group, PropertyDescriptor prop, object obj)
 		{
-			HBox box = new HBox (false, 6);
-
-			Label label;
-
-			label = new Label ("    ");
-			box.PackStart (label, false, false, 0);
-
-			label = new Label (prop.ParamSpec != null ? prop.ParamSpec.Nick : prop.Name);
-			label.UseMarkup = true;
-			label.Justify = Justification.Left;
-			label.Xalign = 0;
-			box.PackStart (label, true, true, 0);
+			string label = prop.ParamSpec != null ? prop.ParamSpec.Nick : prop.Name;
 
 			PropertyEditor rep = PropertyEditor.MakeEditor (prop, prop.ParamSpec, obj);
-			if (rep != null) {
-				editors[prop.Name] = rep;
-				if (prop.ParamSpec != null)
-					editors[prop.ParamSpec.Name] = rep;
-				rep.ShowAll ();
-				sgroup.AddWidget (rep);
-				box.PackStart (rep, false, false, 0);
-			}
+			editors[prop.Name] = rep;
+			if (prop.ParamSpec != null)
+				editors[prop.ParamSpec.Name] = rep;
+			rep.ShowAll ();
 
-			box.ShowAll ();
-			group.PackStart (box, false, false, 0);
+			group.Add (label, rep);
 
 			if (prop.Dependencies.Count > 0 || prop.InverseDependencies.Count > 0)
 				sensitives.Add (prop);
@@ -87,13 +55,7 @@ namespace Stetic {
 		public void NoSelection ()
 		{
 			Clear ();
-
-			Label label = new Label ("<i>No selection</i>");
-			label.UseMarkup = true;
-			label.Justify = Justification.Left;
-			label.Xalign = 0;
-			label.Show ();
-			PackStart (label, true, true, 0);
+			AddGroup ("<i>No selection</i>", false);
 		}
 
 		void Notified (Stetic.Wrapper.Object wrapper, string propertyName)
@@ -166,7 +128,7 @@ namespace Stetic {
 
 		protected void AddParamSpecProperties (object obj, GLib.Object pspecObj)
 		{
-			VBox group = AddGroup ("Properties");
+			Stetic.Grid.Group group = AddGroup ("Properties");
 
 			foreach (PropertyInfo info in obj.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
 				ParamSpec pspec = LookupParamSpec (pspecObj, info);
@@ -178,7 +140,7 @@ namespace Stetic {
 		protected void AddObjectWrapperProperties (object obj, PropertyGroup[] groups)
 		{
 			foreach (PropertyGroup pgroup in groups) {
-				VBox group = AddGroup (pgroup.Name);
+				Stetic.Grid.Group group = AddGroup (pgroup.Name);
 				foreach (PropertyDescriptor prop in pgroup.Properties)
 					AddToGroup (group, prop, obj);
 			}

@@ -23,6 +23,7 @@ libstetic_dll_sources =			\
 	editor/OptIntRange.cs		\
 	editor/StockItem.cs		\
 	editor/String.cs		\
+	editor/Text.cs			\
 	wrapper/Alignment.cs		\
 	wrapper/Arrow.cs		\
 	wrapper/Bin.cs			\

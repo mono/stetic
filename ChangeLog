@@ -1,3 +1,25 @@
+2005-02-11  Dan Winship  <danw@novell.com>
+
+	* stetic/Grid.cs: new base class for PropertyGrid. Instead of
+	being a VBox of Expanders, its now a subclass of Container which
+	lays out its contents by hand; this makes it much easier to make
+	everything end up with the size and location we want (particularly
+	in the presence of multi-line editors).
+
+	* stetic/PropertyGrid.cs: Update to be a subclass of Grid
+
+	* libstetic/editor/Text.cs: TextView-based multi-line text editor
+
+	* libstetic/wrapper/TextView.cs: mark the "Text" property as
+	wanting the "Text" editor type. Proxy the TextView's Buffer's
+	"Changed" event so that the property editor will track typing in
+	the widget.
+
+	* stetic/WidgetSite.cs (OnMotionNotifyEvent): force the dragWindow
+	to be at least 20x20, so that widgets that make very small
+	requests expecting to be allocated much more space (eg, TextView)
+	aren't invisible when dragged.
+
 2005-02-09  Dan Winship  <danw@novell.com>
 
 	* libstetic/editor/Color.cs: add an editor for Gdk.Color-valued

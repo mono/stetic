@@ -214,7 +214,7 @@ namespace Stetic {
 		{
 			Gtk.Window dragWin;
 			DragContext ctx;
-			int mx, my, wx, wy;
+			int mx, my;
 			Requisition req;
 
 			if ((evt.State & ModifierType.Button1Mask) == 0)
@@ -228,22 +228,22 @@ namespace Stetic {
 			mx = (int)evt.XRoot;
 			my = (int)evt.YRoot;
 
-			GdkWindow.GetOrigin (out wx, out wy);
-
 			dragWin = new Gtk.Window (Gtk.WindowType.Popup);
 			dragWin.Add (dragWidget);
+
 			req = dragWidget.SizeRequest ();
+			if (req.Width < 20 && req.Height < 20)
+				dragWin.SetSizeRequest (20, 20);
+			else if (req.Width < 20)
+				dragWin.SetSizeRequest (20, -1);
+			else if (req.Height < 20)
+				dragWin.SetSizeRequest (-1, 20);
 
-			if (wx + req.Width < mx)
-				wx = mx - req.Width / 2;
-			if (wy + req.Height < my)
-				wy = my - req.Height / 2;
-
-			dragWin.Move (wx, wy);
+			dragWin.Move (mx, my);
 			dragWin.Show ();
 
 			ctx = Gtk.Drag.Begin (this, TargetList, DragAction.Move, 1, evt);
-			Gtk.Drag.SetIconWidget (ctx, dragWin, mx - wx, my - wy);
+			Gtk.Drag.SetIconWidget (ctx, dragWin, 0, 0);
 
 			return false;
 		}
