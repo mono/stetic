@@ -111,28 +111,23 @@ namespace Stetic.Wrapper {
 			container.Add (child);
 		}
 
-		Gtk.Widget FindInternalChild (string childId)
+		Widget FindInternalChild (string childId)
 		{
-			Container ancestor = this;
-			while (ancestor != null) {
-				foreach (Gtk.Widget w in ancestor.container.Children) {
-					Widget wrapper = Lookup (w);
-					if (wrapper != null && wrapper.InternalChildId == childId)
-						return w;
-				}
-				ancestor = ParentWrapper;
+			foreach (Gtk.Widget w in container.Children) {
+				Widget wrapper = Lookup (w);
+				if (wrapper != null && wrapper.InternalChildId == childId)
+					return wrapper;
 			}
 			return null;
 		}
 
 		public virtual Widget GladeSetInternalChild (string childId, string className, string id, Hashtable props)
 		{
-			Gtk.Widget widget = FindInternalChild (childId);
-			if (widget == null)
+			Widget wrapper = FindInternalChild (childId);
+			if (wrapper == null)
 				throw new GladeException ("Unrecognized internal child name", className, false, "internal-child", childId);
 
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.Create (stetic, className);
-			GladeUtils.ImportWidget (stetic, wrapper, widget, id, props);
+			GladeUtils.ImportWidget (stetic, wrapper, wrapper.Wrapped, id, props);
 
 			return (Widget) wrapper;
 		}
@@ -321,7 +316,11 @@ namespace Stetic.Wrapper {
 			if (handles != null)
 				handles.Dispose ();
 
-			if (selection != null) {
+			// FIXME: if the selection isn't mapped, we should try to force it
+			// to be. (Eg, if you select a widget in a hidden window, the window
+			// should map. If you select a widget on a non-current notebook
+			// page, the notebook should switch pages, etc.)
+			if (selection != null && selection.IsDrawable) {
 				handles = new HandleWindow (selection, dragHandles);
 				handles.Drag += HandleWindowDrag;
 			} else 

@@ -222,7 +222,7 @@ namespace Stetic {
 			get {
 				if (gladeAttribute != null && gladeAttribute.Name != null)
 					return gladeAttribute.Name;
-				else if (gladeProperty != null)
+				else if (gladeProperty != null && gladeProperty.GladeName != null)
 					return gladeProperty.GladeName;
 				else if (pspec != null)
 					return pspec.Name.Replace ('-', '_');

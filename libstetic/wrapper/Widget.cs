@@ -114,6 +114,9 @@ namespace Stetic.Wrapper {
 				return Lookup (top);
 
 			foreach (Gtk.Widget child in new ChildEnumerator (container)) {
+				if (!child.IsDrawable)
+					continue;
+
 				Gdk.Rectangle alloc = child.Allocation;
 				if (alloc.Contains (x, y)) {
 					Widget wrapper;
@@ -218,7 +221,7 @@ namespace Stetic.Wrapper {
 			set {
 				hasDefault = value;
 
-				if (Wrapped.Toplevel != null)
+				if (Wrapped.Toplevel != null && Wrapped.Toplevel.IsTopLevel)
 					Wrapped.HasDefault = hasDefault;
 				else
 					Wrapped.HierarchyChanged += HierarchyChanged;
@@ -227,7 +230,7 @@ namespace Stetic.Wrapper {
 
 		void HierarchyChanged (object obj, Gtk.HierarchyChangedArgs args)
 		{
-			if (Wrapped.Toplevel != null) {
+			if (Wrapped.Toplevel != null && Wrapped.Toplevel.IsTopLevel) {
 				Wrapped.HasDefault = hasDefault;
 				Wrapped.HierarchyChanged -= HierarchyChanged;
 			}

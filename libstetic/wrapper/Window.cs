@@ -54,13 +54,18 @@ namespace Stetic.Wrapper {
 			window.DeleteEvent += DeleteEvent;
 		}
 
+		public override void Select (Stetic.Wrapper.Widget wrapper)
+		{
+			if (wrapper == this)
+				Wrapped.Show ();
+			base.Select (wrapper);
+		}
+
 		[ConnectBefore]
 		void DeleteEvent (object obj, Gtk.DeleteEventArgs args)
 		{
 			Wrapped.Hide ();
 			args.RetVal = true;
-
-			Select (this);
 		}
 
 		public override bool HExpandable { get { return true; } }

@@ -178,12 +178,14 @@ namespace Stetic.Wrapper {
 			labelWidget = null;
 			hasLabel = true;
 
-			if (button.UseUnderline) {
+			bool useStock = icon != null && icon.StartsWith ("stock:");
+
+			if (button.UseUnderline || useStock) {			    
 				labelWidget = new Gtk.Label (label);
 				labelWidget.MnemonicWidget = button;
 			} else
 				labelWidget = Gtk.Label.New (label);
-				labelWidget.Show ();
+			labelWidget.Show ();
 
 			if (icon == null) {
 				labelWidget.Xalign = button.Xalign;
@@ -192,7 +194,7 @@ namespace Stetic.Wrapper {
 				return;
 			}
 
-			if (icon.StartsWith ("stock:"))
+			if (useStock)
 				iconWidget = new Gtk.Image (icon.Substring (6), Gtk.IconSize.Button);
 			else if (icon.StartsWith ("file:"))
 				iconWidget = new Gtk.Image (icon.Substring (5));

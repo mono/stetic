@@ -21,11 +21,13 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
+
 			if (optionmenu.Menu == null) {
 				Gtk.Menu menu = new Gtk.Menu ();
 				menu.Show ();
 				optionmenu.Menu = menu;
 			}
+			ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Menu), optionmenu.Menu);
 		}
 
 		protected override void GladeImport (string className, string id, Hashtable props)
@@ -35,17 +37,14 @@ namespace Stetic.Wrapper {
 			stetic.GladeImportComplete += FlattenMenu;
 		}
 
-		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
+		public override Widget GladeSetInternalChild (string childId, string className, string id, Hashtable props)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
-			if (wrapper == null)
-				return null;
+			if (childId != "menu")
+				return base.GladeSetInternalChild (childId, className, id, props);
 
-			Gtk.Menu menu = (Gtk.Menu)wrapper.Wrapped;
-			if (menu != null)
-				optionmenu.Menu = menu;
-
-			return wrapper as Stetic.Wrapper.Widget;
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (optionmenu.Menu);
+			GladeUtils.ImportWidget (stetic, wrapper, wrapper.Wrapped, id, props);
+			return wrapper;
 		}
 
 		void FlattenMenu ()
