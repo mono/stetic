@@ -2,30 +2,22 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Font Button", "fontbutton.png", typeof (Gtk.FontButton), ObjectWrapperType.Widget)]
-	public class FontButton : Stetic.Wrapper.Widget {
+	[ObjectWrapper ("Font Button", "fontbutton.png", ObjectWrapperType.Widget)]
+	public class FontButton : Widget {
 
-		public static ItemGroup FontButtonProperties;
+		public static new Type WrappedType = typeof (Gtk.FontButton);
 
-		static FontButton () {
-			FontButtonProperties = new ItemGroup ("Font Button Properties",
-							      typeof (Stetic.Wrapper.FontButton),
-							      typeof (Gtk.FontButton),
-							      "Title",
-							      "FontName",
-							      "ShowSize",
-							      "ShowStyle",
-							      "UseFont",
-							      "UseSize");
-			FontButtonProperties["UseSize"].DependsOn (FontButtonProperties["UseFont"]);
-
-			RegisterWrapper (typeof (Stetic.Wrapper.FontButton),
-					 FontButtonProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			ItemGroup props = AddItemGroup (type, "Font Button Properties",
+							"Title",
+							"FontName",
+							"ShowSize",
+							"ShowStyle",
+							"UseFont",
+							"UseSize");
+			props["UseSize"].DependsOn (props["UseFont"]);
 		}
-
-		public FontButton (IStetic stetic) : this (stetic, new Gtk.FontButton (), false) {}
-		public FontButton (IStetic stetic, Gtk.FontButton fontbutton, bool initialized) : base (stetic, fontbutton, initialized) {}
 
 		public bool UseFont {
 			get {

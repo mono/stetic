@@ -1,5 +1,36 @@
 2005-02-24  Dan Winship  <danw@novell.com>
 
+	* libstetic/ObjectWrapper.cs: remove the protected (IStetic,
+	object) constructor and replace it with a virtual Wrap method.
+	(Register): new method to register a wrapper type
+	(Create): new method to create a wrapper of a given type (with
+	either a provided widget or a fresh one).
+	(AddItemGroup): replaces RegisterWrapper. Adds a single ItemGroup
+	to the type.
+	(AddContextMenuItems): replaces RegisterContextMenu
+
+	* libstetic/ObjectWrapperAttribute.cs: remove the WrappedType
+	again; it's now a static property on the wrapper.
+
+	* libstetic/ItemGroup.cs (ItemGroup): fix this to not lose if
+	passed a wrapperType and a dotted property
+
+	* libstetic/wrapper/*.cs: update for the NWO:
+		* ObjectWrapperAttribute only takes 3 args again
+		* Add static WrappedType property to all wrappers
+		* Add static CreateInstance method to all wrappers that
+		  need to do more than just "new Gtk.Foo ()"
+		* Replace static ctor with static Register method
+		  using AddItemGroup/AddContextMenuItems
+		* Replace instance ctors with a Wrap override
+
+	* stetic/GladeImport.cs: 
+	* stetic/Palette.cs: 
+	* stetic/PropertyGrid.cs: 
+	* stetic/WidgetFactory.cs: Update to match ObjectWrapper changes
+
+2005-02-24  Dan Winship  <danw@novell.com>
+
 	* libstetic/wrapper/Dialog.cs: 
 	* libstetic/wrapper/Window.cs (Modal): wrap this and don't set the
 	underlying window property

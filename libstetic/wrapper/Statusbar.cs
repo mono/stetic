@@ -2,21 +2,15 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Statusbar", "statusbar.png", typeof (Gtk.Statusbar), ObjectWrapperType.Widget)]
-	public class Statusbar : Stetic.Wrapper.Widget {
+	[ObjectWrapper ("Statusbar", "statusbar.png", ObjectWrapperType.Widget)]
+	public class Statusbar : Widget {
 
-		public static ItemGroup StatusbarProperties;
+		public static new Type WrappedType = typeof (Gtk.Statusbar);
 
-		static Statusbar () {
-			StatusbarProperties = new ItemGroup ("Status Bar Properties",
-							     typeof (Gtk.Statusbar),
-							     "HasResizeGrip");
-			RegisterWrapper (typeof (Stetic.Wrapper.Statusbar),
-					 StatusbarProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Status Bar Properties",
+				      "HasResizeGrip");
 		}
-
-		public Statusbar (IStetic stetic) : this (stetic, new Gtk.Statusbar (), false) {}
-		public Statusbar (IStetic stetic, Gtk.Statusbar statusbar, bool initialized) : base (stetic, statusbar, initialized) {}
 	}
 }

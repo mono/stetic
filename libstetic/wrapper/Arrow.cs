@@ -2,23 +2,21 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Arrow", "arrow.png", typeof (Gtk.Arrow), ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Arrow", "arrow.png", ObjectWrapperType.Widget)]
 	public class Arrow : Misc {
 
-		public static ItemGroup ArrowProperties;
+		public static new Type WrappedType = typeof (Gtk.Arrow);
 
-		static Arrow () {
-			ArrowProperties = new ItemGroup ("Arrow Properties",
-							 typeof (Gtk.Arrow),
-							 "ArrowType",
-							 "ShadowType");
-			RegisterWrapper (typeof (Stetic.Wrapper.Arrow),
-					 ArrowProperties,
-					 Misc.MiscProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Arrow Properties",
+				      "ArrowType",
+				      "ShadowType");
 		}
 
-		public Arrow (IStetic stetic) : this (stetic, new Gtk.Arrow (Gtk.ArrowType.Left, Gtk.ShadowType.None), false) {}
-		public Arrow (IStetic stetic, Gtk.Arrow arrow, bool initialized) : base (stetic, arrow, initialized) { }
+		public static new Gtk.Arrow CreateInstance ()
+		{
+			return new Gtk.Arrow (Gtk.ArrowType.Left, Gtk.ShadowType.None);
+		}
 	}
 }

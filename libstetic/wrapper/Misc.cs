@@ -2,18 +2,17 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Misc : Stetic.Wrapper.Widget {
-		public static ItemGroup MiscProperties;
+	public abstract class Misc : Widget {
 
-		static Misc () {
-			MiscProperties = new ItemGroup ("Miscellaneous Alignment Properties",
-							typeof (Gtk.Misc),
-							"Xpad",
-							"Ypad",
-							"Xalign",
-							"Yalign");
+		public static new Type WrappedType = typeof (Gtk.Misc);
+
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Miscellaneous Alignment Properties",
+				      "Xpad",
+				      "Ypad",
+				      "Xalign",
+				      "Yalign");
 		}
-
-		protected Misc (IStetic stetic, Gtk.Misc misc, bool initialized) : base (stetic, misc, initialized) {}
 	}
 }

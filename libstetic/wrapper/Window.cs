@@ -3,52 +3,49 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Window", "window.png", typeof (Gtk.Window), ObjectWrapperType.Window)]
+	[ObjectWrapper ("Window", "window.png", ObjectWrapperType.Window)]
 	public class Window : Bin {
 
-		public static ItemGroup WindowProperties;
-		public static ItemGroup WindowSizeProperties;
-		public static ItemGroup WindowMiscProperties;
+		public static new Type WrappedType = typeof (Gtk.Window);
 
-		static Window () {
-			WindowProperties = new ItemGroup ("Window Properties",
-							  typeof (Stetic.Wrapper.Window),
-							  typeof (Gtk.Window),
-							  "Title",
-							  "Icon",
-							  "Type",
-							  "TypeHint",
-							  "WindowPosition",
-							  "Modal",
-							  "BorderWidth");
-			WindowSizeProperties = new ItemGroup ("Window Size Properties",
-							      typeof (Gtk.Window),
-							      "Resizable",
-							      "AllowGrow",
-							      "AllowShrink",
-							      "DefaultWidth",
-							      "DefaultHeight");
-			WindowMiscProperties = new ItemGroup ("Miscellaneous Window Properties",
-							      typeof (Gtk.Window),
-							      "AcceptFocus",
-							      "Decorated",
-							      "DestroyWithParent",
-							      "Gravity",
-							      "Role",
-							      "SkipPagerHint",
-							      "SkipTaskbarHint");
-			RegisterWrapper (typeof (Stetic.Wrapper.Window),
-					 WindowProperties,
-					 WindowSizeProperties,
-					 WindowMiscProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			if (type == typeof (Stetic.Wrapper.Window)) {
+				AddItemGroup (type, "Window Properties",
+					      "Title",
+					      "Icon",
+					      "Type",
+					      "TypeHint",
+					      "WindowPosition",
+					      "Modal",
+					      "BorderWidth");
+			}
+			AddItemGroup (type, "Window Size Properties",
+				      "Resizable",
+				      "AllowGrow",
+				      "AllowShrink",
+				      "DefaultWidth",
+				      "DefaultHeight");
+			AddItemGroup (type, "Miscellaneous Window Properties",
+				      "AcceptFocus",
+				      "Decorated",
+				      "DestroyWithParent",
+				      "Gravity",
+				      "Role",
+				      "SkipPagerHint",
+				      "SkipTaskbarHint");
 		}
 
-		public Window (IStetic stetic) : this (stetic, new Gtk.Window (Gtk.WindowType.Toplevel), false) {}
-
-
-		public Window (IStetic stetic, Gtk.Window window, bool initialized) : base (stetic, window, initialized)
+		public static new Gtk.Window CreateInstance ()
 		{
+			return new Gtk.Window (Gtk.WindowType.Toplevel);
+		}
+
+		protected override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
+
+			Gtk.Window window = (Gtk.Window)Wrapped;
 			if (!initialized) {
 				window.Title = window.Name;
 

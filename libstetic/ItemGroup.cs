@@ -8,14 +8,15 @@ namespace Stetic {
 
 		public ItemGroup (string name, Type objectType, params string[] names) : this (name, null, objectType, names) {}
 
+
+		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
 		public ItemGroup (string name, Type wrapperType, Type objectType, params string[] names)
 		{
-			BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-
 			Name = name;
 			Items = new ItemDescriptor[names.Length];
 			for (int i = 0; i < names.Length; i++) {
-				if (wrapperType == null)
+				if (wrapperType == null || names[i].IndexOf ('.') != -1)
 					Items[i] = new PropertyDescriptor (objectType, names[i]);
 				else if (wrapperType.GetProperty (names[i], flags) != null || objectType.GetProperty (names[i], flags) != null)
 					Items[i] = new PropertyDescriptor (wrapperType, objectType, names[i]);

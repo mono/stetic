@@ -2,41 +2,34 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Text View", "textview.png", typeof (Gtk.TextView), ObjectWrapperType.Widget)]
-	public class TextView : Stetic.Wrapper.Container {
+	[ObjectWrapper ("Text View", "textview.png", ObjectWrapperType.Widget)]
+	public class TextView : Container {
 
-		public static ItemGroup TextViewProperties;
-		public static ItemGroup TextViewExtraProperties;
+		public static new Type WrappedType = typeof (Gtk.TextView);
 
-		static TextView () {
-			TextViewProperties = new ItemGroup ("Text View Properties",
-							    typeof (Stetic.Wrapper.TextView),
-							    typeof (Gtk.TextView),
-							    "Editable",
-							    "CursorVisible",
-							    "Overwrite",
-							    "AcceptsTab",
-							    "Tabs",
-							    "Text",
-							    "Justification",
-							    "WrapMode",
-							    "PixelsAboveLines",
-							    "PixelsBelowLines",
-							    "PixelsInsideWrap",
-							    "RightMargin",
-							    "LeftMargin",
-							    "Indent");
-			RegisterWrapper (typeof (Stetic.Wrapper.TextView),
-					 TextViewProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Text View Properties",
+				      "Editable",
+				      "CursorVisible",
+				      "Overwrite",
+				      "AcceptsTab",
+				      "Tabs",
+				      "Text",
+				      "Justification",
+				      "WrapMode",
+				      "PixelsAboveLines",
+				      "PixelsBelowLines",
+				      "PixelsInsideWrap",
+				      "RightMargin",
+				      "LeftMargin",
+				      "Indent");
 		}
 
-		public TextView (IStetic stetic) : this (stetic, new Gtk.TextView (), false) {}
-
-
-		public TextView (IStetic stetic, Gtk.TextView textview, bool initialized) : base (stetic, textview, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
-			textview.Buffer.Changed += Buffer_Changed;
+			base.Wrap (obj, initialized);
+			((Gtk.TextView)Wrapped).Buffer.Changed += Buffer_Changed;
 		}
 
 		[Editor (typeof (Stetic.Editor.Text))]

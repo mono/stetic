@@ -4,9 +4,10 @@ using System.Collections;
 namespace Stetic.Wrapper {
 	public abstract class Object : Stetic.ObjectWrapper {
 
-		protected Object (IStetic stetic, GLib.Object obj) : base (stetic, obj)
+		protected override void Wrap (object obj, bool initialized)
 		{
-			obj.AddNotification (NotifyHandler);
+			base.Wrap (obj, initialized);
+			((GLib.Object)Wrapped).AddNotification (NotifyHandler);
 
 			// FIXME; arrange for wrapper disposal?
 		}

@@ -3,40 +3,36 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Radio Button", "radiobutton.png", typeof (Gtk.RadioButton), ObjectWrapperType.Widget)]
-	public class RadioButton : ToggleButton {
+	[ObjectWrapper ("Radio Button", "radiobutton.png", ObjectWrapperType.Widget)]
+	public class RadioButton : Button {
 
-		public static ItemGroup RadioButtonProperties;
-		public static ItemGroup RadioButtonExtraProperties;
-
-		static ArrayList GroupList;
+		static ArrayList GroupList = new ArrayList ();
 		static event Stetic.Editor.GroupPicker.ListChangedDelegate GroupListChanged;
-		static ArrayList GroupLeaders;
+		static ArrayList GroupLeaders = new ArrayList ();
 
-		static RadioButton () {
-			RadioButtonProperties = new ItemGroup ("Radio Button Properties",
-							       typeof (Stetic.Wrapper.RadioButton),
-							       typeof (Gtk.RadioButton),
-							       "Label",
-							       "Group",
-							       "Active",
-							       "Inconsistent",
-							       "DrawIndicator");
-			RegisterWrapper (typeof (Stetic.Wrapper.RadioButton),
-					 RadioButtonProperties,
-					 Button.ButtonExtraProperties,
-					 Widget.CommonWidgetProperties);
+		public static new Type WrappedType = typeof (Gtk.RadioButton);
 
-			GroupList = new ArrayList ();
-			GroupLeaders = new ArrayList ();
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Radio Button Properties",
+				      "Label",
+				      "Group",
+				      "Active",
+				      "Inconsistent",
+				      "DrawIndicator");
 		}
 
-		public RadioButton (IStetic stetic) : this (stetic, new Gtk.RadioButton (""), false) {}
-
-
-		public RadioButton (IStetic stetic, Gtk.RadioButton radiobutton, bool initialized) : base (stetic, radiobutton, initialized)
+		public static new Gtk.RadioButton CreateInstance ()
 		{
+			return new Gtk.RadioButton ("");
+		}
+
+		protected override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
 			if (!initialized) {
+				Gtk.RadioButton radiobutton = (Gtk.RadioButton)Wrapped;
+
 				radiobutton.Label = radiobutton.Name;
 
 				if (GroupList.Count == 0) {

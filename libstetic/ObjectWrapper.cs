@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Reflection;
 
 namespace Stetic {
 	public abstract class ObjectWrapper : IDisposable {
@@ -7,20 +8,91 @@ namespace Stetic {
 		protected IStetic stetic;
 		protected object wrapped;
 
-		static Hashtable wrappers = new Hashtable ();
-		static Hashtable wrapperTypes = new Hashtable ();
-
-		protected ObjectWrapper (IStetic stetic, object obj)
+		protected virtual void Wrap (object obj, bool initialized)
 		{
-			this.stetic = stetic;
 			this.wrapped = obj;
-
 			wrappers[obj] = this;
 		}
 
 		public virtual void Dispose ()
 		{
 			wrappers.Remove (wrapped);
+		}
+
+		static Hashtable wrappers = new Hashtable ();
+		static Hashtable wrapperTypes = new Hashtable ();
+		static Hashtable instanceCtors = new Hashtable ();
+
+		static Type WrappedType (Type type)
+		{
+			FieldInfo finfo = type.GetField ("WrappedType", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+			if (finfo != null)
+				return finfo.GetValue (null) as Type;
+			else {
+				Console.WriteLine ("no WrappedType for {0}", type.FullName);
+				return null;
+			}
+		}
+
+		public static void Register (Type type)
+		{
+			Type wrappedType = WrappedType (type);
+
+			// FIXME: still needed? Why?
+			PropertyInfo pinfo = wrappedType.GetProperty ("GType", BindingFlags.Static | BindingFlags.Public);
+			if (pinfo != null)
+				pinfo.GetValue (null, null);
+
+			if (wrapperTypes.Contains (wrappedType)) {
+				Type[] old_type_array = wrapperTypes[wrappedType] as Type[];
+				Type[] new_type_array = new Type[old_type_array.Length + 1];
+				old_type_array.CopyTo (new_type_array, 0);
+				new_type_array[old_type_array.Length] = type;
+				wrapperTypes[wrappedType] = new_type_array;
+			} else {
+				wrapperTypes[wrappedType] = new Type[] { type };
+			}
+
+			MethodBase instanceCtor = type.GetMethod ("CreateInstance",
+								  BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
+								  null, new Type[0], null);
+			if (instanceCtor == null)
+				instanceCtor = type.GetConstructor (new Type[0]);
+			instanceCtors[type] = instanceCtor;
+
+			// Run wrapper registration methods
+			Type regType = type;
+			while (type != typeof (ObjectWrapper)) {
+				MethodInfo register = type.GetMethod ("Register",
+								      BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
+								      null, new Type[] { typeof (Type) }, null);
+				if (register != null)
+					register.Invoke (null, new object[] { regType });
+				type = type.BaseType;
+			}
+		}
+
+		public static ObjectWrapper Create (Type type, IStetic stetic)
+		{
+			ObjectWrapper wrapper = Activator.CreateInstance (type) as ObjectWrapper;
+			if (wrapper == null)
+				return null;
+			wrapper.stetic = stetic;
+
+			MethodBase instanceCtor = instanceCtors[type] as MethodBase;
+			wrapper.Wrap (instanceCtor.Invoke (null, new object[0]), false);
+			return wrapper;
+		}
+
+		public static ObjectWrapper Create (Type type, IStetic stetic, object wrapped)
+		{
+			ObjectWrapper wrapper = Activator.CreateInstance (type) as ObjectWrapper;
+			if (wrapper == null)
+				return null;
+			wrapper.stetic = stetic;
+
+			wrapper.Wrap (wrapped, true);
+			return wrapper;
 		}
 
 		public static ObjectWrapper Lookup (object obj)
@@ -39,19 +111,6 @@ namespace Stetic {
 				return wrapperTypes[obj.GetType ()] as Type[];
 		}
 
-		public static void RegisterWrapperType (Type objectWrapper, Type wrappedType)
-		{
-			if (wrapperTypes.Contains (wrappedType)) {
-				Type[] old_type_array = wrapperTypes[wrappedType] as Type[];
-				Type[] new_type_array = new Type[old_type_array.Length + 1];
-				old_type_array.CopyTo (new_type_array, 0);
-				new_type_array[old_type_array.Length] = objectWrapper;
-				wrapperTypes[wrappedType] = new_type_array;
-			} else {
-				wrapperTypes[wrappedType] = new Type[] { objectWrapper };
-			}
-		}
-
 		public object Wrapped {
 			get {
 				return wrapped;
@@ -61,30 +120,27 @@ namespace Stetic {
 		static Hashtable groups = new Hashtable ();
 		static Hashtable contextMenus = new Hashtable ();
 
-		protected static void RegisterWrapper (Type t, params ItemGroup[] items)
+		protected static ItemGroup AddItemGroup (Type type, string name, params string[] items)
 		{
-			groups[t] = items;
+			ArrayList list = groups[type] as ArrayList;
+			if (list == null)
+				groups[type] = list = new ArrayList ();
+			ItemGroup group = new ItemGroup (name, type, WrappedType (type), items);
+			list.Add (group);
+			return group;
 		}
 
-		public ItemGroup[] ItemGroups {
+		public ArrayList ItemGroups {
 			get {
-				ItemGroup[] items = (ItemGroup[])groups[GetType ()];
-				if (items == null) {
-					for (Type t = GetType ().BaseType; t != null; t = t.BaseType) {
-						items = (ItemGroup[])groups[t];
-						if (items != null) {
-							groups[GetType ()] = items;
-							break;
-						}
-					}
-				}
-				return items;
+				return groups[GetType ()] as ArrayList;
 			}
 		}
 
-		protected static void RegisterContextMenu (Type t, ItemGroup group)
+		protected static ItemGroup AddContextMenuItems (Type type, params string[] items)
 		{
-			contextMenus[t] = group;
+			ItemGroup group = new ItemGroup (null, type, WrappedType (type), items);
+			contextMenus[type] = group;
+			return group;
 		}
 
 		public ItemGroup ContextMenuItems {

@@ -2,33 +2,21 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Tree View", "treeview.png", typeof (Gtk.TreeView), ObjectWrapperType.Widget)]
-	public class TreeView : Stetic.Wrapper.Container {
+	[ObjectWrapper ("Tree View", "treeview.png", ObjectWrapperType.Widget)]
+	public class TreeView : Container {
 
-		public static ItemGroup TreeViewProperties;
-		public static ItemGroup TreeViewExtraProperties;
+		public static new Type WrappedType = typeof (Gtk.TreeView);
 
-		static TreeView () {
-			TreeViewProperties = new ItemGroup ("Tree View Properties",
-							    typeof (Stetic.Wrapper.TreeView),
-							    typeof (Gtk.TreeView),
-							    "EnableSearch",
-							    "FixedHeightMode",
-							    "HeadersVisible",
-							    "Reorderable",
-							    "RulesHint",
-							    "SearchColumn",
-							    "Model");
-			RegisterWrapper (typeof (Stetic.Wrapper.TreeView),
-					 TreeViewProperties,
-					 Widget.CommonWidgetProperties);
-		}
-
-		public TreeView (IStetic stetic) : this (stetic, new Gtk.TreeView (), false) {}
-
-
-		public TreeView (IStetic stetic, Gtk.TreeView treeview, bool initialized) : base (stetic, treeview, initialized)
+		static new void Register (Type type)
 		{
+			AddItemGroup (type, "Tree View Properties",
+				      "EnableSearch",
+				      "FixedHeightMode",
+				      "HeadersVisible",
+				      "Reorderable",
+				      "RulesHint",
+				      "SearchColumn",
+				      "Model");
 		}
 	}
 }

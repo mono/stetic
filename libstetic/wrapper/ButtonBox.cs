@@ -3,41 +3,33 @@ using System;
 namespace Stetic.Wrapper {
 
 	public abstract class ButtonBox : Box {
-		public static ItemGroup ButtonBoxProperties;
-		public static ItemGroup ButtonBoxChildProperties;
 
-		static ButtonBox () {
-			ButtonBoxProperties = new ItemGroup ("Button Box Properties",
-							     typeof (Gtk.ButtonBox),
-							     "LayoutStyle",
-							     "Homogeneous",
-							     "Spacing",
-							     "BorderWidth");
-			RegisterWrapper (typeof (Stetic.Wrapper.ButtonBox),
-					 ButtonBoxProperties,
-					 Widget.CommonWidgetProperties);
+		public static new Type WrappedType = typeof (Gtk.ButtonBox);
+
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Button Box Properties",
+				      "LayoutStyle",
+				      "Homogeneous",
+				      "Spacing",
+				      "BorderWidth");
 		}
 
-		protected ButtonBox (IStetic stetic, Gtk.ButtonBox bbox, bool initialized) : base (stetic, bbox, initialized) {}
+		public class ButtonBoxChild : Container.ContainerChild {
 
-		public class ButtonBoxChild : Stetic.Wrapper.Box.BoxChild {
-			public static ItemGroup ButtonBoxChildProperties;
+			public static new Type WrappedType = typeof (Gtk.ButtonBox.ButtonBoxChild);
 
-			static ButtonBoxChild ()
+			static new void Register (Type type)
 			{
-				ButtonBoxChildProperties = new ItemGroup ("Button Box Child Layout",
-									  typeof (Gtk.ButtonBox.ButtonBoxChild),
-									  "PackType",
-									  "Secondary",
-									  "Position",
-									  "Expand",
-									  "Fill",
-									  "Padding");
-				RegisterWrapper (typeof (Stetic.Wrapper.ButtonBox.ButtonBoxChild),
-						 ButtonBoxChildProperties);
+				ItemGroup props = AddItemGroup (type, "Button Box Child Layout",
+								"PackType",
+								"Secondary",
+								"Position",
+								"Expand",
+								"Fill",
+								"Padding");
+				props["Fill"].DependsOn (props["Expand"]);
 			}
-
-			public ButtonBoxChild (IStetic stetic, Gtk.ButtonBox.ButtonBoxChild bbc, bool initialized) : base (stetic, bbc, initialized) {}
 		}
 	}
 }

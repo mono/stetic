@@ -2,39 +2,36 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Message Dialog", "messagedialog.png", typeof (Gtk.MessageDialog), ObjectWrapperType.Window)]
+	[ObjectWrapper ("Message Dialog", "messagedialog.png", ObjectWrapperType.Window)]
 	public class MessageDialog : Dialog {
 
-		public static ItemGroup MessageDialogProperties;
+		public static new Type WrappedType = typeof (Gtk.MessageDialog);
 
-		static MessageDialog () {
-			MessageDialogProperties = new ItemGroup ("Message Dialog Properties",
-								 typeof (Stetic.Wrapper.MessageDialog),
-								 typeof (Gtk.MessageDialog),
-								 "Title",
-								 "MessageType",
-								 "PrimaryText",
-								 "SecondaryText",
-								 "Buttons",
-								 "Icon",
-								 "WindowPosition",
-								 "Modal",
-								 "BorderWidth");
-			RegisterWrapper (typeof (Stetic.Wrapper.MessageDialog),
-					 MessageDialogProperties,
-					 Dialog.DialogMiscProperties,
-					 Window.WindowSizeProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Message Dialog Properties",
+				      "Title",
+				      "MessageType",
+				      "PrimaryText",
+				      "SecondaryText",
+				      "Buttons",
+				      "Icon",
+				      "WindowPosition",
+				      "Modal",
+				      "BorderWidth");
 		}
 
 		Gtk.Label label, secondaryLabel;
 		Gtk.Image icon;
 
-		public MessageDialog (IStetic stetic) : this (stetic, new Gtk.Dialog (), false) {}
-
-
-		public MessageDialog (IStetic stetic, Gtk.Dialog dialog, bool initialized) : base (stetic, dialog, initialized)
+		public static new Gtk.Dialog CreateInstance ()
 		{
+			return new Gtk.Dialog ();
+		}
+
+		protected override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
 			if (!initialized) {
 				dialog.Resizable = false;
 				dialog.BorderWidth = 12;

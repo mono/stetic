@@ -3,40 +3,40 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Box : Stetic.Wrapper.Container {
-		public static ItemGroup BoxProperties;
+	public abstract class Box : Container {
 
-		static Box () {
-			BoxProperties = new ItemGroup ("Box Properties",
-						       typeof (Gtk.Box),
-						       "Homogeneous",
-						       "Spacing",
-						       "BorderWidth");
-			RegisterWrapper (typeof (Stetic.Wrapper.Box),
-					 BoxProperties,
-					 Widget.CommonWidgetProperties);
+		public static new Type WrappedType = typeof (Gtk.Box);
 
-			ItemGroup contextMenu = new ItemGroup (null,
-							       typeof (Stetic.Wrapper.Box),
-							       typeof (Gtk.Box),
-							       "InsertBefore",
-							       "InsertAfter");
-			RegisterContextMenu (typeof (Stetic.Wrapper.Box), contextMenu);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Box Properties",
+				      "Homogeneous",
+				      "Spacing",
+				      "BorderWidth");
+
+			AddContextMenuItems (type,
+					     "InsertBefore",
+					     "InsertAfter");
 		}
 
-
-		protected Box (IStetic stetic, Gtk.Box box, bool initialized) : base (stetic, box, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
+			base.Wrap (obj, initialized);
 			if (!initialized) {
 				for (int i = 0; i < 3; i++)
 					box.PackStart (CreateWidgetSite ());
 			}
 		}
 
+		Gtk.Box box {
+			get {
+				return (Gtk.Box)Wrapped;
+			}
+		}
+
 		[Command ("Insert Before", "Insert an empty row/column before the selected one")]
 		void InsertBefore (IWidgetSite context)
 		{
-			Gtk.Box box = (Gtk.Box)Wrapped;
 			Gtk.Box.BoxChild bc = box[(Gtk.Widget)context] as Gtk.Box.BoxChild;
 			WidgetSite site = CreateWidgetSite ();
 			if (bc.PackType == Gtk.PackType.Start) {
@@ -51,7 +51,6 @@ namespace Stetic.Wrapper {
 		[Command ("Insert After", "Insert an empty row/column after the selected one")]
 		void InsertAfter (IWidgetSite context)
 		{
-			Gtk.Box box = (Gtk.Box)Wrapped;
 			Gtk.Box.BoxChild bc = box[(Gtk.Widget)context] as Gtk.Box.BoxChild;
 			WidgetSite site = CreateWidgetSite ();
 			if (bc.PackType == Gtk.PackType.Start) {
@@ -74,24 +73,20 @@ namespace Stetic.Wrapper {
 		}
 
 
-		public class BoxChild : Stetic.Wrapper.Container.ContainerChild {
-			public static ItemGroup BoxChildProperties;
+		public class BoxChild : Container.ContainerChild {
 
-			static BoxChild ()
+			public static new Type WrappedType = typeof (Gtk.Box.BoxChild);
+
+			static new void Register (Type type)
 			{
-				BoxChildProperties = new ItemGroup ("Box Child Layout",
-								    typeof (Gtk.Box.BoxChild),
-								    "PackType",
-								    "Position",
-								    "Expand",
-								    "Fill",
-								    "Padding");
-				BoxChildProperties["Fill"].DependsOn (BoxChildProperties["Expand"]);
-				RegisterWrapper (typeof (Stetic.Wrapper.Box.BoxChild),
-						 BoxChildProperties);
+				ItemGroup props = AddItemGroup (type, "Box Child Layout",
+								"PackType",
+								"Position",
+								"Expand",
+								"Fill",
+								"Padding");
+				props["Fill"].DependsOn (props["Expand"]);
 			}
-
-			public BoxChild (IStetic stetic, Gtk.Box.BoxChild bc, bool initialized) : base (stetic, bc, initialized) {}
 		}
 	}
 }

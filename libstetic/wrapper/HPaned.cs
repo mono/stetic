@@ -2,11 +2,10 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("HPaned", "hpaned.png", typeof (Gtk.HPaned), ObjectWrapperType.Container)]
+	[ObjectWrapper ("HPaned", "hpaned.png", ObjectWrapperType.Container)]
 	public class HPaned : Paned {
 
-		public HPaned (IStetic stetic) : this (stetic, new Gtk.HPaned (), false) {}
-		public HPaned (IStetic stetic, Gtk.HPaned hpaned, bool initialized) : base (stetic, hpaned, initialized) {}
+		public static new Type WrappedType = typeof (Gtk.HPaned);
 
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable {

@@ -2,34 +2,28 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Range : Stetic.Wrapper.Widget {
-		public static ItemGroup RangeProperties;
-		public static ItemGroup RangeAdjustmentProperties;
+	public abstract class Range : Widget {
 
-		static Range () {
-			RangeProperties = new ItemGroup ("Range Properties",
-							 typeof (Gtk.Range),
-							 "UpdatePolicy",
-							 "Inverted");
-			RangeAdjustmentProperties = new ItemGroup ("Adjustment Properties",
-								   typeof (Gtk.Range),
-								   "Adjustment.Lower",
-								   "Adjustment.Upper",
-								   "Adjustment.PageIncrement",
-								   "Adjustment.PageSize",
-								   "Adjustment.StepIncrement",
-								   "Adjustment.Value");
+		public static new Type WrappedType = typeof (Gtk.Range);
 
-			RegisterWrapper (typeof (Stetic.Wrapper.Range),
-					 Range.RangeAdjustmentProperties,
-					 Range.RangeProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Range Properties",
+				      "UpdatePolicy",
+				      "Inverted");
+			AddItemGroup (type, "Adjustment Properties",
+				      "Adjustment.Lower",
+				      "Adjustment.Upper",
+				      "Adjustment.PageIncrement",
+				      "Adjustment.PageSize",
+				      "Adjustment.StepIncrement",
+				      "Adjustment.Value");
 		}
 
-		
-		protected Range (IStetic stetic, Gtk.Range range, bool initialized) : base (stetic, range, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
-			range.Adjustment.AddNotification (AdjustmentNotifyHandler);
+			base.Wrap (obj, initialized);
+			((Gtk.Range)Wrapped).Adjustment.AddNotification (AdjustmentNotifyHandler);
 		}
 
 		void AdjustmentNotifyHandler (object obj, GLib.NotifyArgs args)

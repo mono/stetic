@@ -2,33 +2,28 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Label", "label.png", typeof (Gtk.Label), ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Label", "label.png", ObjectWrapperType.Widget)]
 	public class Label : Misc {
 
-		public static ItemGroup LabelProperties;
+		public static new Type WrappedType = typeof (Gtk.Label);
 
-		static Label () {
-			LabelProperties = new ItemGroup ("Label Properties",
-							 typeof (Gtk.Label),
-							 "LabelProp",
-							 "UseMarkup",
-							 "UseUnderline",
-							 "Wrap",
-							 "MnemonicWidget",
-							 "Justify",
-							 "Selectable");
-			RegisterWrapper (typeof (Stetic.Wrapper.Label),
-					 LabelProperties,
-					 Misc.MiscProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Label Properties",
+				      "LabelProp",
+				      "UseMarkup",
+				      "UseUnderline",
+				      "Wrap",
+				      "MnemonicWidget",
+				      "Justify",
+				      "Selectable");
 		}
 
-		public Label (IStetic stetic) : this (stetic, new Gtk.Label (), false) {}
-		
-
-		public Label (IStetic stetic, Gtk.Label label, bool initialized) : base (stetic, label, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
+			base.Wrap (obj, initialized);
 			if (!initialized) {
+				Gtk.Label label = (Gtk.Label)Wrapped;
 				label.LabelProp = label.Name;
 			}
 		}

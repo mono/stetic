@@ -2,39 +2,29 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Combo Box", "combo.png", typeof (Gtk.ComboBox), ObjectWrapperType.Widget)]
-	public class ComboBox : Stetic.Wrapper.Widget {
+	[ObjectWrapper ("Combo Box", "combo.png", ObjectWrapperType.Widget)]
+	public class ComboBox : Widget {
 
-		public static ItemGroup ComboBoxProperties;
-		public static ItemGroup ComboBoxExtraProperties;
+		public static new Type WrappedType = typeof (Gtk.ComboBox);
 
-		static ComboBox () {
-			ComboBoxProperties = new ItemGroup ("Combo Box Properties",
-							    typeof (Stetic.Wrapper.ComboBox),
-							    typeof (Gtk.ComboBox),
-							    "Items",
-							    "Active");
-			ComboBoxExtraProperties = new ItemGroup ("Extra ComboBox Properties",
-								 typeof (Gtk.ComboBox),
-								 "WrapWidth",
-								 "ColumnSpanColumn",
-								 "RowSpanColumn");
-			RegisterWrapper (typeof (Stetic.Wrapper.ComboBox),
-					 ComboBoxProperties,
-					 ComboBoxExtraProperties,
-					 Widget.CommonWidgetProperties);
-		}
-
-		public ComboBox (IStetic stetic) : this (stetic, Gtk.ComboBox.NewText (), false) {}
-
-		public ComboBox (IStetic stetic, Gtk.ComboBox combobox, bool initialized) : base (stetic, combobox, initialized)
+		static new void Register (Type type)
 		{
-			items = "";
-			item = new string[0];
+			AddItemGroup (type, "Combo Box Properties",
+				      "Items",
+				      "Active");
+			AddItemGroup (type, "Extra ComboBox Properties",
+				      "WrapWidth",
+				      "ColumnSpanColumn",
+				      "RowSpanColumn");
 		}
 
-		string items;
-		string[] item;
+		public static new Gtk.ComboBox CreateInstance ()
+		{
+			return Gtk.ComboBox.NewText ();
+		}
+
+		string items = "";
+		string[] item = new string[0];
 
 		[Editor (typeof (Stetic.Editor.Text))]
 		[Description ("Items", "The items to display in the Combo Box, one per line")]

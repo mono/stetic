@@ -3,32 +3,33 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Widget : Stetic.Wrapper.Object {
-		public static ItemGroup CommonWidgetProperties;
+	public abstract class Widget : Object {
 
-		static Widget () {
-			CommonWidgetProperties = new ItemGroup ("Common Widget Properties",
-								typeof (Stetic.Wrapper.Widget),
-								typeof (Gtk.Widget),
-								"WidthRequest",
-								"HeightRequest",
-								"Visible",
-								"Sensitive",
-								"CanDefault",
-								"HasDefault",
-								"CanFocus",
-								"HasFocus",
-								"Events",
-								"ExtensionEvents");
-			RegisterWrapper (typeof (Stetic.Wrapper.Widget),
-					 CommonWidgetProperties);
+		public static new Type WrappedType = typeof (Gtk.Widget);
+
+		static new void Register (Type type)
+		{
+			AddItemGroup (type,
+				      "Common Widget Properties",
+				      "WidthRequest",
+				      "HeightRequest",
+				      "Visible",
+				      "Sensitive",
+				      "CanDefault",
+				      "HasDefault",
+				      "CanFocus",
+				      "HasFocus",
+				      "Events",
+				      "ExtensionEvents");
 		}
 
 		static Hashtable counters = new Hashtable ();
 
-		
-		protected Widget (IStetic stetic, Gtk.Widget widget, bool initialized) : base (stetic, widget)
+		protected override void Wrap (object obj, bool initialized)
 		{
+			base.Wrap (obj, initialized);
+
+			Gtk.Widget widget = (Gtk.Widget)Wrapped;
 			if (!(widget is Gtk.Window))
 				widget.ShowAll ();
 
@@ -36,9 +37,8 @@ namespace Stetic.Wrapper {
 			if (!counters.Contains (type))
 				counters[type] = 1;
 
-			if (!initialized) {
+			if (!initialized)
 				widget.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
-			}
 			counters[type] = (int)counters[type] + 1;
 		}
 

@@ -13,7 +13,6 @@ namespace Stetic {
 	public sealed class ObjectWrapperAttribute : Attribute {
 		string name, iconName;
 		ObjectWrapperType type;
-		Type wrappedType;
 
 		[Translatable]
 		public string Name {
@@ -31,17 +30,11 @@ namespace Stetic {
 			set { type = value; }
 		}
 
-		public Type WrappedType {
-			get { return wrappedType; }
-			set { wrappedType = value; }
-		}
-
-		public ObjectWrapperAttribute (string name, string iconName, Type wrappedType, ObjectWrapperType type)
+		public ObjectWrapperAttribute (string name, string iconName, ObjectWrapperType type)
 		{
 			this.name = name;
 			this.iconName = iconName;
 			this.type = type;
-			this.wrappedType = wrappedType;
 		}
 	}
 

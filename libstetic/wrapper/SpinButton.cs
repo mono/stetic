@@ -2,36 +2,32 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Spin Button", "spinbutton.png", typeof (Gtk.SpinButton), ObjectWrapperType.Widget)]
-	public class SpinButton : Stetic.Wrapper.Widget {
+	[ObjectWrapper ("Spin Button", "spinbutton.png", ObjectWrapperType.Widget)]
+	public class SpinButton : Widget {
 
-		public static ItemGroup SpinButtonProperties;
-		public static ItemGroup SpinButtonAdjustmentProperties;
+		public static new Type WrappedType = typeof (Gtk.SpinButton);
 
-		static SpinButton () {
-			SpinButtonAdjustmentProperties = new ItemGroup ("Range Properties",
-									typeof (Gtk.SpinButton),
-									"Adjustment.Lower",
-									"Adjustment.Upper",
-									"Adjustment.PageIncrement",
-									"Adjustment.PageSize",
-									"Adjustment.StepIncrement");
-			SpinButtonProperties = new ItemGroup ("Spin Button Properties",
-							      typeof (Gtk.SpinButton),
-							      "ClimbRate",
-							      "Digits",
-							      "Numeric",
-							      "SnapToTicks",
-							      "UpdatePolicy",
-							      "Value",
-							      "Wrap");
-			RegisterWrapper (typeof (Stetic.Wrapper.SpinButton),
-					 SpinButtonProperties,
-					 SpinButtonAdjustmentProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Range Properties",
+				      "Adjustment.Lower",
+				      "Adjustment.Upper",
+				      "Adjustment.PageIncrement",
+				      "Adjustment.PageSize",
+				      "Adjustment.StepIncrement");
+			AddItemGroup (type, "Spin Button Properties",
+				      "ClimbRate",
+				      "Digits",
+				      "Numeric",
+				      "SnapToTicks",
+				      "UpdatePolicy",
+				      "Value",
+				      "Wrap");
 		}
 
-		public SpinButton (IStetic stetic) : this (stetic, new Gtk.SpinButton (0.0, 100.0, 1.0), false) {}
-		public SpinButton (IStetic stetic, Gtk.SpinButton spinbutton, bool initialized) : base (stetic, spinbutton, initialized) {}
+		public static new Gtk.SpinButton CreateInstance ()
+		{
+			return new Gtk.SpinButton (0.0, 100.0, 1.0);
+		}
 	}
 }

@@ -3,45 +3,53 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Expander", "expander.png", typeof (Gtk.Expander), ObjectWrapperType.Container)]
+	[ObjectWrapper ("Expander", "expander.png", ObjectWrapperType.Container)]
 	public class Expander : Bin {
 
-		public static ItemGroup ExpanderProperties;
+		public static new Type WrappedType = typeof (Gtk.Expander);
 
-		static Expander () {
-			ExpanderProperties = new ItemGroup ("Expander Properties",
-							    typeof (Gtk.Expander),
-							    "Expanded",
-							    "Label",
-							    "UseMarkup",
-							    "UseUnderline",
-							    "Spacing",
-							    "BorderWidth");
-			RegisterWrapper (typeof (Stetic.Wrapper.Expander),
-					 ExpanderProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Expander Properties",
+				      "Expanded",
+				      "Label",
+				      "UseMarkup",
+				      "UseUnderline",
+				      "Spacing",
+				      "BorderWidth");
 		}
 
-		public Expander (IStetic stetic) : this (stetic, new Gtk.Expander (""), false) {}
-
-		public Expander (IStetic stetic, Gtk.Expander expander, bool initialized) : base (stetic, expander, initialized)
+		public static new Gtk.Expander CreateInstance ()
 		{
-			if (!initialized) {
+			return new Gtk.Expander ("");
+		}
+
+		protected override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
+
+			if (!initialized)
 				expander.Label = expander.Name;
-			}
+
 			expander.Activated += delegate (object obj, EventArgs args) {
 				EmitContentsChanged ();
 			};
 		}
 
+		Gtk.Expander expander {
+			get {
+				return (Gtk.Expander)Wrapped;
+			}
+		}
+
 		public override bool HExpandable {
 			get {
-				return ((Gtk.Expander)Wrapped).Expanded && site.HExpandable;
+				return expander.Expanded && site.HExpandable;
 			}
 		}
 		public override bool VExpandable {
 			get {
-				return ((Gtk.Expander)Wrapped).Expanded && site.VExpandable;
+				return expander.Expanded && site.VExpandable;
 			}
 		}
 	}

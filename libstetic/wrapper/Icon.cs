@@ -3,25 +3,22 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Stock Icon", "image.png", typeof (Gtk.Image), ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Stock Icon", "image.png", ObjectWrapperType.Widget)]
 	public class Icon : Misc {
 
-		public static ItemGroup IconProperties;
+		public static new Type WrappedType = typeof (Gtk.Image);
 
-		static Icon () {
-			IconProperties = new ItemGroup ("Stock Icon Properties",
-							typeof (Stetic.Wrapper.Icon),
-							typeof (Gtk.Image),
-							"Stock",
-							"IconSize");
-			RegisterWrapper (typeof (Stetic.Wrapper.Icon),
-					 IconProperties,
-					 Misc.MiscProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Stock Icon Properties",
+				      "Stock",
+				      "IconSize");
 		}
 
-		public Icon (IStetic stetic) : this (stetic, new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog), false) {}
-		public Icon (IStetic stetic, Gtk.Image icon, bool initialized) : base (stetic, icon, initialized) {}
+		public static new Gtk.Image CreateInstance ()
+		{
+			return new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog);
+		}
 
 		[Editor (typeof (Stetic.Editor.StockItem))]
 		[Description ("Stock Icon", "The stock icon to display")]

@@ -3,23 +3,17 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Event Box", "eventbox.png", typeof (Gtk.EventBox), ObjectWrapperType.Container)]
+	[ObjectWrapper ("Event Box", "eventbox.png", ObjectWrapperType.Container)]
 	public class EventBox : Bin {
 
-		public static ItemGroup EventBoxProperties;
+		public static new Type WrappedType = typeof (Gtk.EventBox);
 
-		static EventBox () {
-			EventBoxProperties = new ItemGroup ("Event Box Properties",
-							    typeof (Gtk.EventBox),
-							    "AboveChild",
-							    "VisibleWindow",
-							    "BorderWidth");
-			RegisterWrapper (typeof (Stetic.Wrapper.EventBox),
-					 EventBoxProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Event Box Properties",
+				      "AboveChild",
+				      "VisibleWindow",
+				      "BorderWidth");
 		}
-
-		public EventBox (IStetic stetic) : this (stetic, new Gtk.EventBox (), false) {}
-		public EventBox (IStetic stetic, Gtk.EventBox eventbox, bool initialized) : base (stetic, eventbox, initialized) {}
 	}
 }

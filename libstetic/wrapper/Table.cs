@@ -3,46 +3,41 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Table", "table.png", typeof (Gtk.Table), ObjectWrapperType.Container)]
-	public class Table : Stetic.Wrapper.Container {
+	[ObjectWrapper ("Table", "table.png", ObjectWrapperType.Container)]
+	public class Table : Container {
 
-		public static ItemGroup TableProperties;
+		public static new Type WrappedType = typeof (Gtk.Table);
 
-		static Table () {
-			TableProperties = new ItemGroup ("Table Properties",
-							 typeof (Stetic.Wrapper.Table),
-							 typeof (Gtk.Table),
-							 "NRows",
-							 "NColumns",
-							 "Homogeneous",
-							 "RowSpacing",
-							 "ColumnSpacing",
-							 "BorderWidth");
-			RegisterWrapper (typeof (Stetic.Wrapper.Table),
-					 TableProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Table Properties",
+				      "NRows",
+				      "NColumns",
+				      "Homogeneous",
+				      "RowSpacing",
+				      "ColumnSpacing",
+				      "BorderWidth");
 
-			ItemGroup contextMenu = new ItemGroup (null,
-							       typeof (Stetic.Wrapper.Table),
-							       typeof (Gtk.Table),
-							       "InsertRowBefore",
-							       "InsertRowAfter",
-							       "InsertColumnBefore",
-							       "InsertColumnAfter",
-							       "DeleteRow",
-							       "DeleteColumn");
-			RegisterContextMenu (typeof (Stetic.Wrapper.Table), contextMenu);
+			AddContextMenuItems (type,
+					     "InsertRowBefore",
+					     "InsertRowAfter",
+					     "InsertColumnBefore",
+					     "InsertColumnAfter",
+					     "DeleteRow",
+					     "DeleteColumn");
 		}
 
 		const Gtk.AttachOptions expandOpts = Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill;
 		const Gtk.AttachOptions fillOpts = Gtk.AttachOptions.Fill;
 
-		public Table (IStetic stetic) : this (stetic, new Gtk.Table (3, 3, false), false) {}
-
-
-		public Table (IStetic stetic, Gtk.Table table, bool initialized) : base (stetic, table, initialized)
+		public static new Gtk.Table CreateInstance ()
 		{
-			AutoSize = new Set ();
+			return new Gtk.Table (3, 3, false);
+		}
+
+		protected override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
 			Sync ();
 		}
 
@@ -52,7 +47,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		Set AutoSize;
+		Set AutoSize = new Set ();
 
 		int freeze;
 		void Freeze ()
@@ -433,39 +428,35 @@ namespace Stetic.Wrapper {
 		}
 #endif
 
-		public class TableChild : Stetic.Wrapper.Container.ContainerChild {
-			public static ItemGroup TableChildProperties;
+		public class TableChild : Container.ContainerChild {
 
-			static TableChild ()
+			public static new Type WrappedType = typeof (Gtk.Table.TableChild);
+
+			static new void Register (Type type)
 			{
-				TableChildProperties = new ItemGroup ("Table Child Layout",
-								      typeof (Stetic.Wrapper.Table.TableChild),
-								      typeof (Gtk.Table.TableChild),
-								      "TopAttach",
-								      "BottomAttach",
-								      "LeftAttach",
-								      "RightAttach",
-								      "XPadding",
-								      "YPadding",
-								      "AutoSize",
-								      "XExpand",
-								      "XFill",
-								      "XShrink",
-								      "YExpand",
-								      "YFill",
-								      "YShrink");
-				TableChildProperties["XExpand"].DependsInverselyOn (TableChildProperties["AutoSize"]);
-				TableChildProperties["XFill"].DependsInverselyOn (TableChildProperties["AutoSize"]);
-				TableChildProperties["XFill"].DependsOn (TableChildProperties["XExpand"]);
-				TableChildProperties["XShrink"].DependsInverselyOn (TableChildProperties["AutoSize"]);
-				TableChildProperties["YExpand"].DependsInverselyOn (TableChildProperties["AutoSize"]);
-				TableChildProperties["YFill"].DependsInverselyOn (TableChildProperties["AutoSize"]);
-				TableChildProperties["YFill"].DependsOn (TableChildProperties["YExpand"]);
-				TableChildProperties["YShrink"].DependsInverselyOn (TableChildProperties["AutoSize"]);
-				RegisterWrapper (typeof (Stetic.Wrapper.Table.TableChild),
-						 TableChildProperties);
+				ItemGroup props = AddItemGroup (type, "Table Child Layout",
+								"TopAttach",
+								"BottomAttach",
+								"LeftAttach",
+								"RightAttach",
+								"XPadding",
+								"YPadding",
+								"AutoSize",
+								"XExpand",
+								"XFill",
+								"XShrink",
+								"YExpand",
+								"YFill",
+								"YShrink");
+				props["XExpand"].DependsInverselyOn (props["AutoSize"]);
+				props["XFill"].DependsInverselyOn (props["AutoSize"]);
+				props["XFill"].DependsOn (props["XExpand"]);
+				props["XShrink"].DependsInverselyOn (props["AutoSize"]);
+				props["YExpand"].DependsInverselyOn (props["AutoSize"]);
+				props["YFill"].DependsInverselyOn (props["AutoSize"]);
+				props["YFill"].DependsOn (props["YExpand"]);
+				props["YShrink"].DependsInverselyOn (props["AutoSize"]);
 			}
-
 
 			Gtk.Table.TableChild tc {
 				get {
@@ -590,7 +581,6 @@ namespace Stetic.Wrapper {
 				parent.Sync ();
 			}
 
-			public TableChild (IStetic stetic, Gtk.Table.TableChild tablechild, bool initialized) : base (stetic, tablechild, initialized) {}
 		}
 	}
 }

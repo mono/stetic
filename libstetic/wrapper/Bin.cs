@@ -2,16 +2,11 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Bin : Stetic.Wrapper.Container {
+	public abstract class Bin : Container {
 
-		static Bin ()
-		{
-			RegisterWrapper (typeof (Stetic.Wrapper.Bin),
-					 new ItemGroup[0]);
-		}
+		public static new Type WrappedType = typeof (Gtk.Bin);
 
 		protected WidgetSite site;
-
 		protected WidgetSite Site {
 			get {
 				if (site == null)
@@ -20,8 +15,11 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		protected Bin (IStetic stetic, Gtk.Bin bin, bool initialized) : base (stetic, bin, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
+			base.Wrap (obj, initialized);
+
+			Gtk.Bin bin = (Gtk.Bin)obj;
 			if (!initialized && bin.Child == null) {
 				site = CreateWidgetSite ();
 				bin.Add (site);

@@ -3,51 +3,41 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Notebook", "notebook.png", typeof (Gtk.Notebook), ObjectWrapperType.Container)]
-	public class Notebook : Stetic.Wrapper.Container {
+	[ObjectWrapper ("Notebook", "notebook.png", ObjectWrapperType.Container)]
+	public class Notebook : Container {
 
-		public static ItemGroup NotebookProperties;
+		public static new Type WrappedType = typeof (Gtk.Notebook);
 
-		static Notebook () {
-			NotebookProperties = new ItemGroup ("Notebook Properties",
-							    typeof (Stetic.Wrapper.Notebook),
-							    typeof (Gtk.Notebook),
-							    "EnablePopup",
-							    "Homogeneous",
-							    "TabPos",
-							    "TabHborder",
-							    "TabVborder",
-							    "ShowBorder",
-							    "ShowTabs",
-							    "Scrollable",
-							    "BorderWidth",
-							    "InsertBefore",
-							    "InsertAfter");
-			RegisterWrapper (typeof (Stetic.Wrapper.Notebook),
-					 NotebookProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Notebook Properties",
+				      "EnablePopup",
+				      "Homogeneous",
+				      "TabPos",
+				      "TabHborder",
+				      "TabVborder",
+				      "ShowBorder",
+				      "ShowTabs",
+				      "Scrollable",
+				      "BorderWidth",
+				      "InsertBefore",
+				      "InsertAfter");
 
-			ItemGroup contextMenu = new ItemGroup (null,
-							       typeof (Stetic.Wrapper.Notebook),
-							       typeof (Gtk.Notebook),
-							       "PreviousPage",
-							       "NextPage",
-							       "DeletePage",
-							       "SwapPrevious",
-							       "SwapNext",
-							       "InsertBefore",
-							       "InsertAfter");
-			RegisterContextMenu (typeof (Stetic.Wrapper.Notebook), contextMenu);
+			AddContextMenuItems (type,
+					     "PreviousPage",
+					     "NextPage",
+					     "DeletePage",
+					     "SwapPrevious",
+					     "SwapNext",
+					     "InsertBefore",
+					     "InsertAfter");
 		}
 
-		public Notebook (IStetic stetic) : this (stetic, new Gtk.Notebook (), false) {}
-
-
-		public Notebook (IStetic stetic, Gtk.Notebook notebook, bool initialized) : base (stetic, notebook, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
-			if (!initialized) {
+			base.Wrap (obj, initialized);
+			if (!initialized)
 				InsertPage (0);
-			}
 		}
 
 		private Gtk.Notebook notebook {
@@ -58,12 +48,10 @@ namespace Stetic.Wrapper {
 
 		int InsertPage (int position)
 		{
-			WidgetSite pageSite, labelSite;
+			WidgetSite pageSite;
 
 			pageSite = CreateWidgetSite ();
-			labelSite = CreateWidgetSite ();
-			labelSite.Add (new Stetic.Wrapper.Label (stetic).Wrapped as Gtk.Widget);
-			return notebook.InsertPage (pageSite, labelSite, position);
+			return notebook.InsertPage (pageSite, null /* FIXME */, position);
 		}
 
 		[Command ("Go to Previous Page", "Show the previous page", "CheckPreviousPage")]
@@ -138,24 +126,21 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public class NotebookChild : Stetic.Wrapper.Container.ContainerChild {
-			public static ItemGroup NotebookChildProperties;
+		public class NotebookChild : Container.ContainerChild {
 
-			static NotebookChild ()
+			public static new Type WrappedType = typeof (Gtk.Notebook.NotebookChild);
+
+			static new void Register (Type type)
 			{
-				NotebookChildProperties = new ItemGroup ("Notebook Child Layout",
-									 typeof (Gtk.Notebook.NotebookChild),
-									 "TabLabel",
-									 "Position",
-									 "TabPack",
-									 "TabExpand",
-									 "TabFill",
-									 "MenuLabel");
-				RegisterWrapper (typeof (Stetic.Wrapper.Notebook.NotebookChild),
-						 NotebookChildProperties);
+				AddItemGroup (type,
+					      "Notebook Child Layout",
+					      "TabLabel",
+					      "Position",
+					      "TabPack",
+					      "TabExpand",
+					      "TabFill",
+					      "MenuLabel");
 			}
-
-			public NotebookChild (IStetic stetic, Gtk.Notebook.NotebookChild notebookchild, bool initialized) : base (stetic, notebookchild, initialized) {}
 		}
 	}
 }

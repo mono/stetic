@@ -4,52 +4,33 @@ using System.Reflection;
 
 namespace Stetic.Wrapper {
 	public abstract class Container : Widget {
-		static Container ()
+
+		public static new Type WrappedType = typeof (Gtk.Container);
+
+		static Hashtable childTypes = new Hashtable ();
+
+		static new void Register (Type type)
 		{
-			RegisterWrapper (typeof (Stetic.Wrapper.Container),
-					 new ItemGroup[0]);
+			// Check if the type declares a
+			// Stetic.Wrapper.Container.ContainerChild subtype
+			Type childType = typeof (Stetic.Wrapper.Container.ContainerChild);
+			foreach (Type ct in type.GetNestedTypes (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)) {
+				if (ct.IsSubclassOf (childType)) {
+					childTypes[type] = ct;
+					Stetic.ObjectWrapper.Register (ct);
+				}
+			}
 		}
 
-
-		protected Container (IStetic stetic, Gtk.Container container, bool initialized) : base (stetic, container, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
-			container.Removed += SiteRemoved;
+			base.Wrap (obj, initialized);
+			((Gtk.Container)Wrapped).Removed += SiteRemoved;
 		}
 
 		public static new Container Lookup (GLib.Object obj)
 		{
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Container;
-		}
-
-		static Hashtable childTypes = new Hashtable ();
-
-		protected new static void RegisterWrapper (Type t, params ItemGroup[] items)
-		{
-			Stetic.ObjectWrapper.RegisterWrapper (t, items);
-
-			// Check if it declares a Stetic.Wrapper.Container.ContainerChild subtype
-			Type childType = typeof (Stetic.Wrapper.Container.ContainerChild);
-			foreach (Type ct in t.GetNestedTypes (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)) {
-				if (ct.IsSubclassOf (childType)) {
-					childType = ct;
-					break;
-				}
-			}
-
-			// Find the ContainerChild type's constructor
-			foreach (ConstructorInfo ctor in childType.GetConstructors ()) {
-				ParameterInfo[] parms = ctor.GetParameters ();
-				if (parms.Length == 3 &&
-				    parms[0].ParameterType == typeof (Stetic.IStetic) &&
-				    (parms[1].ParameterType == typeof (Gtk.Container.ContainerChild) ||
-				     parms[1].ParameterType.IsSubclassOf (typeof (Gtk.Container.ContainerChild))) &&
-				    parms[2].ParameterType == typeof (bool)) {
-					childTypes[t] = ctor;
-					break;
-				}
-			}
-			if (childTypes[t] == null)
-				throw new ArgumentException ("No suitable constructor for " + childType.FullName);
 		}
 
 		public static Stetic.Wrapper.Container.ContainerChild ChildWrapper (Stetic.IWidgetSite site) {
@@ -65,17 +46,17 @@ namespace Stetic.Wrapper {
 			if (pwrap == null)
 				return null;
 
-			ConstructorInfo ctor;
+			Type ct = null;
 			for (Type t = pwrap.GetType (); t != null; t = t.BaseType) {
-				ctor = childTypes[t] as ConstructorInfo;
-				if (ctor != null)
+				ct = childTypes[t] as Type;
+				if (ct != null)
 					break;
 			}
-			if (ctor == null)
+			if (ct == null)
 				return null;
 
 			Gtk.Container.ContainerChild cc = parent[sitew];
-			return ctor.Invoke (new object[] { pwrap.stetic, cc, false }) as ContainerChild;
+			return Stetic.ObjectWrapper.Create (ct, pwrap.stetic, cc) as ContainerChild;
 		}
 
 		public delegate void ContentsChangedHandler (Container container);
@@ -135,23 +116,24 @@ namespace Stetic.Wrapper {
 
 		public class ContainerChild : Stetic.ObjectWrapper {
 
-			static ContainerChild ()
+			public static new Type WrappedType = typeof (Gtk.Container.ContainerChild);
+
+			static void Register ()
 			{
-				RegisterWrapper (typeof (Stetic.Wrapper.Container.ContainerChild),
-						 new ItemGroup[0]);
+				// FIXME?
 			}
 
-
-			public ContainerChild (IStetic stetic, Gtk.Container.ContainerChild cc, bool initialized) : base (stetic, cc)
+			protected override void Wrap (object obj, bool initialized)
 			{
-				cc.Child.ChildNotified += ChildNotifyHandler;
+				base.Wrap (obj, initialized);
+				((Gtk.Container.ContainerChild)Wrapped).Child.ChildNotified += ChildNotifyHandler;
 
 				// FIXME; arrange for wrapper disposal?
 			}
 
 			public override void Dispose ()
 			{
-				((Gtk.Container.ContainerChild)Wrapped).Parent.ChildNotified -= ChildNotifyHandler;
+				((Gtk.Container.ContainerChild)Wrapped).Child.ChildNotified -= ChildNotifyHandler;
 				base.Dispose ();
 			}
 

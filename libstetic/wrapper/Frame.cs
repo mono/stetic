@@ -2,31 +2,27 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Frame", "frame.png", typeof (Gtk.Frame), ObjectWrapperType.Container)]
+	[ObjectWrapper ("Frame", "frame.png", ObjectWrapperType.Container)]
 	public class Frame : Bin {
 
-		public static ItemGroup FrameProperties;
+		public static new Type WrappedType = typeof (Gtk.Frame);
 
-		static Frame () {
-			FrameProperties = new ItemGroup ("Frame Properties",
-							 typeof (Gtk.Frame),
-							 "Shadow",
-							 "ShadowType",
-							 "Label",
-							 "LabelXalign",
-							 "LabelYalign",
-							 "BorderWidth");
-			RegisterWrapper (typeof (Stetic.Wrapper.Frame),
-					 FrameProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Frame Properties",
+				      "Shadow",
+				      "ShadowType",
+				      "Label",
+				      "LabelXalign",
+				      "LabelYalign",
+				      "BorderWidth");
 		}
 
-		public Frame (IStetic stetic) : this (stetic, new Gtk.Frame (), false) {}
-
-
-		public Frame (IStetic stetic, Gtk.Frame frame, bool initialized) : base (stetic, frame, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
+			base.Wrap (obj, initialized);
 			if (!initialized) {
+				Gtk.Frame frame = (Gtk.Frame)Wrapped;
 				frame.Label = frame.Name;
 			}
 		}

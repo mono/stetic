@@ -2,34 +2,28 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Toggle Button", "togglebutton.png", typeof (Gtk.ToggleButton), ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Toggle Button", "togglebutton.png", ObjectWrapperType.Widget)]
 	public class ToggleButton : Button {
 
-		public static ItemGroup ToggleButtonProperties;
+		public static new Type WrappedType = typeof (Gtk.ToggleButton);
 
-		static ToggleButton () {
-			ToggleButtonProperties = new ItemGroup ("Toggle Button Properties",
-								typeof (Stetic.Wrapper.ToggleButton),
-								typeof (Gtk.ToggleButton),
-								"UseStock",
-								"StockId",
-								"Label",
-								"Active",
-								"Inconsistent");
-			ToggleButtonProperties["StockId"].DependsOn (ToggleButtonProperties["UseStock"]);
-			ToggleButtonProperties["Label"].DependsInverselyOn (ToggleButtonProperties["UseStock"]);
-			RegisterWrapper (typeof (Stetic.Wrapper.ToggleButton),
-					 ToggleButtonProperties,
-					 Button.ButtonExtraProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			ItemGroup props = AddItemGroup (type, "Toggle Button Properties",
+							"UseStock",
+							"StockId",
+							"Label",
+							"Active",
+							"Inconsistent");
+			props["StockId"].DependsOn (props["UseStock"]);
+			props["Label"].DependsInverselyOn (props["UseStock"]);
 		}
 
-		public ToggleButton (IStetic stetic) : this (stetic, new Gtk.ToggleButton (), false) {}
-
-
-		public ToggleButton (IStetic stetic, Gtk.ToggleButton button, bool initialized) : base (stetic, button, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
+			base.Wrap (obj, initialized);
 			if (!initialized) {
+				Gtk.ToggleButton button = (Gtk.ToggleButton)Wrapped;
 				button.Label = button.Name;
 			}
 		}

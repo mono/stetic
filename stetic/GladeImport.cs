@@ -122,7 +122,6 @@ namespace Stetic {
 		static void AddChildren (Gtk.Container container, Stetic.Wrapper.Container wrapper, string className, XmlNodeList children)
 		{
 			foreach (XmlNode node in children) {
-
 				Widget childw = null;
 			
 				bool addWithSite = true;
@@ -144,6 +143,7 @@ namespace Stetic {
 
 					if (childw is Gtk.Container) { 
 						AddChildren ((Gtk.Container)childw, (Stetic.Wrapper.Container)CreateWrapperType (childw), node.SelectSingleNode("widget").Attributes["class"].InnerText, node.SelectNodes ("widget/child"));
+
 					}
 
 					addWithSite = false;
@@ -157,7 +157,7 @@ namespace Stetic {
 				
 				if (childw == null)
 					continue;
-			
+
 				ArrayList childPropNames = new ArrayList ();
 				ArrayList childPropValues = new ArrayList ();
 				
@@ -219,10 +219,14 @@ namespace Stetic {
 
 				GLib.Value value = new GLib.Value ();
 
-				if (!stetic_g_value_init_for_property (ref value, className, propName))
+				if (!stetic_g_value_init_for_property (ref value, className, propName)) {
+					Console.WriteLine ("Unrecognized property {0}.{1}", className, propName);
 					continue;
-				if (!stetic_g_value_hydrate (ref value, stringValue))
+				}
+				if (!stetic_g_value_hydrate (ref value, stringValue)) {
+					Console.WriteLine ("Could not hydrate property {0}.{1} from value '{2}'", className, propName, stringValue);
 					continue;
+				}
 				
 				propNames.Add (propName);
 				values.Add (value);
@@ -247,6 +251,7 @@ namespace Stetic {
 		{
 			Type[] wrapper_types = ObjectWrapper.LookupWrapperTypes (widget);
 			if (wrapper_types == null) {
+				Console.WriteLine ("no wrapper types for widget {0}", widget);
 				return null;
 			}
 
@@ -266,7 +271,8 @@ namespace Stetic {
 			if (empty_istetic == null) {
 				empty_istetic = new WidgetFactory ("null", Gdk.Pixbuf.LoadFromResource ("missing.png"), typeof (Stetic.Wrapper.Label));
 			}
-			return Activator.CreateInstance (final_wrapper_type, new object[] { empty_istetic, widget, true } ) as ObjectWrapper;
+
+			return Stetic.ObjectWrapper.Create (final_wrapper_type, empty_istetic, widget);
 		}
 	}
 }

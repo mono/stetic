@@ -2,11 +2,15 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("HBox", "hbox.png", typeof (Gtk.HBox), ObjectWrapperType.Container)]
+	[ObjectWrapper ("HBox", "hbox.png", ObjectWrapperType.Container)]
 	public class HBox : Box {
 
-		public HBox (IStetic stetic) : this (stetic, new Gtk.HBox (false, 0), false) {}
-		public HBox (IStetic stetic, Gtk.HBox hbox, bool initialized) : base (stetic, hbox, initialized) {}
+		public static new Type WrappedType = typeof (Gtk.HBox);
+
+		public static new Gtk.HBox CreateInstance ()
+		{
+			return new Gtk.HBox (false, 0);
+		}
 
 		public override bool HExpandable {
 			get {

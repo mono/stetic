@@ -3,65 +3,62 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Button", "button.png", typeof (Gtk.Button), ObjectWrapperType.Widget)]
-	public class Button : Stetic.Wrapper.Container {
+	[ObjectWrapper ("Button", "button.png", ObjectWrapperType.Widget)]
+	public class Button : Container {
 
-		public static ItemGroup ButtonProperties;
-		public static ItemGroup ButtonExtraProperties;
+		public static new Type WrappedType = typeof (Gtk.Button);
 
-		static Button () {
-			ButtonProperties = new ItemGroup ("Button Properties",
-							  typeof (Stetic.Wrapper.Button),
-							  typeof (Gtk.Button),
-							  "UseStock",
-							  "StockId",
-							  "Label",
-							  "RemoveContents",
-							  "RestoreLabel");
-			ButtonProperties["StockId"].DependsOn (ButtonProperties["UseStock"]);
-			ButtonProperties["Label"].DependsInverselyOn (ButtonProperties["UseStock"]);
+		static new void Register (Type type)
+		{
+			if (type == typeof (Stetic.Wrapper.Button)) {
+				ItemGroup props = AddItemGroup (type, "Button Properties",
+								"UseStock",
+								"StockId",
+								"Label",
+								"RemoveContents",
+								"RestoreLabel");
 
-			PropertyDescriptor hasLabel = new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
-									      typeof (Gtk.Button),
-									      "HasLabel");
-			ButtonProperties["UseStock"].DependsOn (hasLabel);
-			ButtonProperties["StockId"].DependsOn (hasLabel);
-			ButtonProperties["Label"].DependsOn (hasLabel);
-			ButtonProperties["RestoreLabel"].DependsInverselyOn (hasLabel);
+				PropertyDescriptor hasLabel =
+					new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
+								typeof (Gtk.Button),
+								"HasLabel");
+				PropertyDescriptor hasContents =
+					new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
+								typeof (Gtk.Button),
+								"HasContents");
 
-			PropertyDescriptor hasContents = new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
-										 typeof (Gtk.Button),
-										 "HasContents");
-			ButtonProperties["RemoveContents"].DependsOn (hasContents);
+				props["UseStock"].DependsOn (hasLabel);
+				props["StockId"].DependsOn (hasLabel);
+				props["StockId"].DependsOn (props["UseStock"]);
+				props["Label"].DependsOn (hasLabel);
+				props["Label"].DependsInverselyOn (props["UseStock"]);
+				props["RestoreLabel"].DependsInverselyOn (hasLabel);
+				props["RemoveContents"].DependsOn (hasContents);
 
-			ButtonExtraProperties = new ItemGroup ("Extra Button Properties",
-							       typeof (Gtk.Button),
-							       "FocusOnClick",
-							       "UseUnderline",
-							       "Relief",
-							       "Xalign",
-							       "Yalign");
+				props = AddContextMenuItems (type,
+							     "RemoveContents",
+							     "RestoreLabel");
+				props["RemoveContents"].DependsOn (hasContents);
+				props["RestoreLabel"].DependsInverselyOn (hasLabel);
+			}
 
-			RegisterWrapper (typeof (Stetic.Wrapper.Button),
-					 ButtonProperties,
-					 ButtonExtraProperties,
-					 Widget.CommonWidgetProperties);
-
-			ItemGroup contextMenu = new ItemGroup (null,
-							       typeof (Stetic.Wrapper.Button),
-							       typeof (Gtk.Button),
-							       "RemoveContents",
-							       "RestoreLabel");
-			contextMenu["RemoveContents"].DependsOn (hasContents);
-			contextMenu["RestoreLabel"].DependsInverselyOn (hasLabel);
-			RegisterContextMenu (typeof (Stetic.Wrapper.Button), contextMenu);
+			AddItemGroup (type, "Extra Button Properties",
+				      "FocusOnClick",
+				      "UseUnderline",
+				      "Relief",
+				      "Xalign",
+				      "Yalign",
+				      "BorderWidth");
 		}
 
-		public Button (IStetic stetic) : this (stetic, new Gtk.Button (Gtk.Stock.Ok), false) {}
-		
-
-		public Button (IStetic stetic, Gtk.Button button, bool initialized) : base (stetic, button, initialized)
+		public static new Gtk.Button CreateInstance ()
 		{
+			return new Gtk.Button (Gtk.Stock.Ok);
+		}
+
+		protected override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
 			if (!initialized) {
 				if (button.UseStock) {
 					stockId = button.Label;

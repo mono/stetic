@@ -3,24 +3,21 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Image", "image.png", typeof (Gtk.Image), ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Image", "image.png", ObjectWrapperType.Widget)]
 	public class Image : Misc {
 
-		public static ItemGroup ImageProperties;
+		public static new Type WrappedType = typeof (Gtk.Image);
 
-		static Image () {
-			ImageProperties = new ItemGroup ("Image Properties",
-							 typeof (Stetic.Wrapper.Image),
-							 typeof (Gtk.Image),
-							 "File");
-			RegisterWrapper (typeof (Stetic.Wrapper.Image),
-					 ImageProperties,
-					 Misc.MiscProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			AddItemGroup (type, "Image Properties",
+				      "File");
 		}
 
-		public Image (IStetic stetic) : this (stetic, new Gtk.Image (""), false) {}
-		public Image (IStetic stetic, Gtk.Image image, bool initialized) : base (stetic, image, initialized) {}
+		public static new Gtk.Image CreateInstance ()
+		{
+			return new Gtk.Image ("");
+		}
 
 		string filename = "";
 

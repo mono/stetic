@@ -81,8 +81,9 @@ namespace Stetic {
 		public void AddWidget (Assembly assem, Type type)
 		{
 			foreach (object attr in type.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)) {
+				Stetic.ObjectWrapper.Register (type);
+
 				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
-				ObjectWrapper.RegisterWrapperType (type, owattr.WrappedType);
 
 				Pixbuf icon = Palette.IconForType (type);
 

@@ -102,7 +102,7 @@ namespace Stetic {
 			AppendWrapperGroups (selection);
 
 			packingSelection = Stetic.Wrapper.Container.ChildWrapper (site);
-			if (packingSelection != null && packingSelection.ItemGroups.Length > 0) {
+			if (packingSelection != null && packingSelection.ItemGroups.Count > 0) {
 				AppendWrapperGroups (packingSelection);
 				packingSelection.Notify += Notified;
 			}

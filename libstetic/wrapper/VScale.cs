@@ -2,11 +2,15 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Vertical Scale", "vscale.png", typeof (Gtk.VScale), ObjectWrapperType.Widget)]
+	[ObjectWrapper ("Vertical Scale", "vscale.png", ObjectWrapperType.Widget)]
 	public class VScale : Scale {
 
-		public VScale (IStetic stetic) : this (stetic, new Gtk.VScale (0.0, 100.0, 1.0), false) {}
-		public VScale (IStetic stetic, Gtk.VScale vscale, bool initialized) : base (stetic, vscale, initialized) {}
+		public static new Type WrappedType = typeof (Gtk.VScale);
+
+		public static new Gtk.VScale CreateInstance ()
+		{
+			return new Gtk.VScale (0.0, 100.0, 1.0);
+		}
 
 		public override bool VExpandable { get { return true; } }
 	}

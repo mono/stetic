@@ -2,31 +2,28 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Scale : Stetic.Wrapper.Widget {
-		public static ItemGroup ScaleProperties;
+	public abstract class Scale : Widget {
 
-		static Scale () {
-			ScaleProperties = new ItemGroup ("Scale Properties",
-							 typeof (Gtk.Scale),
-							 "Adjustment.Lower",
-							 "Adjustment.Upper",
-							 "Adjustment.Value",
-							 "DrawValue",
-							 "Digits",
-							 "ValuePos",
-							 "Inverted");
-			ScaleProperties["Digits"].DependsOn (ScaleProperties["DrawValue"]);
-			ScaleProperties["ValuePos"].DependsOn (ScaleProperties["DrawValue"]);
+		public static new Type WrappedType = typeof (Gtk.Scale);
 
-			RegisterWrapper (typeof (Stetic.Wrapper.Scale),
-					 Scale.ScaleProperties,
-					 Widget.CommonWidgetProperties);
+		static new void Register (Type type)
+		{
+			ItemGroup props = AddItemGroup (type, "Scale Properties",
+							"Adjustment.Lower",
+							"Adjustment.Upper",
+							"Adjustment.Value",
+							"DrawValue",
+							"Digits",
+							"ValuePos",
+							"Inverted");
+			props["Digits"].DependsOn (props["DrawValue"]);
+			props["ValuePos"].DependsOn (props["DrawValue"]);
 		}
 
-
-		protected Scale (IStetic stetic, Gtk.Scale scale, bool initialized) : base (stetic, scale, initialized)
+		protected override void Wrap (object obj, bool initialized)
 		{
-			scale.Adjustment.AddNotification (AdjustmentNotifyHandler);
+			base.Wrap (obj, initialized);
+			((Gtk.Scale)Wrapped).Adjustment.AddNotification (AdjustmentNotifyHandler);
 		}
 
 		void AdjustmentNotifyHandler (object obj, GLib.NotifyArgs args)
