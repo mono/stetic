@@ -1,0 +1,139 @@
+Core functionality needed to make it minimally usable as a Glade
+replacement:
+
+    - A real main window, with menus and a toolbar and all that.
+
+    - Glade Import/Export. (Todd is working on import)
+
+
+Application UI:
+
+    - Figure out how to organize the various windows
+
+    - L10n/I18n
+	- Show translated property names/descriptions
+	- Make sure other UI stuff is translated
+	- Make Grid and other custom widgets right-to-left-able
+
+
+UI-Designing UI:
+
+    - Fix up not-fully-functional wrappers:
+
+	- If you remove the label in a Button and replace it with
+	  something else, the something else doesn't show up in the
+	  Project window
+
+	- Does PackStart/PackEnd actually do anything in Box?
+
+	- ButtonBox should fill itself in with buttons, like glade
+          does, and needs to implement insert/remove commands
+
+	- Dialog
+
+	- Notebook has a bunch of problems:
+		- tab labels start out with WidgetSites, but lose them
+		  if you edit the label properties
+		- should the child properties appear as properties of
+		  the page or the tab? or both? or should they have
+		  different properties?
+		- Switch with Prev/Next isn't implemented
+
+	- Window.Visible, Window.Modal, Widget.Sensitive cause
+          interaction problems and need to represented as shadow
+          properties. (Would be nice if we could trick "insensitive"
+          widgets into drawing that way even if they did still respond
+          to clicks.)
+
+	- ... ?
+
+    - Add wrappers for things that aren't wrapped yet
+
+	- TreeView (NodeView?)
+
+	- Layout/Fixed
+
+	- Menubar, Toolbar. (Mike Kestner has some code here.) Use the
+          new GtkAction-based stuff
+
+	- Gnome widgets (the not-yet-deprecated ones anyway)
+		- Not in a separate "Gnome widgets" group.
+		- Though we need some way to do Windows/cross-platform
+		  UIs (ie, gtk-only)
+
+	- Non-widgets:
+		- TreeModel
+		- SizeGroup
+		- Tooltips (UI should be like Glade, but
+		  implementation should be generic, like how it works
+		  in Visual Studio)
+		- EntryCompletion
+
+    - Make widgets more HIGalicious
+
+	- Dialog layout
+
+	- HIG-style frames
+
+    - More auto-layout functionality
+
+	- Containers should try to automatically set Padding/Spacing
+          and BorderWidth
+
+	- Boxes and Tables should autoexpand if you drop widgets on
+          their edges or between other widgets
+
+	- If you drag a non-expandable widget into a Bin, it could add
+          a table
+
+    - "Custom widgets" ?
+
+	- It's better to be able to load the custom widget into stetic
+          and add it directly.
+
+	- But glade-style custom widgets could be nice for UI mockups,
+          when you don't actually have any code for the widget, if you
+          had certain functionality:
+		- display a user-specified image rather than the stock
+		  "custom widget" background
+		- better control of sizing behavior
+
+
+Misc functionality:
+
+    - Load/Save
+	- For now, a native format is less important than glade
+	  import/export
+	- File format should be stable against small changes so that
+	  if multiple developers are working on the same stetic files,
+	  they don't cause cvs/svn conflicts for each other. (IOW,
+	  don't just write things out in hash-table order.)
+
+    - Undo
+
+    - Code generation / MonoDevelop integration
+
+    - Loading additional widget types
+
+    - Be able to specify images as resources rather than files
+
+    - Wiring things together
+	- X is sensitive if Y is checked
+	- X's Foo property contains the value of GConf key Y
+	- Connect X's Foo method to Y's Bar signal
+
+    - Signal support (maybe just via the "wiring" above?)
+
+    - Templates (build something and then save it in a way that you or
+      other people can have it as a pre-built thing in your Palette)
+
+    - Comments (stickynotes that appear in stetic, but not in the
+      runtime UI)
+
+    - A11y
+	- Stetic-itself a11y
+	- A11y of the designed UI
+
+    - Alternate UI views. Change theme (especially to a11y themes) and
+      language independently of the designer's theme/language, to test
+      the designed UI's behavior.
