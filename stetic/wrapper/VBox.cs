@@ -5,7 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class VBox : Gtk.VBox, IWidgetSite {
+	public class VBox : Gtk.VBox, IDesignTimeContainer {
 
 		public VBox (bool homogeneous, int spacing) : base (homogeneous, spacing)
 		{
@@ -42,7 +42,7 @@ namespace Stetic.Wrapper {
 
 		public event OccupancyChangedHandler OccupancyChanged;
 
-		private void ChildOccupancyChanged (IWidgetSite site)
+		private void ChildOccupancyChanged (IDesignTimeContainer container)
 		{
 			if (OccupancyChanged != null)
 				OccupancyChanged (this);

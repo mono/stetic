@@ -9,16 +9,16 @@ namespace Stetic {
 
 	public class ContextMenu : Gtk.Menu {
 
-		WidgetSite site;
+		IWidgetSite site;
 
-		public ContextMenu (WidgetSite site, bool top)
+		public ContextMenu (IWidgetSite site, bool top)
 		{
 			MenuItem item;
 
 			this.site = site;
 
 			if (top) {
-				item = LabelItem (site.Occupied ? site.Child.Name : "Placeholder");
+				item = LabelItem (site.Occupied ? site.Contents.Name : "Placeholder");
 				item.Sensitive = false;
 				Add (item);
 			}
@@ -46,17 +46,10 @@ namespace Stetic {
 			Add (item);
 
 			if (top) {
-				while (site != null) {
-					Widget w = site.Parent;
-					if (w == null)
-						break;
-					site = w.Parent as WidgetSite;
-					if (site == null)
-						break;
-
+				for (site = site.ParentSite; site != null; site = site.ParentSite) {
 					Add (new SeparatorMenuItem ());
 
-					item = LabelItem (w.Name);
+					item = LabelItem (site.Contents.Name);
 					item.Submenu = new ContextMenu (site, false);
 					Add (item);
 				}
@@ -67,7 +60,7 @@ namespace Stetic {
 
 		void DoSelect (object obj, EventArgs args)
 		{
-			site.GrabFocus ();
+			site.Select ();
 		}
 
 		void DoDelete (object obj, EventArgs args)

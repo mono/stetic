@@ -2,19 +2,23 @@ using Gtk;
 using Gdk;
 using GLib;
 using System;
+using System.Collections;
 
 namespace Stetic {
 
-	public delegate void OccupancyChangedHandler (IWidgetSite holder);
-
 	public interface IWidgetSite {
-		bool HExpandable { get; }
-		bool VExpandable { get; }
+		Widget Contents { get; }
+		IWidgetSite ParentSite { get; }
 
-		event OccupancyChangedHandler OccupancyChanged;
+		bool Occupied { get; }
+
+		void Select ();
+		void UnSelect ();
+
+		void Delete ();
 	}
 
-	public class WidgetSite : WidgetBox, IWidgetSite {
+	public class WidgetSite : WidgetBox, IWidgetSite, IDesignTimeContainer {
 
 		static TargetEntry[] Targets;
 		static TargetList TargetList;
@@ -33,7 +37,7 @@ namespace Stetic {
 
 		public WidgetSite ()
 		{
-			Flags |= (int)WidgetFlags.CanFocus;
+			WidgetFlags |= WidgetFlags.CanFocus;
 			Occupancy = SiteOccupancy.Empty;
 		}
 
@@ -42,7 +46,26 @@ namespace Stetic {
 			Add (w);
 		}
 
-		private void ChildOccupancyChanged (IWidgetSite holder)
+		public Widget Contents {
+			get {
+				return Child;
+			}
+		}
+
+		public IWidgetSite ParentSite {
+			get {
+				Widget w = Parent;
+				if (w == null)
+					return null;
+				w = w.Parent;
+				if (w == null)
+					return WindowSite.LookupSite (Parent);
+				else
+					return w as IWidgetSite;
+			}
+		}
+
+		private void ChildOccupancyChanged (IDesignTimeContainer container)
 		{
 			if (OccupancyChanged != null)
 				OccupancyChanged (this);
@@ -52,8 +75,8 @@ namespace Stetic {
 		{
 			base.OnAdded (child);
 			ShowPlaceholder = false;
-			if (child is IWidgetSite)
-				((IWidgetSite)child).OccupancyChanged += ChildOccupancyChanged;
+			if (child is IDesignTimeContainer)
+				((IDesignTimeContainer)child).OccupancyChanged += ChildOccupancyChanged;
 			else
 				InterceptEvents = true;
 			Occupancy = SiteOccupancy.Occupied;
@@ -63,8 +86,8 @@ namespace Stetic {
 		{
 			if (Occupancy == SiteOccupancy.Occupied)
 				Occupancy = SiteOccupancy.Empty;
-			if (w is IWidgetSite)
-				((IWidgetSite)w).OccupancyChanged -= ChildOccupancyChanged;
+			if (w is IDesignTimeContainer)
+				((IDesignTimeContainer)w).OccupancyChanged -= ChildOccupancyChanged;
 			ShowPlaceholder = true;
 			InterceptEvents = false;
 			base.OnRemoved (w);
@@ -122,8 +145,8 @@ namespace Stetic {
 				if (child == null)
 					return true;
 
-				if (child is IWidgetSite)
-					return ((IWidgetSite)child).HExpandable;
+				if (child is IDesignTimeContainer)
+					return ((IDesignTimeContainer)child).HExpandable;
 				else
 					return false;
 			}
@@ -142,8 +165,8 @@ namespace Stetic {
 				if (child == null)
 					return true;
 
-				if (child is IWidgetSite)
-					return ((IWidgetSite)child).VExpandable;
+				if (child is IDesignTimeContainer)
+					return ((IDesignTimeContainer)child).VExpandable;
 				else
 					return false;
 			}
@@ -293,8 +316,18 @@ namespace Stetic {
 		public void UnFocus ()
 		{
 			ShowHandles = false;
-			if (Child != null && !(Child is IWidgetSite))
+			if (Child != null && !(Child is IDesignTimeContainer))
 				InterceptEvents = true;
+		}
+
+		public void Select ()
+		{
+			GrabFocus ();
+		}
+
+		public void UnSelect ()
+		{
+			UnFocus ();
 		}
 
 		public void Delete ()
@@ -304,6 +337,92 @@ namespace Stetic {
 				if (OccupancyChanged != null)
 					OccupancyChanged (this);
 			}
+		}
+
+	}
+
+	public class WindowSite : IWidgetSite {
+		Gtk.Window contents;
+
+		static Hashtable windowSites = new Hashtable ();
+
+		public WindowSite (Gtk.Window contents)
+		{
+			this.contents = contents;
+			windowSites[contents] = this;
+			contents.DeleteEvent += ContentsDeleted;
+			contents.SetFocus += ContentsSetFocus;
+		}
+
+		void ContentsDeleted (object obj, EventArgs args)
+		{
+			if (FocusChanged != null) {
+				FocusChanged (this, null);
+				FocusChanged = null;
+			}
+			windowSites.Remove (contents);
+		}
+
+		public delegate void FocusChangedHandler (WindowSite site, IWidgetSite focus);
+		public event FocusChangedHandler FocusChanged;
+
+		[ConnectBefore] // otherwise contents.Focus will be the new focus, not the old
+		void ContentsSetFocus (object obj, SetFocusArgs args)
+		{
+			WidgetSite oldf = contents.Focus as WidgetSite;
+			Widget w = args.Focus;
+			while (w != null && !(w is WidgetSite))
+				w = w.Parent;
+			WidgetSite newf = (WidgetSite)w;
+
+			if (oldf == newf)
+				return;
+
+			if (oldf != null)
+				oldf.UnFocus ();
+			if (newf != null)
+				newf.Focus ();
+
+			if (FocusChanged != null)
+				FocusChanged (this, newf != null ? (IWidgetSite)newf : (IWidgetSite)this);
+		}
+
+		public static IWidgetSite LookupSite (Widget window)
+		{
+			return windowSites[window] as IWidgetSite;
+		}
+
+		public Widget Contents {
+			get {
+				return contents;
+			}
+		}
+
+		public IWidgetSite ParentSite {
+			get {
+				return null;
+			}
+		}
+
+		public bool Occupied {
+			get {
+				return true;
+			}
+		}
+
+		public void Delete ()
+		{
+			contents.Destroy ();
+		}
+
+		public void Select ()
+		{
+			contents.Focus = null;
+		}
+
+		public void UnSelect ()
+		{
+			;
 		}
 	}
 }

@@ -5,7 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class HPaned : Gtk.HPaned, IWidgetSite {
+	public class HPaned : Gtk.HPaned, IDesignTimeContainer {
 
 		public HPaned ()
 		{
@@ -35,7 +35,7 @@ namespace Stetic.Wrapper {
 
 		public event OccupancyChangedHandler OccupancyChanged;
 
-		private void ChildOccupancyChanged (IWidgetSite site)
+		private void ChildOccupancyChanged (IDesignTimeContainer container)
 		{
 			if (OccupancyChanged != null)
 				OccupancyChanged (this);

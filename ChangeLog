@@ -1,3 +1,30 @@
+2005-01-06  Dan Winship  <danw@novell.com>
+
+	* stetic/IDesignTimeContainer.cs: New name for the old
+	IWidgetSite.
+
+	* stetic/WidgetSite.cs (IWidgetSite): Now a "parent" for
+	WidgetSite and WindowSite.
+	(WidgetSite): Implement IWidgetSite and IDesignTimeContainer.
+	(WindowSite): IWidgetSite implementation for toplevel windows.
+	Includes the focus-tracking code formerly in
+	Stetic.Wrapper.Window.
+
+	* stetic/ContextMenu.cs (ContextMenu):
+	* stetic/Stetic.cs (Select):
+	* stetic/PropertyGrid.cs (PropertyGrid.Select,
+	ChildPropertyGrid.Select): Change WidgetBox and WidgetSite params
+	to IWidgetSite. This lets us select and show properties for toplevels.
+
+	* stetic/WidgetFactory.cs (WindowFactory.OnButtonPressEvent):
+	Create a WindowSite for the new window and connect to its
+	FocusChanged event.
+
+	* stetic/wrapper/*.cs: s/IWidgetSite/IDesignTimeContainer/
+
+	* stetic/wrapper/Window.cs (OnSetFocus): Gone. Handled by
+	WindowSite now.
+
 2005-01-05  Dan Winship  <danw@novell.com>
 
 	* stetic/ContextMenu.cs: Menu subclass to use as a WidgetSite's

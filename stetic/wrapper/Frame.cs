@@ -5,7 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class Frame : Gtk.Frame, IWidgetSite {
+	public class Frame : Gtk.Frame, IDesignTimeContainer {
 
 		public Frame (string label) : base (label)
 		{
@@ -19,7 +19,7 @@ namespace Stetic.Wrapper {
 
 		public event OccupancyChangedHandler OccupancyChanged;
 
-		private void ChildOccupancyChanged (IWidgetSite site)
+		private void ChildOccupancyChanged (IDesignTimeContainer container)
 		{
 			if (OccupancyChanged != null)
 				OccupancyChanged (this);

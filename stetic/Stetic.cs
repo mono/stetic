@@ -51,10 +51,10 @@ namespace Stetic {
 			ChildProperties.NoSelection ();
 		}
 
-		public static void Select (WidgetBox wbox)
+		public static void Select (IWidgetSite site)
 		{
-			Properties.Select (wbox);
-			ChildProperties.Select (wbox);
+			Properties.Select (site);
+			ChildProperties.Select (site);
 		}
 
 	}

@@ -20,35 +20,8 @@ namespace Stetic.Wrapper {
 
 			if (site.Occupied)
 				req = site.SizeRequest ();
-			else {
-				req.Width = req.Height = 200;
-			}
-		}
-
-		protected override void OnSetFocus (Gtk.Widget focus)
-		{
-			WidgetSite oldf = Focus as WidgetSite;
-
-			Gtk.Widget site = focus;
-			while (site != null && !(site is WidgetSite))
-				site = site.Parent;
-			WidgetSite newf = (WidgetSite)site;
-
-			if (oldf == newf)
-				return;
-
-			if (oldf != null)
-				oldf.UnFocus ();
-
-			if (newf != null)
-				newf.Focus ();
-
-			if (newf != null && newf.Child != null)
-				Stetic.Select (newf);
 			else
-				Stetic.NoSelection ();
-
-			base.OnSetFocus (focus);
+				req.Width = req.Height = 200;
 		}
 	}
 }

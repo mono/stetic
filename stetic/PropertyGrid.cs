@@ -108,11 +108,11 @@ namespace Stetic {
 				ed.Update (selection, EventArgs.Empty);
 		}
 
-		public void Select (WidgetBox wbox)
+		public void Select (IWidgetSite site)
 		{
 			Clear ();
 
-			Widget w = wbox.Child;
+			Widget w = site.Contents;
 			if (w == null)
 				return;
 
@@ -168,19 +168,22 @@ namespace Stetic {
 
 	public class ChildPropertyGrid : PropertyGrid {
 
-		public new void Select (WidgetBox wbox)
+		public new void Select (IWidgetSite site)
 		{
 			Clear ();
 
-			Widget w = wbox.Child;
+			if (!(site is Widget) || (site.ParentSite == null))
+				return;
+
+			Widget w = site.Contents;
 			if (w == null)
 				return;
 
-			Container parent = wbox.Parent as Container;
+			Container parent = site.ParentSite.Contents as Container;
 			if (parent == null)
 				return;
 
-			ContainerChild cc = parent[wbox];
+			ContainerChild cc = parent[(Widget)site];
 
 			VBox group = AddGroup ("Properties");
 

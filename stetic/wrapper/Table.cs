@@ -5,7 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class Table : Gtk.Table, IWidgetSite {
+	public class Table : Gtk.Table, IDesignTimeContainer {
 
 		const AttachOptions expandOpts = AttachOptions.Expand | AttachOptions.Fill;
 		const AttachOptions fillOpts = AttachOptions.Fill;
@@ -160,7 +160,7 @@ namespace Stetic.Wrapper {
 			base.OnRemoved (w);
 		}
 
-		private void ChildOccupancyChanged (IWidgetSite isite)
+		private void ChildOccupancyChanged (IDesignTimeContainer isite)
 		{
 			WidgetSite site = (WidgetSite)isite;
 

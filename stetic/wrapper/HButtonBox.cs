@@ -5,7 +5,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class HButtonBox : Gtk.HButtonBox, IWidgetSite {
+	public class HButtonBox : Gtk.HButtonBox, IDesignTimeContainer {
 
 		public HButtonBox ()
 		{
@@ -21,7 +21,7 @@ namespace Stetic.Wrapper {
 
 		public event OccupancyChangedHandler OccupancyChanged;
 
-		private void ChildOccupancyChanged (IWidgetSite site)
+		private void ChildOccupancyChanged (IDesignTimeContainer container)
 		{
 			if (OccupancyChanged != null)
 				OccupancyChanged (this);
