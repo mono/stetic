@@ -17,10 +17,10 @@ namespace Stetic.Wrapper {
 							 "MnemonicWidget",
 							 "Justify",
 							 "Selectable");
-			RegisterItems (typeof (Stetic.Wrapper.Label),
-				       LabelProperties,
-				       Misc.MiscProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Label),
+					 LabelProperties,
+					 Misc.MiscProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Label (IStetic stetic) : this (stetic, new Gtk.Label ()) {}

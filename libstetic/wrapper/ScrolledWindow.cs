@@ -16,9 +16,9 @@ namespace Stetic.Wrapper {
 								  "ShadowType",
 								  "WindowPlacement",
 								  "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.ScrolledWindow),
-				       ScrolledWindowProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.ScrolledWindow),
+					 ScrolledWindowProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public ScrolledWindow (IStetic stetic) : this (stetic, new Gtk.ScrolledWindow ()) {}

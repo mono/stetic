@@ -18,9 +18,9 @@ namespace Stetic.Wrapper {
 			ScaleProperties["Digits"].DependsOn (ScaleProperties["DrawValue"]);
 			ScaleProperties["ValuePos"].DependsOn (ScaleProperties["DrawValue"]);
 
-			RegisterItems (typeof (Stetic.Wrapper.Scale),
-				       Scale.ScaleProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Scale),
+					 Scale.ScaleProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		protected Scale (IStetic stetic, Gtk.Scale scale) : base (stetic, scale)

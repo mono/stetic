@@ -13,9 +13,9 @@ namespace Stetic.Wrapper {
 							     "Homogeneous",
 							     "Spacing",
 							     "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.ButtonBox),
-				       ButtonBoxProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.ButtonBox),
+					 ButtonBoxProperties,
+					 Widget.CommonWidgetProperties);
 
 			ButtonBoxChildProperties = new ItemGroup ("Button Box Child Layout",
 								  typeof (Gtk.ButtonBox.ButtonBoxChild),

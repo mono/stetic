@@ -22,10 +22,10 @@ namespace Stetic.Wrapper {
 							       "Active",
 							       "Inconsistent",
 							       "DrawIndicator");
-			RegisterItems (typeof (Stetic.Wrapper.RadioButton),
-				       RadioButtonProperties,
-				       Button.ButtonExtraProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.RadioButton),
+					 RadioButtonProperties,
+					 Button.ButtonExtraProperties,
+					 Widget.CommonWidgetProperties);
 
 			GroupList = new ArrayList ();
 			GroupLeaders = new ArrayList ();

@@ -17,9 +17,9 @@ namespace Stetic.Wrapper {
 							    "UseUnderline",
 							    "Spacing",
 							    "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.Expander),
-				       ExpanderProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Expander),
+					 ExpanderProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Expander (IStetic stetic) : this (stetic, new Gtk.Expander ("")) {}

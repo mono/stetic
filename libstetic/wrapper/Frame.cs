@@ -16,9 +16,9 @@ namespace Stetic.Wrapper {
 							 "LabelXalign",
 							 "LabelYalign",
 							 "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.Frame),
-				       FrameProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Frame),
+					 FrameProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Frame (IStetic stetic) : this (stetic, new Gtk.Frame ()) {}

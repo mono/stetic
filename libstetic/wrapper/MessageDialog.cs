@@ -20,11 +20,11 @@ namespace Stetic.Wrapper {
 								 "WindowPosition",
 								 "Modal",
 								 "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.MessageDialog),
-				       MessageDialogProperties,
-				       Dialog.DialogMiscProperties,
-				       Window.WindowSizeProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.MessageDialog),
+					 MessageDialogProperties,
+					 Dialog.DialogMiscProperties,
+					 Window.WindowSizeProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		Gtk.Label label, secondaryLabel;

@@ -13,10 +13,10 @@ namespace Stetic.Wrapper {
 							 typeof (Stetic.Wrapper.Image),
 							 typeof (Gtk.Image),
 							 "File");
-			RegisterItems (typeof (Stetic.Wrapper.Image),
-				       ImageProperties,
-				       Misc.MiscProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Image),
+					 ImageProperties,
+					 Misc.MiscProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Image (IStetic stetic) : this (stetic, new Gtk.Image ("")) {}

@@ -19,9 +19,9 @@ namespace Stetic.Wrapper {
 							 "RowSpacing",
 							 "ColumnSpacing",
 							 "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.Table),
-				       TableProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Table),
+					 TableProperties,
+					 Widget.CommonWidgetProperties);
 
 			TableChildProperties = new ItemGroup ("Table Child Layout",
 							      typeof (Gtk.Table.TableChild),

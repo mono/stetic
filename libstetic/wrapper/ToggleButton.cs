@@ -18,10 +18,10 @@ namespace Stetic.Wrapper {
 								"Inconsistent");
 			ToggleButtonProperties["StockId"].DependsOn (ToggleButtonProperties["UseStock"]);
 			ToggleButtonProperties["Label"].DependsInverselyOn (ToggleButtonProperties["UseStock"]);
-			RegisterItems (typeof (Stetic.Wrapper.ToggleButton),
-				       ToggleButtonProperties,
-				       Button.ButtonExtraProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.ToggleButton),
+					 ToggleButtonProperties,
+					 Button.ButtonExtraProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public ToggleButton (IStetic stetic) : this (stetic, new Gtk.ToggleButton ()) {}

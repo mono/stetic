@@ -1,5 +1,10 @@
 2005-02-17  Dan Winship  <danw@novell.com>
 
+	* libstetic/ObjectWrapper.cs (RegisterWrapper): Renamed from
+	RegisterItems.
+
+	* libstetic/wrapper/*.cs: update for that
+
 	* stetic/Stetic.cs: Put all of the windows into a single notebook.
 	Probably not the best layout, but I'm getting sick of the multiple
 	windows...

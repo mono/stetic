@@ -12,10 +12,10 @@ namespace Stetic.Wrapper {
 							 typeof (Gtk.Arrow),
 							 "ArrowType",
 							 "ShadowType");
-			RegisterItems (typeof (Stetic.Wrapper.Arrow),
-				       ArrowProperties,
-				       Misc.MiscProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Arrow),
+					 ArrowProperties,
+					 Misc.MiscProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Arrow (IStetic stetic) : this (stetic, new Gtk.Arrow (Gtk.ArrowType.Left, Gtk.ShadowType.None)) {}

@@ -19,8 +19,8 @@ namespace Stetic.Wrapper {
 								"HasFocus",
 								"Events",
 								"ExtensionEvents");
-			RegisterItems (typeof (Stetic.Wrapper.Widget),
-				       CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Widget),
+					 CommonWidgetProperties);
 		}
 
 		static Hashtable counters = new Hashtable ();

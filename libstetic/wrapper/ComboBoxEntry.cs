@@ -6,10 +6,10 @@ namespace Stetic.Wrapper {
 	public class ComboBoxEntry : Stetic.Wrapper.ComboBox {
 
 		static ComboBoxEntry () {
-			RegisterItems (typeof (Stetic.Wrapper.ComboBoxEntry),
-				       ComboBox.ComboBoxProperties,
-				       ComboBox.ComboBoxExtraProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.ComboBoxEntry),
+					 ComboBox.ComboBoxProperties,
+					 ComboBox.ComboBoxExtraProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public ComboBoxEntry (IStetic stetic) : this (stetic, Gtk.ComboBoxEntry.NewText ()) {}

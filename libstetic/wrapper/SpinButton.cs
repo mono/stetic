@@ -25,10 +25,10 @@ namespace Stetic.Wrapper {
 							      "UpdatePolicy",
 							      "Value",
 							      "Wrap");
-			RegisterItems (typeof (Stetic.Wrapper.SpinButton),
-				       SpinButtonProperties,
-				       SpinButtonAdjustmentProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.SpinButton),
+					 SpinButtonProperties,
+					 SpinButtonAdjustmentProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public SpinButton (IStetic stetic) : this (stetic, new Gtk.SpinButton (0.0, 100.0, 1.0)) {}

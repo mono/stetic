@@ -36,11 +36,11 @@ namespace Stetic.Wrapper {
 							      "Role",
 							      "SkipPagerHint",
 							      "SkipTaskbarHint");
-			RegisterItems (typeof (Stetic.Wrapper.Window),
-				       WindowProperties,
-				       WindowSizeProperties,
-				       WindowMiscProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Window),
+					 WindowProperties,
+					 WindowSizeProperties,
+					 WindowMiscProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Window (IStetic stetic) : this (stetic, new Gtk.Window (Gtk.WindowType.Toplevel)) {}

@@ -14,9 +14,9 @@ namespace Stetic.Wrapper {
 							    "AboveChild",
 							    "VisibleWindow",
 							    "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.EventBox),
-				       EventBoxProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.EventBox),
+					 EventBoxProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public EventBox (IStetic stetic) : this (stetic, new Gtk.EventBox ()) {}

@@ -42,10 +42,10 @@ namespace Stetic.Wrapper {
 							       "Xalign",
 							       "Yalign");
 
-			RegisterItems (typeof (Stetic.Wrapper.Button),
-				       ButtonProperties,
-				       ButtonExtraProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Button),
+					 ButtonProperties,
+					 ButtonExtraProperties,
+					 Widget.CommonWidgetProperties);
 
 			ItemGroup contextMenu = new ItemGroup (null,
 							       typeof (Stetic.Wrapper.Button),

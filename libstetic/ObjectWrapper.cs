@@ -39,7 +39,7 @@ namespace Stetic {
 		static Hashtable groups = new Hashtable ();
 		static Hashtable contextMenus = new Hashtable ();
 
-		protected static void RegisterItems (Type t, params ItemGroup[] items)
+		protected static void RegisterWrapper (Type t, params ItemGroup[] items)
 		{
 			groups[t] = items;
 		}

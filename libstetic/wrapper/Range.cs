@@ -20,10 +20,10 @@ namespace Stetic.Wrapper {
 								   "Adjustment.StepIncrement",
 								   "Adjustment.Value");
 
-			RegisterItems (typeof (Stetic.Wrapper.Range),
-				       Range.RangeAdjustmentProperties,
-				       Range.RangeProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Range),
+					 Range.RangeAdjustmentProperties,
+					 Range.RangeProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		protected Range (IStetic stetic, Gtk.Range range) : base (stetic, range)

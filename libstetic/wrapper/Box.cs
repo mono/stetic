@@ -13,9 +13,9 @@ namespace Stetic.Wrapper {
 						       "Homogeneous",
 						       "Spacing",
 						       "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.Box),
-				       BoxProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Box),
+					 BoxProperties,
+					 Widget.CommonWidgetProperties);
 
 			BoxChildProperties = new ItemGroup ("Box Child Layout",
 							    typeof (Gtk.Box.BoxChild),

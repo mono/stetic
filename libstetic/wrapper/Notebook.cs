@@ -25,9 +25,9 @@ namespace Stetic.Wrapper {
 							    "BorderWidth",
 							    "InsertBefore",
 							    "InsertAfter");
-			RegisterItems (typeof (Stetic.Wrapper.Notebook),
-				       NotebookProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Notebook),
+					 NotebookProperties,
+					 Widget.CommonWidgetProperties);
 
 			NotebookChildProperties = new ItemGroup ("Notebook Child Layout",
 								 typeof (Gtk.Notebook.NotebookChild),

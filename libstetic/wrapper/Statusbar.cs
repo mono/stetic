@@ -11,9 +11,9 @@ namespace Stetic.Wrapper {
 			StatusbarProperties = new ItemGroup ("Status Bar Properties",
 							     typeof (Gtk.Statusbar),
 							     "HasResizeGrip");
-			RegisterItems (typeof (Stetic.Wrapper.Statusbar),
-				       StatusbarProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Statusbar),
+					 StatusbarProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Statusbar (IStetic stetic) : this (stetic, new Gtk.Statusbar ()) {}

@@ -19,10 +19,10 @@ namespace Stetic.Wrapper {
 								 "WrapWidth",
 								 "ColumnSpanColumn",
 								 "RowSpanColumn");
-			RegisterItems (typeof (Stetic.Wrapper.ComboBox),
-				       ComboBoxProperties,
-				       ComboBoxExtraProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.ComboBox),
+					 ComboBoxProperties,
+					 ComboBoxExtraProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public ComboBox (IStetic stetic) : this (stetic, Gtk.ComboBox.NewText ()) {}

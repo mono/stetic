@@ -14,10 +14,10 @@ namespace Stetic.Wrapper {
 							       "Active",
 							       "Inconsistent",
 							       "DrawIndicator");
-			RegisterItems (typeof (Stetic.Wrapper.CheckButton),
-				       CheckButtonProperties,
-				       Button.ButtonExtraProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.CheckButton),
+					 CheckButtonProperties,
+					 Button.ButtonExtraProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public CheckButton (IStetic stetic) : this (stetic, new Gtk.CheckButton ()) {}

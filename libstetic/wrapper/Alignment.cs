@@ -19,9 +19,9 @@ namespace Stetic.Wrapper {
 							     "RightPadding",
 							     "BottomPadding",
 							     "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.Alignment),
-				       AlignmentProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Alignment),
+					 AlignmentProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Alignment (IStetic stetic) : this (stetic, new Gtk.Alignment (0.5f, 0.5f, 1.0f, 1.0f)) {}

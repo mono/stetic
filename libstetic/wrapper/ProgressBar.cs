@@ -13,9 +13,9 @@ namespace Stetic.Wrapper {
 							       "Orientation",
 							       "Text",
 							       "PulseStep");
-			RegisterItems (typeof (Stetic.Wrapper.ProgressBar),
-				       ProgressBarProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.ProgressBar),
+					 ProgressBarProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public ProgressBar (IStetic stetic) : this (stetic, new Gtk.ProgressBar ()) {}

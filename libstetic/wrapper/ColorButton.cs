@@ -14,9 +14,9 @@ namespace Stetic.Wrapper {
 							       "Title",
 							       "Color",
 							       "Alpha");
-			RegisterItems (typeof (Stetic.Wrapper.ColorButton),
-				       ColorButtonProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.ColorButton),
+					 ColorButtonProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public ColorButton (IStetic stetic) : this (stetic, new Gtk.ColorButton ()) {}

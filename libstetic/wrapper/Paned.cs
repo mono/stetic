@@ -12,9 +12,9 @@ namespace Stetic.Wrapper {
 							 "MinPosition",
 							 "MaxPosition",
 							 "BorderWidth");
-			RegisterItems (typeof (Stetic.Wrapper.Paned),
-				       PanedProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Paned),
+					 PanedProperties,
+					 Widget.CommonWidgetProperties);
 
 			PanedChildProperties = new ItemGroup ("Pane Child Layout",
 							      typeof (Gtk.Paned.PanedChild),

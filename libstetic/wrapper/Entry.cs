@@ -23,10 +23,10 @@ namespace Stetic.Wrapper {
 							      "InvisibleChar",
 							      "Xalign");
 
-			RegisterItems (typeof (Stetic.Wrapper.Entry),
-				       EntryProperties,
-				       EntryExtraProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Entry),
+					 EntryProperties,
+					 EntryExtraProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Entry (IStetic stetic) : this (stetic, new Gtk.Entry ()) {}

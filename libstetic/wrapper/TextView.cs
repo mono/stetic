@@ -26,9 +26,9 @@ namespace Stetic.Wrapper {
 							    "RightMargin",
 							    "LeftMargin",
 							    "Indent");
-			RegisterItems (typeof (Stetic.Wrapper.TextView),
-				       TextViewProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.TextView),
+					 TextViewProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public TextView (IStetic stetic) : this (stetic, new Gtk.TextView ()) {}

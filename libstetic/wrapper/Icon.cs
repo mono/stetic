@@ -14,10 +14,10 @@ namespace Stetic.Wrapper {
 							typeof (Gtk.Image),
 							"Stock",
 							"IconSize");
-			RegisterItems (typeof (Stetic.Wrapper.Icon),
-				       IconProperties,
-				       Misc.MiscProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Icon),
+					 IconProperties,
+					 Misc.MiscProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Icon (IStetic stetic) : this (stetic, new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog)) {}

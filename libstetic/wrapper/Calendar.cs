@@ -14,9 +14,9 @@ namespace Stetic.Wrapper {
 							    "ShowDayNames",
 							    "ShowWeekNumbers",
 							    "NoMonthChange");
-			RegisterItems (typeof (Stetic.Wrapper.Calendar),
-				       CalendarProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Calendar),
+					 CalendarProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Calendar (IStetic stetic) : this (stetic, new Gtk.Calendar ()) {}

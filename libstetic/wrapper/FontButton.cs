@@ -19,9 +19,9 @@ namespace Stetic.Wrapper {
 							      "UseSize");
 			FontButtonProperties["UseSize"].DependsOn (FontButtonProperties["UseFont"]);
 
-			RegisterItems (typeof (Stetic.Wrapper.FontButton),
-				       FontButtonProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.FontButton),
+					 FontButtonProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public FontButton (IStetic stetic) : this (stetic, new Gtk.FontButton ()) {}

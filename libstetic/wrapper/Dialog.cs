@@ -26,11 +26,11 @@ namespace Stetic.Wrapper {
 							      "Role",
 							      "SkipPagerHint",
 							      "SkipTaskbarHint");
-			RegisterItems (typeof (Stetic.Wrapper.Dialog),
-				       DialogProperties,
-				       DialogMiscProperties,
-				       Window.WindowSizeProperties,
-				       Widget.CommonWidgetProperties);
+			RegisterWrapper (typeof (Stetic.Wrapper.Dialog),
+					 DialogProperties,
+					 DialogMiscProperties,
+					 Window.WindowSizeProperties,
+					 Widget.CommonWidgetProperties);
 		}
 
 		public Dialog (IStetic stetic) : this (stetic, new Gtk.Dialog ()) {}
