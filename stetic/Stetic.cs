@@ -9,6 +9,10 @@ namespace Stetic {
 
 		static Gnome.Program program;
 
+		static Stetic.Project Project;
+		static Stetic.ProjectView ProjectView;
+		static Stetic.PropertyGrid Properties;
+
 		public static int Main (string[] args) {
 			Gtk.Window win;
 			Gtk.Box vbox, hbox;
@@ -58,7 +62,7 @@ namespace Stetic {
 
 			scwin = new Gtk.ScrolledWindow ();
 			scwin.SetPolicy (Gtk.PolicyType.Never, Gtk.PolicyType.Automatic);
-			Properties = new Stetic.PropertyGrid ();
+			Properties = new Stetic.PropertyGrid (Project);
 			Properties.Show ();
 			scwin.AddWithViewport (Properties);
 			Gtk.Viewport vp = (Gtk.Viewport)scwin.Child;
@@ -101,21 +105,5 @@ namespace Stetic {
 			program.Quit ();
 			args.RetVal = true;
 		}
-
-		public static Stetic.Project Project;
-		static Stetic.ProjectView ProjectView;
-
-		static Stetic.PropertyGrid Properties;
-
-		public static void NoSelection ()
-		{
-			Properties.NoSelection ();
-		}
-
-		public static void Select (IWidgetSite site)
-		{
-			Properties.Select (site);
-		}
-
 	}
 }

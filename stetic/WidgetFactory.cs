@@ -51,16 +51,9 @@ namespace Stetic {
 			Gtk.Window win = wrapper.Wrapped as Gtk.Window;
 			win.Present ();
 
-			SteticMain.Project.AddWindow (win);
-
 			WindowSite site = new WindowSite (win);
-			SteticMain.Select (site);
-			site.FocusChanged += delegate (WindowSite site, IWidgetSite focus) {
-				if (focus == null)
-					SteticMain.NoSelection ();
-				else
-					SteticMain.Select (focus);
-			};
+			project.AddWindow (site, true);
+
 			return true;
 		}
 

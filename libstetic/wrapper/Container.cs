@@ -167,6 +167,7 @@ namespace Stetic.Wrapper {
 		{
 			WidgetSite site = base.CreateWidgetSite ();
 			site.OccupancyChanged += SiteOccupancyChanged;
+			site.ShapeChanged += SiteShapeChanged;
 			AutoSize[site] = true;
 			return site;
 		}
@@ -177,16 +178,24 @@ namespace Stetic.Wrapper {
 			EmitContentsChanged ();
 		}
 
+		protected virtual void SiteShapeChanged (WidgetSite site) {
+			;
+		}
+
 		void SiteRemoved (object obj, Gtk.RemovedArgs args)
 		{
 			WidgetSite site = args.Widget as WidgetSite;
-			if (site != null)
+			if (site != null) {
 				site.OccupancyChanged -= SiteOccupancyChanged;
+				site.ShapeChanged -= SiteShapeChanged;
+				SiteRemoved (site);
+			}
 		}
 
 		protected virtual void SiteRemoved (WidgetSite site)
 		{
 			AutoSize[site] = false;
+			EmitContentsChanged ();
 		}
 
 		class SiteEnumerator {

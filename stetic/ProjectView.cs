@@ -23,7 +23,8 @@ namespace Stetic {
 			AppendColumn (col);
 
 			NodeSelection.Mode = SelectionMode.Single;
-			NodeSelection.Changed += Selection_Changed;
+			NodeSelection.Changed += RowSelected;
+			project.Selected += WidgetSelected;
 		}
 
 		IWidgetSite SelectedSite {
@@ -46,12 +47,29 @@ namespace Stetic {
 			}
 		}
 
-		void Selection_Changed (object obj, EventArgs args)
-		{
-			IWidgetSite selection = SelectedSite;
+		bool syncing = false;
 
-			if (selection != null)
-				selection.Select ();
+		void RowSelected (object obj, EventArgs args)
+		{
+			if (!syncing) {
+				syncing = true;
+				IWidgetSite selection = SelectedSite;
+				if (selection != null)
+					selection.Select ();
+				syncing = false;
+			}
+		}
+
+		void WidgetSelected (IWidgetSite site, ProjectNode node)
+		{
+			if (!syncing) {
+				syncing = true;
+				if (node != null)
+					NodeSelection.SelectNode (node);
+				else
+					NodeSelection.UnselectAll ();
+				syncing = false;
+			}
 		}
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)

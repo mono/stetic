@@ -1,3 +1,54 @@
+2005-03-14  Dan Winship  <danw@novell.com>
+
+	* libstetic/WidgetSite.cs: Make OccupancyChanged mean only
+	"Occupancy changed", and add a new ShapeChanged event for when
+	something else happens that may affect AutoSizing in its parent.
+	(ToString): override this for debug purposes
+
+	* libstetic/wrapper/Container.cs (CreateWidgetSite, SiteRemoved):
+	connect to/disconnect from ShapeChanged
+	(SiteShapeChanged): new virtual method
+	(SiteRemoved): call EmitContentsChanged()
+
+	* libstetic/wrapper/Box.cs (InsertBefore, InsertAfter, DropOn):
+	call EmitContentsChanged()
+	(SiteShapeChanged): connect to this, not OccupancyChanged
+
+	* libstetic/wrapper/Expander.cs: don't EmitContentsChanged when
+	toggling the expander, make HExpandable/VExpandable not depend on
+	whether or not the expander is expanded.
+
+	* libstetic/wrapper/Table.cs (Sync): EmitContentsChanged() iff we
+	added sites.
+	(SiteShapeChanged): connect to this, not OccupancyChanged
+
+	* stetic/Project.cs (AddWindow): take a WindowSite rather than a
+	Window, and connect to its FocusChanged event
+	(AddWidget): connect to the widget's Destroyed event
+	(WidgetDestroyed): remove the widget from the tree
+	(ContentsChanged): simplify using new gtk# api
+	(Selected): new event, emitted from the WindowSite.FocusChanged
+	handler
+
+	* stetic/ProjectView.cs (ProjectView): connect to the project's
+	"Selected" event.
+	(RowSelected): if not already syncing, grab the selection on the
+	widget corresponding to the row.
+	(WidgetSelected): if not already syncing, move the table selection
+	to the selected widget.
+
+	* stetic/Stetic.cs: pass Project to the PropertyGrid.
+	(Select, NoSelection): gone; the PropertyGrid snoops the Project
+	directly now.
+
+	* stetic/Glade.cs (Import):
+	* stetic/WidgetFactory.cs (WindowFactory): remove focus-handling
+	code; Project.AddWindow will deal with it now
+
+	* stetic/PropertyGrid.cs (PropertyGrid): take a Project and
+	connect to its Selected event and set the selection directly from
+	that.
+
 2005-03-11  Dan Winship  <danw@novell.com>
 
 	First draft of Glade export.

@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace Stetic {
 
-	public delegate void OccupancyChangedHandler (WidgetSite site);
+	public delegate void ChangedHandler (WidgetSite site);
 
 	public class WidgetSite : WidgetBox, IWidgetSite {
 
@@ -40,10 +40,12 @@ namespace Stetic {
 			}
 		}
 
+		public event ChangedHandler ShapeChanged;
+
 		private void ChildContentsChanged (Stetic.Wrapper.Container container)
 		{
-			if (OccupancyChanged != null)
-				OccupancyChanged (this);
+			if (ShapeChanged != null)
+				ShapeChanged (this);
 		}
 
 		protected override void OnAdded (Widget child)
@@ -100,8 +102,7 @@ namespace Stetic {
 				case SiteOccupancy.Empty:
 					SetSizeRequest (emptySize.Width, emptySize.Height);
 					DND.DestSet (this, true);
-					if (OccupancyChanged != null)
-						OccupancyChanged (this);
+					EmitOccupancyChanged ();
 					break;
 
 				case SiteOccupancy.Occupied:
@@ -110,8 +111,7 @@ namespace Stetic {
 						DND.DestSet (this, false);
 					else
 						DND.DestUnset (this);
-					if (OccupancyChanged != null)
-						OccupancyChanged (this);
+					EmitOccupancyChanged ();
 					break;
 
 				case SiteOccupancy.PseudoOccupied:
@@ -123,7 +123,15 @@ namespace Stetic {
 			}
 		}
 
-		public event OccupancyChangedHandler OccupancyChanged;
+		public event ChangedHandler OccupancyChanged;
+
+		void EmitOccupancyChanged ()
+		{
+			if (OccupancyChanged != null)
+				OccupancyChanged (this);
+			if (ShapeChanged != null)
+				ShapeChanged (this);
+		}
 
 		public bool Occupied {
 			get { return (Occupancy != SiteOccupancy.Empty); }
@@ -399,11 +407,19 @@ namespace Stetic {
 		public void Delete ()
 		{
 			if (Child != null) {
-				Remove (Child);
-				if (OccupancyChanged != null)
-					OccupancyChanged (this);
+				Child.Destroy ();
+				EmitOccupancyChanged ();
 			}
 		}
 
+		public override string ToString ()
+		{
+			if (Child == null)
+				return "[Empty WidgetSite " + GetHashCode().ToString() + "]";
+			else if (Child.Name == null)
+				return "[WidgetSite " + GetHashCode().ToString() + ": " + Child.ToString() + " " + Child.GetHashCode().ToString() + "]";
+			else
+				return "[WidgetSite " + GetHashCode().ToString() + ": " + Child.ToString() + " '" + Child.Name + "' " + Child.GetHashCode().ToString() + "]";
+		}
 	}
 }

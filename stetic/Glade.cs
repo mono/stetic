@@ -35,14 +35,8 @@ namespace Stetic {
 				Widget w = ImportWidget (project, null, null, toplevel);
 				if (w == null)
 					continue;
-				project.AddWindow (w);
 				WindowSite site = new WindowSite ((Gtk.Window)w);
-				site.FocusChanged += delegate (WindowSite site, IWidgetSite focus) {
-					if (focus == null)
-						SteticMain.NoSelection ();
-					else
-						SteticMain.Select (focus);
-				};
+				project.AddWindow (site);
 			}
 			project.EndGladeImport ();
 		}

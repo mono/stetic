@@ -13,12 +13,13 @@ namespace Stetic {
 
 		ObjectWrapper selection, packingSelection;
 
-		public PropertyGrid ()
+		public PropertyGrid (Project project)
 		{
-			NoSelection ();
+			project.Selected += Selected;
+			Selected (null, null);
 		}
 
-		protected new void Clear ()
+		new void Clear ()
 		{
 			base.Clear ();
 			if (selection != null) {
@@ -29,7 +30,7 @@ namespace Stetic {
 			sensitives = new Hashtable ();
 		}
 
-		protected void AppendProperty (PropertyDescriptor prop, ObjectWrapper wrapper)
+		void AppendProperty (PropertyDescriptor prop, ObjectWrapper wrapper)
 		{
 			PropertyEditor rep = PropertyEditor.MakeEditor (prop, wrapper);
 			editors[prop.Name] = rep;
@@ -58,7 +59,7 @@ namespace Stetic {
 			}
 		}
 
-		protected void AppendCommand (CommandDescriptor cmd, ObjectWrapper wrapper)
+		void AppendCommand (CommandDescriptor cmd, ObjectWrapper wrapper)
 		{
 			Gtk.Button button = new Gtk.Button (cmd.Label);
 			button.Clicked += new Stupid69614Workaround (cmd, wrapper).Activate;
@@ -79,7 +80,7 @@ namespace Stetic {
 			UpdateSensitivity ();
 		}
 
-		protected void UpdateSensitivity ()
+		void UpdateSensitivity ()
 		{
 			foreach (ItemDescriptor item in sensitives.Keys) {
 				Widget w = editors[item.Name] as Widget;
@@ -88,9 +89,14 @@ namespace Stetic {
 			}
 		}
 
-		public void Select (IWidgetSite site)
+		void Selected (IWidgetSite site, ProjectNode node)
 		{
 			Clear ();
+
+			if (site == null) {
+				AppendLabel ("<i>No selection</i>");
+				return;
+			}
 
 			selection = Stetic.ObjectWrapper.Lookup (site.Contents);
 			if (selection == null)
@@ -110,8 +116,7 @@ namespace Stetic {
 			UpdateSensitivity ();
 		}
 
-		void
-		AppendWrapperGroups (ObjectWrapper wrapper)
+		void AppendWrapperGroups (ObjectWrapper wrapper)
 		{
 			bool first = true;
 			foreach (ItemGroup igroup in wrapper.ItemGroups) {
@@ -124,12 +129,6 @@ namespace Stetic {
 				}
 				first = false;
 			}
-		}
-
-		public void NoSelection ()
-		{
-			Clear ();
-			AppendLabel ("<i>No selection</i>");
 		}
 	}
 }

@@ -89,6 +89,7 @@ namespace Stetic.Wrapper {
 			WidgetSite[,] grid;
 			Gtk.Table.TableChild tc;
 			Gtk.Widget[] children;
+			bool addedSites = false;
 
 			if (freeze > 0)
 				return;
@@ -164,6 +165,7 @@ namespace Stetic.Wrapper {
 						site.FreezeChildNotify ();
 						table.Attach (site, col, col + 1, row, row + 1);
 						grid[row,col] = site;
+						addedSites = true;
 					} else if (!site.VExpandable || !AutoSize[site])
 						allPlaceholders = false;
 				}
@@ -210,7 +212,8 @@ namespace Stetic.Wrapper {
 				child.ThawChildNotify ();
 			freeze = 0;
 
-			EmitContentsChanged ();
+			if (addedSites)
+				EmitContentsChanged ();
 		}
 
 		public uint NRows {
@@ -365,7 +368,7 @@ namespace Stetic.Wrapper {
 		public override bool HExpandable { get { return hexpandable; } }
 		public override bool VExpandable { get { return vexpandable; } }
 
-		protected override void SiteOccupancyChanged (WidgetSite site)
+		protected override void SiteShapeChanged (WidgetSite site)
 		{
 			Freeze ();
 			if (site.Occupied && AutoSize[site]) {
@@ -374,7 +377,7 @@ namespace Stetic.Wrapper {
 				tc.YOptions = 0;
 			}
 			Thaw ();
-			base.SiteOccupancyChanged (site);
+			base.SiteShapeChanged (site);
 		}
 
 #if NOT

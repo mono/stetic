@@ -27,13 +27,8 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-
 			if (!initialized)
 				expander.Label = expander.Name;
-
-			expander.Activated += delegate (object obj, EventArgs args) {
-				EmitContentsChanged ();
-			};
 		}
 
 		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
@@ -57,12 +52,12 @@ namespace Stetic.Wrapper {
 
 		public override bool HExpandable {
 			get {
-				return expander.Expanded && site.HExpandable;
+				return site.HExpandable;
 			}
 		}
 		public override bool VExpandable {
 			get {
-				return expander.Expanded && site.VExpandable;
+				return site.VExpandable;
 			}
 		}
 	}

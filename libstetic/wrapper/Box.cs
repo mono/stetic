@@ -98,6 +98,7 @@ namespace Stetic.Wrapper {
 				box.PackEnd (site);
 				box.ReorderChild (site, bc.Position + 1);
 			}
+			EmitContentsChanged ();
 		}
 
 		[Command ("Insert After", "Insert an empty row/column after the selected one")]
@@ -112,14 +113,15 @@ namespace Stetic.Wrapper {
 				box.PackEnd (site);
 				box.ReorderChild (site, bc.Position);
 			}
+			EmitContentsChanged ();
 		}
 
-		protected override void SiteOccupancyChanged (WidgetSite site) {
+		protected override void SiteShapeChanged (WidgetSite site) {
 			if (AutoSize[site]) {
 				Gtk.Box.BoxChild bc = ((Gtk.Box)Wrapped)[site] as Gtk.Box.BoxChild;
 				bc.Expand = bc.Fill = (this is HBox) ? site.HExpandable : site.VExpandable;
 			}
-			base.SiteOccupancyChanged (site);
+			base.SiteShapeChanged (site);
 		}
 
 		void box_ParentSet (object obj, Gtk.ParentSetArgs args)
@@ -142,6 +144,7 @@ namespace Stetic.Wrapper {
 			box.PackStart (site);
 			site.Add (w);
 			box.ReorderChild (site, (int)faultId);
+			EmitContentsChanged ();
 
 			Sync ();
 		}
