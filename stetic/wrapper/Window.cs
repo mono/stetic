@@ -25,11 +25,11 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override void OnSetFocus (Widget focus)
+		protected override void OnSetFocus (Gtk.Widget focus)
 		{
 			WidgetSite oldf = Focus as WidgetSite;
 
-			Widget site = focus;
+			Gtk.Widget site = focus;
 			while (site != null && !(site is WidgetSite))
 				site = site.Parent;
 			WidgetSite newf = (WidgetSite)site;

@@ -7,162 +7,162 @@ namespace Stetic.Wrapper {
 
 	static class DefaultWidgets {
 		[WidgetFactory ("Button", "button.png")]
-		static Widget newButton () {
-			return new Gtk.Button (Gtk.Stock.Ok);
+		static Gtk.Widget newButton () {
+			return new Stetic.Wrapper.Button ();
 		}
 
 		[WidgetFactory ("Entry", "entry.png")]
-		static Widget newEntry ()
+		static Gtk.Widget newEntry ()
 		{
-			return new Gtk.Entry ();
+			return new Stetic.Wrapper.Entry ();
 		}
 
 		[WidgetFactory ("Check Box", "checkbutton.png")]
-		static Widget newCheckButton ()
+		static Gtk.Widget newCheckButton ()
 		{
-			return new Gtk.CheckButton ("Do something");
+			return new Stetic.Wrapper.CheckButton ();
 		}
 
 		[WidgetFactory ("Radio Button", "radiobutton.png")]
-		static Widget newRadioButton ()
+		static Gtk.Widget newRadioButton ()
 		{
-			return new Gtk.RadioButton ("Do something");
+			return new Stetic.Wrapper.RadioButton ();
 		}
 
 		[WidgetFactory ("Spin Button", "spinbutton.png")]
-		static Widget newSpinButton ()
+		static Gtk.Widget newSpinButton ()
 		{
 			return new Gtk.SpinButton (null, 1.0, 2);
 		}
 
 		[WidgetFactory ("Label", "label.png")]
-		static Widget newLabel ()
+		static Gtk.Widget newLabel ()
 		{
-			return new Gtk.Label ("Label:");
+			return new Stetic.Wrapper.Label ();
 		}
 
 		[WidgetFactory ("HSeparator", "hseparator.png")]
-		static Widget newHSeparator ()
+		static Gtk.Widget newHSeparator ()
 		{
-			return new Gtk.HSeparator ();
+			return new Stetic.Wrapper.HSeparator ();
 		}
 
 		[WidgetFactory ("VSeparator", "vseparator.png")]
-		static Widget newVSeparator ()
+		static Gtk.Widget newVSeparator ()
 		{
-			return new Gtk.VSeparator ();
+			return new Stetic.Wrapper.VSeparator ();
 		}
 
 		[WidgetFactory ("Arrow", "arrow.png")]
-		static Widget newArrow ()
+		static Gtk.Widget newArrow ()
 		{
-			return new Gtk.Arrow (ArrowType.Left, ShadowType.None);
+			return new Stetic.Wrapper.Arrow ();
 		}
 
 		[WidgetFactory ("Combo Box", "combo.png")]
-		static Widget newComboBox ()
+		static Gtk.Widget newComboBox ()
 		{
-			return new Gtk.ComboBox ();
+			return new Stetic.Wrapper.ComboBox ();
 		}
 
 		[WidgetFactory ("Drawing Area", "drawingarea.png")]
-		static Widget newDrawingArea ()
+		static Gtk.Widget newDrawingArea ()
 		{
-			return new Gtk.DrawingArea ();
+			return new Stetic.Wrapper.DrawingArea ();
 		}
 
 		[WidgetFactory ("Horizontal Scrollbar", "hscrollbar.png")]
-		static Widget newHScrollbar ()
+		static Gtk.Widget newHScrollbar ()
 		{
-			return new Gtk.HScrollbar (new Gtk.Adjustment (0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
+			return new Stetic.Wrapper.HScrollbar ();
 		}
 
 		[WidgetFactory ("Vertical Scrollbar", "vscrollbar.png")]
-		static Widget newVScrollbar ()
+		static Gtk.Widget newVScrollbar ()
 		{
-			return new Gtk.VScrollbar (new Gtk.Adjustment (0.0, 0.0, 100.0, 1.0, 10.0, 10.0));
+			return new Stetic.Wrapper.VScrollbar ();
 		}
 
 		[WidgetFactory ("Image", "image.png")]
-		static Widget newImage ()
+		static Gtk.Widget newImage ()
 		{
 			return new Gtk.Image ();
 		}
 
 		[WidgetFactory ("Text View", "textview.png")]
-		static Widget newTextView ()
+		static Gtk.Widget newTextView ()
 		{
 			return new Gtk.TextView ();
 		}
 
 		[WidgetFactory ("ToggleButton", "togglebutton.png")]
-		static Widget newToggleButton ()
+		static Gtk.Widget newToggleButton ()
 		{
 			return new Gtk.ToggleButton ("Toggle");
 		}
 
 		[WidgetFactory ("Window", "window.png", WidgetType.Window)]
-		static Widget newWindow ()
+		static Gtk.Widget newWindow ()
 		{
 			return new Stetic.Wrapper.Window ("Window");
 		}
 
 		[WidgetFactory ("Dialog Box", "dialog.png", WidgetType.Window)]
-		static Widget newDialog ()
+		static Gtk.Widget newDialog ()
 		{
 			return new Gtk.Dialog ();
 		}
 
 		[WidgetFactory ("Frame", "frame.png", WidgetType.Container)]
-		static Widget newFrame ()
+		static Gtk.Widget newFrame ()
 		{
 			return new Stetic.Wrapper.Frame ("Frame");
 		}
 
 		[WidgetFactory ("HBox", "hbox.png", WidgetType.Container)]
-		static Widget newHBox ()
+		static Gtk.Widget newHBox ()
 		{
 			return new Stetic.Wrapper.HBox (false, 0);
 		}
 
 		[WidgetFactory ("VBox", "vbox.png", WidgetType.Container)]
-		static Widget newVBox ()
+		static Gtk.Widget newVBox ()
 		{
 			return new Stetic.Wrapper.VBox (false, 0);
 		}
 
 		[WidgetFactory ("HButtonBox", "hbuttonbox.png", WidgetType.Container)]
-		static Widget newHButtonBox ()
+		static Gtk.Widget newHButtonBox ()
 		{
 			return new Stetic.Wrapper.HButtonBox ();
 		}
 
 		[WidgetFactory ("VButtonBox", "vbuttonbox.png", WidgetType.Container)]
-		static Widget newVButtonBox ()
+		static Gtk.Widget newVButtonBox ()
 		{
 			return new Stetic.Wrapper.VButtonBox ();
 		}
 
 		[WidgetFactory ("HPaned", "hpaned.png", WidgetType.Container)]
-		static Widget newHPaned ()
+		static Gtk.Widget newHPaned ()
 		{
 			return new Stetic.Wrapper.HPaned ();
 		}
 		[WidgetFactory ("VPaned", "vpaned.png", WidgetType.Container)]
-		static Widget newVPaned ()
+		static Gtk.Widget newVPaned ()
 		{
 			return new Stetic.Wrapper.VPaned ();
 		}
 #if NO
 		[WidgetFactory ("Notebook", "notebook.png", WidgetType.Container)]
-		static Widget newNotebook ()
+		static Gtk.Widget newNotebook ()
 		{
 			return new Stetic.Wrapper.Notebook ();
 		}
 #endif
 
 		[WidgetFactory ("Table", "table.png", WidgetType.Container)]
-		static Widget newTable ()
+		static Gtk.Widget newTable ()
 		{
 			return new Stetic.Wrapper.Table (3, 3, false);
 		}

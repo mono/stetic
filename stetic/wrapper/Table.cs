@@ -23,7 +23,7 @@ namespace Stetic.Wrapper {
 			WidgetSite site;
 			WidgetSite[,] grid;
 			Table.TableChild tc;
-			Widget[] children;
+			Gtk.Widget[] children;
 
 			if (syncing)
 				return;
@@ -36,7 +36,7 @@ namespace Stetic.Wrapper {
 			// First fill in the placeholders in the grid. If we find any
 			// placeholders covering more than one grid square, remove them.
 			// (New ones will be created below.)
-                        foreach (Widget child in children) {
+                        foreach (Gtk.Widget child in children) {
 				site = (WidgetSite) child;
 				if (site.Occupied)
 					continue;
@@ -55,7 +55,7 @@ namespace Stetic.Wrapper {
 
 			// Now fill in the real widgets, knocking out any placeholders
 			// they overlap.
-                        foreach (Widget child in children) {
+                        foreach (Gtk.Widget child in children) {
 				site = (WidgetSite) child;
 				if (!site.Occupied)
 					continue;
@@ -147,7 +147,7 @@ namespace Stetic.Wrapper {
 
 		public event OccupancyChangedHandler OccupancyChanged;
 
-		protected override void OnRemoved (Widget w)
+		protected override void OnRemoved (Gtk.Widget w)
 		{
 			WidgetSite site = w as WidgetSite;
 
@@ -248,7 +248,7 @@ namespace Stetic.Wrapper {
 		private void AddColumn (uint col)
 		{
 			Resize (NRows, NColumns + 1);
-			foreach (Widget w in Children) {
+			foreach (Gtk.Widget w in Children) {
 				Table.TableChild tc = this[w] as Table.TableChild;
 
 				if (tc.RightAttach > col)
@@ -262,7 +262,7 @@ namespace Stetic.Wrapper {
 		private void AddRow (uint row)
 		{
 			Resize (NRows + 1, NColumns);
-			foreach (Widget w in Children) {
+			foreach (Gtk.Widget w in Children) {
 				Table.TableChild tc = this[w] as Table.TableChild;
 
 				if (tc.BottomAttach > row)

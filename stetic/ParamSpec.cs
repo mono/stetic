@@ -102,6 +102,24 @@ namespace Stetic {
 			}
 		}
 
+		public virtual object Minimum {
+			get {
+				return null;
+			}
+		}
+
+		public virtual object Maximum {
+			get {
+				return null;
+			}
+		}
+
+		public virtual object Default {
+			get {
+				return null;
+			}
+		}
+
 		[DllImport("libsteticglue")]
 		static extern ParamFlags stetic_param_spec_get_flags (IntPtr obj);
 
@@ -206,7 +224,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern sbyte stetic_param_spec_char_get_minimum (IntPtr obj);
 
-		public sbyte Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_char_get_minimum (Raw);
 			}
@@ -215,7 +233,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern sbyte stetic_param_spec_char_get_maximum (IntPtr obj);
 
-		public sbyte Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_char_get_maximum (Raw);
 			}
@@ -224,7 +242,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern sbyte stetic_param_spec_char_get_default (IntPtr obj);
 
-		public sbyte Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_char_get_default (Raw);
 			}
@@ -237,7 +255,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern byte stetic_param_spec_uchar_get_minimum (IntPtr obj);
 
-		public byte Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_uchar_get_minimum (Raw);
 			}
@@ -246,7 +264,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern byte stetic_param_spec_uchar_get_maximum (IntPtr obj);
 
-		public byte Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_uchar_get_maximum (Raw);
 			}
@@ -255,7 +273,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern byte stetic_param_spec_uchar_get_default (IntPtr obj);
 
-		public byte Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_uchar_get_default (Raw);
 			}
@@ -266,11 +284,11 @@ namespace Stetic {
 		public ParamSpecBoolean (IntPtr raw) : base (raw) {}
 
 		[DllImport("libsteticglue")]
-		static extern bool stetic_param_spec_bool_get_default (IntPtr obj);
+		static extern bool stetic_param_spec_boolean_get_default (IntPtr obj);
 
-		public bool Default {
+		public override object Default {
 			get {
-				return stetic_param_spec_bool_get_default (Raw);
+				return stetic_param_spec_boolean_get_default (Raw);
 			}
 		}
 	}
@@ -281,7 +299,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_int_get_minimum (IntPtr obj);
 
-		public int Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_int_get_minimum (Raw);
 			}
@@ -290,7 +308,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_int_get_maximum (IntPtr obj);
 
-		public int Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_int_get_maximum (Raw);
 			}
@@ -299,7 +317,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_int_get_default (IntPtr obj);
 
-		public int Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_int_get_default (Raw);
 			}
@@ -312,7 +330,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern uint stetic_param_spec_uint_get_minimum (IntPtr obj);
 
-		public uint Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_uint_get_minimum (Raw);
 			}
@@ -321,7 +339,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern uint stetic_param_spec_uint_get_maximum (IntPtr obj);
 
-		public uint Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_uint_get_maximum (Raw);
 			}
@@ -330,7 +348,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern uint stetic_param_spec_uint_get_default (IntPtr obj);
 
-		public uint Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_uint_get_default (Raw);
 			}
@@ -343,7 +361,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_long_get_minimum (IntPtr obj);
 
-		public int Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_long_get_minimum (Raw);
 			}
@@ -352,7 +370,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_long_get_maximum (IntPtr obj);
 
-		public int Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_long_get_maximum (Raw);
 			}
@@ -361,7 +379,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_long_get_default (IntPtr obj);
 
-		public int Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_long_get_default (Raw);
 			}
@@ -374,7 +392,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern uint stetic_param_spec_ulong_get_minimum (IntPtr obj);
 
-		public uint Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_ulong_get_minimum (Raw);
 			}
@@ -383,7 +401,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern uint stetic_param_spec_ulong_get_maximum (IntPtr obj);
 
-		public uint Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_ulong_get_maximum (Raw);
 			}
@@ -392,7 +410,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern uint stetic_param_spec_ulong_get_default (IntPtr obj);
 
-		public uint Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_ulong_get_default (Raw);
 			}
@@ -405,7 +423,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern long stetic_param_spec_int64_get_minimum (IntPtr obj);
 
-		public long Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_int64_get_minimum (Raw);
 			}
@@ -414,7 +432,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern long stetic_param_spec_int64_get_maximum (IntPtr obj);
 
-		public long Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_int64_get_maximum (Raw);
 			}
@@ -423,7 +441,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern long stetic_param_spec_int64_get_default (IntPtr obj);
 
-		public long Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_int64_get_default (Raw);
 			}
@@ -436,7 +454,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern ulong stetic_param_spec_uint64_get_minimum (IntPtr obj);
 
-		public ulong Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_uint64_get_minimum (Raw);
 			}
@@ -445,7 +463,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern ulong stetic_param_spec_uint64_get_maximum (IntPtr obj);
 
-		public ulong Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_uint64_get_maximum (Raw);
 			}
@@ -454,7 +472,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern ulong stetic_param_spec_uint64_get_default (IntPtr obj);
 
-		public ulong Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_uint64_get_default (Raw);
 			}
@@ -467,7 +485,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern uint stetic_param_spec_unichar_get_default (IntPtr obj);
 
-		public char Default {
+		public override object Default {
 			get {
 				return Marshaller.GUnicharToChar (stetic_param_spec_unichar_get_default (Raw));
 			}
@@ -480,7 +498,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_enum_get_minimum (IntPtr obj);
 
-		public int Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_enum_get_minimum (Raw);
 			}
@@ -489,7 +507,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_enum_get_maximum (IntPtr obj);
 
-		public int Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_enum_get_maximum (Raw);
 			}
@@ -498,7 +516,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern int stetic_param_spec_enum_get_default (IntPtr obj);
 
-		public int Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_enum_get_default (Raw);
 			}
@@ -531,7 +549,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern uint stetic_param_spec_flags_get_default (IntPtr obj);
 
-		public uint Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_flags_get_default (Raw);
 			}
@@ -555,7 +573,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern float stetic_param_spec_float_get_minimum (IntPtr obj);
 
-		public float Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_float_get_minimum (Raw);
 			}
@@ -564,7 +582,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern float stetic_param_spec_float_get_maximum (IntPtr obj);
 
-		public float Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_float_get_maximum (Raw);
 			}
@@ -573,7 +591,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern float stetic_param_spec_float_get_default (IntPtr obj);
 
-		public float Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_float_get_default (Raw);
 			}
@@ -595,7 +613,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern double stetic_param_spec_double_get_minimum (IntPtr obj);
 
-		public double Minimum {
+		public override object Minimum {
 			get {
 				return stetic_param_spec_double_get_minimum (Raw);
 			}
@@ -604,7 +622,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern double stetic_param_spec_double_get_maximum (IntPtr obj);
 
-		public double Maximum {
+		public override object Maximum {
 			get {
 				return stetic_param_spec_double_get_maximum (Raw);
 			}
@@ -613,7 +631,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern double stetic_param_spec_double_get_default (IntPtr obj);
 
-		public double Default {
+		public override object Default {
 			get {
 				return stetic_param_spec_double_get_default (Raw);
 			}
@@ -635,7 +653,7 @@ namespace Stetic {
 		[DllImport("libsteticglue")]
 		static extern IntPtr stetic_param_spec_string_get_default (IntPtr obj);
 
-		public string Default {
+		public override object Default {
 			get {
 				return Marshal.PtrToStringAnsi (stetic_param_spec_string_get_default (Raw));
 			}

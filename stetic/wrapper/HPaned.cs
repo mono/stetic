@@ -23,7 +23,7 @@ namespace Stetic.Wrapper {
 		public bool HExpandable { get { return true; } }
 		public bool VExpandable {
 			get {
-				foreach (Widget w in Children) {
+				foreach (Gtk.Widget w in Children) {
 					WidgetSite site = (WidgetSite)w;
 
 					if (!site.VExpandable)

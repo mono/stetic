@@ -6,11 +6,15 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class PropertyGrid : Gtk.Table {
+	public class PropertyGrid : Gtk.VBox {
 
-		public PropertyGrid () : base (1, 2, false)
+		SizeGroup sgroup;
+
+		public PropertyGrid () : base (false, 6)
 		{
-			RowSpacing = ColumnSpacing = BorderWidth = 2;
+			BorderWidth = 2;
+
+			sgroup = new SizeGroup (SizeGroupMode.Horizontal);
 			NoSelection ();
 		}
 
@@ -18,36 +22,60 @@ namespace Stetic {
 		{
 			foreach (Widget w in Children)
 				Remove (w);
-			Resize (1, 2);
 		}
 
-		protected void Append (string labelText, Widget rep)
+		protected VBox AddGroup (string name)
 		{
-			uint row;
+			Expander exp = new Expander ("<b>" + name + "</b>");
+			exp.UseMarkup = true;
 
-			row = NRows;
-			if (row == 1 && Children.Length == 0)
-				row = 0;
+			VBox box = new VBox (true, 2);
+			exp.Add (box);
+			exp.ShowAll ();
 
-			Label label = new Label (labelText);
+			if (Children.Length == 0)
+				exp.Expanded = true;
+
+			PackStart (exp, false, false, 0);
+			return box;
+		}
+
+		protected void AddToGroup (VBox group, PropertyDescriptor prop, ParamSpec pspec, object obj)
+		{
+			HBox box = new HBox (false, 6);
+
+			Label label;
+
+			label = new Label ("    ");
+			box.PackStart (label, false, false, 0);
+
+			label = new Label (pspec != null ? pspec.Nick : prop.Name);
 			label.UseMarkup = true;
 			label.Justify = Justification.Left;
 			label.Xalign = 0;
-			label.Show ();
-			Attach (label, 0, 1, row, row + 1,
-				AttachOptions.Expand | AttachOptions.Fill, 0, 0, 0);
+			box.PackStart (label, true, true, 0);
 
+			Widget rep = PropertyEditors.MakeEditor (prop, pspec, obj);
 			if (rep != null) {
 				rep.ShowAll ();
-				Attach (rep, 1, 2, row, row + 1,
-					AttachOptions.Expand | AttachOptions.Fill, 0, 0, 0);
+				sgroup.AddWidget (rep);
+				box.PackStart (rep, false, false, 0);
 			}
+
+			box.ShowAll ();
+			group.PackStart (box, false, false, 0);
 		}
 
 		public void NoSelection ()
 		{
 			Clear ();
-			Append ("<i>No selection</i>", null);
+
+			Label label = new Label ("<i>No selection</i>");
+			label.UseMarkup = true;
+			label.Justify = Justification.Left;
+			label.Xalign = 0;
+			label.Show ();
+			PackStart (label, true, true, 0);
 		}
 
 		public void Select (WidgetBox wbox)
@@ -58,14 +86,39 @@ namespace Stetic {
 			if (w == null)
 				return;
 
-			foreach (PropertyInfo info in w.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
-				foreach (object attr in info.GetCustomAttributes (false)) {
-					PropertyAttribute pattr = attr as PropertyAttribute;
-					if (pattr == null)
-						continue;
+			if (w is Stetic.IObjectWrapper)
+				AddObjectWrapperProperties (w);
+			else
+				AddGObjectProperties (w);
+		}
 
-					ParamSpec pspec = ParamSpec.LookupObjectProperty (w, pattr.Name);
-					Append (pspec.Nick, PropertyEditors.MakeEditor (pspec, info, w));
+		public virtual ParamSpec LookupParamSpec (object obj, PropertyInfo info)
+		{
+			foreach (object attr in info.GetCustomAttributes (typeof (GLib.PropertyAttribute), false)) {
+				PropertyAttribute pattr = (PropertyAttribute)attr;
+				return ParamSpec.LookupObjectProperty ((GLib.Object)obj, pattr.Name);
+			}
+			return null;
+		}
+
+		public void AddGObjectProperties (Widget w)
+		{
+			VBox group = AddGroup ("Properties");
+
+			foreach (PropertyInfo info in w.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
+				ParamSpec pspec = LookupParamSpec (w, info);
+				if (pspec != null)
+					AddToGroup (group, new PropertyDescriptor (w.GetType(), info.Name), pspec, w);
+			}
+		}
+
+		public void AddObjectWrapperProperties (object obj)
+		{
+			foreach (PropertyGroup pgroup in ((IObjectWrapper)obj).PropertyGroups) {
+				VBox group = AddGroup (pgroup.Name);
+				foreach (PropertyDescriptor prop in pgroup.Properties) {
+					ParamSpec pspec = LookupParamSpec (prop.PropertyObject (obj), prop.Info);
+					AddToGroup (group, prop, pspec, obj);
 				}
 			}
 		}
@@ -87,6 +140,8 @@ namespace Stetic {
 
 			ContainerChild cc = parent[wbox];
 
+			VBox group = AddGroup ("Properties");
+
 			foreach (PropertyInfo info in cc.GetType().GetProperties (BindingFlags.Instance | BindingFlags.Public)) {
 				foreach (object attr in info.GetCustomAttributes (false)) {
 					ChildPropertyAttribute pattr = attr as ChildPropertyAttribute;
@@ -94,7 +149,8 @@ namespace Stetic {
 						continue;
 
 					ParamSpec pspec = ParamSpec.LookupChildProperty (parent, pattr.Name);
-					Append (pspec.Nick, PropertyEditors.MakeEditor (pspec, info, cc));
+					if (pspec != null)
+						AddToGroup (group, new PropertyDescriptor (cc.GetType (), info.Name), pspec, cc);
 				}
 			}
 		}

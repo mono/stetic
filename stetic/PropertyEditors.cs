@@ -14,343 +14,218 @@ namespace Stetic {
 		{
 			editors = new Hashtable ();
 
-			foreach (MethodInfo info in typeof (PropertyEditors).GetMethods (BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) {
-				if (info.ReturnType != typeof (Widget))
-					continue;
+			editors[typeof (bool)] = typeof (Stetic.Editor.Boolean);
+			editors[typeof (byte)] = typeof (Stetic.Editor.IntRange);
+			editors[typeof (sbyte)] = typeof (Stetic.Editor.IntRange);
+			editors[typeof (short)] = typeof (Stetic.Editor.IntRange);
+			editors[typeof (ushort)] = typeof (Stetic.Editor.IntRange);
+			editors[typeof (int)] = typeof (Stetic.Editor.IntRange);
+			editors[typeof (uint)] = typeof (Stetic.Editor.IntRange);
+			editors[typeof (long)] = typeof (Stetic.Editor.IntRange);
+			editors[typeof (ulong)] = typeof (Stetic.Editor.IntRange);
+			editors[typeof (float)] = typeof (Stetic.Editor.FloatRange);
+			editors[typeof (double)] = typeof (Stetic.Editor.FloatRange);
+			editors[typeof (char)] = typeof (Stetic.Editor.Char);
+			editors[typeof (string)] = typeof (Stetic.Editor.String);
+		}
 
-				ParameterInfo[] param = info.GetParameters ();
-				if (param.Length != 3 ||
-				    !param[0].ParameterType.IsSubclassOf (typeof (ParamSpec)) ||
-				    param[0].ParameterType == typeof (ParamSpec) ||
-				    param[1].ParameterType != typeof (PropertyInfo) ||
-				    param[2].ParameterType != typeof (object))
-					continue;
+		static public Widget MakeEditor (PropertyDescriptor prop, ParamSpec pspec, object obj)
+		{
+			Type editorType;
+			object min, max, initial;
 
-				editors[param[0].ParameterType] = info;
+			if (pspec != null) {
+				min = pspec.Minimum;
+				max = pspec.Maximum;
+				initial = pspec.Default;
+			} else {
+				min = max = null;
+				initial = prop.Default;
 			}
-		}
 
-		static public Widget MakeEditor (ParamSpec pspec, PropertyInfo info, object obj)
-		{
-			MethodInfo editor = editors[pspec.GetType ()] as MethodInfo;
-			if (editor != null) {
-				object[] args = { pspec, info, obj };
-				return (Widget)editor.Invoke (null, args);
-			} else
-				return new Label ("(unknown type)");
-		}
+			if (prop.CanRead)
+				initial = prop.GetValue (obj);
 
-		// The editors...
+			editorType = prop.EditorType;
+			if (editorType == null) {
+				if (prop.PropertyType.IsEnum) {
+					editorType = typeof (Stetic.Editor.Enumeration);
+					min = max = null;
+				} else if (prop.PropertyType == typeof (int) && ((int)min == -1)) {
+					editorType = typeof (Stetic.Editor.OptIntRange);
+					min = 0;
+				} else {
+					editorType = editors[prop.PropertyType] as Type;
+					if (editorType == null)
+						return NoEditor (prop);
+				}
+			}
 
-		static Widget Boolean (ParamSpecBoolean pspec, PropertyInfo info, object obj)
-		{
-			CheckButton cb = new Gtk.CheckButton ("");
-
-			if (info.CanRead)
-				cb.Active = (bool)info.GetValue (obj, null);
+			if (min != null && max != null)
+				return RangeEditor (editorType, min, max, initial, obj, prop);
 			else
-				cb.Active = pspec.Default;
-
-			if (info.CanWrite) {
-				cb.Toggled += delegate (object o, EventArgs args) {
-					info.SetValue (obj, cb.Active, null);
-				};
-			} else
-				cb.Sensitive = false;
-
-			return cb;
+				return BasicEditor (editorType, initial, obj, prop);
 		}
 
-		static Widget Char (ParamSpecChar pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum, 1.0);
+		private class BasicEditorHelper {
+			PropertyDescriptor prop;
+			PropertyInfo vprop;
+			object editor, obj;
 
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (sbyte)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget UChar (ParamSpecUChar pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum, 1.0);
-
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (byte)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget Int (ParamSpecInt pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum, 1.0);
-
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (int)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget UInt (ParamSpecUInt pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum, 1.0);
-
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (uint)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget Long (ParamSpecLong pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum, 1.0);
-
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (int)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget ULong (ParamSpecULong pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum, 1.0);
-
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (uint)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget Int64 (ParamSpecInt64 pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum, 1.0);
-
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (long)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget UInt64 (ParamSpecUInt64 pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum, 1.0);
-
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (ulong)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget Float (ParamSpecFloat pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum,
-							    pspec.Epsilon > 0.01 ? pspec.Epsilon : 0.01);
-
-			if (info.CanRead)
-				sb.Value = Convert.ToDouble (info.GetValue (obj, null));
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (float)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget Double (ParamSpecDouble pspec, PropertyInfo info, object obj)
-		{
-			SpinButton sb = new Gtk.SpinButton (pspec.Minimum, pspec.Maximum,
-							    pspec.Epsilon > 0.01 ? pspec.Epsilon : 0.01);
-
-			if (info.CanRead)
-				sb.Value = (double)info.GetValue (obj, null);
-			else
-				sb.Value = (double)pspec.Default;
-
-			if (info.CanWrite) {
-				sb.ValueChanged += delegate (object o, EventArgs args) {
-					info.SetValue (obj, (double)sb.Value, null);
-				};
-			} else
-				sb.Sensitive = false;
-
-			return sb;
-		}
-
-		static Widget String (ParamSpecString pspec, PropertyInfo info, object obj)
-		{
-			Entry entry = new Gtk.Entry ();
-
-			if (info.CanRead)
-				entry.Text = (string)info.GetValue (obj, null);
-			else if (pspec.Default != null)
-				entry.Text = pspec.Default;
-
-			if (info.CanWrite) {
-				entry.Changed += delegate (object o, EventArgs args) {
-					info.SetValue (obj, entry.Text, null);
-				};
-			} else
-				entry.Sensitive = false;
-
-			return entry;
-		}
-
-		// Can't currently use an anon delegate here because of bug 69614
-		private class EnumHelper {
-			PropertyInfo info;
-			object obj;
-			ArrayList values;
-
-			public EnumHelper (PropertyInfo info, object obj, ArrayList values)
+			public BasicEditorHelper (PropertyDescriptor prop, object obj,
+						  PropertyInfo vprop, object editor)
 			{
-				this.info = info;
+				this.prop = prop;
 				this.obj = obj;
-				this.values = values;
+				this.vprop = vprop;
+				this.editor = editor;
 			}
 
-			public void Changed (object o, EventArgs args)
+			public void ValueChanged (object o, EventArgs args)
 			{
-				ComboBox combo = (ComboBox)o;
-				if (combo.Active != -1)
-					info.SetValue (obj, values[combo.Active], null);
+				prop.SetValue (obj, vprop.GetValue (editor, null));
 			}
 		}
 
-		static Widget Enum (ParamSpecEnum pspec, PropertyInfo info, object obj)
+		static Widget BasicEditor (Type editorType, object value,
+					   object obj, PropertyDescriptor prop)
 		{
-			ComboBox combo;
-			int defaultValue;
-			ArrayList values;
+			PropertyInfo vprop = ValueProperty (editorType);
+			EventInfo vevent = ValueEvent (editorType);
 
-			combo = ComboBox.NewText ();
+			ConstructorInfo ctor;
+			Widget editor;
 
-			if (info.CanRead)
-				defaultValue = (int)info.GetValue (obj, null);
-			else
-				defaultValue = pspec.Default;
+			// Find a constructor. First we look for a constructor that takes
+			// just an object of the editor's Value type (ie, a default
+			// value). If that fails, we look for a no-arg constructor. If
+			// there's no no-arg constructor, we look for a constructor that
+			// takes a System.Type arg and call that with the type of the
+			// property (this is used by the enum editor, which needs to know
+			// specifically what kind of enum it's editing).
 
-			values = new ArrayList ();
-			for (int val = pspec.Minimum, nItems = 0; val <= pspec.Maximum; val++) {
-				string name = pspec.ValueName (val);
-				if (name == null)
-					continue;
+			ctor = editorType.GetConstructor (new Type[] { vprop.PropertyType });
+			if (ctor != null)
+				editor = (Widget)ctor.Invoke (new object[] { value });
+			else {
+				ctor = editorType.GetConstructor (new Type[0]);
+				if (ctor != null)
+					editor = (Widget)ctor.Invoke (new object[0]);
+				else {
+					ctor = editorType.GetConstructor (new Type[] { typeof (Type) });
+					if (ctor == null)
+						return null;
+					editor = (Widget)ctor.Invoke (new object[] { prop.PropertyType });
+				}
 
-				combo.AppendText (name + " (" + val.ToString() + ")");
-				values.Add (System.Enum.ToObject (info.PropertyType, val));
-
-				if (val == defaultValue)
-					combo.Active = nItems;
-				nItems++;
+				// Set the default value
+				if (vprop.CanWrite)
+					vprop.SetValue (editor, value, null);
 			}
 
-			if (info.CanWrite) {
-				EnumHelper eh = new EnumHelper (info, obj, values);
-				combo.Changed += eh.Changed;
+			editor.ShowAll ();
+
+			if (prop.CanWrite && (vevent != null)) {
+				BasicEditorHelper beh = new BasicEditorHelper (prop, obj, vprop, editor);
+				vevent.AddEventHandler (editor, new EventHandler (beh.ValueChanged));
+			} else
+				editor.Sensitive = false;
+
+			return editor;
+		}
+
+		private class RangeEditorHelper {
+			PropertyDescriptor prop;
+			PropertyInfo vprop;
+			object editor, obj;
+
+			public RangeEditorHelper (PropertyDescriptor prop, object obj,
+						  PropertyInfo vprop, object editor)
+			{
+				this.prop = prop;
+				this.obj = obj;
+				this.vprop = vprop;
+				this.editor = editor;
 			}
 
-			return combo;
+			public void ValueChanged (object o, EventArgs args)
+			{
+				prop.SetValue (obj, Convert.ChangeType (vprop.GetValue (editor, null), prop.PropertyType));
+			}
 		}
 
-		static Widget Flags (ParamSpecFlags pspec, PropertyInfo info, object obj)
+		static Widget RangeEditor (Type editorType, object min, object max, object initial,
+					   object obj, PropertyDescriptor prop)
 		{
-			return new Gtk.Label ("(flags)");
+			PropertyInfo vprop = ValueProperty (editorType);
+			EventInfo vevent = ValueEvent (editorType);
+
+			ConstructorInfo ctor;
+			Widget editor;
+
+			// If the passed in values aren't the same type as used by the
+			// editor, convert them.
+			if (vprop.PropertyType != prop.PropertyType) {
+				min = Convert.ChangeType (min, vprop.PropertyType);
+				max = Convert.ChangeType (max, vprop.PropertyType);
+				initial = Convert.ChangeType (initial, vprop.PropertyType);
+			}
+
+			// First look for a constructor that takes a minimum, a maximum,
+			// and a default value. Then look for one that just takes a minimum
+			// and maximum.
+			ctor = editorType.GetConstructor (new Type[] { vprop.PropertyType, vprop.PropertyType, vprop.PropertyType });
+			if (ctor != null) {
+				editor = (Widget)ctor.Invoke (new object[] { min, max, initial });
+			} else {
+				// min, max
+				ctor = editorType.GetConstructor (new Type[] { vprop.PropertyType, vprop.PropertyType });
+				if (ctor != null) {
+					editor = (Widget)ctor.Invoke (new object[] { min, max });
+					if (vprop.CanWrite)
+						vprop.SetValue (editor, initial, null);
+				} else
+					return null;
+			}
+
+			editor.ShowAll ();
+
+			if (prop.CanWrite && (vevent != null)) {
+				RangeEditorHelper reh = new RangeEditorHelper (prop, obj, vprop, editor);
+				vevent.AddEventHandler (editor, new EventHandler (reh.ValueChanged));
+			} else
+				editor.Sensitive = false;
+
+			return editor;
 		}
 
-		static Widget Pointer (ParamSpecPointer pspec, PropertyInfo info, object obj)
+		static PropertyInfo ValueProperty (Type editorType)
 		{
-			return new Gtk.Label ("(pointer)");
+			if (editorType.IsDefined (typeof (Stetic.PropertyEditorAttribute), false)) {
+				foreach (object attr in editorType.GetCustomAttributes (typeof (Stetic.PropertyEditorAttribute), false)) {
+					PropertyEditorAttribute peattr = (PropertyEditorAttribute)attr;
+					return editorType.GetProperty (peattr.Property);
+				}
+			}
+
+			return editorType.GetProperty ("Value");
 		}
 
-		static Widget Boxed (ParamSpecBoxed pspec, PropertyInfo info, object obj)
+		static EventInfo ValueEvent (Type editorType)
 		{
-			return new Gtk.Label ("(boxed)");
+			if (editorType.IsDefined (typeof (Stetic.PropertyEditorAttribute), false)) {
+				foreach (object attr in editorType.GetCustomAttributes (typeof (Stetic.PropertyEditorAttribute), false)) {
+					PropertyEditorAttribute peattr = (PropertyEditorAttribute)attr;
+					return editorType.GetEvent (peattr.Event);
+				}
+			}
+
+			return editorType.GetEvent ("ValueChanged");
 		}
 
-		static Widget Param (ParamSpecParam pspec, PropertyInfo info, object obj)
+		static Widget NoEditor (PropertyDescriptor prop)
 		{
-			return new Gtk.Label ("(param)");
-		}
-
-		static Widget Object (ParamSpecObject pspec, PropertyInfo info, object obj)
-		{
-			return new Gtk.Label ("(object)");
+			return new Gtk.Label ("(" + prop.PropertyType.Name + ")");
 		}
 	}
 }
