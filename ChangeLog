@@ -1,3 +1,10 @@
+2004-12-20  Dan Winship  <danw@novell.com>
+
+	* stetic/wrapper: Rename "wrappers" dir to "wrapper", to match the
+	namespace
+
+	* stetic/Makefile.am (stetic_exe_SOURCES): update for that
+
 2004-12-15  Dan Winship  <danw@novell.com>
 
 	* stetic/Stetic.cs: 

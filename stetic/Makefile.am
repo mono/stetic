@@ -11,16 +11,16 @@ stetic_exe_SOURCES =			\
 	WidgetBox.cs			\
 	WidgetFactory.cs		\
 	WidgetSite.cs			\
-	wrappers/DefaultWidgets.cs	\
-	wrappers/Frame.cs		\
-	wrappers/HBox.cs		\
-	wrappers/HButtonBox.cs		\
-	wrappers/HPaned.cs		\
-	wrappers/Table.cs		\
-	wrappers/VBox.cs		\
-	wrappers/VButtonBox.cs		\
-	wrappers/VPaned.cs		\
-	wrappers/Window.cs
+	wrapper/DefaultWidgets.cs	\
+	wrapper/Frame.cs		\
+	wrapper/HBox.cs			\
+	wrapper/HButtonBox.cs		\
+	wrapper/HPaned.cs		\
+	wrapper/Table.cs		\
+	wrapper/VBox.cs			\
+	wrapper/VButtonBox.cs		\
+	wrapper/VPaned.cs		\
+	wrapper/Window.cs
 
 comma = ,
 STETIC_RESOURCE_FILES = $(wildcard $(top_srcdir)/pixmaps/*.png)
