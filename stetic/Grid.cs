@@ -11,13 +11,29 @@ namespace Stetic {
 			BorderWidth = 2;
 			WidgetFlags |= WidgetFlags.NoWindow;
 			lines = new ArrayList ();
+			group = null;
 		}
 
+		// Padding constants
 		const int groupPad = 6;
 		const int hPad = 6;
 		const int linePad = 3;
 
-		public class Pair {
+		// Theme-based sizes; computed at first SizeRequest
+		static int indent = -1;
+		static int lineHeight = -1;
+
+		Grid[] group;
+		public static void Connect (params Grid[] grids)
+		{
+			for (int i = 0; i < grids.Length; i++) {
+				grids[i].group = new Grid[grids.Length - 1];
+				Array.Copy (grids, 0, grids[i].group, 0, i);
+				Array.Copy (grids, i + 1, grids[i].group, i, grids.Length - i - 1);
+			}
+		}
+
+		class Pair {
 			Gtk.Label label;
 			Gtk.Widget editor;
 
@@ -158,16 +174,13 @@ namespace Stetic {
 		// These are figured out at requisition time and used again at
 		// allocation time.
 		int lwidth, ewidth;
-		int indent, lineHeight;
 
-		protected override void OnSizeRequested (ref Gtk.Requisition req)
+		void SizeRequestGrid (Grid grid, ref Gtk.Requisition req)
 		{
 			bool visible = true;
 
 			req.Width = req.Height = 0;
-			lwidth = ewidth = indent = lineHeight = 0;
-
-			foreach (object obj in lines) {
+			foreach (object obj in grid.lines) {
 				if (obj is Expander) {
 					Gtk.Widget w = (Gtk.Widget)obj;
 					Gtk.Requisition childreq;
@@ -179,7 +192,7 @@ namespace Stetic {
 
 					visible = ((Gtk.Expander)obj).Expanded;
 
-					if (indent == 0) {
+					if (indent == -1) {
 						// Seems like there should be an easier way...
 						int focusWidth = (int)w.StyleGetProperty ("focus-line-width");
 						int focusPad = (int)w.StyleGetProperty ("focus-padding");
@@ -203,7 +216,7 @@ namespace Stetic {
 					lreq = p.Label.SizeRequest ();
 					ereq = p.Editor.SizeRequest ();
 
-					if (lineHeight == 0)
+					if (lineHeight == -1)
 						lineHeight = (int)(1.5 * lreq.Height);
 
 					if (lreq.Width > lwidth)
@@ -217,9 +230,20 @@ namespace Stetic {
 			}
 
 			req.Width = Math.Max (req.Width, indent + lwidth + hPad + ewidth);
-
 			req.Height += 2 * (int)BorderWidth;
 			req.Width += 2 * (int)BorderWidth;
+		}
+
+		protected override void OnSizeRequested (ref Gtk.Requisition req)
+		{
+			lwidth = ewidth = 0;
+
+			if (group != null) {
+				foreach (Grid grid in group)
+					SizeRequestGrid (grid, ref req);
+			}
+
+			SizeRequestGrid (this, ref req);
 		}
 
 		protected override void OnSizeAllocated (Gdk.Rectangle alloc)

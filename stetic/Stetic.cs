@@ -38,6 +38,7 @@ namespace Stetic {
 			ChildProperties = new Stetic.ChildPropertyGrid ();
 			ChildProperties.Show ();
 			notebook.AppendPage (ChildProperties, new Label ("Packing"));
+			Stetic.Grid.Connect (Properties, ChildProperties);
 			win.ShowAll ();
 
 			win = new Gtk.Window ("Project");
