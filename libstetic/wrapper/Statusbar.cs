@@ -12,5 +12,7 @@ namespace Stetic.Wrapper {
 			AddItemGroup (type, "Status Bar Properties",
 				      "HasResizeGrip");
 		}
+
+		public override bool HExpandable { get { return true; } }
 	}
 }

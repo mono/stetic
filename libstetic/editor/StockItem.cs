@@ -21,8 +21,14 @@ namespace Stetic.Editor {
 				if (item.StockId == null)
 					continue;
 				stockItems.Add (item);
+				Console.WriteLine ("adding {0}", item.Label);
 			}
 			stockItems.Sort (this);
+
+			Console.WriteLine ("\nSORTING\n");
+
+			foreach (Gtk.StockItem item in stockItems)
+				Console.WriteLine ("{0}", item.Label);
 
 			stockIds = new ArrayList ();
 			foreach (Gtk.StockItem item in stockItems) {
@@ -55,7 +61,8 @@ namespace Stetic.Editor {
 			Gtk.StockItem x = (Gtk.StockItem)itemx;
 			Gtk.StockItem y = (Gtk.StockItem)itemy;
 
-			return string.Compare (x.Label, y.Label);
+			return string.Compare (x.Label.Replace ("_", ""),
+					       y.Label.Replace ("_", ""));
 		}
 
 		public string StockId {

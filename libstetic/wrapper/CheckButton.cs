@@ -24,5 +24,7 @@ namespace Stetic.Wrapper {
 				checkbutton.Label = checkbutton.Name;
 			}
 		}
+
+		public override bool HExpandable { get { return true; } }
 	}
 }

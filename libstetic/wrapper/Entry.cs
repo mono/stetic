@@ -41,5 +41,7 @@ namespace Stetic.Wrapper {
 				InvisibleChar = Char.Parse (value);
 			}
 		}
+
+		public override bool HExpandable { get { return true; } }
 	}
 }

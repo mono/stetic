@@ -1,5 +1,19 @@
 2005-03-15  Dan Winship  <danw@novell.com>
 
+	* libstetic/editor/StockItem.cs: fix sorting again. (ignore "_")
+
+	* libstetic/wrapper/CheckButton.cs: 
+	* libstetic/wrapper/Entry.cs: 
+	* libstetic/wrapper/ProgressBar.cs: 
+	* libstetic/wrapper/RadioButton.cs: 
+	* libstetic/wrapper/Statusbar.cs: mark HExpandable
+
+	* libstetic/wrapper/DrawingArea.cs: 
+	* libstetic/wrapper/TextView.cs: 
+	* libstetic/wrapper/TreeView.cs: mark HExpandable and VExpandable
+
+2005-03-15  Dan Winship  <danw@novell.com>
+
 	* libstetic/WidgetSite.cs (AddFault, AddHFault, AddVFault): Make
 	AddHFault and AddVFault take WidgetSites rather than coordinates,
 	and provide AddFault for fully-generic fault adding. For AddHFault

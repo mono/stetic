@@ -49,5 +49,8 @@ namespace Stetic.Wrapper {
 		{
 			EmitNotify ("Text");
 		}
+
+		public override bool HExpandable { get { return true; } }
+		public override bool VExpandable { get { return true; } }
 	}
 }

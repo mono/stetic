@@ -14,5 +14,7 @@ namespace Stetic.Wrapper {
 				      "Text",
 				      "PulseStep");
 		}
+
+		public override bool HExpandable { get { return true; } }
 	}
 }

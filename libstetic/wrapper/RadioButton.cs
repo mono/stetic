@@ -147,5 +147,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 		}
+
+		public override bool HExpandable { get { return true; } }
 	}
 }

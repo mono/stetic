@@ -18,5 +18,8 @@ namespace Stetic.Wrapper {
 				      "SearchColumn",
 				      "Model");
 		}
+
+		public override bool HExpandable { get { return true; } }
+		public override bool VExpandable { get { return true; } }
 	}
 }
