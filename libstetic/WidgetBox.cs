@@ -86,15 +86,42 @@ namespace Stetic {
 			base.OnRemoved (child);
 		}
 
-		protected virtual bool OnChildButtonPress (Gdk.EventButton evt)
+		public event EventHandler PopupContextMenu;
+
+		protected void EmitPopupContextMenu ()
 		{
-			return false;
+			if (PopupContextMenu != null)
+				PopupContextMenu (this, EventArgs.Empty);
 		}
 
 		[ConnectBefore]
 		void InterceptButtonPress (object obj, ButtonPressEventArgs args)
 		{
-			args.RetVal = OnChildButtonPress (args.Event);
+			if (args.Event.Type != EventType.ButtonPress)
+				return;
+
+			if (args.Event.Button == 1 && !ShowHandles) {
+				GrabFocus ();
+				args.RetVal = true;
+			} else if (args.Event.Button == 3) {
+				args.RetVal = true;
+				EmitPopupContextMenu ();
+			}
+		}
+
+		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
+		{
+			if (evt.Button == 3 && evt.Type == EventType.ButtonPress) {
+				EmitPopupContextMenu ();
+				return true;
+			}
+			return false;
+		}
+
+		protected override bool OnPopupMenu ()
+		{
+			EmitPopupContextMenu ();
+			return true;
 		}
 
 		protected override void OnSizeRequested (ref Requisition req)

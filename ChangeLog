@@ -1,3 +1,22 @@
+2005-02-19  Dan Winship  <danw@novell.com>
+
+	* libstetic/WidgetBox.cs (PopupContextMenu): new event to mean
+	"pop up a context menu for some reason", which could be because of
+	a keypress or button press in either the widgetbox itself or its
+	child.
+	(InterceptButtonPress, OnButtonPressEvent): Handle this stuff here
+	rather than passing it off to WidgetSite.
+
+	* stetic/WidgetSite.cs:
+	* libstetic/WidgetSite.cs: move stetic/WidgetSite.cs to libstetic,
+	minus the very very small amount that depended on other things in
+	stetic/.
+
+	* libstetic/WindowSite.cs: split this out of WidgetSite.cs
+
+	* stetic/WidgetFactory.cs (CreateWidgetSite): connect to the
+	site's PopupContextMenu event.
+
 2005-02-18  Dan Winship  <danw@novell.com>
 
 	* libstetic/TranslatableAttribute.cs: new attribute to mark a

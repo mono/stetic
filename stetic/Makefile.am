@@ -10,8 +10,7 @@ stetic_exe_SOURCES =			\
 	PropertyEditor.cs		\
 	PropertyGrid.cs			\
 	Stetic.cs			\
-	WidgetFactory.cs		\
-	WidgetSite.cs
+	WidgetFactory.cs
 
 comma = ,
 ICON_FILES = $(wildcard $(srcdir)/*.png)

@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class WidgetFactory : WidgetSiteImpl, IStetic {
+	public class WidgetFactory : WidgetSite, IStetic {
 
 		protected ConstructorInfo ctor;
 
@@ -44,7 +44,12 @@ namespace Stetic {
 
 		public WidgetSite CreateWidgetSite ()
 		{
-			return new WidgetSiteImpl ();
+			WidgetSite site = new WidgetSite ();
+			site.PopupContextMenu += delegate (object obj, EventArgs args) {
+				Menu m = new ContextMenu ((WidgetSite)site);
+				m.Popup ();
+			};
+			return site;
 		}
 	}
 
