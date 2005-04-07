@@ -1,5 +1,23 @@
 2005-04-07  Dan Winship  <danw@novell.com>
 
+	* glue/custom.c: 
+	* libstetic/wrapper/Custom.cs: 
+	* libstetic/wrapper/pixmaps/custom.png: Add custom widgets (a bit
+	kludgy at the moment).
+
+	* libstetic/wrapper/Calendar.cs (GladeImport): handle "display_options"
+
+	* libstetic/wrapper/ComboBox.cs (Items): tag this properly for
+	glade import/export
+
+	* libstetic/wrapper/ScrolledWindow.cs (AddPlaceholder): override
+	this to add the placeholder in a viewport
+
+	* libstetic/wrapper/Widget.cs (ParentWrapper): fix to not get into
+	an infinite loop on toplevel windows.
+
+2005-04-07  Dan Winship  <danw@novell.com>
+
 	Add Toolbar and its children, plus a bunch of things I had to fix
 	to get there.
 	

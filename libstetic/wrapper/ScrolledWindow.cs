@@ -42,5 +42,14 @@ namespace Stetic.Wrapper {
 			else
 				scwin.AddWithViewport (newChild);
 		}
+
+		public override Placeholder AddPlaceholder ()
+		{
+			Gtk.ScrolledWindow scwin = (Gtk.ScrolledWindow)Wrapped;
+
+			Placeholder ph = CreatePlaceholder ();
+			scwin.AddWithViewport (ph);
+			return ph;
+		}
 	}
 }

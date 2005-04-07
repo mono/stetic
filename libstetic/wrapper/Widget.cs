@@ -66,7 +66,7 @@ namespace Stetic.Wrapper {
 
 		public Stetic.Wrapper.Container ParentWrapper {
 			get {
-				Gtk.Widget parent = Wrapped;
+				Gtk.Widget parent = Wrapped.Parent;
 				Container wrapper = null;
 				while (wrapper == null && parent != null) {
 					wrapper = Stetic.Wrapper.Container.Lookup (parent);

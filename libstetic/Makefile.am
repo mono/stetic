@@ -50,6 +50,7 @@ libstetic_dll_sources =			\
 	wrapper/ComboBox.cs		\
 	wrapper/ComboBoxEntry.cs	\
 	wrapper/Container.cs		\
+	wrapper/Custom.cs		\
 	wrapper/Dialog.cs		\
 	wrapper/DrawingArea.cs		\
 	wrapper/Entry.cs		\

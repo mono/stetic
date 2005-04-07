@@ -34,7 +34,7 @@ namespace Stetic.Wrapper {
 
 		[Editor (typeof (Stetic.Editor.Text))]
 		[Description ("Items", "The items to display in the Combo Box, one per line")]
-		[GladeProperty]
+		[GladeProperty (Name = "items")]
 		public string Items {
 			get {
 				return items;
