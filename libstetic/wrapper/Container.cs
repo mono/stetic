@@ -182,8 +182,7 @@ namespace Stetic.Wrapper {
 		{
 			Placeholder ph = new Placeholder ();
 			ph.Show ();
-			ph.Drop += PlaceholderDrop;
-			ph.DragEnd += PlaceholderDragEnd;
+			ph.DragDrop += PlaceholderDragDrop;
 			ph.ButtonPressEvent += PlaceholderButtonPress;
 			AutoSize[ph] = true;
 			return ph;
@@ -205,26 +204,20 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		void PlaceholderDrop (Placeholder ph, Gtk.Widget dropped)
+		void PlaceholderDragDrop (object obj, Gtk.DragDropArgs args)
 		{
+			Placeholder ph = obj as Placeholder;
+			Gtk.Widget dropped = DND.Drop (args.Context, args.Time);
+			if (dropped == null)
+				return;
+
 			ReplaceChild (ph, dropped);
 			ph.Destroy ();
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (dropped);
 			if (wrapper != null)
 				wrapper.Select ();
 			EmitContentsChanged ();
-		}
-
-		void PlaceholderDragEnd (object obj, Gtk.DragEndArgs args)
-		{
-			Placeholder ph = obj as Placeholder;
-
-			dragSource = null;
-			if (DND.DragWidget == null) {
-				ph.SetSizeRequest (-1, -1);
-				Sync ();
-			} else
-				ReplaceChild (ph, DND.DragWidget);
+			args.RetVal = true;
 		}
 
 		protected virtual void ChildContentsChanged (Container child) {
@@ -251,7 +244,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public IEnumerable RealChildren {
+		public virtual IEnumerable RealChildren {
 			get {
 				RealChildEnumerator rce = new RealChildEnumerator ();
 				container.Forall (rce.Add);
@@ -332,14 +325,34 @@ namespace Stetic.Wrapper {
 		void HandleWindowDrag (Gdk.EventMotion evt)
 		{
 			Gtk.Widget dragWidget = selection;
-			Gdk.Rectangle alloc = dragWidget.Allocation;
 
 			Select ((Stetic.Wrapper.Widget)null);
 
-			dragSource = CreatePlaceholder ();
-			dragSource.SetSizeRequest (alloc.Width, alloc.Height);
-			ReplaceChild (dragWidget, dragSource);
+			dragSource = CreateDragSource (dragWidget);
 			DND.Drag (dragSource, evt, dragWidget);
+		}
+
+		protected virtual Gtk.Widget CreateDragSource (Gtk.Widget dragWidget)
+		{
+			Placeholder ph = CreatePlaceholder ();
+			Gdk.Rectangle alloc = dragWidget.Allocation;
+			ph.SetSizeRequest (alloc.Width, alloc.Height);
+			ph.DragEnd += DragEnd;
+			ReplaceChild (dragWidget, ph);
+			return ph;
+		}
+
+		void DragEnd (object obj, Gtk.DragEndArgs args)
+		{
+			Placeholder ph = obj as Placeholder;
+			ph.DragEnd -= DragEnd;
+
+			dragSource = null;
+			if (DND.DragWidget == null) {
+				ph.SetSizeRequest (-1, -1);
+				Sync ();
+			} else
+				ReplaceChild (ph, DND.Cancel ());
 		}
 
 		void SizeAllocated (object obj, Gtk.SizeAllocatedArgs args)

@@ -26,7 +26,8 @@ namespace Stetic {
 
 			if (dot != -1) {
 				// Sub-property (eg, "Alignment.Value")
-				memberInfo = FindProperty (objectType, propertyName.Substring (0, dot));
+				memberInfo = FindProperty (wrapperType, objectType, propertyName.Substring (0, dot));
+				isWrapperProperty = memberInfo.DeclaringType.IsSubclassOf (typeof (ObjectWrapper));
 				gladeProperty = new PropertyDescriptor (wrapperType, objectType, memberInfo.Name);
 				propertyInfo = FindProperty (memberInfo.PropertyType, propertyName.Substring (dot + 1));
 			} else if (slash != -1) {

@@ -9,7 +9,6 @@ namespace Stetic {
 		{
 			DND.DestSet (this, true);
 			Events |= Gdk.EventMask.ButtonPressMask;
-
 		}
 
 		const int minSize = 10;
@@ -64,22 +63,6 @@ namespace Stetic {
 			GdkWindow.DrawLine (dark, width - 1, 0, width - 1, height - 1);
 
 			return base.OnExposeEvent (evt);
-		}
-
-		public delegate void DropHandler (Placeholder ph, Widget w);
-		public event DropHandler Drop;
-
-		protected override bool OnDragDrop (Gdk.DragContext ctx, int x, int y, uint time)
-		{
-			Widget dragged = DND.Drop (ctx, time);
-			if (dragged == null)
-				return false;
-
-			if (Drop != null)
-				Drop (this, dragged);
-			else
-				dragged.Destroy ();
-			return true;
 		}
 	}
 }

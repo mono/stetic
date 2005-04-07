@@ -15,10 +15,12 @@ libstetic_dll_sources =			\
 	IStetic.cs			\
 	ObjectWrapper.cs		\
 	ObjectWrapperAttribute.cs	\
+	ObjectWrapperType.cs		\
 	ParamSpec.cs			\
 	Placeholder.cs			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
+	RadioGroupManager.cs		\
 	RangeAttribute.cs		\
 	Set.cs				\
 	TranslatableAttribute.cs	\
@@ -73,14 +75,19 @@ libstetic_dll_sources =			\
 	wrapper/Paned.cs		\
 	wrapper/ProgressBar.cs		\
 	wrapper/RadioButton.cs		\
+	wrapper/RadioToolButton.cs	\
 	wrapper/Range.cs		\
 	wrapper/Scale.cs		\
 	wrapper/ScrolledWindow.cs	\
+	wrapper/SeparatorToolItem.cs	\
 	wrapper/SpinButton.cs		\
 	wrapper/Statusbar.cs		\
 	wrapper/Table.cs		\
 	wrapper/TextView.cs		\
 	wrapper/ToggleButton.cs		\
+	wrapper/ToggleToolButton.cs	\
+	wrapper/Toolbar.cs		\
+	wrapper/ToolButton.cs		\
 	wrapper/TreeView.cs		\
 	wrapper/VBox.cs			\
 	wrapper/VButtonBox.cs		\

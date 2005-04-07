@@ -103,15 +103,23 @@ namespace Stetic {
 				return null;
 			}
 
+			Gtk.Widget w = Cancel ();
+			Gtk.Drag.Finish (ctx, true, true, time);
+			return w;
+		}
+
+		// Call this from a DragEnd event to check if the widget wasn't dropped
+		public static Gtk.Widget Cancel ()
+		{
 			Gtk.Widget w = dragWidget;
 			dragWidget = null;
 
 			// Remove the widget from its dragWindow
 			Gtk.Container parent = w.Parent as Gtk.Container;
-			if (parent != null)
+			if (parent != null) {
 				parent.Remove (w);
-
-			Gtk.Drag.Finish (ctx, true, true, time);
+				parent.Destroy ();
+			}
 			return w;
 		}
 

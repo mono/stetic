@@ -2,17 +2,9 @@ using System;
 
 namespace Stetic {
 
-	public enum ObjectWrapperType {
-		Object,
-		Widget,
-		Container,
-		Window
-	};
-
 	[AttributeUsage (AttributeTargets.Class)]
 	public sealed class ObjectWrapperAttribute : Attribute {
-		string name, iconName;
-		ObjectWrapperType type;
+		string name, iconName, type;
 		bool deprecated;
 
 		[Translatable]
@@ -26,7 +18,7 @@ namespace Stetic {
 			set { iconName = value; }
 		}
 
-		public ObjectWrapperType Type {
+		public string Type {
 			get { return type; }
 			set { type = value; }
 		}
@@ -36,7 +28,7 @@ namespace Stetic {
 			set { deprecated = value; }
 		}
 
-		public ObjectWrapperAttribute (string name, string iconName, ObjectWrapperType type)
+		public ObjectWrapperAttribute (string name, string iconName, string type)
 		{
 			this.name = name;
 			this.iconName = iconName;

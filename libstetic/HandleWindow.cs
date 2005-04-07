@@ -46,6 +46,7 @@ namespace Stetic {
 		{
 			if (selection != null) {
 				selection.SizeAllocated -= SelectionResized;
+				selection.WidgetEvent -= SelectionEvent;
 				selection = null;
 			}
 
@@ -119,11 +120,11 @@ namespace Stetic {
 		{
 			if (args.Event.Window != window)
 				return;
+			args.RetVal = true;
 
 			switch (args.Event.Type) {
 			case Gdk.EventType.ButtonPress:
 				Gdk.EventButton evb = (Gdk.EventButton)args.Event;
-				args.RetVal = true;
 
 				if (evb.Type == Gdk.EventType.ButtonPress && evb.Button == 1) {
 					clickX = (int)evb.XRoot;
@@ -133,7 +134,6 @@ namespace Stetic {
 
 			case Gdk.EventType.MotionNotify:
 				Gdk.EventMotion evm = (Gdk.EventMotion)args.Event;
-				args.RetVal = true;
 
 				if (!dragHandles)
 					return;

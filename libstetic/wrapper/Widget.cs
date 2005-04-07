@@ -40,9 +40,22 @@ namespace Stetic.Wrapper {
 				Wrapped.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
 			counters[type] = (int)counters[type] + 1;
 
-			Wrapped.Events |= Gdk.EventMask.ButtonPressMask;
-			Wrapped.WidgetEvent += WidgetEvent;
 			Wrapped.PopupMenu += PopupMenu;
+			InterceptClicks (Wrapped);
+		}
+
+		void InterceptClicks (Gtk.Widget widget)
+		{
+			widget.Events |= Gdk.EventMask.ButtonPressMask;
+			widget.WidgetEvent += WidgetEvent;
+
+			Gtk.Container container = widget as Gtk.Container;
+			if (container != null) {
+				foreach (Gtk.Widget child in new ChildEnumerator (container)) {
+					if (Lookup (child) == null)
+						InterceptClicks (child);
+				}
+			}
 		}
 
 		public new Gtk.Widget Wrapped {
@@ -53,7 +66,13 @@ namespace Stetic.Wrapper {
 
 		public Stetic.Wrapper.Container ParentWrapper {
 			get {
-				return Stetic.Wrapper.Container.Lookup (Wrapped.Parent);
+				Gtk.Widget parent = Wrapped;
+				Container wrapper = null;
+				while (wrapper == null && parent != null) {
+					wrapper = Stetic.Wrapper.Container.Lookup (parent);
+					parent = parent.Parent;
+				}
+				return wrapper;
 			}
 		}
 

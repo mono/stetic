@@ -11,35 +11,30 @@ namespace Stetic.Editor {
 	class GroupPicker : Gtk.HBox {
 
 		Gtk.ComboBox combo;
+		RadioGroupManager manager;
 		ArrayList values;
-		EventInfo groupChanged;
+		string group;
 
 		public GroupPicker (PropertyInfo info) : base (false, 0)
 		{
 			BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 			Type owner = info.DeclaringType;
 
-			FieldInfo groupInfo = owner.GetField (info.Name + "List", flags);
-			if (groupInfo == null || groupInfo.FieldType != typeof (ArrayList))
-				throw new ArgumentException ("No 'static ArrayList " + info.Name + "List' property on " + owner.FullName);
+			FieldInfo managerInfo = owner.GetField (info.Name + "Manager", flags);
+			if (managerInfo == null || managerInfo.FieldType != typeof (Stetic.RadioGroupManager))
+				throw new ArgumentException ("No 'static RadioGroupManager " + info.Name + "Manager' property on " + owner.FullName);
 
-			values = groupInfo.GetValue (null) as ArrayList;
-
-			groupChanged = owner.GetEvent (info.Name + "ListChanged", flags);
-			if (groupChanged != null)
-				groupChanged.AddEventHandler (null, new ListChangedDelegate (ListChanged));
-
-			ListChanged ();
+			manager = managerInfo.GetValue (null) as RadioGroupManager;
+			manager.GroupsChanged += GroupsChanged;
+			GroupsChanged ();
 		}
 
 		protected override void OnDestroyed ()
 		{
-			groupChanged.RemoveEventHandler (null, new ListChangedDelegate (ListChanged));
+			manager.GroupsChanged -= GroupsChanged;
 		}
 
-		public delegate void ListChangedDelegate ();
-
-		void ListChanged ()
+		void GroupsChanged ()
 		{
 			if (combo != null) {
 				combo.Changed -= combo_Changed;
@@ -51,27 +46,32 @@ namespace Stetic.Editor {
 			combo.Show ();
 			PackStart (combo, true, true, 0);
 
-			for (int i = 0; i < values.Count; i++) {
-				combo.AppendText (values[i] as string);
-				if (values[i] == groupname)
+			values = new ArrayList ();
+			int i = 0;
+			foreach (string name in manager.GroupNames) {
+				values.Add (name);
+				combo.AppendText (name);
+				if (name == group)
 					combo.Active = i;
+				i++;
 			}
+
+			// FIXME: once we go to 2.6, add a separator here
 
 			combo.AppendText ("Rename Group...");
 			combo.AppendText ("New Group...");
 		}
 
-		int group;
-		string groupname;
-		public int Group {
+		public string Group {
 			get {
 				return group;
 			}
 			set {
-				if (value < 0 || value >= values.Count)
-					return;
-				group = combo.Active = value;
-				groupname = values[value] as string;
+				int index = values.IndexOf (value);
+				if (index != -1) {
+					combo.Active = index;
+					group = values[index] as string;
+				}
 			}
 		}
 
@@ -84,8 +84,7 @@ namespace Stetic.Editor {
 				return;
 			}
 
-			group = combo.Active;
-			groupname = values[group] as string;
+			group = values[combo.Active] as string;
 			if (Changed != null)
 				Changed (this, EventArgs.Empty);
 		}
@@ -112,7 +111,7 @@ namespace Stetic.Editor {
 			hbox.PackStart (label, false, false, 0);
 			entry.ActivatesDefault = true;
 			if (rename)
-				entry.Text = groupname;
+				entry.Text = group;
 			hbox.PackStart (entry, true, true, 0);
 			dialog.VBox.PackStart (hbox, false, false, 0);
 
@@ -122,18 +121,22 @@ namespace Stetic.Editor {
 			Gtk.ResponseType response = (Gtk.ResponseType)dialog.Run ();
 			if (response == Gtk.ResponseType.Cancel || entry.Text.Length == 0) {
 				dialog.Destroy ();
-				combo.Active = group;
+				Group = group; // reset combo.Active
 				return;
 			}
 
-			groupname = entry.Text;
+			string oldname = group;
+			group = entry.Text;
 			dialog.Destroy ();
 
+			// FIXME: check that the new name doesn't already exist
+
+			// This will trigger a GroupsChanged, which will eventually
+			// update combo.Active
 			if (rename)
-				values[group] = groupname;
+				manager.Rename (oldname, group);
 			else
-				values.Add (groupname);
-			ListChanged ();
+				manager.Add (group);
 		}
 	}
 }

@@ -1,3 +1,72 @@
+2005-04-07  Dan Winship  <danw@novell.com>
+
+	Add Toolbar and its children, plus a bunch of things I had to fix
+	to get there.
+	
+	* libstetic/DND.cs (Cancel): Returns the widget that was being
+	dragged, after removing it from the DragWindow, so we don't get
+	errors when you cancel a drag.
+
+	* libstetic/HandleWindow.cs (Dispose): disconnect from
+	selection.WidgetEvent.
+	(SelectionEvent): if the event occurred in the handle window,
+	always return true. Fixes the bug where widgets sometimes undrew
+	themselves when they were selected.
+
+	* libstetic/ObjectWrapperAttribute.cs (ObjectWrapperType): kill
+	this enum
+	(Type): make this a string
+
+	* libstetic/ObjectWrapperType.cs: new static class containing
+	constant strings for the predefined wrapper types (including the
+	new ToolbarItem type).
+
+	* libstetic/Placeholder.cs (OnDragDrop): remove this; Container
+	can handle the event itself.
+
+	* libstetic/PropertyDescriptor.cs: Fix this to be able to handle
+	the case of a subproperty of a wrapper type (eg,
+	ToolItem.IsImportant in Wrapper.Toolbar.ToolbarChild)
+
+	* libstetic/RadioGroupManager.cs: Move the group-handling code
+	from Wrapper.RadioButton here, and genericize it to be able to
+	work with RadioToolButtons and RadioMenuItems as well.
+
+	* libstetic/editor/GroupPicker.cs: update to use RadioGroupManager.
+
+	* libstetic/wrapper/Container.cs (PlaceholderDragDrop): connect to
+	this directly rather than having the Placeholder proxy it to us.
+	(CreateDragSource): new virtual method to create a Placeholder (or
+	not) specifically for when dragging something out of a container
+	(CreatePlaceholder): update signal-handling here
+	(RealChildren): make this virtual
+
+	* libstetic/wrapper/Toolbar.cs: Wrap this.
+	(RealChildren, ReplaceChild): Override these to handle "invisible"
+	ToolItem wrappers around non-ToolItem objects stuck into the
+	toolbar.
+	(DoSync, Drop): do DND autoexpanding. (At some point, we should
+	use the actual toolbar DND editing methods.)
+	(CreateDragSource, DragEnd): return a Gtk.Invisible rather than
+	adding a placeholder to the toolbar.
+	(ToolbarChild): wrap this, putting the three ToolItem properties
+	here, since it's where they really belong.
+
+	* libstetic/wrapper/RadioButton.cs: port to use RadioGroupManager
+
+	* libstetic/wrapper/Widget.cs (Wrap, InterceptClicks): recursively
+	set up event interception, so that widgets with internal embedded
+	widgets work correctly.
+	(ParentWrapper): Make this able to cope with non-wrapped widgets
+	in the hierarchy.
+
+	* libstetic/wrapper/RadioToolButton.cs: 
+	* libstetic/wrapper/SeparatorToolItem.cs: 
+	* libstetic/wrapper/ToggleToolButton.cs: 
+	* libstetic/wrapper/ToolButton.cs: Wrap
+
+	* stetic/Palette.cs: update for ObjectWrapperType changes
+
 2005-04-05  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/Widget.cs (ToString): override

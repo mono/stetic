@@ -3,19 +3,24 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Radio Button", "radiobutton.png", ObjectWrapperType.Widget)]
-	public class RadioButton : Button {
+	[ObjectWrapper ("Toolbar Radio Button", "radiobutton.png", ObjectWrapperType.ToolbarItem)]
+	public class RadioToolButton : ToggleToolButton {
 
-		public static new Type WrappedType = typeof (Gtk.RadioButton);
+		public static new Type WrappedType = typeof (Gtk.RadioToolButton);
 
 		static new void Register (Type type)
 		{
-			AddItemGroup (type, "Radio Button Properties",
+			AddItemGroup (type, "Toolbar Toggle Button Properties",
+				      "Icon",
 				      "Label",
+				      "UseUnderline",
 				      "Group",
-				      "Active",
-				      "Inconsistent",
-				      "DrawIndicator");
+				      "Active");
+		}
+
+		public static new Gtk.ToolButton CreateInstance ()
+		{
+			return new Gtk.RadioToolButton (new GLib.SList (IntPtr.Zero), Gtk.Stock.SortAscending);
 		}
 
 		static RadioGroupManager GroupManager = new RadioGroupManager (WrappedType);
@@ -24,12 +29,11 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 
-			Gtk.RadioButton radiobutton = (Gtk.RadioButton)Wrapped;
-			if (!initialized) {
-				radiobutton.Label = radiobutton.Name;
+			Gtk.RadioToolButton radio = (Gtk.RadioToolButton)Wrapped;
+			if (!initialized)
 				Group = GroupManager.LastGroup;
-			} else if (radiobutton.Group == null)
-				Group = radiobutton.Name;
+			else if (radio.Group == null)
+				Group = radio.Name;
 		}
 
 		protected override void GladeImport (string className, string id, Hashtable props)
@@ -53,7 +57,5 @@ namespace Stetic.Wrapper {
 				GroupManager[Wrapped] = value;
 			}
 		}
-
-		public override bool HExpandable { get { return true; } }
 	}
 }

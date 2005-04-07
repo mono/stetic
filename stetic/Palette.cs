@@ -49,9 +49,10 @@ namespace Stetic {
 			main = new VBox (false, 2);
 			AddWithViewport (main);
 
-			AddOrGetGroup ("Widgets");
-			AddOrGetGroup ("Containers");
-			AddOrGetGroup ("Windows");
+			AddOrGetGroup (Stetic.ObjectWrapperType.Widget);
+			AddOrGetGroup (Stetic.ObjectWrapperType.Container);
+			AddOrGetGroup (Stetic.ObjectWrapperType.ToolbarItem);
+			AddOrGetGroup (Stetic.ObjectWrapperType.Window);
 		}
 		
 		private Group AddOrGetGroup(string name)
@@ -87,24 +88,18 @@ namespace Stetic {
 				Stetic.ObjectWrapper.Register (type);
 
 				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
-				if (owattr.Deprecated)
+				if (owattr.Deprecated || owattr.Type == ObjectWrapperType.Internal)
 					return;
 
 				Pixbuf icon = Palette.IconForType (type);
+				WidgetFactory factory;
 
-				switch (owattr.Type) {
-				case ObjectWrapperType.Container:
-					AddOrGetGroup("Containers").Append (new WidgetFactory (project, owattr.Name, icon, type));
-					break;
+				if (owattr.Type == ObjectWrapperType.Window)
+					factory = new WindowFactory (project, owattr.Name, icon, type);
+				else
+					factory = new WidgetFactory (project, owattr.Name, icon, type);
 
-				case ObjectWrapperType.Window:
-					AddOrGetGroup("Windows").Append (new WindowFactory (project, owattr.Name, icon, type));
-					break;
-
-				default:
-					AddOrGetGroup("Widgets").Append (new WidgetFactory (project, owattr.Name, icon, type));
-					break;
-				}
+				AddOrGetGroup(owattr.Type).Append (factory);
 			}
 		}
 
