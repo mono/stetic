@@ -52,7 +52,7 @@ namespace Stetic.Wrapper {
 			Gtk.Menu menu = optionmenu.Menu as Gtk.Menu;
 			System.Text.StringBuilder sb = new System.Text.StringBuilder ();
 
-			foreach (Gtk.Widget w in menu.Children) {
+			foreach (Gtk.Widget w in menu) {
 				Gtk.MenuItem item = w as Gtk.MenuItem;
 				if (item == null)
 					continue;

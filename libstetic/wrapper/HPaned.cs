@@ -10,7 +10,7 @@ namespace Stetic.Wrapper {
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable {
 			get {
-				foreach (Gtk.Widget w in paned.Children) {
+				foreach (Gtk.Widget w in paned) {
 					if (!ChildVExpandable (w))
 						return false;
 				}

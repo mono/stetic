@@ -113,7 +113,7 @@ namespace Stetic.Wrapper {
 
 		Widget FindInternalChild (string childId)
 		{
-			foreach (Gtk.Widget w in container.Children) {
+			foreach (Gtk.Widget w in container.AllChildren) {
 				Widget wrapper = Lookup (w);
 				if (wrapper != null && wrapper.InternalChildId == childId)
 					return wrapper;
@@ -235,20 +235,14 @@ namespace Stetic.Wrapper {
 			EmitContentsChanged ();
 		}
 
-		class RealChildEnumerator {
-			public ArrayList Children = new ArrayList ();
-			public void Add (Gtk.Widget widget)
-			{
-				if (!(widget is Placeholder))
-					Children.Add (widget);
-			}
-		}
-
 		public virtual IEnumerable RealChildren {
 			get {
-				RealChildEnumerator rce = new RealChildEnumerator ();
-				container.Forall (rce.Add);
-				return rce.Children;
+				ArrayList children = new ArrayList ();
+				foreach (Gtk.Widget widget in container.AllChildren) {
+					if (!(widget is Placeholder))
+						children.Add (widget);
+				}
+				return children;
 			}
 		}
 

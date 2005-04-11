@@ -51,7 +51,7 @@ namespace Stetic.Wrapper {
 
 			Gtk.Container container = widget as Gtk.Container;
 			if (container != null) {
-				foreach (Gtk.Widget child in new ChildEnumerator (container)) {
+				foreach (Gtk.Widget child in container.AllChildren) {
 					if (Lookup (child) == null)
 						InterceptClicks (child);
 				}
@@ -106,33 +106,13 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		class ChildEnumerator : IEnumerable {
-			public ChildEnumerator (Gtk.Container container)
-			{
-				children = new ArrayList ();
-				container.Forall (Add);
-			}
-
-			ArrayList children;
-
-			public void Add (Gtk.Widget widget)
-			{
-				children.Add (widget);
-			}
-
-			public IEnumerator GetEnumerator ()
-			{
-				return children.GetEnumerator ();
-			}
-		}
-
 		Widget FindWrapper (Gtk.Widget top, int x, int y)
 		{
 			Gtk.Container container = top as Gtk.Container;
 			if (container == null)
 				return Lookup (top);
 
-			foreach (Gtk.Widget child in new ChildEnumerator (container)) {
+			foreach (Gtk.Widget child in container.AllChildren) {
 				if (!child.IsDrawable)
 					continue;
 

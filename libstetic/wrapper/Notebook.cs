@@ -168,7 +168,7 @@ namespace Stetic.Wrapper {
 
 		public override bool HExpandable {
 			get {
-				foreach (Gtk.Widget w in notebook.Children) {
+				foreach (Gtk.Widget w in notebook) {
 					if (ChildHExpandable (w)) 
 						return true;
 				}
@@ -178,7 +178,7 @@ namespace Stetic.Wrapper {
 
 		public override bool VExpandable {
 			get {
-				foreach (Gtk.Widget w in notebook.Children) {
+				foreach (Gtk.Widget w in notebook) {
 					if (ChildVExpandable (w))
 						return true;
 				}

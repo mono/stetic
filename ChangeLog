@@ -1,5 +1,23 @@
 2005-04-11  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/HBox.cs: 
+	* libstetic/wrapper/HPaned.cs: 
+	* libstetic/wrapper/Notebook.cs: 
+	* libstetic/wrapper/OptionMenu.cs: 
+	* libstetic/wrapper/VBox.cs: 
+	* libstetic/wrapper/VPaned.cs: s/.Children//
+
+	* libstetic/wrapper/Container.cs (FindInternalChild): use
+	AllChildren
+	(RealChildren): use AllChildren. kill RealChildEnumerator.
+
+	* libstetic/wrapper/Widget.cs (InterceptClicks, FindWrapper): use
+	AllChildren, kill ChildEnumerator
+
+	* stetic/Grid.cs (ForAll): use new signature
+
+2005-04-11  Dan Winship  <danw@novell.com>
+
 	* glue/custom.c (custom_new): new method
 
 	* libstetic/RadioGroupManager.cs (this[Gtk.Widget]): track the
@@ -13,8 +31,6 @@
 
 	* libstetic/wrapper/Custom.cs (Stetic.Custom.ctor()): call
 	custom_new()
-
-	* stetic/Grid.cs (ForAll): use new signature
 
 	* TODO: misc updates
 
