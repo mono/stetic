@@ -103,6 +103,12 @@ namespace Stetic {
 			return group;
 		}
 
+		void RadioDestroyed (object obj, EventArgs args)
+		{
+			Gtk.Widget radio = obj as Gtk.Widget;
+			this[radio] = null;
+		}
+
 		public string this[Gtk.Widget radio] {
 			get {
 				RadioGroup group = widgets[radio] as RadioGroup;
@@ -115,7 +121,9 @@ namespace Stetic {
 				GLib.SList group_value;
 
 				RadioGroup oldGroup = widgets[radio] as RadioGroup;
-				if (oldGroup != null) {
+				if (oldGroup == null) {
+					radio.Destroyed += RadioDestroyed;
+				} else {
 					if (oldGroup.Name == value)
 						return;
 					oldGroup.Widgets.Remove (radio);
@@ -123,6 +131,13 @@ namespace Stetic {
 						groups.Remove (oldGroup);
 						EmitGroupsChanged ();
 					}
+				}
+
+				if (value == null) {
+					radio.Destroyed -= RadioDestroyed;
+					groupProperty.SetValue (radio, new GLib.SList (IntPtr.Zero), null);
+					widgets.Remove (radio);
+					return;
 				}
 
 				RadioGroup newGroup = FindGroup (value);

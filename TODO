@@ -28,17 +28,18 @@ UI-Designing UI:
 		  you add/remove them.
 		- "Buttons" menu labels need to be better
 
-	- Notebook has a bunch of problems:
-		- tab labels start out with WidgetSites, but lose them
-		  if you edit the label properties
+	- Notebook has a few problems:
 		- should the child properties appear as properties of
 		  the page or the tab? or both? or should they have
 		  different properties?
 		- Switch with Prev/Next isn't implemented
 
 	- Widget.Sensitive needs special handling. Ideally we'd make
-          the widget insensitive, but have its site intercept clicks
-          anyway.
+          the widget insensitive, but intercept clicks on it anyway.
+          (This would have to be done via a separate Gdk.Window not
+          associated with that widget, because gtk_propagate_event()
+          filters out events to insensitive widgets before we get any
+          chance to see them.)
 
 	- Widget.Visible: glade treats this as a shadow property.
           Should we?
@@ -49,10 +50,8 @@ UI-Designing UI:
 
 	- Layout/Fixed
 
-	- Menubar, Toolbar. (Mike Kestner has some code here.) Use the
-          new GtkAction-based stuff (?). Should also support the old
-          stuff as well as far as creation/editing (Toolbar,
-          ToolbarItem, etc)
+	- Menubar. (Mike Kestner has some code here.) Use the new
+          GtkAction-based stuff (?).
 
 	- Gnome widgets (the not-yet-deprecated ones anyway)
 		- Not in a separate "Gnome widgets" group.

@@ -290,8 +290,10 @@ namespace Stetic.Wrapper {
 
 		public virtual void UnSelect (Stetic.Wrapper.Widget wrapper)
 		{
-			if (selection == wrapper.Wrapped)
+			if (selection == wrapper.Wrapped) {
 				Select (null, false);
+				stetic.Selection = null;
+			}
 		}
 
 		public virtual void Select (Placeholder ph)

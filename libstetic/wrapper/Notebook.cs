@@ -194,7 +194,6 @@ namespace Stetic.Wrapper {
 			{
 				AddItemGroup (type,
 					      "Notebook Child Layout",
-					      "TabLabel",
 					      "Position",
 					      "TabPack",
 					      "TabExpand",

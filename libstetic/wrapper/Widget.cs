@@ -174,6 +174,7 @@ namespace Stetic.Wrapper {
 
 		public void Delete ()
 		{
+			UnSelect ();
 			if (ParentWrapper != null)
 				ParentWrapper.Delete (this);
 			else

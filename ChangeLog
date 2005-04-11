@@ -1,3 +1,16 @@
+2005-04-11  Dan Winship  <danw@novell.com>
+
+	* libstetic/RadioGroupManager.cs (this[Gtk.Widget]): track the
+	Destroyed event on radio widgets and update everything
+	appropriately when a radio widget is destroyed.
+
+	* libstetic/wrapper/Widget.cs (Delete): UnSelect when Deleting.
+
+	* libstetic/wrapper/Container.cs (UnSelect): clear the Project
+	selection when unselecting.
+
+	* TODO: misc updates
+
 2005-04-07  Dan Winship  <danw@novell.com>
 
 	* glue/custom.c: 
