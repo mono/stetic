@@ -1,5 +1,7 @@
 2005-04-11  Dan Winship  <danw@novell.com>
 
+	* glue/custom.c (custom_new): new method
+
 	* libstetic/RadioGroupManager.cs (this[Gtk.Widget]): track the
 	Destroyed event on radio widgets and update everything
 	appropriately when a radio widget is destroyed.
@@ -8,6 +10,11 @@
 
 	* libstetic/wrapper/Container.cs (UnSelect): clear the Project
 	selection when unselecting.
+
+	* libstetic/wrapper/Custom.cs (Stetic.Custom.ctor()): call
+	custom_new()
+
+	* stetic/Grid.cs (ForAll): use new signature
 
 	* TODO: misc updates
 

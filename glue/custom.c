@@ -14,6 +14,7 @@ typedef struct {
 } CustomClass;
 
 GType custom_get_type (void);
+Custom *custom_new (void);
 static void custom_realize (GtkWidget *widget);
 
 G_DEFINE_TYPE (Custom, custom, GTK_TYPE_DRAWING_AREA)
@@ -30,6 +31,12 @@ static void
 custom_init (Custom *custom)
 {
 	;
+}
+
+Custom *
+custom_new (void)
+{
+	return g_object_new (custom_get_type (), NULL);
 }
 
 /* from glade */

@@ -186,18 +186,18 @@ namespace Stetic {
 			tips = new Gtk.Tooltips ();
 		}
 
-		protected override void ForAll (bool include_internals, CallbackInvoker invoker)
+		protected override void ForAll (bool include_internals, Gtk.Callback callback)
 		{
 			if (!include_internals)
 				return;
 
 			foreach (object obj in lines) {
 				if (obj is Widget)
-					invoker.Invoke ((Widget)obj);
+					callback ((Widget)obj);
 				else if (obj is Pair) {
 					Pair p = (Pair)obj;
-					invoker.Invoke (p.Label);
-					invoker.Invoke (p.Editor);
+					callback (p.Label);
+					callback (p.Editor);
 				}
 			}
 		}

@@ -10,7 +10,14 @@ namespace Stetic {
 		}
 
 		public Custom (IntPtr raw) : base(raw) {}
-		public Custom () : base (IntPtr.Zero) {}
+
+		[DllImport("libsteticglue")]
+		static extern IntPtr custom_new();
+
+		public Custom () : base (IntPtr.Zero)
+		{
+			Raw = custom_new ();
+		}
 
 		~Custom () { Dispose (); }
 
