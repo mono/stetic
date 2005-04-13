@@ -8,7 +8,7 @@ namespace Stetic {
 
 	public class PropertyDescriptor : ItemDescriptor {
 
-		PropertyInfo memberInfo, propertyInfo, baseInfo;
+		PropertyInfo memberInfo, propertyInfo;
 		bool isWrapperProperty;
 		ParamSpec pspec;
 		Type editorType;

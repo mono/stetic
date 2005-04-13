@@ -40,9 +40,6 @@ namespace Stetic {
 			project.EndGladeImport ();
 		}
 
-		[DllImport("libsteticglue")]
-		static extern bool stetic_g_value_init_for_child_property (ref GLib.Value value, string className, string propertyName);
-
 		static Stetic.Wrapper.Widget ImportWidget (Project project, Stetic.Wrapper.Container parent, XmlNode thischild, XmlNode widget)
 		{
 			string className = widget.Attributes["class"].Value;

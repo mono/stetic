@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.ScrolledWindow);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "ScrolledWindow Properties",
 				      "VscrollbarPolicy",

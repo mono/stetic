@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.EventBox);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Event Box Properties",
 				      "AboveChild",

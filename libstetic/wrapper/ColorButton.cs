@@ -7,7 +7,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.ColorButton);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Color Button Properties",
 				      "Title",

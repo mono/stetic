@@ -7,7 +7,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.SeparatorToolItem);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Toolbar Separator Properties",
 				      "Draw");

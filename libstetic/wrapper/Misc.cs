@@ -6,7 +6,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Misc);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Miscellaneous Alignment Properties",
 				      "Xpad",

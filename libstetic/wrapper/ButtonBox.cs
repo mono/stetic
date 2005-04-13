@@ -7,7 +7,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.ButtonBox);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Button Box Properties",
 				      "LayoutStyle",
@@ -20,7 +20,7 @@ namespace Stetic.Wrapper {
 
 			public static new Type WrappedType = typeof (Gtk.ButtonBox.ButtonBoxChild);
 
-			static new void Register (Type type)
+			internal static new void Register (Type type)
 			{
 				ItemGroup props = AddItemGroup (type, "Button Box Child Layout",
 								"PackType",

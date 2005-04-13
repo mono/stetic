@@ -6,7 +6,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Scale);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			ItemGroup props = AddItemGroup (type, "Scale Properties",
 							"Adjustment.Lower",

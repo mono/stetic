@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.ToolButton);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			if (type == typeof (Stetic.Wrapper.ToolButton)) {
 				AddItemGroup (type, "Toolbar Button Properties",

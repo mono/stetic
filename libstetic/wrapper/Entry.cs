@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Entry);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Entry Properties",
 				      "Text",
@@ -33,7 +33,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		private string GladeInvisibleChar {
+		internal string GladeInvisibleChar {
 			get {
 				return InvisibleChar.ToString ();
 			}

@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Table);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Table Properties",
 				      "NRows",
@@ -301,42 +301,42 @@ namespace Stetic.Wrapper {
 		}
 
 		[Command ("Insert Row Before", "Insert an empty row above the selected row")]
-		void InsertRowBefore (Gtk.Widget context)
+		internal void InsertRowBefore (Gtk.Widget context)
 		{
 			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			AddRow (tc.TopAttach);
 		}
 
 		[Command ("Insert Row After", "Insert an empty row below the selected row")]
-		void InsertRowAfter (Gtk.Widget context)
+		internal void InsertRowAfter (Gtk.Widget context)
 		{
 			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			AddRow (tc.BottomAttach);
 		}
 
 		[Command ("Insert Column Before", "Insert an empty column before the selected column")]
-		void InsertColumnBefore (Gtk.Widget context)
+		internal void InsertColumnBefore (Gtk.Widget context)
 		{
 			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			AddColumn (tc.LeftAttach);
 		}
 
 		[Command ("Insert Column After", "Insert an empty column after the selected column")]
-		void InsertColumnAfter (Gtk.Widget context)
+		internal void InsertColumnAfter (Gtk.Widget context)
 		{
 			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			AddColumn (tc.RightAttach);
 		}
 
 		[Command ("Delete Row", "Delete the selected row")]
-		void DeleteRow (Gtk.Widget context)
+		internal void DeleteRow (Gtk.Widget context)
 		{
 			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			DeleteRow (tc.TopAttach);
 		}
 
 		[Command ("Delete Column", "Delete the selected column")]
-		void DeleteColumn (Gtk.Widget context)
+		internal void DeleteColumn (Gtk.Widget context)
 		{
 			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
 			DeleteColumn (tc.LeftAttach);
@@ -364,7 +364,7 @@ namespace Stetic.Wrapper {
 
 			public static new Type WrappedType = typeof (Gtk.Table.TableChild);
 
-			static new void Register (Type type)
+			internal static new void Register (Type type)
 			{
 				ItemGroup props = AddItemGroup (type, "Table Child Layout",
 								"TopAttach",
@@ -393,12 +393,6 @@ namespace Stetic.Wrapper {
 			Gtk.Table.TableChild tc {
 				get {
 					return (Gtk.Table.TableChild)Wrapped;
-				}
-			}
-
-			Stetic.Wrapper.Table parent {
-				get {
-					return (Stetic.Wrapper.Table)ParentWrapper;
 				}
 			}
 

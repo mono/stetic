@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Button);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			if (type == typeof (Stetic.Wrapper.Button)) {
 				ItemGroup props = AddItemGroup (type, "Button Properties",
@@ -138,7 +138,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[Command ("Remove Button Contents", "Remove the current contents of the button")]
-		void RemoveContents ()
+		internal void RemoveContents ()
 		{
 			if (button.Child != null)
 				button.Remove (button.Child);
@@ -151,7 +151,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[Command ("Restore Button Label", "Restore the button's label")]
-		void RestoreLabel ()
+		internal void RestoreLabel ()
 		{
 			ConstructChild ();
 			EmitNotify ("HasContents");

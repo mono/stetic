@@ -7,7 +7,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.ToggleButton);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			ItemGroup props = AddItemGroup (type, "Toggle Button Properties",
 							"Icon",

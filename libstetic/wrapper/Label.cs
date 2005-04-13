@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Label);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Label Properties",
 				      "LabelProp",
@@ -46,7 +46,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		private string GladeMnemonicWidget {
+		internal string GladeMnemonicWidget {
 			get {
 				Gtk.Widget mnem = MnemonicWidget;
 				if (mnem == null)

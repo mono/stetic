@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Toolbar);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Tool Bar Properties",
 				      "Orientation",
@@ -188,7 +188,7 @@ namespace Stetic.Wrapper {
 		public class ToolbarChild : Container.ContainerChild {
 			public static new Type WrappedType = typeof (Gtk.Toolbar.ToolbarChild);
 
-			static new void Register (Type type)
+			internal static new void Register (Type type)
 			{
 				AddItemGroup (type, "Tool Bar Child Properties",
 					      "Homogeneous",

@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Image);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			ItemGroup props = AddItemGroup (type, "Image Properties",
 							"UseStock",

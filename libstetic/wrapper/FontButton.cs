@@ -7,7 +7,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.FontButton);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			ItemGroup props = AddItemGroup (type, "Font Button Properties",
 							"Title",

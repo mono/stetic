@@ -8,7 +8,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Notebook);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Notebook Properties",
 				      "EnablePopup",
@@ -114,54 +114,54 @@ namespace Stetic.Wrapper {
 		}
 
 		[Command ("Go to Previous Page", "Show the previous page", "CheckPreviousPage")]
-		void PreviousPage ()
+		internal void PreviousPage ()
 		{
 			notebook.PrevPage ();
 		}
 
-		bool CheckPreviousPage ()
+		internal bool CheckPreviousPage ()
 		{
 			return notebook.CurrentPage > 0;
 		}
 
 		[Command ("Go to Next Page", "Show the next page", "CheckNextPage")]
-		void NextPage ()
+		internal void NextPage ()
 		{
 			notebook.NextPage ();
 		}
 
-		bool CheckNextPage ()
+		internal bool CheckNextPage ()
 		{
 			return notebook.CurrentPage < notebook.NPages - 1;
 		}
 
 		[Command ("Delete Page", "Delete the current page")]
-		void DeletePage ()
+		internal void DeletePage ()
 		{
 			tabs.RemoveAt (notebook.CurrentPage);
 			notebook.RemovePage (notebook.CurrentPage);
 		}
 
 		[Command ("Swap with Previous Page", "Swap the contents of this page with the contents of the previous page", "CheckPreviousPage")]
-		void SwapPrevious ()
+		internal void SwapPrevious ()
 		{
 			// FIXME
 		}
 
 		[Command ("Swap with Next Page", "Swap the contents of this page with the contents of the next page", "CheckNextPage")]
-		void SwapNext ()
+		internal void SwapNext ()
 		{
 			// FIXME
 		}
 
 		[Command ("Insert Page Before", "Insert a blank page before this one")]
-		void InsertBefore ()
+		internal void InsertBefore ()
 		{
 			notebook.CurrentPage = InsertPage (notebook.CurrentPage);
 		}
 
 		[Command ("Insert Page After", "Insert a blank page after this one")]
-		void InsertAfter ()
+		internal void InsertAfter ()
 		{
 			notebook.CurrentPage = InsertPage (notebook.CurrentPage + 1);
 		}
@@ -190,7 +190,7 @@ namespace Stetic.Wrapper {
 
 			public static new Type WrappedType = typeof (Gtk.Notebook.NotebookChild);
 
-			static new void Register (Type type)
+			internal static new void Register (Type type)
 			{
 				AddItemGroup (type,
 					      "Notebook Child Layout",

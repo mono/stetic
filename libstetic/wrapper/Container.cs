@@ -10,7 +10,7 @@ namespace Stetic.Wrapper {
 
 		static Hashtable childTypes = new Hashtable ();
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			// Check if the type or one of its ancestors declares a
 			// Stetic.Wrapper.Container.ContainerChild subtype
@@ -397,7 +397,7 @@ namespace Stetic.Wrapper {
 
 			public static new Type WrappedType = typeof (Gtk.Container.ContainerChild);
 
-			static void Register ()
+			internal static void Register ()
 			{
 				// FIXME?
 			}

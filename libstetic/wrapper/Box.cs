@@ -7,7 +7,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Box);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Box Properties",
 				      "Homogeneous",
@@ -85,7 +85,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[Command ("Insert Before", "Insert an empty row/column before the selected one")]
-		void InsertBefore (Gtk.Widget context)
+		internal void InsertBefore (Gtk.Widget context)
 		{
 			Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
 			Placeholder ph = CreatePlaceholder ();
@@ -100,7 +100,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[Command ("Insert After", "Insert an empty row/column after the selected one")]
-		void InsertAfter (Gtk.Widget context)
+		internal void InsertAfter (Gtk.Widget context)
 		{
 			Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
 			Placeholder ph = CreatePlaceholder ();
@@ -152,7 +152,7 @@ namespace Stetic.Wrapper {
 
 			public static new Type WrappedType = typeof (Gtk.Box.BoxChild);
 
-			static new void Register (Type type)
+			internal static new void Register (Type type)
 			{
 				ItemGroup props = AddItemGroup (type, "Box Child Layout",
 								"PackType",

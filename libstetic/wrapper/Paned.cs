@@ -6,7 +6,7 @@ namespace Stetic.Wrapper {
 
 		public static new Type WrappedType = typeof (Gtk.Paned);
 
-		static new void Register (Type type)
+		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Pane Properties",
 				      "MinPosition",
@@ -42,7 +42,7 @@ namespace Stetic.Wrapper {
 
 			public static new Type WrappedType = typeof (Gtk.Paned.PanedChild);
 
-			static new void Register (Type type)
+			internal static new void Register (Type type)
 			{
 				AddItemGroup (type, "Pane Child Layout",
 					      "Resize",
