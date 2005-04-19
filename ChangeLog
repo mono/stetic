@@ -1,3 +1,16 @@
+2005-04-19  Dan Winship  <danw@novell.com>
+
+	* libstetic/GladeUtils.cs (ParseProperty, PropToString): do the
+	value<->string conversion here rather than calling out to C glue.
+	Later on, this will let us get rid of some per-widget hacks, but
+	for now it just does exactly what the C code did.
+
+	* libstetic/wrapper/Container.cs (GladeExportChild): fix the
+	tagging of internal-children, which has apparently been broken for
+	a while.
+
+	* glue/value.c: gone
+
 2005-04-13  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/*.cs: change a bunch of fields that are only

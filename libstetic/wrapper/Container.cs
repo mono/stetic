@@ -90,8 +90,8 @@ namespace Stetic.Wrapper {
 			childprops = null;
 			wrapper.GladeExport (out className, out id, out props);
 
-			if (InternalChildId != null)
-				internalId = InternalChildId;
+			if (wrapper.InternalChildId != null)
+				internalId = wrapper.InternalChildId;
 			else {
 				ObjectWrapper childwrapper = ChildWrapper (wrapper);
 				if (childwrapper != null)

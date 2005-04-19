@@ -7,5 +7,4 @@ libsteticglue_la_LIBADD = $(GTK_LIBS)
 
 libsteticglue_la_SOURCES = 	\
 	custom.c		\
-	paramspec.c		\
-	value.c
+	paramspec.c
