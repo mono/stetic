@@ -1,4 +1,4 @@
-INCLUDES = $(GTK_CFLAGS) -std=c99
+INCLUDES = $(GTK_CFLAGS)
 
 lib_LTLIBRARIES = libsteticglue.la
 
@@ -7,4 +7,5 @@ libsteticglue_la_LIBADD = $(GTK_LIBS)
 
 libsteticglue_la_SOURCES = 	\
 	custom.c		\
+	misc.c			\
 	paramspec.c

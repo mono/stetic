@@ -24,6 +24,7 @@ libstetic_dll_sources =			\
 	RangeAttribute.cs		\
 	Set.cs				\
 	TranslatableAttribute.cs	\
+	editor/Accelerator.cs		\
 	editor/Boolean.cs		\
 	editor/Char.cs			\
 	editor/Color.cs			\
@@ -46,6 +47,7 @@ libstetic_dll_sources =			\
 	wrapper/ButtonBox.cs		\
 	wrapper/Calendar.cs		\
 	wrapper/CheckButton.cs		\
+	wrapper/CheckMenuItem.cs	\
 	wrapper/ColorButton.cs		\
 	wrapper/ComboBox.cs		\
 	wrapper/ComboBoxEntry.cs	\
@@ -65,9 +67,11 @@ libstetic_dll_sources =			\
 	wrapper/HScrollbar.cs		\
 	wrapper/HSeparator.cs		\
 	wrapper/Image.cs		\
+	wrapper/ImageMenuItem.cs	\
 	wrapper/Label.cs		\
 	wrapper/MessageDialog.cs	\
 	wrapper/Menu.cs			\
+	wrapper/MenuBar.cs		\
 	wrapper/MenuItem.cs		\
 	wrapper/Misc.cs			\
 	wrapper/Notebook.cs		\
@@ -76,10 +80,12 @@ libstetic_dll_sources =			\
 	wrapper/Paned.cs		\
 	wrapper/ProgressBar.cs		\
 	wrapper/RadioButton.cs		\
+	wrapper/RadioMenuItem.cs	\
 	wrapper/RadioToolButton.cs	\
 	wrapper/Range.cs		\
 	wrapper/Scale.cs		\
 	wrapper/ScrolledWindow.cs	\
+	wrapper/SeparatorMenuItem.cs	\
 	wrapper/SeparatorToolItem.cs	\
 	wrapper/SpinButton.cs		\
 	wrapper/Statusbar.cs		\
@@ -99,11 +105,10 @@ libstetic_dll_sources =			\
 	wrapper/Widget.cs		\
 	wrapper/Window.cs
 
-comma = ,
-ICON_FILES = $(wildcard $(srcdir)/wrapper/pixmaps/*.png)
-ICON_RESOURCES = $(foreach file,$(ICON_FILES),-resource:$(file)$(comma)$(notdir $(file)))
-
-libstetic.dll: $(libstetic_dll_sources) $(ICON_FILES)
-	$(MCS) -g -pkg:gnome-sharp-2.0 -target:library -o $@ $(libstetic_dll_sources) $(ICON_RESOURCES)
+libstetic.dll: $(libstetic_dll_sources)
+	@rm -f sources.rsp
+	@echo $(libstetic_dll_sources) > sources.rsp
+	@for pixmap in $(srcdir)/wrapper/pixmaps/*.png; do echo -resource:$$pixmap,`basename $$pixmap` >> sources.rsp; done
+	$(MCS) -g -pkg:gnome-sharp-2.0 -target:library -o $@ @sources.rsp
 
 CLEANFILES = libstetic.dll libstetic.dll.mdb

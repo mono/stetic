@@ -202,6 +202,11 @@ namespace Stetic {
 			}
 		}
 
+		protected static ArrayList GetItemGroups (Type type)
+		{
+			return groups[type] as ArrayList;
+		}
+
 		protected static ItemGroup AddContextMenuItems (Type type, params string[] items)
 		{
 			ItemGroup group = new ItemGroup (null, type, WrappedType (type), items);

@@ -1,3 +1,25 @@
+2005-04-20  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/CheckMenuItem.cs: 
+	* libstetic/wrapper/ImageMenuItem.cs: 
+	* libstetic/wrapper/MenuBar.cs: 
+	* libstetic/wrapper/MenuItem.cs: 
+	* libstetic/wrapper/RadioMenuItem.cs: 
+	* libstetic/wrapper/SeparatorMenuItem.cs: wrap these enough to be
+	able to glade-import menus, but not really well enough to be able
+	to edit them happily.
+
+	* libstetic/Makefile.am (libstetic.dll): Change the rule to write
+	all the args out to a response file and then use that.
+
+	* libstetic/editor/Accelerator.cs: PropertyGrid editor for
+	accelerators. Loosely based on EggCellRendererKeys.
+
+	* glue/misc.c (stetic_keycode_is_modifier): for
+	Stetic.Editor.Accelerator
+
+	* glue/Makefile.am (libsteticglue_la_SOURCES): add misc.c
+
 2005-04-19  Dan Winship  <danw@novell.com>
 
 	* libstetic/GladeUtils.cs (ParseProperty, PropToString): do the
