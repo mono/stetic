@@ -1,6 +1,6 @@
 INCLUDES = $(GTK_CFLAGS)
 
-lib_LTLIBRARIES = libsteticglue.la
+pkglib_LTLIBRARIES = libsteticglue.la
 
 libsteticglue_la_LDFLAGS = -module -avoid-version -no-undefined
 libsteticglue_la_LIBADD = $(GTK_LIBS)

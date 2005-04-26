@@ -1,4 +1,4 @@
-noinst_DATA = libstetic.dll
+pkglib_DATA = libstetic.dll libstetic.dll.config
 
 libstetic_dll_sources =			\
 	CommandAttribute.cs		\
@@ -109,6 +109,12 @@ libstetic.dll: $(libstetic_dll_sources)
 	@rm -f sources.rsp
 	@echo $(libstetic_dll_sources) > sources.rsp
 	@for pixmap in $(srcdir)/wrapper/pixmaps/*.png; do echo -resource:$$pixmap,`basename $$pixmap` >> sources.rsp; done
-	$(MCS) -g -pkg:gnome-sharp-2.0 -target:library -o $@ @sources.rsp
+	$(MCS) -debug -pkg:gnome-sharp-2.0 -target:library -out:$@ @sources.rsp
 
-CLEANFILES = libstetic.dll libstetic.dll.mdb
+CLEANFILES = libstetic.dll libstetic.dll.mdb sources.rsp
+
+EXTRA_DIST =				\
+	$(libstetic_dll_sources)	\
+	libstetic.dll.config		\
+	wrapper/pixmaps/COPIED		\
+	wrapper/pixmaps/*.png

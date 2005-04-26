@@ -1,3 +1,29 @@
+2005-04-26  Dan Winship  <danw@novell.com>
+
+	* glue/Makefile.am (pkglib_LTLIBRARIES): install libsteticglue.la
+
+	* libstetic/Makefile.am (pkglib_DATA): install libstetic.dll and
+	libstetic.dll.config
+	(libstetic.dll): update to non-warned-about mcs option syntax
+	(CLEANFILES, EXTRA_DIST): update
+	
+	* libstetic/libstetic.dll.config: remove unused mapping
+
+	* libstetic/wrapper/pixmaps/Makefile.am: remove unused Makefile
+
+	* stetic/Makefile.am (pkglib_DATA, bin_DATA): install stetic and
+	stetic.exe
+	(stetic.exe): update to non-warned-about mcs option syntax
+	(CLEANFILES, EXTRA_DIST): update
+	(run, trace, mdb, gdb): targets to run the uninstalled stetic.exe
+
+	* stetic/stetic.in: redo this for installation
+
+	* stetic/stetic.exe.config: remove this; stetic.exe doesn't
+	DllImport anything of its own
+
+	* configure.in: remove unused GACUTIL checks
+
 2005-04-20  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/CheckMenuItem.cs: 

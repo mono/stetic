@@ -21,16 +21,8 @@ if test "$MCS" = "no" ; then
 	AC_MSG_ERROR([No $CS compiler found])
 fi
 
-AC_PATH_PROG(GACUTIL, gacutil, no)
-if test "x$GACUTIL" = "xno" ; then
-	AC_MSG_ERROR([No gacutil tool found])
-fi
-GACUTIL_FLAGS='/package $(PACKAGE_VERSION) /gacdir $(DESTDIR)$(libdir)'
-
 AC_SUBST(MONO)
 AC_SUBST(MCS)
-AC_SUBST(GACUTIL)
-AC_SUBST(GACUTIL_FLAGS)
 
 PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.4)
 AC_SUBST(GTK_CFLAGS)
