@@ -9,8 +9,6 @@ namespace Stetic.Wrapper {
 		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Pane Properties",
-				      "MinPosition",
-				      "MaxPosition",
 				      "BorderWidth");
 		}
 

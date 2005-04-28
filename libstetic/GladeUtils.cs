@@ -318,7 +318,7 @@ namespace Stetic {
 						      adj.Value, adj.Lower, adj.Upper,
 						      adj.StepIncrement, adj.PageIncrement,
 						      adj.PageSize);
-			} else if (prop.PropertyType.IsEnum && prop.ParamSpec != null) {
+			} else if (value is Enum && prop.ParamSpec != null) {
 				IntPtr klass = g_type_class_ref (prop.ParamSpec.ValueType);
 
 				if (prop.PropertyType.IsDefined (typeof (FlagsAttribute), false)) {
@@ -350,7 +350,7 @@ namespace Stetic {
 					IntPtr name = Marshal.ReadIntPtr (enum_value, Marshal.SizeOf (typeof (IntPtr)));
 					return GLib.Marshaller.Utf8PtrToString (name);
 				}
-			} else if (prop.PropertyType == typeof (bool))
+			} else if (value is bool)
 				return (bool)value ? "True" : "False";
 			else
 				return value.ToString ();
@@ -377,6 +377,8 @@ namespace Stetic {
 				foreach (ItemDescriptor item in group.Items) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null || prop.GladeName == null)
+						continue;
+					if (!prop.VisibleFor (wrapper))
 						continue;
 
 					string val = PropToString (wrapper, prop);

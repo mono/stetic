@@ -1,3 +1,19 @@
+2005-04-28  Dan Winship  <danw@novell.com>
+
+	* libstetic/GladeUtils.cs (PropToString): switch based on the type
+	of value, not on prop.PropertyType, since they might not match
+	(eg, if UseUnderlying is set).
+	(GetProps): skip props that aren't visible on a given wrapper
+	
+	* glue/custom.c: define the last_modification_time property to
+	avoid warnings on glade import
+
+	* libstetic/wrapper/Expander.cs: 
+	* libstetic/wrapper/Frame.cs (GladeExportChild): implement
+
+	* libstetic/wrapper/Paned.cs: Remove MaxPosition/MinPosition from
+	the Pane Properties; they're not writable.
+
 2005-04-26  Dan Winship  <danw@novell.com>
 
 	* glue/Makefile.am (pkglib_LTLIBRARIES): install libsteticglue.la
