@@ -1,3 +1,15 @@
+2005-05-04  Dan Winship  <danw@novell.com>
+
+	* configure.in: require gtk-sharp 2.5
+
+	* libstetic/editor/GroupPicker.cs: use ComboBox.RowSeparatorFunc
+	to add a separator to the menu
+
+	* libstetic/wrapper/Toolbar.cs (Tooltips): Remove; this is a real
+	property in gtk 2.6
+
+	* libstetic/wrapper/ToggleToolButton.cs (Active): Likewise
+
 2005-04-28  Dan Winship  <danw@novell.com>
 
 	* libstetic/GladeUtils.cs (PropToString): switch based on the type

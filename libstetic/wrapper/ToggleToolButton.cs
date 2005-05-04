@@ -20,25 +20,5 @@ namespace Stetic.Wrapper {
 		{
 			return new Gtk.ToggleToolButton (Gtk.Stock.Bold);
 		}
-
-		// FIXME. Not needed in 2.6
-		[GladeProperty (Name = "active", Proxy = "GladeActive")]
-		public bool Active {
-			get {
-				return ((Gtk.ToggleToolButton)Wrapped).Active;
-			}
-			set {
-				((Gtk.ToggleToolButton)Wrapped).Active = value;
-			}
-		}
-
-		public string GladeActive {
-			get {
-				return Active ? "True" : "False";
-			}
-			set {
-				Active = (value == "True");
-			}
-		}
 	}
 }

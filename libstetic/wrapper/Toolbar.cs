@@ -38,26 +38,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		// FIXME. Not needed in 2.6
-		[GladeProperty (Name = "tooltips", Proxy = "GladeTooltips")]
-		public bool Tooltips {
-			get {
-				return toolbar.Tooltips;
-			}
-			set {
-				toolbar.Tooltips = value;
-			}
-		}
-
-		public string GladeTooltips {
-			get {
-				return Tooltips ? "True" : "False";
-			}
-			set {
-				Tooltips = (value == "True");
-			}
-		}
-
 		Gtk.Toolbar toolbar {
 			get {
 				return (Gtk.Toolbar)Wrapped;
