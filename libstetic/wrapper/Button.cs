@@ -116,6 +116,30 @@ namespace Stetic.Wrapper {
 			hasLabel = true;
 		}
 
+		public override void GladeExport (out string className, out string id, out Hashtable props)
+		{
+			base.GladeExport (out className, out id, out props);
+			props["use_stock"] = IsStock ? "True" : "False";
+		}
+
+		public override IEnumerable RealChildren {
+			get {
+				if (HasLabel)
+					return new Gtk.Widget[0];
+				else
+					return base.RealChildren;
+			}
+		}
+
+		public override IEnumerable GladeChildren {
+			get {
+				if (Icon == null || IsStock)
+					return new Gtk.Widget[0];
+				else
+					return base.RealChildren;
+			}
+		}
+
 		private Gtk.Button button {
 			get {
 				return (Gtk.Button)Wrapped;
@@ -210,6 +234,26 @@ namespace Stetic.Wrapper {
 			alignment.ShowAll ();
 
 			button.Add (alignment);
+
+			Widget wrapper;
+			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Label), labelWidget);
+			wrapper.Unselectable = true;
+			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Image), iconWidget);
+			wrapper.Unselectable = true;
+			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.HBox), box);
+			wrapper.Unselectable = true;
+			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Alignment), alignment);
+			wrapper.Unselectable = true;
+		}
+
+		bool IsStock {
+			get {
+				if (icon == null || !icon.StartsWith ("stock:"))
+					return false;
+
+				Gtk.StockItem item = Gtk.Stock.Lookup (icon.Substring (6));
+				return item.Label != null && label == item.Label;
+			}
 		}
 
 		[Editor (typeof (Stetic.Editor.Image))]
@@ -255,9 +299,6 @@ namespace Stetic.Wrapper {
 		public bool HasResponseId {
 			get {
 				Stetic.Wrapper.Widget pwrap = ParentWrapper;
-				if (pwrap == null)
-					return false;
-				pwrap = pwrap.ParentWrapper;
 				if (pwrap == null)
 					return false;
 				return pwrap.InternalChildId == "action_area";

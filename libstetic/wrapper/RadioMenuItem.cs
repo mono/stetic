@@ -36,12 +36,23 @@ namespace Stetic.Wrapper {
 		protected override void GladeImport (string className, string id, Hashtable props)
 		{
 			string group = GladeUtils.ExtractProperty ("group", props);
+			string active = GladeUtils.ExtractProperty ("active", props);
 			base.GladeImport (className, id, props);
 
 			if (group != null)
 				Group = group;
 			else
 				Group = Wrapped.Name;
+			if (active == "True")
+				((Gtk.RadioMenuItem)Wrapped).Active = true;
+		}
+
+		public override void GladeExport (out string className, out string id, out Hashtable props)
+		{
+			base.GladeExport (out className, out id, out props);
+			string group = GroupManager.GladeGroupName (Wrapped);
+			if (group != id)
+				props["group"] = group;
 		}
 
 		[Editor (typeof (Stetic.Editor.GroupPicker))]

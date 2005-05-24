@@ -108,25 +108,29 @@ namespace Stetic.Wrapper {
 
 		Widget FindWrapper (Gtk.Widget top, int x, int y)
 		{
+			Widget wrapper;
+
 			Gtk.Container container = top as Gtk.Container;
-			if (container == null)
-				return Lookup (top);
+			if (container != null) {
+				foreach (Gtk.Widget child in container.AllChildren) {
+					if (!child.IsDrawable)
+						continue;
 
-			foreach (Gtk.Widget child in container.AllChildren) {
-				if (!child.IsDrawable)
-					continue;
-
-				Gdk.Rectangle alloc = child.Allocation;
-				if (alloc.Contains (x, y)) {
-					Widget wrapper;
-					if (child.GdkWindow == top.GdkWindow)
-						wrapper = FindWrapper (child, x, y);
-					else
-						wrapper = FindWrapper (child, x - alloc.X, y - alloc.Y);
-					if (wrapper != null)
-						return wrapper;
+					Gdk.Rectangle alloc = child.Allocation;
+					if (alloc.Contains (x, y)) {
+						if (child.GdkWindow == top.GdkWindow)
+							wrapper = FindWrapper (child, x, y);
+						else
+							wrapper = FindWrapper (child, x - alloc.X, y - alloc.Y);
+						if (wrapper != null)
+							return wrapper;
+					}
 				}
 			}
+
+			wrapper = Lookup (top);
+			if (wrapper != null && wrapper.Unselectable)
+				return null;
 
 			return Lookup (top);
 		}
@@ -194,6 +198,8 @@ namespace Stetic.Wrapper {
 
 		public virtual bool HExpandable { get { return false; } }
 		public virtual bool VExpandable { get { return false; } }
+
+		public bool Unselectable;
 
 		bool window_visible;
 		[GladeProperty]

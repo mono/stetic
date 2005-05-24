@@ -34,7 +34,7 @@ namespace Stetic {
 				// Split-up property (eg, "XOptions/XExpand")
 				gladeProperty = new PropertyDescriptor (wrapperType, objectType, propertyName.Substring (0, slash));
 				propertyInfo = FindProperty (wrapperType, objectType, propertyName.Substring (slash + 1));
-				isWrapperProperty = true;
+				isWrapperProperty = propertyInfo.DeclaringType.IsSubclassOf (typeof (ObjectWrapper));
 			} else {
 				// Basic simple property
 				propertyInfo = FindProperty (wrapperType, objectType, propertyName);
@@ -76,8 +76,13 @@ namespace Stetic {
 
 				if (attr is Stetic.GladePropertyAttribute) {
 					gladeAttribute = (GladePropertyAttribute)attr;
-					if (gladeAttribute.Proxy != null)
+					if (gladeAttribute.Proxy != null) {
 						gladeProperty = new PropertyDescriptor (wrapperType, objectType, gladeAttribute.Proxy);
+						if (gladeProperty.pspec == null)
+							gladeProperty.pspec = pspec;
+						if (gladeProperty.gladeAttribute == null)
+							gladeProperty.gladeAttribute = gladeAttribute;
+					}
 				}
 			}
 		}
@@ -209,13 +214,19 @@ namespace Stetic {
 
 		public GladeProperty GladeFlags {
 			get {
-				return gladeAttribute != null ? gladeAttribute.Flags : 0;
+				if (gladeAttribute != null)
+					return gladeAttribute.Flags;
+				else
+					return 0;
 			}
 		}
 
 		public PropertyDescriptor GladeProperty {
 			get {
-				return gladeProperty;
+				if (gladeProperty != null)
+					return gladeProperty;
+				else
+					return this;
 			}
 		}
 
@@ -223,38 +234,10 @@ namespace Stetic {
 			get {
 				if (gladeAttribute != null && gladeAttribute.Name != null)
 					return gladeAttribute.Name;
-				else if (gladeProperty != null && gladeProperty.GladeName != null)
-					return gladeProperty.GladeName;
 				else if (pspec != null)
 					return pspec.Name.Replace ('-', '_');
 				else
 					return null;
-			}
-		}
-
-		public object GladeGetValue (ObjectWrapper wrapper)
-		{
-			if (gladeProperty != null)
-				return gladeProperty.GetValue (wrapper);
-			else {
-				object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
-				if (memberInfo != null)
-					return memberInfo.GetValue (obj, null);
-				else
-					return propertyInfo.GetValue (obj, null);
-			}
-		}
-
-		public void GladeSetValue (ObjectWrapper wrapper, object value)
-		{
-			if (gladeProperty != null)
-				gladeProperty.SetValue (wrapper, value);
-			else {
-				object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
-				if (memberInfo != null)
-					memberInfo.SetValue (obj, value, null);
-				else
-					propertyInfo.SetValue (obj, value, null);
 			}
 		}
 	}

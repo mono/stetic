@@ -2,23 +2,28 @@ using System;
 using System.Collections;
 using System.Reflection;
 
-// The external (UI/glade file) representation of "radio widget"
-// (Gtk.RadioButton, Gtk.RadioToolButton, and Gtk.RadioMenuItem) groups
-// is that the groups have names, and each widget's "group" property stores
-// the name of its group.
+// The stetic representation of "radio widget" (Gtk.RadioButton,
+// Gtk.RadioToolButton, and Gtk.RadioMenuItem) groups is that the
+// groups have names, and each widget's "Group" property stores the
+// name of its group. The glade representation is similar, except that
+// the group names aren't arbitrary; they have to be the name of the
+// first widget in the group. (On disk, the "group leader" has no
+// "group" property, and the other widgets have the leader's name as
+// their group property.)
 //
-// The internal (Gtk) representation of groups is that each radio widget
-// has a GLib.SList "Group" property. The content of the list is essentially
-// opaque. (For Gtk.RadioButton, the list contains all of the RadioButtons
-// in the group. But for Gtk.ToolRadioButton it contains pointers to internal
-// widgets, not the ToolRadioButtons themselves.) The only thing we can do
-// with them then is to read one widget's group and then immediately assign
-// it to another widget. We can't look into the list, or assume that a
-// widget's Group property will keep the same value if any other widget's
-// Group changes.
+// The internal gtk representation of groups is that each radio widget
+// has a GLib.SList "Group" property. The content of the list is
+// essentially opaque. (For Gtk.RadioButton, the list contains all of
+// the RadioButtons in the group. But for Gtk.ToolRadioButton it
+// contains pointers to internal widgets, not the ToolRadioButtons
+// themselves.) The only thing we can do with them then is to read one
+// widget's group and then immediately assign it to another widget. We
+// can't look into the list, or assume that a widget's Group property
+// will keep the same value if any other widget's Group changes.
 //
-// Each radio widget type wrapper class keeps a static RadioGroupManager to
-// handle this string<->GLib.SList translation for it.
+// Each radio widget type wrapper class keeps a static
+// RadioGroupManager to handle this string<->GLib.SList translation
+// for it.
 
 namespace Stetic {
 
@@ -153,6 +158,16 @@ namespace Stetic {
 				newGroup.Widgets.Add (radio);
 				widgets[radio] = newGroup;
 			}
+		}
+
+		public string GladeGroupName (Gtk.Widget radio)
+		{
+			RadioGroup group = widgets[radio] as RadioGroup;
+			if (group == null || group.Widgets.Count == 0)
+				return null;
+
+			Gtk.Widget leader = (Gtk.Widget)group.Widgets[0];
+			return leader.Name;
 		}
 	}
 }

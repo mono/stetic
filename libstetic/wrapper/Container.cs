@@ -246,6 +246,12 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		public virtual IEnumerable GladeChildren {
+			get {
+				return RealChildren;
+			}
+		}
+
 		protected virtual void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			Gtk.Container.ContainerChild cc;

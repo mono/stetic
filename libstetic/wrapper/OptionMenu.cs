@@ -14,7 +14,6 @@ namespace Stetic.Wrapper {
 		internal static new void Register (Type type)
 		{
 			AddItemGroup (type, "Option Menu Properties",
-				      "Items",
 				      "Active");
 		}
 
@@ -27,14 +26,20 @@ namespace Stetic.Wrapper {
 				menu.Show ();
 				optionmenu.Menu = menu;
 			}
-			ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Menu), optionmenu.Menu);
+			Widget menuWrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Menu), optionmenu.Menu);
+			menuWrapper.InternalChildId = "menu";
 		}
 
 		protected override void GladeImport (string className, string id, Hashtable props)
 		{
-			GladeUtils.ExtractProperty ("history", props);
+			string history = GladeUtils.ExtractProperty ("history", props);
 			base.GladeImport (className, id, props);
-			stetic.GladeImportComplete += FlattenMenu;
+			stetic.GladeImportComplete += delegate () {
+				if (history != null)
+					Active = Int32.Parse (history);
+				else
+					Active = 0;
+			};
 		}
 
 		public override Widget GladeSetInternalChild (string childId, string className, string id, Hashtable props)
@@ -47,22 +52,10 @@ namespace Stetic.Wrapper {
 			return wrapper;
 		}
 
-		void FlattenMenu ()
-		{
-			Gtk.Menu menu = optionmenu.Menu as Gtk.Menu;
-			System.Text.StringBuilder sb = new System.Text.StringBuilder ();
-
-			foreach (Gtk.Widget w in menu) {
-				Gtk.MenuItem item = w as Gtk.MenuItem;
-				if (item == null)
-					continue;
-				Gtk.Label label = item.Child as Gtk.Label;
-				if (label != null)
-					sb.Append (label.LabelProp);
-				sb.Append ("\n");
+		public override IEnumerable GladeChildren {
+			get {
+				return new Gtk.Widget[] { optionmenu.Menu };
 			}
-
-			Items = sb.ToString ();
 		}
 
 		Gtk.OptionMenu optionmenu {
@@ -71,45 +64,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		string items = "";
-		string[] item = new string[0];
-
-		[Editor (typeof (Stetic.Editor.Text))]
-		[Description ("Items", "The items to display in the Option Menu, one per line")]
-		public string Items {
-			get {
-				return items;
-			}
-			set {
-				int active = optionmenu.History;
-				Gtk.Menu menu = new Gtk.Menu ();
-
-				items = value;
-				while (items.EndsWith ("\n"))
-					items = items.Substring (0, items.Length - 1);
-				item = items.Split ('\n');
-
-				for (int i = 0; i < item.Length; i++) {
-					Gtk.MenuItem mitem;
-					if (item[i] == "")
-						mitem = new Gtk.SeparatorMenuItem ();
-					else
-						mitem = new Gtk.MenuItem (item[i]);
-					mitem.Show ();
-					mitem.Activated += delegate (object obj, EventArgs args) {
-						EmitNotify ("Active");
-					};
-					menu.Add (mitem);
-				}
-
-				menu.Show ();
-				optionmenu.Menu = menu;
-				optionmenu.SetHistory ((uint)active);
-
-				EmitNotify ("Items");
-			}
-		}
-
+		[GladeProperty (Name = "history")]
 		[Description ("Active", "The active menu item")]
 		[Range (0, System.Int32.MaxValue)]
 		public int Active {

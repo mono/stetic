@@ -161,7 +161,7 @@ namespace Stetic {
 			if (container != null) {
 				XmlElement elt;
 
-				foreach (Gtk.Widget child in container.RealChildren) {
+				foreach (Gtk.Widget child in container.GladeChildren) {
 #if FIXME
 					if (!site.Occupied) {
 						child = doc.CreateElement ("child");

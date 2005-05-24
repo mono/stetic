@@ -81,19 +81,21 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		string labelText;
+
 		[GladeProperty (Name = "label")]
 		[Description ("Label", "The text of the menu item")]
 		public string Label {
 			get {
-				return label.LabelProp;
+				return labelText;
 			}
 			set {
-				label.LabelProp = value;
+				label.LabelProp = labelText = value;
 				EmitNotify ("Label");
 			}
 		}
 
-		[GladeProperty (Name = "use_underline", Proxy = "GladeUseUnderline")]
+		[GladeProperty (Name = "use_underline")]
 		[Description ("Use Underline", "If set, an underline in the text indicates the next character should be used for the mnemonic accelerator key")]
 		public bool UseUnderline {
 			get {
@@ -102,15 +104,6 @@ namespace Stetic.Wrapper {
 			set {
 				label.UseUnderline = value;
 				EmitNotify ("UseUnderline");
-			}
-		}
-
-		internal string GladeUseUnderline {
-			get {
-				return UseUnderline ? "True" : "False";
-			}
-			set {
-				UseUnderline = (value == "True");
 			}
 		}
 

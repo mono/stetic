@@ -22,7 +22,10 @@ namespace Stetic {
 			foreach (ItemGroup group in wrapper.ItemGroups) {
 				foreach (ItemDescriptor item in group.Items) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
-					if (prop == null || prop.GladeName == null)
+					if (prop == null)
+						continue;
+					prop = prop.GladeProperty;
+					if (prop.GladeName == null)
 						continue;
 					if (prop.GladeFlags == 0 ||
 					    (prop.GladeFlags & GladeProperty.UseUnderlying) != 0)
@@ -38,27 +41,117 @@ namespace Stetic {
 			}
 		}
 
-		static void ParseProperty (Type type, bool childprop, string name, string strval, out GLib.Value value)
+		static GLib.Value ParseBasicType (GLib.TypeFundamentals type, string strval)
 		{
-			if (name == "adjustment") {
-				try {
-					string[] vals = strval.Split (' ');
-					double deflt, min, max, step, page_inc, page_size;
-
-					deflt = Double.Parse (vals[0]);
-					min = Double.Parse (vals[1]);
-					max = Double.Parse (vals[2]);
-					step = Double.Parse (vals[3]);
-					page_inc = Double.Parse (vals[4]);
-					page_size = Double.Parse (vals[5]);
-
-					value = new GLib.Value (new Gtk.Adjustment (deflt, min, max, step, page_inc, page_size));
-					return;
-				} catch {
-					;
-				}
+			switch (type) {
+			case GLib.TypeFundamentals.TypeChar:
+				return new GLib.Value (SByte.Parse (strval));
+			case GLib.TypeFundamentals.TypeUChar:
+				return new GLib.Value (Byte.Parse (strval));
+			case GLib.TypeFundamentals.TypeBoolean:
+				return new GLib.Value (strval == "True");
+			case GLib.TypeFundamentals.TypeInt:
+				return new GLib.Value (Int32.Parse (strval));
+			case GLib.TypeFundamentals.TypeUInt:
+				return new GLib.Value (UInt32.Parse (strval));
+			case GLib.TypeFundamentals.TypeInt64:
+				return new GLib.Value (Int64.Parse (strval));
+			case GLib.TypeFundamentals.TypeUInt64:
+				return new GLib.Value (UInt64.Parse (strval));
+			case GLib.TypeFundamentals.TypeFloat:
+				return new GLib.Value (Single.Parse (strval));
+			case GLib.TypeFundamentals.TypeDouble:
+				return new GLib.Value (Double.Parse (strval));
+			case GLib.TypeFundamentals.TypeString:
+				return new GLib.Value (strval);
+			default:
+				throw new GladeException ("Could not parse");
 			}
+		}
 
+		static GLib.Value ParseEnum (IntPtr gtype, string strval)
+		{
+			IntPtr enum_class = g_type_class_ref (gtype);
+			try {
+				IntPtr enum_value = g_enum_get_value_by_name (enum_class, strval);
+				if (enum_value == IntPtr.Zero)
+					throw new GladeException ("Could not parse");
+
+				IntPtr eval = Marshal.ReadIntPtr (enum_value);
+
+				string typeName = GLib.Marshaller.Utf8PtrToString (g_type_name (gtype));
+				return new GLib.Value (new GLib.EnumWrapper ((int)eval, false), typeName);
+			} finally {
+				g_type_class_unref (enum_class);
+			}
+		}
+
+		static GLib.Value ParseFlags (IntPtr gtype, string strval)
+		{
+			IntPtr flags_class = g_type_class_ref (gtype);
+			uint fval = 0;
+
+			try {
+				// The Trim() is needed for Widget.Events.
+				// The get_value_by_nick() is for BoxChild.[XY]Options
+				foreach (string flag in strval.Split ('|')) {
+					if (flag == "")
+						continue;
+					IntPtr flags_value = g_flags_get_value_by_name (flags_class, flag.Trim ());
+					if (flags_value == IntPtr.Zero)
+						flags_value = g_flags_get_value_by_nick (flags_class, flag);
+					if (flags_value == IntPtr.Zero)
+						throw new GladeException ("Could not parse");
+
+					IntPtr bits = Marshal.ReadIntPtr (flags_value);
+					fval |= (uint)bits;
+				}
+
+				string typeName = GLib.Marshaller.Utf8PtrToString (g_type_name (gtype));
+				return new GLib.Value (new GLib.EnumWrapper ((int)fval, true), typeName);
+			} finally {
+				g_type_class_unref (flags_class);
+			}
+		}
+
+		static GLib.Value ParseAdjustment (string strval)
+		{
+			string[] vals = strval.Split (' ');
+			double deflt, min, max, step, page_inc, page_size;
+
+			deflt = Double.Parse (vals[0]);
+			min = Double.Parse (vals[1]);
+			max = Double.Parse (vals[2]);
+			step = Double.Parse (vals[3]);
+			page_inc = Double.Parse (vals[4]);
+			page_size = Double.Parse (vals[5]);
+			return new GLib.Value (new Gtk.Adjustment (deflt, min, max, step, page_inc, page_size));
+		}
+
+		static GLib.Value ParseProperty (ParamSpec pspec, Type propType, string strval)
+		{
+			IntPtr gtype;
+			if (propType != null)
+				gtype = ((GLib.GType)propType).Val;
+			else if (pspec != null)
+				gtype = pspec.ValueType;
+			else
+				throw new GladeException ("Bad type");
+
+			GLib.TypeFundamentals typef = (GLib.TypeFundamentals)(int)g_type_fundamental (gtype);
+
+			if (gtype == Gtk.Adjustment.GType.Val)
+				return ParseAdjustment (strval);
+			else if (typef == GLib.TypeFundamentals.TypeEnum)
+				return ParseEnum (gtype, strval);
+			else if (typef == GLib.TypeFundamentals.TypeFlags)
+				return ParseFlags (gtype, strval);
+			else
+				return ParseBasicType (typef, strval);
+		}
+
+		static GLib.Value ParseProperty (Type type, bool childprop, string name, string strval)
+		{
 			ParamSpec pspec;
 
 			if (childprop)
@@ -68,72 +161,9 @@ namespace Stetic {
 			if (pspec == null)
 				throw new GladeException ("Unknown property", type.ToString (), childprop, name, strval);
 
-			GLib.GType gtype = new GLib.GType (g_type_fundamental (pspec.ValueType));
-			switch ((GLib.TypeFundamentals)(int)gtype.Val) {
-			case GLib.TypeFundamentals.TypeChar:
-				value = new GLib.Value (SByte.Parse (strval));
-				break;
-			case GLib.TypeFundamentals.TypeUChar:
-				value = new GLib.Value (Byte.Parse (strval));
-				break;
-			case GLib.TypeFundamentals.TypeBoolean:
-				value = new GLib.Value (strval == "True");
-				break;
-			case GLib.TypeFundamentals.TypeInt:
-				value = new GLib.Value (Int32.Parse (strval));
-				break;
-			case GLib.TypeFundamentals.TypeUInt:
-				value = new GLib.Value (UInt32.Parse (strval));
-				break;
-			case GLib.TypeFundamentals.TypeInt64:
-				value = new GLib.Value (Int64.Parse (strval));
-				break;
-			case GLib.TypeFundamentals.TypeUInt64:
-				value = new GLib.Value (UInt64.Parse (strval));
-				break;
-			case GLib.TypeFundamentals.TypeFloat:
-				value = new GLib.Value (Single.Parse (strval));
-				break;
-			case GLib.TypeFundamentals.TypeDouble:
-				value = new GLib.Value (Double.Parse (strval));
-				break;
-			case GLib.TypeFundamentals.TypeString:
-				value = new GLib.Value (strval);
-				break;
-
-			case GLib.TypeFundamentals.TypeEnum:
-				IntPtr enum_class = g_type_class_ref (pspec.ValueType);
-				IntPtr enum_value = g_enum_get_value_by_name (enum_class, strval);
-				if (enum_value == IntPtr.Zero)
-					goto default;
-
-				IntPtr eval = Marshal.ReadIntPtr (enum_value);
-				string ename = GLib.Marshaller.Utf8PtrToString (g_type_name_from_class (enum_class));
-				value = new GLib.Value (new GLib.EnumWrapper ((int)eval, false), ename);
-				g_type_class_unref (enum_class);
-				break;
-
-			case GLib.TypeFundamentals.TypeFlags:
-				IntPtr flags_class = g_type_class_ref (pspec.ValueType);
-				uint fval = 0;
-
-				foreach (string flag in strval.Split ('|')) {
-					if (flag == "")
-						continue;
-					IntPtr flags_value = g_flags_get_value_by_nick (flags_class, flag);
-					if (flags_value == IntPtr.Zero)
-						goto default;
-
-					IntPtr bits = Marshal.ReadIntPtr (flags_value);
-					fval |= (uint)bits;
-				}
-
-				string fname = GLib.Marshaller.Utf8PtrToString (g_type_name_from_class (flags_class));
-				value = new GLib.Value (new GLib.EnumWrapper ((int)fval, true), fname);
-				g_type_class_unref (flags_class);
-				break;
-
-			default:
+			try {
+				return ParseProperty (pspec, null, strval);
+			} catch {
 				throw new GladeException ("Could not parse property", type.ToString (), childprop, name, strval);
 			}
 		}
@@ -149,7 +179,7 @@ namespace Stetic {
 
 				GLib.Value value;
 				try {
-					ParseProperty (type, childprops, name, strval, out value);
+					value = ParseProperty (type, childprops, name, strval);
 					names.Add (name);
 					values.Add (value);
 				} catch (GladeException ge) {
@@ -250,18 +280,15 @@ namespace Stetic {
 		static void ParseGladeProperty (ObjectWrapper wrapper, bool childprop,
 						PropertyDescriptor prop, string strval)
 		{
-			if (((prop.GladeFlags & GladeProperty.Proxied) != 0) ||
-			    prop.PropertyType == typeof (string))
-				prop.GladeSetValue (wrapper, strval);
-			else {
-				GLib.Value value;
-				ParseProperty (ObjectWrapper.WrappedType (wrapper.GetType ()),
-					       childprop, prop.GladeName, strval, out value);
+			try {
+				GLib.Value value = ParseProperty (prop.ParamSpec, prop.PropertyType, strval);
 				if (prop.PropertyType.IsEnum) {
-					GLib.EnumWrapper wrap = (GLib.EnumWrapper)value;
-					prop.GladeSetValue (wrapper, Enum.ToObject (prop.PropertyType, (int)wrap));
+					GLib.EnumWrapper ewrap = (GLib.EnumWrapper)value;
+					prop.SetValue (wrapper, Enum.ToObject (prop.PropertyType, (int)ewrap));
 				} else
-					prop.GladeSetValue (wrapper, value.Val);
+					prop.SetValue (wrapper, value.Val);
+			} catch (Exception e) {
+				throw new GladeException ("Could not parse property", wrapper.GetType ().ToString (), childprop, prop.GladeName, strval);
 			}
 		}
 
@@ -278,12 +305,6 @@ namespace Stetic {
 
 		static string PropToString (ObjectWrapper wrapper, PropertyDescriptor prop)
 		{
-			// If this is a stetic-only property, skip it
-			if (prop.GladeName == null && prop.GladeFlags == 0)
-				return null;
-
-			// Get the value, either from the underlying property or from
-			// the wrapper
 			object value;
 
 			if ((prop.GladeFlags & GladeProperty.UseUnderlying) != 0) {
@@ -301,12 +322,9 @@ namespace Stetic {
 				}
 				value = gval.Val;
 			} else
-				value = prop.GladeGetValue (wrapper);
+				value = prop.GetValue (wrapper);
 			if (value == null)
 				return null;
-
-			if (prop.GladeProperty != null)
-				prop = prop.GladeProperty;
 
 			// If the property has its default value, we don't need to write it
 			if (prop.ParamSpec != null && value.Equals (prop.ParamSpec.Default))
@@ -376,12 +394,15 @@ namespace Stetic {
 			foreach (ItemGroup group in wrapper.ItemGroups) {
 				foreach (ItemDescriptor item in group.Items) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
-					if (prop == null || prop.GladeName == null)
+					if (prop == null)
+						continue;
+					prop = prop.GladeProperty;
+					if (prop.GladeName == null)
 						continue;
 					if (!prop.VisibleFor (wrapper))
 						continue;
 
-					string val = PropToString (wrapper, prop);
+					string val = PropToString (wrapper, prop.GladeProperty);
 					if (val != null)
 						props[prop.GladeName] = val;
 				}
@@ -392,10 +413,10 @@ namespace Stetic {
 		static extern IntPtr g_type_fundamental (IntPtr gtype);
 
 		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_type_name_from_class (IntPtr klass);
+		static extern IntPtr g_type_from_name (string name);
 
 		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_type_from_name (string name);
+		static extern IntPtr g_type_name (IntPtr gtype);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_class_ref (IntPtr gtype);
@@ -426,6 +447,9 @@ namespace Stetic {
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_flags_get_value_by_nick (IntPtr flags_class, string nick);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern IntPtr g_flags_get_value_by_name (IntPtr flags_class, string nick);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_flags_get_first_value (IntPtr flags_class, uint val);

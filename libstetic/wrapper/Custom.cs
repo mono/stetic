@@ -6,7 +6,7 @@ namespace Stetic {
 	public class Custom : Gtk.DrawingArea {
 		static Custom ()
 		{
-			GLib.ObjectManager.RegisterType (GType, typeof (Stetic.Custom));
+			GLib.GType.Register (GType, typeof (Stetic.Custom));
 		}
 
 		public Custom (IntPtr raw) : base(raw) {}
@@ -49,7 +49,8 @@ namespace Stetic.Wrapper {
 				      "Int2");
 		}
 
-		string creationFunction, string1, string2, int1 = "0", int2 = "0";
+		string creationFunction, string1, string2;
+		int int1, int2;
 
 		[GladeProperty (Name = "creation_function")]
 		public string CreationFunction {
@@ -81,35 +82,23 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		// This is sort of lame. But the properties were actually int-valued,
-		// they would need GladeProxies. We should move all of these into
-		// custom.c anyway.
-
 		[GladeProperty (Name = "int1")]
-		public string Int1 {
+		public int Int1 {
 			get {
 				return int1;
 			}
 			set {
-				try {
-					int1 = Int32.Parse (value).ToString ();
-				} catch {
-					int1 = "0";
-				}
+				int1 = value;
 			}
 		}
 
 		[GladeProperty (Name = "int2")]
-		public string Int2 {
+		public int Int2 {
 			get {
 				return int2;
 			}
 			set {
-				try {
-					int2 = Int32.Parse (value).ToString ();
-				} catch {
-					int2 = "0";
-				}
+				int2 = value;
 			}
 		}
 	}

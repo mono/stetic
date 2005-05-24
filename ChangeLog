@@ -1,3 +1,74 @@
+2005-05-24  Dan Winship  <danw@novell.com>
+
+	* libstetic/GladeUtils.cs: Fix up the parsing/unparsing to be
+	based on C# types rather than ParamSpec GTypes, so that it can be
+	used for C# wrapper properties. Update for PropertyDescriptor
+	GladeProperty changes.
+
+	* libstetic/PropertyDescriptor.cs (PropertyDescriptor): Allow the
+	"Foo" in a "Foo/Bar" property to be a wrapper property. Copy the
+	ParamSpec and GladeAttribute from a property to its glade proxy.
+	(GladeProperty): don't return null; if the property has no
+	GladeProperty proxy, return the property itself.
+	(GladeName): don't peek into GladeProperty. (Make the caller do
+	it).
+	(GladeGetValue, GladeSetValue): gone; just use GetValue/SetValue
+	on the GladeProperty.
+
+	* libstetic/RadioGroupManager.cs (GladeGroupName): return the
+	glade "group" property value for a radio group item.
+
+	* libstetic/editor/GroupPicker.cs (Dispose): Changed from
+	OnDestroyed() to work around a gtk# refcounting bug at the moment.
+
+	* libstetic/wrapper/Button.cs (ConstructChild): build Unselectable
+	wrappers for the contents, so they can be glade-serialized
+	correctly.
+	(GladeChildren): include or skip the child wrappers as
+	appropriate.
+	(HasResponseId): fix
+
+	* libstetic/wrapper/Calendar.cs (DisplayOptions): proxies
+	Gtk.Calendar.DisplayOptions, with a GladeProperty attribute.
+	(Register): Change properties to, "DisplayOptions/ShowHeading",
+	etc, so that DisplayOptions is treated as the glade property.
+	(GladeImport): no longer needed
+
+	* libstetic/wrapper/Container.cs (GladeChildren): new virtual
+	property to get a list of children for glade export purposes
+
+	* libstetic/wrapper/Custom.cs:
+	s/ObjectManager.RegisterType/GType.Register/
+	(Int1, Int2): make these ints now that GladeUtils can deal with
+	that.
+
+	* libstetic/wrapper/MenuItem.cs (Label): store the label text
+	separately from the Label itself, since OptionMenu will steal the
+	Label of the selected MenuItem, so our Label will sometimes be
+	unexpectedly null.
+	(UseUnderline): remove glade proxy now that GladeUtils can
+	directly deal with the property being a bool.
+
+	* libstetic/wrapper/OptionMenu.cs (Items, FlattenMenu): Remove.
+	Make the contents be a menu, not just a list of labels.
+	(Wrap): mark the menu wrapper with the InternalChildId "menu"
+	(GladeImport): don't need FlattenMenu any more, but have to set
+	Active property after the menu is built.
+	(GladeChildren): return the menu.
+
+	* libstetic/wrapper/RadioButton.cs:
+	* libstetic/wrapper/RadioMenuItem.cs: 
+	* libstetic/wrapper/RadioToolButton.cs (GladeImport): Re-set
+	"Active" after setting the group.
+	(GladeExport): Use GroupManager.GladeGroupName() to get the right
+	group
+
+	* libstetic/wrapper/Widget.cs (Unselectable): new property.
+	(FindWrapper): skip wrappers marked Unselectable.
+
+	* stetic/Glade.cs (ExportWidget): use GladeChildren rather than
+	RealChildren.
+
 2005-05-04  Dan Winship  <danw@novell.com>
 
 	* configure.in: require gtk-sharp 2.5

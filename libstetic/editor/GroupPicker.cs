@@ -29,9 +29,10 @@ namespace Stetic.Editor {
 			GroupsChanged ();
 		}
 
-		protected override void OnDestroyed ()
+		public override void Dispose ()
 		{
 			manager.GroupsChanged -= GroupsChanged;
+			base.Dispose ();
 		}
 
 		void GroupsChanged ()
