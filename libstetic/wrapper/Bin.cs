@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 namespace Stetic.Wrapper {
 
@@ -10,7 +11,16 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized && bin.Child == null)
-				bin.Add (CreatePlaceholder ());
+				AddPlaceholder ();
+		}
+
+		protected override void GladeImport (string className, string id, Hashtable props)
+		{
+			base.GladeImport (className, id, props);
+			stetic.GladeImportComplete += delegate () {
+				if (bin.Child == null)
+					AddPlaceholder ();
+			};
 		}
 
 		Gtk.Bin bin {

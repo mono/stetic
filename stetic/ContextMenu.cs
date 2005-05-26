@@ -15,7 +15,7 @@ namespace Stetic {
 
 			this.wrapper = null;
 
-			item = LabelItem ("Placeholder");
+			item = LabelItem ("Placeholder", null);
 			item.Sensitive = false;
 			Add (item);
 
@@ -23,7 +23,7 @@ namespace Stetic {
 			item.Sensitive = false;
 			Add (item);
 
-			BuildContextMenu (Stetic.Wrapper.Widget.Lookup (ph.Parent), false, false, ph);
+			BuildContextMenu (Stetic.Wrapper.Container.LookupParent (ph), false, false, true, ph);
 		}
 
 		public ContextMenu (Stetic.Wrapper.Widget wrapper) : this (wrapper, wrapper.Wrapped) {}
@@ -35,7 +35,7 @@ namespace Stetic {
 			this.wrapper = wrapper;
 
 			if (context == wrapper.Wrapped) {
-				item = LabelItem (wrapper.Wrapped.Name);
+				item = LabelItem (wrapper.Wrapped.Name, wrapper.GetType ());
 				item.Sensitive = false;
 				Add (item);
 			}
@@ -53,10 +53,10 @@ namespace Stetic {
 				Add (item);
 			}
 
-			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildId != null, context);
+			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildId != null, context == wrapper.Wrapped, context);
 		}
 
-		void BuildContextMenu (Stetic.Wrapper.Widget parentWrapper, bool occupied, bool isInternal, Widget context)
+		void BuildContextMenu (Stetic.Wrapper.Widget parentWrapper, bool occupied, bool isInternal, bool top, Widget context)
 		{
 			MenuItem item;
 
@@ -79,12 +79,14 @@ namespace Stetic {
 				item.Sensitive = false;
 			Add (item);
 
-			for (; parentWrapper != null; parentWrapper = parentWrapper.ParentWrapper) {
-				Add (new SeparatorMenuItem ());
+			if (top) {
+				for (; parentWrapper != null; parentWrapper = parentWrapper.ParentWrapper) {
+					Add (new SeparatorMenuItem ());
 
-				item = LabelItem (parentWrapper.Wrapped.Name);
-				item.Submenu = new ContextMenu (parentWrapper, context);
-				Add (item);
+					item = LabelItem (parentWrapper.Wrapped.Name, parentWrapper.GetType ());
+					item.Submenu = new ContextMenu (parentWrapper, context);
+					Add (item);
+				}
 			}
 
 			ShowAll ();
@@ -122,16 +124,23 @@ namespace Stetic {
 			wrapper.Delete ();
 		}
 
-		static MenuItem LabelItem (string labelString)
+		static MenuItem LabelItem (string labelString, Type type)
 		{
-			MenuItem item;
+			ImageMenuItem item;
 			Label label;
 
 			label = new Label (labelString);
 			label.UseUnderline = false;
 			label.SetAlignment (0.0f, 0.5f);
-			item = new MenuItem ();
+			item = new ImageMenuItem ();
 			item.Add (label);
+
+			if (type != null) {
+				Gdk.Pixbuf pixbuf = Palette.IconForType (type);
+				int width, height;
+				Gtk.Icon.SizeLookup (Gtk.IconSize.Menu, out width, out height);
+				item.Image = new Gtk.Image (pixbuf.ScaleSimple (width, height, Gdk.InterpType.Bilinear));
+			}
 
 			return item;
 		}

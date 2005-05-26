@@ -31,6 +31,17 @@ namespace Stetic {
 			sensitives = new Hashtable ();
 		}
 
+		void AppendHeader ()
+		{
+			AppendProperty (new PropertyDescriptor (typeof (Stetic.Wrapper.Widget), typeof (Gtk.Widget), "Name"), selection);
+
+			Gtk.HBox box = new Gtk.HBox (false, 6);
+			box.PackStart (new Gtk.Image (Palette.IconForType (selection.GetType ())), false, false, 0);
+			box.PackStart (new Gtk.Label (selection.Wrapped.GetType ().FullName), false, false, 0);
+			box.ShowAll ();
+			AppendPair ("Widget Class", box, null);
+		}
+
 		void AppendProperty (PropertyDescriptor prop, ObjectWrapper wrapper)
 		{
 			if (!prop.VisibleFor (wrapper))
@@ -105,7 +116,7 @@ namespace Stetic {
 
 			selection.Notify += Notified;
 
-			AppendProperty (new PropertyDescriptor (typeof (Stetic.Wrapper.Widget), typeof (Gtk.Widget), "Name"), selection);
+			AppendHeader ();
 			AppendWrapperGroups (selection);
 
 			packingSelection = Stetic.Wrapper.Container.ChildWrapper (selection);

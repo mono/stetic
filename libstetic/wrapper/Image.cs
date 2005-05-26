@@ -36,6 +36,17 @@ namespace Stetic.Wrapper {
 				File = filename;
 		}
 
+		public override void GladeExport (out string className, out string id, out Hashtable props)
+		{
+			base.GladeExport (out className, out id, out props);
+			if (useStock)
+				GladeUtils.ExtractProperty ("filename", props);
+			else {
+				GladeUtils.ExtractProperty ("stock", props);
+				GladeUtils.ExtractProperty ("icon_size", props);
+			}
+		}
+
 		Gtk.Image image {
 			get {
 				return (Gtk.Image)Wrapped;
@@ -71,6 +82,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				image.Stock = stock = value;
+				filename = null;
 			}
 		}
 
@@ -85,7 +97,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		string filename = "";
+		string filename;
 
 		[Editor (typeof (Stetic.Editor.ImageFile))]
 		[GladeProperty (Name = "pixbuf")]
@@ -94,9 +106,14 @@ namespace Stetic.Wrapper {
 				return filename;
 			}
 			set {
-				image.File = filename = value;
-				if (value == "")
+				if (value == "" || value == null) {
 					image.Stock = Gtk.Stock.MissingImage;
+					IconSize = Gtk.IconSize.Button;
+					filename = stock = null;
+				} else {
+					image.File = filename = value;
+					stock = null;
+				}
 			}
 		}
 	}

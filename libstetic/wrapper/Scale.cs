@@ -18,6 +18,10 @@ namespace Stetic.Wrapper {
 							"Inverted");
 			props["Digits"].DependsOn (props["DrawValue"]);
 			props["ValuePos"].DependsOn (props["DrawValue"]);
+
+			// The default value in the ParamSpec is wrong, so hide it
+			((PropertyDescriptor)props["DrawValue"]).HasDefault = false;
+			((PropertyDescriptor)props["ValuePos"]).HasDefault = false;
 		}
 
 		public override void Wrap (object obj, bool initialized)

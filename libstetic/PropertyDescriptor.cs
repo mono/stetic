@@ -9,7 +9,7 @@ namespace Stetic {
 	public class PropertyDescriptor : ItemDescriptor {
 
 		PropertyInfo memberInfo, propertyInfo;
-		bool isWrapperProperty;
+		bool isWrapperProperty, hasDefault;
 		ParamSpec pspec;
 		Type editorType;
 		string label, description;
@@ -53,6 +53,7 @@ namespace Stetic {
 				description = pspec.Blurb;
 				minimum = pspec.Minimum;
 				maximum = pspec.Maximum;
+				hasDefault = true;
 			} else
 				label = propertyInfo.Name;
 
@@ -184,6 +185,16 @@ namespace Stetic {
 		public object Maximum {
 			get {
 				return maximum;
+			}
+		}
+
+		// Whether or not the property has a default value
+		public bool HasDefault {
+			get {
+				return hasDefault;
+			}
+			set {
+				hasDefault = value;
 			}
 		}
 

@@ -49,7 +49,7 @@ namespace Stetic.Wrapper {
 				button.ResponseId = response;
 
 			if (response == (int)Gtk.ResponseType.Help) {
-				Gtk.ButtonBox.ButtonBoxChild bbc = ((Gtk.Container)Wrapped)[((Gtk.Widget)wrapper.Wrapped).Parent] as Gtk.ButtonBox.ButtonBoxChild;
+				Gtk.ButtonBox.ButtonBoxChild bbc = ((Gtk.Container)Wrapped)[((Gtk.Widget)wrapper.Wrapped)] as Gtk.ButtonBox.ButtonBoxChild;
 				bbc.Secondary = true;
 			}
 

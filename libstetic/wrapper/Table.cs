@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace Stetic.Wrapper {
 
@@ -49,12 +50,29 @@ namespace Stetic.Wrapper {
 
 		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
 		{
-			if (childprops["x_options"] == null)
-				childprops["x_options"] = "expand|fill";
-			if (childprops["y_options"] == null)
-				childprops["y_options"] = "expand|fill";
+			string opts = (string)childprops["x_options"];
+			if (opts == null)
+				childprops["x_options"] = "GTK_EXPAND|GTK_FILL";
+			else if (opts != "")
+				childprops["x_options"] = "GTK_" + Regex.Replace (opts.ToUpper (), @"\|", "|GTK_");
+			opts = (string)childprops["y_options"];
+			if (opts == null)
+				childprops["y_options"] = "GTK_EXPAND|GTK_FILL";
+			else if (opts != "")
+				childprops["y_options"] = "GTK_" + Regex.Replace (opts.ToUpper (), @"\|", "|GTK_");
 
 			return base.GladeImportChild (className, id, props, childprops);
+		}
+
+		public override void GladeExportChild (Widget wrapper, out string className, out string internalId, out string id, out Hashtable props, out Hashtable childprops)
+		{
+			base.GladeExportChild (wrapper, out className, out internalId, out id, out props, out childprops);
+			string opts = (string)childprops["x_options"];
+			if (opts != null)
+				childprops["x_options"] = Regex.Replace (opts.ToLower (), "gtk_", "");
+			opts = (string)childprops["y_options"];
+			if (opts != null)
+				childprops["y_options"] = Regex.Replace (opts.ToLower (), "gtk_", "");
 		}
 
 		void PostGladeSync ()

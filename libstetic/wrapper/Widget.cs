@@ -66,13 +66,7 @@ namespace Stetic.Wrapper {
 
 		public Stetic.Wrapper.Container ParentWrapper {
 			get {
-				Gtk.Widget parent = Wrapped.Parent;
-				Container wrapper = null;
-				while (wrapper == null && parent != null) {
-					wrapper = Stetic.Wrapper.Container.Lookup (parent);
-					parent = parent.Parent;
-				}
-				return wrapper;
+				return Container.LookupParent (Wrapped);
 			}
 		}
 
@@ -96,7 +90,7 @@ namespace Stetic.Wrapper {
 			if (wrapper == null)
 				return;
 
-			if (wrapper != stetic.Selection) {
+			if (wrapper.Wrapped != stetic.Selection) {
 				wrapper.Select ();
 				args.RetVal = true;
 			}
@@ -148,17 +142,8 @@ namespace Stetic.Wrapper {
 				((Container)this).Select (this);
 		}
 
-		public void UnSelect ()
-		{
-			if (ParentWrapper != null)
-				ParentWrapper.UnSelect (this);
-			else if (this is Stetic.Wrapper.Container)
-				((Container)this).UnSelect (this);
-		}
-
 		public void Delete ()
 		{
-			UnSelect ();
 			if (ParentWrapper != null)
 				ParentWrapper.Delete (this);
 			else

@@ -38,4 +38,4 @@ mdb:
 	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic mdb stetic.exe
 
 gdb:
-	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic gdb $(MONO)
+	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic gdb --args $(MONO) stetic.exe

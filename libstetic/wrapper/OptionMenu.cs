@@ -35,12 +35,17 @@ namespace Stetic.Wrapper {
 			string history = GladeUtils.ExtractProperty ("history", props);
 			base.GladeImport (className, id, props);
 			stetic.GladeImportComplete += delegate () {
+				Gtk.Widget menu = optionmenu.Menu;
+				optionmenu.Menu = new Gtk.Menu ();
+				optionmenu.Menu = menu;
 				if (history != null)
 					Active = Int32.Parse (history);
 				else
 					Active = 0;
 			};
 		}
+
+		// Some versions of glade call the menu an internal child, some don't
 
 		public override Widget GladeSetInternalChild (string childId, string className, string id, Hashtable props)
 		{
@@ -50,6 +55,11 @@ namespace Stetic.Wrapper {
 			Widget wrapper = Stetic.Wrapper.Widget.Lookup (optionmenu.Menu);
 			GladeUtils.ImportWidget (stetic, wrapper, wrapper.Wrapped, id, props);
 			return wrapper;
+		}
+
+		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
+		{
+			return GladeSetInternalChild ("menu", className, id, props);
 		}
 
 		public override IEnumerable GladeChildren {

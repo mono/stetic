@@ -137,6 +137,18 @@ namespace Stetic.Wrapper {
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Container;
 		}
 
+
+		public static Container LookupParent (Gtk.Widget widget)
+		{
+			Gtk.Widget parent = widget.Parent;
+			Container wrapper = null;
+			while (wrapper == null && parent != null) {
+				wrapper = Lookup (parent);
+				parent = parent.Parent;
+			}
+			return wrapper;
+		}
+
 		public static Stetic.Wrapper.Container.ContainerChild ChildWrapper (Stetic.Wrapper.Widget wrapper) {
 			Stetic.Wrapper.Container parentWrapper = wrapper.ParentWrapper;
 			if (parentWrapper == null)
@@ -281,25 +293,25 @@ namespace Stetic.Wrapper {
 
 		public virtual void Select (Stetic.Wrapper.Widget wrapper)
 		{
-			if (wrapper == null)
-				Select (null, false);
-			else
-				Select (wrapper.Wrapped, (wrapper.InternalChildId == null));
-			stetic.Selection = wrapper;
-		}
-
-		public virtual void UnSelect (Stetic.Wrapper.Widget wrapper)
-		{
-			if (selection == wrapper.Wrapped) {
+			if (wrapper == null) {
 				Select (null, false);
 				stetic.Selection = null;
+			} else {
+				Select (wrapper.Wrapped, (wrapper.InternalChildId == null));
+				stetic.Selection = wrapper.Wrapped;
 			}
+		}
+
+		public virtual void UnSelect (Gtk.Widget widget)
+		{
+			if (selection == widget)
+				Select (null, false);
 		}
 
 		public virtual void Select (Placeholder ph)
 		{
 			Select (ph, false);
-			stetic.Selection = null;
+			stetic.Selection = ph;
 		}
 
 		void Select (Gtk.Widget widget, bool dragHandles)

@@ -74,6 +74,13 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		protected override void GladeImport (string className, string id, Hashtable props)
+		{
+			base.GladeImport (className, id, props);
+			if (props["label"] == null && button.Child != null)
+				button.Remove (button.Child);
+		}
+
 		public override Widget GladeImportChild (string className, string id,
 							 Hashtable props, Hashtable childprops)
 		{
@@ -113,13 +120,18 @@ namespace Stetic.Wrapper {
 			else
 				Icon = "file:" + iwrap.File;
 			Label = label.LabelProp;
+			UseUnderline = label.UseUnderline;
 			hasLabel = true;
 		}
 
 		public override void GladeExport (out string className, out string id, out Hashtable props)
 		{
 			base.GladeExport (out className, out id, out props);
-			props["use_stock"] = IsStock ? "True" : "False";
+			if (IsStock) {
+				props["use_stock"] = "True";
+				props["label"] = icon.Substring (6);
+			} else
+				props["use_stock"] = "False";
 		}
 
 		public override IEnumerable RealChildren {
@@ -133,7 +145,7 @@ namespace Stetic.Wrapper {
 
 		public override IEnumerable GladeChildren {
 			get {
-				if (Icon == null || IsStock)
+				if (HasContents && (Icon == null || IsStock))
 					return new Gtk.Widget[0];
 				else
 					return base.RealChildren;

@@ -1,3 +1,71 @@
+2005-05-26  Dan Winship  <danw@novell.com>
+
+	* libstetic/GladeUtils.cs (ParseFlags, PropToString): Remove
+	special cases for TableChild options (now handled in Table.cs).
+	Use PropertyDescriptor.HasDefault.
+
+	* libstetic/IStetic.cs (Selection): Make this a Gtk.Widget, not a
+	Stetic.Wrapper.Widget, so we can keep more careful track of
+	Placeholder selections.
+
+	* libstetic/PropertyDescriptor.cs (HasDefault): new settable
+	property to say whether or not the property has a default value.
+	(See Scale.cs below).
+
+	* libstetic/wrapper/Bin.cs (GladeImport): at GladeImportComplete
+	time, if the bin is empty, add a Placeholder.
+
+	* libstetic/wrapper/Button.cs (GladeImport, GladeChildren): dtrt
+	with buttons that contain placeholders.
+	(FixupGladeChildren): set UseUnderline correctly.
+	(GladeExport): handle stock buttons correctly
+
+	* libstetic/wrapper/ButtonBox.cs (GladeImportChild): fix the
+	"Help" button case.
+
+	* libstetic/wrapper/Container.cs (LookupParent): was
+	Widget.ParentWrapper, but now can be used for Placeholders as
+	well.
+	(Select, UnSelect): update for selection changes
+
+	* libstetic/wrapper/Image.cs (GladeExport): don't export the
+	"filename" property when it's a stock image, or the "stock"
+	property when it's an image file.
+	(UseStock, Stock, Filename): misc other fixes
+
+	* libstetic/wrapper/OptionMenu.cs (GladeImport): juggle the Menu
+	at GladeImportComplete time to force a proper size request
+	(GladeImportChild): allow the menu to be specified as an internal
+	or non-internal child, since different versions of glade
+	apparently do different things.
+
+	* libstetic/wrapper/Scale.cs (Register): clear HasDefault on the
+	DrawValue and ValuePos properties, since the ParamSpecs are
+	registered with the wrong default values.
+
+	* libstetic/wrapper/Table.cs (GladeImportChild, GladeExportChild):
+	translate between the "normal" flag value representation
+	("GTK_EXPAND|GTK_FILL") and TableChild's special representation
+	("expand|fill") here rather than in GladeUtils.
+
+	* libstetic/wrapper/Widget.cs (ParentWrapper): use
+	Container.LookupParent().
+	(WidgetEvent): update for selection changes
+	(UnSelect): gone, handled by other things now
+
+	* stetic/ContextMenu.cs: Fix (again) so that only the top level
+	menu has submenus. Add icons to the widget labels.
+
+	* stetic/Glade.cs (Export): close the file when we're done.
+	(ExportWidget): Remove a no-longer-relevant FIXME about
+	Placeholders
+
+	* stetic/Project.cs (Selection, etc): update for IStetic change to
+	make Selection a Gtk.Widget. Unselect the previous selection
+	always. (Previously Placeholders weren't unselected properly.)
+
+	* stetic/PropertyGrid.cs: Add a "Widget Class" line (with icon)
+
 2005-05-24  Dan Winship  <danw@novell.com>
 
 	* libstetic/GladeUtils.cs: Fix up the parsing/unparsing to be

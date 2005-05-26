@@ -93,13 +93,10 @@ namespace Stetic {
 
 			try {
 				// The Trim() is needed for Widget.Events.
-				// The get_value_by_nick() is for BoxChild.[XY]Options
 				foreach (string flag in strval.Split ('|')) {
 					if (flag == "")
 						continue;
 					IntPtr flags_value = g_flags_get_value_by_name (flags_class, flag.Trim ());
-					if (flags_value == IntPtr.Zero)
-						flags_value = g_flags_get_value_by_nick (flags_class, flag);
 					if (flags_value == IntPtr.Zero)
 						throw new GladeException ("Could not parse");
 
@@ -327,7 +324,7 @@ namespace Stetic {
 				return null;
 
 			// If the property has its default value, we don't need to write it
-			if (prop.ParamSpec != null && value.Equals (prop.ParamSpec.Default))
+			if (prop.HasDefault && value.Equals (prop.ParamSpec.Default))
 				return null;
 
 			if (value is Gtk.Adjustment) {
@@ -350,11 +347,11 @@ namespace Stetic {
 						IntPtr fval = Marshal.ReadIntPtr (flags_value);
 						val &= ~(uint)fval;
 
-						IntPtr nick = Marshal.ReadIntPtr (flags_value, 2 * Marshal.SizeOf (typeof (IntPtr)));
-						if (nick != IntPtr.Zero) {
+						IntPtr name = Marshal.ReadIntPtr (flags_value, Marshal.SizeOf (typeof (IntPtr)));
+						if (name != IntPtr.Zero) {
 							if (sb.Length != 0)
 								sb.Append ('|');
-							sb.Append (GLib.Marshaller.Utf8PtrToString (nick));
+							sb.Append (GLib.Marshaller.Utf8PtrToString (name));
 						}
 					}
 
@@ -444,9 +441,6 @@ namespace Stetic {
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_enum_get_value (IntPtr enum_class, int val);
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_flags_get_value_by_nick (IntPtr flags_class, string nick);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_flags_get_value_by_name (IntPtr flags_class, string nick);

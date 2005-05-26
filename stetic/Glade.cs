@@ -108,6 +108,7 @@ namespace Stetic {
 			XmlTextWriter writer = new XmlTextWriter (filename, System.Text.Encoding.ASCII);
 			writer.Formatting = Formatting.Indented;
 			doc.Save (writer);
+			writer.Close ();
 		}
 
 		static XmlElement ExportWidget (Project project, XmlDocument doc,
@@ -162,15 +163,6 @@ namespace Stetic {
 				XmlElement elt;
 
 				foreach (Gtk.Widget child in container.GladeChildren) {
-#if FIXME
-					if (!site.Occupied) {
-						child = doc.CreateElement ("child");
-						child.AppendChild (doc.CreateElement ("placeholder"));
-						widget.AppendChild (child);
-						continue;
-					}
-#endif
-
 					elt = ExportWidget (project, doc, container, child);
 					if (elt != null)
 						widget.AppendChild (elt);

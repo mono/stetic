@@ -23,7 +23,7 @@ namespace Stetic {
 		{
 			AddWidget (window.Wrapped, null, -1);
 			if (select)
-				Selection = window;
+				Selection = window.Wrapped;
 		}
 
 		void AddWidget (Widget widget, ProjectNode parent)
@@ -156,11 +156,11 @@ namespace Stetic {
 		public delegate void SelectedHandler (Stetic.Wrapper.Widget focus, ProjectNode node);
 		public event SelectedHandler Selected;
 
-		Stetic.Wrapper.Widget selection;
+		Gtk.Widget selection;
 
 		// IStetic
 
-		public Stetic.Wrapper.Widget Selection
+		public Gtk.Widget Selection
 		{
 			get {
 				return selection;
@@ -169,17 +169,22 @@ namespace Stetic {
 				if (selection == value)
 					return;
 
-				if (selection != null)
-					selection.UnSelect ();
+				if (selection != null) {
+					Stetic.Wrapper.Container parent = Stetic.Wrapper.Container.LookupParent (selection);
+					if (parent != null)
+						parent.UnSelect (selection);
+				}
+
 				selection = value;
 
 				if (Selected == null)
 					return;
 
-				if (selection == null)
+				Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (selection);
+				if (wrapper == null)
 					Selected (null, null);
 				else
-					Selected (selection, nodes[selection.Wrapped] as ProjectNode);
+					Selected (wrapper, nodes[selection] as ProjectNode);
 			}
 		}
 

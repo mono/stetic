@@ -4,7 +4,7 @@ namespace Stetic {
 	public delegate void ISteticDelegate ();
 
 	public interface IStetic {
-		Stetic.Wrapper.Widget Selection { get; set; }
+		Gtk.Widget Selection { get; set; }
 
 		void PopupContextMenu (Stetic.Wrapper.Widget wrapper);
 		void PopupContextMenu (Placeholder ph);
