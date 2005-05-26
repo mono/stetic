@@ -1,5 +1,34 @@
 2005-05-26  Dan Winship  <danw@novell.com>
 
+	* stetic/Stetic.cs (Main): Load the UI from a glade file rather
+	than hardcoding it.
+
+	* stetic/stetic.glade: the UI, now editable in itself
+
+	* stetic/Glade.cs: Rename this class to GladeFiles, because C#'s
+	namespacing rules suck.
+
+	* stetic/Makefile.am: add stetic.glade as a resource
+
+	* libstetic/wrapper/Container.cs (LookupParent): don't return
+	Unselectable wrappers
+
+	* libstetic/wrapper/Custom.cs (Int1, Int2): Add RangeAttributes
+	to these so the property grid doesn't crash
+
+	* libstetic/wrapper/Paned.cs (ReplaceChild): Make this actually
+	work.
+
+	* libstetic/wrapper/ScrolledWindow.cs (ReplaceChild,
+	AddPlaceholder): when using a Viewport, create an (unselectable)
+	ObjectWrapper for it.
+	(RealChildren, GladeChildren): override to make the viewport show
+	up when glade-exporting, but not otherwise.
+
+	* libstetic/wrapper/Viewport.cs: new, wrapper for Gtk.Viewport.
+
+2005-05-26  Dan Winship  <danw@novell.com>
+
 	* libstetic/GladeUtils.cs (ParseFlags, PropToString): Remove
 	special cases for TableChild options (now handled in Table.cs).
 	Use PropertyDescriptor.HasDefault.

@@ -142,7 +142,7 @@ namespace Stetic.Wrapper {
 		{
 			Gtk.Widget parent = widget.Parent;
 			Container wrapper = null;
-			while (wrapper == null && parent != null) {
+			while ((wrapper == null || wrapper.Unselectable) && parent != null) {
 				wrapper = Lookup (parent);
 				parent = parent.Parent;
 			}

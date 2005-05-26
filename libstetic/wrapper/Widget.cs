@@ -123,10 +123,9 @@ namespace Stetic.Wrapper {
 			}
 
 			wrapper = Lookup (top);
-			if (wrapper != null && wrapper.Unselectable)
+			if (wrapper == null || wrapper.Unselectable)
 				return null;
-
-			return Lookup (top);
+			return wrapper;
 		}
 
 		void PopupMenu (object obj, EventArgs args)

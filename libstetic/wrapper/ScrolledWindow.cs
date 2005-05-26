@@ -22,33 +22,55 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
-				Gtk.ScrolledWindow scrolled = (Gtk.ScrolledWindow)Wrapped;
 				scrolled.SetPolicy (Gtk.PolicyType.Always, Gtk.PolicyType.Always);
 				if (scrolled.Child == null)
-					scrolled.AddWithViewport (CreatePlaceholder ());
+					AddPlaceholder ();
+			}
+		}
+
+		public Gtk.ScrolledWindow scrolled {
+			get {
+				return (Gtk.ScrolledWindow)Wrapped;
+			}
+		}
+
+		public override IEnumerable RealChildren {
+			get {
+				if (scrolled.Child is Gtk.Viewport)
+					return ((Gtk.Viewport)scrolled.Child).Children;
+				else
+					return base.RealChildren;
+			}
+		}
+
+		public override IEnumerable GladeChildren {
+			get {
+				return base.RealChildren;
 			}
 		}
 
 		public override bool HExpandable { get { return true; } }
 		public override bool VExpandable { get { return true; } }
 
+		void AddWithViewport (Gtk.Widget child)
+		{
+			scrolled.AddWithViewport (child);
+			ObjectWrapper.Create (stetic, typeof (Viewport), scrolled.Child);
+		}
+
 		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
-			Gtk.ScrolledWindow scwin = (Gtk.ScrolledWindow)Wrapped;
-
-			scwin.Remove (scwin.Child);
+			scrolled.Remove (scrolled.Child);
 			if (newChild.SetScrollAdjustments (null, null))
-				scwin.Add (newChild);
+				scrolled.Add (newChild);
 			else
-				scwin.AddWithViewport (newChild);
+				AddWithViewport (newChild);
 		}
 
 		public override Placeholder AddPlaceholder ()
 		{
-			Gtk.ScrolledWindow scwin = (Gtk.ScrolledWindow)Wrapped;
-
 			Placeholder ph = CreatePlaceholder ();
-			scwin.AddWithViewport (ph);
+			AddWithViewport (ph);
 			return ph;
 		}
 	}

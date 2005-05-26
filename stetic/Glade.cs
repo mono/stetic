@@ -8,7 +8,7 @@ using Gtk;
 
 namespace Stetic {
 
-	public static class Glade {
+	public static class GladeFiles {
 
 		public const string Glade20SystemId = "http://glade.gnome.org/glade-2.0.dtd";
 

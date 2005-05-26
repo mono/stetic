@@ -98,6 +98,7 @@ libstetic_dll_sources =			\
 	wrapper/TreeView.cs		\
 	wrapper/VBox.cs			\
 	wrapper/VButtonBox.cs		\
+	wrapper/Viewport.cs		\
 	wrapper/VPaned.cs		\
 	wrapper/VScale.cs		\
 	wrapper/VScrollbar.cs		\

@@ -29,11 +29,13 @@ namespace Stetic.Wrapper {
 
 		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
-			paned.Remove (oldChild);
-			if (oldChild == paned.Child1)
+			if (oldChild == paned.Child1) {
+				paned.Remove (oldChild);
 				paned.Add1 (newChild);
-			else if (oldChild == paned.Child2)
+			} else if (oldChild == paned.Child2) {
+				paned.Remove (oldChild);
 				paned.Add2 (newChild);
+			}
 		}
 
 		public class PanedChild : Container.ContainerChild {

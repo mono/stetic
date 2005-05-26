@@ -83,6 +83,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[GladeProperty (Name = "int1")]
+		[Range (Int32.MinValue, Int32.MaxValue)]
 		public int Int1 {
 			get {
 				return int1;
@@ -93,6 +94,7 @@ namespace Stetic.Wrapper {
 		}
 
 		[GladeProperty (Name = "int2")]
+		[Range (Int32.MinValue, Int32.MaxValue)]
 		public int Int2 {
 			get {
 				return int2;

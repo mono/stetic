@@ -14,17 +14,17 @@ stetic_exe_sources =			\
 	WidgetFactory.cs
 
 comma = ,
-ICON_FILES = $(wildcard $(srcdir)/*.png)
-ICON_RESOURCES = $(foreach file,$(ICON_FILES),-resource:$(file)$(comma)$(notdir $(file)))
+RESOURCE_FILES = $(wildcard $(srcdir)/*.png) stetic.glade
+RESOURCES = $(foreach file,$(RESOURCE_FILES),-resource:$(file)$(comma)$(notdir $(file)))
 
-stetic.exe: $(stetic_exe_sources) $(ICON_FILES) ../libstetic/libstetic.dll
-	$(MCS) -debug -pkg:gnome-sharp-2.0 -r:../libstetic/libstetic.dll -out:stetic.exe $(stetic_exe_sources) $(ICON_RESOURCES)
+stetic.exe: $(stetic_exe_sources) $(RESOURCE_FILES) ../libstetic/libstetic.dll
+	$(MCS) -debug -pkg:gnome-sharp-2.0 -pkg:glade-sharp-2.0 -r:../libstetic/libstetic.dll -out:stetic.exe $(stetic_exe_sources) $(RESOURCES)
 
 stetic: stetic.in
 	sed -e "s:\@MONO\@:$(MONO):" -e "s:\@pkglibdir\@:$(pkglibdir):" $< > $@
 	chmod a+x $@
 
-EXTRA_DIST = $(stetic_exe_sources) *.png stetic.in
+EXTRA_DIST = $(stetic_exe_sources) $(RESOURCE_FILES) stetic.in
 
 CLEANFILES = stetic stetic.exe stetic.exe.mdb
 
