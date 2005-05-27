@@ -180,6 +180,16 @@ namespace Stetic {
 			widgetFaults[win] = new Fault (owner, faultId, orientation, win);
 		}
 
+		public static void AddFault (Stetic.Wrapper.Widget owner, object faultId,
+					     Gtk.Orientation orientation,
+					     Gtk.Widget before, Gtk.Widget after)
+		{
+			if (orientation == Gtk.Orientation.Horizontal)
+				AddHFault (owner, faultId, before, after);
+			else
+				AddVFault (owner, faultId, before, after);
+		}
+
 		public static void AddHFault (Stetic.Wrapper.Widget owner, object faultId,
 					      Gtk.Widget above, Gtk.Widget below)
 		{
@@ -267,6 +277,47 @@ namespace Stetic {
 
 			AddFault (owner, faultId, Gtk.Orientation.Vertical,
 				  x1, y1, x2 - x1, y2 - y1);
+		}
+
+		public static void AddFault (Stetic.Wrapper.Widget owner, object faultId,
+					     Gtk.SideType side, Gtk.Widget widget)
+		{
+			Gdk.Rectangle fault;
+			Gtk.Orientation orientation;
+
+			if (widget == null) {
+				fault = owner.Wrapped.Allocation;
+				int border = (int)((Gtk.Container)owner.Wrapped).BorderWidth;
+				fault.Inflate (-border, -border);
+			} else
+				fault = widget.Allocation;
+
+			switch (side) {
+			case Gtk.SideType.Top:
+				fault.Y -= FaultOverlap;
+				fault.Height = 2 * FaultOverlap;
+				orientation = Gtk.Orientation.Horizontal;
+				break;
+			case Gtk.SideType.Bottom:
+				fault.Y += fault.Height - FaultOverlap;
+				fault.Height = 2 * FaultOverlap;
+				orientation = Gtk.Orientation.Horizontal;
+				break;
+			case Gtk.SideType.Left:
+				fault.X -= FaultOverlap;
+				fault.Width = 2 * FaultOverlap;
+				orientation = Gtk.Orientation.Vertical;
+				break;
+			case Gtk.SideType.Right:
+				fault.X += fault.Width - FaultOverlap;
+				fault.Width = 2 *FaultOverlap;
+				orientation = Gtk.Orientation.Vertical;
+				break;
+			default:
+				throw new Exception ("not reached");
+			}
+
+			AddFault (owner, faultId, orientation, fault);
 		}
 
 		static void FaultWidgetDestroyed (object widget, EventArgs args)

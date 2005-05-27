@@ -1,3 +1,13 @@
+2005-05-27  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/Box.cs (DoSync, Drop): Properly handle
+	PackStart vs PackEnd (particularly in terms of creating all the
+	right drag faults).
+
+	* libstetic/DND.cs (AddFault): add some new overloads
+
+	* TODO: remove comments about PackStart/PackEnd
+
 2005-05-26  Dan Winship  <danw@novell.com>
 
 	* stetic/Stetic.cs (Main): Load the UI from a glade file rather

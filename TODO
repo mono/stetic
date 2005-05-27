@@ -14,12 +14,6 @@ UI-Designing UI:
 
     - Fix up not-fully-functional wrappers:
 
-	- Does PackStart/PackEnd actually do anything in Box?
-		- In glade, you can't have gaps between two PackEnd
-		  children. So you can have a box with a single
-		  PackStart child in Positition 3, but if you change
-		  it to PackEnd, it has to be in the last position.
-
 	- ButtonBox should fill itself in with buttons, like glade
           does, and needs to implement insert/remove commands
 
