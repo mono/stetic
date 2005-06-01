@@ -318,10 +318,15 @@ namespace Stetic.Wrapper {
 		{
 			if (widget == selection)
 				return;
-			selection = widget;
 
+			if (selection != null)
+				selection.Destroyed -= SelectionDestroyed;
 			if (handles != null)
 				handles.Dispose ();
+
+			selection = widget;
+			if (selection != null)
+				selection.Destroyed += SelectionDestroyed;
 
 			// FIXME: if the selection isn't mapped, we should try to force it
 			// to be. (Eg, if you select a widget in a hidden window, the window
@@ -332,6 +337,11 @@ namespace Stetic.Wrapper {
 				handles.Drag += HandleWindowDrag;
 			} else 
 				handles = null;
+		}
+
+		void SelectionDestroyed (object obj, EventArgs args)
+		{
+			UnSelect (selection);
 		}
 
 		Gtk.Widget dragSource;
@@ -377,8 +387,6 @@ namespace Stetic.Wrapper {
 
 		public void Delete (Stetic.Wrapper.Widget wrapper)
 		{
-			if (wrapper.Wrapped == selection)
-				Select (null, false);
 			ReplaceChild (wrapper.Wrapped, CreatePlaceholder ());
 			wrapper.Wrapped.Destroy ();
 		}

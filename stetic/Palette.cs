@@ -6,9 +6,8 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class Palette : Gtk.ScrolledWindow {
+	public class Palette : Gtk.VBox {
 
-		Gtk.VBox main;
 		Hashtable groups;
 		Project project;
 
@@ -36,32 +35,25 @@ namespace Stetic {
 			} 
 		}
 		
-		public Palette (Project project)
+		public Palette (Project project) : base (false, 2)
 		{
 			this.project = project;
 
-			HscrollbarPolicy = Gtk.PolicyType.Never;
-			VscrollbarPolicy = Gtk.PolicyType.Automatic;
-			ShadowType = ShadowType.None;
-			
 			groups = new Hashtable ();
-			
-			main = new VBox (false, 2);
-			AddWithViewport (main);
 
 			AddOrGetGroup (Stetic.ObjectWrapperType.Widget);
 			AddOrGetGroup (Stetic.ObjectWrapperType.Container);
 			AddOrGetGroup (Stetic.ObjectWrapperType.ToolbarItem);
 			AddOrGetGroup (Stetic.ObjectWrapperType.Window);
 		}
-		
+
 		private Group AddOrGetGroup(string name)
 		{
 			Group group = (Group) groups[name];
 			
 			if (group == null) {
 				group = new Group (name); 
-				main.PackStart (group, false, false, 0);
+				PackStart (group, false, false, 0);
 				groups.Add (name, group);
 			}
 			

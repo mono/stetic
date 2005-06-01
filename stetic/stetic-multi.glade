@@ -4,15 +4,11 @@
 <glade-interface>
 
 <widget class="GtkWindow" id="MainWindow">
-  <property name="width_request">640</property>
-  <property name="height_request">480</property>
   <property name="events">GDK_BUTTON_PRESS_MASK</property>
   <property name="title">Stetic</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
   <property name="modal">False</property>
-  <property name="default_width">640</property>
-  <property name="default_height">480</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
   <property name="decorated">True</property>
@@ -21,7 +17,7 @@
   <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
-  <signal name="delete_event" handler="Window_Delete" last_modification_time="Wed, 01 Jun 2005 15:25:39 GMT"/>
+  <signal name="delete_event" handler="Window_Delete" last_modification_time="Wed, 01 Jun 2005 18:46:49 GMT"/>
 
   <child>
     <widget class="GtkVBox" id="vbox1">
@@ -182,121 +178,24 @@
       </child>
 
       <child>
-	<widget class="GtkHBox" id="hbox1">
+	<widget class="GtkScrolledWindow" id="scrolledwindow2">
+	  <property name="width_request">400</property>
+	  <property name="height_request">200</property>
 	  <property name="visible">True</property>
-	  <property name="homogeneous">False</property>
-	  <property name="spacing">6</property>
+	  <property name="can_focus">True</property>
+	  <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+	  <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+	  <property name="shadow_type">GTK_SHADOW_NONE</property>
+	  <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
 
 	  <child>
-	    <widget class="GtkScrolledWindow" id="scrolledwindow4">
+	    <widget class="Custom" id="ProjectView">
 	      <property name="visible">True</property>
-	      <property name="can_focus">True</property>
-	      <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
-	      <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-	      <property name="shadow_type">GTK_SHADOW_IN</property>
-	      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
-
-	      <child>
-		<widget class="GtkViewport" id="viewport1">
-		  <property name="visible">True</property>
-		  <property name="events">GDK_BUTTON_PRESS_MASK</property>
-		  <property name="shadow_type">GTK_SHADOW_NONE</property>
-
-		  <child>
-		    <widget class="Custom" id="Palette">
-		      <property name="visible">True</property>
-		      <property name="events">GDK_BUTTON_PRESS_MASK</property>
-		      <property name="int1">0</property>
-		      <property name="int2">0</property>
-		      <property name="last_modification_time">Wed, 01 Jun 2005 15:17:33 GMT</property>
-		    </widget>
-		  </child>
-		</widget>
-	      </child>
+	      <property name="events">GDK_BUTTON_PRESS_MASK</property>
+	      <property name="int1">0</property>
+	      <property name="int2">0</property>
+	      <property name="last_modification_time">Wed, 01 Jun 2005 18:42:32 GMT</property>
 	    </widget>
-	    <packing>
-	      <property name="padding">0</property>
-	      <property name="expand">False</property>
-	      <property name="fill">True</property>
-	    </packing>
-	  </child>
-
-	  <child>
-	    <widget class="GtkVPaned" id="vpaned1">
-	      <property name="visible">True</property>
-	      <property name="can_focus">True</property>
-
-	      <child>
-		<widget class="GtkScrolledWindow" id="scrolledwindow5">
-		  <property name="visible">True</property>
-		  <property name="can_focus">True</property>
-		  <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
-		  <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-		  <property name="shadow_type">GTK_SHADOW_IN</property>
-		  <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
-
-		  <child>
-		    <widget class="GtkViewport" id="viewport2">
-		      <property name="visible">True</property>
-		      <property name="events">GDK_BUTTON_PRESS_MASK</property>
-		      <property name="shadow_type">GTK_SHADOW_NONE</property>
-
-		      <child>
-			<widget class="Custom" id="ProjectView">
-			  <property name="visible">True</property>
-			  <property name="events">GDK_BUTTON_PRESS_MASK</property>
-			  <property name="int1">0</property>
-			  <property name="int2">0</property>
-			  <property name="last_modification_time">Wed, 01 Jun 2005 15:17:33 GMT</property>
-			</widget>
-		      </child>
-		    </widget>
-		  </child>
-		</widget>
-		<packing>
-		  <property name="shrink">False</property>
-		  <property name="resize">False</property>
-		</packing>
-	      </child>
-
-	      <child>
-		<widget class="GtkScrolledWindow" id="scrolledwindow6">
-		  <property name="visible">True</property>
-		  <property name="can_focus">True</property>
-		  <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
-		  <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-		  <property name="shadow_type">GTK_SHADOW_NONE</property>
-		  <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
-
-		  <child>
-		    <widget class="GtkViewport" id="viewport3">
-		      <property name="visible">True</property>
-		      <property name="events">GDK_BUTTON_PRESS_MASK</property>
-		      <property name="shadow_type">GTK_SHADOW_NONE</property>
-
-		      <child>
-			<widget class="Custom" id="PropertyGrid">
-			  <property name="visible">True</property>
-			  <property name="events">GDK_BUTTON_PRESS_MASK</property>
-			  <property name="int1">0</property>
-			  <property name="int2">0</property>
-			  <property name="last_modification_time">Wed, 01 Jun 2005 15:17:33 GMT</property>
-			</widget>
-		      </child>
-		    </widget>
-		  </child>
-		</widget>
-		<packing>
-		  <property name="shrink">False</property>
-		  <property name="resize">True</property>
-		</packing>
-	      </child>
-	    </widget>
-	    <packing>
-	      <property name="padding">0</property>
-	      <property name="expand">True</property>
-	      <property name="fill">True</property>
-	    </packing>
 	  </child>
 	</widget>
 	<packing>
@@ -304,6 +203,82 @@
 	  <property name="expand">True</property>
 	  <property name="fill">True</property>
 	</packing>
+      </child>
+    </widget>
+  </child>
+</widget>
+
+<widget class="GtkWindow" id="PropertiesWindow">
+  <property name="width_request">400</property>
+  <property name="height_request">400</property>
+  <property name="events">GDK_BUTTON_PRESS_MASK</property>
+  <property name="title">Properties</property>
+  <property name="type">GTK_WINDOW_TOPLEVEL</property>
+  <property name="window_position">GTK_WIN_POS_NONE</property>
+  <property name="modal">False</property>
+  <property name="resizable">True</property>
+  <property name="destroy_with_parent">False</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
+  <property name="focus_on_map">True</property>
+  <signal name="delete_event" handler="Window_Delete" last_modification_time="Wed, 01 Jun 2005 18:47:02 GMT"/>
+
+  <child>
+    <widget class="Custom" id="PropertyGrid">
+      <property name="visible">True</property>
+      <property name="events">GDK_BUTTON_PRESS_MASK</property>
+      <property name="int1">0</property>
+      <property name="int2">0</property>
+      <property name="last_modification_time">Wed, 01 Jun 2005 18:42:32 GMT</property>
+    </widget>
+  </child>
+</widget>
+
+<widget class="GtkWindow" id="PaletteWindow">
+  <property name="events">GDK_BUTTON_PRESS_MASK</property>
+  <property name="title">Palette</property>
+  <property name="type">GTK_WINDOW_TOPLEVEL</property>
+  <property name="window_position">GTK_WIN_POS_NONE</property>
+  <property name="modal">False</property>
+  <property name="resizable">True</property>
+  <property name="destroy_with_parent">False</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
+  <property name="focus_on_map">True</property>
+  <signal name="delete_event" handler="Window_Delete" last_modification_time="Wed, 01 Jun 2005 18:47:11 GMT"/>
+
+  <child>
+    <widget class="GtkScrolledWindow" id="scrolledwindow1">
+      <property name="width_request">200</property>
+      <property name="height_request">400</property>
+      <property name="visible">True</property>
+      <property name="can_focus">True</property>
+      <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+      <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+      <property name="shadow_type">GTK_SHADOW_NONE</property>
+      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
+
+      <child>
+	<widget class="GtkViewport" id="viewport1">
+	  <property name="visible">True</property>
+	  <property name="shadow_type">GTK_SHADOW_NONE</property>
+
+	  <child>
+	    <widget class="Custom" id="Palette">
+	      <property name="visible">True</property>
+	      <property name="events">GDK_BUTTON_PRESS_MASK</property>
+	      <property name="int1">0</property>
+	      <property name="int2">0</property>
+	      <property name="last_modification_time">Wed, 01 Jun 2005 18:42:32 GMT</property>
+	    </widget>
+	  </child>
+	</widget>
       </child>
     </widget>
   </child>

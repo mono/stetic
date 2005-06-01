@@ -160,8 +160,7 @@ namespace Stetic {
 
 		// IStetic
 
-		public Gtk.Widget Selection
-		{
+		public Gtk.Widget Selection {
 			get {
 				return selection;
 			}
@@ -169,7 +168,8 @@ namespace Stetic {
 				if (selection == value)
 					return;
 
-				if (selection != null) {
+				// FIXME: should there be an IsDestroyed property?
+				if (selection != null && selection.Handle != IntPtr.Zero) {
 					Stetic.Wrapper.Container parent = Stetic.Wrapper.Container.LookupParent (selection);
 					if (parent != null)
 						parent.UnSelect (selection);

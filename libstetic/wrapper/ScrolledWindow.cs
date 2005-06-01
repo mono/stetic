@@ -54,12 +54,17 @@ namespace Stetic.Wrapper {
 
 		void AddWithViewport (Gtk.Widget child)
 		{
-			scrolled.AddWithViewport (child);
-			ObjectWrapper.Create (stetic, typeof (Viewport), scrolled.Child);
+			Gtk.Viewport viewport = new Gtk.Viewport (scrolled.Hadjustment, scrolled.Vadjustment);
+			ObjectWrapper.Create (stetic, typeof (Viewport), viewport);
+			viewport.Add (child);
+			viewport.Show ();
+			scrolled.Add (viewport);
 		}
 
 		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
+			if (scrolled.Child is Gtk.Viewport)
+				((Gtk.Viewport)scrolled.Child).Remove (oldChild);
 			scrolled.Remove (scrolled.Child);
 			if (newChild.SetScrollAdjustments (null, null))
 				scrolled.Add (newChild);

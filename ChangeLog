@@ -1,3 +1,38 @@
+2005-06-01  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/ScrolledWindow.cs (AddWithViewport): Create
+	and wrap the viewport first, rather than trying to wrap it after
+	adding it to the window, which may cause a warning trying to set
+	its .Events in Widget.Wrap().
+	(ReplaceChild): If oldChild is in a Viewport, remove it from that
+	as well as removing the viewport from the scrolled window.
+
+	* libstetic/wrapper/Container.cs (Select): connect to the
+	selection's "Destroyed" event (and disconnect from the old
+	selection's)
+	(SelectionDestroyed): Unselect the selection
+	(Delete): No longer need to do it here. (Now destroyed widgets get
+	properly unselected whether you delete them directly or delete one
+	of their ancestors.)
+
+	* stetic/Palette.cs: Fix this to not be a subclass of
+	ScrolledWindow; the caller can put it in a ScrolledWindow itself
+	if it wants to.
+
+	* stetic/Project.cs (Selection): don't try to unselect the
+	previous selection if it's been destroyed, or we'll get a warning.
+
+	* stetic/stetic.glade: Fill in the menu contents here, set up some
+	signal handlers.
+
+	* stetic/stetic-multi.glade: An alternate UI file, with multiple
+	windows like glade.
+
+	* stetic/Stetic.cs (Main): update for the .glade file changes.
+	(Cut, Copy, Paste, Delete): currently dummy methods
+	(Quit): implement
+	(About): implement
+
 2005-05-27  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/Box.cs (DoSync, Drop): Properly handle
