@@ -73,31 +73,33 @@ namespace Stetic.Wrapper {
 		[GLib.ConnectBefore]
 		void WidgetEvent (object obj, Gtk.WidgetEventArgs args)
 		{
-			if (args.Event.Type != Gdk.EventType.ButtonPress)
-				return;
+			if (args.Event.Type == Gdk.EventType.ButtonPress)
+				args.RetVal = HandleClick ((Gdk.EventButton)args.Event);
+		}
 
-			Gdk.EventButton evb = (Gdk.EventButton)args.Event;
+		internal bool HandleClick (Gdk.EventButton evb)
+		{
 			int x = (int)evb.X, y = (int)evb.Y;
 			int erx, ery, wrx, wry;
 
 			// Translate from event window to widget window coords
-			args.Event.Window.GetOrigin (out erx, out ery);
+			evb.Window.GetOrigin (out erx, out ery);
 			Wrapped.GdkWindow.GetOrigin (out wrx, out wry);
 			x += erx - wrx;
 			y += ery - wry;
 
 			Widget wrapper = FindWrapper (Wrapped, x, y);
 			if (wrapper == null)
-				return;
+				return false;
 
 			if (wrapper.Wrapped != stetic.Selection) {
 				wrapper.Select ();
-				args.RetVal = true;
-			}
-			if (evb.Button == 3) {
+				return true;
+			} else if (evb.Button == 3) {
 				stetic.PopupContextMenu (wrapper);
-				args.RetVal = true;
-			}
+				return true;
+			} else
+				return false;
 		}
 
 		Widget FindWrapper (Gtk.Widget top, int x, int y)
@@ -218,6 +220,23 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		[GladeProperty]
+		public bool Sensitive {
+			get {
+				return Wrapped.Sensitive;
+			}
+			set {
+				if (Wrapped.Sensitive == value)
+					return;
+
+				Wrapped.Sensitive = value;
+				if (Wrapped.Sensitive)
+					InsensitiveManager.Remove (this);
+				else
+					InsensitiveManager.Add (this);
+			}
+		}
+
 		void HierarchyChanged (object obj, Gtk.HierarchyChangedArgs args)
 		{
 			if (Wrapped.Toplevel != null && Wrapped.Toplevel.IsTopLevel) {
@@ -232,6 +251,84 @@ namespace Stetic.Wrapper {
 				return "[" + Wrapped.GetType ().Name + " '" + Wrapped.Name + "' " + Wrapped.GetHashCode ().ToString () + "]";
 			else
 				return "[" + Wrapped.GetType ().Name + " " + Wrapped.GetHashCode ().ToString () + "]";
+		}
+	}
+
+	internal static class InsensitiveManager {
+
+		static Gtk.Invisible invis;
+		static Hashtable map;
+
+		static InsensitiveManager ()
+		{
+			map = new Hashtable ();
+			invis = new Gtk.Invisible ();
+			invis.ButtonPressEvent += ButtonPress;
+		}
+
+		static void ButtonPress (object obj, Gtk.ButtonPressEventArgs args)
+		{
+			Gtk.Widget widget = (Gtk.Widget)map[args.Event.Window];
+			if (widget == null)
+				return;
+
+			Widget wrapper = Widget.Lookup (widget);
+			args.RetVal = wrapper.HandleClick (args.Event);
+		}
+
+		public static void Add (Widget wrapper)
+		{
+			Gtk.Widget widget = wrapper.Wrapped;
+			Gdk.WindowAttr attributes;
+
+			attributes = new Gdk.WindowAttr ();
+			attributes.WindowType = Gdk.WindowType.Child;
+			attributes.Wclass = Gdk.WindowClass.InputOnly;
+			attributes.Mask = Gdk.EventMask.ButtonPressMask;
+
+			Gdk.Window win = new Gdk.Window (widget.GdkWindow, attributes, 0);
+			win.UserData = invis.Handle;
+			win.MoveResize (widget.Allocation);
+			win.Show ();
+
+			map[widget] = win;
+			map[win] = widget;
+			widget.SizeAllocated += Insensitive_SizeAllocate;
+			widget.Mapped += Insensitive_Mapped;
+			widget.Unmapped += Insensitive_Unmapped;
+		}
+
+		public static void Remove (Widget wrapper)
+		{
+			Gtk.Widget widget = wrapper.Wrapped;
+			Gdk.Window win = (Gdk.Window)map[widget];
+			if (win == null)
+				return;
+
+			map.Remove (widget);
+			map.Remove (win);
+			win.Destroy ();
+			widget.SizeAllocated -= Insensitive_SizeAllocate;
+			widget.Mapped -= Insensitive_Mapped;
+			widget.Unmapped -= Insensitive_Unmapped;
+		}
+
+		static void Insensitive_SizeAllocate (object obj, Gtk.SizeAllocatedArgs args)
+		{
+			Gdk.Window win = (Gdk.Window)map[obj];
+			win.MoveResize (args.Allocation);
+		}
+
+		static void Insensitive_Mapped (object obj, EventArgs args)
+		{
+			Gdk.Window win = (Gdk.Window)map[obj];
+			win.Show ();
+		}
+
+		static void Insensitive_Unmapped (object obj, EventArgs args)
+		{
+			Gdk.Window win = (Gdk.Window)map[obj];
+			win.Hide ();
 		}
 	}
 }

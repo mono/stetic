@@ -1,3 +1,17 @@
+2005-06-10  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/Widget.cs (InsensitiveManager): new static
+	class to manage insensitive widgets (using a Gtk.Invisible and
+	InputOnly Gdk.Windows to intercept clicks on them).
+	(Sensitive): Inform the InsensitiveManager about the widget's
+	state.
+
+	* libstetic/HandleWindow.cs: Likewise, attach the HandleWindow to
+	a Gtk.Invisible, so we still get events on it even if the selected
+	widget is insensitive.
+
+	* TODO: Sensitive is handled properly now.
+
 2005-06-01  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/ScrolledWindow.cs (AddWithViewport): Create

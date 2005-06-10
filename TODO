@@ -28,13 +28,6 @@ UI-Designing UI:
 		  different properties?
 		- Switch with Prev/Next isn't implemented
 
-	- Widget.Sensitive needs special handling. Ideally we'd make
-          the widget insensitive, but intercept clicks on it anyway.
-          (This would have to be done via a separate Gdk.Window not
-          associated with that widget, because gtk_propagate_event()
-          filters out events to insensitive widgets before we get any
-          chance to see them.)
-
 	- Widget.Visible: glade treats this as a shadow property.
           Should we?
 
@@ -119,7 +112,7 @@ Misc functionality:
       other people can have it as a pre-built thing in your Palette)
 
     - Comments (stickynotes that appear in stetic, but not in the
-      runtime UI)
+      runtime UI). Translator comments on strings.
 
     - A11y
 	- Stetic-itself a11y

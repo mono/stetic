@@ -22,7 +22,9 @@ namespace Stetic {
 			this.dragHandles = dragHandles;
 
 			selection.SizeAllocated += SelectionResized;
-			selection.WidgetEvent += SelectionEvent;
+
+			invis = new Gtk.Invisible ();
+			invis.WidgetEvent += HandleEvent;
 
 			Gdk.WindowAttr attributes = new Gdk.WindowAttr ();
 			attributes.WindowType = Gdk.WindowType.Child;
@@ -36,7 +38,7 @@ namespace Stetic {
 			window = new Gdk.Window (selection.Toplevel.GdkWindow, attributes,
 						 Gdk.WindowAttributesType.Visual |
 						 Gdk.WindowAttributesType.Colormap);
-			window.UserData = selection.Handle;
+			window.UserData = invis.Handle;
 			selection.Style.Attach (window);
 
 			Shape ();
@@ -46,8 +48,12 @@ namespace Stetic {
 		{
 			if (selection != null) {
 				selection.SizeAllocated -= SelectionResized;
-				selection.WidgetEvent -= SelectionEvent;
 				selection = null;
+			}
+
+			if (invis != null) {
+				invis.Destroy ();
+				invis = null;
 			}
 
 			if (window != null) {
@@ -56,7 +62,7 @@ namespace Stetic {
 			}
 		}
 
-		Gtk.Widget selection;
+		Gtk.Widget selection, invis;
 		bool dragHandles;
 
 		Gdk.Window window;
@@ -116,10 +122,8 @@ namespace Stetic {
 		int clickX, clickY;
 
 		[GLib.ConnectBefore]
-		void SelectionEvent (object obj, Gtk.WidgetEventArgs args)
+		void HandleEvent (object obj, Gtk.WidgetEventArgs args)
 		{
-			if (args.Event.Window != window)
-				return;
 			args.RetVal = true;
 
 			switch (args.Event.Type) {
