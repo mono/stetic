@@ -58,8 +58,6 @@ UI-Designing UI:
 
 	- Dialog layout
 
-	- HIG-style frames
-
     - More auto-layout functionality
 
 	- Containers should try to automatically set Padding/Spacing

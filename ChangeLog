@@ -1,3 +1,8 @@
+2005-06-12  Todd Berman  <tberman@off.net>
+
+	* libstetic/wrapper/Frame.cs: Make the frame HIG-ified by default.
+	* TODO: Update TODO.
+
 2005-06-10  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/Widget.cs (InsensitiveManager): new static
