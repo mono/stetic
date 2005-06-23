@@ -210,9 +210,9 @@ namespace Stetic.Wrapper {
 								"Expand",
 								"Fill",
 								"Padding");
-				props["Expand"].DependsInverselyOn (props["AutoSize"]);
-				props["Fill"].DependsInverselyOn (props["AutoSize"]);
-				props["Fill"].DependsOn (props["Expand"]);
+				props["Expand"].DisabledIf (props["AutoSize"], true);
+				props["Fill"].DisabledIf (props["AutoSize"], true);
+				props["Fill"].DisabledIf (props["Expand"], false);
 			}
 
 			protected override void EmitNotify (string propertyName)

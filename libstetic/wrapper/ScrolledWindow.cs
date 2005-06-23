@@ -56,6 +56,7 @@ namespace Stetic.Wrapper {
 		{
 			Gtk.Viewport viewport = new Gtk.Viewport (scrolled.Hadjustment, scrolled.Vadjustment);
 			ObjectWrapper.Create (stetic, typeof (Viewport), viewport);
+			viewport.ShadowType = Gtk.ShadowType.None;
 			viewport.Add (child);
 			viewport.Show ();
 			scrolled.Add (viewport);

@@ -16,8 +16,8 @@ namespace Stetic.Wrapper {
 							"Digits",
 							"ValuePos",
 							"Inverted");
-			props["Digits"].DependsOn (props["DrawValue"]);
-			props["ValuePos"].DependsOn (props["DrawValue"]);
+			props["Digits"].DisabledIf (props["DrawValue"], false);
+			props["ValuePos"].DisabledIf (props["DrawValue"], false);
 
 			// The default value in the ParamSpec is wrong, so hide it
 			((PropertyDescriptor)props["DrawValue"]).HasDefault = false;

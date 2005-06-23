@@ -29,7 +29,7 @@ namespace Stetic.Wrapper {
 								"Expand",
 								"Fill",
 								"Padding");
-				props["Fill"].DependsOn (props["Expand"]);
+				props["Fill"].DisabledIf (props["Expand"], false);
 			}
 		}
 

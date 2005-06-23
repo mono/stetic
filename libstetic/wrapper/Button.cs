@@ -11,43 +11,43 @@ namespace Stetic.Wrapper {
 		internal static new void Register (Type type)
 		{
 			if (type == typeof (Stetic.Wrapper.Button)) {
-				ItemGroup props = AddItemGroup (type, "Button Properties",
-								"Icon",
-								"Label",
-								"ResponseId",
-								"RemoveContents",
-								"RestoreLabel");
-
-				PropertyDescriptor hasLabel =
-					new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
-								typeof (Gtk.Button),
-								"HasLabel");
-				PropertyDescriptor hasContents =
-					new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
-								typeof (Gtk.Button),
-								"HasContents");
-
-				props["Icon"].DependsOn (hasLabel);
-				props["Label"].DependsOn (hasLabel);
-				props["RestoreLabel"].DependsInverselyOn (hasLabel);
-				props["RemoveContents"].DependsOn (hasContents);
+				ItemGroup bprops = AddItemGroup (type, "Button Properties",
+								 "Type",
+								 "StockId",
+								 "ApplicationIcon",
+								 "ThemedIcon",
+								 "Label",
+								 "UseUnderline",
+								 "ResponseId");
 
 				PropertyDescriptor hasResponseId =
 					new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
 								typeof (Gtk.Button),
 								"HasResponseId");
-				props["ResponseId"].VisibleIf (hasResponseId);
-
-				props = AddContextMenuItems (type,
-							     "RemoveContents",
-							     "RestoreLabel");
-				props["RemoveContents"].DependsOn (hasContents);
-				props["RestoreLabel"].DependsInverselyOn (hasLabel);
+				bprops["ResponseId"].InvisibleIf (hasResponseId, false);
 			}
+
+			ItemGroup props = (ItemGroup)(GetItemGroups (type)[0]);
+
+			props["StockId"].InvisibleIf (props["Type"], ButtonType.TextOnly,
+						      ButtonType.ThemedIcon,
+						      ButtonType.ApplicationIcon,
+						      ButtonType.Custom);
+			props["ApplicationIcon"].InvisibleIf (props["Type"], ButtonType.StockItem,
+							      ButtonType.TextOnly,
+							      ButtonType.ThemedIcon,
+							      ButtonType.Custom);
+			props["ThemedIcon"].InvisibleIf (props["Type"], ButtonType.StockItem,
+							 ButtonType.TextOnly,
+							 ButtonType.ApplicationIcon,
+							 ButtonType.Custom);
+			props["Label"].InvisibleIf (props["Type"], ButtonType.StockItem,
+						    ButtonType.Custom);
+			props["UseUnderline"].InvisibleIf (props["Type"], ButtonType.StockItem,
+							   ButtonType.Custom);
 
 			AddItemGroup (type, "Extra Button Properties",
 				      "FocusOnClick",
-				      "UseUnderline",
 				      "Relief",
 				      "Xalign",
 				      "Yalign",
@@ -63,15 +63,17 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 
-			if (button.UseStock)
-				Icon = "stock:" + button.Label;
-			else {
-				Icon = null;
-				if (initialized)
-					Label = button.Label;
-				else
-					Label = button.Name;
-			}
+			if (button.UseStock) {
+				type = ButtonType.StockItem;
+				StockId = button.Label;
+			} else if (!initialized) {
+				type = ButtonType.TextOnly;
+				Label = button.Name;
+			} else if (button.Child is Gtk.Label) {
+				type = ButtonType.TextOnly;
+				label = button.Label;
+			} else
+				FixupGladeChildren ();
 		}
 
 		protected override void GladeImport (string className, string id, Hashtable props)
@@ -84,6 +86,7 @@ namespace Stetic.Wrapper {
 		public override Widget GladeImportChild (string className, string id,
 							 Hashtable props, Hashtable childprops)
 		{
+			Type = ButtonType.Custom;
 			stetic.GladeImportComplete += FixupGladeChildren;
 
 			if (button.Child != null)
@@ -94,7 +97,7 @@ namespace Stetic.Wrapper {
 		void FixupGladeChildren ()
 		{
 			stetic.GladeImportComplete -= FixupGladeChildren;
-			hasLabel = false;
+			type = ButtonType.Custom;
 
 			Gtk.Alignment alignment = button.Child as Gtk.Alignment;
 			if (alignment == null)
@@ -115,37 +118,36 @@ namespace Stetic.Wrapper {
 			if (iwrap == null)
 				return;
 
-			if (iwrap.UseStock)
-				Icon = "stock:" + iwrap.Stock;
-			else
-				Icon = "file:" + iwrap.File;
-			Label = label.LabelProp;
-			UseUnderline = label.UseUnderline;
-			hasLabel = true;
+			this.label = label.LabelProp;
+			button.UseUnderline = label.UseUnderline;
+
+			if (iwrap.Type == Image.ImageType.ThemedIcon) {
+				themedIcon = iwrap.IconName;
+				Type = ButtonType.ThemedIcon;
+			} else {
+				applicationIcon = iwrap.Filename;
+				Type = ButtonType.ApplicationIcon;
+			}
 		}
 
 		public override void GladeExport (out string className, out string id, out Hashtable props)
 		{
 			base.GladeExport (out className, out id, out props);
-			if (IsStock) {
-				props["use_stock"] = "True";
-				props["label"] = icon.Substring (6);
-			} else
-				props["use_stock"] = "False";
+			props["use_stock"] = (Type == ButtonType.StockItem) ? "True" : "False";
 		}
 
 		public override IEnumerable RealChildren {
 			get {
-				if (HasLabel)
-					return new Gtk.Widget[0];
-				else
+				if (type == ButtonType.Custom)
 					return base.RealChildren;
+				else
+					return new Gtk.Widget[0];
 			}
 		}
 
 		public override IEnumerable GladeChildren {
 			get {
-				if (HasContents && (Icon == null || IsStock))
+				if (type == ButtonType.StockItem || type == ButtonType.TextOnly)
 					return new Gtk.Widget[0];
 				else
 					return base.RealChildren;
@@ -158,84 +160,72 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		// true if the button has an icon+label rather than custom contents
-		bool hasLabel;
-		public bool HasLabel {
+		public enum ButtonType {
+			StockItem,
+			TextOnly,
+			ThemedIcon,
+			ApplicationIcon,
+			Custom
+		};
+
+		ButtonType type;
+		public ButtonType Type {
 			get {
-				return hasLabel;
+				return type;
+			}
+			set {
+				type = value;
+				EmitNotify ("Type");
+				switch (type) {
+				case ButtonType.StockItem:
+					button.UseStock = true;
+					StockId = stockId;
+					break;
+				case ButtonType.TextOnly:
+					button.UseStock = false;
+					button.Image = null;
+					Label = label;
+					break;
+				case ButtonType.ThemedIcon:
+					button.UseStock = false;
+					Label = label;
+					ThemedIcon = themedIcon;
+					break;
+				case ButtonType.ApplicationIcon:
+					button.UseStock = false;
+					Label = label;
+					ApplicationIcon = applicationIcon;
+					break;
+				case ButtonType.Custom:
+					button.UseStock = false;
+					button.Image = null;
+					if (button.Child != null)
+						ReplaceChild (button.Child, CreatePlaceholder ());
+					break;
+				}
 			}
 		}
 
-		// true if the button has *anything* in it
-		public bool HasContents {
-			get {
-				return !(button.Child is Placeholder);
-			}
-		}
-
-		[Command ("Remove Button Contents", "Remove the current contents of the button")]
-		internal void RemoveContents ()
+		void ConstructContents ()
 		{
+			Gtk.Label labelWidget;
+			Gtk.Image iconWidget;
+
+			Console.WriteLine ("ConstructContents on {0}, Type {1}, Icon {2}", this, Type, themedIcon);
+
 			if (button.Child != null)
 				button.Remove (button.Child);
 
-			button.Add (CreatePlaceholder ());
-			hasLabel = false;
-
-			EmitNotify ("HasContents");
-			EmitNotify ("HasLabel");
-		}
-
-		[Command ("Restore Button Label", "Restore the button's label")]
-		internal void RestoreLabel ()
-		{
-			ConstructChild ();
-			EmitNotify ("HasContents");
-			EmitNotify ("HasLabel");
-		}
-
-		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
-		{
-			base.ReplaceChild (oldChild, newChild);
-			EmitNotify ("HasContents");
-		}
-
-		Gtk.Image iconWidget;
-		Gtk.Label labelWidget;
-		string icon;
-		string label;
-
-		void ConstructChild ()
-		{
-			button.UseStock = false;
-			if (button.Child != null)
-				button.Remove (button.Child);
-			iconWidget = null;
-			labelWidget = null;
-			hasLabel = true;
-
-			bool useStock = icon != null && icon.StartsWith ("stock:");
-
-			if (button.UseUnderline || useStock) {			    
+			if (button.UseUnderline) {
 				labelWidget = new Gtk.Label (label);
 				labelWidget.MnemonicWidget = button;
 			} else
 				labelWidget = Gtk.Label.New (label);
-			labelWidget.Show ();
 
-			if (icon == null) {
-				labelWidget.Xalign = button.Xalign;
-				labelWidget.Yalign = button.Yalign;
-				button.Add (labelWidget);
-				return;
-			}
-
-			if (useStock)
-				iconWidget = new Gtk.Image (icon.Substring (6), Gtk.IconSize.Button);
-			else if (icon.StartsWith ("file:"))
-				iconWidget = new Gtk.Image (icon.Substring (5));
+			if (type == ButtonType.ThemedIcon)
+				iconWidget = Gtk.Image.NewFromIconName (themedIcon, Gtk.IconSize.Button);
 			else
-				iconWidget = new Gtk.Image (Gtk.Stock.MissingImage, Gtk.IconSize.Button);
+				iconWidget = new Gtk.Image (applicationIcon);
 
 			Gtk.HBox box = new Gtk.HBox (false, 2);
 			box.PackStart (iconWidget, false, false, 0);
@@ -243,12 +233,8 @@ namespace Stetic.Wrapper {
 
 			Gtk.Alignment alignment = new Gtk.Alignment (button.Xalign, button.Yalign, 0.0f, 0.0f);
 			alignment.Add (box);
-			alignment.ShowAll ();
 
-			button.Add (alignment);
-
-			Widget wrapper;
-			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Label), labelWidget);
+			Widget wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Label), labelWidget);
 			wrapper.Unselectable = true;
 			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Image), iconWidget);
 			wrapper.Unselectable = true;
@@ -256,37 +242,54 @@ namespace Stetic.Wrapper {
 			wrapper.Unselectable = true;
 			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Alignment), alignment);
 			wrapper.Unselectable = true;
+
+			alignment.ShowAll ();
+			button.Add (alignment);
 		}
 
-		bool IsStock {
+		string stockId = Gtk.Stock.Ok;
+		[Editor (typeof (Stetic.Editor.StockItem))]
+		public string StockId {
 			get {
-				if (icon == null || !icon.StartsWith ("stock:"))
-					return false;
-
-				Gtk.StockItem item = Gtk.Stock.Lookup (icon.Substring (6));
-				return item.Label != null && label == item.Label;
-			}
-		}
-
-		[Editor (typeof (Stetic.Editor.Image))]
-		[Description ("Icon", "The icon to display in the button")]
-		public string Icon {
-			get {
-				return icon;
+				return stockId;
 			}
 			set {
-				icon = value;
-				if (icon != null && icon.StartsWith ("stock:")) {
-					Gtk.StockItem item = Gtk.Stock.Lookup (icon.Substring (6));
-					if (item.Label != null) {
-						label = item.Label;
-						EmitNotify ("Label");
-					}
-				}
-				ConstructChild ();
+				button.Label = value;
+				button.UseStock = true;
+				Gtk.StockItem item = Gtk.Stock.Lookup (value);
+				if (item.StockId == value)
+					label = item.Label;
+				EmitNotify ("StockId");
 			}
 		}
 
+		string applicationIcon;
+		[Editor (typeof (Stetic.Editor.ImageFile))]
+		public string ApplicationIcon {
+			get {
+				return applicationIcon;
+			}
+			set {
+				applicationIcon = value;
+				ConstructContents ();
+				EmitNotify ("ApplicationIcon");
+			}
+		}
+
+		string themedIcon;
+		[Editor (typeof (Stetic.Editor.ThemedIcon))]
+		public string ThemedIcon {
+			get {
+				return themedIcon;
+			}
+			set {
+				themedIcon = value;
+				ConstructContents ();
+				EmitNotify ("Icon");
+			}
+		}
+
+		string label;
 		[GladeProperty (GladeProperty.UseUnderlying)]
 		public string Label {
 			get {
@@ -294,17 +297,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				label = value;
-				ConstructChild ();
-			}
-		}
-
-		public bool UseUnderline {
-			get {
-				return button.UseUnderline;
-			}
-			set {
-				button.UseUnderline = value;
-				ConstructChild ();
+				button.Label = value;
 			}
 		}
 

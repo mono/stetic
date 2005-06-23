@@ -293,6 +293,9 @@ namespace Stetic {
 
 				if (obj is Widget) {
 					Gtk.Widget w = (Gtk.Widget)obj;
+					if (!w.Visible)
+						continue;
+
 					Gdk.Rectangle childalloc;
 					Gtk.Requisition childreq;
 
@@ -315,6 +318,11 @@ namespace Stetic {
 					y += childalloc.Height;
 				} else if (obj is Pair) {
 					Pair p = (Pair)obj;
+					if (!p.Editor.Visible) {
+						p.Label.Hide ();
+						continue;
+					} else if (!p.Label.Visible)
+						p.Label.Show ();
 
 					Gtk.Requisition lreq, ereq;
 					Gdk.Rectangle lalloc, ealloc;

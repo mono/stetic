@@ -16,7 +16,7 @@ namespace Stetic.Wrapper {
 							"ShowStyle",
 							"UseFont",
 							"UseSize");
-			props["UseSize"].DependsOn (props["UseFont"]);
+			props["UseSize"].DisabledIf (props["UseFont"], false);
 		}
 
 		public bool UseFont {

@@ -4,7 +4,7 @@ using System.Collections;
 namespace Stetic.Wrapper {
 
 	[ObjectWrapper ("Radio Button", "radiobutton.png", ObjectWrapperType.Widget)]
-	public class RadioButton : Button {
+	public class RadioButton : CheckButton {
 
 		public static new Type WrappedType = typeof (Gtk.RadioButton);
 
@@ -15,7 +15,9 @@ namespace Stetic.Wrapper {
 				      "Group",
 				      "Active",
 				      "Inconsistent",
-				      "DrawIndicator");
+				      "DrawIndicator",
+				      "RemoveLabel",
+				      "RestoreLabel");
 		}
 
 		static RadioGroupManager GroupManager = new RadioGroupManager (WrappedType);

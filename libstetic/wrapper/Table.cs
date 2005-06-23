@@ -398,14 +398,14 @@ namespace Stetic.Wrapper {
 								"YOptions/YExpand",
 								"YOptions/YFill",
 								"YOptions/YShrink");
-				props["XExpand"].DependsInverselyOn (props["AutoSize"]);
-				props["XFill"].DependsInverselyOn (props["AutoSize"]);
-				props["XFill"].DependsOn (props["XExpand"]);
-				props["XShrink"].DependsInverselyOn (props["AutoSize"]);
-				props["YExpand"].DependsInverselyOn (props["AutoSize"]);
-				props["YFill"].DependsInverselyOn (props["AutoSize"]);
-				props["YFill"].DependsOn (props["YExpand"]);
-				props["YShrink"].DependsInverselyOn (props["AutoSize"]);
+				props["XExpand"].DisabledIf (props["AutoSize"], true);
+				props["XFill"].DisabledIf (props["AutoSize"], true);
+				props["XFill"].DisabledIf (props["XExpand"], false);
+				props["XShrink"].DisabledIf (props["AutoSize"], true);
+				props["YExpand"].DisabledIf (props["AutoSize"], true);
+				props["YFill"].DisabledIf (props["AutoSize"], true);
+				props["YFill"].DisabledIf (props["YExpand"], false);
+				props["YShrink"].DisabledIf (props["AutoSize"], true);
 			}
 
 			Gtk.Table.TableChild tc {

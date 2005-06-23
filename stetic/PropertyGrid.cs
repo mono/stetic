@@ -9,7 +9,7 @@ namespace Stetic {
 	public class PropertyGrid : Stetic.Grid {
 
 		Hashtable editors;
-		Hashtable sensitives;
+		Hashtable sensitives, invisibles;
 
 		Stetic.Wrapper.Widget selection;
 		Stetic.Wrapper.Container.ContainerChild packingSelection;
@@ -29,6 +29,7 @@ namespace Stetic {
 			}
 			editors = new Hashtable ();
 			sensitives = new Hashtable ();
+			invisibles = new Hashtable ();
 		}
 
 		void AppendHeader ()
@@ -44,9 +45,6 @@ namespace Stetic {
 
 		void AppendProperty (PropertyDescriptor prop, ObjectWrapper wrapper)
 		{
-			if (!prop.VisibleFor (wrapper))
-				return;
-
 			PropertyEditor rep = PropertyEditor.MakeEditor (prop, wrapper);
 			editors[prop.Name] = rep;
 			if (prop.ParamSpec != null)
@@ -57,6 +55,8 @@ namespace Stetic {
 
 			if (prop.HasDependencies)
 				sensitives[prop] = wrapper;
+			if (prop.HasVisibility)
+				invisibles[prop] = wrapper;
 		}
 
 		private class Stupid69614Workaround {
@@ -85,6 +85,10 @@ namespace Stetic {
 				editors[cmd.Name] = button;
 				sensitives[cmd] = wrapper;
 			}
+			if (cmd.HasVisibility) {
+				editors[cmd.Name] = button;
+				invisibles[cmd] = wrapper;
+			}
 		}
 
 		void Notified (object wrapper, string propertyName)
@@ -101,6 +105,15 @@ namespace Stetic {
 				Widget w = editors[item.Name] as Widget;
 				if (w != null)
 					w.Sensitive = item.EnabledFor (sensitives[item] as ObjectWrapper);
+			}
+			foreach (ItemDescriptor item in invisibles.Keys) {
+				Widget w = editors[item.Name] as Widget;
+				if (w != null) {
+					if (!item.VisibleFor (invisibles[item] as ObjectWrapper))
+						w.Hide ();
+					else
+						w.Show ();
+				}
 			}
 		}
 

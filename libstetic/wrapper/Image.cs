@@ -11,13 +11,13 @@ namespace Stetic.Wrapper {
 		internal static new void Register (Type type)
 		{
 			ItemGroup props = AddItemGroup (type, "Image Properties",
-							"UseStock",
-							"Stock",
+							"Type",
+							"IconName",
 							"IconSize",
-							"File");
-			props["Stock"].DependsOn (props["UseStock"]);			
-			props["IconSize"].DependsOn (props["UseStock"]);			
-			props["File"].DependsInverselyOn (props["UseStock"]);			
+							"Filename");
+			props["IconName"].InvisibleIf (props["Type"], ImageType.ApplicationImage);
+			props["IconSize"].InvisibleIf (props["Type"], ImageType.ApplicationImage);
+			props["Filename"].InvisibleIf (props["Type"], ImageType.ThemedIcon);
 		}
 
 		public static new Gtk.Image CreateInstance ()
@@ -28,22 +28,16 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-			useStock = (image.StorageType == Gtk.ImageType.Stock);
-			if (useStock) {
-				stock = image.Stock;
+			if (image.StorageType == Gtk.ImageType.Stock) {
+				type = ImageType.ThemedIcon;
+				iconName = image.Stock;
 				iconSize = (Gtk.IconSize)image.IconSize;
-			} else
-				File = filename;
-		}
-
-		public override void GladeExport (out string className, out string id, out Hashtable props)
-		{
-			base.GladeExport (out className, out id, out props);
-			if (useStock)
-				GladeUtils.ExtractProperty ("filename", props);
-			else {
-				GladeUtils.ExtractProperty ("stock", props);
-				GladeUtils.ExtractProperty ("icon_size", props);
+			} else if (image.StorageType == Gtk.ImageType.IconName) {
+				type = ImageType.ThemedIcon;
+				iconName = image.IconName;
+				iconSize = (Gtk.IconSize)image.IconSize;
+			} else {
+				type = ImageType.ApplicationImage;
 			}
 		}
 
@@ -53,36 +47,44 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		bool useStock;
+		public enum ImageType {
+			ThemedIcon,
+			ApplicationImage,
+		}
 
-		[Description ("Use Stock Icon", "Whether to use a stock icon rather than an image file")]
-		public bool UseStock {
+		ImageType type;
+
+		[Description ("Image Type", "Whether to use a themed icon or an application-provided image")]
+		public ImageType Type {
 			get {
-				return useStock;
+				return type;
 			}
 			set {
-				useStock = value;
-				EmitNotify ("UseStock");
+				type = value;
+				EmitNotify ("Type");
 
-				if (useStock) {
-					Stock = stock;
+				if (type == ImageType.ThemedIcon) {
+					IconName = iconName;
 					IconSize = iconSize;
 				} else
-					File = filename;
+					Filename = filename;
 			}
 		}
 
-		string stock;
+		string iconName;
 
-		[Editor (typeof (Stetic.Editor.StockItem))]
-		[Description ("Stock Icon", "The stock icon to display")]
-		public string Stock {
+		[Editor (typeof (Stetic.Editor.ThemedIcon))]
+		[Description ("Icon name", "The themed icon to display")]
+		public string IconName {
 			get {
-				return stock;
+				return iconName;
 			}
 			set {
-				image.Stock = stock = value;
-				filename = null;
+				Gtk.StockItem item = Gtk.Stock.Lookup (value);
+				if (item.StockId == value)
+					image.Stock = iconName = value;
+				else
+					image.IconName = iconName = value;
 			}
 		}
 
@@ -101,19 +103,17 @@ namespace Stetic.Wrapper {
 
 		[Editor (typeof (Stetic.Editor.ImageFile))]
 		[GladeProperty (Name = "pixbuf")]
-		public string File {
+		public string Filename {
 			get {
 				return filename;
 			}
 			set {
 				if (value == "" || value == null) {
 					image.Stock = Gtk.Stock.MissingImage;
-					IconSize = Gtk.IconSize.Button;
-					filename = stock = null;
-				} else {
+					image.IconSize = (int)Gtk.IconSize.Button;
+					filename = null;
+				} else
 					image.File = filename = value;
-					stock = null;
-				}
 			}
 		}
 	}

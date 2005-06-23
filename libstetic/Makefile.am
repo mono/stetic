@@ -39,6 +39,7 @@ libstetic_dll_sources =			\
 	editor/StockItem.cs		\
 	editor/String.cs		\
 	editor/Text.cs			\
+	editor/ThemedIcon.cs		\
 	wrapper/Alignment.cs		\
 	wrapper/Arrow.cs		\
 	wrapper/Bin.cs			\

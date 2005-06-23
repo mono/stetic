@@ -10,24 +10,13 @@ namespace Stetic {
 		// The property's display name
 		public abstract string Name { get; }
 
-		// Marks the property as depending on master (which
-		// must have Type bool). The property will be
-		// sensitive in the PropertyGrid when master is true.
-		public void DependsOn (ItemDescriptor master)
+		// Marks the property as being insensitive when "master"
+		// has any of the given values
+		public void DisabledIf (ItemDescriptor master, params object[] values)
 		{
 			if (deps == null)
 				deps = new Hashtable ();
-			deps[master] = true;
-		}
-
-		// Marks the property as depending inversely on master
-		// (which must have Type bool). The property will be
-		// sensitive in the PropertyGrid when master is false.
-		public void DependsInverselyOn (ItemDescriptor master)
-		{
-			if (deps == null)
-				deps = new Hashtable ();
-			deps[master] = false;
+			deps[master] = values;
 		}
 
 		public bool HasDependencies {
@@ -38,9 +27,13 @@ namespace Stetic {
 
 		public bool EnabledFor (ObjectWrapper wrapper)
 		{
-			if (deps != null) {
-				foreach (PropertyDescriptor dep in deps.Keys) {
-					if ((bool)dep.GetValue (wrapper) != (bool)deps[dep])
+			if (deps == null)
+				return true;
+
+			foreach (PropertyDescriptor dep in deps.Keys) {
+				object depValue = dep.GetValue (wrapper);
+				foreach (object value in (object[])deps[dep]) {
+					if (value.Equals (depValue))
 						return false;
 				}
 			}
@@ -48,30 +41,33 @@ namespace Stetic {
 		}
 
 		// As above, but the property will not even be visible if the
-		// master property is false.
-		public void VisibleIf (ItemDescriptor master)
+		// master property value is wrong
+		public void InvisibleIf (ItemDescriptor master, params object[] values)
 		{
 			if (visdeps == null)
 				visdeps = new Hashtable ();
-			visdeps[master] = true;
-		}
-
-		public void InvisibleIf (ItemDescriptor master)
-		{
-			if (visdeps == null)
-				visdeps = new Hashtable ();
-			visdeps[master] = false;
+			visdeps[master] = values;
 		}
 
 		public bool VisibleFor (ObjectWrapper wrapper)
 		{
-			if (visdeps != null) {
-				foreach (PropertyDescriptor dep in visdeps.Keys) {
-					if ((bool)dep.GetValue (wrapper) != (bool)visdeps[dep])
+			if (visdeps == null)
+				return true;
+
+			foreach (PropertyDescriptor dep in visdeps.Keys) {
+				object depValue = dep.GetValue (wrapper);
+				foreach (object value in (object[])visdeps[dep]) {
+					if (value.Equals (depValue))
 						return false;
 				}
 			}
 			return true;
+		}
+
+		public bool HasVisibility {
+			get {
+				return visdeps != null;
+			}
 		}
 	}
 }

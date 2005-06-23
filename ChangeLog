@@ -1,3 +1,59 @@
+2005-06-23  Dan Winship  <danw@novell.com>
+
+	* libstetic/ItemDescriptor.cs (DisabledIf): Replaces DependsOn and
+	DependsInverselyOn; specifies that a property is disabled if
+	another property has any of the listed values. (Rather than only
+	being able to depend on boolean values like before).
+	(InvisibleIf): Likewise replaces VisibleIf and InvisibleIf.
+	(HasVisibility): Tests if an item has any visibility constraints,
+	a la HasDependencies.
+
+	* libstetic/editor/ThemedIcon.cs: new editor for selecting a
+	themed icon (which can be either a registered stock icon or one of
+	the broader set of theme-based icons).
+
+	* libstetic/wrapper/Button.cs: Redo this using an enum to select
+	the type of button (Stock, Text-only, Themed icon + Label,
+	Icon-from-file + Label, or Custom contents). Use
+	ItemDescriptor.InvisibleIf to cause irrelevant fields to be
+	hidden.
+	(Register): Rework for the above, plus for the
+	ToggleButton/CheckButton inheritance changes below.
+	(ThemedIcon): Use the ThemedIcon editor to select this.
+
+	* libstetic/wrapper/Image.cs: Handle the themed icon vs
+	icon-from-file distinction the same way Button does.
+
+	* libstetic/wrapper/CheckButton.cs: inherit from Container rather
+	than Button, since we're mostly not like Button.
+
+	* libstetic/wrapper/RadioButton.cs: inherit from CheckButton, not
+	Button.
+
+	* libstetic/wrapper/ToggleButton.cs: Simplify because it can
+	inherit more behavior from Button, now that CheckButton doesn't.
+
+	* libstetic/wrapper/Dialog.cs (AddButton): update for Button
+	changes
+
+	* libstetic/wrapper/ScrolledWindow.cs (AddWithViewport): Set the
+	ShadowType on the Viewport to None.
+
+	* libstetic/wrapper/Box.cs (BoxChild.Register):
+	* libstetic/wrapper/ButtonBox.cs (ButtonBoxChild.Register):
+	* libstetic/wrapper/FontButton.cs (Register):
+	* libstetic/wrapper/Scale.cs (Register):
+	* libstetic/wrapper/Table.cs (TableChild.Register): Update for
+	ItemDescriptor changes.
+
+	* stetic/PropertyGrid.cs: Add logic to allow property visibility
+	to change on the fly, rather than being assumed to be constant for
+	a given object.
+
+	* stetic/Grid.cs (OnSizeAllocated): if a widget is invisible,
+	don't allocate space for it. If an editor is invisible, hide its
+	label too.
+
 2005-06-12  Todd Berman  <tberman@off.net>
 
 	* libstetic/wrapper/Frame.cs: Make the frame HIG-ified by default.
