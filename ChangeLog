@@ -1,3 +1,17 @@
+2005-06-28  Raja R Harinath  <rharinath@novell.com>
+
+	Fix 'make distcheck'.
+	* stetic/Makefile.am (RESOURCE_FILES): Pick stetic.glade from
+	$(srcdir).
+	(stetic.exe): Prepend $(srcdir)/ to all source filenames.
+	(EXTRA_DIST): Add stetic.glade.  Don't use $(RESOURCE_FILES).
+	Automake doesn't grok $(wildcard ..).
+	(dist-hook): New.  Copy the png files here.
+	* libstetic/Makefile.am (libstetic.dll): Prepend $(srcdir)/ to all
+	source filenames.
+	(EXTRA_DIST): Don't list wrapper/pixmaps/*.png.
+	(dist-hook): New.  Copy the png files here.
+
 2005-06-23  Dan Winship  <danw@novell.com>
 
 	* libstetic/ItemDescriptor.cs (DisabledIf): Replaces DependsOn and
