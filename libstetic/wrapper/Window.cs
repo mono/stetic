@@ -4,38 +4,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Window", "window.png", ObjectWrapperType.Window)]
 	public class Window : Bin {
-
-		public static new Type WrappedType = typeof (Gtk.Window);
-
-		internal static new void Register (Type type)
-		{
-			if (type == typeof (Stetic.Wrapper.Window)) {
-				AddItemGroup (type, "Window Properties",
-					      "Title",
-					      "Icon",
-					      "Type",
-					      "TypeHint",
-					      "WindowPosition",
-					      "Modal",
-					      "BorderWidth");
-			}
-			AddItemGroup (type, "Window Size Properties",
-				      "Resizable",
-				      "AllowGrow",
-				      "AllowShrink",
-				      "DefaultWidth",
-				      "DefaultHeight");
-			AddItemGroup (type, "Miscellaneous Window Properties",
-				      "AcceptFocus",
-				      "Decorated",
-				      "DestroyWithParent",
-				      "Gravity",
-				      "Role",
-				      "SkipPagerHint",
-				      "SkipTaskbarHint");
-		}
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -107,7 +76,6 @@ namespace Stetic.Wrapper {
 		}
 
 		string icon;
-		[Editor (typeof (Stetic.Editor.ImageFile))]
 		public string Icon {
 			get {
 				return icon;

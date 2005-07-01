@@ -3,56 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Button", "button.png", ObjectWrapperType.Widget)]
 	public class Button : Container {
-
-		public static new Type WrappedType = typeof (Gtk.Button);
-
-		internal static new void Register (Type type)
-		{
-			if (type == typeof (Stetic.Wrapper.Button)) {
-				ItemGroup bprops = AddItemGroup (type, "Button Properties",
-								 "Type",
-								 "StockId",
-								 "ApplicationIcon",
-								 "ThemedIcon",
-								 "Label",
-								 "UseUnderline",
-								 "ResponseId");
-
-				PropertyDescriptor hasResponseId =
-					new PropertyDescriptor (typeof (Stetic.Wrapper.Button),
-								typeof (Gtk.Button),
-								"HasResponseId");
-				bprops["ResponseId"].InvisibleIf (hasResponseId, false);
-			}
-
-			ItemGroup props = (ItemGroup)(GetItemGroups (type)[0]);
-
-			props["StockId"].InvisibleIf (props["Type"], ButtonType.TextOnly,
-						      ButtonType.ThemedIcon,
-						      ButtonType.ApplicationIcon,
-						      ButtonType.Custom);
-			props["ApplicationIcon"].InvisibleIf (props["Type"], ButtonType.StockItem,
-							      ButtonType.TextOnly,
-							      ButtonType.ThemedIcon,
-							      ButtonType.Custom);
-			props["ThemedIcon"].InvisibleIf (props["Type"], ButtonType.StockItem,
-							 ButtonType.TextOnly,
-							 ButtonType.ApplicationIcon,
-							 ButtonType.Custom);
-			props["Label"].InvisibleIf (props["Type"], ButtonType.StockItem,
-						    ButtonType.Custom);
-			props["UseUnderline"].InvisibleIf (props["Type"], ButtonType.StockItem,
-							   ButtonType.Custom);
-
-			AddItemGroup (type, "Extra Button Properties",
-				      "FocusOnClick",
-				      "Relief",
-				      "Xalign",
-				      "Yalign",
-				      "BorderWidth");
-		}
 
 		public static new Gtk.Button CreateInstance ()
 		{
@@ -211,8 +162,6 @@ namespace Stetic.Wrapper {
 			Gtk.Label labelWidget;
 			Gtk.Image iconWidget;
 
-			Console.WriteLine ("ConstructContents on {0}, Type {1}, Icon {2}", this, Type, themedIcon);
-
 			if (button.Child != null)
 				button.Remove (button.Child);
 
@@ -234,13 +183,13 @@ namespace Stetic.Wrapper {
 			Gtk.Alignment alignment = new Gtk.Alignment (button.Xalign, button.Yalign, 0.0f, 0.0f);
 			alignment.Add (box);
 
-			Widget wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Label), labelWidget);
+			Widget wrapper = (Widget)ObjectWrapper.Create (stetic, labelWidget);
 			wrapper.Unselectable = true;
-			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Image), iconWidget);
+			wrapper = (Widget)ObjectWrapper.Create (stetic, iconWidget);
 			wrapper.Unselectable = true;
-			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.HBox), box);
+			wrapper = (Widget)ObjectWrapper.Create (stetic, box);
 			wrapper.Unselectable = true;
-			wrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Alignment), alignment);
+			wrapper = (Widget)ObjectWrapper.Create (stetic, alignment);
 			wrapper.Unselectable = true;
 
 			alignment.ShowAll ();
@@ -248,7 +197,6 @@ namespace Stetic.Wrapper {
 		}
 
 		string stockId = Gtk.Stock.Ok;
-		[Editor (typeof (Stetic.Editor.StockItem))]
 		public string StockId {
 			get {
 				return stockId;
@@ -264,7 +212,6 @@ namespace Stetic.Wrapper {
 		}
 
 		string applicationIcon;
-		[Editor (typeof (Stetic.Editor.ImageFile))]
 		public string ApplicationIcon {
 			get {
 				return applicationIcon;
@@ -277,7 +224,6 @@ namespace Stetic.Wrapper {
 		}
 
 		string themedIcon;
-		[Editor (typeof (Stetic.Editor.ThemedIcon))]
 		public string ThemedIcon {
 			get {
 				return themedIcon;
@@ -311,10 +257,6 @@ namespace Stetic.Wrapper {
 		}
 
 		int responseId;
-
-		[GladeProperty (Name = "response_id")]
-		[Editor (typeof (Stetic.Editor.ResponseId))]
-		[Description ("Response Id", "The response ID to emit when this button is clicked.")]
 		public int ResponseId {
 			get {
 				return responseId;

@@ -3,24 +3,9 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Radio Menu Item", "radiomenuitem.png", ObjectWrapperType.Internal)]
 	public class RadioMenuItem : MenuItem {
 
-		public static new Type WrappedType = typeof (Gtk.RadioMenuItem);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type,
-				      "Radio Menu Item Properties",
-				      "Label",
-				      "UseUnderline",
-				      "Accelerator",
-				      "Group",
-				      "Active",
-				      "Inconsistent");
-		}
-
-		static RadioGroupManager GroupManager = new RadioGroupManager (WrappedType);
+		static RadioGroupManager GroupManager = new RadioGroupManager (typeof (Gtk.RadioMenuItem));
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -55,8 +40,6 @@ namespace Stetic.Wrapper {
 				props["group"] = group;
 		}
 
-		[Editor (typeof (Stetic.Editor.GroupPicker))]
-		[Description ("Group", "The name of the radio button group that this menu item belongs to")]
 		public string Group {
 			get {
 				return GroupManager[Wrapped];

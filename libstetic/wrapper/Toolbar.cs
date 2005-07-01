@@ -3,19 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Toolbar", "toolbar.png", ObjectWrapperType.Widget)]
 	public class Toolbar : Container {
-
-		public static new Type WrappedType = typeof (Gtk.Toolbar);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Tool Bar Properties",
-				      "Orientation",
-				      "ShowArrow",
-				      "ToolbarStyle",
-				      "Tooltips");
-		}
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -166,18 +154,6 @@ namespace Stetic.Wrapper {
 		}
 
 		public class ToolbarChild : Container.ContainerChild {
-			public static new Type WrappedType = typeof (Gtk.Toolbar.ToolbarChild);
-
-			internal static new void Register (Type type)
-			{
-				AddItemGroup (type, "Tool Bar Child Properties",
-					      "Homogeneous",
-					      "Expand",
-					      "ToolItem.IsImportant",
-					      "ToolItem.VisibleHorizontal",
-					      "ToolItem.VisibleVertical");
-			}
-
 			public Gtk.ToolItem ToolItem {
 				get {
 					Gtk.Container.ContainerChild cc = (Gtk.Container.ContainerChild)Wrapped;

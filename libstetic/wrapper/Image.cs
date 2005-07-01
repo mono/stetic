@@ -3,22 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Image", "image.png", ObjectWrapperType.Widget)]
-	public class Image : Misc {
-
-		public static new Type WrappedType = typeof (Gtk.Image);
-
-		internal static new void Register (Type type)
-		{
-			ItemGroup props = AddItemGroup (type, "Image Properties",
-							"Type",
-							"IconName",
-							"IconSize",
-							"Filename");
-			props["IconName"].InvisibleIf (props["Type"], ImageType.ApplicationImage);
-			props["IconSize"].InvisibleIf (props["Type"], ImageType.ApplicationImage);
-			props["Filename"].InvisibleIf (props["Type"], ImageType.ThemedIcon);
-		}
+	public class Image : Widget {
 
 		public static new Gtk.Image CreateInstance ()
 		{
@@ -54,7 +39,6 @@ namespace Stetic.Wrapper {
 
 		ImageType type;
 
-		[Description ("Image Type", "Whether to use a themed icon or an application-provided image")]
 		public ImageType Type {
 			get {
 				return type;
@@ -72,9 +56,6 @@ namespace Stetic.Wrapper {
 		}
 
 		string iconName;
-
-		[Editor (typeof (Stetic.Editor.ThemedIcon))]
-		[Description ("Icon name", "The themed icon to display")]
 		public string IconName {
 			get {
 				return iconName;
@@ -100,9 +81,6 @@ namespace Stetic.Wrapper {
 		}
 
 		string filename;
-
-		[Editor (typeof (Stetic.Editor.ImageFile))]
-		[GladeProperty (Name = "pixbuf")]
 		public string Filename {
 			get {
 				return filename;

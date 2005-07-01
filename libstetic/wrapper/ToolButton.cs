@@ -3,20 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Toolbar Button", "button.png", ObjectWrapperType.ToolbarItem)]
 	public class ToolButton : Widget {
-
-		public static new Type WrappedType = typeof (Gtk.ToolButton);
-
-		internal static new void Register (Type type)
-		{
-			if (type == typeof (Stetic.Wrapper.ToolButton)) {
-				AddItemGroup (type, "Toolbar Button Properties",
-					      "Icon",
-					      "Label",
-					      "UseUnderline");
-			}
-		}
 
 		public static new Gtk.ToolButton CreateInstance ()
 		{
@@ -43,9 +30,6 @@ namespace Stetic.Wrapper {
 		}
 
 		string icon;
-
-		[Editor (typeof (Stetic.Editor.Image))]
-		[Description ("Icon", "The icon to display in the button")]
 		public string Icon {
 			get {
 				return icon;

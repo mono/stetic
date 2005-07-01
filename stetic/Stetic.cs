@@ -36,10 +36,6 @@ namespace Stetic {
 				scrolled.Add (ProjectView);
 			}
 
-			AssemblyName an = new AssemblyName ();
-			an.Name = "libstetic";
-			Palette.AddWidgets (System.Reflection.Assembly.Load (an));
-
 			foreach (Gtk.Widget w in glade.GetWidgetPrefix ("")) {
 				if (w is Gtk.Window)
 					w.ShowAll ();

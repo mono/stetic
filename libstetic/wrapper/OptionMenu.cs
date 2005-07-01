@@ -6,16 +6,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Option Menu", "optionmenu.png", ObjectWrapperType.Widget, Deprecated = true)]
 	public class OptionMenu : Container {
-
-		public static new Type WrappedType = typeof (Gtk.OptionMenu);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Option Menu Properties",
-				      "Active");
-		}
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -26,7 +17,7 @@ namespace Stetic.Wrapper {
 				menu.Show ();
 				optionmenu.Menu = menu;
 			}
-			Widget menuWrapper = (Widget)ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Menu), optionmenu.Menu);
+			Widget menuWrapper = (Widget)ObjectWrapper.Create (stetic, optionmenu.Menu);
 			menuWrapper.InternalChildId = "menu";
 		}
 
@@ -74,9 +65,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty (Name = "history")]
-		[Description ("Active", "The active menu item")]
-		[Range (0, System.Int32.MaxValue)]
 		public int Active {
 			get {
 				return optionmenu.History;

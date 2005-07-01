@@ -35,7 +35,7 @@ namespace Stetic {
 					return null;
 
 				ProjectNode node = (ProjectNode)nodes[0];
-				return node.Wrapper;
+				return Stetic.Wrapper.Widget.Lookup (node.Widget);
 			}
 		}
 

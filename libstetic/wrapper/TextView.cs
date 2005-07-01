@@ -3,29 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Text View", "textview.png", ObjectWrapperType.Widget)]
 	public class TextView : Container {
-
-		public static new Type WrappedType = typeof (Gtk.TextView);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Text View Properties",
-				      "Editable",
-				      "CursorVisible",
-				      "Overwrite",
-				      "AcceptsTab",
-				      "Tabs",
-				      "Text",
-				      "Justification",
-				      "WrapMode",
-				      "PixelsAboveLines",
-				      "PixelsBelowLines",
-				      "PixelsInsideWrap",
-				      "RightMargin",
-				      "LeftMargin",
-				      "Indent");
-		}
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -33,9 +11,6 @@ namespace Stetic.Wrapper {
 			((Gtk.TextView)Wrapped).Buffer.Changed += Buffer_Changed;
 		}
 
-		[Editor (typeof (Stetic.Editor.Text))]
-		[Description ("Text", "The initial text to display in the Text View")]
-		[GladeProperty (Name = "text")]
 		public string Text {
 			get {
 				return ((Gtk.TextView)Wrapped).Buffer.Text;
@@ -49,8 +24,5 @@ namespace Stetic.Wrapper {
 		{
 			EmitNotify ("Text");
 		}
-
-		public override bool HExpandable { get { return true; } }
-		public override bool VExpandable { get { return true; } }
 	}
 }

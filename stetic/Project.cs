@@ -14,16 +14,16 @@ namespace Stetic {
 			store = new NodeStore (typeof (ProjectNode));
 		}
 
-		public void AddWindow (Stetic.Wrapper.Window window)
+		public void AddWindow (Gtk.Window window)
 		{
 			AddWindow (window, false);
 		}
 
-		public void AddWindow (Stetic.Wrapper.Window window, bool select)
+		public void AddWindow (Gtk.Window window, bool select)
 		{
-			AddWidget (window.Wrapped, null, -1);
+			AddWidget (window, null, -1);
 			if (select)
-				Selection = window.Wrapped;
+				Selection = window;
 		}
 
 		void AddWidget (Widget widget, ProjectNode parent)
@@ -33,11 +33,10 @@ namespace Stetic {
 
 		void AddWidget (Widget widget, ProjectNode parent, int position)
 		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			if (wrapper == null)
+			if (Stetic.Wrapper.Widget.Lookup (widget) == null)
 				return;
 
-			ProjectNode node = new ProjectNode (wrapper);
+			ProjectNode node = new ProjectNode (widget);
 			nodes[widget] = node;
 			if (parent == null) {
 				if (position == -1)
@@ -225,44 +224,38 @@ namespace Stetic {
 
 	[TreeNode (ColumnCount=2)]
 	public class ProjectNode : TreeNode {
-		Stetic.Wrapper.Widget wrapper;
-		Gdk.Pixbuf icon;
+		Widget widget;
+		ClassDescriptor klass;
 
-		public ProjectNode (Stetic.Wrapper.Widget wrapper)
+		public ProjectNode (Gtk.Widget widget)
 		{
-			this.wrapper = wrapper;
-			icon = Stetic.Palette.IconForType (wrapper.GetType ());
-		}
-
-		public Stetic.Wrapper.Widget Wrapper {
-			get {
-				return wrapper;
-			}
+			this.widget = widget;
+			klass = Registry.LookupClass (widget.GetType ());
 		}
 
 		public Widget Widget {
 			get {
-				return (Gtk.Widget)wrapper.Wrapped;
+				return widget;
 			}
 		}
 
 		[TreeNodeValue (Column=0)]
 		public Gdk.Pixbuf Icon {
 			get {
-				return icon;
+				return klass.Icon;
 			}
 		}
 
 		[TreeNodeValue (Column=1)]
 		public string Name {
 			get {
-				return Widget.Name;
+				return widget.Name;
 			}
 		}
 
 		public override string ToString ()
 		{
-			return "[ProjectNode " + GetHashCode().ToString() + " " + Widget.GetType().FullName + " '" + Name + "']";
+			return "[ProjectNode " + GetHashCode().ToString() + " " + widget.GetType().FullName + " '" + Name + "']";
 		}
 	}
 

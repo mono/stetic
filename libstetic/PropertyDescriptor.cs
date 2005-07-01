@@ -1,8 +1,7 @@
-using GLib;
-using Gtk;
 using System;
 using System.Collections;
 using System.Reflection;
+using System.Xml;
 
 namespace Stetic {
 
@@ -19,35 +18,73 @@ namespace Stetic {
 
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-		public PropertyDescriptor (Type wrapperType, Type objectType, string propertyName)
+		public PropertyDescriptor (XmlElement elem, ItemGroup group, ClassDescriptor klass) : base (elem, group, klass)
 		{
+			string propertyName = elem.GetAttribute ("name");
 			int dot = propertyName.IndexOf ('.');
-			int slash = propertyName.IndexOf ('/');
 
 			if (dot != -1) {
 				// Sub-property (eg, "Alignment.Value")
-				memberInfo = FindProperty (wrapperType, objectType, propertyName.Substring (0, dot));
+				memberInfo = FindProperty (klass.WrapperType, klass.WrappedType, propertyName.Substring (0, dot));
 				isWrapperProperty = memberInfo.DeclaringType.IsSubclassOf (typeof (ObjectWrapper));
-				gladeProperty = new PropertyDescriptor (wrapperType, objectType, memberInfo.Name);
+				gladeProperty = new PropertyDescriptor (isWrapperProperty ? klass.WrapperType : klass.WrappedType, memberInfo.Name);
 				propertyInfo = FindProperty (memberInfo.PropertyType, propertyName.Substring (dot + 1));
-			} else if (slash != -1) {
-				// Split-up property (eg, "XOptions/XExpand")
-				gladeProperty = new PropertyDescriptor (wrapperType, objectType, propertyName.Substring (0, slash));
-				propertyInfo = FindProperty (wrapperType, objectType, propertyName.Substring (slash + 1));
-				isWrapperProperty = propertyInfo.DeclaringType.IsSubclassOf (typeof (ObjectWrapper));
 			} else {
 				// Basic simple property
-				propertyInfo = FindProperty (wrapperType, objectType, propertyName);
+				propertyInfo = FindProperty (klass.WrapperType, klass.WrappedType, propertyName);
 				isWrapperProperty = propertyInfo.DeclaringType.IsSubclassOf (typeof (ObjectWrapper));
 			}
 
 			pspec = FindPSpec (propertyInfo);
 			if (isWrapperProperty && pspec == null) {
-				PropertyInfo pinfo = objectType.GetProperty (propertyInfo.Name, flags);
+				PropertyInfo pinfo = klass.WrappedType.GetProperty (propertyInfo.Name, flags);
 				if (pinfo != null)
 					pspec = FindPSpec (pinfo);
 			}
 
+			if (elem.HasAttribute ("label"))
+				label = elem.GetAttribute ("label");
+			else if (pspec != null)
+				label = pspec.Nick;
+			else
+				label = propertyInfo.Name;
+
+			if (elem.HasAttribute ("description"))
+				description = elem.GetAttribute ("description");
+			else if (pspec != null)
+				description = pspec.Blurb;
+
+			if (elem.HasAttribute ("min"))
+				minimum = Convert.ChangeType (elem.GetAttribute ("min"), propertyInfo.PropertyType);
+			else if (pspec != null)
+				minimum = pspec.Minimum;
+
+			if (elem.HasAttribute ("max"))
+				maximum = Convert.ChangeType (elem.GetAttribute ("max"), propertyInfo.PropertyType);
+			else if (pspec != null)
+				maximum = pspec.Maximum;
+
+			if (pspec != null && !elem.HasAttribute ("ignore-default"))
+				hasDefault = true;
+
+			editorType = Type.GetType (elem.GetAttribute ("editor"));
+
+			gladeAttribute = (GladePropertyAttribute) Attribute.GetCustomAttribute (propertyInfo, typeof (Stetic.GladePropertyAttribute));
+			if (gladeAttribute != null && gladeAttribute.Proxy != null) {
+				gladeProperty = new PropertyDescriptor (klass.WrapperType, gladeAttribute.Proxy);
+				if (gladeProperty.pspec == null)
+					gladeProperty.pspec = pspec;
+				if (gladeProperty.gladeAttribute == null)
+					gladeProperty.gladeAttribute = gladeAttribute;
+			}
+		}
+
+		PropertyDescriptor (Type objectType, string propertyName)
+		{
+			propertyInfo = FindProperty (objectType, propertyName);
+			isWrapperProperty = false;
+
+			pspec = FindPSpec (propertyInfo);
 			if (pspec != null) {
 				label = pspec.Nick;
 				description = pspec.Blurb;
@@ -56,36 +93,6 @@ namespace Stetic {
 				hasDefault = true;
 			} else
 				label = propertyInfo.Name;
-
-			foreach (object attr in propertyInfo.GetCustomAttributes (false)) {
-				if (attr is Stetic.DescriptionAttribute) {
-					DescriptionAttribute dattr = (DescriptionAttribute)attr;
-					label = dattr.Name;
-					description = dattr.Description;
-				}
-
-				if (attr is Stetic.EditorAttribute) {
-					EditorAttribute eattr = (EditorAttribute)attr;
-					editorType = eattr.EditorType;
-				}
-
-				if (attr is Stetic.RangeAttribute) {
-					RangeAttribute rattr = (RangeAttribute)attr;
-					minimum = rattr.Minimum;
-					maximum = rattr.Maximum;
-				}
-
-				if (attr is Stetic.GladePropertyAttribute) {
-					gladeAttribute = (GladePropertyAttribute)attr;
-					if (gladeAttribute.Proxy != null) {
-						gladeProperty = new PropertyDescriptor (wrapperType, objectType, gladeAttribute.Proxy);
-						if (gladeProperty.pspec == null)
-							gladeProperty.pspec = pspec;
-						if (gladeProperty.gladeAttribute == null)
-							gladeProperty.gladeAttribute = gladeAttribute;
-					}
-				}
-			}
 		}
 
 		static PropertyInfo FindProperty (Type type, string propertyName) {
@@ -113,12 +120,12 @@ namespace Stetic {
 		{
 			foreach (object attr in pinfo.GetCustomAttributes (false)) {
 				if (attr is GLib.PropertyAttribute) {
-					PropertyAttribute pattr = (PropertyAttribute)attr;
+					GLib.PropertyAttribute pattr = (GLib.PropertyAttribute)attr;
 					return ParamSpec.LookupObjectProperty (pinfo.DeclaringType, pattr.Name);
 				}
 
 				if (attr is Gtk.ChildPropertyAttribute) {
-					ChildPropertyAttribute cpattr = (ChildPropertyAttribute)attr;
+					Gtk.ChildPropertyAttribute cpattr = (Gtk.ChildPropertyAttribute)attr;
 					return ParamSpec.LookupChildProperty (pinfo.DeclaringType.DeclaringType, cpattr.Name);
 				}
 			}
@@ -198,10 +205,11 @@ namespace Stetic {
 			}
 		}
 
-		// Gets the value of the property on @wrapper
-		public object GetValue (ObjectWrapper wrapper)
+		// Gets the value of the property on @obj
+		public object GetValue (object obj)
 		{
-			object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
+			if (isWrapperProperty)
+				obj = ObjectWrapper.Lookup (obj);
 			if (memberInfo != null)
 				obj = memberInfo.GetValue (obj, null);
 			return propertyInfo.GetValue (obj, null);
@@ -214,10 +222,11 @@ namespace Stetic {
 			}
 		}
 
-		// Sets the value of the property on @wrapper
-		public void SetValue (ObjectWrapper wrapper, object value)
+		// Sets the value of the property on @obj
+		public void SetValue (object obj, object value)
 		{
-			object obj = isWrapperProperty ? wrapper : wrapper.Wrapped;
+			if (isWrapperProperty)
+				obj = ObjectWrapper.Lookup (obj);
 			if (memberInfo != null)
 				obj = memberInfo.GetValue (obj, null);
 			propertyInfo.SetValue (obj, value, null);

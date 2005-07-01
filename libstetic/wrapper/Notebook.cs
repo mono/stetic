@@ -3,35 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Notebook", "notebook.png", ObjectWrapperType.Container)]
 	public class Notebook : Container {
-
-		public static new Type WrappedType = typeof (Gtk.Notebook);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Notebook Properties",
-				      "EnablePopup",
-				      "Homogeneous",
-				      "TabPos",
-				      "TabHborder",
-				      "TabVborder",
-				      "ShowBorder",
-				      "ShowTabs",
-				      "Scrollable",
-				      "BorderWidth",
-				      "InsertBefore",
-				      "InsertAfter");
-
-			AddContextMenuItems (type,
-					     "PreviousPage",
-					     "NextPage",
-					     "DeletePage",
-					     "SwapPrevious",
-					     "SwapNext",
-					     "InsertBefore",
-					     "InsertAfter");
-		}
 
 		ArrayList tabs = new ArrayList ();
 
@@ -113,7 +85,6 @@ namespace Stetic.Wrapper {
 			return notebook.InsertPage (CreatePlaceholder (), widget, position);
 		}
 
-		[Command ("Go to Previous Page", "Show the previous page", "CheckPreviousPage")]
 		internal void PreviousPage ()
 		{
 			notebook.PrevPage ();
@@ -124,7 +95,6 @@ namespace Stetic.Wrapper {
 			return notebook.CurrentPage > 0;
 		}
 
-		[Command ("Go to Next Page", "Show the next page", "CheckNextPage")]
 		internal void NextPage ()
 		{
 			notebook.NextPage ();
@@ -135,32 +105,27 @@ namespace Stetic.Wrapper {
 			return notebook.CurrentPage < notebook.NPages - 1;
 		}
 
-		[Command ("Delete Page", "Delete the current page")]
 		internal void DeletePage ()
 		{
 			tabs.RemoveAt (notebook.CurrentPage);
 			notebook.RemovePage (notebook.CurrentPage);
 		}
 
-		[Command ("Swap with Previous Page", "Swap the contents of this page with the contents of the previous page", "CheckPreviousPage")]
 		internal void SwapPrevious ()
 		{
 			// FIXME
 		}
 
-		[Command ("Swap with Next Page", "Swap the contents of this page with the contents of the next page", "CheckNextPage")]
 		internal void SwapNext ()
 		{
 			// FIXME
 		}
 
-		[Command ("Insert Page Before", "Insert a blank page before this one")]
 		internal void InsertBefore ()
 		{
 			notebook.CurrentPage = InsertPage (notebook.CurrentPage);
 		}
 
-		[Command ("Insert Page After", "Insert a blank page after this one")]
 		internal void InsertAfter ()
 		{
 			notebook.CurrentPage = InsertPage (notebook.CurrentPage + 1);
@@ -183,22 +148,6 @@ namespace Stetic.Wrapper {
 						return true;
 				}
 				return false;
-			}
-		}
-
-		public class NotebookChild : Container.ContainerChild {
-
-			public static new Type WrappedType = typeof (Gtk.Notebook.NotebookChild);
-
-			internal static new void Register (Type type)
-			{
-				AddItemGroup (type,
-					      "Notebook Child Layout",
-					      "Position",
-					      "TabPack",
-					      "TabExpand",
-					      "TabFill",
-					      "MenuLabel");
 			}
 		}
 	}

@@ -2,15 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Paned : Container {
-
-		public static new Type WrappedType = typeof (Gtk.Paned);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Pane Properties",
-				      "BorderWidth");
-		}
+	public class Paned : Container {
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -35,18 +27,6 @@ namespace Stetic.Wrapper {
 			} else if (oldChild == paned.Child2) {
 				paned.Remove (oldChild);
 				paned.Add2 (newChild);
-			}
-		}
-
-		public class PanedChild : Container.ContainerChild {
-
-			public static new Type WrappedType = typeof (Gtk.Paned.PanedChild);
-
-			internal static new void Register (Type type)
-			{
-				AddItemGroup (type, "Pane Child Layout",
-					      "Resize",
-					      "Shrink");
 			}
 		}
 	}

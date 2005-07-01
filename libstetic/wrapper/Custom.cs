@@ -34,25 +34,11 @@ namespace Stetic {
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Custom Widget", "custom.png", ObjectWrapperType.Widget)]
-	public class Custom : DrawingArea {
-
-		public static new Type WrappedType = typeof (Stetic.Custom);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Custom Widget Properties",
-				      "CreationFunction",
-				      "String1",
-				      "String2",
-				      "Int1",
-				      "Int2");
-		}
+	public class Custom : Widget {
 
 		string creationFunction, string1, string2;
 		int int1, int2;
 
-		[GladeProperty (Name = "creation_function")]
 		public string CreationFunction {
 			get {
 				return creationFunction;
@@ -62,7 +48,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty (Name = "string1")]
 		public string String1 {
 			get {
 				return string1;
@@ -72,7 +57,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty (Name = "string2")]
 		public string String2 {
 			get {
 				return string2;
@@ -82,8 +66,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty (Name = "int1")]
-		[Range (Int32.MinValue, Int32.MaxValue)]
 		public int Int1 {
 			get {
 				return int1;
@@ -93,8 +75,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty (Name = "int2")]
-		[Range (Int32.MinValue, Int32.MaxValue)]
 		public int Int2 {
 			get {
 				return int2;

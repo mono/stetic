@@ -3,21 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Frame", "frame.png", ObjectWrapperType.Container)]
 	public class Frame : Bin {
-
-		public static new Type WrappedType = typeof (Gtk.Frame);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Frame Properties",
-				      "Shadow",
-				      "ShadowType",
-				      "Label",
-				      "LabelXalign",
-				      "LabelYalign",
-				      "BorderWidth");
-		}
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -28,7 +14,7 @@ namespace Stetic.Wrapper {
 				frame.Shadow = Gtk.ShadowType.None;
 				Gtk.Alignment align = new Gtk.Alignment (0, 0, 1, 1);
 				align.LeftPadding = 12;
-				Alignment align_wrapper = (Alignment)ObjectWrapper.Create (stetic, typeof (Alignment), align);
+				Bin align_wrapper = (Bin)ObjectWrapper.Create (stetic, align);
 				align_wrapper.AddPlaceholder ();
 				ReplaceChild (frame.Child, (Gtk.Widget)align_wrapper.Wrapped);
 			}

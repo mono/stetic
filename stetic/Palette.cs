@@ -6,10 +6,9 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class Palette : Gtk.VBox {
+	public class Palette : Gtk.VBox, IComparer {
 
 		Hashtable groups;
-		Project project;
 
 		class Group : Gtk.Expander {
 		
@@ -34,73 +33,57 @@ namespace Stetic {
 				vbox.PackStart (w, false, false, 0);
 			} 
 		}
-		
+
 		public Palette (Project project) : base (false, 2)
 		{
-			this.project = project;
-
 			groups = new Hashtable ();
 
-			AddOrGetGroup (Stetic.ObjectWrapperType.Widget);
-			AddOrGetGroup (Stetic.ObjectWrapperType.Container);
-			AddOrGetGroup (Stetic.ObjectWrapperType.ToolbarItem);
-			AddOrGetGroup (Stetic.ObjectWrapperType.Window);
-		}
+			AddOrGetGroup ("widget", "Widgets");
+			AddOrGetGroup ("container", "Containers");
+			AddOrGetGroup ("toolbaritem", "Toolbar Items");
+			AddOrGetGroup ("window", "Windows");
 
-		private Group AddOrGetGroup(string name)
-		{
-			Group group = (Group) groups[name];
-			
-			if (group == null) {
-				group = new Group (name); 
-				PackStart (group, false, false, 0);
-				groups.Add (name, group);
-			}
-			
-			return group; 
-		}
+			ArrayList classes = new ArrayList ();
+			foreach (ClassDescriptor klass in Registry.AllClasses)
+				classes.Add (klass);
+			classes.Sort (this);
 
-		public static Pixbuf IconForType (Type type)
-		{
-			foreach (object attr in type.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)) {
-				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
+			foreach (ClassDescriptor klass in classes) {
+				if (klass.Deprecated || klass.Category == "internal" || klass.Icon == null)
+					continue;
 
-				try {
-					return new Gdk.Pixbuf (type.Assembly, owattr.IconName);
-				} catch {
-					;
-				}
-			}
-			return Gdk.Pixbuf.LoadFromResource ("missing.png");
-		}
-
-		public void AddWidget (Assembly assem, Type type)
-		{
-			foreach (object attr in type.GetCustomAttributes (typeof (ObjectWrapperAttribute), false)) {
-				Stetic.ObjectWrapper.Register (type);
-
-				ObjectWrapperAttribute owattr = attr as ObjectWrapperAttribute;
-				if (owattr.Deprecated || owattr.Type == ObjectWrapperType.Internal)
-					return;
-
-				Pixbuf icon = Palette.IconForType (type);
 				WidgetFactory factory;
-
-				if (owattr.Type == ObjectWrapperType.Window)
-					factory = new WindowFactory (project, owattr.Name, icon, type);
+				if (klass.Category == "window")
+					factory = new WindowFactory (project, klass);
 				else
-					factory = new WidgetFactory (project, owattr.Name, icon, type);
+					factory = new WidgetFactory (project, klass);
 
-				AddOrGetGroup(owattr.Type).Append (factory);
+				AddOrGetGroup(klass.Category).Append (factory);
 			}
 		}
 
-		public void AddWidgets (Assembly assem)
+		public int Compare (object x, object y)
 		{
-			foreach (Type type in assem.GetExportedTypes ())
-				AddWidget (assem, type);
+			return string.Compare (((ClassDescriptor)x).Label,
+					       ((ClassDescriptor)y).Label);
+		}
 
-			ShowAll ();
-		}			
+		private Group AddOrGetGroup (string id, string name)
+		{
+			Group group = (Group) groups[id];
+
+			if (group == null) {
+				group = new Group (name);
+				PackStart (group, false, false, 0);
+				groups.Add (id, group);
+			}
+
+			return group;
+		}
+
+		private Group AddOrGetGroup (string name)
+		{
+			return AddOrGetGroup (name, name);
+		}
 	}
 }

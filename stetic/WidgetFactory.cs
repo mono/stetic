@@ -9,22 +9,22 @@ namespace Stetic {
 	public class WidgetFactory : EventBox {
 
 		protected Project project;
-		protected Type wrapperType;
+		protected ClassDescriptor klass;
 
-		public WidgetFactory (Project project, string name, Pixbuf icon, Type wrapperType)
+		public WidgetFactory (Project project, ClassDescriptor klass)
 		{
 			this.project = project;
-			this.wrapperType = wrapperType;
+			this.klass = klass;
 			DND.SourceSet (this);
 
 			AboveChild = true;
 
 			Gtk.HBox hbox = new HBox (false, 6);
 
-			icon = icon.ScaleSimple (16, 16, Gdk.InterpType.Bilinear);
+			Gdk.Pixbuf icon = klass.Icon.ScaleSimple (16, 16, Gdk.InterpType.Bilinear);
 			hbox.PackStart (new Gtk.Image (icon), false, false, 0);
 
-			Gtk.Label label = new Gtk.Label ("<small>" + name + "</small>");
+			Gtk.Label label = new Gtk.Label ("<small>" + klass.Label + "</small>");
 			label.UseMarkup = true;
 			label.Justify = Justification.Left;
 			label.Xalign = 0;
@@ -35,23 +35,18 @@ namespace Stetic {
 
 		protected override void OnDragBegin (Gdk.DragContext ctx)
 		{
-			Stetic.Wrapper.Widget wrapper = Stetic.ObjectWrapper.Create (project, wrapperType) as Stetic.Wrapper.Widget;
-			DND.Drag (this, ctx, wrapper.Wrapped as Widget);
+			DND.Drag (this, ctx, klass.NewInstance (project) as Widget);
 		}
 	}
 
 	public class WindowFactory : WidgetFactory {
-		public WindowFactory (Project project, string name, Pixbuf icon, Type wrapperType) :
-			base (project, name, icon, wrapperType) {}
+		public WindowFactory (Project project, ClassDescriptor klass) : base (project, klass) {}
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
-			Stetic.Wrapper.Window wrapper = Stetic.ObjectWrapper.Create (project, wrapperType) as Stetic.Wrapper.Window;
-
-			Gtk.Window win = wrapper.Wrapped as Gtk.Window;
+			Gtk.Window win = klass.NewInstance (project) as Gtk.Window;
 			win.Present ();
-
-			project.AddWindow (wrapper, true);
+			project.AddWindow (win, true);
 
 			return true;
 		}

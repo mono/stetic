@@ -3,24 +3,9 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Radio Button", "radiobutton.png", ObjectWrapperType.Widget)]
 	public class RadioButton : CheckButton {
 
-		public static new Type WrappedType = typeof (Gtk.RadioButton);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Radio Button Properties",
-				      "Label",
-				      "Group",
-				      "Active",
-				      "Inconsistent",
-				      "DrawIndicator",
-				      "RemoveLabel",
-				      "RestoreLabel");
-		}
-
-		static RadioGroupManager GroupManager = new RadioGroupManager (WrappedType);
+		static RadioGroupManager GroupManager = new RadioGroupManager (typeof (Gtk.RadioButton));
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -56,8 +41,6 @@ namespace Stetic.Wrapper {
 				props["group"] = group;
 		}
 
-		[Editor (typeof (Stetic.Editor.GroupPicker))]
-		[Description ("Group", "The name of the radio button group that this button belongs to")]
 		public string Group {
 			get {
 				return GroupManager[Wrapped];
@@ -66,7 +49,5 @@ namespace Stetic.Wrapper {
 				GroupManager[Wrapped] = value;
 			}
 		}
-
-		public override bool HExpandable { get { return true; } }
 	}
 }

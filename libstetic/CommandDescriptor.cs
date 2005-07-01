@@ -1,7 +1,7 @@
-using GLib;
 using System;
 using System.Collections;
 using System.Reflection;
+using System.Xml;
 
 namespace Stetic {
 
@@ -11,29 +11,26 @@ namespace Stetic {
 		bool needsContext;
 		MethodInfo checkInfo, doInfo;
 
-		public CommandDescriptor (Type wrapperType, string commandName)
+		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
+		public CommandDescriptor (XmlElement elem, ItemGroup group, ClassDescriptor klass) : base (elem, group, klass)
 		{
-			BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+			name = elem.GetAttribute ("name");
+			label = elem.GetAttribute ("label");
+			description = elem.GetAttribute ("description");
 
-			name = commandName;
-
-			doInfo = wrapperType.GetMethod (commandName, flags, null, new Type[] { typeof (Gtk.Widget) }, null);
+			doInfo = klass.WrapperType.GetMethod (name, flags, null, new Type[] { typeof (Gtk.Widget) }, null);
 			if (doInfo != null)
 				needsContext = true;
 			else
-				doInfo = wrapperType.GetMethod (commandName, flags, null, new Type[0], null);
+				doInfo = klass.WrapperType.GetMethod (name, flags, null, new Type[0], null);
 			if (doInfo == null)
-				throw new ArgumentException ("Invalid command name " + wrapperType.Name + "." + commandName);
+				throw new ArgumentException ("Invalid command name " + klass.WrapperType.Name + "." + name);
 
-			foreach (CommandAttribute cattr in doInfo.GetCustomAttributes (typeof (CommandAttribute), false)) {
-				label = cattr.Name;
-				description = cattr.Description;
-				if (cattr.Checker != null) {
-					checkInfo = wrapperType.GetMethod (cattr.Checker, flags, null, needsContext ? new Type[] { typeof (Gtk.Widget) } : new Type[0], null);
-					if (checkInfo == null)
-						throw new ArgumentException ("Invalid checker name " + cattr.Checker + " for command " + wrapperType.Name + "." + commandName);
-				}
-				break;
+			if (elem.GetAttribute ("check") != "") {
+				checkInfo = klass.WrapperType.GetMethod (elem.GetAttribute ("check"), flags, null, needsContext ? new Type[] { typeof (Gtk.Widget) } : new Type[0], null);
+				if (checkInfo == null)
+					throw new ArgumentException ("Invalid checker name " + elem.GetAttribute ("check") + " for command " + klass.WrapperType.Name + "." + name);
 			}
 		}
 
@@ -61,31 +58,34 @@ namespace Stetic {
 			}
 		}
 
-		public bool Enabled (ObjectWrapper wrapper)
+		public bool Enabled (object obj)
 		{
 			if (checkInfo == null)
-				return EnabledFor (wrapper);
+				return EnabledFor (obj);
 			else
-				return (bool)checkInfo.Invoke (wrapper, new object[0]);
+				return (bool)checkInfo.Invoke (ObjectWrapper.Lookup (obj), new object[0]);
 		}
 
-		public bool Enabled (ObjectWrapper wrapper, Gtk.Widget context)
+		public bool Enabled (object obj, Gtk.Widget context)
 		{
 			if (checkInfo == null)
-				return EnabledFor (wrapper);
-			else if (needsContext)
+				return EnabledFor (obj);
+
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
+			if (needsContext)
 				return (bool)checkInfo.Invoke (wrapper, new object[] { context });
 			else
 				return (bool)checkInfo.Invoke (wrapper, new object[0]);
 		}
 
-		public void Run (ObjectWrapper wrapper)
+		public void Run (object obj)
 		{
-			doInfo.Invoke (wrapper, new object[0]);
+			doInfo.Invoke (ObjectWrapper.Lookup (obj), new object[0]);
 		}
 
-		public void Run (ObjectWrapper wrapper, Gtk.Widget context)
+		public void Run (object obj, Gtk.Widget context)
 		{
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
 			if (needsContext)
 				doInfo.Invoke (wrapper, new object[] { context });
 			else

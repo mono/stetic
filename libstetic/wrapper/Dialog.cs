@@ -2,31 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Dialog Box", "dialog.png", ObjectWrapperType.Window)]
 	public class Dialog : Window {
-
-		public static new Type WrappedType = typeof (Gtk.Dialog);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Dialog Properties",
-				      "Title",
-				      "Buttons",
-				      "HelpButton",
-				      "Icon",
-				      "WindowPosition",
-				      "Modal",
-				      "BorderWidth");
-			AddItemGroup (type, "Miscellaneous Dialog Properties",
-				      "HasSeparator",
-				      "AcceptFocus",
-				      "Decorated",
-				      "DestroyWithParent",
-				      "Gravity",
-				      "Role",
-				      "SkipPagerHint",
-				      "SkipTaskbarHint");
-		}
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -35,12 +11,12 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 			dialog.HasSeparator = false;
 
-			wrapper = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.VBox), dialog.VBox) as Stetic.Wrapper.Widget;
+			wrapper = ObjectWrapper.Create (stetic, dialog.VBox) as Stetic.Wrapper.Widget;
 			wrapper.InternalChildId = "vbox";
 			if (dialog.VBox.Name == "GtkVBox")
 				dialog.VBox.Name = dialog.Name + "_vbox";
 
-			wrapper = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.HButtonBox), dialog.ActionArea) as Stetic.Wrapper.Widget;
+			wrapper = ObjectWrapper.Create (stetic, dialog.ActionArea) as Stetic.Wrapper.Widget;
 			wrapper.InternalChildId = "action_area";
 			if (dialog.ActionArea.Name == "GtkHButtonBox")
 				dialog.ActionArea.Name = dialog.Name + "_action_area";
@@ -68,8 +44,6 @@ namespace Stetic.Wrapper {
 
 		StandardButtons buttons;
 
-//		[Editor (typeof (Stetic.Editor.DialogButtons))]
-		[Description ("Buttons", "The buttons to display")]
 		public StandardButtons Buttons {
 			get {
 				return buttons;
@@ -110,7 +84,6 @@ namespace Stetic.Wrapper {
 
 		Gtk.Button helpButton;
 
-		[Description ("Help Button", "Whether or not to display a \"Help\" button")]
 		public bool HelpButton {
 			get {
 				return helpButton != null;
@@ -128,13 +101,18 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		static ClassDescriptor buttonClass;
+
 		Gtk.Button AddButton (string stockId, Gtk.ResponseType response, bool hasDefault)
 		{
 			Stetic.Wrapper.Button wrapper;
 			Gtk.Button button;
 
-			wrapper = ObjectWrapper.Create (stetic, typeof (Stetic.Wrapper.Button)) as Stetic.Wrapper.Button;
-			button = (Gtk.Button)wrapper.Wrapped;
+			if (buttonClass == null)
+				buttonClass = Registry.LookupClass ("GtkButton");
+
+			button = (Gtk.Button)buttonClass.NewInstance (stetic);
+			wrapper = (Stetic.Wrapper.Button) ObjectWrapper.Lookup (button);
 			if (stockId != null) {
 				wrapper.Type = Button.ButtonType.StockItem;
 				wrapper.StockId = stockId;

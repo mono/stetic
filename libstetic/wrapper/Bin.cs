@@ -3,9 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Bin : Container {
-
-		public static new Type WrappedType = typeof (Gtk.Bin);
+	public class Bin : Container {
 
 		public override void Wrap (object obj, bool initialized)
 		{

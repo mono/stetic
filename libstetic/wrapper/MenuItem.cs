@@ -3,32 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Menu Item", "menuitem.png", ObjectWrapperType.Internal)]
 	public class MenuItem : Container {
-
-		public static new Type WrappedType = typeof (Gtk.MenuItem);
-
-		internal static new void Register (Type type)
-		{
-			if (type == typeof (Stetic.Wrapper.MenuItem)) {
-				AddItemGroup (type,
-					      "Menu Item Properties",
-					      "Label",
-					      "UseUnderline",
-					      "Accelerator");
-			}
-
-			foreach (ItemGroup props in GetItemGroups (type)) {
-				ItemDescriptor accelerator = props["Accelerator"];
-				if (accelerator != null) {
-					PropertyDescriptor hasSubmenu =
-						new PropertyDescriptor (typeof (Stetic.Wrapper.MenuItem),
-									typeof (Gtk.MenuItem),
-									"HasSubmenu");
-					accelerator.InvisibleIf (hasSubmenu);
-				}
-			}
-		}
 
 		public static new Gtk.MenuItem CreateInstance ()
 		{
@@ -83,8 +58,6 @@ namespace Stetic.Wrapper {
 
 		string labelText;
 
-		[GladeProperty (Name = "label")]
-		[Description ("Label", "The text of the menu item")]
 		public string Label {
 			get {
 				return labelText;
@@ -95,8 +68,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty (Name = "use_underline")]
-		[Description ("Use Underline", "If set, an underline in the text indicates the next character should be used for the mnemonic accelerator key")]
 		public bool UseUnderline {
 			get {
 				return label.UseUnderline;
@@ -109,8 +80,6 @@ namespace Stetic.Wrapper {
 
 		Gtk.AccelGroup accelGroup;
 		string accelerator;
-
-		[Editor (typeof (Stetic.Editor.Accelerator))]
 		public string Accelerator {
 			get {
 				return accelerator;

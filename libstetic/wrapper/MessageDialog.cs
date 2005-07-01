@@ -2,24 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Message Dialog", "messagedialog.png", ObjectWrapperType.Window)]
 	public class MessageDialog : Dialog {
-
-		public static new Type WrappedType = typeof (Gtk.MessageDialog);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Message Dialog Properties",
-				      "Title",
-				      "MessageType",
-				      "PrimaryText",
-				      "SecondaryText",
-				      "Buttons",
-				      "Icon",
-				      "WindowPosition",
-				      "Modal",
-				      "BorderWidth");
-		}
 
 		Gtk.Label label, secondaryLabel;
 		Gtk.Image icon;
@@ -73,7 +56,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[Description ("Message Type", "The type of message dialog this is")]
 		public Gtk.MessageType MessageType {
 			get {
 				if (icon.Stock == Gtk.Stock.DialogInfo)
@@ -106,8 +88,6 @@ namespace Stetic.Wrapper {
 		}
 
 		public string primaryText;
-
-		[Description ("Primary Text", "The primary message text")]
 		public string PrimaryText {
 			get {
 				return primaryText;
@@ -118,7 +98,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[Description ("Secondary Text", "The secondary message text")]
 		public string SecondaryText {
 			get {
 				return secondaryLabel.Text;
@@ -129,8 +108,6 @@ namespace Stetic.Wrapper {
 		}
 
 		Gtk.ButtonsType buttons;
-
-		[Description ("Buttons", "The buttons to offer")]
 		public new Gtk.ButtonsType Buttons {
 			get {
 				return buttons;

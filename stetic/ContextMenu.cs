@@ -15,7 +15,7 @@ namespace Stetic {
 
 			this.wrapper = null;
 
-			item = LabelItem ("Placeholder", null);
+			item = LabelItem (ph);
 			item.Sensitive = false;
 			Add (item);
 
@@ -35,7 +35,7 @@ namespace Stetic {
 			this.wrapper = wrapper;
 
 			if (context == wrapper.Wrapped) {
-				item = LabelItem (wrapper.Wrapped.Name, wrapper.GetType ());
+				item = LabelItem (context);
 				item.Sensitive = false;
 				Add (item);
 			}
@@ -44,13 +44,18 @@ namespace Stetic {
 			item.Activated += DoSelect;
 			Add (item);
 
-			foreach (CommandDescriptor cmd in wrapper.ContextMenuItems.Items) {
-				item = new MenuItem (cmd.Label);
-				if (cmd.Enabled (wrapper, context))
-					item.Activated += new Stupid69614Workaround (cmd, wrapper, context).Activate;
-				else
-					item.Sensitive = false;
-				Add (item);
+			ClassDescriptor klass = Registry.LookupClass (wrapper.Wrapped.GetType ());
+			if (klass != null) {
+				foreach (CommandDescriptor cmd in klass.ContextMenu.Items) {
+					item = new MenuItem (cmd.Label);
+					if (cmd.Enabled (wrapper.Wrapped, context)) {
+						item.Activated += delegate (object o, EventArgs args) {
+							cmd.Run (wrapper.Wrapped, context);
+						};
+					} else
+						item.Sensitive = false;
+					Add (item);
+				}
 			}
 
 			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildId != null, context == wrapper.Wrapped, context);
@@ -83,7 +88,7 @@ namespace Stetic {
 				for (; parentWrapper != null; parentWrapper = parentWrapper.ParentWrapper) {
 					Add (new SeparatorMenuItem ());
 
-					item = LabelItem (parentWrapper.Wrapped.Name, parentWrapper.GetType ());
+					item = LabelItem (parentWrapper.Wrapped);
 					item.Submenu = new ContextMenu (parentWrapper, context);
 					Add (item);
 				}
@@ -97,23 +102,6 @@ namespace Stetic {
 			Destroy ();
 		}
 
-		private class Stupid69614Workaround {
-			CommandDescriptor cmd;
-			ObjectWrapper wrapper;
-			Widget context;
-
-			public Stupid69614Workaround (CommandDescriptor cmd, ObjectWrapper wrapper, Widget context)
-			{
-				this.cmd = cmd;
-				this.wrapper = wrapper;
-				this.context = context;
-			}
-
-			public void Activate (object o, EventArgs args) {
-				cmd.Run (wrapper, context);
-			}
-		}
-
 		void DoSelect (object obj, EventArgs args)
 		{
 			wrapper.Select ();
@@ -124,19 +112,20 @@ namespace Stetic {
 			wrapper.Delete ();
 		}
 
-		static MenuItem LabelItem (string labelString, Type type)
+		static MenuItem LabelItem (Gtk.Widget widget)
 		{
 			ImageMenuItem item;
 			Label label;
 
-			label = new Label (labelString);
+			label = new Label (widget is Placeholder ? "Placeholder" : widget.Name);
 			label.UseUnderline = false;
 			label.SetAlignment (0.0f, 0.5f);
 			item = new ImageMenuItem ();
 			item.Add (label);
 
-			if (type != null) {
-				Gdk.Pixbuf pixbuf = Palette.IconForType (type);
+			ClassDescriptor klass = Registry.LookupClass (widget.GetType ());
+			if (klass != null) {
+				Gdk.Pixbuf pixbuf = klass.Icon;
 				int width, height;
 				Gtk.Icon.SizeLookup (Gtk.IconSize.Menu, out width, out height);
 				item.Image = new Gtk.Image (pixbuf.ScaleSimple (width, height, Gdk.InterpType.Bilinear));

@@ -3,35 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public abstract class ButtonBox : Box {
-
-		public static new Type WrappedType = typeof (Gtk.ButtonBox);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Button Box Properties",
-				      "LayoutStyle",
-				      "Homogeneous",
-				      "Spacing",
-				      "BorderWidth");
-		}
-
-		public class ButtonBoxChild : Container.ContainerChild {
-
-			public static new Type WrappedType = typeof (Gtk.ButtonBox.ButtonBoxChild);
-
-			internal static new void Register (Type type)
-			{
-				ItemGroup props = AddItemGroup (type, "Button Box Child Layout",
-								"PackType",
-								"Secondary",
-								"Position",
-								"Expand",
-								"Fill",
-								"Padding");
-				props["Fill"].DisabledIf (props["Expand"], false);
-			}
-		}
+	public class ButtonBox : Box {
 
 		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
 		{

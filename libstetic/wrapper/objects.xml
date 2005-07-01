@@ -1,0 +1,1126 @@
+<objects>
+
+    <object type="Gtk.Widget,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
+	<internal-properties>
+	    <property name="Name" />
+	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Common Widget Properties">
+		<property name="WidthRequest" />
+		<property name="HeightRequest" />
+		<property name="Visible" />
+		<property name="Sensitive" />
+		<property name="CanDefault" />
+		<property name="HasDefault" />
+		<property name="CanFocus" />
+		<property name="HasFocus" />
+		<property name="Events" />
+		<property name="ExtensionEvents" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Window,gtk-sharp" wrapper="Stetic.Wrapper.Window"
+	    label="Window" icon="window.png" palette-category="window">
+	<itemgroups>
+	    <itemgroup label="Window Properties">
+		<property name="Title" />
+		<property name="Icon" editor="Stetic.Editor.ImageFile" />
+		<property name="Type" />
+		<property name="TypeHint" />
+		<property name="WindowPosition" />
+		<property name="Modal" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup label="Window Size Properties" name="Size">
+		<property name="Resizable" />
+		<property name="AllowGrow" />
+		<property name="AllowShrink" />
+		<property name="DefaultWidth" />
+		<property name="DefaultHeight" />
+	    </itemgroup>
+	    <itemgroup label="Miscellaneous Window Properties" name="Misc">
+		<property name="AcceptFocus" />
+		<property name="Decorated" />
+		<property name="DestroyWithParent" />
+		<property name="Gravity" />
+		<property name="Role" />
+		<property name="SkipPagerHint" />
+		<property name="SkipTaskbarHint" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Misc,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
+	<itemgroups>
+	    <itemgroup label="Miscellaneous Alignment Properties">
+		<property name="Xpad" />
+		<property name="Ypad" />
+		<property name="Xalign" />
+		<property name="Yalign" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Paned,gtk-sharp" wrapper="Stetic.Wrapper.Paned">
+	<itemgroups>
+	    <itemgroup label="Pane Properties">
+		<property name="BorderWidth" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+    <object type="Gtk.Paned+PanedChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
+	<itemgroups>
+	    <itemgroup label="Pane Child Layout">
+		<property name="Resize" />
+		<property name="Shrink" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Range,gtk-sharp" wrapper="Stetic.Wrapper.Range">
+	<itemgroups>
+	    <itemgroup label="Range Properties">
+		<property name="UpdatePolicy" />
+		<property name="Inverted" />
+		<property name="Adjustment.Lower" />
+		<property name="Adjustment.Upper" />
+		<property name="Adjustment.PageIncrement" />
+		<property name="Adjustment.PageSize" />
+		<property name="Adjustment.StepIncrement" />
+		<property name="Adjustment.Value" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Scale,gtk-sharp" wrapper="Stetic.Wrapper.Scale">
+	<itemgroups>
+	    <itemgroup label="Scale Properties">
+		<property name="Adjustment.Lower" />
+		<property name="Adjustment.Upper" />
+		<property name="Adjustment.Value" />
+		<property name="DrawValue" ignore-default="true" />
+		<property name="Digits">
+		    <disabled-if name="DrawValue" value="false" />
+		</property>
+		<property name="ValuePos" ignore-default="true" >
+		    <disabled-if name="DrawValue" value="false" />
+		</property>
+		<property name="Inverted" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Alignment,gtk-sharp" wrapper="Stetic.Wrapper.Bin"
+	    label="Alignment" icon="alignment.png" palette-category="container">
+	<itemgroups>
+	    <itemgroup label="Alignment Properties">
+		<property name="Xscale" />
+		<property name="Yscale" />
+		<property name="Xalign" />
+		<property name="Yalign" />
+		<property name="LeftPadding" />
+		<property name="TopPadding" />
+		<property name="RightPadding" />
+		<property name="BottomPadding" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Arrow,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Arrow" icon="arrow.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Arrow Properties">
+		<property name="ArrowType" />
+		<property name="ShadowType" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Misc" important="true" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Bin,gtk-sharp" wrapper="Stetic.Wrapper.Bin" />
+
+    <object type="Gtk.Box,gtk-sharp" wrapper="Stetic.Wrapper.Box">
+	<itemgroups>
+	    <itemgroup label="Box Properties">
+		<property name="Homogeneous" />
+		<property name="Spacing" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	</itemgroups>
+	<contextmenu>
+	    <command name="InsertBefore" label="Insert Before"
+		     description="Insert an empty row/column before the selected one" />
+	    <command name="InsertAfter" label="Insert After"
+		     description="Insert an empty row/column after the selected one" />
+	</contextmenu>
+    </object>
+    <object type="Gtk.Box+BoxChild,gtk-sharp" wrapper="Stetic.Wrapper.Box+BoxChild">
+	<itemgroups>
+	    <itemgroup label="Box Child Layout">
+		<property name="PackType" />
+		<property name="Position" />
+		<property ref="Gtk.Container.AutoSize" />
+		<property name="Expand">
+		    <disabled-if name="AutoSize" value="true" />
+		</property>
+		<property name="Fill">
+		    <disabled-if name="AutoSize" value="true" />
+		    <disabled-if name="Expand" value="false" />
+		</property>
+		<property name="Padding" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox">
+	<itemgroups>
+	    <itemgroup label="Button Box Properties">
+		<property name="LayoutStyle" />
+		<property name="Spacing" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+    <object type="Gtk.ButtonBox+ButtonBoxChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
+	<itemgroups>
+	    <itemgroup label="Button Box Child Layout">
+		<property name="PackType" />
+		<property name="Secondary" />
+		<property name="Position" />
+		<property name="Expand" />
+		<property name="Fill">
+		    <disabled-if name="Expand" value="false" />
+		</property>
+		<property name="Padding" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Button,gtk-sharp" wrapper="Stetic.Wrapper.Button"
+	    label="Button" icon="button.png" palette-category="widget">
+	<internal-properties>
+	    <property name="HasResponseId" />
+	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Button Properties">
+		<property name="Type" label="Button Type"
+			  description="The type of button" />
+		<property name="StockId" label="Stock Item"
+			  description="The stock button ID"
+			  editor="Stetic.Editor.StockItem">
+		    <invisible-if name="Type" value="TextOnly" />
+		    <invisible-if name="Type" value="ThemedIcon" />
+		    <invisible-if name="Type" value="ApplicationIcon" />
+		    <invisible-if name="Type" value="Custom" />
+		</property>
+		<property name="ApplicationIcon" label="Icon Filename"
+			  description="The icon to display in the button"
+			  editor="Stetic.Editor.ImageFile">
+		    <invisible-if name="Type" value="StockItem" />
+		    <invisible-if name="Type" value="TextOnly" />
+		    <invisible-if name="Type" value="ThemedIcon" />
+		    <invisible-if name="Type" value="Custom" />
+		</property>
+		<property name="ThemedIcon" label="Icon Name"
+			  description="The icon to display in the button"
+			  editor="Stetic.Editor.ThemedIcon">
+		    <invisible-if name="Type" value="StockItem" />
+		    <invisible-if name="Type" value="TextOnly" />
+		    <invisible-if name="Type" value="ApplicationIcon" />
+		    <invisible-if name="Type" value="Custom" />
+		</property>
+		<property name="Label">
+		    <invisible-if name="Type" value="StockItem" />
+		    <invisible-if name="Type" value="Custom" />
+		</property>
+		<property name="UseUnderline">
+		    <invisible-if name="Type" value="StockItem" />
+		    <invisible-if name="Type" value="Custom" />
+		</property>
+		<property name="ResponseId" label="Response Id" glade-name="response_id"
+			  description="The response ID to emit when this button is clicked."
+			  editor="Stetic.Editor.ResponseId">
+		    <visible-if name="HasResponseId" value="true" />
+		</property>
+	    </itemgroup>
+	    <itemgroup label="Extra Button Properties" name="Extra">
+		<property name="FocusOnClick" />
+		<property name="Relief" />
+		<property name="Xalign" />
+		<property name="Yalign" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Calendar,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Calendar" icon="calendar.png" palette-category="widget">
+	<internal-properties>
+	    <property name="DisplayOptions" glade-name="display_options" />
+	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Calendar Properties">
+		<property name="ShowHeading" />
+		<property name="ShowDayNames" />
+		<property name="ShowWeekNumbers" />
+		<property name="NoMonthChange" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.CheckButton,gtk-sharp" wrapper="Stetic.Wrapper.CheckButton"
+	    label="Check Box" icon="checkbutton.png" palette-category="widget"
+	    hexpandable="true">
+	<internal-properties>
+	    <property name="HasLabel" />
+	</internal-properties>
+	<commands>
+	    <command name="RemoveLabel" label="Remove Label"
+		     description="Remove the button's label">
+		<disabled-if name="HasLabel" value="false" />
+	    </command>
+	    <command name="RestoreLabel" label="Restore Label"
+		     description="Restore the button's label">
+		<disabled-if name="HasLabel" value="true" />
+	    </command>
+	</commands>
+	<itemgroups>
+	    <itemgroup label="Check Box Properties">
+		<property name="Label" initial="Name" />
+		<property name="Active" />
+		<property name="Inconsistent" />
+		<property name="DrawIndicator" />
+		<command ref="RemoveLabel" />
+		<command ref="RestoreLabel" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Button.Extra" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<contextmenu>
+	    <command ref="RemoveLabel" />
+	    <command ref="RestoreLabel" />
+	</contextmenu>
+    </object>
+
+    <object type="Gtk.MenuItem,gtk-sharp" wrapper="Stetic.Wrapper.MenuItem"
+	    label="Menu Item" icon="menuitem.png" palette-category="internal">
+	<internal-properties>
+	    <property name="HasSubmenu" />
+	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Menu Item Properties">
+		<property name="Label" glade-name="label" label="Label"
+			  description="The text of the menu item" />
+		<property name="UseUnderline" glade-name="use_underline" label="Use Underline"
+			  description="If set, an underline in the text indicates the next character should be used for the mnemonic accelerator key" />
+		<property name="Accelerator" editor="Stetic.Editor.Accelerator">
+		    <disabled-if name="HasSubmenu" value="true" />
+		</property>
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.CheckMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.MenuItem" 
+	    label="Check Menu Item" icon="checkmenuitem.png" palette-category="internal">
+	<itemgroups>
+	    <itemgroup label="Check Menu Item Properties">
+		<property ref="Gtk.MenuItem.Label" />
+		<property ref="Gtk.MenuItem.UseUnderline" />
+		<property ref="Gtk.MenuItem.Accelerator" />
+		<property name="Active" />
+		<property name="Inconsistent" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ColorButton,gtk-sharp" wrapper="Stetic.Wrapper.ColorButton"
+	    label="Color Button" icon="colorbutton.png" palette-category="widget">
+	<internal-properties>
+	    <property name="UseAlpha" />
+	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Color Button Properties">
+		<property name="Title" />
+		<property name="Color" />
+		<property name="Alpha" min="-1" max="65535" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ComboBox,gtk-sharp" wrapper="Stetic.Wrapper.ComboBox"
+	    label="Combo Box" icon="combo.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Combo Box Properties">
+		<property name="Items" label="Items" glade-name="items"
+			  description="The items to display in the Combo Box, one per line"
+			  editor="Stetic.Editor.Text" />
+		<property name="Active" />
+	    </itemgroup>
+	    <itemgroup label="Extra Combo Box Properties" name="Extra">
+		<property name="WrapWidth" />
+		<property name="ColumnSpanColumn" />
+		<property name="RowSpanColumn" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ComboBoxEntry,gtk-sharp" wrapper="Stetic.Wrapper.ComboBoxEntry" 
+	    label="Combo Box Entry" icon="comboboxentry.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup ref="Gtk.ComboBox" />
+	    <itemgroup ref="Gtk.ComboBox.Extra" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container">
+	<internal-properties>
+	    <property name="AutoSize" label="Auto Size"
+		      description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container" />
+	</internal-properties>
+    </object>
+    <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
+
+    <object type="Gtk.Dialog,gtk-sharp" wrapper="Stetic.Wrapper.Dialog"
+	    label="Dialog Box" icon="dialog.png" palette-category="window">
+	<itemgroups>
+	    <itemgroup label="Dialog Properties">
+		<property name="Title" />
+		<property name="Buttons" label="Buttons"
+			  description="The buttons to display" />
+		<property name="HelpButton" label="Help Button"
+			  description="Whether or not to display a 'Help' button" />
+		<property name="Icon" />
+		<property name="WindowPosition" />
+		<property name="Modal" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup label="Miscellaneous Dialog Properties" name="Misc">
+		<property name="HasSeparator" />
+		<property name="AcceptFocus" />
+		<property name="Decorated" />
+		<property name="DestroyWithParent" />
+		<property name="Gravity" />
+		<property name="Role" />
+		<property name="SkipPagerHint" />
+		<property name="SkipTaskbarHint" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Window.Size" />
+	    <itemgroup ref="Gtk.Window.Misc" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.DrawingArea,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Drawing Area" icon="drawingarea.png" palette-category="widget"
+	    hexpandable="true" vexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Widget" important="false" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Entry,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Entry" icon="entry.png" palette-category="widget"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Entry Properties">
+		<property name="Text" />
+		<property name="Editable" />
+		<property name="WidthChars" />
+		<property name="MaxLength" />
+		<property name="HasFrame" />
+		<property name="ActivatesDefault" />
+		<property name="Visibility" />
+	    </itemgroup>
+	    <itemgroup label="Extra Entry Properties" name="Extra">
+		<property name="InvisibleChar" />
+		<property name="Xalign" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.EventBox,gtk-sharp" wrapper="Stetic.Wrapper.Bin"
+	    label="Event Box" icon="eventbox.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Event Box Properties">
+		<property name="AboveChild" />
+		<property name="VisibleWindow" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Expander,gtk-sharp" wrapper="Stetic.Wrapper.Expander"
+	    label="Expander" icon="expander.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Expander Properties">
+		<property name="Expanded" />
+		<property name="Label" initial="Name"/>
+		<property name="UseMarkup" />
+		<property name="UseUnderline" />
+		<property name="Spacing" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.FontButton,gtk-sharp" wrapper="Stetic.Wrapper.FontButton"
+	    label="Font Button" icon="fontbutton.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Font Button Properties">
+		<property name="Title" />
+		<property name="FontName" />
+		<property name="ShowSize" />
+		<property name="ShowStyle" />
+		<property name="UseFont" />
+		<property name="UseSize">
+		    <disabled-if name="UseFont" value="false" />
+		</property>
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Frame,gtk-sharp" wrapper="Stetic.Wrapper.Frame"
+	    label="Frame" icon="frame.png" palette-category="container">
+	<itemgroups>
+	    <itemgroup label="Frame Properties">
+		<property name="Shadow" />
+		<property name="ShadowType" />
+		<property name="Label" />
+		<property name="LabelXalign" />
+		<property name="LabelYalign" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.HBox,gtk-sharp" wrapper="Stetic.Wrapper.Box"
+	    label="HBox" icon="hbox.png" palette-category="container">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Box" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<contextmenu ref="Gtk.Box" />
+    </object>
+
+    <object type="Gtk.HButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox"
+	    label="HButtonBox" icon="hbuttonbox.png" palette-category="container"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.ButtonBox" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<contextmenu ref="Gtk.Box" />
+    </object>
+
+    <object type="Gtk.HPaned,gtk-sharp" wrapper="Stetic.Wrapper.Paned"
+	    label="HPaned" icon="hpaned.png" palette-category="container"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Paned" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.HScale,gtk-sharp" wrapper="Stetic.Wrapper.HScale"
+	    label="Horizontal Scale" icon="hscale.png" palette-category="container"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Scale" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.HScrollbar,gtk-sharp" wrapper="Stetic.Wrapper.HScrollbar"
+	    label="Horizontal Scrollbar" icon="hscrollbar.png" palette-category="container"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Range" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.HSeparator,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Horizontal Separator" icon="hseparator.png" palette-category="container"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Widget" important="false" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Image,gtk-sharp" wrapper="Stetic.Wrapper.Image"
+	    label="Image" icon="image.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Image Properties">
+		<property name="Type" label="Image Type"
+			  description="Whether to use a themed icon or an application-provided image" />
+		<property name="IconName" label="Icon name"
+			  description="The themed icon to display"
+			  editor="Stetic.Editor.ThemedIcon">
+		    <invisible-if name="Type" value="ApplicationImage" />
+		</property>
+		<property name="IconSize">
+		    <invisible-if name="Type" value="ApplicationImage" />
+		</property>
+		<property name="Filename" glade-name="pixbuf"
+			  editor="Stetic.Editor.ImageFile">
+		    <invisible-if name="Type" value="ThemedIcon" />
+		</property>
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Misc" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ImageMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.ImageMenuItem"
+	    label="Image Menu Item" icon="imagemenuitem.png" palette-category="internal">
+	<itemgroups>
+	    <itemgroup label="Image Menu Item Properties">
+		<property name="Image" editor="Stetic.Editor.Image" />
+		<property ref="Gtk.MenuItem.Label" />
+		<property ref="Gtk.MenuItem.UseUnderline" />
+		<property ref="Gtk.MenuItem.Accelerator" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Label,gtk-sharp" wrapper="Stetic.Wrapper.Label"
+	    label="Label" icon="label.png" palette-category="widget">
+	<internal-properties>
+	    <property name="GladeMnemonicWidget" />
+	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Label Properties">
+		<property name="LabelProp" />
+		<property name="UseMarkup" />
+		<property name="UseUnderline" />
+		<property name="Wrap" />
+		<property name="MnemonicWidget" />
+		<property name="Justify" />
+		<property name="Selectable" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Misc" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.MenuBar,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Menu Bar" icon="menubar.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Widget" important="false" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Menu,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Menu" icon="menu.png" palette-category="internal">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Widget" important="false" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.MessageDialog,gtk-sharp" wrapper="Stetic.Wrapper.MessageDialog"
+	    label="Message Dialog" icon="messagedialog.png" palette-category="window">
+	<itemgroups>
+	    <itemgroup label="Message Dialog Properties">
+		<property name="Title" />
+		<property name="MessageType" label="Message Type"
+			  description="The type of message dialog this is" />
+		<property name="PrimaryText" label="Primary Text"
+			  description="The primary message text" />
+		<property name="SecondaryText" label="Secondary Text"
+			  description="The secondary message text" />
+		<property name="Buttons" label="Buttons"
+			  description="The buttons to offer" />
+		<property name="Icon" />
+		<property name="WindowPosition" />
+		<property name="Modal" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Dialog.Misc" />
+	    <itemgroup ref="Gtk.Window.Size" />
+	    <itemgroup ref="Gtk.Window.Misc" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Notebook,gtk-sharp" wrapper="Stetic.Wrapper.Notebook"
+	    label="Notebook" icon="notebook.png" palette-category="container">
+	<itemgroups>
+	    <itemgroup label="Notebook Properties">
+		<property name="EnablePopup" />
+		<property name="Homogeneous" />
+		<property name="TabPos" />
+		<property name="TabHborder" />
+		<property name="TabVborder" />
+		<property name="ShowBorder" />
+		<property name="ShowTabs" />
+		<property name="Scrollable" />
+		<property name="BorderWidth" />
+		<command ref="InsertBefore" />
+		<command ref="InsertAfter" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<contextmenu>
+	    <command name="PreviousPage" label="Go to Previous Page"
+		     description="Show the previous page"
+		     check="CheckPreviousPage" />
+	    <command name="NextPage" label="Go to Next Page"
+		     description="Show the next page"
+		     check="CheckNextPage" />
+	    <command name="DeletePage" label="Delete Page"
+		     description="Delete the current page" />
+	    <command name="SwapPrevious" label="Swap with Previous Page"
+		     description="Swap the contents of this page with the contents of the previous page"
+		     check="CheckPreviousPage" />
+	    <command name="SwapNext" label="Swap with Next Page"
+		     description="Swap the contents of this page with the contents of the next page"
+		     check="CheckNextPage" />
+	    <command name="InsertBefore" label="Insert Page Before"
+		     description="Insert a blank page before this one" />
+	    <command name="InsertAfter" label="Insert Page After"
+		     description="Insert a blank page after this one" />
+	</contextmenu>
+    </object>
+    <object type="Gtk.Notebook+NotebookChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
+	<itemgroups>
+	    <itemgroup label="Notebook Child Layout">
+		<property name="Position" />
+		<property name="TabPack" />
+		<property name="TabExpand" />
+		<property name="TabFill" />
+		<property name="MenuLabel" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.OptionMenu,gtk-sharp" wrapper="Stetic.Wrapper.OptionMenu"
+	    label="Option Menu" icon="optionmenu.png" deprecated="true">
+	<itemgroups>
+	    <itemgroup label="Option Menu Properties">
+		<property name="Active" glade-name="history" label="Active"
+			  description="The active menu item" min="0" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ProgressBar,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Progress Bar" icon="progressbar.png" palette-category="widget"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Progress Bar Properties">
+		<property name="Orientation" />
+		<property name="Text" />
+		<property name="PulseStep" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.RadioButton,gtk-sharp" wrapper="Stetic.Wrapper.RadioButton"
+	    label="Radio Button" icon="radiobutton.png" palette-category="widget"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Radio Button Properties">
+		<property name="Label" />
+		<property name="Group" label="Group"
+			  description="The name of the radio button group that this button belongs to"
+			  editor="Stetic.Editor.GroupPicker" />
+		<property name="Active" />
+		<property name="Inconsistent" />
+		<property name="DrawIndicator" />
+		<command ref="Gtk.CheckButton.RemoveLabel" />
+		<command ref="Gtk.CheckButton.RestoreLabel" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Button.Extra" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<contextmenu>
+	    <command ref="Gtk.CheckButton.RemoveLabel" />
+	    <command ref="Gtk.CheckButton.RestoreLabel" />
+	</contextmenu>
+    </object>
+
+    <object type="Gtk.RadioMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.RadioMenuItem"
+	    label="Radio Menu Item" icon="radiomenuitem.png" palette-category="internal">
+	<itemgroups>
+	    <itemgroup label="Radio Menu Item Properties">
+		<property ref="Gtk.MenuItem.Label" />
+		<property ref="Gtk.MenuItem.UseUnderline" />
+		<property ref="Gtk.MenuItem.Accelerator" />
+		<property name="Group" label="Group"
+			  description="The name of the radio menu item group that this menu item belongs to"
+			  editor="Stetic.Editor.GroupPicker" />
+		<property name="Active" />
+		<property name="Inconsistent" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.RadioToolButton,gtk-sharp" wrapper="Stetic.Wrapper.RadioToolButton"
+	    label="Toolbar Radio Button" icon="radiobutton.png" palette-category="toolbaritem">
+	<itemgroups>
+	    <itemgroup label="Toolbar Radio Button Properties">
+		<property name="Icon" />
+		<property name="Label" />
+		<property name="UseUnderline" />
+		<property name="Group" label="Group"
+			  description="The name of the radio toolbar item group that this toolbar item belongs to"
+			  editor="Stetic.Editor.GroupPicker" />
+		<property name="Active" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ScrolledWindow,gtk-sharp" wrapper="Stetic.Wrapper.ScrolledWindow"
+	    label="Scrolled Window" icon="scrolledwindow.png" palette-category="container"
+	    hexpandable="true" vexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Scrolled Window Properties">
+		<property name="VscrollbarPolicy" />
+		<property name="HscrollbarPolicy" />
+		<property name="ShadowType" />
+		<property name="WindowPlacement" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.SeparatorMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Separator Menu Item" icon="hseparator.png" palette-category="internal">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Widget" important="false" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.SeparatorToolItem,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Toolbar Separator" icon="vseparator.png" palette-category="toolbaritem">
+	<itemgroups>
+	    <itemgroup label="Toolbar Separator Properties">
+		<property name="Draw" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.SpinButton,gtk-sharp" wrapper="Stetic.Wrapper.SpinButton"
+	    label="Spin Button" icon="spinbutton.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Range Properties">
+		<property name="Adjustment.Lower" />
+		<property name="Adjustment.Upper" />
+		<property name="Adjustment.PageIncrement" />
+		<property name="Adjustment.PageSize" />
+		<property name="Adjustment.StepIncrement" />
+	    </itemgroup>
+	    <itemgroup label="Spin Button Properties" important="true">
+		<property name="ClimbRate" />
+		<property name="Digits" />
+		<property name="Numeric" />
+		<property name="SnapToTicks" />
+		<property name="UpdatePolicy" />
+		<property name="Value" />
+		<property name="Wrap" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Statusbar,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Statusbar" icon="statusbar.png" palette-category="widget"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Status Bar Properties">
+		<property name="HasResizeGrip" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Table,gtk-sharp" wrapper="Stetic.Wrapper.Table"
+	    label="Table" icon="table.png" palette-category="container">
+	<itemgroups>
+	    <itemgroup label="Table Properties">
+		<property name="NRows" />
+		<property name="NColumns" />
+		<property name="Homogeneous" />
+		<property name="RowSpacing" />
+		<property name="ColumnSpacing" />
+		<property name="BorderWidth" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<contextmenu>
+	    <command name="InsertRowBefore" label="Insert Row Before"
+		     description="Insert an empty row above the selected row" />
+	    <command name="InsertRowAfter" label="Insert Row After"
+		     description="Insert an empty row below the selected row" />
+	    <command name="InsertColumnBefore" label="Insert Column Before"
+		     description="Insert an empty column before the selected column" />
+	    <command name="InsertColumnAfter" label="Insert Column After"
+		     description="Insert an empty column after the selected column" />
+	    <command name="DeleteRow" label="Delete Row"
+		     description="Delete the selected row" />
+	    <command name="DeleteColumn" label="Delete Column"
+		     description="Delete the selected column" />
+	</contextmenu>
+    </object>
+    <object type="Gtk.Table+TableChild,gtk-sharp" wrapper="Stetic.Wrapper.Table+TableChild">
+	<internal-properties>
+	    <property name="XOptions" />
+	    <property name="YOptions" />
+	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Table Child Layout">
+		<property name="TopAttach" />
+		<property name="BottomAttach" />
+		<property name="LeftAttach" />
+		<property name="RightAttach" />
+		<property name="XPadding" />
+		<property name="YPadding" />
+		<property ref="Gtk.Container.AutoSize" />
+		<property name="XExpand" label="Expand Horizontally"
+			  description="Whether or not the table cell should expand horizontally">
+		    <disabled-if name="AutoSize" value="true" />
+		</property>
+		<property name="XFill" label="Fill Horizontally"
+			  description="Whether or not the widget should expand to fill its cell horizontally">
+		    <disabled-if name="AutoSize" value="true" />
+		    <disabled-if name="XExpand" value="true" />
+		</property>
+		<property name="XShrink" label="Shrink Horizontally"
+			  description="Whether or not the table cell should shrink horizontally">
+		    <disabled-if name="AutoSize" value="true" />
+		</property>
+		<property name="YExpand" label="Expand Vertically"
+			  description="Whether or not the table cell should expand vertically">
+		    <disabled-if name="AutoSize" value="true" />
+		</property>
+		<property name="YFill" label="Fill Vertically"
+			  description="Whether or not the widget should expand to fill its cell vertically">
+		    <disabled-if name="AutoSize" value="true" />
+		    <disabled-if name="YExpand" value="true" />
+		</property>
+		<property name="YShrink" label="Shrink Vertically"
+			  description="Whether or not the table cell should shrink vertically">
+		    <disabled-if name="AutoSize" value="true" />
+		</property>
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.TextView,gtk-sharp" wrapper="Stetic.Wrapper.TextView"
+	    label="Text View" icon="textview.png" palette-category="widget"
+	    hexpandable="true" vexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Text View Properties">
+		<property name="Editable" />
+		<property name="CursorVisible" />
+		<property name="Overwrite" />
+		<property name="AcceptsTab" />
+		<property name="Tabs" />
+		<property name="Text" label="Text" glade-name="text"
+			  description="The initial text to display in the Text View"
+			  editor="Stetic.Editor.Text" />
+		<property name="Justification" />
+		<property name="WrapMode" />
+		<property name="PixelsAboveLines" />
+		<property name="PixelsBelowLines" />
+		<property name="PixelsInsideWrap" />
+		<property name="LeftMargin" />
+		<property name="RightMargin" />
+		<property name="Indent" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ToggleButton,gtk-sharp" wrapper="Stetic.Wrapper.Button"
+	    label="Toggle Button" icon="togglebutton.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Toggle Button Properties">
+		<property ref="Gtk.Button.Type" />
+		<property ref="Gtk.Button.StockId" />
+		<property ref="Gtk.Button.ApplicationIcon" />
+		<property ref="Gtk.Button.ThemedIcon" />
+		<property ref="Gtk.Button.Label" />
+		<property ref="Gtk.Button.UseUnderline" />
+		<property name="Active" />
+		<property name="Inconsistent" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Button.Extra" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ToggleToolButton,gtk-sharp" wrapper="Stetic.Wrapper.ToggleToolButton"
+	    label="Toolbar Toggle Button" icon="checkbutton.png" palette-category="toolbaritem">
+	<itemgroups>
+	    <itemgroup label="Toolbar Toggle Button Properties">
+		<property name="Icon" />
+		<property name="Label" />
+		<property name="UseUnderline" />
+		<property name="Active" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.Toolbar,gtk-sharp" wrapper="Stetic.Wrapper.Toolbar"
+	    label="Toolbar" icon="toolbar.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Tool Bar Properties">
+		<property name="Orientation" />
+		<property name="ShowArrow" />
+		<property name="ToolbarStyle" />
+		<property name="Tooltips" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+    <object type="Gtk.Toolbar+ToolbarChild,gtk-sharp" wrapper="Stetic.Wrapper.Toolbar+ToolbarChild">
+	<internal-properties>
+	    <property name="ToolItem" />
+	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Tool Bar Child Properties">
+		<property name="Homogeneous" />
+		<property name="Expand" />
+		<property name="ToolItem.IsImportant" />
+		<property name="ToolItem.VisibleHorizontal" />
+		<property name="ToolItem.VisibleVertical" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ToolButton,gtk-sharp" wrapper="Stetic.Wrapper.ToolButton"
+	    label="Toolbar Button" icon="button.png" palette-category="toolbaritem">
+	<itemgroups>
+	    <itemgroup label="Toolbar Button Properties">
+		<property name="Icon" label="Icon"
+			  description="The icon to display in the button"
+			  editor="Stetic.Editor.Image" />
+		<property name="Label" />
+		<property name="UseUnderline" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.TreeView,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Tree View" icon="treeview.png" palette-category="widget"
+	    hexpandable="true" vexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Tree View Properties">
+		<property name="EnableSearch" />
+		<property name="FixedHeightMode" />
+		<property name="HeadersVisible" />
+		<property name="Reorderable" />
+		<property name="RulesHint" />
+		<property name="SearchColumn" />
+		<property name="Model" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.VBox,gtk-sharp" wrapper="Stetic.Wrapper.Box"
+	    label="VBox" icon="vbox.png" palette-category="container">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Box" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<contextmenu ref="Gtk.Box" />
+    </object>
+
+    <object type="Gtk.VButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox"
+	    label="VButtonBox" icon="vbuttonbox.png" palette-category="container"
+	    vexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.ButtonBox" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<contextmenu ref="Gtk.Box" />
+    </object>
+
+    <object type="Gtk.Viewport,gtk-sharp" wrapper="Stetic.Wrapper.Viewport"
+	    label="Viewport" icon="viewport.png" palette-category="internal">
+	<itemgroups>
+	    <itemgroup label="Viewport Properties">
+		<property name="ShadowType" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.VPaned,gtk-sharp" wrapper="Stetic.Wrapper.Paned"
+	    label="VPaned" icon="vpaned.png" palette-category="container"
+	    vexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Paned" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.VScale,gtk-sharp" wrapper="Stetic.Wrapper.VScale"
+	    label="Vertical Scale" icon="vscale.png" palette-category="container"
+	    vexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Scale" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.VScrollbar,gtk-sharp" wrapper="Stetic.Wrapper.VScrollbar"
+	    label="Vertical Scrollbar" icon="vscrollbar.png" palette-category="container"
+	    vexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Range" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.VSeparator,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Vertical Separator" icon="vseparator.png" palette-category="container"
+	    vexpandable="true">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Widget" important="false" />
+	</itemgroups>
+    </object>
+
+    <object type="Stetic.Custom" wrapper="Stetic.Wrapper.Custom"
+	    label="Custom Widget" icon="custom.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup label="Custom Widget Properties">
+		<property name="CreationFunction" glade-name="creation_function" />
+		<property name="String1" glade-name="string1" />
+		<property name="String2" glade-name="string2" />
+		<property name="Int1" glade-name="int1" />
+		<property name="Int2" glade-name="int2" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+</objects>

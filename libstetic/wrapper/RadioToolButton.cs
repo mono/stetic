@@ -3,27 +3,14 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Toolbar Radio Button", "radiobutton.png", ObjectWrapperType.ToolbarItem)]
 	public class RadioToolButton : ToggleToolButton {
-
-		public static new Type WrappedType = typeof (Gtk.RadioToolButton);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Toolbar Toggle Button Properties",
-				      "Icon",
-				      "Label",
-				      "UseUnderline",
-				      "Group",
-				      "Active");
-		}
 
 		public static new Gtk.ToolButton CreateInstance ()
 		{
 			return new Gtk.RadioToolButton (new GLib.SList (IntPtr.Zero), Gtk.Stock.SortAscending);
 		}
 
-		static RadioGroupManager GroupManager = new RadioGroupManager (WrappedType);
+		static RadioGroupManager GroupManager = new RadioGroupManager (typeof (Gtk.RadioToolButton));
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -58,8 +45,6 @@ namespace Stetic.Wrapper {
 				props["group"] = group;
 		}
 
-		[Editor (typeof (Stetic.Editor.GroupPicker))]
-		[Description ("Group", "The name of the radio button group that this button belongs to")]
 		public string Group {
 			get {
 				return GroupManager[Wrapped];

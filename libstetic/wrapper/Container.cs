@@ -6,34 +6,16 @@ using System.Runtime.InteropServices;
 namespace Stetic.Wrapper {
 	public abstract class Container : Widget {
 
-		public static new Type WrappedType = typeof (Gtk.Container);
-
-		static Hashtable childTypes = new Hashtable ();
-
-		internal static new void Register (Type type)
-		{
-			// Check if the type or one of its ancestors declares a
-			// Stetic.Wrapper.Container.ContainerChild subtype
-			Type childType = typeof (Stetic.Wrapper.Container.ContainerChild);
-
-			do {
-				foreach (Type ct in type.GetNestedTypes (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)) {
-					if (ct.IsSubclassOf (childType)) {
-						if (!childTypes.ContainsValue (ct))
-							Stetic.ObjectWrapper.Register (ct);
-						childTypes[type] = ct;
-						return;
-					}
-				}
-				type = type.BaseType;
-			} while (type != typeof (Stetic.Wrapper.Container));
-		}
-
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			container.Removed += ChildRemoved;
 			container.SizeAllocated += SizeAllocated;
+
+			if (Wrapped.GetType ().ToString ()[0] == 'H')
+				ContainerOrientation = Gtk.Orientation.Horizontal;
+			else
+				ContainerOrientation = Gtk.Orientation.Vertical;
 		}
 
 		Gtk.Container container {
@@ -164,17 +146,8 @@ namespace Stetic.Wrapper {
 			if (child == null)
 				return null;
 
-			Type ct = null;
-			for (Type t = parentWrapper.GetType (); t != null; t = t.BaseType) {
-				ct = childTypes[t] as Type;
-				if (ct != null)
-					break;
-			}
-			if (ct == null)
-				return null;
-
 			Gtk.Container.ContainerChild cc = parent[child];
-			return Stetic.ObjectWrapper.Create (parentWrapper.stetic, ct, cc) as ContainerChild;
+			return Stetic.ObjectWrapper.Create (parentWrapper.stetic, cc) as ContainerChild;
 		}
 
 		public delegate void ContentsChangedHandler (Container container);
@@ -419,9 +392,48 @@ namespace Stetic.Wrapper {
 				return false;
 		}
 
-		public class ContainerChild : Stetic.ObjectWrapper {
+		// Note that this will be invalid/random for non-H/V-paired classes
+		protected Gtk.Orientation ContainerOrientation;
 
-			public static new Type WrappedType = typeof (Gtk.Container.ContainerChild);
+		public override bool HExpandable {
+			get {
+				if (base.HExpandable)
+					return true;
+
+				// A horizontally-oriented container is HExpandable if any
+				// child is. A vertically-oriented container is HExpandable
+				// if *every* child is.
+
+				foreach (Gtk.Widget w in container) {
+					if (ChildHExpandable (w)) {
+						if (ContainerOrientation == Gtk.Orientation.Horizontal)
+							return true;
+					} else if (ContainerOrientation == Gtk.Orientation.Vertical)
+						return false;
+				}
+				return (ContainerOrientation == Gtk.Orientation.Vertical);
+			}
+		}
+
+		public override bool VExpandable {
+			get {
+				if (base.VExpandable)
+					return true;
+
+				// Opposite of above
+
+				foreach (Gtk.Widget w in container) {
+					if (ChildVExpandable (w)) {
+						if (ContainerOrientation == Gtk.Orientation.Vertical)
+							return true;
+					} else if (ContainerOrientation == Gtk.Orientation.Horizontal)
+						return false;
+				}
+				return (ContainerOrientation == Gtk.Orientation.Horizontal);
+			}
+		}
+
+		public class ContainerChild : Stetic.ObjectWrapper {
 
 			internal static void Register ()
 			{
@@ -466,7 +478,6 @@ namespace Stetic.Wrapper {
 				}
 			}
 
-			[Description ("Auto Size", "If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container")]
 			public bool AutoSize {
 				get {
 					return ParentWrapper.AutoSize[cc.Child];

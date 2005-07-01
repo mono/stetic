@@ -1,3 +1,88 @@
+2005-07-01  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/objects.xml: new XML description of widgets,
+	replacing the Register() methods and a lot of miscellaneous
+	property attributes.
+
+	* libstetic/CommandAttribute.cs: 
+	* libstetic/DescriptionAttribute.cs: 
+	* libstetic/ObjectWrapperAttribute.cs: 
+	* libstetic/ObjectWrapperType.cs: 
+	* libstetic/RangeAttribute.cs: gone (replaced by XML attributes)
+
+	* libstetic/ItemGroup.cs: construct from XML
+
+	* libstetic/ItemDescriptor.cs: construct from XML
+	(EnabledFor, VisibleFor): take the widget as an argument rather
+	than the wrapper
+
+	* libstetic/PropertyDescriptor.cs: construct from XML, remove
+	slashed property names
+	(GetValue, SetValue): take the widget rather than the wrapper
+
+	* libstetic/CommandDescriptor.cs: construct from XML
+	(Enabled, Run): take the widget rather than the wrapper
+
+	* libstetic/Registry.cs: New static class that handles keeping
+	track of ObjectWrappers and ClassDescriptors.
+
+	* libstetic/ClassDescriptor.cs: new, describes a class. Takes on a
+	lot of functionality that used to be in static ObjectWrapper
+	methods. Also, having ItemGroups, etc stored on a ClassDescriptor
+	object means we don't need a ObjectWrapper subclass for each
+	wrapped class (unless the wrapper implements some special
+	functionality).
+
+	* libstetic/ObjectWrapper.cs: Remove a lot of static methods,
+	which are now handled by Registry and ClassDescriptor.
+
+	* libstetic/GladeUtils.cs: Misc updates for Registry/ObjectWrapper
+	changes
+
+	* libstetic/wrapper/*.cs: remove Register() and various other
+	no-longer-needed things
+	
+	* libstetic/wrapper/Alignment.cs:
+	* libstetic/wrapper/Arrow.cs:
+	* libstetic/wrapper/Calendar.cs:
+	* libstetic/wrapper/CheckMenuItem.cs:
+	* libstetic/wrapper/DrawingArea.cs:
+	* libstetic/wrapper/Entry.cs:
+	* libstetic/wrapper/EventBox.cs:
+	* libstetic/wrapper/HBox.cs:
+	* libstetic/wrapper/HButtonBox.cs:
+	* libstetic/wrapper/HPaned.cs:
+	* libstetic/wrapper/HSeparator.cs:
+	* libstetic/wrapper/Menu.cs:
+	* libstetic/wrapper/MenuBar.cs:
+	* libstetic/wrapper/Misc.cs:
+	* libstetic/wrapper/ProgressBar.cs:
+	* libstetic/wrapper/SeparatorMenuItem.cs:
+	* libstetic/wrapper/SeparatorToolItem.cs:
+	* libstetic/wrapper/Statusbar.cs:
+	* libstetic/wrapper/ToggleButton.cs:
+	* libstetic/wrapper/TreeView.cs:
+	* libstetic/wrapper/VBox.cs:
+	* libstetic/wrapper/VButtonBox.cs:
+	* libstetic/wrapper/VPaned.cs:
+	* libstetic/wrapper/VSeparator.cs: gone; these classes don't
+	need any special functionality beyond what can be specified in
+	objects.xml.
+
+	* stetic/Palette.cs: Use Registry.AllClasses to get the palette
+	contents.
+
+	* stetic/PropertyEditor.cs: use objects directly rather than via
+	their wrappers (particularly since PropertyDescriptor.Get/SetValue
+	now work directly on the objects).
+
+	* stetic/WidgetFactory.cs: take a ClassDescriptor instead of name,
+	icon, and wrapperType.
+
+	* stetic/ContextMenu.cs:
+	* stetic/Project.cs:
+	* stetic/PropertyGrid.cs: misc updates for other changes
+
 2005-06-28  Raja R Harinath  <rharinath@novell.com>
 
 	Fix 'make distcheck'.

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Xml;
 
 namespace Stetic {
 
@@ -7,17 +8,45 @@ namespace Stetic {
 
 		Hashtable deps, visdeps;
 
+		protected ItemDescriptor () {}
+
+		protected ItemDescriptor (XmlElement elem, ItemGroup group, ClassDescriptor klass)
+		{
+			deps = AddSubprops (elem.GetElementsByTagName ("disabled-if"), group, klass);
+			visdeps = AddSubprops (elem.GetElementsByTagName ("invisible-if"), group, klass);
+		}
+
+		Hashtable AddSubprops (XmlNodeList nodes, ItemGroup group, ClassDescriptor klass)
+		{
+			Hashtable hash = null;
+
+			foreach (XmlElement elem in nodes) {
+				string name = elem.GetAttribute ("name");
+				string value = elem.GetAttribute ("value");
+
+				PropertyDescriptor prop = (PropertyDescriptor)group[name];
+				if (prop == null)
+					prop = (PropertyDescriptor)klass[name];
+				if (prop == null)
+					throw new ArgumentException ("Bad sub-prop " + name);
+				if (hash == null)
+					hash = new Hashtable ();
+				ArrayList values = (ArrayList)hash[prop];
+				if (values == null)
+					hash[prop] = values = new ArrayList ();
+
+				object val;
+				if (prop.PropertyType.IsEnum)
+					val = Enum.Parse (prop.PropertyType, value);
+				else
+					val = Convert.ChangeType (value, prop.PropertyType);
+				values.Add (val);
+			}
+			return hash;
+		}
+
 		// The property's display name
 		public abstract string Name { get; }
-
-		// Marks the property as being insensitive when "master"
-		// has any of the given values
-		public void DisabledIf (ItemDescriptor master, params object[] values)
-		{
-			if (deps == null)
-				deps = new Hashtable ();
-			deps[master] = values;
-		}
 
 		public bool HasDependencies {
 			get {
@@ -25,38 +54,14 @@ namespace Stetic {
 			}
 		}
 
-		public bool EnabledFor (ObjectWrapper wrapper)
+		public bool EnabledFor (object obj)
 		{
 			if (deps == null)
 				return true;
 
 			foreach (PropertyDescriptor dep in deps.Keys) {
-				object depValue = dep.GetValue (wrapper);
-				foreach (object value in (object[])deps[dep]) {
-					if (value.Equals (depValue))
-						return false;
-				}
-			}
-			return true;
-		}
-
-		// As above, but the property will not even be visible if the
-		// master property value is wrong
-		public void InvisibleIf (ItemDescriptor master, params object[] values)
-		{
-			if (visdeps == null)
-				visdeps = new Hashtable ();
-			visdeps[master] = values;
-		}
-
-		public bool VisibleFor (ObjectWrapper wrapper)
-		{
-			if (visdeps == null)
-				return true;
-
-			foreach (PropertyDescriptor dep in visdeps.Keys) {
-				object depValue = dep.GetValue (wrapper);
-				foreach (object value in (object[])visdeps[dep]) {
+				object depValue = dep.GetValue (obj);
+				foreach (object value in (ArrayList)deps[dep]) {
 					if (value.Equals (depValue))
 						return false;
 				}
@@ -68,6 +73,21 @@ namespace Stetic {
 			get {
 				return visdeps != null;
 			}
+		}
+
+		public bool VisibleFor (object obj)
+		{
+			if (visdeps == null)
+				return true;
+
+			foreach (PropertyDescriptor dep in visdeps.Keys) {
+				object depValue = dep.GetValue (obj);
+				foreach (object value in (ArrayList)visdeps[dep]) {
+					if (value.Equals (depValue))
+						return false;
+				}
+			}
+			return true;
 		}
 	}
 }

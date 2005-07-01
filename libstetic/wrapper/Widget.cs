@@ -3,25 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Widget : Object {
-
-		public static new Type WrappedType = typeof (Gtk.Widget);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type,
-				      "Common Widget Properties",
-				      "WidthRequest",
-				      "HeightRequest",
-				      "Visible",
-				      "Sensitive",
-				      "CanDefault",
-				      "HasDefault",
-				      "CanFocus",
-				      "HasFocus",
-				      "Events",
-				      "ExtensionEvents");
-		}
+	public class Widget : Object {
 
 		static Hashtable counters = new Hashtable ();
 
@@ -42,6 +24,10 @@ namespace Stetic.Wrapper {
 
 			Wrapped.PopupMenu += PopupMenu;
 			InterceptClicks (Wrapped);
+
+			ClassDescriptor klass = Registry.LookupClass (obj.GetType ());
+			hexpandable = klass.HExpandable;
+			vexpandable = klass.VExpandable;
 		}
 
 		void InterceptClicks (Gtk.Widget widget)
@@ -182,8 +168,9 @@ namespace Stetic.Wrapper {
 			widget.Destroy ();
 		}
 
-		public virtual bool HExpandable { get { return false; } }
-		public virtual bool VExpandable { get { return false; } }
+		bool hexpandable, vexpandable;
+		public virtual bool HExpandable { get { return hexpandable; } }
+		public virtual bool VExpandable { get { return vexpandable; } }
 
 		public bool Unselectable;
 

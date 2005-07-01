@@ -3,22 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Label", "label.png", ObjectWrapperType.Widget)]
-	public class Label : Misc {
-
-		public static new Type WrappedType = typeof (Gtk.Label);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Label Properties",
-				      "LabelProp",
-				      "UseMarkup",
-				      "UseUnderline",
-				      "Wrap",
-				      "MnemonicWidget",
-				      "Justify",
-				      "Selectable");
-		}
+	public class Label : Widget {
 
 		public Label () {}
 

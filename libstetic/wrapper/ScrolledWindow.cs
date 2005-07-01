@@ -3,20 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("ScrolledWindow", "scrolledwindow.png", ObjectWrapperType.Container)]
 	public class ScrolledWindow : Bin {
-
-		public static new Type WrappedType = typeof (Gtk.ScrolledWindow);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "ScrolledWindow Properties",
-				      "VscrollbarPolicy",
-				      "HscrollbarPolicy",
-				      "ShadowType",
-				      "WindowPlacement",
-				      "BorderWidth");
-		}
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -49,13 +36,10 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override bool HExpandable { get { return true; } }
-		public override bool VExpandable { get { return true; } }
-
 		void AddWithViewport (Gtk.Widget child)
 		{
 			Gtk.Viewport viewport = new Gtk.Viewport (scrolled.Hadjustment, scrolled.Vadjustment);
-			ObjectWrapper.Create (stetic, typeof (Viewport), viewport);
+			ObjectWrapper.Create (stetic, viewport);
 			viewport.ShadowType = Gtk.ShadowType.None;
 			viewport.Add (child);
 			viewport.Show ();

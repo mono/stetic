@@ -14,12 +14,12 @@ namespace Stetic {
 			return value;
 		}
 
-		static void ExtractWrapperProperties (ObjectWrapper wrapper, Hashtable props, 
+		static void ExtractWrapperProperties (ClassDescriptor klass, Hashtable props, 
 						      out Hashtable wProps)
 		{
 			wProps = null;
 
-			foreach (ItemGroup group in wrapper.ItemGroups) {
+			foreach (ItemGroup group in klass.ItemGroups) {
 				foreach (ItemDescriptor item in group.Items) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null)
@@ -191,16 +191,16 @@ namespace Stetic {
 		static public void ImportWidget (IStetic stetic, ObjectWrapper wrapper,
 						 string className, string id, Hashtable props)
 		{
-			Hashtable wProps;
-			ExtractWrapperProperties (wrapper, props, out wProps);
+			ClassDescriptor klass = Registry.LookupClass (className);
 
-			IntPtr gtype = g_type_from_name (className);
+			Hashtable wProps;
+			ExtractWrapperProperties (klass, props, out wProps);
 
 			string[] propNames;
 			GLib.Value[] propVals;
-			ParseProperties (ObjectWrapper.WrappedType (wrapper.GetType ()), false, props, out propNames, out propVals);
+			ParseProperties (klass.WrappedType, false, props, out propNames, out propVals);
 
-			IntPtr raw = gtksharp_object_newv (gtype, propNames.Length, propNames, propVals);
+			IntPtr raw = gtksharp_object_newv (klass.GType.Val, propNames.Length, propNames, propVals);
 			if (raw == IntPtr.Zero)
 				throw new GladeException ("Could not create widget", className);
 
@@ -217,7 +217,7 @@ namespace Stetic {
 						 Gtk.Widget widget, string id, Hashtable props)
 		{
 			Hashtable wProps;
-			ExtractWrapperProperties (wrapper, props, out wProps);
+			ExtractWrapperProperties (Registry.LookupClass (widget.GetType ()), props, out wProps);
 
 			string[] propNames;
 			GLib.Value[] propVals;
@@ -281,9 +281,9 @@ namespace Stetic {
 				GLib.Value value = ParseProperty (prop.ParamSpec, prop.PropertyType, strval);
 				if (prop.PropertyType.IsEnum) {
 					GLib.EnumWrapper ewrap = (GLib.EnumWrapper)value;
-					prop.SetValue (wrapper, Enum.ToObject (prop.PropertyType, (int)ewrap));
+					prop.SetValue (wrapper.Wrapped, Enum.ToObject (prop.PropertyType, (int)ewrap));
 				} else
-					prop.SetValue (wrapper, value.Val);
+					prop.SetValue (wrapper.Wrapped, value.Val);
 			} catch (Exception e) {
 				throw new GladeException ("Could not parse property", wrapper.GetType ().ToString (), childprop, prop.GladeName, strval);
 			}
@@ -319,7 +319,7 @@ namespace Stetic {
 				}
 				value = gval.Val;
 			} else
-				value = prop.GetValue (wrapper);
+				value = prop.GetValue (wrapper.Wrapped);
 			if (value == null)
 				return null;
 
@@ -374,10 +374,8 @@ namespace Stetic {
 		static public void ExportWidget (IStetic stetic, ObjectWrapper wrapper,
 						 out string className, out string id, out Hashtable props)
 		{
-			Type wrappedType = ObjectWrapper.WrappedType (wrapper.GetType ());
-			if (wrappedType == null)
-				throw new GladeException ("Unrecognized wrapper type", wrapper.GetType ().ToString ());
-			className = ObjectWrapper.NativeTypeName (wrappedType);
+			Type wrappedType = wrapper.Wrapped.GetType ();
+			className = ((GLib.GType)wrappedType).ToString ();
 
 			id = ((Gtk.Widget)wrapper.Wrapped).Name;
 
@@ -388,7 +386,7 @@ namespace Stetic {
 		{
 			props = new Hashtable ();
 
-			foreach (ItemGroup group in wrapper.ItemGroups) {
+			foreach (ItemGroup group in Registry.LookupClass (wrapper.Wrapped.GetType ()).ItemGroups) {
 				foreach (ItemDescriptor item in group.Items) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null)
@@ -396,7 +394,7 @@ namespace Stetic {
 					prop = prop.GladeProperty;
 					if (prop.GladeName == null)
 						continue;
-					if (!prop.VisibleFor (wrapper))
+					if (!prop.VisibleFor (wrapper.Wrapped))
 						continue;
 
 					string val = PropToString (wrapper, prop.GladeProperty);
@@ -408,9 +406,6 @@ namespace Stetic {
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_fundamental (IntPtr gtype);
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_type_from_name (string name);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_name (IntPtr gtype);

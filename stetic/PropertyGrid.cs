@@ -32,20 +32,24 @@ namespace Stetic {
 			invisibles = new Hashtable ();
 		}
 
+		PropertyDescriptor name;
+
 		void AppendHeader ()
 		{
-			AppendProperty (new PropertyDescriptor (typeof (Stetic.Wrapper.Widget), typeof (Gtk.Widget), "Name"), selection);
+			if (name == null)
+				name = (PropertyDescriptor)Registry.LookupClass ("GtkWidget") ["Name"];
+			AppendProperty (name, selection.Wrapped);
 
 			Gtk.HBox box = new Gtk.HBox (false, 6);
-			box.PackStart (new Gtk.Image (Palette.IconForType (selection.GetType ())), false, false, 0);
+			box.PackStart (new Gtk.Image (Registry.LookupClass (selection.Wrapped.GetType ()).Icon), false, false, 0);
 			box.PackStart (new Gtk.Label (selection.Wrapped.GetType ().FullName), false, false, 0);
 			box.ShowAll ();
 			AppendPair ("Widget Class", box, null);
 		}
 
-		void AppendProperty (PropertyDescriptor prop, ObjectWrapper wrapper)
+		void AppendProperty (PropertyDescriptor prop, object obj)
 		{
-			PropertyEditor rep = PropertyEditor.MakeEditor (prop, wrapper);
+			PropertyEditor rep = PropertyEditor.MakeEditor (prop, obj);
 			editors[prop.Name] = rep;
 			if (prop.ParamSpec != null)
 				editors[prop.ParamSpec.Name] = rep;
@@ -54,40 +58,27 @@ namespace Stetic {
 			AppendPair (prop.Label, rep, prop.Description);
 
 			if (prop.HasDependencies)
-				sensitives[prop] = wrapper;
+				sensitives[prop] = obj;
 			if (prop.HasVisibility)
-				invisibles[prop] = wrapper;
+				invisibles[prop] = obj;
 		}
 
-		private class Stupid69614Workaround {
-			CommandDescriptor cmd;
-			ObjectWrapper wrapper;
-
-			public Stupid69614Workaround (CommandDescriptor cmd, ObjectWrapper wrapper)
-			{
-				this.cmd = cmd;
-				this.wrapper = wrapper;
-			}
-
-			public void Activate (object o, EventArgs args) {
-				cmd.Run (wrapper);
-			}
-		}
-
-		void AppendCommand (CommandDescriptor cmd, ObjectWrapper wrapper)
+		void AppendCommand (CommandDescriptor cmd, object obj)
 		{
 			Gtk.Button button = new Gtk.Button (cmd.Label);
-			button.Clicked += new Stupid69614Workaround (cmd, wrapper).Activate;
+			button.Clicked += delegate (object o, EventArgs args) {
+				cmd.Run (obj);
+			};
 			button.Show ();
 			Append (button, cmd.Description);
 
 			if (cmd.HasDependencies) {
 				editors[cmd.Name] = button;
-				sensitives[cmd] = wrapper;
+				sensitives[cmd] = obj;
 			}
 			if (cmd.HasVisibility) {
 				editors[cmd.Name] = button;
-				invisibles[cmd] = wrapper;
+				invisibles[cmd] = obj;
 			}
 		}
 
@@ -95,7 +86,7 @@ namespace Stetic {
 		{
 			PropertyEditor ed = editors[propertyName] as PropertyEditor;
 			if (ed != null)
-				ed.Update (wrapper, EventArgs.Empty);
+				ed.Update ();
 			UpdateSensitivity ();
 		}
 
@@ -104,12 +95,12 @@ namespace Stetic {
 			foreach (ItemDescriptor item in sensitives.Keys) {
 				Widget w = editors[item.Name] as Widget;
 				if (w != null)
-					w.Sensitive = item.EnabledFor (sensitives[item] as ObjectWrapper);
+					w.Sensitive = item.EnabledFor (sensitives[item]);
 			}
 			foreach (ItemDescriptor item in invisibles.Keys) {
 				Widget w = editors[item.Name] as Widget;
 				if (w != null) {
-					if (!item.VisibleFor (invisibles[item] as ObjectWrapper))
+					if (!item.VisibleFor (invisibles[item]))
 						w.Hide ();
 					else
 						w.Show ();
@@ -119,6 +110,8 @@ namespace Stetic {
 
 		void Selected (Stetic.Wrapper.Widget selection, ProjectNode node)
 		{
+			ClassDescriptor klass;
+
 			Clear ();
 
 			this.selection = selection;
@@ -129,28 +122,33 @@ namespace Stetic {
 
 			selection.Notify += Notified;
 
+			klass = Registry.LookupClass (selection.Wrapped.GetType ());
+
 			AppendHeader ();
-			AppendWrapperGroups (selection);
+			AppendItemGroups (klass, selection.Wrapped);
 
 			packingSelection = Stetic.Wrapper.Container.ChildWrapper (selection);
-			if (packingSelection != null && packingSelection.ItemGroups.Count > 0) {
-				AppendWrapperGroups (packingSelection);
-				packingSelection.Notify += Notified;
+			if (packingSelection != null) {
+				klass = Registry.LookupClass (packingSelection.Wrapped.GetType ());
+				if (klass.ItemGroups.Count > 0) {
+					AppendItemGroups (klass, packingSelection.Wrapped);
+					packingSelection.Notify += Notified;
+				}
 			}
 
 			UpdateSensitivity ();
 		}
 
-		void AppendWrapperGroups (ObjectWrapper wrapper)
+		void AppendItemGroups (ClassDescriptor klass, object obj)
 		{
 			bool first = true;
-			foreach (ItemGroup igroup in wrapper.ItemGroups) {
-				AppendGroup (igroup.Name, first);
+			foreach (ItemGroup igroup in klass.ItemGroups) {
+				AppendGroup (igroup.Label, first);
 				foreach (ItemDescriptor item in igroup.Items) {
 					if (item is PropertyDescriptor)
-						AppendProperty ((PropertyDescriptor)item, wrapper);
+						AppendProperty ((PropertyDescriptor)item, obj);
 					else if (item is CommandDescriptor)
-						AppendCommand ((CommandDescriptor)item, wrapper);
+						AppendCommand ((CommandDescriptor)item, obj);
 				}
 				first = false;
 			}

@@ -1,41 +1,55 @@
 using System;
 using System.Reflection;
+using System.Xml;
 
 namespace Stetic {
 	public struct ItemGroup {
-		public string Name;
+		public string Label, Name;
 		public ItemDescriptor[] Items;
 
-		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+		public static ItemGroup Empty;
 
-		public ItemGroup (string name, Type wrapperType, Type objectType, params string[] names)
+		static ItemGroup ()
 		{
-			Name = name;
-			Items = new ItemDescriptor[names.Length];
-			for (int i = 0; i < names.Length; i++) {
-				if (names[i].IndexOfAny (new char[] {'.', '/'}) != -1)
-					Items[i] = new PropertyDescriptor (wrapperType, objectType, names[i]);
-				else if (wrapperType.GetProperty (names[i], flags) != null || objectType.GetProperty (names[i], flags) != null)
-					Items[i] = new PropertyDescriptor (wrapperType, objectType, names[i]);
-				else if (wrapperType.GetMethod (names[i], flags, null, new Type[0], null) != null)
-					Items[i] = new CommandDescriptor (wrapperType, names[i]);
-				else if (wrapperType.GetMethod (names[i], flags, null, new Type[] { typeof (Gtk.Widget) }, null) != null)
-					Items[i] = new CommandDescriptor (wrapperType, names[i]);
+			Empty = new ItemGroup ();
+			Empty.Items = new ItemDescriptor[0];
+		}
+
+		public ItemGroup (XmlElement elem, ClassDescriptor klass)
+		{
+			Label = elem.GetAttribute ("label");
+			Name = elem.GetAttribute ("name");
+
+			XmlNodeList nodes = elem.ChildNodes;
+			Items = new ItemDescriptor[nodes.Count];
+			for (int i = 0; i < nodes.Count; i++) {
+				XmlElement item = (XmlElement)elem.ChildNodes[i];
+				string refname = item.GetAttribute ("ref");
+				if (refname != "") {
+					if (refname.IndexOf ('.') != -1)
+						Items[i] = Registry.LookupItem (refname);
+					else
+						Items[i] = klass[refname];
+					continue;
+				}
+
+				if (item.Name == "property")
+					Items[i] = new PropertyDescriptor ((XmlElement)item, this, klass);
+				else if (item.Name == "command")
+					Items[i] = new CommandDescriptor ((XmlElement)item, this, klass);
 				else
-					throw new ApplicationException ("Bad item name " + names[i] + " in " + wrapperType.Name);
+					throw new ApplicationException ("Bad item name " + item.Name + " in " + klass.WrapperType.Name);
 			}
 		}
 
 		public ItemDescriptor this [string name] {
 			get {
 				foreach (ItemDescriptor item in Items) {
-					if (item.Name == name)
+					if (item != null && item.Name == name)
 						return item;
 				}
 				return null;
 			}
 		}
-
-		public static ItemGroup Empty = new ItemGroup (null, null, null);
 	}
 }

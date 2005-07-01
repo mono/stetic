@@ -2,20 +2,8 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Color Button", "colorbutton.png", ObjectWrapperType.Widget)]
 	public class ColorButton : Widget {
 
-		public static new Type WrappedType = typeof (Gtk.ColorButton);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Color Button Properties",
-				      "Title",
-				      "Color",
-				      "Alpha");
-		}
-
-		[Range (-1, 65535)]
 		public int Alpha {
 			get {
 				Gtk.ColorButton cb = (Gtk.ColorButton)Wrapped;

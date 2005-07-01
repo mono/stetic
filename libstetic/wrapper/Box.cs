@@ -3,21 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public abstract class Box : Container {
-
-		public static new Type WrappedType = typeof (Gtk.Box);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Box Properties",
-				      "Homogeneous",
-				      "Spacing",
-				      "BorderWidth");
-
-			AddContextMenuItems (type,
-					     "InsertBefore",
-					     "InsertAfter");
-		}
+	public class Box : Container {
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -61,11 +47,12 @@ namespace Stetic.Wrapper {
 
 			Gtk.Widget[] sorted = new Gtk.Widget[children.Length];
 			int last_start = -1;
+			bool hbox = ContainerOrientation == Gtk.Orientation.Horizontal;
 
 			foreach (Gtk.Widget child in children) {
 				Gtk.Box.BoxChild bc = box[child] as Gtk.Box.BoxChild;
 				if (AutoSize[child]) {
-					bool exp = (this is HBox) ? ChildHExpandable (child) : ChildVExpandable (child);
+					bool exp = hbox ? ChildHExpandable (child) : ChildVExpandable (child);
 					if (bc.Expand != exp)
 						bc.Expand = exp;
 					if (bc.Fill != exp)
@@ -85,7 +72,6 @@ namespace Stetic.Wrapper {
 					sorted[bc.Position] = child;
 			}
 
-			bool hbox = (this is HBox || this is HButtonBox);
 			// The orientation of the faults is the opposite of the
 			// orientation of the box
 			Gtk.Orientation orientation = hbox ? Gtk.Orientation.Vertical : orientation = Gtk.Orientation.Horizontal;
@@ -126,7 +112,6 @@ namespace Stetic.Wrapper {
 				DND.AddFault (this, -sorted.Length, before, sorted[sorted.Length - 1]);
 		}
 
-		[Command ("Insert Before", "Insert an empty row/column before the selected one")]
 		internal void InsertBefore (Gtk.Widget context)
 		{
 			Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
@@ -141,7 +126,6 @@ namespace Stetic.Wrapper {
 			EmitContentsChanged ();
 		}
 
-		[Command ("Insert After", "Insert an empty row/column after the selected one")]
 		internal void InsertAfter (Gtk.Widget context)
 		{
 			Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
@@ -161,7 +145,7 @@ namespace Stetic.Wrapper {
 
 			if (widget != null && AutoSize[widget]) {
 				Gtk.Box.BoxChild bc = box[widget] as Gtk.Box.BoxChild;
-				bc.Expand = bc.Fill = (this is HBox) ? ChildHExpandable (widget) : ChildVExpandable (widget);
+				bc.Expand = bc.Fill = (ContainerOrientation == Gtk.Orientation.Horizontal) ? ChildHExpandable (widget) : ChildVExpandable (widget);
 			}
 			base.ChildContentsChanged (child);
 		}
@@ -198,22 +182,6 @@ namespace Stetic.Wrapper {
 		}
 
 		public class BoxChild : Container.ContainerChild {
-
-			public static new Type WrappedType = typeof (Gtk.Box.BoxChild);
-
-			internal static new void Register (Type type)
-			{
-				ItemGroup props = AddItemGroup (type, "Box Child Layout",
-								"PackType",
-								"Position",
-								"AutoSize",
-								"Expand",
-								"Fill",
-								"Padding");
-				props["Expand"].DisabledIf (props["AutoSize"], true);
-				props["Fill"].DisabledIf (props["AutoSize"], true);
-				props["Fill"].DisabledIf (props["Expand"], false);
-			}
 
 			protected override void EmitNotify (string propertyName)
 			{

@@ -3,21 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Combo Box", "combo.png", ObjectWrapperType.Widget)]
 	public class ComboBox : Widget {
-
-		public static new Type WrappedType = typeof (Gtk.ComboBox);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type, "Combo Box Properties",
-				      "Items",
-				      "Active");
-			AddItemGroup (type, "Extra ComboBox Properties",
-				      "WrapWidth",
-				      "ColumnSpanColumn",
-				      "RowSpanColumn");
-		}
 
 		public static new Gtk.ComboBox CreateInstance ()
 		{
@@ -32,9 +18,6 @@ namespace Stetic.Wrapper {
 		string items = "";
 		string[] item = new string[0];
 
-		[Editor (typeof (Stetic.Editor.Text))]
-		[Description ("Items", "The items to display in the Combo Box, one per line")]
-		[GladeProperty (Name = "items")]
 		public string Items {
 			get {
 				return items;

@@ -35,7 +35,7 @@ namespace Stetic {
 				Stetic.Wrapper.Window window =
 					ImportWidget (project, null, null, toplevel) as Stetic.Wrapper.Window;
 				if (window != null)
-					project.AddWindow (window);
+					project.AddWindow ((Gtk.Window)window.Wrapped);
 			}
 			project.EndGladeImport ();
 		}

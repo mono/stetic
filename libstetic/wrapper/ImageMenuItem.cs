@@ -3,20 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	[ObjectWrapper ("Image Menu Item", "imagemenuitem.png", ObjectWrapperType.Internal)]
 	public class ImageMenuItem : MenuItem {
-
-		public static new Type WrappedType = typeof (Gtk.ImageMenuItem);
-
-		internal static new void Register (Type type)
-		{
-			AddItemGroup (type,
-				      "Image Menu Item Properties",
-				      "Image",
-				      "Label",
-				      "UseUnderline",
-				      "Accelerator");
-		}
 
 		public static new Gtk.ImageMenuItem CreateInstance ()
 		{
@@ -43,7 +30,6 @@ namespace Stetic.Wrapper {
 
 		string image;
 
-		[Editor (typeof (Stetic.Editor.Image))]
 		public string Image {
 			get {
 				return image;
