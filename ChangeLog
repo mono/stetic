@@ -1,3 +1,9 @@
+2005-07-06  Dan Winship  <danw@novell.com>
+
+	* libstetic/DND.cs (NewWindow):
+	* libstetic/HandleWindow.cs (HandleWindow): update for new
+	studlynamed WindowAttr fields.
+
 2005-07-01  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/objects.xml: new XML description of widgets,
