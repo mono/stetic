@@ -265,36 +265,31 @@ namespace Stetic.Wrapper {
 		public static void Add (Widget wrapper)
 		{
 			Gtk.Widget widget = wrapper.Wrapped;
-			Gdk.WindowAttr attributes;
 
-			attributes = new Gdk.WindowAttr ();
-			attributes.WindowType = Gdk.WindowType.Child;
-			attributes.Wclass = Gdk.WindowClass.InputOnly;
-			attributes.Mask = Gdk.EventMask.ButtonPressMask;
-
-			Gdk.Window win = new Gdk.Window (widget.GdkWindow, attributes, 0);
-			win.UserData = invis.Handle;
-			win.MoveResize (widget.Allocation);
-			win.Show ();
-
-			map[widget] = win;
-			map[win] = widget;
 			widget.SizeAllocated += Insensitive_SizeAllocate;
+			widget.Realized += Insensitive_Realized;
+			widget.Unrealized += Insensitive_Unrealized;
 			widget.Mapped += Insensitive_Mapped;
 			widget.Unmapped += Insensitive_Unmapped;
+
+			if (widget.IsRealized)
+				Insensitive_Realized (widget, EventArgs.Empty);
+			if (widget.IsMapped)
+				Insensitive_Mapped (widget, EventArgs.Empty);
 		}
 
 		public static void Remove (Widget wrapper)
 		{
 			Gtk.Widget widget = wrapper.Wrapped;
 			Gdk.Window win = (Gdk.Window)map[widget];
-			if (win == null)
-				return;
-
-			map.Remove (widget);
-			map.Remove (win);
-			win.Destroy ();
+			if (win != null) {
+				map.Remove (widget);
+				map.Remove (win);
+				win.Destroy ();
+			}
 			widget.SizeAllocated -= Insensitive_SizeAllocate;
+			widget.Realized -= Insensitive_Realized;
+			widget.Unrealized -= Insensitive_Unrealized;
 			widget.Mapped -= Insensitive_Mapped;
 			widget.Unmapped -= Insensitive_Unmapped;
 		}
@@ -302,7 +297,25 @@ namespace Stetic.Wrapper {
 		static void Insensitive_SizeAllocate (object obj, Gtk.SizeAllocatedArgs args)
 		{
 			Gdk.Window win = (Gdk.Window)map[obj];
-			win.MoveResize (args.Allocation);
+			if (win != null)
+				win.MoveResize (args.Allocation);
+		}
+
+		static void Insensitive_Realized (object obj, EventArgs args)
+		{
+			Gtk.Widget widget = (Gtk.Widget)obj;
+
+			Gdk.WindowAttr attributes = new Gdk.WindowAttr ();
+			attributes.WindowType = Gdk.WindowType.Child;
+			attributes.Wclass = Gdk.WindowClass.InputOnly;
+			attributes.Mask = Gdk.EventMask.ButtonPressMask;
+
+			Gdk.Window win = new Gdk.Window (widget.GdkWindow, attributes, 0);
+			win.UserData = invis.Handle;
+			win.MoveResize (widget.Allocation);
+
+			map[widget] = win;
+			map[win] = widget;
 		}
 
 		static void Insensitive_Mapped (object obj, EventArgs args)
@@ -315,6 +328,14 @@ namespace Stetic.Wrapper {
 		{
 			Gdk.Window win = (Gdk.Window)map[obj];
 			win.Hide ();
+		}
+
+		static void Insensitive_Unrealized (object obj, EventArgs args)
+		{
+			Gdk.Window win = (Gdk.Window)map[obj];
+			win.Destroy ();
+			map.Remove (obj);
+			map.Remove (win);
 		}
 	}
 }

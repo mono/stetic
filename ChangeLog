@@ -1,5 +1,12 @@
 2005-07-08  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/Widget.cs (InsensitiveManager): track
+	realize/unrealize events and only create the intercepting window
+	when the underlying widget is realized, or else it will end up as
+	a child of the root window and we'll totally lose.
+
+2005-07-08  Dan Winship  <danw@novell.com>
+
 	* libstetic/wrapper/objects.xml: add <glade-transform> nodes with
 	XSL transformations to fix some oddities in the glade file format.
 	(GtkHButtonBox): set the "secondary" property on a Help button
