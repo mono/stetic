@@ -106,11 +106,10 @@ namespace Stetic {
 			uint fval = 0;
 
 			try {
-				// The Trim() is needed for Widget.Events.
 				foreach (string flag in strval.Split ('|')) {
 					if (flag == "")
 						continue;
-					IntPtr flags_value = g_flags_get_value_by_name (flags_class, flag.Trim ());
+					IntPtr flags_value = g_flags_get_value_by_name (flags_class, flag);
 					if (flags_value == IntPtr.Zero)
 						throw new GladeException ("Could not parse");
 

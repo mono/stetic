@@ -39,7 +39,6 @@ libstetic_dll_sources =			\
 	wrapper/Bin.cs			\
 	wrapper/Box.cs			\
 	wrapper/Button.cs		\
-	wrapper/ButtonBox.cs		\
 	wrapper/CheckButton.cs		\
 	wrapper/ColorButton.cs		\
 	wrapper/ComboBox.cs		\

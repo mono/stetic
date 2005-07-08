@@ -67,6 +67,8 @@ namespace Stetic.Wrapper {
 					Console.Error.WriteLine (ge.Message);
 				}
 			}
+
+			Sync ();
 		}
 
 		public virtual Widget GladeImportChild (XmlElement child_elem)

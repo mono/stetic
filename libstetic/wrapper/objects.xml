@@ -1,4 +1,5 @@
-<objects>
+<?xml version="1.0" encoding="utf-8" ?>
+<objects xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
     <object type="Gtk.Widget,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
 	<internal-properties>
@@ -18,6 +19,54 @@
 		<property name="ExtensionEvents" />
 	    </itemgroup>
 	</itemgroups>
+
+	<glade-transform>
+	    <!-- "events" property has extra spaces around "|"s -->
+	    <import>
+		<xsl:template match="widget/property[@name='events']/text()">
+		    <xsl:call-template name="GtkWidget_fixevents">
+			<xsl:with-param name="string" select="." />
+		    </xsl:call-template>
+		</xsl:template>
+		<xsl:template name="GtkWidget_fixevents">
+		    <xsl:param name="string"/>
+		    <xsl:choose>
+			<xsl:when test="contains($string, ' | ')">
+			    <xsl:value-of select="substring-before($string, ' | ')"/>
+			    <xsl:text>|</xsl:text>
+			    <xsl:call-template name="GtkWidget_fixevents">
+				<xsl:with-param name="string" select="substring-after($string, ' | ')"/>
+			    </xsl:call-template>
+			</xsl:when>
+			<xsl:otherwise>
+			    <xsl:value-of select="$string" />
+			</xsl:otherwise>
+		    </xsl:choose>
+		</xsl:template>
+	    </import>
+	    <export>
+		<xsl:template match="widget/property[@name='events']/text()">
+		    <xsl:call-template name="GtkWidget_breakevents">
+			<xsl:with-param name="string" select="." />
+		    </xsl:call-template>
+		</xsl:template>
+		<xsl:template name="GtkWidget_breakevents">
+		    <xsl:param name="string"/>
+		    <xsl:choose>
+			<xsl:when test="contains($string, '|')">
+			    <xsl:value-of select="substring-before($string, '|')"/>
+			    <xsl:text> | </xsl:text>
+			    <xsl:call-template name="GtkWidget_breakevents">
+				<xsl:with-param name="string" select="substring-after($string, '|')"/>
+			    </xsl:call-template>
+			</xsl:when>
+			<xsl:otherwise>
+			    <xsl:value-of select="$string" />
+			</xsl:otherwise>
+		    </xsl:choose>
+		</xsl:template>
+	    </export>
+	</glade-transform>
     </object>
 
     <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container" />
@@ -187,7 +236,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.ButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox">
+    <object type="Gtk.ButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.Box">
 	<itemgroups>
 	    <itemgroup label="Button Box Properties">
 		<property name="LayoutStyle" />
@@ -336,6 +385,27 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+
+	<glade-transform>
+	    <!-- A regular MenuItem with no label is really a SeparatorMenuItem -->
+	    <import>
+		<xsl:template match="widget[@class='GtkMenuItem']">
+		    <xsl:choose>
+			<xsl:when test="not(property[@name='label']) and not(property[@name='stock_item'])">
+			    <widget class="GtkSeparatorMenuItem">
+				<xsl:attribute name="id"><xsl:value-of select="@id" /></xsl:attribute>
+				<xsl:apply-templates select="node()" />
+			    </widget>
+			</xsl:when>
+			<xsl:otherwise>
+			    <xsl:copy>
+				<xsl:apply-templates select="@*|node()" />
+			    </xsl:copy>
+			</xsl:otherwise>
+		    </xsl:choose>
+		</xsl:template>
+	    </import>
+	</glade-transform>
     </object>
 
     <object type="Gtk.CheckMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.MenuItem" 
@@ -521,7 +591,7 @@
 	<contextmenu ref="Gtk.Box" />
     </object>
 
-    <object type="Gtk.HButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox"
+    <object type="Gtk.HButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.Box"
 	    label="HButtonBox" icon="hbuttonbox.png" palette-category="container"
 	    hexpandable="true">
 	<itemgroups>
@@ -529,6 +599,22 @@
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<contextmenu ref="Gtk.Box" />
+
+	<glade-transform>
+	    <!-- If a child has a "response_id" of -11 (GTK_RESPONSE_HELP), it should be packed with the "secondary" property -->
+	    <import>
+		<xsl:template match="widget[@class='GtkHButtonBox']/child/widget[@class='GtkButton']">
+		    <xsl:copy>
+			<xsl:apply-templates select="@*|node()"/>
+		    </xsl:copy>
+		    <xsl:if test="number (property[@name='response_id']) = -11">
+			<packing>
+			    <property name="secondary">True</property>
+			</packing>
+		    </xsl:if>
+		</xsl:template>
+	    </import>
+	</glade-transform>
     </object>
 
     <object type="Gtk.HPaned,gtk-sharp" wrapper="Stetic.Wrapper.Paned"
@@ -883,6 +969,59 @@
 	    <command name="DeleteColumn" label="Delete Column"
 		     description="Delete the selected column" />
 	</contextmenu>
+
+	<glade-transform>
+	    <!-- Child packing options are non-standard ("expand" instead of "GTK_EXPAND") -->
+	    <import>
+		<xsl:template match="widget[@class='GtkTable']/child/packing/property[@name='x_options' or @name='y_options']/text()">
+		    <xsl:call-template name="GtkTable_fixoptions">
+			<xsl:with-param name="string" select="." />
+		    </xsl:call-template>
+		</xsl:template>
+		<xsl:template name="GtkTable_fixoptions">
+		    <xsl:param name="string"/>
+		    <xsl:choose>
+			<xsl:when test="contains($string, '|')">
+			    <xsl:call-template name="GtkTable_fixoptions">
+				<xsl:with-param name="string" select="substring-before($string, '|')"/>
+			    </xsl:call-template>
+			    <xsl:text>|</xsl:text>
+			    <xsl:call-template name="GtkTable_fixoptions">
+				<xsl:with-param name="string" select="substring-after($string, '|')"/>
+			    </xsl:call-template>
+			</xsl:when>
+			<xsl:otherwise>
+			    <xsl:text>GTK_</xsl:text>
+			    <xsl:value-of select="translate($string,'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
+			</xsl:otherwise>
+		    </xsl:choose>
+		</xsl:template>
+	    </import>
+	    <export>
+		<xsl:template match="widget[@class='GtkTable']/child/packing/property[@name='x_options' or @name='y_options']/text()">
+		    <xsl:call-template name="GtkTable_breakoptions">
+			<xsl:with-param name="options" select="." />
+		    </xsl:call-template>
+		</xsl:template>
+		<xsl:template name="GtkTable_breakoptions">
+		    <xsl:param name="string"/>
+		    <xsl:choose>
+			<xsl:when test="contains($string, '|')">
+			    <xsl:call-template name="GtkTable_breakoptions">
+				<xsl:with-param name="string" select="substring-before($string, '|')"/>
+			    </xsl:call-template>
+			    <xsl:text>|</xsl:text>
+			    <xsl:call-template name="GtkTable_breakoptions">
+				<xsl:with-param name="string" select="substring-after($string, '|')"/>
+			    </xsl:call-template>
+			</xsl:when>
+			<xsl:otherwise>
+			    <xsl:value-of select="translate(substring-after($string, 'GTK_'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')"/>
+			</xsl:otherwise>
+		    </xsl:choose>
+		</xsl:template>
+	    </export>
+	</glade-transform>
     </object>
     <object type="Gtk.Table+TableChild,gtk-sharp" wrapper="Stetic.Wrapper.Table+TableChild">
 	<internal-properties>
@@ -1052,7 +1191,7 @@
 	<contextmenu ref="Gtk.Box" />
     </object>
 
-    <object type="Gtk.VButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox"
+    <object type="Gtk.VButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.Box"
 	    label="VButtonBox" icon="vbuttonbox.png" palette-category="container"
 	    vexpandable="true">
 	<itemgroups>

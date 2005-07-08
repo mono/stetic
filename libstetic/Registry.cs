@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Xml;
+using System.Xml.Xsl;
 
 namespace Stetic {
 	public static class Registry {
@@ -10,6 +10,8 @@ namespace Stetic {
 		static Hashtable classes_by_type = new Hashtable ();
 		static Hashtable classes_by_cname = new Hashtable ();
 		static Hashtable classes_by_csname = new Hashtable ();
+
+		static XslTransform gladeImport, gladeExport;
 
 		static Registry ()
 		{
@@ -25,11 +27,53 @@ namespace Stetic {
 				classes_by_cname[klass.CName] = klass;
 				classes_by_csname[klass.WrappedType.FullName] = klass;
 			}
+
+			XmlDocument doc = CreateGladeTransformBase ();
+			XmlNamespaceManager nsm = new XmlNamespaceManager (doc.NameTable);
+			nsm.AddNamespace ("xsl", "http://www.w3.org/1999/XSL/Transform");
+
+			foreach (XmlElement elem in objects.SelectNodes ("/objects/object/glade-transform/import/xsl:*", nsm))
+				doc.FirstChild.PrependChild (doc.ImportNode (elem, true));
+			gladeImport = new XslTransform ();
+			gladeImport.Load (doc, null, null);
+
+			doc = CreateGladeTransformBase ();
+			foreach (XmlElement elem in objects.SelectNodes ("/objects/object/glade-transform/export/xsl:*", nsm))
+				doc.FirstChild.PrependChild (doc.ImportNode (elem, true));
+			gladeExport = new XslTransform ();
+			gladeExport.Load (doc, null, null);
+		}
+
+		static XmlDocument CreateGladeTransformBase ()
+		{
+			XmlDocument doc = new XmlDocument ();
+			doc.LoadXml (
+				"<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+				"  <xsl:template match='@*|node()'>" +
+				"    <xsl:copy>" +
+				"      <xsl:apply-templates select='@*|node()' />" +
+				"    </xsl:copy>" +
+				"  </xsl:template>" +
+				"</xsl:stylesheet>"
+				);
+			return doc;
 		}
 
 		public static IEnumerable AllClasses {
 			get {
 				return classes_by_type.Values;
+			}
+		}
+
+		public static XslTransform GladeImportXsl {
+			get {
+				return gladeImport;
+			}
+		}
+
+		public static XslTransform GladeExportXsl {
+			get {
+				return gladeExport;
 			}
 		}
 

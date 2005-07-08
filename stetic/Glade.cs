@@ -24,9 +24,11 @@ namespace Stetic {
 			    doctype.SystemId != Glade20SystemId)
 				throw new ApplicationException ("Not a glade file according to doctype");
 
-			XmlNode node;
+			XmlReader reader = Registry.GladeImportXsl.Transform (doc, null, (XmlResolver)null);
+			doc = new XmlDocument ();
+			doc.Load (reader);
 
-			node = doc.SelectSingleNode ("/glade-interface");
+			XmlNode node = doc.SelectSingleNode ("/glade-interface");
 			if (node == null)
 				throw new ApplicationException ("Not a glade file according to node name");
 
@@ -63,7 +65,7 @@ namespace Stetic {
 			// FIXME; if you use UTF8, it starts with a BOM???
 			XmlTextWriter writer = new XmlTextWriter (filename, System.Text.Encoding.ASCII);
 			writer.Formatting = Formatting.Indented;
-			doc.Save (writer);
+			Registry.GladeExportXsl.Transform (doc, null, writer, null);
 			writer.Close ();
 		}
 	}

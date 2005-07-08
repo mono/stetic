@@ -1,5 +1,35 @@
 2005-07-08  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/objects.xml: add <glade-transform> nodes with
+	XSL transformations to fix some oddities in the glade file format.
+	(GtkHButtonBox): set the "secondary" property on a Help button
+	child. Use Gtk.Box as a wrapper now, since we don't need a
+	ButtonBox wrapper any more.
+	(GtkButtonBox, GtkVButtonBox): use Gtk.Box as a wrapper.
+	(GtkMenuItem): a menuitem with no label should be a
+	SeparatorMenuItem.
+	(GtkTable): fix/break the non-standard "x_options" and "y_options"
+	(GtkWidget): remove/add the extraneous spaces in "events"
+
+	* libstetic/wrapper/ButtonBox.cs: gone
+
+	* libstetic/wrapper/Container.cs (GladeImport): Sync() at the end.
+
+	* libstetic/wrapper/Table.cs (GladeImportChild, GladeExportChild):
+	gone, handled by xsl now.
+	(GladeImport): gone, Container does the Sync() for us now.
+
+	* libstetic/GladeUtils.cs (ParseFlags): remove special case for
+	Widget.Events
+
+	* libstetic/Registry.cs: handle the <glade-transform> nodes.
+	(GladeImportXsl, GladeExportXsl): properties to return
+	XslTransforms for glade import and export.
+
+	* stetic/Glade.cs: use Registry.GladeImportXsl and GladeExportXsl.
+
+2005-07-08  Dan Winship  <danw@novell.com>
+
 	Rework the glade import/export framework to pass XmlElements
 	directly to the wrapper import/export methods, rather than trying
 	to parse out the "relevant" parts into Hashtables, etc. This makes
