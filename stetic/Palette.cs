@@ -49,7 +49,7 @@ namespace Stetic {
 			classes.Sort (this);
 
 			foreach (ClassDescriptor klass in classes) {
-				if (klass.Deprecated || klass.Category == "internal" || klass.Icon == null)
+				if (klass.Deprecated || klass.Category == "")
 					continue;
 
 				WidgetFactory factory;

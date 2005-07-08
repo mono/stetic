@@ -8,12 +8,11 @@ namespace Stetic {
 	public class PropertyDescriptor : ItemDescriptor {
 
 		PropertyInfo memberInfo, propertyInfo;
-		bool isWrapperProperty, hasDefault;
+		bool isWrapperProperty, hasDefault, gladeOverride;
 		ParamSpec pspec;
 		Type editorType;
-		string label, description;
+		string label, description, gladeName;
 		object minimum, maximum;
-		GladePropertyAttribute gladeAttribute;
 		PropertyDescriptor gladeProperty;
 
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
@@ -69,14 +68,13 @@ namespace Stetic {
 
 			editorType = Type.GetType (elem.GetAttribute ("editor"));
 
-			gladeAttribute = (GladePropertyAttribute) Attribute.GetCustomAttribute (propertyInfo, typeof (Stetic.GladePropertyAttribute));
-			if (gladeAttribute != null && gladeAttribute.Proxy != null) {
-				gladeProperty = new PropertyDescriptor (klass.WrapperType, gladeAttribute.Proxy);
-				if (gladeProperty.pspec == null)
-					gladeProperty.pspec = pspec;
-				if (gladeProperty.gladeAttribute == null)
-					gladeProperty.gladeAttribute = gladeAttribute;
-			}
+			if (elem.HasAttribute ("glade-override"))
+				gladeOverride = true;
+			else
+				gladeOverride = (pspec == null);
+
+			if (elem.HasAttribute ("glade-name"))
+				gladeName = elem.GetAttribute ("glade-name");
 		}
 
 		PropertyDescriptor (Type objectType, string propertyName)
@@ -232,12 +230,9 @@ namespace Stetic {
 			propertyInfo.SetValue (obj, value, null);
 		}
 
-		public GladeProperty GladeFlags {
+		public bool GladeOverride {
 			get {
-				if (gladeAttribute != null)
-					return gladeAttribute.Flags;
-				else
-					return 0;
+				return gladeOverride;
 			}
 		}
 
@@ -252,8 +247,8 @@ namespace Stetic {
 
 		public string GladeName {
 			get {
-				if (gladeAttribute != null && gladeAttribute.Name != null)
-					return gladeAttribute.Name;
+				if (gladeName != null)
+					return gladeName;
 				else if (pspec != null)
 					return pspec.Name.Replace ('-', '_');
 				else

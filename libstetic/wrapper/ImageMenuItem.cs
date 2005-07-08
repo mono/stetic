@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -11,16 +11,17 @@ namespace Stetic.Wrapper {
 			return new Gtk.ImageMenuItem ("");
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
+		public override void GladeImport (XmlElement elem)
 		{
 			Gtk.StockItem stockItem = Gtk.StockItem.Zero;
-			string use_stock = GladeUtils.ExtractProperty ("use_stock", props);
-			if (use_stock == "True") {
-				stockItem = Gtk.Stock.Lookup (props["label"] as string);
+			bool use_stock = (bool)GladeUtils.ExtractProperty (elem, "use_stock", false);
+			if (use_stock) {
+				string label = (string)GladeUtils.GetProperty (elem, "label", "");
+				stockItem = Gtk.Stock.Lookup (label);
 				if (stockItem.Label != null)
-					props.Remove ("label");
+					GladeUtils.ExtractProperty (elem, "label", "");
 			}
-			base.GladeImport (className, id, props);
+			base.GladeImport (elem);
 
 			if (stockItem.StockId != null)
 				Image = "stock:" + stockItem.StockId;

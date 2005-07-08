@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -10,9 +10,10 @@ namespace Stetic.Wrapper {
 			return Gtk.ComboBox.NewText ();
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
+		public override void GladeImport (XmlElement elem)
 		{
-			GladeUtils.ImportWidget (stetic, this, CreateInstance (), id, props);
+			Wrap (CreateInstance (), false);
+			base.GladeImport (elem);
 		}
 
 		string items = "";

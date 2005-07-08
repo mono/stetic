@@ -21,27 +21,14 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty (GladeProperty.LateImport, Proxy = "GladeMnemonicWidget")]
-		public Gtk.Widget MnemonicWidget {
+		string mnem;
+		public string MnemonicWidget {
 			get {
-				return ((Gtk.Label)Wrapped).MnemonicWidget;
+				return mnem;
 			}
 			set {
-				((Gtk.Label)Wrapped).MnemonicWidget = value;
-			}
-		}
-
-		internal string GladeMnemonicWidget {
-			get {
-				Gtk.Widget mnem = MnemonicWidget;
-				if (mnem == null)
-					return null;
-				else
-					return mnem.Name;
-			}
-			set {
-				Gtk.Widget mnem = stetic.LookupWidgetById (value);
-				MnemonicWidget = mnem;
+				mnem = value;
+				((Gtk.Label)Wrapped).MnemonicWidget = stetic.LookupWidgetById (mnem);
 			}
 		}
 	}

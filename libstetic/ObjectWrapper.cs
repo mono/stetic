@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Xml;
 
 namespace Stetic {
 	public abstract class ObjectWrapper : IDisposable {
@@ -30,6 +31,8 @@ namespace Stetic {
 		public static ObjectWrapper Create (IStetic stetic, object wrapped, bool initialized)
 		{
 			ClassDescriptor klass = Registry.LookupClass (wrapped.GetType ());
+			if (klass == null)
+				throw new ApplicationException ("No wrapper for " + wrapped.GetType ().FullName);
 			ObjectWrapper wrapper = Activator.CreateInstance (klass.WrapperType) as ObjectWrapper;
 			if (wrapper == null)
 				return null;
@@ -39,8 +42,9 @@ namespace Stetic {
 			return wrapper;
 		}
 
-		public static ObjectWrapper GladeImport (IStetic stetic, string className, string id, Hashtable props)
+		public static ObjectWrapper GladeImport (IStetic stetic, XmlElement elem)
 		{
+			string className = elem.GetAttribute ("class");
 			ClassDescriptor klass = Registry.LookupClass (className);
 			if (klass == null)
 				throw new GladeException ("No Stetic wrapper for type", className);
@@ -54,7 +58,7 @@ namespace Stetic {
 				throw new GladeException ("Can't create wrapper for type " + klass.WrapperType.FullName, className);
 			wrapper.stetic = stetic;
 			try {
-				info.Invoke (wrapper, new object[] { className, id, props });
+				info.Invoke (wrapper, new object[] { elem });
 			} catch (TargetInvocationException tie) {
 				throw tie.InnerException;
 			}

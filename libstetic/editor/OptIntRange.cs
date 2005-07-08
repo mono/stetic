@@ -7,14 +7,18 @@ namespace Stetic.Editor {
 		Gtk.CheckButton check;
 		Gtk.SpinButton spin;
 
-		public OptIntRange (int min, int max) : base (false, 6)
+		public OptIntRange (object min, object max) : base (false, 6)
 		{
 			check = new Gtk.CheckButton ();
 			check.Show ();
 			check.Toggled += check_Toggled;
 			PackStart (check, false, false, 0);
 
-			spin = new Gtk.SpinButton ((double)min, (double)max, 1.0);
+			if (min == null)
+				min = Int32.MinValue;
+			if (max == null)
+				max = Int32.MaxValue;
+			spin = new Gtk.SpinButton ((double)(int)min, (double)(int)max, 1.0);
 			spin.Show ();
 			spin.ValueChanged += spin_ValueChanged;
 			PackStart (spin, true, true, 0);

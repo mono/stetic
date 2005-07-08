@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -20,43 +21,36 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
+		public override void GladeImport (XmlElement elem)
 		{
-			stetic.GladeImportComplete += PostGladeSync;
-			base.GladeImport (className, id, props);
-		}
-
-		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
-		{
-			string opts = (string)childprops["x_options"];
-			if (opts == null)
-				childprops["x_options"] = "GTK_EXPAND|GTK_FILL";
-			else if (opts != "")
-				childprops["x_options"] = "GTK_" + Regex.Replace (opts.ToUpper (), @"\|", "|GTK_");
-			opts = (string)childprops["y_options"];
-			if (opts == null)
-				childprops["y_options"] = "GTK_EXPAND|GTK_FILL";
-			else if (opts != "")
-				childprops["y_options"] = "GTK_" + Regex.Replace (opts.ToUpper (), @"\|", "|GTK_");
-
-			return base.GladeImportChild (className, id, props, childprops);
-		}
-
-		public override void GladeExportChild (Widget wrapper, out string className, out string internalId, out string id, out Hashtable props, out Hashtable childprops)
-		{
-			base.GladeExportChild (wrapper, out className, out internalId, out id, out props, out childprops);
-			string opts = (string)childprops["x_options"];
-			if (opts != null)
-				childprops["x_options"] = Regex.Replace (opts.ToLower (), "gtk_", "");
-			opts = (string)childprops["y_options"];
-			if (opts != null)
-				childprops["y_options"] = Regex.Replace (opts.ToLower (), "gtk_", "");
-		}
-
-		void PostGladeSync ()
-		{
+			base.GladeImport (elem);
 			Sync ();
-			stetic.GladeImportComplete -= PostGladeSync;
+		}
+
+		public override Widget GladeImportChild (XmlElement child_elem)
+		{
+			string opts = (string)GladeUtils.ExtractChildProperty (child_elem, "x_options", "expand|fill");
+			GladeUtils.SetChildProperty (child_elem, "x_options", Regex.Replace (opts.ToUpper (), @"(?<!\w)(\w)", "GTK_$1"));
+
+			opts = (string)GladeUtils.ExtractChildProperty (child_elem, "y_options", "expand|fill");
+			GladeUtils.SetChildProperty (child_elem, "y_options", Regex.Replace (opts.ToUpper (), @"(?<!\w)(\w)", "GTK_$1"));
+
+			return base.GladeImportChild (child_elem);
+		}
+
+		public override XmlElement GladeExportChild (Widget wrapper, XmlDocument doc)
+		{
+			XmlElement child_elem = base.GladeExportChild (wrapper, doc);
+
+			string opts = (string)GladeUtils.ExtractChildProperty (child_elem, "x_options", "");
+			if (opts != "")
+				GladeUtils.SetChildProperty (child_elem, "x_options", Regex.Replace (opts.ToLower (), "gtk_", ""));
+
+			opts = (string)GladeUtils.ExtractChildProperty (child_elem, "y_options", "");
+			if (opts != "")
+				GladeUtils.SetChildProperty (child_elem, "y_options", Regex.Replace (opts.ToLower (), "gtk_", ""));
+
+			return child_elem;
 		}
 
 		private Gtk.Table table {

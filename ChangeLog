@@ -1,3 +1,111 @@
+2005-07-08  Dan Winship  <danw@novell.com>
+
+	Rework the glade import/export framework to pass XmlElements
+	directly to the wrapper import/export methods, rather than trying
+	to parse out the "relevant" parts into Hashtables, etc. This makes
+	it easier to handle a lot of the things that need special
+	handling now, and will make it easier to handle signal,
+	accelerator, and a11y import/export stuff later.
+
+	* libstetic/GladePropertyAttribute.cs: gone, entirely replaced by
+	XML attributes now
+
+	* libstetic/GladeUtils.cs: update to use XML.
+	(ParseProperty): handle gunichar properties.
+	(Wrap): don't need the LateImportHelper stuff now
+
+	* libstetic/ObjectWrapper.cs (GladeImport): update to use XML
+
+	* libstetic/PropertyDescriptor.cs: Update for removal of
+	GladePropertyAttribute. Handle glade-name and glade-override xml
+	attributes.
+
+	* libstetic/wrapper/objects.xml: Add glade-override="true" to
+	properties that should be read from/written to the wrapper rather
+	than the object during glade import/export. Move AutoSize from
+	Container to ContainerChild, where it belonged. Fix
+	Button.ResponseId to invisiblify correctly. Remove
+	palette-category="internal" since the Palette will now ignore
+	objects with no palette-category. Make Menu be wrapped by
+	Container rather than Widget, so its MenuItems will be added
+	correctly.
+
+	* libstetic/wrapper/Button.cs (GladeImport, GladeExport): update
+	(GladeImportChild): update, and remove the GladeImportComplete
+	stuff, since we can do it immediately after
+	base.GladeImportChild() now.
+	(StockId): Fix so this actually works :)
+	
+	* libstetic/wrapper/ButtonBox.cs (GladeImportChild): update,
+	remove redundant setting of button.ResponseId.
+
+	* libstetic/wrapper/Container.cs: make non-abstract, since Menu
+	uses this as its wrapper now.
+	(GladeImport, GladeImportChild, GladeSetInternalChild,
+	GladeExport, GladeExportChild): Update. In particular, Container
+	now handles recursing into child widgets itself, which is nice
+	because it means all of a widget's children are imported when its
+	base.GladeImport() call returns, which lets us simplify a few
+	places that used to need the GladeImportComplete event.
+
+	* libstetic/wrapper/Image.cs (Wrap): Fix the case of wrapping a
+	Gtk.Image with no image specified
+	(IconSize): Remove GladePropertyAttribute
+
+	* libstetic/wrapper/Label.cs (MnemonicWidget): make this a string,
+	for now at least.
+
+	* libstetic/wrapper/OptionMenu.cs (GladeImport, etc):
+	* libstetic/wrapper/Table.cs (GladeImport, etc): update. Remove
+	GladeImportComplete hacks.
+
+	* libstetic/wrapper/Widget.cs (GladeImport, GladeExport): Make
+	these work with XML.
+	(Visible, HasDefault, Sensitive): Remove the
+	GladePropertyAttribute.
+
+	* libstetic/wrapper/Window.cs (Modal, TypeHint, Type): Remove
+	GladePropertyAttribute.
+
+	* libstetic/wrapper/Bin.cs (GladeImport):
+	* libstetic/wrapper/ComboBox.cs (GladeImport):
+	* libstetic/wrapper/CheckButton.cs (GladeImportChild):
+	* libstetic/wrapper/Expander.cs (GladeImportChild, GladeExportChild):
+	* libstetic/wrapper/Frame.cs (GladeImportChild, GladeExportChild):
+	* libstetic/wrapper/ImageMenuItem.cs (GladeImport):
+	* libstetic/wrapper/Notebook.cs (GladeImportChild, GladeExportChild):
+	* libstetic/wrapper/MenuItem.cs (GladeImportChild):
+	* libstetic/wrapper/RadioButton.cs (GladeImport, GladeExport):
+	* libstetic/wrapper/RadioMenuItem.cs (GladeImport, GladeExport): 
+	* libstetic/wrapper/RadioToolButton.cs (GladeImport, GladeExport):
+	* libstetic/wrapper/ToolButton.cs (GladeImport): update
+
+	* libstetic/editor/FloatRange.cs: 
+	* libstetic/editor/IntRange.cs: 
+	* libstetic/editor/OptIntRange.cs: Make these take object args,
+	and substitute in a default min/max value if either is null.
+
+	* libstetic/ClassDescriptor.cs: 
+	* libstetic/ItemDescriptor.cs: Use SelectNodes, not
+	GetElementsByTagName, which is recursive. (Oops.)
+
+	* libstetic/ParamSpec.cs (IsUnichar): add this, to test
+	G_IS_PARAM_SPEC_UNICHAR, since you can't otherwise distinguish
+	them from uint paramspecs.
+
+	* stetic/Glade.cs: update to pass XML to libstetic, and to not
+	recurse (since the wrappers do it themselves now).
+
+	* stetic/Palette.cs: ignore classes with no palette category
+	specified.
+
+	* stetic/PropertyEditor.cs: merge BasicEditor and RangeEditor
+	together, and update for the range editor changes to handle
+	implicit min/max.
+
+	* glue/paramspec.c (stetic_param_spec_is_unichar): glue for
+	ParamSpec.IsUnichar.
+
 2005-07-06  Dan Winship  <danw@novell.com>
 
 	* libstetic/DND.cs (NewWindow):

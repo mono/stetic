@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -137,15 +138,16 @@ namespace Stetic.Wrapper {
 				Wrapped.Destroy ();
 		}
 
-		protected virtual void GladeImport (string className, string id, Hashtable props)
+		public virtual void GladeImport (XmlElement elem)
 		{
-			GladeUtils.ImportWidget (stetic, this, className, id, props);
+			GladeUtils.ImportWidget (stetic, this, elem);
 		}
 
-		public virtual void GladeExport (out string className, out string id, out Hashtable props)
+		public virtual XmlElement GladeExport (XmlDocument doc)
 		{
-			GladeUtils.ExportWidget (stetic, this, out className, out id, out props);
-			GladeUtils.ExtractProperty ("name", props);
+			XmlElement elem = GladeUtils.ExportWidget (stetic, this, doc);
+			GladeUtils.ExtractProperty (elem, "name", "");
+			return elem;
 		}
 
 		public static new Widget Lookup (GLib.Object obj)
@@ -175,7 +177,6 @@ namespace Stetic.Wrapper {
 		public bool Unselectable;
 
 		bool window_visible;
-		[GladeProperty]
 		public bool Visible {
 			get {
 				if (Wrapped is Gtk.Window)
@@ -192,7 +193,6 @@ namespace Stetic.Wrapper {
 		}
 
 		bool hasDefault;
-		[GladeProperty]
 		public bool HasDefault {
 			get {
 				return hasDefault;
@@ -207,7 +207,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		[GladeProperty]
 		public bool Sensitive {
 			get {
 				return Wrapped.Sensitive;

@@ -67,7 +67,7 @@ namespace Stetic {
 
 			XmlElement groups_elem = elem["itemgroups"];
 			if (groups_elem != null) {
-				foreach (XmlElement group_elem in groups_elem.GetElementsByTagName ("itemgroup")) {
+				foreach (XmlElement group_elem in groups_elem.SelectNodes ("./itemgroup")) {
 					ItemGroup itemgroup;
 
 					if (group_elem.HasAttribute ("ref")) {

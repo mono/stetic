@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -14,11 +14,12 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override Widget GladeImportChild (string className, string id,
-							 Hashtable props, Hashtable childprops)
+		public override Widget GladeImportChild (XmlElement child_elem)
 		{
 			hasLabel = false;
-			return base.GladeImportChild (className, id, props, childprops);
+			if (checkbutton.Child != null)
+				checkbutton.Remove (checkbutton.Child);
+			return base.GladeImportChild (child_elem);
 		}
 
 		public Gtk.CheckButton checkbutton {

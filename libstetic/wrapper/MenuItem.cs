@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -16,10 +16,9 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 		}
 
-		public override Widget GladeImportChild (string className, string id,
-							 Hashtable props, Hashtable childprops)
+		public override Widget GladeImportChild (XmlElement child_elem)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, child_elem["widget"]);
 			menuitem.Submenu = (Gtk.Menu)wrapper.Wrapped;
 			return (Widget)wrapper;
 		}

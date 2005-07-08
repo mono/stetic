@@ -43,7 +43,6 @@ namespace Stetic.Wrapper {
 		// We don't want to actually set the underlying properties for these;
 		// that would be annoying to interact with.
 		bool modal;
-		[GladeProperty]
 		public bool Modal {
 			get {
 				return modal;
@@ -54,7 +53,6 @@ namespace Stetic.Wrapper {
 		}
 
 		Gdk.WindowTypeHint typeHint;
-		[GladeProperty]
 		public Gdk.WindowTypeHint TypeHint {
 			get {
 				return typeHint;
@@ -65,7 +63,6 @@ namespace Stetic.Wrapper {
 		}
 
 		Gtk.WindowType type;
-		[GladeProperty]
 		public Gtk.WindowType Type {
 			get {
 				return type;

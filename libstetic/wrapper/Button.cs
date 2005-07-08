@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -23,33 +24,33 @@ namespace Stetic.Wrapper {
 			} else if (button.Child is Gtk.Label) {
 				type = ButtonType.TextOnly;
 				label = button.Label;
-			} else
+			} else {
+				type = ButtonType.Custom;
 				FixupGladeChildren ();
+			}
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
+		public override void GladeImport (XmlElement elem)
 		{
-			base.GladeImport (className, id, props);
-			if (props["label"] == null && button.Child != null)
+			base.GladeImport (elem);
+			if (elem.SelectSingleNode ("./property[@name='label']") == null &&
+			    elem.SelectSingleNode ("./child/widget") == null)
 				button.Remove (button.Child);
 		}
 
-		public override Widget GladeImportChild (string className, string id,
-							 Hashtable props, Hashtable childprops)
+		public override Widget GladeImportChild (XmlElement child_elem)
 		{
 			Type = ButtonType.Custom;
-			stetic.GladeImportComplete += FixupGladeChildren;
 
 			if (button.Child != null)
 				button.Remove (button.Child);
-			return base.GladeImportChild (className, id, props, childprops);
+			Widget wrapper = base.GladeImportChild (child_elem);
+			FixupGladeChildren ();
+			return wrapper;
 		}
 
 		void FixupGladeChildren ()
 		{
-			stetic.GladeImportComplete -= FixupGladeChildren;
-			type = ButtonType.Custom;
-
 			Gtk.Alignment alignment = button.Child as Gtk.Alignment;
 			if (alignment == null)
 				return;
@@ -81,10 +82,12 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override void GladeExport (out string className, out string id, out Hashtable props)
+		public override XmlElement GladeExport (XmlDocument doc)
 		{
-			base.GladeExport (out className, out id, out props);
-			props["use_stock"] = (Type == ButtonType.StockItem) ? "True" : "False";
+			XmlElement elem = base.GladeExport (doc);
+			GladeUtils.SetProperty (elem, "use_stock",
+						(Type == ButtonType.StockItem) ? "True" : "False");
+			return elem;
 		}
 
 		public override IEnumerable RealChildren {
@@ -202,7 +205,7 @@ namespace Stetic.Wrapper {
 				return stockId;
 			}
 			set {
-				button.Label = value;
+				button.Label = stockId = value;
 				button.UseStock = true;
 				Gtk.StockItem item = Gtk.Stock.Lookup (value);
 				if (item.StockId == value)
@@ -236,7 +239,6 @@ namespace Stetic.Wrapper {
 		}
 
 		string label;
-		[GladeProperty (GladeProperty.UseUnderlying)]
 		public string Label {
 			get {
 				return label;

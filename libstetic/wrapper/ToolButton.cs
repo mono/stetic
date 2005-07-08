@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -19,11 +19,11 @@ namespace Stetic.Wrapper {
 				icon = "stock:" + toolbutton.StockId;
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
+		public override void GladeImport (XmlElement elem)
 		{
-			string icon = GladeUtils.ExtractProperty ("icon", props);
-			base.GladeImport (className, id, props);
-			if (icon != null)
+			string icon = (string)GladeUtils.ExtractProperty (elem, "icon", "");
+			base.GladeImport (elem);
+			if (icon != "")
 				Icon = "file:" + icon;
 			else if (((Gtk.ToolButton)Wrapped).StockId == null)
 				Icon = null;

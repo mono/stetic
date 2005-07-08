@@ -108,6 +108,15 @@ namespace Stetic {
 			}
 		}
 
+		[DllImport("libsteticglue")]
+		static extern bool stetic_param_spec_is_unichar (IntPtr pspec);
+
+		public bool IsUnichar {
+			get {
+				return stetic_param_spec_is_unichar (_obj);
+			}
+		}
+
 		static Hashtable props = new Hashtable (), childProps = new Hashtable ();
 
 		private class ParamSpecTypeHack : GLib.Object {

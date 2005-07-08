@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -14,34 +15,24 @@ namespace Stetic.Wrapper {
 				InsertPage (0);
 		}
 
-		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
+		public override Widget GladeImportChild (XmlElement child_elem)
 		{
-			if (childprops.Count == 1 && ((string)childprops["type"]) == "tab") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
+			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "tab") {
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, child_elem["widget"]);
 				Gtk.Widget widget = (Gtk.Widget)wrapper.Wrapped;
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), widget);
 				tabs.Add (widget);
 				return (Widget)wrapper;
 			} else
-				return base.GladeImportChild (className, id, props, childprops);
+				return base.GladeImportChild (child_elem);
 		}
 
-		public override void GladeExportChild (Widget wrapper, out string className,
-						       out string internalId, out string id,
-						       out Hashtable props,
-						       out Hashtable childprops)
+		public override XmlElement GladeExportChild (Widget wrapper, XmlDocument doc)
 		{
-			Gtk.Widget widget = wrapper.Wrapped as Gtk.Widget;
-			if (!tabs.Contains (widget)) {
-				base.GladeExportChild (wrapper, out className, out internalId,
-						       out id, out props, out childprops);
-				return;
-			}
-
-			internalId = null;
-			childprops = new Hashtable ();
-			childprops["type"] = "tab";
-			wrapper.GladeExport (out className, out id, out props);
+			XmlElement child_elem = base.GladeExportChild (wrapper, doc);
+			if (tabs.Contains (wrapper.Wrapped))
+				GladeUtils.SetChildProperty (child_elem, "type", "tab");
+			return child_elem;
 		}
 
 		private Gtk.Notebook notebook {

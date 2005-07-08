@@ -1,44 +1,58 @@
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Xml;
 
 namespace Stetic {
 
 	public static class GladeUtils {
 
-		public static string ExtractProperty (string name, Hashtable props)
+		static object GetProperty (XmlElement elem, string selector, object defaultValue, bool extract)
 		{
-			string value = props[name] as string;
-			if (value != null)
-				props.Remove (name);
-			return value;
+			XmlElement prop = (XmlElement)elem.SelectSingleNode (selector);
+			if (prop == null)
+				return defaultValue;
+			if (extract)
+				prop.ParentNode.RemoveChild (prop);
+			return ParseProperty (null, defaultValue.GetType (), prop.InnerText).Val;
 		}
 
-		static void ExtractWrapperProperties (ClassDescriptor klass, Hashtable props, 
-						      out Hashtable wProps)
+		public static object GetProperty (XmlElement elem, string name, object defaultValue)
 		{
-			wProps = null;
+			return GetProperty (elem, "./property[@name='" + name + "']", defaultValue, false);
+		}
 
-			foreach (ItemGroup group in klass.ItemGroups) {
-				foreach (ItemDescriptor item in group.Items) {
-					PropertyDescriptor prop = item as PropertyDescriptor;
-					if (prop == null)
-						continue;
-					prop = prop.GladeProperty;
-					if (prop.GladeName == null)
-						continue;
-					if (prop.GladeFlags == 0 ||
-					    (prop.GladeFlags & GladeProperty.UseUnderlying) != 0)
-						continue;
+		public static object ExtractProperty (XmlElement elem, string name, object defaultValue)
+		{
+			return GetProperty (elem, "./property[@name='" + name + "']", defaultValue, true);
+		}
 
-					string val = ExtractProperty (prop.GladeName, props);
-					if (val != null) {
-						if (wProps == null)
-							wProps = new Hashtable ();
-						wProps[prop] = val;
-					}
-				}
+		public static object GetChildProperty (XmlElement elem, string name, object defaultValue)
+		{
+			return GetProperty (elem, "./packing/property[@name='" + name + "']", defaultValue, false);
+		}
+
+		public static object ExtractChildProperty (XmlElement elem, string name, object defaultValue)
+		{
+			return GetProperty (elem, "./packing/property[@name='" + name + "']", defaultValue, true);
+		}
+
+		public static void SetProperty (XmlElement elem, string name, string value)
+		{
+			XmlElement prop_elem = elem.OwnerDocument.CreateElement ("property");
+			prop_elem.SetAttribute ("name", name);
+			prop_elem.InnerText = value;
+			elem.AppendChild (prop_elem);
+		}
+
+		public static void SetChildProperty (XmlElement elem, string name, string value)
+		{
+			XmlElement packing_elem = elem["packing"];
+			if (packing_elem == null) {
+				packing_elem = elem.OwnerDocument.CreateElement ("packing");
+				elem.AppendChild (packing_elem);
 			}
+			SetProperty (packing_elem, name, value);
 		}
 
 		static GLib.Value ParseBasicType (GLib.TypeFundamentals type, string strval)
@@ -125,6 +139,11 @@ namespace Stetic {
 			return new GLib.Value (new Gtk.Adjustment (deflt, min, max, step, page_inc, page_size));
 		}
 
+		static GLib.Value ParseUnichar (string strval)
+		{
+			return new GLib.Value (strval.Length == 1 ? (uint)strval[0] : 0U);
+		}
+
 		static GLib.Value ParseProperty (ParamSpec pspec, Type propType, string strval)
 		{
 			IntPtr gtype;
@@ -143,6 +162,8 @@ namespace Stetic {
 				return ParseEnum (gtype, strval);
 			else if (typef == GLib.TypeFundamentals.TypeFlags)
 				return ParseFlags (gtype, strval);
+			else if (pspec != null && pspec.IsUnichar)
+				return ParseUnichar (strval);
 			else
 				return ParseBasicType (typef, strval);
 		}
@@ -165,14 +186,15 @@ namespace Stetic {
 			}
 		}
 
-		static void ParseProperties (Type type, bool childprops, Hashtable props,
+		static void ParseProperties (Type type, bool childprops, IEnumerable props,
 					     out string[] propNames, out GLib.Value[] propVals)
 		{
 			ArrayList names = new ArrayList ();
 			ArrayList values = new ArrayList ();
 
-			foreach (string name in props.Keys) {
-				string strval = props[name] as string;
+			foreach (XmlElement prop in props) {
+				string name = prop.GetAttribute ("name");
+				string strval = prop.InnerText;
 
 				GLib.Value value;
 				try {
@@ -188,90 +210,80 @@ namespace Stetic {
 			propVals = (GLib.Value[])values.ToArray (typeof (GLib.Value));
 		}
 
-		static public void ImportWidget (IStetic stetic, ObjectWrapper wrapper,
-						 string className, string id, Hashtable props)
+		// Eek, scary. props is string->XmlElement, wProps is
+		// PropertyDescriptor->string
+		static void ExtractWrapperProperties (ClassDescriptor klass, XmlElement elem,
+						      out Hashtable props, out Hashtable wProps)
 		{
-			ClassDescriptor klass = Registry.LookupClass (className);
+			props = new Hashtable ();
+			wProps = new Hashtable ();
+			foreach (XmlElement prop in elem.SelectNodes ("./property"))
+				props[prop.GetAttribute ("name")] = prop;
 
-			Hashtable wProps;
-			ExtractWrapperProperties (klass, props, out wProps);
+			foreach (ItemGroup group in klass.ItemGroups) {
+				foreach (ItemDescriptor item in group.Items) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop == null)
+						continue;
+					prop = prop.GladeProperty;
+					if (prop.GladeName == null || !prop.GladeOverride)
+						continue;
 
-			string[] propNames;
-			GLib.Value[] propVals;
-			ParseProperties (klass.WrappedType, false, props, out propNames, out propVals);
+					XmlElement prop_elem = props[prop.GladeName] as XmlElement;
+					if (prop_elem == null)
+						continue;
 
-			IntPtr raw = gtksharp_object_newv (klass.GType.Val, propNames.Length, propNames, propVals);
-			if (raw == IntPtr.Zero)
-				throw new GladeException ("Could not create widget", className);
-
-			Gtk.Widget widget = (Gtk.Widget)GLib.Object.GetObject (raw, true);
-			if (widget == null) {
-				gtk_object_sink (raw);
-				throw new GladeException ("Could not create gtk# wrapper", className);
+					props.Remove (prop.GladeName);
+					wProps[prop] = prop_elem.InnerText;
+				}
 			}
-
-			Wrap (stetic, wrapper, widget, id, wProps);
 		}
 
 		static public void ImportWidget (IStetic stetic, ObjectWrapper wrapper,
-						 Gtk.Widget widget, string id, Hashtable props)
+						 XmlElement elem)
 		{
-			Hashtable wProps;
-			ExtractWrapperProperties (Registry.LookupClass (widget.GetType ()), props, out wProps);
+			string className = elem.GetAttribute ("class");
+			if (className == null)
+				throw new GladeException ("<widget> node with no class name");
+
+			ClassDescriptor klass = Registry.LookupClass (className);
+			if (klass == null)
+				throw new GladeException ("No stetic ClassDescriptor for " + className);
+
+			Hashtable props, wProps;
+			ExtractWrapperProperties (klass, elem, out props, out wProps);
 
 			string[] propNames;
 			GLib.Value[] propVals;
-			ParseProperties (widget.GetType (), false, props,
+			ParseProperties (klass.WrappedType, false, props.Values,
 					 out propNames, out propVals);
 
-			for (int i = 0; i < propNames.Length; i++)
-				g_object_set_property (widget.Handle, propNames[i], ref propVals[i]);
+			Gtk.Widget widget;
 
-			Wrap (stetic, wrapper, widget, id, wProps);
-		}
+			if (wrapper.Wrapped == null) {
+				IntPtr raw = gtksharp_object_newv (klass.GType.Val, propNames.Length, propNames, propVals);
+				if (raw == IntPtr.Zero)
+					throw new GladeException ("Could not create widget", className);
 
-		static void Wrap (IStetic stetic, ObjectWrapper wrapper,
-				  Gtk.Widget widget, string id, Hashtable wProps)
-		{
-			widget.Name = id;
-			wrapper.Wrap (widget, true);
+				widget = (Gtk.Widget)GLib.Object.GetObject (raw, true);
+				if (widget == null) {
+					gtk_object_sink (raw);
+					throw new GladeException ("Could not create gtk# wrapper", className);
+				}
+				wrapper.Wrap (widget, true);
+			} else {
+				widget = (Gtk.Widget)wrapper.Wrapped;
+				for (int i = 0; i < propNames.Length; i++)
+					g_object_set_property (widget.Handle, propNames[i], ref propVals[i]);
+			}
+
+			widget.Name = elem.GetAttribute ("id");
 
 			if (wProps == null)
 				return;
 
-			LateImportHelper helper = null;
-			foreach (PropertyDescriptor prop in wProps.Keys) {
-				if ((prop.GladeFlags & GladeProperty.LateImport) != 0) {
-					if (helper == null) {
-						helper = new LateImportHelper (stetic, wrapper, false);
-						stetic.GladeImportComplete += helper.LateImport;
-					}
-					helper.Props[prop] = wProps[prop];
-				} else
-					ParseGladeProperty (wrapper, false, prop, wProps[prop] as string);
-			}
-		}
-
-		private class LateImportHelper {
-			public LateImportHelper (IStetic stetic, ObjectWrapper wrapper, bool childprop) {
-				this.stetic = stetic;
-				this.wrapper = wrapper;
-				this.childprop = childprop;
-				Props = new Hashtable ();
-			}
-
-			IStetic stetic;
-			ObjectWrapper wrapper;
-			bool childprop;
-			public Hashtable Props;
-
-			public void LateImport () {
-				foreach (PropertyDescriptor prop in Props.Keys) {
-					ParseGladeProperty (wrapper, childprop,
-							    prop, Props[prop] as string);
-				}
-				stetic.GladeImportComplete -= LateImport;
-			}
+			foreach (PropertyDescriptor prop in wProps.Keys)
+				ParseGladeProperty (wrapper, false, prop, wProps[prop] as string);
 		}
 
 		static void ParseGladeProperty (ObjectWrapper wrapper, bool childprop,
@@ -289,11 +301,12 @@ namespace Stetic {
 			}
 		}
 
-		static public void SetPacking (Gtk.Container parent, Gtk.Widget child, Hashtable childprops)
+		static public void SetPacking (Gtk.Container parent, Gtk.Widget child, XmlElement child_elem)
 		{
 			string[] propNames;
 			GLib.Value[] propVals;
-			ParseProperties (parent.GetType (), true, childprops,
+			ParseProperties (parent.GetType (), true,
+					 child_elem.SelectNodes ("./packing/property"),
 					 out propNames, out propVals);
 
 			for (int i = 0; i < propNames.Length; i++)
@@ -304,7 +317,7 @@ namespace Stetic {
 		{
 			object value;
 
-			if ((prop.GladeFlags & GladeProperty.UseUnderlying) != 0) {
+			if (!prop.GladeOverride) {
 				Stetic.Wrapper.Container.ContainerChild ccwrap = wrapper as Stetic.Wrapper.Container.ContainerChild;
 				GLib.Value gval;
 
@@ -371,21 +384,23 @@ namespace Stetic {
 				return value.ToString ();
 		}
 
-		static public void ExportWidget (IStetic stetic, ObjectWrapper wrapper,
-						 out string className, out string id, out Hashtable props)
+		static public XmlElement ExportWidget (IStetic stetic, ObjectWrapper wrapper,
+						       XmlDocument doc)
 		{
 			Type wrappedType = wrapper.Wrapped.GetType ();
-			className = ((GLib.GType)wrappedType).ToString ();
+			string className = ((GLib.GType)wrappedType).ToString ();
+			string id = ((Gtk.Widget)wrapper.Wrapped).Name;
 
-			id = ((Gtk.Widget)wrapper.Wrapped).Name;
+			XmlElement  elem = doc.CreateElement ("widget");
+			elem.SetAttribute ("class", className);
+			elem.SetAttribute ("id", id);
 
-			GetProps (wrapper, out props);
+			GetProps (wrapper, elem);
+			return elem;
 		}
 
-		static public void GetProps (ObjectWrapper wrapper, out Hashtable props)
+		static public void GetProps (ObjectWrapper wrapper, XmlElement parent_elem)
 		{
-			props = new Hashtable ();
-
 			foreach (ItemGroup group in Registry.LookupClass (wrapper.Wrapped.GetType ()).ItemGroups) {
 				foreach (ItemDescriptor item in group.Items) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
@@ -398,8 +413,11 @@ namespace Stetic {
 						continue;
 
 					string val = PropToString (wrapper, prop.GladeProperty);
-					if (val != null)
-						props[prop.GladeName] = val;
+					if (val != null) {
+						XmlElement prop_elem = parent_elem.OwnerDocument.CreateElement ("property");
+						prop_elem.InnerText = val;
+						parent_elem.AppendChild (prop_elem);
+					}
 				}
 			}
 		}

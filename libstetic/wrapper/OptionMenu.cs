@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Xml;
 
 // Don't warn that OptionMenu is deprecated. We know that.
 #pragma warning disable 612
@@ -21,36 +22,37 @@ namespace Stetic.Wrapper {
 			menuWrapper.InternalChildId = "menu";
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
+		public override void GladeImport (XmlElement elem)
 		{
-			string history = GladeUtils.ExtractProperty ("history", props);
-			base.GladeImport (className, id, props);
-			stetic.GladeImportComplete += delegate () {
-				Gtk.Widget menu = optionmenu.Menu;
-				optionmenu.Menu = new Gtk.Menu ();
-				optionmenu.Menu = menu;
-				if (history != null)
-					Active = Int32.Parse (history);
-				else
-					Active = 0;
-			};
+			int history = (int)GladeUtils.ExtractProperty (elem, "history", -1);
+			base.GladeImport (elem);
+
+			// Fiddle with things to make the optionmenu resize itself correctly
+			Gtk.Widget menu = optionmenu.Menu;
+			optionmenu.Menu = new Gtk.Menu ();
+			optionmenu.Menu = menu;
+
+			if (history != -1)
+				Active = history;
+			else
+				Active = 0;
 		}
 
 		// Some versions of glade call the menu an internal child, some don't
 
-		public override Widget GladeSetInternalChild (string childId, string className, string id, Hashtable props)
+		public override Widget GladeSetInternalChild (XmlElement child_elem)
 		{
-			if (childId != "menu")
-				return base.GladeSetInternalChild (childId, className, id, props);
-
-			Widget wrapper = Stetic.Wrapper.Widget.Lookup (optionmenu.Menu);
-			GladeUtils.ImportWidget (stetic, wrapper, wrapper.Wrapped, id, props);
-			return wrapper;
+			if (child_elem.GetAttribute ("internal-child") == "menu")
+				return GladeImportChild (child_elem);
+			else
+				return base.GladeSetInternalChild (child_elem);
 		}
 
-		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
+		public override Widget GladeImportChild (XmlElement child_elem)
 		{
-			return GladeSetInternalChild ("menu", className, id, props);
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (optionmenu.Menu);
+			wrapper.GladeImport (child_elem["widget"]);
+			return wrapper;
 		}
 
 		public override IEnumerable GladeChildren {

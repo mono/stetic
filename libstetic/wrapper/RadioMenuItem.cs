@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -18,26 +19,27 @@ namespace Stetic.Wrapper {
 				Group = radio.Name;
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
+		public override void GladeImport (XmlElement elem)
 		{
-			string group = GladeUtils.ExtractProperty ("group", props);
-			string active = GladeUtils.ExtractProperty ("active", props);
-			base.GladeImport (className, id, props);
+			string group = (string)GladeUtils.ExtractProperty (elem, "group", "");
+			bool active = (bool)GladeUtils.ExtractProperty (elem, "active", false);
+			base.GladeImport (elem);
 
-			if (group != null)
+			if (group != "")
 				Group = group;
 			else
 				Group = Wrapped.Name;
-			if (active == "True")
+			if (active)
 				((Gtk.RadioMenuItem)Wrapped).Active = true;
 		}
 
-		public override void GladeExport (out string className, out string id, out Hashtable props)
+		public override XmlElement GladeExport (XmlDocument doc)
 		{
-			base.GladeExport (out className, out id, out props);
+			XmlElement elem = base.GladeExport (doc);
 			string group = GroupManager.GladeGroupName (Wrapped);
-			if (group != id)
-				props["group"] = group;
+			if (group != Wrapped.Name)
+				GladeUtils.SetProperty (elem, "group", group);
+			return elem;
 		}
 
 		public string Group {

@@ -8,10 +8,10 @@
 	    <itemgroup label="Common Widget Properties">
 		<property name="WidthRequest" />
 		<property name="HeightRequest" />
-		<property name="Visible" />
-		<property name="Sensitive" />
+		<property name="Visible" glade-override="true" />
+		<property name="Sensitive" glade-override="true" />
 		<property name="CanDefault" />
-		<property name="HasDefault" />
+		<property name="HasDefault" glade-override="true" />
 		<property name="CanFocus" />
 		<property name="HasFocus" />
 		<property name="Events" />
@@ -20,16 +20,24 @@
 	</itemgroups>
     </object>
 
+    <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container" />
+    <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
+	<internal-properties>
+	    <property name="AutoSize" label="Auto Size"
+		      description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container" />
+	</internal-properties>
+    </object>
+
     <object type="Gtk.Window,gtk-sharp" wrapper="Stetic.Wrapper.Window"
 	    label="Window" icon="window.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Window Properties">
 		<property name="Title" />
 		<property name="Icon" editor="Stetic.Editor.ImageFile" />
-		<property name="Type" />
-		<property name="TypeHint" />
+		<property name="Type" glade-override="true" />
+		<property name="TypeHint" glade-override="true" />
 		<property name="WindowPosition" />
-		<property name="Modal" />
+		<property name="Modal" glade-override="true" />
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup label="Window Size Properties" name="Size">
@@ -166,7 +174,7 @@
 	    <itemgroup label="Box Child Layout">
 		<property name="PackType" />
 		<property name="Position" />
-		<property ref="Gtk.Container.AutoSize" />
+		<property ref="Gtk.Container+ContainerChild.AutoSize" />
 		<property name="Expand">
 		    <disabled-if name="AutoSize" value="true" />
 		</property>
@@ -247,7 +255,7 @@
 		<property name="ResponseId" label="Response Id" glade-name="response_id"
 			  description="The response ID to emit when this button is clicked."
 			  editor="Stetic.Editor.ResponseId">
-		    <visible-if name="HasResponseId" value="true" />
+		    <invisible-if name="HasResponseId" value="false" />
 		</property>
 	    </itemgroup>
 	    <itemgroup label="Extra Button Properties" name="Extra">
@@ -312,7 +320,7 @@
     </object>
 
     <object type="Gtk.MenuItem,gtk-sharp" wrapper="Stetic.Wrapper.MenuItem"
-	    label="Menu Item" icon="menuitem.png" palette-category="internal">
+	    label="Menu Item" icon="menuitem.png">
 	<internal-properties>
 	    <property name="HasSubmenu" />
 	</internal-properties>
@@ -331,7 +339,7 @@
     </object>
 
     <object type="Gtk.CheckMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.MenuItem" 
-	    label="Check Menu Item" icon="checkmenuitem.png" palette-category="internal">
+	    label="Check Menu Item" icon="checkmenuitem.png">
 	<itemgroups>
 	    <itemgroup label="Check Menu Item Properties">
 		<property ref="Gtk.MenuItem.Label" />
@@ -386,14 +394,6 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container">
-	<internal-properties>
-	    <property name="AutoSize" label="Auto Size"
-		      description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container" />
-	</internal-properties>
-    </object>
-    <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
-
     <object type="Gtk.Dialog,gtk-sharp" wrapper="Stetic.Wrapper.Dialog"
 	    label="Dialog Box" icon="dialog.png" palette-category="window">
 	<itemgroups>
@@ -405,7 +405,7 @@
 			  description="Whether or not to display a 'Help' button" />
 		<property name="Icon" />
 		<property name="WindowPosition" />
-		<property name="Modal" />
+		<property name="Modal" glade-override="true" />
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup label="Miscellaneous Dialog Properties" name="Misc">
@@ -590,7 +590,7 @@
     </object>
 
     <object type="Gtk.ImageMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.ImageMenuItem"
-	    label="Image Menu Item" icon="imagemenuitem.png" palette-category="internal">
+	    label="Image Menu Item" icon="imagemenuitem.png">
 	<itemgroups>
 	    <itemgroup label="Image Menu Item Properties">
 		<property name="Image" editor="Stetic.Editor.Image" />
@@ -604,16 +604,13 @@
 
     <object type="Gtk.Label,gtk-sharp" wrapper="Stetic.Wrapper.Label"
 	    label="Label" icon="label.png" palette-category="widget">
-	<internal-properties>
-	    <property name="GladeMnemonicWidget" />
-	</internal-properties>
 	<itemgroups>
 	    <itemgroup label="Label Properties">
 		<property name="LabelProp" />
 		<property name="UseMarkup" />
 		<property name="UseUnderline" />
 		<property name="Wrap" />
-		<property name="MnemonicWidget" />
+		<property name="MnemonicWidget" glade-override="true" />
 		<property name="Justify" />
 		<property name="Selectable" />
 	    </itemgroup>
@@ -629,12 +626,13 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Menu,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
-	    label="Menu" icon="menu.png" palette-category="internal">
+    <object type="Gtk.Menu,gtk-sharp" wrapper="Stetic.Wrapper.Container"
+	    label="Menu" icon="menu.png">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
     </object>
+    <object type="Gtk.Menu+MenuChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
 
     <object type="Gtk.MessageDialog,gtk-sharp" wrapper="Stetic.Wrapper.MessageDialog"
 	    label="Message Dialog" icon="messagedialog.png" palette-category="window">
@@ -651,7 +649,7 @@
 			  description="The buttons to offer" />
 		<property name="Icon" />
 		<property name="WindowPosition" />
-		<property name="Modal" />
+		<property name="Modal" glade-override="true" />
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Dialog.Misc" />
@@ -760,7 +758,7 @@
     </object>
 
     <object type="Gtk.RadioMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.RadioMenuItem"
-	    label="Radio Menu Item" icon="radiomenuitem.png" palette-category="internal">
+	    label="Radio Menu Item" icon="radiomenuitem.png">
 	<itemgroups>
 	    <itemgroup label="Radio Menu Item Properties">
 		<property ref="Gtk.MenuItem.Label" />
@@ -808,7 +806,7 @@
     </object>
 
     <object type="Gtk.SeparatorMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
-	    label="Separator Menu Item" icon="hseparator.png" palette-category="internal">
+	    label="Separator Menu Item" icon="hseparator.png">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
@@ -899,7 +897,7 @@
 		<property name="RightAttach" />
 		<property name="XPadding" />
 		<property name="YPadding" />
-		<property ref="Gtk.Container.AutoSize" />
+		<property ref="Gtk.Container+ContainerChild.AutoSize" />
 		<property name="XExpand" label="Expand Horizontally"
 			  description="Whether or not the table cell should expand horizontally">
 		    <disabled-if name="AutoSize" value="true" />
@@ -1065,7 +1063,7 @@
     </object>
 
     <object type="Gtk.Viewport,gtk-sharp" wrapper="Stetic.Wrapper.Viewport"
-	    label="Viewport" icon="viewport.png" palette-category="internal">
+	    label="Viewport" icon="viewport.png">
 	<itemgroups>
 	    <itemgroup label="Viewport Properties">
 		<property name="ShadowType" />

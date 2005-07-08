@@ -49,7 +49,7 @@ namespace Stetic {
 
 		void AppendProperty (PropertyDescriptor prop, object obj)
 		{
-			PropertyEditor rep = PropertyEditor.MakeEditor (prop, obj);
+			PropertyEditor rep = new PropertyEditor (prop, obj);
 			editors[prop.Name] = rep;
 			if (prop.ParamSpec != null)
 				editors[prop.ParamSpec.Name] = rep;

@@ -3,6 +3,7 @@
 #include <glib-object.h>
 
 GType stetic_param_spec_get_value_type (GParamSpec *pspec);
+gboolean stetic_param_spec_is_unichar (GParamSpec *pspec);
 gboolean stetic_param_spec_get_minimum (GParamSpec *pspec, GValue *value);
 gboolean stetic_param_spec_get_maximum (GParamSpec *pspec, GValue *value);
 gboolean stetic_param_spec_get_default (GParamSpec *pspec, GValue *value);
@@ -11,6 +12,12 @@ GType
 stetic_param_spec_get_value_type (GParamSpec *pspec)
 {
 	return pspec->value_type;
+}
+
+gboolean
+stetic_param_spec_is_unichar (GParamSpec *pspec)
+{
+	return G_IS_PARAM_SPEC_UNICHAR (pspec);
 }
 
 gboolean

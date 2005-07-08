@@ -2,9 +2,10 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Xml;
 
 namespace Stetic.Wrapper {
-	public abstract class Container : Widget {
+	public class Container : Widget {
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -50,35 +51,87 @@ namespace Stetic.Wrapper {
 			freeze = 0;
 		}
 
-		public virtual Widget GladeImportChild (string className, string id,
-							Hashtable props, Hashtable childprops)
+		public override void GladeImport (XmlElement elem)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
+			base.GladeImport (elem);
+
+			foreach (XmlElement child_elem in elem.SelectNodes ("./child")) {
+				try {
+					if (child_elem.HasAttribute ("internal-child"))
+						GladeSetInternalChild (child_elem);
+					else if (child_elem["widget"] == null)
+						AddPlaceholder ();
+					else
+						GladeImportChild (child_elem);
+				} catch (GladeException ge) {
+					Console.Error.WriteLine (ge.Message);
+				}
+			}
+		}
+
+		public virtual Widget GladeImportChild (XmlElement child_elem)
+		{
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, child_elem["widget"]);
+
 			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
 			AutoSize[child] = false;
 			container.Add (child);
 
-			GladeUtils.SetPacking (container, child, childprops);
+			GladeUtils.SetPacking (container, child, child_elem);
 			return (Widget)wrapper;
 		}
 
-		public virtual void GladeExportChild (Widget wrapper, out string className,
-						      out string internalId, out string id,
-						      out Hashtable props,
-						      out Hashtable childprops)
+		public virtual Widget GladeSetInternalChild (XmlElement child_elem)
 		{
-			internalId = null;
-			childprops = null;
-			wrapper.GladeExport (out className, out id, out props);
+			string childId = child_elem.GetAttribute ("internal-child");
+
+			foreach (Gtk.Widget w in container.AllChildren) {
+				Widget wrapper = Lookup (w);
+				if (wrapper != null && wrapper.InternalChildId == childId) {
+					wrapper.GladeImport (child_elem["widget"]);
+					GladeUtils.SetPacking (container, wrapper.Wrapped, child_elem);
+					return (Widget)wrapper;
+				}
+			}
+
+			throw new GladeException ("Unrecognized internal child name", GetType ().Name, false, "internal-child", childId);
+		}
+
+		public override XmlElement GladeExport (XmlDocument doc)
+		{
+			XmlElement elem = base.GladeExport (doc);
+
+			foreach (Gtk.Widget child in GladeChildren) {
+				Widget wrapper = Widget.Lookup (child);
+				if (wrapper == null)
+					continue;
+				XmlElement child_elem = GladeExportChild (wrapper, doc);
+				elem.AppendChild (child_elem);
+			}
+
+			return elem;
+		}
+
+		public virtual XmlElement GladeExportChild (Widget wrapper, XmlDocument doc)
+		{
+			XmlElement child_elem = doc.CreateElement ("child");
+			XmlElement widget_elem = wrapper.GladeExport (doc);
+			child_elem.AppendChild (widget_elem);
 
 			if (wrapper.InternalChildId != null)
-				internalId = wrapper.InternalChildId;
+				child_elem.SetAttribute ("internal-child", wrapper.InternalChildId);
 			else {
 				ObjectWrapper childwrapper = ChildWrapper (wrapper);
-				if (childwrapper != null)
-					GladeUtils.GetProps (childwrapper, out childprops);
+				if (childwrapper != null) {
+					XmlElement packing_elem = doc.CreateElement ("packing");
+					GladeUtils.GetProps (childwrapper, packing_elem);
+					if (packing_elem.HasChildNodes)
+						child_elem.AppendChild (packing_elem);
+				}
 			}
+
+			return child_elem;
 		}
 
 		public virtual Placeholder AddPlaceholder ()
@@ -93,32 +146,10 @@ namespace Stetic.Wrapper {
 			container.Add (child);
 		}
 
-		Widget FindInternalChild (string childId)
-		{
-			foreach (Gtk.Widget w in container.AllChildren) {
-				Widget wrapper = Lookup (w);
-				if (wrapper != null && wrapper.InternalChildId == childId)
-					return wrapper;
-			}
-			return null;
-		}
-
-		public virtual Widget GladeSetInternalChild (string childId, string className, string id, Hashtable props)
-		{
-			Widget wrapper = FindInternalChild (childId);
-			if (wrapper == null)
-				throw new GladeException ("Unrecognized internal child name", className, false, "internal-child", childId);
-
-			GladeUtils.ImportWidget (stetic, wrapper, wrapper.Wrapped, id, props);
-
-			return (Widget) wrapper;
-		}
-
 		public static new Container Lookup (GLib.Object obj)
 		{
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Container;
 		}
-
 
 		public static Container LookupParent (Gtk.Widget widget)
 		{

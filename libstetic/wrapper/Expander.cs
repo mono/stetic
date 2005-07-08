@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -10,27 +11,22 @@ namespace Stetic.Wrapper {
 			return new Gtk.Expander ("");
 		}
 
-		public override Widget GladeImportChild (string className, string id, Hashtable props, Hashtable childprops)
+		public override Widget GladeImportChild (XmlElement child_elem)
 		{
-			if (childprops.Count == 1 && ((string)childprops["type"]) == "label_item") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, className, id, props);
+			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "label_item") {
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, child_elem["widget"]);
 				expander.LabelWidget = (Gtk.Widget)wrapper.Wrapped;
 				return (Widget)wrapper;
 			} else
-				return base.GladeImportChild (className, id, props, childprops);
+				return base.GladeImportChild (child_elem);
 		}
 
-		public override void GladeExportChild (Widget wrapper, out string className,
-						       out string internalId, out string id,
-						       out Hashtable props,
-						       out Hashtable childprops)
+		public override XmlElement GladeExportChild (Widget wrapper, XmlDocument doc)
 		{
-			base.GladeExportChild (wrapper, out className, out internalId,
-					       out id, out props, out childprops);
-			if (wrapper.Wrapped == expander.LabelWidget) {
-				childprops = new Hashtable ();
-				childprops["type"] = "label_item";
-			}
+			XmlElement child_elem = base.GladeExportChild (wrapper, doc);
+			if (wrapper.Wrapped == expander.LabelWidget)
+				GladeUtils.SetChildProperty (child_elem, "type", "label_item");
+			return child_elem;
 		}
 
 		Gtk.Expander expander {

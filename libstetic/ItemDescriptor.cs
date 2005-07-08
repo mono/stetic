@@ -12,8 +12,8 @@ namespace Stetic {
 
 		protected ItemDescriptor (XmlElement elem, ItemGroup group, ClassDescriptor klass)
 		{
-			deps = AddSubprops (elem.GetElementsByTagName ("disabled-if"), group, klass);
-			visdeps = AddSubprops (elem.GetElementsByTagName ("invisible-if"), group, klass);
+			deps = AddSubprops (elem.SelectNodes ("./disabled-if"), group, klass);
+			visdeps = AddSubprops (elem.SelectNodes ("./invisible-if"), group, klass);
 		}
 
 		Hashtable AddSubprops (XmlNodeList nodes, ItemGroup group, ClassDescriptor klass)

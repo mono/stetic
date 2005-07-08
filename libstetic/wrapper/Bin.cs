@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Xml;
 
 namespace Stetic.Wrapper {
 
@@ -12,13 +12,11 @@ namespace Stetic.Wrapper {
 				AddPlaceholder ();
 		}
 
-		protected override void GladeImport (string className, string id, Hashtable props)
+		public override void GladeImport (XmlElement elem)
 		{
-			base.GladeImport (className, id, props);
-			stetic.GladeImportComplete += delegate () {
-				if (bin.Child == null)
-					AddPlaceholder ();
-			};
+			base.GladeImport (elem);
+			if (elem["child"] == null)
+				AddPlaceholder ();
 		}
 
 		Gtk.Bin bin {
