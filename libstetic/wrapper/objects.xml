@@ -100,6 +100,7 @@
 		<property name="AcceptFocus" />
 		<property name="Decorated" />
 		<property name="DestroyWithParent" />
+		<property name="FocusOnMap" />
 		<property name="Gravity" />
 		<property name="Role" />
 		<property name="SkipPagerHint" />
@@ -123,6 +124,9 @@
     <object type="Gtk.Paned,gtk-sharp" wrapper="Stetic.Wrapper.Paned">
 	<itemgroups>
 	    <itemgroup label="Pane Properties">
+		<property name="Position" />
+		<property name="MinPosition" />
+		<property name="MaxPosition" />
 		<property name="BorderWidth" />
 	    </itemgroup>
 	</itemgroups>
@@ -157,6 +161,9 @@
 	    <itemgroup label="Scale Properties">
 		<property name="Adjustment.Lower" />
 		<property name="Adjustment.Upper" />
+		<property name="Adjustment.PageIncrement" />
+		<property name="Adjustment.PageSize" />
+		<property name="Adjustment.StepIncrement" />
 		<property name="Adjustment.Value" />
 		<property name="DrawValue" ignore-default="true" />
 		<property name="Digits">
@@ -166,6 +173,7 @@
 		    <disabled-if name="DrawValue" value="false" />
 		</property>
 		<property name="Inverted" />
+		<property name="UpdatePolicy" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -433,6 +441,7 @@
 		<property name="Color" />
 		<property name="Alpha" min="-1" max="65535" />
 	    </itemgroup>
+	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
@@ -445,11 +454,8 @@
 			  description="The items to display in the Combo Box, one per line"
 			  editor="Stetic.Editor.Text" />
 		<property name="Active" />
-	    </itemgroup>
-	    <itemgroup label="Extra Combo Box Properties" name="Extra">
-		<property name="WrapWidth" />
-		<property name="ColumnSpanColumn" />
-		<property name="RowSpanColumn" />
+		<property name="AddTearoffs" />
+		<property name="FocusOnClick" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -458,8 +464,12 @@
     <object type="Gtk.ComboBoxEntry,gtk-sharp" wrapper="Stetic.Wrapper.ComboBoxEntry" 
 	    label="Combo Box Entry" icon="comboboxentry.png" palette-category="widget">
 	<itemgroups>
-	    <itemgroup ref="Gtk.ComboBox" />
-	    <itemgroup ref="Gtk.ComboBox.Extra" />
+	    <itemgroup label="Combo Box Entry Properties">
+		<property ref="Gtk.ComboBox.Items" />
+		<property name="Active" />
+		<property name="AddTearoffs" />
+		<property name="HasFrame" />
+	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
@@ -489,7 +499,6 @@
 		<property name="SkipTaskbarHint" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Window.Size" />
-	    <itemgroup ref="Gtk.Window.Misc" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
@@ -563,6 +572,7 @@
 		    <disabled-if name="UseFont" value="false" />
 		</property>
 	    </itemgroup>
+	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
@@ -699,6 +709,10 @@
 		<property name="MnemonicWidget" glade-override="true" />
 		<property name="Justify" />
 		<property name="Selectable" />
+		<property name="Ellipsize" />
+		<property name="WidthChars" />
+		<property name="SingleLineMode" />
+		<property name="Angle" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Misc" />
 	    <itemgroup ref="Gtk.Widget" />
@@ -740,7 +754,6 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />
-	    <itemgroup ref="Gtk.Window.Misc" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
@@ -814,6 +827,7 @@
 	    <itemgroup label="Progress Bar Properties">
 		<property name="Orientation" />
 		<property name="Text" />
+		<property name="Fraction" />
 		<property name="PulseStep" />
 	    </itemgroup>
 	</itemgroups>
@@ -1177,6 +1191,8 @@
 		<property name="RulesHint" />
 		<property name="SearchColumn" />
 		<property name="Model" />
+		<property name="HoverSelection" />
+		<property name="HoverExpand" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
