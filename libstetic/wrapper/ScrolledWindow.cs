@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public class ScrolledWindow : Bin {
+	public class ScrolledWindow : Container {
 
 		public override void Wrap (object obj, bool initialized)
 		{

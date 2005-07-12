@@ -1,40 +1,36 @@
 using System;
-using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace Stetic {
 	public class Custom : Gtk.DrawingArea {
-		static Custom ()
+		public Custom () {}
+
+		public Custom (IntPtr raw) : base (raw) {}
+
+		// from glade
+		static private string[] custom_bg_xpm = {
+			"8 8 4 1",
+			" 	c None",
+			".	c #BBBBBB",
+			"+	c #D6D6D6",
+			"@	c #6B5EFF",
+			".+..+...",
+			"+..@@@..",
+			"..@...++",
+			"..@...++",
+			"+.@..+..",
+			".++@@@..",
+			"..++....",
+			"..++...."
+		};
+
+		protected override void OnRealized ()
 		{
-			GLib.GType.Register (GType, typeof (Stetic.Custom));
+			base.OnRealized ();
+
+			Gdk.Pixmap pixmap, mask;
+			pixmap = Gdk.Pixmap.CreateFromXpmD (GdkWindow, out mask, new Gdk.Color (99, 99, 99), custom_bg_xpm);
+			GdkWindow.SetBackPixmap (pixmap, false);
 		}
-
-		public Custom (IntPtr raw) : base(raw) {}
-
-		[DllImport("libsteticglue")]
-		static extern IntPtr custom_new();
-
-		public Custom () : base (IntPtr.Zero)
-		{
-			Raw = custom_new ();
-		}
-
-		~Custom () { Dispose (); }
-
-		[DllImport("libsteticglue")]
-		static extern IntPtr custom_get_type();
-
-		public static new GLib.GType GType { 
-			get {
-				return new GLib.GType (custom_get_type ());
-			}
-		}
-	}
-}
-
-namespace Stetic.Wrapper {
-
-	public class Custom : Widget {
 
 		string creationFunction, string1, string2;
 		int int1, int2;
@@ -45,6 +41,15 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				creationFunction = value;
+			}
+		}
+
+		public string LastModificationTime {
+			get {
+				return null;
+			}
+			set {
+				;
 			}
 		}
 

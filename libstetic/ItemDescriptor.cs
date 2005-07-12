@@ -7,11 +7,13 @@ namespace Stetic {
 	public abstract class ItemDescriptor {
 
 		Hashtable deps, visdeps;
+		bool isInternal;
 
 		protected ItemDescriptor () {}
 
 		protected ItemDescriptor (XmlElement elem, ItemGroup group, ClassDescriptor klass)
 		{
+			isInternal = elem.HasAttribute ("internal");
 			deps = AddSubprops (elem.SelectNodes ("./disabled-if"), group, klass);
 			visdeps = AddSubprops (elem.SelectNodes ("./invisible-if"), group, klass);
 		}
@@ -88,6 +90,12 @@ namespace Stetic {
 				}
 			}
 			return true;
+		}
+
+		public bool IsInternal {
+			get {
+				return isInternal;
+			}
 		}
 	}
 }

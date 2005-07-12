@@ -220,7 +220,7 @@ namespace Stetic {
 				props[prop.GetAttribute ("name")] = prop;
 
 			foreach (ItemGroup group in klass.ItemGroups) {
-				foreach (ItemDescriptor item in group.Items) {
+				foreach (ItemDescriptor item in group) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null)
 						continue;
@@ -387,12 +387,11 @@ namespace Stetic {
 						       XmlDocument doc)
 		{
 			Type wrappedType = wrapper.Wrapped.GetType ();
-			string className = ((GLib.GType)wrappedType).ToString ();
-			string id = ((Gtk.Widget)wrapper.Wrapped).Name;
+			ClassDescriptor klass = Registry.LookupClass (wrappedType);
 
 			XmlElement  elem = doc.CreateElement ("widget");
-			elem.SetAttribute ("class", className);
-			elem.SetAttribute ("id", id);
+			elem.SetAttribute ("class", klass.CName);
+			elem.SetAttribute ("id", ((Gtk.Widget)wrapper.Wrapped).Name);
 
 			GetProps (wrapper, elem);
 			return elem;
@@ -400,8 +399,10 @@ namespace Stetic {
 
 		static public void GetProps (ObjectWrapper wrapper, XmlElement parent_elem)
 		{
-			foreach (ItemGroup group in Registry.LookupClass (wrapper.Wrapped.GetType ()).ItemGroups) {
-				foreach (ItemDescriptor item in group.Items) {
+			ClassDescriptor klass = Registry.LookupClass (wrapper.Wrapped.GetType ());
+
+			foreach (ItemGroup group in klass.ItemGroups) {
+				foreach (ItemDescriptor item in group) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null)
 						continue;

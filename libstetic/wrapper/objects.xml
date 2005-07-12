@@ -2,9 +2,6 @@
 <objects xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
     <object type="Gtk.Widget,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
-	<internal-properties>
-	    <property name="Name" />
-	</internal-properties>
 	<itemgroups>
 	    <itemgroup label="Common Widget Properties">
 		<property name="WidthRequest" />
@@ -17,6 +14,7 @@
 		<property name="HasFocus" />
 		<property name="Events" />
 		<property name="ExtensionEvents" />
+		<property name="Name" internal="true" init-with-name="true" />
 	    </itemgroup>
 	</itemgroups>
 
@@ -71,17 +69,20 @@
 
     <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container" />
     <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
-	<internal-properties>
-	    <property name="AutoSize" label="Auto Size"
-		      description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container" />
-	</internal-properties>
+	<itemgroups>
+	    <itemgroup label="Container Layout">
+		<property name="AutoSize" label="Auto Size"
+			  description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container"
+			  internal="true" />
+	    </itemgroup>
+	</itemgroups>
     </object>
 
     <object type="Gtk.Window,gtk-sharp" wrapper="Stetic.Wrapper.Window"
 	    label="Window" icon="window.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Window Properties">
-		<property name="Title" />
+		<property name="Title" init-with-name="true" />
 		<property name="Icon" editor="Stetic.Editor.ImageFile" />
 		<property name="Type" glade-override="true" />
 		<property name="TypeHint" glade-override="true" />
@@ -110,7 +111,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Misc,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
+    <object type="Gtk.Misc,gtk-sharp">
 	<itemgroups>
 	    <itemgroup label="Miscellaneous Alignment Properties">
 		<property name="Xpad" />
@@ -131,7 +132,7 @@
 	    </itemgroup>
 	</itemgroups>
     </object>
-    <object type="Gtk.Paned+PanedChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
+    <object type="Gtk.Paned+PanedChild,gtk-sharp">
 	<itemgroups>
 	    <itemgroup label="Pane Child Layout">
 		<property name="Resize" />
@@ -179,7 +180,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Alignment,gtk-sharp" wrapper="Stetic.Wrapper.Bin"
+    <object type="Gtk.Alignment,gtk-sharp"
 	    label="Alignment" icon="alignment.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Alignment Properties">
@@ -197,7 +198,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Arrow,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.Arrow,gtk-sharp"
 	    label="Arrow" icon="arrow.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Arrow Properties">
@@ -209,7 +210,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Bin,gtk-sharp" wrapper="Stetic.Wrapper.Bin" />
+    <object type="Gtk.Bin,gtk-sharp" />
 
     <object type="Gtk.Box,gtk-sharp" wrapper="Stetic.Wrapper.Box">
 	<itemgroups>
@@ -244,7 +245,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.ButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.Box">
+    <object type="Gtk.ButtonBox,gtk-sharp">
 	<itemgroups>
 	    <itemgroup label="Button Box Properties">
 		<property name="LayoutStyle" />
@@ -253,7 +254,7 @@
 	    </itemgroup>
 	</itemgroups>
     </object>
-    <object type="Gtk.ButtonBox+ButtonBoxChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
+    <object type="Gtk.ButtonBox+ButtonBoxChild,gtk-sharp">
 	<itemgroups>
 	    <itemgroup label="Button Box Child Layout">
 		<property name="PackType" />
@@ -270,9 +271,6 @@
 
     <object type="Gtk.Button,gtk-sharp" wrapper="Stetic.Wrapper.Button"
 	    label="Button" icon="button.png" palette-category="widget">
-	<internal-properties>
-	    <property name="HasResponseId" />
-	</internal-properties>
 	<itemgroups>
 	    <itemgroup label="Button Properties">
 		<property name="Type" label="Button Type"
@@ -309,6 +307,7 @@
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
+		<property name="HasResponseId" internal="true" />
 		<property name="ResponseId" label="Response Id" glade-name="response_id"
 			  description="The response ID to emit when this button is clicked."
 			  editor="Stetic.Editor.ResponseId">
@@ -326,13 +325,11 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Calendar,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.Calendar,gtk-sharp"
 	    label="Calendar" icon="calendar.png" palette-category="widget">
-	<internal-properties>
-	    <property name="DisplayOptions" glade-name="display_options" />
-	</internal-properties>
 	<itemgroups>
 	    <itemgroup label="Calendar Properties">
+		<property name="DisplayOptions" glade-name="display_options" internal="true" />
 		<property name="ShowHeading" />
 		<property name="ShowDayNames" />
 		<property name="ShowWeekNumbers" />
@@ -345,27 +342,21 @@
     <object type="Gtk.CheckButton,gtk-sharp" wrapper="Stetic.Wrapper.CheckButton"
 	    label="Check Box" icon="checkbutton.png" palette-category="widget"
 	    hexpandable="true">
-	<internal-properties>
-	    <property name="HasLabel" />
-	</internal-properties>
-	<commands>
-	    <command name="RemoveLabel" label="Remove Label"
-		     description="Remove the button's label">
-		<disabled-if name="HasLabel" value="false" />
-	    </command>
-	    <command name="RestoreLabel" label="Restore Label"
-		     description="Restore the button's label">
-		<disabled-if name="HasLabel" value="true" />
-	    </command>
-	</commands>
 	<itemgroups>
 	    <itemgroup label="Check Box Properties">
-		<property name="Label" initial="Name" />
+		<property name="Label" init-with-name="true" />
 		<property name="Active" />
 		<property name="Inconsistent" />
 		<property name="DrawIndicator" />
-		<command ref="RemoveLabel" />
-		<command ref="RestoreLabel" />
+		<property name="HasLabel" internal="true" />
+		<command name="RemoveLabel" label="Remove Label"
+			 description="Remove the button's label">
+		    <disabled-if name="HasLabel" value="false" />
+		</command>
+		<command name="RestoreLabel" label="Restore Label"
+			 description="Restore the button's label">
+		    <disabled-if name="HasLabel" value="true" />
+		</command>
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
@@ -378,15 +369,13 @@
 
     <object type="Gtk.MenuItem,gtk-sharp" wrapper="Stetic.Wrapper.MenuItem"
 	    label="Menu Item" icon="menuitem.png">
-	<internal-properties>
-	    <property name="HasSubmenu" />
-	</internal-properties>
 	<itemgroups>
 	    <itemgroup label="Menu Item Properties">
 		<property name="Label" glade-name="label" label="Label"
 			  description="The text of the menu item" />
 		<property name="UseUnderline" glade-name="use_underline" label="Use Underline"
 			  description="If set, an underline in the text indicates the next character should be used for the mnemonic accelerator key" />
+		<property name="HasSubmenu" internal="true" />
 		<property name="Accelerator" editor="Stetic.Editor.Accelerator">
 		    <disabled-if name="HasSubmenu" value="true" />
 		</property>
@@ -416,7 +405,7 @@
 	</glade-transform>
     </object>
 
-    <object type="Gtk.CheckMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.MenuItem" 
+    <object type="Gtk.CheckMenuItem,gtk-sharp"
 	    label="Check Menu Item" icon="checkmenuitem.png">
 	<itemgroups>
 	    <itemgroup label="Check Menu Item Properties">
@@ -432,13 +421,11 @@
 
     <object type="Gtk.ColorButton,gtk-sharp" wrapper="Stetic.Wrapper.ColorButton"
 	    label="Color Button" icon="colorbutton.png" palette-category="widget">
-	<internal-properties>
-	    <property name="UseAlpha" />
-	</internal-properties>
 	<itemgroups>
 	    <itemgroup label="Color Button Properties">
 		<property name="Title" />
 		<property name="Color" />
+		<property name="UseAlpha" internal="true" />
 		<property name="Alpha" min="-1" max="65535" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
@@ -483,7 +470,7 @@
 			  description="The buttons to display" />
 		<property name="HelpButton" label="Help Button"
 			  description="Whether or not to display a 'Help' button" />
-		<property name="Icon" />
+		<property name="Icon" editor="Stetic.Editor.ImageFile" />
 		<property name="WindowPosition" />
 		<property name="Modal" glade-override="true" />
 		<property name="BorderWidth" />
@@ -503,7 +490,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.DrawingArea,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.DrawingArea,gtk-sharp"
 	    label="Drawing Area" icon="drawingarea.png" palette-category="widget"
 	    hexpandable="true" vexpandable="true">
 	<itemgroups>
@@ -511,7 +498,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Entry,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.Entry,gtk-sharp"
 	    label="Entry" icon="entry.png" palette-category="widget"
 	    hexpandable="true">
 	<itemgroups>
@@ -532,7 +519,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.EventBox,gtk-sharp" wrapper="Stetic.Wrapper.Bin"
+    <object type="Gtk.EventBox,gtk-sharp"
 	    label="Event Box" icon="eventbox.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Event Box Properties">
@@ -549,7 +536,7 @@
 	<itemgroups>
 	    <itemgroup label="Expander Properties">
 		<property name="Expanded" />
-		<property name="Label" initial="Name"/>
+		<property name="Label" init-with-name="true"/>
 		<property name="UseMarkup" />
 		<property name="UseUnderline" />
 		<property name="Spacing" />
@@ -592,7 +579,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.HBox,gtk-sharp" wrapper="Stetic.Wrapper.Box"
+    <object type="Gtk.HBox,gtk-sharp"
 	    label="HBox" icon="hbox.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Box" />
@@ -601,7 +588,7 @@
 	<contextmenu ref="Gtk.Box" />
     </object>
 
-    <object type="Gtk.HButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.Box"
+    <object type="Gtk.HButtonBox,gtk-sharp"
 	    label="HButtonBox" icon="hbuttonbox.png" palette-category="container"
 	    hexpandable="true">
 	<itemgroups>
@@ -627,7 +614,7 @@
 	</glade-transform>
     </object>
 
-    <object type="Gtk.HPaned,gtk-sharp" wrapper="Stetic.Wrapper.Paned"
+    <object type="Gtk.HPaned,gtk-sharp"
 	    label="HPaned" icon="hpaned.png" palette-category="container"
 	    hexpandable="true">
 	<itemgroups>
@@ -654,7 +641,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.HSeparator,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.HSeparator,gtk-sharp"
 	    label="Horizontal Separator" icon="hseparator.png" palette-category="container"
 	    hexpandable="true">
 	<itemgroups>
@@ -702,7 +689,7 @@
 	    label="Label" icon="label.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Label Properties">
-		<property name="LabelProp" />
+		<property name="LabelProp" init-with-name="true" />
 		<property name="UseMarkup" />
 		<property name="UseUnderline" />
 		<property name="Wrap" />
@@ -719,22 +706,22 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.MenuBar,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.MenuBar,gtk-sharp"
 	    label="Menu Bar" icon="menubar.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Menu,gtk-sharp" wrapper="Stetic.Wrapper.Container"
+    <object type="Gtk.Menu,gtk-sharp"
 	    label="Menu" icon="menu.png">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
     </object>
-    <object type="Gtk.Menu+MenuChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
+    <object type="Gtk.Menu+MenuChild,gtk-sharp" />
 
-    <object type="Gtk.MessageDialog,gtk-sharp" wrapper="Stetic.Wrapper.MessageDialog"
+    <object type="Stetic.MessageDialog" cname="GtkMessageDialog" wrapper="Stetic.Wrapper.Window"
 	    label="Message Dialog" icon="messagedialog.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Message Dialog Properties">
@@ -747,7 +734,7 @@
 			  description="The secondary message text" />
 		<property name="Buttons" label="Buttons"
 			  description="The buttons to offer" />
-		<property name="Icon" />
+		<property name="Icon" editor="Stetic.Editor.ImageFile" />
 		<property name="WindowPosition" />
 		<property name="Modal" glade-override="true" />
 		<property name="BorderWidth" />
@@ -797,7 +784,7 @@
 		     description="Insert a blank page after this one" />
 	</contextmenu>
     </object>
-    <object type="Gtk.Notebook+NotebookChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
+    <object type="Gtk.Notebook+NotebookChild,gtk-sharp">
 	<itemgroups>
 	    <itemgroup label="Notebook Child Layout">
 		<property name="Position" />
@@ -820,7 +807,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.ProgressBar,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.ProgressBar,gtk-sharp"
 	    label="Progress Bar" icon="progressbar.png" palette-category="widget"
 	    hexpandable="true">
 	<itemgroups>
@@ -838,7 +825,7 @@
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup label="Radio Button Properties">
-		<property name="Label" />
+		<property name="Label" init-with-name="true" />
 		<property name="Group" label="Group"
 			  description="The name of the radio button group that this button belongs to"
 			  editor="Stetic.Editor.GroupPicker" />
@@ -905,14 +892,14 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.SeparatorMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.SeparatorMenuItem,gtk-sharp"
 	    label="Separator Menu Item" icon="hseparator.png">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
     </object>
 
-    <object type="Gtk.SeparatorToolItem,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.SeparatorToolItem,gtk-sharp"
 	    label="Toolbar Separator" icon="vseparator.png" palette-category="toolbaritem">
 	<itemgroups>
 	    <itemgroup label="Toolbar Separator Properties">
@@ -945,7 +932,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Statusbar,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.Statusbar,gtk-sharp"
 	    label="Statusbar" icon="statusbar.png" palette-category="widget"
 	    hexpandable="true">
 	<itemgroups>
@@ -1038,10 +1025,6 @@
 	</glade-transform>
     </object>
     <object type="Gtk.Table+TableChild,gtk-sharp" wrapper="Stetic.Wrapper.Table+TableChild">
-	<internal-properties>
-	    <property name="XOptions" />
-	    <property name="YOptions" />
-	</internal-properties>
 	<itemgroups>
 	    <itemgroup label="Table Child Layout">
 		<property name="TopAttach" />
@@ -1051,6 +1034,8 @@
 		<property name="XPadding" />
 		<property name="YPadding" />
 		<property ref="Gtk.Container+ContainerChild.AutoSize" />
+		<property name="XOptions" internal="true" />
+		<property name="YOptions" internal="true" />
 		<property name="XExpand" label="Expand Horizontally"
 			  description="Whether or not the table cell should expand horizontally">
 		    <disabled-if name="AutoSize" value="true" />
@@ -1107,7 +1092,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.ToggleButton,gtk-sharp" wrapper="Stetic.Wrapper.Button"
+    <object type="Gtk.ToggleButton,gtk-sharp"
 	    label="Toggle Button" icon="togglebutton.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Toggle Button Properties">
@@ -1151,13 +1136,11 @@
 	</itemgroups>
     </object>
     <object type="Gtk.Toolbar+ToolbarChild,gtk-sharp" wrapper="Stetic.Wrapper.Toolbar+ToolbarChild">
-	<internal-properties>
-	    <property name="ToolItem" />
-	</internal-properties>
 	<itemgroups>
 	    <itemgroup label="Tool Bar Child Properties">
 		<property name="Homogeneous" />
 		<property name="Expand" />
+		<property name="ToolItem" internal="true" />
 		<property name="ToolItem.IsImportant" />
 		<property name="ToolItem.VisibleHorizontal" />
 		<property name="ToolItem.VisibleVertical" />
@@ -1179,7 +1162,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.TreeView,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.TreeView,gtk-sharp"
 	    label="Tree View" icon="treeview.png" palette-category="widget"
 	    hexpandable="true" vexpandable="true">
 	<itemgroups>
@@ -1198,7 +1181,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.VBox,gtk-sharp" wrapper="Stetic.Wrapper.Box"
+    <object type="Gtk.VBox,gtk-sharp"
 	    label="VBox" icon="vbox.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Box" />
@@ -1207,7 +1190,7 @@
 	<contextmenu ref="Gtk.Box" />
     </object>
 
-    <object type="Gtk.VButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.Box"
+    <object type="Gtk.VButtonBox,gtk-sharp"
 	    label="VButtonBox" icon="vbuttonbox.png" palette-category="container"
 	    vexpandable="true">
 	<itemgroups>
@@ -1227,7 +1210,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.VPaned,gtk-sharp" wrapper="Stetic.Wrapper.Paned"
+    <object type="Gtk.VPaned,gtk-sharp"
 	    label="VPaned" icon="vpaned.png" palette-category="container"
 	    vexpandable="true">
 	<itemgroups>
@@ -1254,7 +1237,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.VSeparator,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.VSeparator,gtk-sharp"
 	    label="Vertical Separator" icon="vseparator.png" palette-category="container"
 	    vexpandable="true">
 	<itemgroups>
@@ -1262,11 +1245,12 @@
 	</itemgroups>
     </object>
 
-    <object type="Stetic.Custom" wrapper="Stetic.Wrapper.Custom"
+    <object type="Stetic.Custom" cname="Custom"
 	    label="Custom Widget" icon="custom.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Custom Widget Properties">
 		<property name="CreationFunction" glade-name="creation_function" />
+		<property name="LastModificationTime" glade-name="last_modification_time" internal="true" />
 		<property name="String1" glade-name="string1" />
 		<property name="String2" glade-name="string2" />
 		<property name="Int1" glade-name="int1" />

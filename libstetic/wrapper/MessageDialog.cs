@@ -1,60 +1,50 @@
 using System;
 
-namespace Stetic.Wrapper {
+namespace Stetic {
 
-	public class MessageDialog : Dialog {
+	public class MessageDialog : Gtk.Dialog {
+
+		public MessageDialog ()
+		{
+			Resizable = false;
+			HasSeparator = false;
+			BorderWidth = 12;
+
+			label = new Gtk.Label ();
+			label.LineWrap = true;
+			label.Selectable = true;
+			label.UseMarkup = true;
+			label.SetAlignment (0.0f, 0.0f);
+
+			secondaryLabel = new Gtk.Label ();
+			secondaryLabel.LineWrap = true;
+			secondaryLabel.Selectable = true;
+			secondaryLabel.UseMarkup = true;
+			secondaryLabel.SetAlignment (0.0f, 0.0f);
+
+			icon = new Gtk.Image (Gtk.Stock.DialogInfo, Gtk.IconSize.Dialog);
+			icon.SetAlignment (0.5f, 0.0f);
+
+			Gtk.StockItem item = Gtk.Stock.Lookup (icon.Stock);
+			Title = item.Label;
+
+			Gtk.HBox hbox = new Gtk.HBox (false, 12);
+			Gtk.VBox vbox = new Gtk.VBox (false, 12);
+
+			vbox.PackStart (label, false, false, 0);
+			vbox.PackStart (secondaryLabel, true, true, 0);
+
+			hbox.PackStart (icon, false, false, 0);
+			hbox.PackStart (vbox, true, true, 0);
+
+			VBox.PackStart (hbox, false, false, 0);
+			hbox.ShowAll ();
+
+			Buttons = Gtk.ButtonsType.OkCancel;
+		}
 
 		Gtk.Label label, secondaryLabel;
 		Gtk.Image icon;
-
-		public static new Gtk.Dialog CreateInstance ()
-		{
-			return new Gtk.Dialog ();
-		}
-
-		public override void Wrap (object obj, bool initialized)
-		{
-			base.Wrap (obj, initialized);
-			if (!initialized) {
-				dialog.Resizable = false;
-				dialog.BorderWidth = 12;
-
-				label = new Gtk.Label ();
-				label.LineWrap = true;
-				label.Selectable = true;
-				label.UseMarkup = true;
-				label.SetAlignment (0.0f, 0.0f);
-
-				secondaryLabel = new Gtk.Label ();
-				secondaryLabel.LineWrap = true;
-				secondaryLabel.Selectable = true;
-				secondaryLabel.UseMarkup = true;
-				secondaryLabel.SetAlignment (0.0f, 0.0f);
-
-				icon = new Gtk.Image (Gtk.Stock.DialogInfo, Gtk.IconSize.Dialog);
-				icon.SetAlignment (0.5f, 0.0f);
-
-				Gtk.HBox hbox = new Gtk.HBox (false, 12);
-				Gtk.VBox vbox = new Gtk.VBox (false, 12);
-
-				vbox.PackStart (label, false, false, 0);
-				vbox.PackStart (secondaryLabel, true, true, 0);
-
-				hbox.PackStart (icon, false, false, 0);
-				hbox.PackStart (vbox, true, true, 0);
-
-				dialog.VBox.PackStart (hbox, false, false, 0);
-				hbox.ShowAll ();
-
-				Buttons = Gtk.ButtonsType.OkCancel;
-			}
-		}
-
-		private Gtk.Dialog dialog {
-			get {
-				return (Gtk.Dialog)Wrapped;
-			}
-		}
 
 		public Gtk.MessageType MessageType {
 			get {
@@ -69,7 +59,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				Gtk.StockItem item = Gtk.Stock.Lookup (icon.Stock);
-				bool setTitle = (dialog.Title == "") || (dialog.Title == item.Label);
+				bool setTitle = (Title == "") || (Title == item.Label);
 
 				if (value == Gtk.MessageType.Info)
 					icon.Stock = Gtk.Stock.DialogInfo;
@@ -82,7 +72,7 @@ namespace Stetic.Wrapper {
 
 				if (setTitle) {
 					item = Gtk.Stock.Lookup (icon.Stock);
-					dialog.Title = item.Label;
+					Title = item.Label;
 				}
 			}
 		}
@@ -113,9 +103,9 @@ namespace Stetic.Wrapper {
 				return buttons;
 			}
 			set {
-				Gtk.Widget[] oldButtons = dialog.ActionArea.Children;
+				Gtk.Widget[] oldButtons = ActionArea.Children;
 				foreach (Gtk.Widget w in oldButtons)
-					dialog.ActionArea.Remove (w);
+					ActionArea.Remove (w);
 
 				buttons = value;
 				switch (buttons) {
@@ -124,25 +114,25 @@ namespace Stetic.Wrapper {
 					break;
 
 				case Gtk.ButtonsType.Ok:
-					dialog.AddButton (Gtk.Stock.Ok, Gtk.ResponseType.Ok);
+					AddButton (Gtk.Stock.Ok, Gtk.ResponseType.Ok);
 					break;
 
 				case Gtk.ButtonsType.Close:
-					dialog.AddButton (Gtk.Stock.Close, Gtk.ResponseType.Close);
+					AddButton (Gtk.Stock.Close, Gtk.ResponseType.Close);
 					break;
 
 				case Gtk.ButtonsType.Cancel:
-					dialog.AddButton (Gtk.Stock.Cancel, Gtk.ResponseType.Cancel);
+					AddButton (Gtk.Stock.Cancel, Gtk.ResponseType.Cancel);
 					break;
 
 				case Gtk.ButtonsType.YesNo:
-					dialog.AddButton (Gtk.Stock.No, Gtk.ResponseType.No);
-					dialog.AddButton (Gtk.Stock.Yes, Gtk.ResponseType.Yes);
+					AddButton (Gtk.Stock.No, Gtk.ResponseType.No);
+					AddButton (Gtk.Stock.Yes, Gtk.ResponseType.Yes);
 					break;
 
 				case Gtk.ButtonsType.OkCancel:
-					dialog.AddButton (Gtk.Stock.Cancel, Gtk.ResponseType.Cancel);
-					dialog.AddButton (Gtk.Stock.Ok, Gtk.ResponseType.Ok);
+					AddButton (Gtk.Stock.Cancel, Gtk.ResponseType.Cancel);
+					AddButton (Gtk.Stock.Ok, Gtk.ResponseType.Ok);
 					break;
 				}
 			}

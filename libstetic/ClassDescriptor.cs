@@ -10,24 +10,40 @@ namespace Stetic {
 		Type wrapped, wrapper;
 		GLib.GType gtype;
 
-		MethodInfo ctor_minfo;
+		MethodInfo ctorMethodInfo;
 		ConstructorInfo cinfo;
-		bool use_gtype_ctor;
+		bool useGTypeCtor;
 
-		string label, category;
+		string label, category, cname;
 		Gdk.Pixbuf icon;
 		bool deprecated, hexpandable, vexpandable;
 
-		ItemGroup internal_props = ItemGroup.Empty;
-		ItemGroup commands = ItemGroup.Empty;
-		ItemGroup contextMenu = ItemGroup.Empty;
 		ArrayList groups = new ArrayList ();
+		int importantGroups;
+		ItemGroup contextMenu = ItemGroup.Empty;
 
 		public ClassDescriptor (Assembly assembly, XmlElement elem)
 		{
 			wrapped = Type.GetType (elem.GetAttribute ("type"), true);
-			wrapper = Type.GetType (elem.GetAttribute ("wrapper"), true);
+			if (elem.HasAttribute ("wrapper"))
+			    wrapper = Type.GetType (elem.GetAttribute ("wrapper"), true);
+			else {
+				for (Type type = wrapped.BaseType; type != null; type = type.BaseType) {
+					ClassDescriptor parent = Registry.LookupClass (type);
+					if (parent != null) {
+						wrapper = parent.WrapperType;
+						break;
+					}
+				}
+				if (wrapper == null)
+					throw new ArgumentException ("No wrapper type for class {0}", wrapped.FullName);
+			}
+
 			gtype = (GLib.GType)wrapped;
+			if (elem.HasAttribute ("cname"))
+				cname = elem.GetAttribute ("cname");
+			else
+				cname = gtype.ToString ();
 
 			label = elem.GetAttribute ("label");
 			category = elem.GetAttribute ("palette-category");
@@ -46,42 +62,40 @@ namespace Stetic {
 			if (elem.HasAttribute ("vexpandable"))
 				vexpandable = true;
 
-			ctor_minfo = wrapper.GetMethod ("CreateInstance",
-							BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
-							null, new Type[0], null);
-			if (ctor_minfo == null) {
+			ctorMethodInfo = wrapper.GetMethod ("CreateInstance",
+							    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
+							    null, new Type[0], null);
+			if (ctorMethodInfo == null) {
 				cinfo = wrapped.GetConstructor (new Type[0]);
 				if (cinfo == null) {
-					use_gtype_ctor = true;
+					useGTypeCtor = true;
 					cinfo = wrapped.GetConstructor (new Type[] { typeof (IntPtr) });
 				}
 			}
 
-			XmlElement internal_elem = elem["internal-properties"];
-			if (internal_elem != null)
-				internal_props = new ItemGroup (internal_elem, this);
-
-			XmlElement commands_elem = elem["commands"];
-			if (commands_elem != null)
-				commands = new ItemGroup (commands_elem, this);
-
-			XmlElement groups_elem = elem["itemgroups"];
-			if (groups_elem != null) {
-				foreach (XmlElement group_elem in groups_elem.SelectNodes ("./itemgroup")) {
+			XmlElement groupsElem = elem["itemgroups"];
+			if (groupsElem != null) {
+				foreach (XmlElement groupElem in groupsElem.SelectNodes ("itemgroup")) {
 					ItemGroup itemgroup;
 
-					if (group_elem.HasAttribute ("ref")) {
-						string refname = group_elem.GetAttribute ("ref");
+					if (groupElem.HasAttribute ("ref")) {
+						string refname = groupElem.GetAttribute ("ref");
 						itemgroup = Registry.LookupItemGroup (refname);
 					} else
-						itemgroup = new ItemGroup (group_elem, this);
+						itemgroup = new ItemGroup (groupElem, this);
 					groups.Add (itemgroup);
+
+					if (groupElem.HasAttribute ("important")) {
+						if (groupElem.GetAttribute ("important") == "true")
+							importantGroups++;
+					} else if (groups.Count == 1)
+						importantGroups++;
 				}
 			}
 
-			XmlElement context_elem = elem["contextmenu"];
-			if (context_elem != null)
-				contextMenu = new ItemGroup (context_elem, this);
+			XmlElement contextElem = elem["contextmenu"];
+			if (contextElem != null)
+				contextMenu = new ItemGroup (contextElem, this);
 			else
 				contextMenu = ItemGroup.Empty;
 		}
@@ -106,7 +120,7 @@ namespace Stetic {
 
 		public string CName {
 			get {
-				return gtype.ToString ();
+				return cname;
 			}
 		}
 
@@ -149,17 +163,28 @@ namespace Stetic {
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_object_new (IntPtr gtype, IntPtr dummy);
 
+		int counter;
+
 		public object NewInstance (IStetic stetic)
 		{
 			object inst;
 
-			if (ctor_minfo != null)
-				inst = ctor_minfo.Invoke (null, new object[0]);
-			else if (!use_gtype_ctor)
+			if (ctorMethodInfo != null)
+				inst = ctorMethodInfo.Invoke (null, new object[0]);
+			else if (!useGTypeCtor)
 				inst = cinfo.Invoke (null, new object[0]);
 			else {
 				IntPtr raw = g_object_new (gtype.Val, IntPtr.Zero);
 				inst = cinfo.Invoke (new object[] { raw });
+			}
+
+			string name = wrapped.Name.ToLower () + (++counter).ToString ();
+			foreach (ItemGroup group in groups) {
+				foreach (ItemDescriptor item in group) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop != null && prop.InitWithName)
+						prop.SetValue (inst, name);
+				}
 			}
 
 			ObjectWrapper.Create (stetic, inst, false);
@@ -168,18 +193,9 @@ namespace Stetic {
 
 		public ItemDescriptor this[string name] {
 			get {
-				ItemDescriptor item;
-
-				item = internal_props[name];
-				if (item != null)
-					return item;
-				item = commands[name];
-				if (item != null)
-					return item;
-
 				if (groups != null) {
 					foreach (ItemGroup group in groups) {
-						item = group[name];
+						ItemDescriptor item = group[name];
 						if (item != null)
 							return item;
 					}
@@ -192,6 +208,12 @@ namespace Stetic {
 		public ArrayList ItemGroups {
 			get {
 				return groups;
+			}
+		}
+
+		public int ImportantGroups {
+			get {
+				return importantGroups;
 			}
 		}
 

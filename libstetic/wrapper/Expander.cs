@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace Stetic.Wrapper {
 
-	public class Expander : Bin {
+	public class Expander : Container {
 
 		public static new Gtk.Expander CreateInstance ()
 		{

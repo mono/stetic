@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace Stetic.Wrapper {
 
-	public class Frame : Bin {
+	public class Frame : Container {
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -15,7 +15,7 @@ namespace Stetic.Wrapper {
 				frame.Shadow = Gtk.ShadowType.None;
 				Gtk.Alignment align = new Gtk.Alignment (0, 0, 1, 1);
 				align.LeftPadding = 12;
-				Bin align_wrapper = (Bin)ObjectWrapper.Create (stetic, align);
+				Container align_wrapper = (Container)ObjectWrapper.Create (stetic, align);
 				align_wrapper.AddPlaceholder ();
 				ReplaceChild (frame.Child, (Gtk.Widget)align_wrapper.Wrapped);
 			}

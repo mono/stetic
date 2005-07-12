@@ -10,6 +10,10 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
+
+			if (!initialized && container.Children.Length == 0)
+				AddPlaceholder ();
+
 			container.Removed += ChildRemoved;
 			container.SizeAllocated += SizeAllocated;
 

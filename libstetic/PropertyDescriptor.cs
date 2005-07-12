@@ -8,7 +8,7 @@ namespace Stetic {
 	public class PropertyDescriptor : ItemDescriptor {
 
 		PropertyInfo memberInfo, propertyInfo;
-		bool isWrapperProperty, hasDefault, gladeOverride;
+		bool isWrapperProperty, hasDefault, gladeOverride, initWithName;
 		ParamSpec pspec;
 		Type editorType;
 		string label, description, gladeName;
@@ -75,6 +75,9 @@ namespace Stetic {
 
 			if (elem.HasAttribute ("glade-name"))
 				gladeName = elem.GetAttribute ("glade-name");
+
+			if (elem.HasAttribute ("init-with-name"))
+				initWithName = true;
 		}
 
 		PropertyDescriptor (Type objectType, string propertyName)
@@ -253,6 +256,12 @@ namespace Stetic {
 					return pspec.Name.Replace ('-', '_');
 				else
 					return null;
+			}
+		}
+
+		public bool InitWithName {
+			get {
+				return initWithName;
 			}
 		}
 	}

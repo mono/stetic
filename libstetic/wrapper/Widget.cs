@@ -6,22 +6,12 @@ namespace Stetic.Wrapper {
 
 	public class Widget : Object {
 
-		static Hashtable counters = new Hashtable ();
-
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 
 			if (!(Wrapped is Gtk.Window))
 				Wrapped.ShowAll ();
-
-			Type type = GetType ();
-			if (!counters.Contains (type))
-				counters[type] = 1;
-
-			if (!initialized)
-				Wrapped.Name = type.Name.ToLower () + ((int)counters[type]).ToString ();
-			counters[type] = (int)counters[type] + 1;
 
 			Wrapped.PopupMenu += PopupMenu;
 			InterceptClicks (Wrapped);

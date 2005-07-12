@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public class Viewport : Bin {
+	public class Viewport : Container {
 
 		public Viewport ()
 		{

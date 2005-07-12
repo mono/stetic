@@ -52,7 +52,7 @@ namespace Stetic {
 				if (prop.PropertyType.IsEnum) {
 					editorType = typeof (Stetic.Editor.Enumeration);
 					min = max = null;
-				} else if (prop.PropertyType == typeof (int) && ((int)min == -1)) {
+				} else if (prop.PropertyType == typeof (int) && min != null && ((int)min == -1)) {
 					editorType = typeof (Stetic.Editor.OptIntRange);
 					min = 0;
 				} else {

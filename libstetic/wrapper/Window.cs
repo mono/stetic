@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public class Window : Bin {
+	public class Window : Container {
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -14,8 +14,6 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 
 			if (!initialized) {
-				window.Title = window.Name;
-
 				if (window.Child is Placeholder)
 					window.Child.SetSizeRequest (200, 200);
 			}

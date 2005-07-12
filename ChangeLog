@@ -1,3 +1,86 @@
+2005-07-12  Dan Winship  <danw@novell.com>
+
+	* libstetic/ClassDescriptor.cs: fix some names with underscores to
+	use camelCase instead.
+	(ClassDescriptor): If a class has no wrapper typed specified, use
+	its parent's wrapper type. Allow a "cname" attribute, to override
+	the CName property, so we can use a different class at design time
+	than we do at runtime (eg, for MessageDialog). Remove the
+	never-necessary "commands" node and no-longer-necessary
+	"internal-properties" node. Count the number of "important"
+	itemgroups.
+	(NewInstance): move the widget-name-generation code here from
+	Widget, and apply it to every property on the object with the
+	init-with-name attribute.
+	(ImportantGroups): return the number of "important" itemgroups
+	
+	* libstetic/GladeUtils.cs (ExtractWrapperProperties, GetProps):
+	update for ItemGroup being enumerable.
+	(ExportWidget): use the ClassDescriptor's CName, not the wrapped
+	type's name.
+
+	* libstetic/ItemDescriptor.cs (ItemDescriptor, IsInternal): note
+	when properties are internal.
+
+	* libstetic/ItemGroup.cs: make this IEnumerable, clean up a bit
+
+	* libstetic/PropertyDescriptor.cs (PropertyDescriptor,
+	InitWithName): note when properties have the init-with-name
+	attribute set.
+
+	* libstetic/wrapper/objects.xml: Move all internal-properties
+	properties to internal="true" properties in itemgroups. Set
+	init-with-name where appropriate. Remove now-redundant
+	wrapper="..." attributes. Remove <commands> node from Gtk.Label.
+	Fix Custom and GtkMessageDialog with cname attributes.
+
+	* libstetic/wrapper/Bin.cs: gone; Container can handle all of
+	this now.
+
+	* libstetic/wrapper/Expander.cs: 
+	* libstetic/wrapper/Frame.cs: 
+	* libstetic/wrapper/ScrolledWindow.cs: 
+	* libstetic/wrapper/Viewport.cs: inherit from Container now, since
+	Bin is gone
+
+	* libstetic/wrapper/CheckButton.cs (Wrap): Remove Label setting,
+	which now happens via init-with-name.
+
+	* libstetic/wrapper/Container.cs (Wrap): when initializing a
+	container, if it has no children, add a placeholder.
+
+	* libstetic/wrapper/Custom.cs: Remove references to C glue since
+	we can now do this entirely in C# via the "cname" property. Move
+	all of the properties into Stetic.Custom and remove
+	Stetic.Wrapper.Custom.
+
+	* libstetic/wrapper/Label.cs (Wrap): remove; LabelProp gets
+	initialized via init-with-name now
+
+	* libstetic/wrapper/MessageDialog.cs: create a new class
+	Stetic.MessageDialog that subclasses Gtk.Dialog (and update the
+	objects.xml entry to use that). The old solution of just creating
+	a special Gtk.Dialog in CreateInstance() doesn't work any more.
+
+	* libstetic/wrapper/RadioButton.cs (Wrap): remove the Label
+	setting, which now happens via init-with-name
+
+	* libstetic/wrapper/Widget.cs (Wrap): remove the Name setting,
+	which now happens in ClassDescriptor.
+
+	* libstetic/wrapper/Window.cs: inherit from Container, since Bin
+	is now gone, and remove Title setting, which now happens via
+	init-with-name
+	
+	* stetic/PropertyEditor.cs: fix a bug in int properties with
+	neither a min nor a max specified.
+
+	* stetic/PropertyGrid.cs (AppendItemGroups): use
+	ClassDescriptor.ImportantGroups rather than assuming the first
+	ItemGroup should be expanded and the later ones shouldn't.
+
+	* glue/custom.c: no longer needed
+
 2005-07-11  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/objects.xml: add some missing properties

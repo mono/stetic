@@ -13,10 +13,9 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 
 			Gtk.RadioButton radiobutton = (Gtk.RadioButton)Wrapped;
-			if (!initialized) {
-				radiobutton.Label = radiobutton.Name;
+			if (!initialized)
 				Group = GroupManager.LastGroup;
-			} else if (radiobutton.Group == null)
+			else if (radiobutton.Group == null)
 				Group = radiobutton.Name;
 		}
 

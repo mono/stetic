@@ -5,15 +5,6 @@ namespace Stetic.Wrapper {
 
 	public class CheckButton : Container {
 
-		public override void Wrap (object obj, bool initialized)
-		{
-			base.Wrap (obj, initialized);
-			if (!initialized) {
-				Gtk.CheckButton checkbutton = (Gtk.CheckButton)obj;
-				checkbutton.Label = checkbutton.Name;
-			}
-		}
-
 		public override Widget GladeImportChild (XmlElement child_elem)
 		{
 			hasLabel = false;

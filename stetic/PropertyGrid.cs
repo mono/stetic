@@ -141,16 +141,17 @@ namespace Stetic {
 
 		void AppendItemGroups (ClassDescriptor klass, object obj)
 		{
-			bool first = true;
+			int nImportantGroups = klass.ImportantGroups;
 			foreach (ItemGroup igroup in klass.ItemGroups) {
-				AppendGroup (igroup.Label, first);
-				foreach (ItemDescriptor item in igroup.Items) {
+				AppendGroup (igroup.Label, nImportantGroups-- > 0);
+				foreach (ItemDescriptor item in igroup) {
+					if (item.IsInternal)
+						continue;
 					if (item is PropertyDescriptor)
 						AppendProperty ((PropertyDescriptor)item, obj);
 					else if (item is CommandDescriptor)
 						AppendCommand ((CommandDescriptor)item, obj);
 				}
-				first = false;
 			}
 		}
 	}

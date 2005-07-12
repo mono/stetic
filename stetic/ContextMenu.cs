@@ -46,7 +46,7 @@ namespace Stetic {
 
 			ClassDescriptor klass = Registry.LookupClass (wrapper.Wrapped.GetType ());
 			if (klass != null) {
-				foreach (CommandDescriptor cmd in klass.ContextMenu.Items) {
+				foreach (CommandDescriptor cmd in klass.ContextMenu) {
 					item = new MenuItem (cmd.Label);
 					if (cmd.Enabled (wrapper.Wrapped, context)) {
 						item.Activated += delegate (object o, EventArgs args) {
