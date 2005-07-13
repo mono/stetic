@@ -34,8 +34,10 @@ libstetic_dll_sources =			\
 	editor/ResponseId.cs		\
 	editor/StockItem.cs		\
 	editor/String.cs		\
+	editor/StringArray.cs		\
 	editor/Text.cs			\
 	editor/ThemedIcon.cs		\
+	wrapper/AboutDialog.cs		\
 	wrapper/Box.cs			\
 	wrapper/Button.cs		\
 	wrapper/CheckButton.cs		\
@@ -47,6 +49,7 @@ libstetic_dll_sources =			\
 	wrapper/Dialog.cs		\
 	wrapper/Expander.cs		\
 	wrapper/FontButton.cs		\
+	wrapper/FontSelectionDialog.cs	\
 	wrapper/Frame.cs		\
 	wrapper/HScale.cs		\
 	wrapper/HScrollbar.cs		\

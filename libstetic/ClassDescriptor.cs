@@ -20,7 +20,8 @@ namespace Stetic {
 
 		ArrayList groups = new ArrayList ();
 		int importantGroups;
-		ItemGroup contextMenu = ItemGroup.Empty;
+		ItemGroup contextMenu;
+		ItemGroup internalChildren;
 
 		public ClassDescriptor (Assembly assembly, XmlElement elem)
 		{
@@ -98,6 +99,12 @@ namespace Stetic {
 				contextMenu = new ItemGroup (contextElem, this);
 			else
 				contextMenu = ItemGroup.Empty;
+
+			XmlElement ichildElem = elem["internal-children"];
+			if (ichildElem != null)
+				internalChildren = new ItemGroup (ichildElem, this);
+			else
+				internalChildren = ItemGroup.Empty;
 		}
 
 		public Type WrappedType {
@@ -220,6 +227,12 @@ namespace Stetic {
 		public ItemGroup ContextMenu {
 			get {
 				return contextMenu;
+			}
+		}
+
+		public ItemGroup InternalChildren {
+			get {
+				return internalChildren;
 			}
 		}
 	}

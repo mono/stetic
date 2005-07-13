@@ -1,3 +1,45 @@
+2005-07-13  Dan Winship  <danw@novell.com>
+
+	* libstetic/ClassDescriptor.cs (ClassDescriptor) parse the
+	internal-children node of a class as an ItemGroup.
+	(InternalChildren): return it
+
+	* libstetic/wrapper/objects.xml: Add internal-children nodes to
+	Dialog and OptionMenu. Add info for AboutDialog, ColorSelection,
+	ColorSelectionDialog, FileChooserWidget, FileChooserButton,
+	FileChooserDialog, FontSelection, and FontSelectionDialog (several
+	of which also have internal-children). Move AutoSize from
+	ContainerChild to BoxChild and TableChild for now at least.
+
+	* libstetic/wrapper/Container.cs (Wrap): get the ClassDescriptor's
+	InternalChildren list and set InternalChildId and Name on the
+	container's internal children.
+
+	* libstetic/wrapper/Dialog.cs (Wrap): 
+	* libstetic/wrapper/OptionMenu.cs (Wrap): Remove internal child
+	handling; it's done by Container now.
+
+	* libstetic/wrapper/AboutDialog.cs: wrap this, to make the
+	Website/WebsiteLabel behavior more interactively-sane, and to make
+	it not default to putting "Stetic" as the application name :).
+
+	* libstetic/wrapper/FontSelectionDialog.cs: wrapper to expose the
+	internal FontSelection widget.
+
+	* libstetic/editor/StringArray.cs: editor for string[] (for
+	AboutDialog)
+
+	* stetic/PropertyEditor.cs: add Stetic.Editor.StringArray to the
+	editors hashtable.
+
+	* stetic/Grid.cs (SizeAllocate): don't vertically center the label
+	wrt the editor if the editor is more than twice the line height
+	(eg, a multiline text box).
+
+	* stetic/Stetic.cs (Main): call Gtk.AboutDialog.SetUrlHook() here
+	rather than in About(), so that the UrlHook is set for
+	user-created about dialogs too.
+
 2005-07-12  Dan Winship  <danw@novell.com>
 
 	* libstetic/ClassDescriptor.cs: fix some names with underscores to

@@ -41,6 +41,10 @@ namespace Stetic {
 					w.ShowAll ();
 			}
 
+			// This is needed for both our own About dialog and for ones
+			// the user constructs
+			Gtk.AboutDialog.SetUrlHook (ActivateUrl);
+
 			program.Run ();
 			return 0;
 		}
@@ -105,7 +109,6 @@ namespace Stetic {
 
 		internal static void About (object obj, EventArgs e)
 		{
-			Gtk.AboutDialog.SetUrlHook (ActivateUrl);
 			Gtk.AboutDialog about = new Gtk.AboutDialog ();
 			about.Name = "Stetic";
 			about.Version = "0.0.0";

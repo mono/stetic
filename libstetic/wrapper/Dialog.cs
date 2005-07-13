@@ -6,22 +6,10 @@ namespace Stetic.Wrapper {
 
 		public override void Wrap (object obj, bool initialized)
 		{
-			Stetic.Wrapper.Widget wrapper;
-
 			base.Wrap (obj, initialized);
 			dialog.HasSeparator = false;
 
-			wrapper = ObjectWrapper.Create (stetic, dialog.VBox) as Stetic.Wrapper.Widget;
-			wrapper.InternalChildId = "vbox";
-			if (dialog.VBox.Name == "GtkVBox")
-				dialog.VBox.Name = dialog.Name + "_vbox";
-
-			wrapper = ObjectWrapper.Create (stetic, dialog.ActionArea) as Stetic.Wrapper.Widget;
-			wrapper.InternalChildId = "action_area";
-			if (dialog.ActionArea.Name == "GtkHButtonBox")
-				dialog.ActionArea.Name = dialog.Name + "_action_area";
-
-			if (!initialized) {
+			if (!initialized && dialog.VBox.Children.Length == 1) {
 				Placeholder ph = CreatePlaceholder ();
 				ph.SetSizeRequest (200, 200);
 				dialog.VBox.Add (ph);

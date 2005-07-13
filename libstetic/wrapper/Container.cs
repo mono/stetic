@@ -11,6 +11,17 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 
+			ClassDescriptor klass = Registry.LookupClass (obj.GetType ());
+			foreach (PropertyDescriptor prop in klass.InternalChildren) {
+				Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
+				if (child == null)
+					continue;
+				Widget wrapper = ObjectWrapper.Create (stetic, child) as Stetic.Wrapper.Widget;
+				wrapper.InternalChildId = prop.GladeName;
+				if (child.Name == ((GLib.GType)child.GetType ()).ToString ())
+					child.Name = container.Name + "_" + prop.GladeName;
+			}
+
 			if (!initialized && container.Children.Length == 0)
 				AddPlaceholder ();
 

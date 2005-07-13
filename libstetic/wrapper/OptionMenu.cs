@@ -11,15 +11,14 @@ namespace Stetic.Wrapper {
 
 		public override void Wrap (object obj, bool initialized)
 		{
-			base.Wrap (obj, initialized);
-
-			if (optionmenu.Menu == null) {
+			Gtk.OptionMenu omenu = (Gtk.OptionMenu)obj;
+			if (omenu.Menu == null) {
 				Gtk.Menu menu = new Gtk.Menu ();
 				menu.Show ();
-				optionmenu.Menu = menu;
+				omenu.Menu = menu;
 			}
-			Widget menuWrapper = (Widget)ObjectWrapper.Create (stetic, optionmenu.Menu);
-			menuWrapper.InternalChildId = "menu";
+
+			base.Wrap (obj, initialized);
 		}
 
 		public override void GladeImport (XmlElement elem)

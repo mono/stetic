@@ -331,7 +331,10 @@ namespace Stetic {
 					ereq = p.Editor.ChildRequisition;
 
 					lalloc.X = xbase + indent;
-					lalloc.Y = y + (Math.Max (lineHeight, ereq.Height) - lreq.Height) / 2;
+					if (ereq.Height < lineHeight * 2)
+						lalloc.Y = y + (ereq.Height - lreq.Height) / 2;
+					else
+						lalloc.Y = y + (lineHeight - lreq.Height) / 2;
 					lalloc.Width = lwidth;
 					lalloc.Height = lreq.Height;
 					p.Label.SizeAllocate (lalloc);

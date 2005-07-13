@@ -32,6 +32,7 @@ namespace Stetic {
 			editors[typeof (double)] = typeof (Stetic.Editor.FloatRange);
 			editors[typeof (char)] = typeof (Stetic.Editor.Char);
 			editors[typeof (string)] = typeof (Stetic.Editor.String);
+			editors[typeof (string[])] = typeof (Stetic.Editor.StringArray);
 			editors[typeof (Gdk.Color)] = typeof (Stetic.Editor.Color);
 		}
 

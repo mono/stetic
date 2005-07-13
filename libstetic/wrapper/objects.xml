@@ -68,15 +68,7 @@
     </object>
 
     <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container" />
-    <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild">
-	<itemgroups>
-	    <itemgroup label="Container Layout">
-		<property name="AutoSize" label="Auto Size"
-			  description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container"
-			  internal="true" />
-	    </itemgroup>
-	</itemgroups>
-    </object>
+    <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
 
     <object type="Gtk.Window,gtk-sharp" wrapper="Stetic.Wrapper.Window"
 	    label="Window" icon="window.png" palette-category="window">
@@ -232,7 +224,8 @@
 	    <itemgroup label="Box Child Layout">
 		<property name="PackType" />
 		<property name="Position" />
-		<property ref="Gtk.Container+ContainerChild.AutoSize" />
+		<property name="AutoSize" label="Auto Size"
+			  description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container" />
 		<property name="Expand">
 		    <disabled-if name="AutoSize" value="true" />
 		</property>
@@ -488,6 +481,10 @@
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<internal-children>
+	    <property name="VBox" glade-name="vbox" />
+	    <property name="ActionArea" glade-name="action_area" />
+	</internal-children>
     </object>
 
     <object type="Gtk.DrawingArea,gtk-sharp"
@@ -805,6 +802,9 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<internal-children>
+	    <property name="Menu" glade-name="menu" />
+	</internal-children>
     </object>
 
     <object type="Gtk.ProgressBar,gtk-sharp"
@@ -1033,7 +1033,8 @@
 		<property name="RightAttach" />
 		<property name="XPadding" />
 		<property name="YPadding" />
-		<property ref="Gtk.Container+ContainerChild.AutoSize" />
+		<property name="AutoSize" label="Auto Size"
+			  description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container" />
 		<property name="XOptions" internal="true" />
 		<property name="YOptions" internal="true" />
 		<property name="XExpand" label="Expand Horizontally"
@@ -1258,6 +1259,164 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+    </object>
+
+    <object type="Gtk.AboutDialog,gtk-sharp" wrapper="Stetic.Wrapper.AboutDialog"
+	    label="About Dialog" icon="aboutdialog.png" palette-category="window">
+	<itemgroups>
+	    <itemgroup label="About Dialog Properties">
+		<property name="Name" />
+		<property name="Version" />
+		<property name="Logo" glade-override="true"
+			  editor="Stetic.Editor.ImageFile" />
+		<property name="Comments" />
+		<property name="Copyright" />
+		<property name="Website" />
+		<property name="WebsiteLabel" />
+		<property name="Authors" />
+		<property name="Documenters" />
+		<property name="Artists" />
+		<property name="TranslatorCredits" />
+		<property name="License" editor="Stetic.Editor.Text" />
+		<property name="Icon" editor="Stetic.Editor.ImageFile" />
+		<property name="WindowPosition" />
+		<property name="Modal" glade-override="true" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Dialog.Misc" />
+	    <itemgroup ref="Gtk.Window.Size" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ColorSelection,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Color Selection" icon="colorselection.png" palette-category="widget"
+	    hexpandable="true" vexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Color Selection Properties">
+		<property name="CurrentColor" />
+		<property name="HasPalette" />
+		<property name="HasOpacityControl" />
+		<property name="CurrentAlpha">
+		    <disabled-if name="HasOpacityControl" value="false" />
+		</property>
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.ColorSelectionDialog,gtk-sharp" wrapper="Stetic.Wrapper.Window"
+	    label="Color Selection Dialog" icon="colorselectiondialog.png" palette-category="window">
+	<itemgroups>
+	    <itemgroup label="Color Selection Dialog Properties">
+		<property name="Title" />
+		<property name="Icon" editor="Stetic.Editor.ImageFile" />
+		<property name="WindowPosition" />
+		<property name="Modal" glade-override="true" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Dialog.Misc" />
+	    <itemgroup ref="Gtk.Window.Size" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<internal-children>
+	    <property name="ColorSelection" glade-name="color_selection" />
+	    <property name="OkButton" glade-name="ok_button" />
+	    <property name="CancelButton" glade-name="cancel_button" />
+	    <property name="HelpButton" glade-name="help_button" />
+	</internal-children>
+    </object>
+
+    <object type="Gtk.FileChooserWidget,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="File Chooser Widget" icon="fileselection.png" palette-category="widget"
+	    hexpandable="true" vexpandable="true">
+	<itemgroups>
+	    <itemgroup label="File Chooser Widget Properties">
+		<property name="Action" />
+		<property name="LocalOnly" />
+		<property name="SelectMultiple">
+		    <disabled-if name="Action" value="Save" />
+		    <disabled-if name="Action" value="CreateFolder" />
+		</property>
+		<property name="ShowHidden" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.FileChooserButton,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="File Chooser Button" icon="fileselection.png" palette-category="widget"
+	    hexpandable="true">
+	<itemgroups>
+	    <itemgroup label="File Chooser Button Properties">
+		<property name="Title" />
+		<property name="Action" />
+		<property name="LocalOnly" />
+		<property name="SelectMultiple">
+		    <disabled-if name="Action" value="Save" />
+		    <disabled-if name="Action" value="CreateFolder" />
+		</property>
+		<property name="ShowHidden" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.FileChooserDialog,gtk-sharp"
+	    label="File Chooser Dialog" icon="fileselection.png" palette-category="window">
+	<itemgroups>
+	    <itemgroup label="File Chooser Dialog Properties">
+		<property name="Title" />
+		<property name="Action" />
+		<property name="LocalOnly" />
+		<property name="SelectMultiple">
+		    <disabled-if name="Action" value="Save" />
+		    <disabled-if name="Action" value="CreateFolder" />
+		</property>
+		<property name="ShowHidden" />
+		<property name="Icon" editor="Stetic.Editor.ImageFile" />
+		<property name="WindowPosition" />
+		<property name="Modal" glade-override="true" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Dialog.Misc" />
+	    <itemgroup ref="Gtk.Window.Size" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<internal-children>
+	    <property name="VBox" glade-name="vbox" />
+	    <property name="ActionArea" glade-name="action_area" />
+	</internal-children>
+    </object>
+
+    <object type="Gtk.FontSelection,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+	    label="Font Selection" icon="fontselection.png" palette-category="widget"
+	    hexpandable="true" vexpandable="true">
+	<itemgroups>
+	    <itemgroup label="Font Selection Properties">
+		<property name="FontName" />
+		<property name="PreviewText" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
+    <object type="Gtk.FontSelectionDialog,gtk-sharp" wrapper="Stetic.Wrapper.FontSelectionDialog"
+	    label="Font Selection Dialog" icon="fontselectiondialog.png" palette-category="window">
+	<itemgroups>
+	    <itemgroup label="Font Selection Dialog Properties">
+		<property name="Title" />
+		<property name="Icon" editor="Stetic.Editor.ImageFile" />
+		<property name="WindowPosition" />
+		<property name="Modal" glade-override="true" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Dialog.Misc" />
+	    <itemgroup ref="Gtk.Window.Size" />
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<internal-children>
+	    <property name="FontSelection" glade-name="font_selection" />
+	    <property name="OkButton" glade-name="ok_button" />
+	    <property name="CancelButton" glade-name="cancel_button" />
+	    <property name="ApplyButton" glade-name="help_button" />
+	</internal-children>
     </object>
 
 </objects>
