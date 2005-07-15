@@ -74,7 +74,7 @@
 	    label="Window" icon="window.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Window Properties">
-		<property name="Title" init-with-name="true" />
+		<property name="Title" init-with-name="true" translatable="true" />
 		<property name="Icon" editor="Stetic.Editor.ImageFile" />
 		<property name="Type" glade-override="true" />
 		<property name="TypeHint" glade-override="true" />
@@ -292,7 +292,7 @@
 		    <invisible-if name="Type" value="ApplicationIcon" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
-		<property name="Label">
+		<property name="Label" translatable="true">
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
@@ -337,7 +337,7 @@
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup label="Check Box Properties">
-		<property name="Label" init-with-name="true" />
+		<property name="Label" init-with-name="true" translatable="true" />
 		<property name="Active" />
 		<property name="Inconsistent" />
 		<property name="DrawIndicator" />
@@ -364,7 +364,7 @@
 	    label="Menu Item" icon="menuitem.png">
 	<itemgroups>
 	    <itemgroup label="Menu Item Properties">
-		<property name="Label" glade-name="label" label="Label"
+		<property name="Label" translatable="true" glade-name="label" label="Label"
 			  description="The text of the menu item" />
 		<property name="UseUnderline" glade-name="use_underline" label="Use Underline"
 			  description="If set, an underline in the text indicates the next character should be used for the mnemonic accelerator key" />
@@ -416,7 +416,7 @@
 	    label="Color Button" icon="colorbutton.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Color Button Properties">
-		<property name="Title" />
+		<property name="Title" translatable="true" />
 		<property name="Color" />
 		<property name="UseAlpha" internal="true" />
 		<property name="Alpha" min="-1" max="65535" />
@@ -430,7 +430,7 @@
 	    label="Combo Box" icon="combo.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Combo Box Properties">
-		<property name="Items" label="Items" glade-name="items"
+		<property name="Items" translatable="true" label="Items" glade-name="items"
 			  description="The items to display in the Combo Box, one per line"
 			  editor="Stetic.Editor.Text" />
 		<property name="Active" />
@@ -458,14 +458,14 @@
 	    label="Dialog Box" icon="dialog.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Dialog Properties">
-		<property name="Title" />
+		<property ref="Gtk.Window.Title" />
 		<property name="Buttons" label="Buttons"
 			  description="The buttons to display" />
 		<property name="HelpButton" label="Help Button"
 			  description="Whether or not to display a 'Help' button" />
-		<property name="Icon" editor="Stetic.Editor.ImageFile" />
-		<property name="WindowPosition" />
-		<property name="Modal" glade-override="true" />
+		<property ref="Gtk.Window.Icon" />
+		<property ref="Gtk.Window.WindowPosition" />
+		<property ref="Gtk.Window.Modal" />
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup label="Miscellaneous Dialog Properties" name="Misc">
@@ -500,7 +500,7 @@
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup label="Entry Properties">
-		<property name="Text" />
+		<property name="Text" translatable="true" />
 		<property name="Editable" />
 		<property name="WidthChars" />
 		<property name="MaxLength" />
@@ -533,7 +533,7 @@
 	<itemgroups>
 	    <itemgroup label="Expander Properties">
 		<property name="Expanded" />
-		<property name="Label" init-with-name="true"/>
+		<property name="Label" init-with-name="true" translatable="true" />
 		<property name="UseMarkup" />
 		<property name="UseUnderline" />
 		<property name="Spacing" />
@@ -547,7 +547,7 @@
 	    label="Font Button" icon="fontbutton.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Font Button Properties">
-		<property name="Title" />
+		<property name="Title" translatable="true" />
 		<property name="FontName" />
 		<property name="ShowSize" />
 		<property name="ShowStyle" />
@@ -567,7 +567,7 @@
 	    <itemgroup label="Frame Properties">
 		<property name="Shadow" />
 		<property name="ShadowType" />
-		<property name="Label" />
+		<property name="Label" translatable="true" />
 		<property name="LabelXalign" />
 		<property name="LabelYalign" />
 		<property name="BorderWidth" />
@@ -686,7 +686,7 @@
 	    label="Label" icon="label.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Label Properties">
-		<property name="LabelProp" init-with-name="true" />
+		<property name="LabelProp" init-with-name="true" translatable="true" />
 		<property name="UseMarkup" />
 		<property name="UseUnderline" />
 		<property name="Wrap" />
@@ -722,18 +722,18 @@
 	    label="Message Dialog" icon="messagedialog.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Message Dialog Properties">
-		<property name="Title" />
+		<property ref="Gtk.Window.Title" />
 		<property name="MessageType" label="Message Type"
 			  description="The type of message dialog this is" />
-		<property name="PrimaryText" label="Primary Text"
+		<property name="PrimaryText" translatable="true" label="Primary Text"
 			  description="The primary message text" />
-		<property name="SecondaryText" label="Secondary Text"
+		<property name="SecondaryText" translatable="true" label="Secondary Text"
 			  description="The secondary message text" />
 		<property name="Buttons" label="Buttons"
 			  description="The buttons to offer" />
-		<property name="Icon" editor="Stetic.Editor.ImageFile" />
-		<property name="WindowPosition" />
-		<property name="Modal" glade-override="true" />
+		<property ref="Gtk.Window.Icon" />
+		<property ref="Gtk.Window.WindowPosition" />
+		<property ref="Gtk.Window.Modal" />
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Dialog.Misc" />
@@ -788,7 +788,7 @@
 		<property name="TabPack" />
 		<property name="TabExpand" />
 		<property name="TabFill" />
-		<property name="MenuLabel" />
+		<property name="MenuLabel" translatable="true" />
 	    </itemgroup>
 	</itemgroups>
     </object>
@@ -813,7 +813,7 @@
 	<itemgroups>
 	    <itemgroup label="Progress Bar Properties">
 		<property name="Orientation" />
-		<property name="Text" />
+		<property name="Text" translatable="true" />
 		<property name="Fraction" />
 		<property name="PulseStep" />
 	    </itemgroup>
@@ -825,13 +825,13 @@
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup label="Radio Button Properties">
-		<property name="Label" init-with-name="true" />
+		<property ref="Gtk.CheckButton.Label" />
 		<property name="Group" label="Group"
 			  description="The name of the radio button group that this button belongs to"
 			  editor="Stetic.Editor.GroupPicker" />
-		<property name="Active" />
-		<property name="Inconsistent" />
-		<property name="DrawIndicator" />
+		<property ref="Gtk.CheckButton.Active" />
+		<property ref="Gtk.CheckButton.Inconsistent" />
+		<property ref="Gtk.CheckButton.DrawIndicator" />
 		<command ref="Gtk.CheckButton.RemoveLabel" />
 		<command ref="Gtk.CheckButton.RestoreLabel" />
 	    </itemgroup>
@@ -861,13 +861,27 @@
 	</itemgroups>
     </object>
 
+    <object type="Gtk.ToolButton,gtk-sharp" wrapper="Stetic.Wrapper.ToolButton"
+	    label="Toolbar Button" icon="button.png" palette-category="toolbaritem">
+	<itemgroups>
+	    <itemgroup label="Toolbar Button Properties">
+		<property name="Icon" label="Icon"
+			  description="The icon to display in the button"
+			  editor="Stetic.Editor.Image" />
+		<property name="Label" translatable="true" />
+		<property name="UseUnderline" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+    </object>
+
     <object type="Gtk.RadioToolButton,gtk-sharp" wrapper="Stetic.Wrapper.RadioToolButton"
 	    label="Toolbar Radio Button" icon="radiobutton.png" palette-category="toolbaritem">
 	<itemgroups>
 	    <itemgroup label="Toolbar Radio Button Properties">
-		<property name="Icon" />
-		<property name="Label" />
-		<property name="UseUnderline" />
+		<property ref="Gtk.ToolButton.Icon" />
+		<property ref="Gtk.ToolButton.Label" />
+		<property ref="Gtk.ToolButton.UseUnderline" />
 		<property name="Group" label="Group"
 			  description="The name of the radio toolbar item group that this toolbar item belongs to"
 			  editor="Stetic.Editor.GroupPicker" />
@@ -1077,7 +1091,7 @@
 		<property name="Overwrite" />
 		<property name="AcceptsTab" />
 		<property name="Tabs" />
-		<property name="Text" label="Text" glade-name="text"
+		<property name="Text" translatable="true" label="Text" glade-name="text"
 			  description="The initial text to display in the Text View"
 			  editor="Stetic.Editor.Text" />
 		<property name="Justification" />
@@ -1115,9 +1129,9 @@
 	    label="Toolbar Toggle Button" icon="checkbutton.png" palette-category="toolbaritem">
 	<itemgroups>
 	    <itemgroup label="Toolbar Toggle Button Properties">
-		<property name="Icon" />
-		<property name="Label" />
-		<property name="UseUnderline" />
+		<property ref="Gtk.ToolButton.Icon" />
+		<property ref="Gtk.ToolButton.Label" />
+		<property ref="Gtk.ToolButton.UseUnderline" />
 		<property name="Active" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
@@ -1146,20 +1160,6 @@
 		<property name="ToolItem.VisibleHorizontal" />
 		<property name="ToolItem.VisibleVertical" />
 	    </itemgroup>
-	</itemgroups>
-    </object>
-
-    <object type="Gtk.ToolButton,gtk-sharp" wrapper="Stetic.Wrapper.ToolButton"
-	    label="Toolbar Button" icon="button.png" palette-category="toolbaritem">
-	<itemgroups>
-	    <itemgroup label="Toolbar Button Properties">
-		<property name="Icon" label="Icon"
-			  description="The icon to display in the button"
-			  editor="Stetic.Editor.Image" />
-		<property name="Label" />
-		<property name="UseUnderline" />
-	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
 
@@ -1265,22 +1265,22 @@
 	    label="About Dialog" icon="aboutdialog.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="About Dialog Properties">
-		<property name="Name" />
-		<property name="Version" />
+		<property name="Name" translatable="true" />
+		<property name="Version" translatable="true" />
 		<property name="Logo" glade-override="true"
 			  editor="Stetic.Editor.ImageFile" />
-		<property name="Comments" />
-		<property name="Copyright" />
-		<property name="Website" />
-		<property name="WebsiteLabel" />
-		<property name="Authors" />
-		<property name="Documenters" />
-		<property name="Artists" />
-		<property name="TranslatorCredits" />
-		<property name="License" editor="Stetic.Editor.Text" />
-		<property name="Icon" editor="Stetic.Editor.ImageFile" />
-		<property name="WindowPosition" />
-		<property name="Modal" glade-override="true" />
+		<property name="Comments" translatable="true" />
+		<property name="Copyright" translatable="true" />
+		<property name="Website" translatable="true" />
+		<property name="WebsiteLabel" translatable="true" />
+		<property name="Authors" translatable="true" />
+		<property name="Documenters" translatable="true" />
+		<property name="Artists" translatable="true" />
+		<property name="TranslatorCredits" translatable="true" />
+		<property name="License" translatable="true" editor="Stetic.Editor.Text" />
+		<property ref="Gtk.Window.Icon" />
+		<property ref="Gtk.Window.WindowPosition" />
+		<property ref="Gtk.Window.Modal" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />
@@ -1308,10 +1308,10 @@
 	    label="Color Selection Dialog" icon="colorselectiondialog.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Color Selection Dialog Properties">
-		<property name="Title" />
-		<property name="Icon" editor="Stetic.Editor.ImageFile" />
-		<property name="WindowPosition" />
-		<property name="Modal" glade-override="true" />
+		<property ref="Gtk.Window.Title" />
+		<property ref="Gtk.Window.Icon" />
+		<property ref="Gtk.Window.WindowPosition" />
+		<property ref="Gtk.Window.Modal" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />
@@ -1347,7 +1347,7 @@
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup label="File Chooser Button Properties">
-		<property name="Title" />
+		<property name="Title" translatable="true" />
 		<property name="Action" />
 		<property name="LocalOnly" />
 		<property name="SelectMultiple">
@@ -1364,7 +1364,7 @@
 	    label="File Chooser Dialog" icon="fileselection.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="File Chooser Dialog Properties">
-		<property name="Title" />
+		<property ref="Gtk.Window.Title" />
 		<property name="Action" />
 		<property name="LocalOnly" />
 		<property name="SelectMultiple">
@@ -1372,9 +1372,9 @@
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
 		<property name="ShowHidden" />
-		<property name="Icon" editor="Stetic.Editor.ImageFile" />
-		<property name="WindowPosition" />
-		<property name="Modal" glade-override="true" />
+		<property ref="Gtk.Window.Icon" />
+		<property ref="Gtk.Window.WindowPosition" />
+		<property ref="Gtk.Window.Modal" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />
@@ -1392,7 +1392,7 @@
 	<itemgroups>
 	    <itemgroup label="Font Selection Properties">
 		<property name="FontName" />
-		<property name="PreviewText" />
+		<property name="PreviewText" translatable="true" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -1402,10 +1402,10 @@
 	    label="Font Selection Dialog" icon="fontselectiondialog.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Font Selection Dialog Properties">
-		<property name="Title" />
-		<property name="Icon" editor="Stetic.Editor.ImageFile" />
-		<property name="WindowPosition" />
-		<property name="Modal" glade-override="true" />
+		<property ref="Gtk.Window.Title" />
+		<property ref="Gtk.Window.Icon" />
+		<property ref="Gtk.Window.WindowPosition" />
+		<property ref="Gtk.Window.Modal" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />

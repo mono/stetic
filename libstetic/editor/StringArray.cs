@@ -1,12 +1,11 @@
 using System;
-using System.Reflection;
 
 namespace Stetic.Editor {
 
 	[PropertyEditor ("Value", "Changed")]
 	public class StringArray : Text {
 
-		public StringArray (PropertyInfo info) : base (info) {}
+		public StringArray (PropertyDescriptor prop, object obj) : base (prop, obj) {}
 
 		public new string[] Value {
 			get {

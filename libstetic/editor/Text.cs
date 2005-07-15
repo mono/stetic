@@ -1,39 +1,22 @@
 using System;
-using System.Reflection;
 
 namespace Stetic.Editor {
 
 	[PropertyEditor ("Value", "Changed")]
-	public class Text : Gtk.ScrolledWindow {
+	public class Text : Translatable {
 
-		Gtk.TextView textview;
+		Stetic.TextBox textbox;
 
-		public Text (PropertyInfo info)
+		public Text (PropertyDescriptor prop, object obj) : base (prop, obj)
 		{
-			ShadowType = Gtk.ShadowType.In;
-			SetPolicy (Gtk.PolicyType.Never, Gtk.PolicyType.Automatic);
+			textbox = new Stetic.TextBox (6);
+			textbox.Show ();
+			Add (textbox);
 
-			textview = new Gtk.TextView ();
-			textview.WrapMode = Gtk.WrapMode.Word;
-			textview.Show ();
-			Add (textview);
-
-			int nlines = 6;
-			foreach (EditorAttribute eattr in info.GetCustomAttributes (typeof (Stetic.EditorAttribute), false)) {
-				if (eattr.EditorSize != -1)
-					nlines = eattr.EditorSize;
-			}
-
-			Pango.Context ctx = textview.PangoContext;
-			Pango.FontMetrics metrics = ctx.GetMetrics (textview.Style.FontDescription,
-								    ctx.Language);
-			int lineHeight = (metrics.Ascent + metrics.Descent) / (int)Pango.Scale.PangoScale;
-			SetSizeRequest (-1, lineHeight * nlines);
-
-			textview.Buffer.Changed += Buffer_Changed;
+			textbox.Changed += Text_Changed;
 		}
 
-		public void Buffer_Changed (object obj, EventArgs args)
+		public void Text_Changed (object obj, EventArgs args)
 		{
 			if (Changed != null)
 				Changed (this, EventArgs.Empty);
@@ -41,10 +24,10 @@ namespace Stetic.Editor {
 
 		public string Value {
 			get {
-				return textview.Buffer.Text;
+				return textbox.Text;
 			}
 			set {
-				textview.Buffer.Text = value;
+				textbox.Text = value;
 			}
 		}
 

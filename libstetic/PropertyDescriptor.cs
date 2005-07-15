@@ -5,6 +5,11 @@ using System.Xml;
 
 namespace Stetic {
 
+	public class TranslationInfo {
+		public bool Translated;
+		public string Context, Comment;
+	}
+
 	public class PropertyDescriptor : ItemDescriptor {
 
 		PropertyInfo memberInfo, propertyInfo;
@@ -14,6 +19,8 @@ namespace Stetic {
 		string label, description, gladeName;
 		object minimum, maximum;
 		PropertyDescriptor gladeProperty;
+
+		Hashtable translationInfo;
 
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
@@ -78,6 +85,9 @@ namespace Stetic {
 
 			if (elem.HasAttribute ("init-with-name"))
 				initWithName = true;
+
+			if (elem.HasAttribute ("translatable"))
+				translationInfo = new Hashtable ();
 		}
 
 		PropertyDescriptor (Type objectType, string propertyName)
@@ -263,6 +273,65 @@ namespace Stetic {
 			get {
 				return initWithName;
 			}
+		}
+
+		public bool Translatable {
+			get {
+				return translationInfo != null;
+			}
+		}
+
+		public bool IsTranslated (object obj)
+		{
+			TranslationInfo info = (TranslationInfo)translationInfo[obj];
+
+			// Since translatable properties are assumed to be translated
+			// by default, we return true if there is no TranslationInfo
+			// for the object
+			return (info == null || info.Translated == true);
+		}
+
+		public void SetTranslated (object obj, bool translated)
+		{
+			TranslationInfo info = (TranslationInfo)translationInfo[obj];
+			if (info == null) {
+				info = new TranslationInfo ();
+				translationInfo[obj] = info;
+			}
+
+			if (translated)
+				info.Translated = true;
+			else
+				info.Translated = false;
+			// We leave the old Context and Comment around, so that if
+			// you toggle Translated off and then back on, the old info
+			// is still there.
+		}
+
+		public string TranslationContext (object obj)
+		{
+			TranslationInfo info = (TranslationInfo)translationInfo[obj];
+
+			return info != null ? info.Context : null;
+		}
+
+		public void SetTranslationContext (object obj, string context)
+		{
+			SetTranslated (obj, true);
+			((TranslationInfo)translationInfo[obj]).Context = context;
+		}
+
+		public string TranslationComment (object obj)
+		{
+			TranslationInfo info = (TranslationInfo)translationInfo[obj];
+
+			return info != null ? info.Comment : null;
+		}
+
+		public void SetTranslationComment (object obj, string comment)
+		{
+			SetTranslated (obj, true);
+			((TranslationInfo)translationInfo[obj]).Comment = comment;
 		}
 	}
 }

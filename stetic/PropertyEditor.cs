@@ -83,19 +83,24 @@ namespace Stetic {
 			}
 
 			// Find a constructor.
-			ConstructorInfo ctor = editorType.GetConstructor (new Type[] { typeof (PropertyInfo) });
+			ConstructorInfo ctor = editorType.GetConstructor (new Type[] { typeof (PropertyDescriptor) });
 			if (ctor != null)
-				editor = (Widget)ctor.Invoke (new object[] { prop.PropertyInfo });
+				editor = (Widget)ctor.Invoke (new object[] { prop });
 			else {
 				// min/max
 				ctor = editorType.GetConstructor (new Type[] { typeof (object), typeof (object) });
 				if (ctor != null)
 					editor = (Widget)ctor.Invoke (new object[] { min, max });
 				else {
-					ctor = editorType.GetConstructor (new Type[0]);
-					if (ctor == null)
-						throw new ApplicationException ("No constructor for editor type " + editorType.ToString () + " for " + prop.Name);;
-					editor = (Widget)ctor.Invoke (new object[0]);
+					ctor = editorType.GetConstructor (new Type[] { typeof (PropertyDescriptor), typeof (object) });
+					if (ctor != null)
+						editor = (Widget)ctor.Invoke (new object[] { prop, obj });
+					else {
+						ctor = editorType.GetConstructor (new Type[0]);
+						if (ctor == null)
+							throw new ApplicationException ("No constructor for editor type " + editorType.ToString () + " for " + prop.Name);;
+						editor = (Widget)ctor.Invoke (new object[0]);
+					}
 				}
 			}
 

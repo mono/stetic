@@ -95,24 +95,29 @@ namespace Stetic.Wrapper {
 			AutoSize[child] = false;
 			container.Add (child);
 
-			GladeUtils.SetPacking (container, child, child_elem);
+			GladeUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
 			return (Widget)wrapper;
 		}
 
 		public virtual Widget GladeSetInternalChild (XmlElement child_elem)
 		{
+			ClassDescriptor klass = Registry.LookupClass (Wrapped.GetType ());
 			string childId = child_elem.GetAttribute ("internal-child");
 
-			foreach (Gtk.Widget w in container.AllChildren) {
-				Widget wrapper = Lookup (w);
-				if (wrapper != null && wrapper.InternalChildId == childId) {
+			foreach (PropertyDescriptor prop in klass.InternalChildren) {
+				if (prop.GladeName != childId)
+					continue;
+
+				Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
+				Widget wrapper = Widget.Lookup (child);
+				if (wrapper != null) {
 					wrapper.GladeImport (child_elem["widget"]);
-					GladeUtils.SetPacking (container, wrapper.Wrapped, child_elem);
+					GladeUtils.SetPacking (ChildWrapper (wrapper), child_elem);
 					return (Widget)wrapper;
 				}
 			}
 
-			throw new GladeException ("Unrecognized internal child name", GetType ().Name, false, "internal-child", childId);
+			throw new GladeException ("Unrecognized internal child name", Wrapped.GetType ().FullName, false, "internal-child", childId);
 		}
 
 		public override XmlElement GladeExport (XmlDocument doc)

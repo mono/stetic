@@ -1,3 +1,65 @@
+2005-07-15  Dan Winship  <danw@novell.com>
+
+	* libstetic/PropertyDescriptor.cs (Translatable, IsTranslated,
+	SetTranslated, TranslationContext, SetTranslationContext,
+	TranslationComment, SetTranslationComment): support for
+	translatable properties.
+
+	* libstetic/GladeUtils.cs: Reorg a bunch to handle
+	translatable-string-related attributes on import/export.
+	(SetPacking): do GladeOverride packing properties correctly.
+
+	* libstetic/EditorAttribute.cs: gone. We weren't really using it
+	anyway, and editors can get data from the PropertyDescriptor now.
+
+	* libstetic/TextBox.cs: a vertically-scrolling
+	fixed-number-of-lines TextView. Stolen from Stetic.Editor.Text,
+	now also used by Stetic.Editor.Translatable.
+
+	* libstetic/editor/Translatable.cs: base class for translatable
+	property editors. Adds an icon indicating whether or not the
+	property is marked for translation, with a pop-up menu allowing
+	you to toggle that and set a context or comment (which appear
+	inline in the property grid rather than only in a separate
+	window).
+
+	* libstetic/editor/String.cs: inherit from Translatable
+
+	* libstetic/editor/Text.cs: inherit from Translatable and use
+	TextBox.
+
+	* libstetic/editor/Enumeration.cs: 
+	* libstetic/editor/GroupPicker.cs: 
+	* libstetic/editor/StringArray.cs: update protytype to take a
+	PropertyDescriptor rather than a PropertyInfo.
+
+	* libstetic/wrapper/objects.xml: Mark all translatable string
+	properties with translatable="true". Also make more use of
+	<property ref=...> to simplify/correctify things.
+
+	* libstetic/wrapper/Container.cs (GladeSetInternalChild): Make
+	this look up the internal child using the properties on the
+	ClassDescriptor, since the "child" might really be a grandchild or
+	deeper descendant.
+	(GladeImportChild, GladeSetInternalChild): Update for
+	GladeUtils.SetPacking change.
+
+	* libstetic/wrapper/pixmaps/globe.png: 
+	* libstetic/wrapper/pixmaps/globe-not.png: translated/not
+	translated icon
+
+	* stetic/stetic.glade: Remove the height_request and
+	width_request, because we only wanted to set initial defaults and
+	let it resize itself appropriately after that.
+
+	* stetic/PropertyEditor.cs (PropertyEditor): Pass
+	PropertyDescriptors, not PropertyInfos to editor constructors, and
+	add another new type (PropertyDescriptor, object).
+
+	* stetic/Glade.cs (Export): set the DOCTYPE after the xsl
+	transform, or else XslTransform will insist on adding lots of
+	redundant attributes we don't want.
+
 2005-07-13  Dan Winship  <danw@novell.com>
 
 	* libstetic/ClassDescriptor.cs (ClassDescriptor) parse the

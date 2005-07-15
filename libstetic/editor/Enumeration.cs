@@ -9,7 +9,7 @@ namespace Stetic.Editor {
 		Gtk.ComboBox combo;
 		ArrayList values;
 
-		public Enumeration (PropertyInfo info) : base (false, 0)
+		public Enumeration (PropertyDescriptor prop) : base (false, 0)
 		{
 			combo = Gtk.ComboBox.NewText ();
 			combo.Changed += combo_Changed;
@@ -17,9 +17,9 @@ namespace Stetic.Editor {
 			PackStart (combo, true, true, 0);
 
 			values = new ArrayList ();
-			foreach (int i in Enum.GetValues (info.PropertyType)) {
-				Enum value = (Enum)Enum.ToObject (info.PropertyType, i);
-				string name = Enum.GetName (info.PropertyType, value);
+			foreach (int i in Enum.GetValues (prop.PropertyType)) {
+				Enum value = (Enum)Enum.ToObject (prop.PropertyType, i);
+				string name = Enum.GetName (prop.PropertyType, value);
 
 				combo.AppendText (name);
 				values.Add (value);

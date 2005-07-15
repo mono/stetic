@@ -195,6 +195,11 @@ namespace Stetic {
 				string name = prop.GetAttribute ("name");
 				string strval = prop.InnerText;
 
+				// Skip translation context
+				if (prop.GetAttribute ("context") == "yes" &&
+				    strval.IndexOf ('|') != -1)
+					strval = strval.Substring (strval.IndexOf ('|') + 1);
+
 				GLib.Value value;
 				try {
 					value = ParseProperty (type, childprops, name, strval);
@@ -209,31 +214,28 @@ namespace Stetic {
 			propVals = (GLib.Value[])values.ToArray (typeof (GLib.Value));
 		}
 
-		// Eek, scary. props is string->XmlElement, wProps is
-		// PropertyDescriptor->string
-		static void ExtractWrapperProperties (ClassDescriptor klass, XmlElement elem,
-						      out Hashtable props, out Hashtable wProps)
+		static void ExtractProperties (ClassDescriptor klass, XmlElement elem,
+					       out Hashtable rawProps, out Hashtable overrideProps)
 		{
-			props = new Hashtable ();
-			wProps = new Hashtable ();
-			foreach (XmlElement prop in elem.SelectNodes ("./property"))
-				props[prop.GetAttribute ("name")] = prop;
-
+			rawProps = new Hashtable ();
+			overrideProps = new Hashtable ();
 			foreach (ItemGroup group in klass.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null)
 						continue;
 					prop = prop.GladeProperty;
-					if (prop.GladeName == null || !prop.GladeOverride)
+					if (prop.GladeName == null)
 						continue;
 
-					XmlElement prop_elem = props[prop.GladeName] as XmlElement;
-					if (prop_elem == null)
+					XmlNode prop_node = elem.SelectSingleNode ("property[@name='" + prop.GladeName + "']");
+					if (prop_node == null)
 						continue;
 
-					props.Remove (prop.GladeName);
-					wProps[prop] = prop_elem.InnerText;
+					if (prop.GladeOverride)
+						overrideProps[prop] = prop_node;
+					else
+						rawProps[prop] = prop_node;
 				}
 			}
 		}
@@ -249,12 +251,12 @@ namespace Stetic {
 			if (klass == null)
 				throw new GladeException ("No stetic ClassDescriptor for " + className);
 
-			Hashtable props, wProps;
-			ExtractWrapperProperties (klass, elem, out props, out wProps);
+			Hashtable rawProps, overrideProps;
+			ExtractProperties (klass, elem, out rawProps, out overrideProps);
 
 			string[] propNames;
 			GLib.Value[] propVals;
-			ParseProperties (klass.WrappedType, false, props.Values,
+			ParseProperties (klass.WrappedType, false, rawProps.Values,
 					 out propNames, out propVals);
 
 			Gtk.Widget widget;
@@ -275,41 +277,79 @@ namespace Stetic {
 				for (int i = 0; i < propNames.Length; i++)
 					g_object_set_property (widget.Handle, propNames[i], ref propVals[i]);
 			}
+			MarkTranslatables (widget, rawProps);
 
 			widget.Name = elem.GetAttribute ("id");
 
-			if (wProps == null)
-				return;
-
-			foreach (PropertyDescriptor prop in wProps.Keys)
-				ParseGladeProperty (wrapper, false, prop, wProps[prop] as string);
+			SetOverrideProperties (wrapper, overrideProps);
+			MarkTranslatables (widget, overrideProps);
 		}
 
-		static void ParseGladeProperty (ObjectWrapper wrapper, bool childprop,
-						PropertyDescriptor prop, string strval)
+		static void SetOverrideProperties (ObjectWrapper wrapper, Hashtable overrideProps)
 		{
-			try {
-				GLib.Value value = ParseProperty (prop.ParamSpec, prop.PropertyType, strval);
-				if (prop.PropertyType.IsEnum) {
-					GLib.EnumWrapper ewrap = (GLib.EnumWrapper)value;
-					prop.SetValue (wrapper.Wrapped, Enum.ToObject (prop.PropertyType, (int)ewrap));
-				} else
-					prop.SetValue (wrapper.Wrapped, value.Val);
-			} catch (Exception e) {
-				throw new GladeException ("Could not parse property", wrapper.GetType ().ToString (), childprop, prop.GladeName, strval);
+			foreach (PropertyDescriptor prop in overrideProps.Keys) {
+				XmlElement prop_elem = overrideProps[prop] as XmlElement;
+
+				try {
+					GLib.Value value = ParseProperty (prop.ParamSpec, prop.PropertyType, prop_elem.InnerText);
+					if (prop.PropertyType.IsEnum) {
+						GLib.EnumWrapper ewrap = (GLib.EnumWrapper)value;
+						prop.SetValue (wrapper.Wrapped, Enum.ToObject (prop.PropertyType, (int)ewrap));
+					} else
+						prop.SetValue (wrapper.Wrapped, value.Val);
+				} catch (Exception e) {
+					throw new GladeException ("Could not parse property", wrapper.GetType ().ToString (), wrapper is Stetic.Wrapper.Container.ContainerChild, prop.GladeName, prop_elem.InnerText);
+				}
 			}
 		}
 
-		static public void SetPacking (Gtk.Container parent, Gtk.Widget child, XmlElement child_elem)
+		static void MarkTranslatables (object obj, Hashtable props)
 		{
+			foreach (PropertyDescriptor prop in props.Keys) {
+				if (!prop.Translatable)
+					continue;
+
+				XmlElement prop_elem = props[prop] as XmlElement;
+				if (prop_elem.GetAttribute ("translatable") != "yes") {
+					prop.SetTranslated (obj, false);
+					continue;
+				}
+
+				prop.SetTranslated (obj, true);
+				if (prop_elem.GetAttribute ("context") == "yes") {
+					string strval = prop_elem.InnerText;
+					int bar = strval.IndexOf ('|');
+					if (bar != -1)
+						prop.SetTranslationContext (obj, strval.Substring (0, bar));
+				}
+
+				if (prop_elem.HasAttribute ("comments"))
+					prop.SetTranslationComment (obj, prop_elem.GetAttribute ("comments"));
+			}
+		}
+
+		static public void SetPacking (Stetic.Wrapper.Container.ContainerChild wrapper, XmlElement child_elem)
+		{
+			Gtk.Container.ContainerChild cc = wrapper.Wrapped as Gtk.Container.ContainerChild;
+
+			ClassDescriptor klass = Registry.LookupClass (cc.GetType ());
+			if (klass == null)
+				throw new GladeException ("No stetic ClassDescriptor for " + cc.GetType ().FullName);
+
+			Hashtable rawProps, overrideProps;
+			ExtractProperties (klass, child_elem["packing"], out rawProps, out overrideProps);
+
 			string[] propNames;
 			GLib.Value[] propVals;
-			ParseProperties (parent.GetType (), true,
-					 child_elem.SelectNodes ("./packing/property"),
+			ParseProperties (cc.Parent.GetType (), true, rawProps.Values,
 					 out propNames, out propVals);
 
 			for (int i = 0; i < propNames.Length; i++)
-				parent.ChildSetProperty (child, propNames[i], propVals[i]);
+				cc.Parent.ChildSetProperty (cc.Child, propNames[i], propVals[i]);
+			MarkTranslatables (cc, rawProps);
+
+			SetOverrideProperties (wrapper, overrideProps);
+			MarkTranslatables (cc, overrideProps);
 		}
 
 		static string PropToString (ObjectWrapper wrapper, PropertyDescriptor prop)
@@ -322,7 +362,7 @@ namespace Stetic {
 
 				if (ccwrap != null) {
 					Gtk.Container.ContainerChild cc = (Gtk.Container.ContainerChild)ccwrap.Wrapped;
-					gval = new GLib.Value ();
+					gval = new GLib.Value (new GLib.GType (prop.ParamSpec.ValueType));
 					gtk_container_child_get_property (cc.Parent.Handle, cc.Child.Handle, prop.GladeName, ref gval);
 				} else {
 					Gtk.Widget widget = wrapper.Wrapped as Gtk.Widget;
@@ -412,12 +452,25 @@ namespace Stetic {
 					if (!prop.VisibleFor (wrapper.Wrapped))
 						continue;
 
-					string val = PropToString (wrapper, prop.GladeProperty);
-					if (val != null) {
-						XmlElement prop_elem = parent_elem.OwnerDocument.CreateElement ("property");
-						prop_elem.InnerText = val;
-						parent_elem.AppendChild (prop_elem);
+					string val = PropToString (wrapper, prop);
+					if (val == null)
+						continue;
+
+					XmlElement prop_elem = parent_elem.OwnerDocument.CreateElement ("property");
+					prop_elem.SetAttribute ("name", prop.GladeName);
+					prop_elem.InnerText = val;
+
+					if (prop.Translatable && prop.IsTranslated (wrapper.Wrapped)) {
+						prop_elem.SetAttribute ("translatable", "yes");
+						if (prop.TranslationContext (wrapper.Wrapped) != null) {
+							prop_elem.SetAttribute ("context", "yes");
+							prop_elem.InnerText = prop.TranslationContext (wrapper.Wrapped) + "|" + prop_elem.InnerText;
+						}
+						if (prop.TranslationComment (wrapper.Wrapped) != null)
+							prop_elem.SetAttribute ("comments", prop.TranslationComment (wrapper.Wrapped));
 					}
+
+					parent_elem.AppendChild (prop_elem);
 				}
 			}
 		}

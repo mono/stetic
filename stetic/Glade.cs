@@ -46,9 +46,6 @@ namespace Stetic {
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
 
-			XmlDocumentType doctype = doc.CreateDocumentType ("glade-interface", null, Glade20SystemId, null);
-			doc.AppendChild (doctype);
-
 			XmlElement toplevel = doc.CreateElement ("glade-interface");
 			doc.AppendChild (toplevel);
 
@@ -62,10 +59,17 @@ namespace Stetic {
 					toplevel.AppendChild (elem);
 			}
 
+			XmlReader reader = Registry.GladeExportXsl.Transform (doc, null, (XmlResolver)null);
+			doc = new XmlDocument ();
+			doc.Load (reader);
+
+			XmlDocumentType doctype = doc.CreateDocumentType ("glade-interface", null, Glade20SystemId, null);
+			doc.PrependChild (doctype);
+
 			// FIXME; if you use UTF8, it starts with a BOM???
 			XmlTextWriter writer = new XmlTextWriter (filename, System.Text.Encoding.ASCII);
 			writer.Formatting = Formatting.Indented;
-			Registry.GladeExportXsl.Transform (doc, null, writer, null);
+			doc.Save (writer);
 			writer.Close ();
 		}
 	}

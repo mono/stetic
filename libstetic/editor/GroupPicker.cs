@@ -15,9 +15,11 @@ namespace Stetic.Editor {
 		ArrayList values;
 		string group;
 
-		public GroupPicker (PropertyInfo info) : base (false, 0)
+		const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+
+		public GroupPicker (PropertyDescriptor prop) : base (false, 0)
 		{
-			BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+			PropertyInfo info = prop.PropertyInfo;
 			Type owner = info.DeclaringType;
 
 			FieldInfo managerInfo = owner.GetField (info.Name + "Manager", flags);

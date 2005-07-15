@@ -4,7 +4,6 @@ libstetic_dll_sources =			\
 	ClassDescriptor.cs		\
 	CommandDescriptor.cs		\
 	DND.cs				\
-	EditorAttribute.cs		\
 	GladeException.cs		\
 	GladeUtils.cs			\
 	HandleWindow.cs			\
@@ -19,6 +18,7 @@ libstetic_dll_sources =			\
 	RadioGroupManager.cs		\
 	Registry.cs			\
 	Set.cs				\
+	TextBox.cs			\
 	TranslatableAttribute.cs	\
 	editor/Accelerator.cs		\
 	editor/Boolean.cs		\
@@ -37,6 +37,7 @@ libstetic_dll_sources =			\
 	editor/StringArray.cs		\
 	editor/Text.cs			\
 	editor/ThemedIcon.cs		\
+	editor/Translatable.cs		\
 	wrapper/AboutDialog.cs		\
 	wrapper/Box.cs			\
 	wrapper/Button.cs		\
