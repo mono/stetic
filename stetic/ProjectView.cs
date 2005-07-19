@@ -52,7 +52,7 @@ namespace Stetic {
 			}
 		}
 
-		void WidgetSelected (Stetic.Wrapper.Widget selection, ProjectNode node)
+		void WidgetSelected (Gtk.Widget selection, ProjectNode node)
 		{
 			if (!syncing) {
 				syncing = true;

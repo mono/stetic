@@ -1,5 +1,28 @@
 2005-07-19  Dan Winship  <danw@novell.com>
 
+	* stetic/UIManager.cs: subclass of Gtk.UIManager for Stetic. Not
+	horribly functional yet, though it does track Edit menu
+	sensitivity, for both widgets and text, and implements
+	Cut/Copy/Paste for text (but not widgets).
+
+	* stetic/stetic.glade: Replace the menubar with another Custom.
+
+	* stetic/Stetic.cs (Main): create a Stetic.UIManager. Set
+	SteticMain.MainWindow (to the window containing the PropertyGrid).
+	Move menu command implementations to UIManager.cs
+
+	* stetic/ContextMenu.cs: use ImageMenuItems for Cut/Copy/Paste.
+	Use the UIManager to implement them.
+
+	* stetic/Project.cs (SelectedHandler, Selection): pass the
+	Gtk.Widget, not its wrapper, since there won't be a wrapper in the
+	Placeholder case.
+
+	* stetic/ProjectView.cs (WidgetSelected):
+	* stetic/PropertyGrid.cs (Selected): update for prototype change
+
+2005-07-19  Dan Winship  <danw@novell.com>
+
 	* libstetic/IProject.cs: rename IStetic to IProject
 
 	* libstetic/*.cs:

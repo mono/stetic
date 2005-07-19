@@ -108,13 +108,13 @@ namespace Stetic {
 			}
 		}
 
-		void Selected (Stetic.Wrapper.Widget selection, ProjectNode node)
+		void Selected (Gtk.Widget widget, ProjectNode node)
 		{
 			ClassDescriptor klass;
 
 			Clear ();
 
-			this.selection = selection;
+			selection = Stetic.Wrapper.Widget.Lookup (widget);
 			if (selection == null) {
 				AppendLabel ("<i>No selection</i>");
 				return;

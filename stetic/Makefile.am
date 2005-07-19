@@ -11,6 +11,7 @@ stetic_exe_sources =			\
 	PropertyEditor.cs		\
 	PropertyGrid.cs			\
 	Stetic.cs			\
+	UIManager.cs			\
 	WidgetFactory.cs
 
 comma = ,

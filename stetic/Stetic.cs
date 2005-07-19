@@ -1,5 +1,4 @@
 using Gtk;
-using Gnome;
 using System;
 using System.Reflection;
 
@@ -7,21 +6,25 @@ namespace Stetic {
 
 	public class SteticMain  {
 
-		static Gnome.Program program;
+		public static Gnome.Program Program;
 
 		static Stetic.Palette Palette;
 		static Stetic.Project Project;
 		static Stetic.ProjectView ProjectView;
 		static Stetic.PropertyGrid Properties;
 
+		public static Stetic.UIManager UIManager;
+		public static Gtk.Window MainWindow;
+
 		public static int Main (string[] args) {
-			program = new Gnome.Program ("Stetic", "0.0", Modules.UI, args);
+			Program = new Gnome.Program ("Stetic", "0.0", Gnome.Modules.UI, args);
 
 			Project = new Project ();
 
 			Palette = new Stetic.Palette (Project);
 			ProjectView = new Stetic.ProjectView (Project);
 			Properties = new Stetic.PropertyGrid (Project);
+			UIManager = new Stetic.UIManager (Project);
 
 			Glade.XML.CustomHandler = CustomWidgetHandler;
 			Glade.XML glade = new Glade.XML ("stetic.glade", null);
@@ -37,15 +40,19 @@ namespace Stetic {
 			}
 
 			foreach (Gtk.Widget w in glade.GetWidgetPrefix ("")) {
-				if (w is Gtk.Window)
-					w.ShowAll ();
+				Gtk.Window win = w as Gtk.Window;
+				if (win != null) {
+					win.AddAccelGroup (UIManager.AccelGroup);
+					win.ShowAll ();
+				}
 			}
+			MainWindow = (Gtk.Window)Properties.Toplevel;
 
 			// This is needed for both our own About dialog and for ones
 			// the user constructs
 			Gtk.AboutDialog.SetUrlHook (ActivateUrl);
 
-			program.Run ();
+			Program.Run ();
 			return 0;
 		}
 
@@ -59,64 +66,10 @@ namespace Stetic {
 				return ProjectView;
 			else if (name == "PropertyGrid")
 				return Properties;
+			else if (name == "MenuBar")
+				return UIManager.MenuBar;
 			else
 				return null;
-		}
-
-		internal static void ImportGlade (object obj, EventArgs e)
-		{
-			FileChooserDialog dialog =
-				new FileChooserDialog ("Import from Glade File", null, FileChooserAction.Open,
-						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
-						       Gtk.Stock.Open, Gtk.ResponseType.Ok);
-			int response = dialog.Run ();
-			if (response == (int)Gtk.ResponseType.Ok)
-				GladeFiles.Import (Project, dialog.Filename);
-			dialog.Hide ();
-		}
-
-		internal static void ExportGlade (object obj, EventArgs e)
-		{
-			FileChooserDialog dialog =
-				new FileChooserDialog ("Export to Glade File", null, FileChooserAction.Save,
-						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
-						       Gtk.Stock.Save, Gtk.ResponseType.Ok);
-			int response = dialog.Run ();
-			if (response == (int)Gtk.ResponseType.Ok)
-				GladeFiles.Export (Project, dialog.Filename);
-			dialog.Hide ();
-		}
-
-		internal static void Cut (object obj, EventArgs e)
-		{
-			Console.WriteLine ("Cut");
-		}
-
-		internal static void Copy (object obj, EventArgs e)
-		{
-			Console.WriteLine ("Copy");
-		}
-
-		internal static void Paste (object obj, EventArgs e)
-		{
-			Console.WriteLine ("Paste");
-		}
-
-		internal static void Delete (object obj, EventArgs e)
-		{
-			Console.WriteLine ("Delete");
-		}
-
-		internal static void About (object obj, EventArgs e)
-		{
-			Gtk.AboutDialog about = new Gtk.AboutDialog ();
-			about.Name = "Stetic";
-			about.Version = "0.0.0";
-			about.Comments = "A GNOME and Gtk GUI designer";
-			about.Authors = new string[] { "Dan Winship" };
-			about.Copyright = "Copyright 2004, 2005 Novell, Inc.";
-			about.Website = "http://mono-project.com/Stetic";
-			about.Run ();
 		}
 
 		static void ActivateUrl (Gtk.AboutDialog about, string url)
@@ -124,13 +77,8 @@ namespace Stetic {
 			Gnome.Url.Show (url);
 		}
 
-		internal static void Quit (object obj, EventArgs e)
-		{
-			program.Quit ();
-		}
-
 		internal static void Window_Delete (object obj, DeleteEventArgs args) {
-			program.Quit ();
+			Program.Quit ();
 			args.RetVal = true;
 		}
 	}

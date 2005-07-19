@@ -7,13 +7,13 @@ namespace Stetic {
 
 	public class ContextMenu : Gtk.Menu {
 
-		Stetic.Wrapper.Widget wrapper;
+		Gtk.Widget widget;
 
 		public ContextMenu (Placeholder ph)
 		{
 			MenuItem item;
 
-			this.wrapper = null;
+			this.widget = ph;
 
 			item = LabelItem (ph);
 			item.Sensitive = false;
@@ -32,9 +32,9 @@ namespace Stetic {
 		{
 			MenuItem item;
 
-			this.wrapper = wrapper;
+			widget = wrapper.Wrapped;
 
-			if (context == wrapper.Wrapped) {
+			if (widget == context) {
 				item = LabelItem (context);
 				item.Sensitive = false;
 				Add (item);
@@ -44,13 +44,13 @@ namespace Stetic {
 			item.Activated += DoSelect;
 			Add (item);
 
-			ClassDescriptor klass = Registry.LookupClass (wrapper.Wrapped.GetType ());
+			ClassDescriptor klass = Registry.LookupClass (widget.GetType ());
 			if (klass != null) {
 				foreach (CommandDescriptor cmd in klass.ContextMenu) {
 					item = new MenuItem (cmd.Label);
-					if (cmd.Enabled (wrapper.Wrapped, context)) {
+					if (cmd.Enabled (widget, context)) {
 						item.Activated += delegate (object o, EventArgs args) {
-							cmd.Run (wrapper.Wrapped, context);
+							cmd.Run (widget, context);
 						};
 					} else
 						item.Sensitive = false;
@@ -58,26 +58,35 @@ namespace Stetic {
 				}
 			}
 
-			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildId != null, context == wrapper.Wrapped, context);
+			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildId != null, widget == context, context);
 		}
 
 		void BuildContextMenu (Stetic.Wrapper.Widget parentWrapper, bool occupied, bool isInternal, bool top, Widget context)
 		{
 			MenuItem item;
 
-			item = new MenuItem ("Cu_t");
-			if (!occupied || isInternal)
+			item = new ImageMenuItem (Gtk.Stock.Cut, null);
+			if (occupied && !isInternal)
+				item.Activated += DoCut;
+			else
 				item.Sensitive = false;
 			Add (item);
-			item = new MenuItem ("_Copy");
-			if (!occupied)
-				item.Sensitive = false;
-			Add (item);
-			item = new MenuItem ("_Paste");
+
+			item = new ImageMenuItem (Gtk.Stock.Copy, null);
 			if (occupied)
+				item.Activated += DoCopy;
+			else
 				item.Sensitive = false;
 			Add (item);
-			item = new MenuItem ("_Delete");
+
+			item = new ImageMenuItem (Gtk.Stock.Paste, null);
+			if (!occupied)
+				item.Activated += DoPaste;
+			else
+				item.Sensitive = false;
+			Add (item);
+
+			item = new ImageMenuItem (Gtk.Stock.Delete, null);
 			if (occupied && !isInternal)
 				item.Activated += DoDelete;
 			else
@@ -104,12 +113,29 @@ namespace Stetic {
 
 		void DoSelect (object obj, EventArgs args)
 		{
-			wrapper.Select ();
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
+			if (wrapper != null)
+				wrapper.Select ();
+		}
+
+		void DoCut (object obj, EventArgs args)
+		{
+			SteticMain.UIManager.Cut (widget);
+		}
+
+		void DoCopy (object obj, EventArgs args)
+		{
+			SteticMain.UIManager.Copy (widget);
+		}
+
+		void DoPaste (object obj, EventArgs args)
+		{
+			SteticMain.UIManager.Paste (widget);
 		}
 
 		void DoDelete (object obj, EventArgs args)
 		{
-			wrapper.Delete ();
+			SteticMain.UIManager.Delete (widget);
 		}
 
 		static MenuItem LabelItem (Gtk.Widget widget)

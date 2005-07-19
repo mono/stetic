@@ -152,7 +152,7 @@ namespace Stetic {
 			store = new NodeStore (typeof (ProjectNode));
 		}
 
-		public delegate void SelectedHandler (Stetic.Wrapper.Widget focus, ProjectNode node);
+		public delegate void SelectedHandler (Gtk.Widget selection, ProjectNode node);
 		public event SelectedHandler Selected;
 
 		Gtk.Widget selection;
@@ -176,14 +176,8 @@ namespace Stetic {
 
 				selection = value;
 
-				if (Selected == null)
-					return;
-
-				Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (selection);
-				if (wrapper == null)
-					Selected (null, null);
-				else
-					Selected (wrapper, nodes[selection] as ProjectNode);
+				if (Selected != null)
+					Selected (selection, nodes[selection] as ProjectNode);
 			}
 		}
 
