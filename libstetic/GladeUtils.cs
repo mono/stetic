@@ -240,8 +240,7 @@ namespace Stetic {
 			}
 		}
 
-		static public void ImportWidget (IStetic stetic, ObjectWrapper wrapper,
-						 XmlElement elem)
+		static public void ImportWidget (ObjectWrapper wrapper, XmlElement elem)
 		{
 			string className = elem.GetAttribute ("class");
 			if (className == null)
@@ -423,8 +422,7 @@ namespace Stetic {
 				return value.ToString ();
 		}
 
-		static public XmlElement ExportWidget (IStetic stetic, ObjectWrapper wrapper,
-						       XmlDocument doc)
+		static public XmlElement ExportWidget (ObjectWrapper wrapper, XmlDocument doc)
 		{
 			Type wrappedType = wrapper.Wrapped.GetType ();
 			ClassDescriptor klass = Registry.LookupClass (wrappedType);

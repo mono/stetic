@@ -7,7 +7,7 @@ using System.Xml;
 namespace Stetic {
 	public abstract class ObjectWrapper : IDisposable {
 
-		protected IStetic stetic;
+		protected IProject proj;
 		protected object wrapped;
 
 		public virtual void Wrap (object obj, bool initialized)
@@ -23,12 +23,12 @@ namespace Stetic {
 
 		static Hashtable wrappers = new Hashtable ();
 
-		public static ObjectWrapper Create (IStetic stetic, object wrapped)
+		public static ObjectWrapper Create (IProject proj, object wrapped)
 		{
-			return Create (stetic, wrapped, true);
+			return Create (proj, wrapped, true);
 		}
 
-		public static ObjectWrapper Create (IStetic stetic, object wrapped, bool initialized)
+		public static ObjectWrapper Create (IProject proj, object wrapped, bool initialized)
 		{
 			ClassDescriptor klass = Registry.LookupClass (wrapped.GetType ());
 			if (klass == null)
@@ -36,13 +36,13 @@ namespace Stetic {
 			ObjectWrapper wrapper = Activator.CreateInstance (klass.WrapperType) as ObjectWrapper;
 			if (wrapper == null)
 				return null;
-			wrapper.stetic = stetic;
+			wrapper.proj = proj;
 
 			wrapper.Wrap (wrapped, initialized);
 			return wrapper;
 		}
 
-		public static ObjectWrapper GladeImport (IStetic stetic, XmlElement elem)
+		public static ObjectWrapper GladeImport (IProject proj, XmlElement elem)
 		{
 			string className = elem.GetAttribute ("class");
 			ClassDescriptor klass = Registry.LookupClass (className);
@@ -56,7 +56,7 @@ namespace Stetic {
 			ObjectWrapper wrapper = Activator.CreateInstance (klass.WrapperType) as ObjectWrapper;
 			if (wrapper == null)
 				throw new GladeException ("Can't create wrapper for type " + klass.WrapperType.FullName, className);
-			wrapper.stetic = stetic;
+			wrapper.proj = proj;
 			try {
 				info.Invoke (wrapper, new object[] { elem });
 			} catch (TargetInvocationException tie) {

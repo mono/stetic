@@ -99,7 +99,7 @@ namespace Stetic.Wrapper {
 			if (buttonClass == null)
 				buttonClass = Registry.LookupClass ("GtkButton");
 
-			button = (Gtk.Button)buttonClass.NewInstance (stetic);
+			button = (Gtk.Button)buttonClass.NewInstance (proj);
 			wrapper = (Stetic.Wrapper.Button) ObjectWrapper.Lookup (button);
 			if (stockId != null) {
 				wrapper.Type = Button.ButtonType.StockItem;

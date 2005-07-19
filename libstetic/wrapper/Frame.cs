@@ -15,7 +15,7 @@ namespace Stetic.Wrapper {
 				frame.Shadow = Gtk.ShadowType.None;
 				Gtk.Alignment align = new Gtk.Alignment (0, 0, 1, 1);
 				align.LeftPadding = 12;
-				Container align_wrapper = (Container)ObjectWrapper.Create (stetic, align);
+				Container align_wrapper = (Container)ObjectWrapper.Create (proj, align);
 				align_wrapper.AddPlaceholder ();
 				ReplaceChild (frame.Child, (Gtk.Widget)align_wrapper.Wrapped);
 			}
@@ -30,7 +30,7 @@ namespace Stetic.Wrapper {
 		public override Widget GladeImportChild (XmlElement child_elem)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "label_item") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, child_elem["widget"]);
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (proj, child_elem["widget"]);
 				frame.LabelWidget = (Gtk.Widget)wrapper.Wrapped;
 				return (Widget)wrapper;
 			} else

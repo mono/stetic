@@ -16,7 +16,7 @@ namespace Stetic.Wrapper {
 				Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
 				if (child == null)
 					continue;
-				Widget wrapper = ObjectWrapper.Create (stetic, child) as Stetic.Wrapper.Widget;
+				Widget wrapper = ObjectWrapper.Create (proj, child) as Stetic.Wrapper.Widget;
 				wrapper.InternalChildId = prop.GladeName;
 				if (child.Name == ((GLib.GType)child.GetType ()).ToString ())
 					child.Name = container.Name + "_" + prop.GladeName;
@@ -88,7 +88,7 @@ namespace Stetic.Wrapper {
 
 		public virtual Widget GladeImportChild (XmlElement child_elem)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, child_elem["widget"]);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (proj, child_elem["widget"]);
 
 			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
@@ -200,7 +200,7 @@ namespace Stetic.Wrapper {
 				return null;
 
 			Gtk.Container.ContainerChild cc = parent[child];
-			return Stetic.ObjectWrapper.Create (parentWrapper.stetic, cc) as ContainerChild;
+			return Stetic.ObjectWrapper.Create (parentWrapper.proj, cc) as ContainerChild;
 		}
 
 		public delegate void ContentsChangedHandler (Container container);
@@ -237,7 +237,7 @@ namespace Stetic.Wrapper {
 				Select (ph);
 				args.RetVal = true;
 			} else if (args.Event.Button == 3) {
-				stetic.PopupContextMenu (ph);
+				proj.PopupContextMenu (ph);
 				args.RetVal = true;
 			}
 		}
@@ -321,10 +321,10 @@ namespace Stetic.Wrapper {
 		{
 			if (wrapper == null) {
 				Select (null, false);
-				stetic.Selection = null;
+				proj.Selection = null;
 			} else {
 				Select (wrapper.Wrapped, (wrapper.InternalChildId == null));
-				stetic.Selection = wrapper.Wrapped;
+				proj.Selection = wrapper.Wrapped;
 			}
 		}
 
@@ -337,7 +337,7 @@ namespace Stetic.Wrapper {
 		public virtual void Select (Placeholder ph)
 		{
 			Select (ph, false);
-			stetic.Selection = ph;
+			proj.Selection = ph;
 		}
 
 		void Select (Gtk.Widget widget, bool dragHandles)

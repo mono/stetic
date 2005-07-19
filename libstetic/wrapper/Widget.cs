@@ -69,11 +69,11 @@ namespace Stetic.Wrapper {
 			if (wrapper == null)
 				return false;
 
-			if (wrapper.Wrapped != stetic.Selection) {
+			if (wrapper.Wrapped != proj.Selection) {
 				wrapper.Select ();
 				return true;
 			} else if (evb.Button == 3) {
-				stetic.PopupContextMenu (wrapper);
+				proj.PopupContextMenu (wrapper);
 				return true;
 			} else
 				return false;
@@ -109,7 +109,7 @@ namespace Stetic.Wrapper {
 
 		void PopupMenu (object obj, EventArgs args)
 		{
-			stetic.PopupContextMenu (this);
+			proj.PopupContextMenu (this);
 		}
 
 		public void Select ()
@@ -130,12 +130,12 @@ namespace Stetic.Wrapper {
 
 		public virtual void GladeImport (XmlElement elem)
 		{
-			GladeUtils.ImportWidget (stetic, this, elem);
+			GladeUtils.ImportWidget (this, elem);
 		}
 
 		public virtual XmlElement GladeExport (XmlDocument doc)
 		{
-			XmlElement elem = GladeUtils.ExportWidget (stetic, this, doc);
+			XmlElement elem = GladeUtils.ExportWidget (this, doc);
 			GladeUtils.ExtractProperty (elem, "name", "");
 			return elem;
 		}

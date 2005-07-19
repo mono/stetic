@@ -18,7 +18,7 @@ namespace Stetic.Wrapper {
 
 		public override Widget GladeImportChild (XmlElement child_elem)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, child_elem["widget"]);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (proj, child_elem["widget"]);
 			menuitem.Submenu = (Gtk.Menu)wrapper.Wrapped;
 			return (Widget)wrapper;
 		}

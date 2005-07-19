@@ -19,7 +19,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				mnem = value;
-				((Gtk.Label)Wrapped).MnemonicWidget = stetic.LookupWidgetById (mnem);
+				((Gtk.Label)Wrapped).MnemonicWidget = proj.LookupWidgetById (mnem);
 			}
 		}
 	}

@@ -186,13 +186,13 @@ namespace Stetic.Wrapper {
 			Gtk.Alignment alignment = new Gtk.Alignment (button.Xalign, button.Yalign, 0.0f, 0.0f);
 			alignment.Add (box);
 
-			Widget wrapper = (Widget)ObjectWrapper.Create (stetic, labelWidget);
+			Widget wrapper = (Widget)ObjectWrapper.Create (proj, labelWidget);
 			wrapper.Unselectable = true;
-			wrapper = (Widget)ObjectWrapper.Create (stetic, iconWidget);
+			wrapper = (Widget)ObjectWrapper.Create (proj, iconWidget);
 			wrapper.Unselectable = true;
-			wrapper = (Widget)ObjectWrapper.Create (stetic, box);
+			wrapper = (Widget)ObjectWrapper.Create (proj, box);
 			wrapper.Unselectable = true;
-			wrapper = (Widget)ObjectWrapper.Create (stetic, alignment);
+			wrapper = (Widget)ObjectWrapper.Create (proj, alignment);
 			wrapper.Unselectable = true;
 
 			alignment.ShowAll ();

@@ -9,7 +9,7 @@ libstetic_dll_sources =			\
 	HandleWindow.cs			\
 	ItemDescriptor.cs		\
 	ItemGroup.cs			\
-	IStetic.cs			\
+	IProject.cs			\
 	ObjectWrapper.cs		\
 	ParamSpec.cs			\
 	Placeholder.cs			\

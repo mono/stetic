@@ -172,7 +172,7 @@ namespace Stetic {
 
 		int counter;
 
-		public object NewInstance (IStetic stetic)
+		public object NewInstance (IProject proj)
 		{
 			object inst;
 
@@ -194,7 +194,7 @@ namespace Stetic {
 				}
 			}
 
-			ObjectWrapper.Create (stetic, inst, false);
+			ObjectWrapper.Create (proj, inst, false);
 			return inst;
 		}
 

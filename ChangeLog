@@ -1,3 +1,11 @@
+2005-07-19  Dan Winship  <danw@novell.com>
+
+	* libstetic/IProject.cs: rename IStetic to IProject
+
+	* libstetic/*.cs:
+	* libstetic/wrapper/*.cs:
+	* stetic/Project.cs: update
+
 2005-07-15  Dan Winship  <danw@novell.com>
 
 	* libstetic/PropertyDescriptor.cs (Translatable, IsTranslated,

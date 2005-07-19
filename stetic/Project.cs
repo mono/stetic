@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Stetic {
 
-	public class Project : IStetic {
+	public class Project : IProject {
 		Hashtable nodes;
 		NodeStore store;
 
@@ -157,7 +157,7 @@ namespace Stetic {
 
 		Gtk.Widget selection;
 
-		// IStetic
+		// IProject
 
 		public Gtk.Widget Selection {
 			get {
@@ -208,7 +208,7 @@ namespace Stetic {
 			return null;
 		}
 
-		public event ISteticDelegate GladeImportComplete;
+		public event IProjectDelegate GladeImportComplete;
 
 		public void BeginGladeImport ()
 		{

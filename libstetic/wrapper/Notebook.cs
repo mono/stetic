@@ -18,7 +18,7 @@ namespace Stetic.Wrapper {
 		public override Widget GladeImportChild (XmlElement child_elem)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "tab") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (stetic, child_elem["widget"]);
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (proj, child_elem["widget"]);
 				Gtk.Widget widget = (Gtk.Widget)wrapper.Wrapped;
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), widget);
 				tabs.Add (widget);

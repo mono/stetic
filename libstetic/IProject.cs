@@ -1,9 +1,9 @@
 using System;
 
 namespace Stetic {
-	public delegate void ISteticDelegate ();
+	public delegate void IProjectDelegate ();
 
-	public interface IStetic {
+	public interface IProject {
 		Gtk.Widget Selection { get; set; }
 
 		void PopupContextMenu (Stetic.Wrapper.Widget wrapper);
@@ -11,6 +11,6 @@ namespace Stetic {
 
 		Gtk.Widget LookupWidgetById (string id);
 
-		event ISteticDelegate GladeImportComplete;
+		event IProjectDelegate GladeImportComplete;
 	}
 }
