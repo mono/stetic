@@ -234,7 +234,7 @@ namespace Stetic.Wrapper {
 			set {
 				themedIcon = value;
 				ConstructContents ();
-				EmitNotify ("Icon");
+				EmitNotify ("ThemedIcon");
 			}
 		}
 
@@ -265,6 +265,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				responseId = value;
+				EmitNotify ("ResponseId");
 			}
 		}
 	}

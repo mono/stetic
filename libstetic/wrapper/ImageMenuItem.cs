@@ -54,6 +54,8 @@ namespace Stetic.Wrapper {
 					icon = new Gtk.Image (Gtk.Stock.MissingImage, Gtk.IconSize.Menu);
 
 				((Gtk.ImageMenuItem)Wrapped).Image = icon;
+
+				EmitNotify ("Image");
 			}
 		}
 	}

@@ -53,6 +53,8 @@ namespace Stetic.Wrapper {
 					toolbutton.IconWidget = new Gtk.Image (Gtk.Stock.MissingImage, Gtk.IconSize.SmallToolbar);
 					toolbutton.IconWidget.Show ();
 				}
+
+				EmitNotify ("Icon");
 			}
 		}
 	}

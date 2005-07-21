@@ -175,9 +175,10 @@ namespace Stetic.Wrapper {
 					return Wrapped.Visible;
 			}
 			set {
-				if (Wrapped is Gtk.Window)
+				if (Wrapped is Gtk.Window) {
 					window_visible = value;
-				else
+					EmitNotify ("Visible");
+				} else
 					Wrapped.Visible = value;
 			}
 		}
@@ -210,6 +211,7 @@ namespace Stetic.Wrapper {
 					InsensitiveManager.Remove (this);
 				else
 					InsensitiveManager.Add (this);
+				EmitNotify ("Sensitive");
 			}
 		}
 

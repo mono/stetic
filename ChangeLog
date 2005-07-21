@@ -1,3 +1,8 @@
+2005-07-21  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/*.cs: add a bunch of missing EmitNotify()
+	calls.
+
 2005-07-19  Dan Winship  <danw@novell.com>
 
 	* stetic/UIManager.cs: subclass of Gtk.UIManager for Stetic. Not

@@ -68,6 +68,8 @@ namespace Stetic.Wrapper {
 					image.Stock = iconName = value;
 				else
 					image.IconName = iconName = value;
+
+				EmitNotify ("IconName");
 			}
 		}
 
@@ -93,6 +95,8 @@ namespace Stetic.Wrapper {
 					filename = null;
 				} else
 					image.File = filename = value;
+
+				EmitNotify ("Filename");
 			}
 		}
 	}

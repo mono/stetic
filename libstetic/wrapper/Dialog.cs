@@ -67,6 +67,8 @@ namespace Stetic.Wrapper {
 					AddButton (null, 0, true);
 					break;
 				}
+
+				EmitNotify ("Buttons");
 			}
 		}
 
@@ -86,6 +88,8 @@ namespace Stetic.Wrapper {
 					helpButton.Destroy ();
 					helpButton = null;
 				}
+
+				EmitNotify ("HelpButton");
 			}
 		}
 

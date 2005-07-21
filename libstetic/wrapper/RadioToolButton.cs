@@ -53,6 +53,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				GroupManager[Wrapped] = value;
+				EmitNotify ("Group");
 			}
 		}
 	}

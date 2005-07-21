@@ -47,6 +47,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				modal = value;
+				EmitNotify ("Modal");
 			}
 		}
 
@@ -57,6 +58,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				typeHint = value;
+				EmitNotify ("TypeHint");
 			}
 		}
 
@@ -67,6 +69,7 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				type = value;
+				EmitNotify ("Type");
 			}
 		}
 
