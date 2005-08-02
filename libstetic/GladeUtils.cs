@@ -91,10 +91,8 @@ namespace Stetic {
 				if (enum_value == IntPtr.Zero)
 					throw new GladeException ("Could not parse");
 
-				IntPtr eval = Marshal.ReadIntPtr (enum_value);
-
-				string typeName = GLib.Marshaller.Utf8PtrToString (g_type_name (gtype));
-				return new GLib.Value (new GLib.EnumWrapper ((int)eval, false), typeName);
+				int eval = Marshal.ReadInt32 (enum_value);
+				return new GLib.Value (Enum.ToObject (GLib.GType.LookupType (gtype), eval));
 			} finally {
 				g_type_class_unref (enum_class);
 			}
@@ -113,12 +111,11 @@ namespace Stetic {
 					if (flags_value == IntPtr.Zero)
 						throw new GladeException ("Could not parse");
 
-					IntPtr bits = Marshal.ReadIntPtr (flags_value);
+					int bits = Marshal.ReadInt32 (flags_value);
 					fval |= (uint)bits;
 				}
 
-				string typeName = GLib.Marshaller.Utf8PtrToString (g_type_name (gtype));
-				return new GLib.Value (new GLib.EnumWrapper ((int)fval, true), typeName);
+				return new GLib.Value (Enum.ToObject (GLib.GType.LookupType (gtype), fval));
 			} finally {
 				g_type_class_unref (flags_class);
 			}
@@ -291,11 +288,7 @@ namespace Stetic {
 
 				try {
 					GLib.Value value = ParseProperty (prop.ParamSpec, prop.PropertyType, prop_elem.InnerText);
-					if (prop.PropertyType.IsEnum) {
-						GLib.EnumWrapper ewrap = (GLib.EnumWrapper)value;
-						prop.SetValue (wrapper.Wrapped, Enum.ToObject (prop.PropertyType, (int)ewrap));
-					} else
-						prop.SetValue (wrapper.Wrapped, value.Val);
+					prop.SetValue (wrapper.Wrapped, value.Val);
 				} catch (Exception e) {
 					throw new GladeException ("Could not parse property", wrapper.GetType ().ToString (), wrapper is Stetic.Wrapper.Container.ContainerChild, prop.GladeName, prop_elem.InnerText);
 				}
@@ -475,9 +468,6 @@ namespace Stetic {
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_fundamental (IntPtr gtype);
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_type_name (IntPtr gtype);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_class_ref (IntPtr gtype);

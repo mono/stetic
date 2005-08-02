@@ -652,6 +652,7 @@
 	    <itemgroup label="Image Properties">
 		<property name="Type" label="Image Type"
 			  description="Whether to use a themed icon or an application-provided image" />
+		<property name="Stock" internal="true" />
 		<property name="IconName" label="Icon name"
 			  description="The themed icon to display"
 			  editor="Stetic.Editor.ThemedIcon">
@@ -755,8 +756,10 @@
 		<property name="ShowTabs" />
 		<property name="Scrollable" />
 		<property name="BorderWidth" />
-		<command ref="InsertBefore" />
-		<command ref="InsertAfter" />
+		<command name="InsertBefore" label="Insert Page Before"
+			 description="Insert a blank page before this one" />
+		<command name="InsertAfter" label="Insert Page After"
+			 description="Insert a blank page after this one" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -775,10 +778,8 @@
 	    <command name="SwapNext" label="Swap with Next Page"
 		     description="Swap the contents of this page with the contents of the next page"
 		     check="CheckNextPage" />
-	    <command name="InsertBefore" label="Insert Page Before"
-		     description="Insert a blank page before this one" />
-	    <command name="InsertAfter" label="Insert Page After"
-		     description="Insert a blank page after this one" />
+	    <command ref="InsertBefore" />
+	    <command ref="InsertAfter" />
 	</contextmenu>
     </object>
     <object type="Gtk.Notebook+NotebookChild,gtk-sharp">

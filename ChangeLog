@@ -1,3 +1,18 @@
+2005-08-02  Dan Winship  <danw@novell.com>
+
+	* libstetic/GladeUtils.cs (ParseEnum, ParseFlags, PropToString):
+	use Enum rather than obsolete EnumWrapper
+
+	* libstetic/editor/Translatable.cs (ButtonPressed): Use
+	non-obsolete Gtk.Menu.Popup().
+
+	* libstetic/wrapper/objects.xml: add "Stock" internal property to
+	Image so that stock images load correctly again. Fix
+	Gtk.Notebook's InsertBefore and InsertAfter commands.
+
+	* stetic/ContextMenu.cs (ContextMenu): work around another
+	anonymous delegates bug (75689)
+
 2005-07-21  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/*.cs: add a bunch of missing EmitNotify()

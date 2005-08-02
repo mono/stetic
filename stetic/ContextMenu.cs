@@ -49,8 +49,9 @@ namespace Stetic {
 				foreach (CommandDescriptor cmd in klass.ContextMenu) {
 					item = new MenuItem (cmd.Label);
 					if (cmd.Enabled (widget, context)) {
+						Gtk.Widget wdup = widget, cdup = context; // FIXME bxc 75689
 						item.Activated += delegate (object o, EventArgs args) {
-							cmd.Run (widget, context);
+							cmd.Run (wdup, cdup);
 						};
 					} else
 						item.Sensitive = false;
