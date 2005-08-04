@@ -79,6 +79,12 @@ namespace Stetic {
 			}
 		}
 
+		public IProject Project {
+			get {
+				return proj;
+			}
+		}
+
 		public delegate void WrapperNotificationDelegate (object obj, string propertyName);
 		public event WrapperNotificationDelegate Notify;
 

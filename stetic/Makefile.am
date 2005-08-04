@@ -2,6 +2,7 @@ pkglib_DATA = stetic.exe
 bin_SCRIPTS = stetic
 
 stetic_exe_sources =			\
+	Clipboard.cs			\
 	ContextMenu.cs			\
 	Glade.cs			\
 	Grid.cs				\

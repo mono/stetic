@@ -7,6 +7,136 @@ namespace Stetic {
 
 	public static class GladeUtils {
 
+		public const string Glade20SystemId = "http://glade.gnome.org/glade-2.0.dtd";
+
+		static Gdk.Atom gladeAtom;
+		public static Gdk.Atom ApplicationXGladeAtom {
+			get {
+				if (gladeAtom == null)
+					gladeAtom = Gdk.Atom.Intern ("application/x-glade", false);
+				return gladeAtom;
+			}
+		}
+
+		public static XmlDocument XslImportTransform (XmlDocument doc)
+		{
+			XmlDocumentType doctype = doc.DocumentType;
+			if (doctype == null ||
+			    doctype.Name != "glade-interface" ||
+			    doctype.SystemId != Glade20SystemId)
+				throw new GladeException ("Not a glade file according to doctype");
+
+			XmlReader reader = Registry.GladeImportXsl.Transform (doc, null, (XmlResolver)null);
+			doc = new XmlDocument ();
+			doc.PreserveWhitespace = true;
+			doc.Load (reader);
+
+			return doc;
+		}
+
+		public static XmlDocument XslExportTransform (XmlDocument doc)
+		{
+			XmlReader reader = Registry.GladeExportXsl.Transform (doc, null, (XmlResolver)null);
+			doc = new XmlDocument ();
+			doc.PreserveWhitespace = true;
+			doc.Load (reader);
+
+			XmlDocumentType doctype = doc.CreateDocumentType ("glade-interface", null, Glade20SystemId, null);
+			doc.PrependChild (doctype);
+
+			return doc;
+		}
+
+		public static void Copy (Gtk.Widget widget, Gtk.SelectionData seldata, bool copyAsText)
+		{
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
+			if (wrapper == null)
+				return;
+
+			XmlDocument doc = new XmlDocument ();
+			doc.PreserveWhitespace = true;
+
+			XmlElement toplevel = doc.CreateElement ("glade-interface");
+			doc.AppendChild (toplevel);
+
+			// For toplevel widgets, glade just saves it as-is. For
+			// non-toplevels, it puts the widget into a dummy GtkWindow,
+			// but using the packing attributes of the widget's real
+			// container (so as to preserve expand/fill settings and the
+			// like).
+
+			XmlElement elem;
+			Stetic.Wrapper.Container parent = wrapper.ParentWrapper;
+
+			if (parent == null) {
+				elem = wrapper.GladeExport (doc);
+				if (elem == null)
+					return;
+				if (!(widget is Gtk.Window)) {
+					XmlElement window = doc.CreateElement ("widget");
+					window.SetAttribute ("class", "GtkWindow");
+					window.SetAttribute ("id", "glade-dummy-container");
+					XmlElement child = doc.CreateElement ("child");
+					window.AppendChild (child);
+					child.AppendChild (elem);
+					elem = window;
+				}
+			} else {
+				elem = doc.CreateElement ("widget");
+				// Set the class correctly (temporarily) so the XSL
+				// transforms will work correctly.
+				ClassDescriptor klass = Registry.LookupClass (parent.Wrapped.GetType ());
+				elem.SetAttribute ("class", klass.CName);
+				elem.AppendChild (parent.GladeExportChild (wrapper, doc));
+			}
+			toplevel.AppendChild (elem);
+
+			doc = XslExportTransform (doc);
+
+			if (parent != null) {
+				elem = (XmlElement)doc.SelectSingleNode ("glade-interface/widget");
+				elem.SetAttribute ("class", "GtkWindow");
+				elem.SetAttribute ("id", "glade-dummy-container");
+			}
+
+			if (copyAsText)
+				seldata.Text = doc.OuterXml;
+			else
+				seldata.Set (ApplicationXGladeAtom, 8, System.Text.Encoding.UTF8.GetBytes (doc.OuterXml));
+		}
+
+		public static Stetic.Wrapper.Widget Paste (IProject project, Gtk.SelectionData seldata)
+		{
+			if (seldata.Type != ApplicationXGladeAtom)
+				return null;
+			string data = System.Text.Encoding.UTF8.GetString (seldata.Data);
+
+			XmlDocument doc = new XmlDocument ();
+			doc.PreserveWhitespace = true;
+			try {
+				doc.LoadXml (data);
+				doc = XslImportTransform (doc);
+			} catch {
+				return null;
+			}
+
+			XmlElement elem = (XmlElement)doc.SelectSingleNode ("glade-interface/widget");
+			if (elem.GetAttribute ("class") != "GtkWindow" ||
+			    elem.GetAttribute ("id") != "glade-dummy-container") {
+				// Creating a new toplevel
+				Stetic.Wrapper.Widget toplevel = (Stetic.Wrapper.Widget)
+					Stetic.ObjectWrapper.GladeImport (project, elem);
+				if (toplevel != null) {
+					project.AddWindow ((Gtk.Window)toplevel.Wrapped);
+					toplevel.Wrapped.Show ();
+				}
+				return toplevel;
+			}
+
+			return (Stetic.Wrapper.Widget)
+				Stetic.ObjectWrapper.GladeImport (project, (XmlElement)elem.SelectSingleNode ("child/widget"));
+		}
+
 		static object GetProperty (XmlElement elem, string selector, object defaultValue, bool extract)
 		{
 			XmlElement prop = (XmlElement)elem.SelectSingleNode (selector);
@@ -322,6 +452,10 @@ namespace Stetic {
 
 		static public void SetPacking (Stetic.Wrapper.Container.ContainerChild wrapper, XmlElement child_elem)
 		{
+			XmlElement packing = child_elem["packing"];
+			if (packing == null)
+				return;
+
 			Gtk.Container.ContainerChild cc = wrapper.Wrapped as Gtk.Container.ContainerChild;
 
 			ClassDescriptor klass = Registry.LookupClass (cc.GetType ());
@@ -329,7 +463,7 @@ namespace Stetic {
 				throw new GladeException ("No stetic ClassDescriptor for " + cc.GetType ().FullName);
 
 			Hashtable rawProps, overrideProps;
-			ExtractProperties (klass, child_elem["packing"], out rawProps, out overrideProps);
+			ExtractProperties (klass, packing, out rawProps, out overrideProps);
 
 			string[] propNames;
 			GLib.Value[] propVals;

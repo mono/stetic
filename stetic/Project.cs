@@ -177,7 +177,7 @@ namespace Stetic {
 				selection = value;
 
 				if (Selected != null)
-					Selected (selection, nodes[selection] as ProjectNode);
+					Selected (selection, selection == null ? null : nodes[selection] as ProjectNode);
 			}
 		}
 

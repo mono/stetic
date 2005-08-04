@@ -127,25 +127,13 @@ namespace Stetic {
 			Console.WriteLine ("Redo");
 		}
 
-		public void Cut (Gtk.Widget widget)
-		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			Console.WriteLine ("Cut {0}", wrapper == null ? widget.ToString () : wrapper.ToString ());
-		}
-
 		void Cut (object obj, EventArgs e)
 		{
 			Gtk.Editable focus = Focus;
 			if (focus != null)
 				focus.CutClipboard ();
 			else if (project.Selection != null)
-				Cut (project.Selection);
-		}
-
-		public void Copy (Gtk.Widget widget)
-		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			Console.WriteLine ("Copy {0}", wrapper == null ? widget.ToString () : wrapper.ToString ());
+				Clipboard.Cut (project.Selection);
 		}
 
 		void Copy (object obj, EventArgs e)
@@ -154,13 +142,7 @@ namespace Stetic {
 			if (focus != null)
 				focus.CopyClipboard ();
 			else if (project.Selection != null)
-				Copy (project.Selection);
-		}
-
-		public void Paste (Gtk.Widget widget)
-		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			Console.WriteLine ("Paste into {0}", wrapper == null ? widget.ToString () : wrapper.ToString ());
+				Clipboard.Copy (project.Selection);
 		}
 
 		void Paste (object obj, EventArgs e)
@@ -169,7 +151,7 @@ namespace Stetic {
 			if (focus != null)
 				focus.PasteClipboard ();
 			else if (project.Selection != null)
-				Paste (project.Selection);
+				Clipboard.Paste (project.Selection as Placeholder);
 		}
 
 		public void Delete (Gtk.Widget widget)

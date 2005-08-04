@@ -19,7 +19,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			if (oldChild == paned.Child1) {
 				paned.Remove (oldChild);

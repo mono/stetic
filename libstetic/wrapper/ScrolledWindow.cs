@@ -30,12 +30,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override IEnumerable GladeChildren {
-			get {
-				return base.RealChildren;
-			}
-		}
-
 		void AddWithViewport (Gtk.Widget child)
 		{
 			Gtk.Viewport viewport = new Gtk.Viewport (scrolled.Hadjustment, scrolled.Vadjustment);
@@ -46,7 +40,7 @@ namespace Stetic.Wrapper {
 			scrolled.Add (viewport);
 		}
 
-		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			if (scrolled.Child is Gtk.Viewport)
 				((Gtk.Viewport)scrolled.Child).Remove (oldChild);

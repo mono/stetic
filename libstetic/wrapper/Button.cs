@@ -24,6 +24,7 @@ namespace Stetic.Wrapper {
 			} else if (button.Child is Gtk.Label) {
 				type = ButtonType.TextOnly;
 				label = button.Label;
+				useUnderline = button.UseUnderline;
 			} else {
 				type = ButtonType.Custom;
 				FixupGladeChildren ();
@@ -33,9 +34,6 @@ namespace Stetic.Wrapper {
 		public override void GladeImport (XmlElement elem)
 		{
 			base.GladeImport (elem);
-			if (elem.SelectSingleNode ("./property[@name='label']") == null &&
-			    elem.SelectSingleNode ("./child/widget") == null)
-				button.Remove (button.Child);
 		}
 
 		public override Widget GladeImportChild (XmlElement child_elem)
@@ -85,8 +83,8 @@ namespace Stetic.Wrapper {
 		public override XmlElement GladeExport (XmlDocument doc)
 		{
 			XmlElement elem = base.GladeExport (doc);
-			GladeUtils.SetProperty (elem, "use_stock",
-						(Type == ButtonType.StockItem) ? "True" : "False");
+			if (Type == ButtonType.StockItem)
+				GladeUtils.SetProperty (elem, "label", stockId);
 			return elem;
 		}
 
@@ -104,7 +102,7 @@ namespace Stetic.Wrapper {
 				if (type == ButtonType.StockItem || type == ButtonType.TextOnly)
 					return new Gtk.Widget[0];
 				else
-					return base.RealChildren;
+					return base.GladeChildren;
 			}
 		}
 
@@ -136,18 +134,22 @@ namespace Stetic.Wrapper {
 					StockId = stockId;
 					break;
 				case ButtonType.TextOnly:
+					labelWidget = null;
 					button.UseStock = false;
 					button.Image = null;
 					Label = label;
+					UseUnderline = useUnderline;
 					break;
 				case ButtonType.ThemedIcon:
 					button.UseStock = false;
 					Label = label;
+					UseUnderline = useUnderline;
 					ThemedIcon = themedIcon;
 					break;
 				case ButtonType.ApplicationIcon:
 					button.UseStock = false;
 					Label = label;
+					UseUnderline = useUnderline;
 					ApplicationIcon = applicationIcon;
 					break;
 				case ButtonType.Custom:
@@ -160,15 +162,16 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		Gtk.Label labelWidget;
+
 		void ConstructContents ()
 		{
-			Gtk.Label labelWidget;
 			Gtk.Image iconWidget;
 
 			if (button.Child != null)
 				button.Remove (button.Child);
 
-			if (button.UseUnderline) {
+			if (useUnderline) {
 				labelWidget = new Gtk.Label (label);
 				labelWidget.MnemonicWidget = button;
 			} else
@@ -208,8 +211,10 @@ namespace Stetic.Wrapper {
 				button.Label = stockId = value;
 				button.UseStock = true;
 				Gtk.StockItem item = Gtk.Stock.Lookup (value);
-				if (item.StockId == value)
+				if (item.StockId == value) {
 					label = item.Label;
+					useUnderline = true;
+				}
 				EmitNotify ("StockId");
 			}
 		}
@@ -245,7 +250,24 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				label = value;
-				button.Label = value;
+				if (labelWidget != null)
+					labelWidget.LabelProp = value;
+				else
+					button.Label = value;
+			}
+		}
+
+		bool useUnderline;
+		public bool UseUnderline {
+			get {
+				return useUnderline;
+			}
+			set {
+				useUnderline = value;
+				if (labelWidget != null)
+					labelWidget.UseUnderline = value;
+				else
+					button.UseUnderline = value;
 			}
 		}
 

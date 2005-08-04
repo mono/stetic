@@ -49,7 +49,7 @@ namespace Stetic.Wrapper {
 			base.Select (wrapper);
 		}
 
-		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			int index = tabs.IndexOf (oldChild);
 			if (index != -1) {

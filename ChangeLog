@@ -1,3 +1,71 @@
+2005-08-04  Dan Winship  <danw@novell.com>
+
+	Support cut+paste of widgets, including interprocess cut+paste and
+	drag+drop. (For some reason, it is very slow when going
+	cross-process...)
+	
+	* libstetic/GladeUtils.cs (ApplicationXGladeAtom): Gdk.Atom for
+	glade selections.
+	(XslImportTransform, XslExportTransform): do the import/export xsl
+	fixups.
+	(Copy): copy a glade representation of a widget into a
+	Gtk.SelectionData (in the same format that glade uses for its own
+	internal clipboard).
+	(Paste): generate a widget from a glade representation in a
+	Gtk.SelectionData.
+
+	* libstetic/DND.cs (targetList): add application/x-glade to the
+	supported target types.
+	(Drag): connect to the source's DragDataGet signal
+	(Drop): if asked to drop an out-of-proc widget, call
+	Gtk.Drag.GetData and return null.
+	(DragDataGet): Respond by calling GladeUtils.Copy
+	(FaultDragDrop, FaultDragDataReceived): update to be able to deal
+	with receiving an out-of-proc widget
+
+	* libstetic/ObjectWrapper.cs (Project): new public property to get
+	the wrapper's Project
+
+	* libstetic/wrapper/Container.cs (GladeExport): create
+	<placeholder> elements as appropriate.
+	(CreatePlaceholder): connect to DragDataReceived.
+	(PlaceholderDragDataReceived): Paste the received widget data into
+	place.
+	(GladeChildren): return AllChildren, not RealChildren, because we
+	want to include placeholders.
+	(ReplaceChild): make this public
+
+	* libstetic/wrapper/Button.cs (UseUnderline): wrap this; we can't
+	set it directly on the button when we have a special icon set.
+	(GladeImport): Remove a useless special case.
+	(GladeExport): Set the "label" property when the button has a
+	stock id.
+	(GladeChildren): return base.GladeChildren, not base.RealChildren.
+
+	* libstetic/wrapper/ScrolledWindow.cs (GladeChildren): don't need
+	to override any more.
+
+	* libstetic/wrapper/objects.xml (Gtk.Button): add UseStock as an
+	internal property.
+	(Gtk.ColorButton): Remove the "Color" property, since we have no
+	way to serialize it.
+	(Gtk.ColorSelection): Likewise for CurrentColor here.
+
+	* stetic/Clipboard.cs: new static class with some cut/paste helper
+	routines.
+
+	* stetic/ContextMenu.cs (DoCut, DoCopy, DoPaste, DoDelete): update
+	to use Clipboard
+
+	* stetic/Glade.cs: use GladeUtils.XslImportTransform and
+	XslExportTransform.
+
+	* stetic/Project.cs (Selection): don't crash when clearing the
+	selection
+
+	* stetic/UIManager.cs (Cut, Copy, Paste): Implement these for
+	widgets as well as text.
+
 2005-08-02  Dan Winship  <danw@novell.com>
 
 	* libstetic/GladeUtils.cs (ParseEnum, ParseFlags, PropToString):

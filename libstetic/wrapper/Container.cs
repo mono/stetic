@@ -123,12 +123,16 @@ namespace Stetic.Wrapper {
 		public override XmlElement GladeExport (XmlDocument doc)
 		{
 			XmlElement elem = base.GladeExport (doc);
+			XmlElement child_elem;
 
 			foreach (Gtk.Widget child in GladeChildren) {
 				Widget wrapper = Widget.Lookup (child);
-				if (wrapper == null)
-					continue;
-				XmlElement child_elem = GladeExportChild (wrapper, doc);
+				if (wrapper != null)
+					child_elem = GladeExportChild (wrapper, doc);
+				else {
+					child_elem = doc.CreateElement ("child");
+					child_elem.AppendChild (doc.CreateElement ("placeholder"));
+				}
 				elem.AppendChild (child_elem);
 			}
 
@@ -221,6 +225,7 @@ namespace Stetic.Wrapper {
 			Placeholder ph = new Placeholder ();
 			ph.Show ();
 			ph.DragDrop += PlaceholderDragDrop;
+			ph.DragDataReceived += PlaceholderDragDataReceived;
 			ph.ButtonPressEvent += PlaceholderButtonPress;
 			AutoSize[ph] = true;
 			return ph;
@@ -242,20 +247,30 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		void PlaceholderDrop (Placeholder ph, Stetic.Wrapper.Widget wrapper)
+		{
+			ReplaceChild (ph, wrapper.Wrapped);
+			ph.Destroy ();
+			wrapper.Select ();
+		}
+
 		void PlaceholderDragDrop (object obj, Gtk.DragDropArgs args)
 		{
-			Placeholder ph = obj as Placeholder;
-			Gtk.Widget dropped = DND.Drop (args.Context, args.Time);
-			if (dropped == null)
-				return;
+			Placeholder ph = (Placeholder)obj;
+			Widget dropped = DND.Drop (args.Context, ph, args.Time);
+			if (dropped != null) {
+				PlaceholderDrop (ph, dropped);
+				args.RetVal = true;
+			}
+		}
 
-			ReplaceChild (ph, dropped);
-			ph.Destroy ();
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (dropped);
-			if (wrapper != null)
-				wrapper.Select ();
-			EmitContentsChanged ();
-			args.RetVal = true;
+		void PlaceholderDragDataReceived (object obj, Gtk.DragDataReceivedArgs args)
+		{
+			Widget dropped = GladeUtils.Paste (proj, args.SelectionData);
+			Gtk.Drag.Finish (args.Context, dropped != null,
+					 dropped != null, args.Time);
+			if (dropped != null)
+				PlaceholderDrop ((Placeholder)obj, dropped);
 		}
 
 		protected virtual void ChildContentsChanged (Container child) {
@@ -286,11 +301,11 @@ namespace Stetic.Wrapper {
 
 		public virtual IEnumerable GladeChildren {
 			get {
-				return RealChildren;
+				return container.AllChildren;
 			}
 		}
 
-		protected virtual void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		public virtual void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			Gtk.Container.ContainerChild cc;
 			Hashtable props = new Hashtable ();

@@ -121,22 +121,24 @@ namespace Stetic {
 
 		void DoCut (object obj, EventArgs args)
 		{
-			SteticMain.UIManager.Cut (widget);
+			Clipboard.Cut (widget);
 		}
 
 		void DoCopy (object obj, EventArgs args)
 		{
-			SteticMain.UIManager.Copy (widget);
+			Clipboard.Copy (widget);
 		}
 
 		void DoPaste (object obj, EventArgs args)
 		{
-			SteticMain.UIManager.Paste (widget);
+			Clipboard.Paste (widget as Placeholder);
 		}
 
 		void DoDelete (object obj, EventArgs args)
 		{
-			SteticMain.UIManager.Delete (widget);
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
+			if (wrapper != null)
+				wrapper.Delete ();
 		}
 
 		static MenuItem LabelItem (Gtk.Widget widget)

@@ -118,7 +118,7 @@ namespace Stetic.Wrapper {
 			return index;
 		}
 
-		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			ToolItemize (newChild, ToolDeItemize (oldChild));
 		}

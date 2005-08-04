@@ -266,6 +266,7 @@
 	    label="Button" icon="button.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Button Properties">
+		<property name="UseStock" internal="true" />
 		<property name="Type" label="Button Type"
 			  description="The type of button" />
 		<property name="StockId" label="Stock Item"
@@ -417,7 +418,6 @@
 	<itemgroups>
 	    <itemgroup label="Color Button Properties">
 		<property name="Title" translatable="true" />
-		<property name="Color" />
 		<property name="UseAlpha" internal="true" />
 		<property name="Alpha" min="-1" max="65535" />
 	    </itemgroup>
@@ -1294,12 +1294,8 @@
 	    hexpandable="true" vexpandable="true">
 	<itemgroups>
 	    <itemgroup label="Color Selection Properties">
-		<property name="CurrentColor" />
 		<property name="HasPalette" />
 		<property name="HasOpacityControl" />
-		<property name="CurrentAlpha">
-		    <disabled-if name="HasOpacityControl" value="false" />
-		</property>
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>

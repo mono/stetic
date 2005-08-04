@@ -45,7 +45,7 @@ namespace Stetic.Wrapper {
 			HasLabel = true;
 		}
 
-		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			base.ReplaceChild (oldChild, newChild);
 			EmitNotify ("HasContents");

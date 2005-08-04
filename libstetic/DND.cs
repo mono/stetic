@@ -8,15 +8,20 @@ namespace Stetic {
 		static Gtk.TargetList targetList;
 		static Gdk.Atom steticWidgetType;
 
+		const int SteticType = 0;
+		const int GladeType = 1;
+
 		static DND ()
 		{
 			steticWidgetType = Gdk.Atom.Intern ("application/x-stetic-widget", false);
 
-			targets = new Gtk.TargetEntry[1];
-			targets[0] = new Gtk.TargetEntry ("application/x-stetic-widget", 0, 0);
+			targets = new Gtk.TargetEntry[2];
+			targets[0] = new Gtk.TargetEntry ("application/x-stetic-widget", 0, SteticType);
+			targets[1] = new Gtk.TargetEntry ((string)GladeUtils.ApplicationXGladeAtom, 0, GladeType);
 
 			targetList = new Gtk.TargetList ();
 			targetList.Add (steticWidgetType, 0, 0);
+			targetList.Add (GladeUtils.ApplicationXGladeAtom, 0, 1);
 		}
 
 		public static void SourceSet (Gtk.Widget source)
@@ -82,8 +87,10 @@ namespace Stetic {
 			dragWin.Show ();
 			Gtk.Drag.SetIconWidget (ctx, dragWin, 0, 0);
 
-			if (source != null)
+			if (source != null) {
+				source.DragDataGet += DragDataGet;
 				source.DragEnd += DragEnded;
+			}
 		}
 
 		public static Gtk.Widget DragWidget {
@@ -93,19 +100,16 @@ namespace Stetic {
 		}
 
 		// Call this from a DragDrop event to receive the dragged widget
-		public static Gtk.Widget Drop (Gdk.DragContext ctx, uint time)
+		public static Stetic.Wrapper.Widget Drop (Gdk.DragContext ctx, Gtk.Widget target, uint time)
 		{
 			if (dragWidget == null) {
-				// This would only happen if you dragged from another
-				// process. Maybe in the future we could handle that by
-				// serializing to glade format. But not yet.
-				Gtk.Drag.Finish (ctx, false, false, time);
+				Gtk.Drag.GetData (target, ctx, GladeUtils.ApplicationXGladeAtom, time);
 				return null;
 			}
 
 			Gtk.Widget w = Cancel ();
 			Gtk.Drag.Finish (ctx, true, true, time);
-			return w;
+			return Stetic.Wrapper.Widget.Lookup (w);
 		}
 
 		// Call this from a DragEnd event to check if the widget wasn't dropped
@@ -129,6 +133,16 @@ namespace Stetic {
 			HideFaults ();
 
 			((Gtk.Widget)obj).DragEnd -= DragEnded;
+			((Gtk.Widget)obj).DragDataGet -= DragDataGet;
+		}
+
+		static void DragDataGet (object obj, Gtk.DragDataGetArgs args)
+		{
+			if (args.Info == GladeType) {
+				Gtk.Widget w = Cancel ();
+				if (w != null)
+					GladeUtils.Copy (w, args.SelectionData, false);
+			}
 		}
 
 		class Fault {
@@ -175,6 +189,7 @@ namespace Stetic {
 				widget.DragMotion += FaultDragMotion;
 				widget.DragLeave += FaultDragLeave;
 				widget.DragDrop += FaultDragDrop;
+				widget.DragDataReceived += FaultDragDataReceived;
 				DND.DestSet (widget, false);
 			}
 			widgetFaults[win] = new Fault (owner, faultId, orientation, win);
@@ -431,21 +446,34 @@ namespace Stetic {
 			dragFault = null;
 		}
 
+		static void FaultDrop (Stetic.Wrapper.Widget wrapper, int x, int y)
+		{
+			Fault fault;
+			FindFault (x, y, out fault);
+			fault.Owner.Drop (wrapper.Wrapped, fault.Id);
+			wrapper.Select ();
+		}
+
 		static void FaultDragDrop (object obj, Gtk.DragDropArgs args)
 		{
-			Gtk.Widget dragged = DND.Drop (args.Context, args.Time);
-			if (dragged == null)
-				return;
+			Stetic.Wrapper.Widget dropped = DND.Drop (args.Context, (Gtk.Widget)obj, args.Time);
+			if (dropped != null) {
+				FaultDrop (dropped, args.X, args.Y);
+				args.RetVal = true;
+			}
+		}
 
-			Fault fault;
-			FindFault (args.X, args.Y, out fault);
-			fault.Owner.Drop (dragged, fault.Id);
+		static void FaultDragDataReceived (object obj, Gtk.DragDataReceivedArgs args)
+		{
+			Stetic.Wrapper.Widget dropped = null;
 
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (dragged);
-			if (wrapper != null)
-				wrapper.Select ();
-
-			args.RetVal = true;
+			Stetic.Wrapper.Widget faultOwner = Stetic.Wrapper.Widget.Lookup ((Gtk.Widget)obj);
+			if (faultOwner != null)
+				dropped = GladeUtils.Paste (faultOwner.Project, args.SelectionData);
+			Gtk.Drag.Finish (args.Context, dropped != null,
+					 dropped != null, args.Time);
+			if (dropped != null)
+				FaultDrop (dropped, args.X, args.Y);
 		}
 
 		static Gdk.Window NewWindow (Gtk.Widget parent, Gdk.WindowClass wclass)

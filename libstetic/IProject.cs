@@ -12,5 +12,7 @@ namespace Stetic {
 		Gtk.Widget LookupWidgetById (string id);
 
 		event IProjectDelegate GladeImportComplete;
+
+		void AddWindow (Gtk.Window window);
 	}
 }

@@ -10,23 +10,12 @@ namespace Stetic {
 
 	public static class GladeFiles {
 
-		public const string Glade20SystemId = "http://glade.gnome.org/glade-2.0.dtd";
-
 		public static void Import (Project project, string filename)
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
 			doc.Load (filename);
-
-			XmlDocumentType doctype = doc.DocumentType;
-			if (doctype == null ||
-			    doctype.Name != "glade-interface" ||
-			    doctype.SystemId != Glade20SystemId)
-				throw new ApplicationException ("Not a glade file according to doctype");
-
-			XmlReader reader = Registry.GladeImportXsl.Transform (doc, null, (XmlResolver)null);
-			doc = new XmlDocument ();
-			doc.Load (reader);
+			doc = GladeUtils.XslImportTransform (doc);
 
 			XmlNode node = doc.SelectSingleNode ("/glade-interface");
 			if (node == null)
@@ -59,12 +48,7 @@ namespace Stetic {
 					toplevel.AppendChild (elem);
 			}
 
-			XmlReader reader = Registry.GladeExportXsl.Transform (doc, null, (XmlResolver)null);
-			doc = new XmlDocument ();
-			doc.Load (reader);
-
-			XmlDocumentType doctype = doc.CreateDocumentType ("glade-interface", null, Glade20SystemId, null);
-			doc.PrependChild (doctype);
+			doc = GladeUtils.XslExportTransform (doc);
 
 			// FIXME; if you use UTF8, it starts with a BOM???
 			XmlTextWriter writer = new XmlTextWriter (filename, System.Text.Encoding.ASCII);
