@@ -743,10 +743,7 @@
 	<itemgroups>
 	    <itemgroup label="Notebook Properties">
 		<property name="EnablePopup" />
-		<property name="Homogeneous" />
 		<property name="TabPos" />
-		<property name="TabHborder" />
-		<property name="TabVborder" />
 		<property name="ShowBorder" />
 		<property name="ShowTabs" />
 		<property name="Scrollable" />

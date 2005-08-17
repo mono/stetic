@@ -6,6 +6,7 @@
 	to be "container".
 	(Frame): Remove the Label property, as with Expander. Also remove
 	the redundant and deprecated "Shadow" property.
+	(Notebook): Remove some deprecated properties
 
 	* libstetic/wrapper/Expander.cs (Wrap): create an ObjectWrapper
 	for the expander's LabelWidget
