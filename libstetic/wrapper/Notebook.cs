@@ -11,8 +11,13 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-			if (!initialized)
+			if (!initialized) {
+				if (notebook.Children.Length != 0) {
+					// Remove the dummy page Container.Wrap added
+					notebook.Remove (notebook.Children[0]);
+				}
 				InsertPage (0);
+			}
 		}
 
 		public override Widget GladeImportChild (XmlElement child_elem)
@@ -43,9 +48,11 @@ namespace Stetic.Wrapper {
 
 		public override void Select (Stetic.Wrapper.Widget wrapper)
 		{
-			int index = tabs.IndexOf (wrapper.Wrapped);
-			if (index != -1 && index != notebook.CurrentPage)
-				notebook.CurrentPage = index;
+			if (wrapper != null) {
+				int index = tabs.IndexOf (wrapper.Wrapped);
+				if (index != -1 && index != notebook.CurrentPage)
+					notebook.CurrentPage = index;
+			}
 			base.Select (wrapper);
 		}
 

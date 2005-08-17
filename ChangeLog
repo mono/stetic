@@ -1,3 +1,22 @@
+2005-08-17  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/objects.xml (Expander): Remove "Label",
+	"UseMarkup", and "UseUnderline" properties; we'll treat the label
+	as a child widget now, like Glade does. Also fix palette-category
+	to be "container".
+	(Frame): Remove the Label property, as with Expander. Also remove
+	the redundant and deprecated "Shadow" property.
+
+	* libstetic/wrapper/Expander.cs (Wrap): create an ObjectWrapper
+	for the expander's LabelWidget
+	(ReplaceChild): deal with LabelWidget
+
+	* libstetic/wrapper/Frame.cs: Likewise
+
+	* libstetic/wrapper/Notebook.cs (Wrap): remove the dummy page that
+	will have been added by Container.Wrap.
+	(Select): don't crash if the passed-in wrapper is null
+
 2005-08-04  Dan Winship  <danw@novell.com>
 
 	Support cut+paste of widgets, including interprocess cut+paste and

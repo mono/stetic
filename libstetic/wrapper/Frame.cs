@@ -19,6 +19,7 @@ namespace Stetic.Wrapper {
 				align_wrapper.AddPlaceholder ();
 				ReplaceChild (frame.Child, (Gtk.Widget)align_wrapper.Wrapped);
 			}
+			ObjectWrapper.Create (proj, frame.LabelWidget);
 		}
 
 		Gtk.Frame frame {
@@ -43,6 +44,14 @@ namespace Stetic.Wrapper {
 			if (wrapper.Wrapped == frame.LabelWidget)
 				GladeUtils.SetChildProperty (child_elem, "type", "label_item");
 			return child_elem;
+		}
+
+		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		{
+			if (oldChild == frame.LabelWidget)
+				frame.LabelWidget = newChild;
+			else
+				base.ReplaceChild (oldChild, newChild);
 		}
 	}
 }

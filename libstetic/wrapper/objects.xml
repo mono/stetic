@@ -529,13 +529,10 @@
     </object>
 
     <object type="Gtk.Expander,gtk-sharp" wrapper="Stetic.Wrapper.Expander"
-	    label="Expander" icon="expander.png" palette-category="widget">
+	    label="Expander" icon="expander.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Expander Properties">
 		<property name="Expanded" />
-		<property name="Label" init-with-name="true" translatable="true" />
-		<property name="UseMarkup" />
-		<property name="UseUnderline" />
 		<property name="Spacing" />
 		<property name="BorderWidth" />
 	    </itemgroup>
@@ -565,9 +562,7 @@
 	    label="Frame" icon="frame.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Frame Properties">
-		<property name="Shadow" />
 		<property name="ShadowType" />
-		<property name="Label" translatable="true" />
 		<property name="LabelXalign" />
 		<property name="LabelYalign" />
 		<property name="BorderWidth" />

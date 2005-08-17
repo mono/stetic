@@ -11,6 +11,16 @@ namespace Stetic.Wrapper {
 			return new Gtk.Expander ("");
 		}
 
+		public override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
+			if (!initialized) {
+				expander.Label = expander.Name;
+				AddPlaceholder ();
+			}
+			ObjectWrapper.Create (proj, expander.LabelWidget);
+		}
+
 		public override Widget GladeImportChild (XmlElement child_elem)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "label_item") {
@@ -33,6 +43,14 @@ namespace Stetic.Wrapper {
 			get {
 				return (Gtk.Expander)Wrapped;
 			}
+		}
+
+		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		{
+			if (oldChild == expander.LabelWidget)
+				expander.LabelWidget = newChild;
+			else
+				base.ReplaceChild (oldChild, newChild);
 		}
 	}
 }
