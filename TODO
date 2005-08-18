@@ -1,7 +1,5 @@
 Application UI:
 
-    - A real main window, with menus and a toolbar and all that.
-
     - Figure out how to organize the various windows
 
     - L10n/I18n
@@ -21,6 +19,7 @@ UI-Designing UI:
 		- "Buttons" should automatically switch to "Custom" if
 		  you add/remove them.
 		- "Buttons" menu labels need to be better
+		- action_area is currently broken on glade import
 
 	- Notebook has a few problems:
 		- should the child properties appear as properties of
@@ -37,22 +36,27 @@ UI-Designing UI:
 
 	- Layout/Fixed
 
-	- Menubar. (Mike Kestner has some code here.) Use the new
-          GtkAction-based stuff (?).
+	- Menubar, finish Toolbar (UIManager, Gtk.Action, etc)
 
 	- Gnome widgets (the not-yet-deprecated ones anyway)
+		- This might be just GnomeDruid in 2.6?
 		- Not in a separate "Gnome widgets" group.
-		- Though we need some way to do Windows/cross-platform
-		  UIs (ie, gtk-only)
+			- Though we need some way to do Windows/
+			  cross-platform UIs (ie, gtk-only)
+			- Also need to be able to target different
+			  Gtk# versions 
 
 	- Non-widgets:
 		- TreeModel
 		- SizeGroup
-		- Tooltips (UI should be like Glade, but
-		  implementation should be generic, like how it works
-		  in Visual Studio)
 		- EntryCompletion
 		- Stock items
+
+	- AspectFrame, CellView, HandleBox, HRuler, IconView,
+	  InputDialog, VRuler
+		- (Glade does all these)
+
+	- pop-up menus
 
     - Make widgets more HIGalicious
 
@@ -84,14 +88,14 @@ UI-Designing UI:
 Misc functionality:
 
     - Load/Save
-	- For now, a native format is less important than glade
-	  import/export
+	- Get GtkBuilder format finalized...
 	- File format should be stable against small changes so that
 	  if multiple developers are working on the same stetic files,
 	  they don't cause cvs/svn conflicts for each other. (IOW,
 	  don't just write things out in hash-table order.)
 
     - Undo
+	- Use the cut+paste code. Just serialize before/after state.
 
     - Code generation / MonoDevelop integration
 
@@ -104,13 +108,15 @@ Misc functionality:
 	- X's Foo property contains the value of GConf key Y
 	- Connect X's Foo method to Y's Bar signal
 
-    - Signal support
+    - Signals (this is different from MD...)
+
+    - Accelerators
 
     - Templates (build something and then save it in a way that you or
       other people can have it as a pre-built thing in your Palette)
 
     - Comments (stickynotes that appear in stetic, but not in the
-      runtime UI). Translator comments on strings.
+      runtime UI).
 
     - A11y
 	- Stetic-itself a11y
