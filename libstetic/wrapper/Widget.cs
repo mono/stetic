@@ -223,6 +223,15 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		public string Tooltip {
+			get {
+				return proj.Tooltips[Wrapped];
+			}
+			set {
+				proj.Tooltips[Wrapped] = value;
+			}
+		}
+
 		public override string ToString ()
 		{
 			if (Wrapped.Name != null)

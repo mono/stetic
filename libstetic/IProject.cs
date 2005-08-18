@@ -6,6 +6,8 @@ namespace Stetic {
 	public interface IProject {
 		Gtk.Widget Selection { get; set; }
 
+		Stetic.Tooltips Tooltips { get; }
+
 		void PopupContextMenu (Stetic.Wrapper.Widget wrapper);
 		void PopupContextMenu (Placeholder ph);
 

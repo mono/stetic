@@ -1,3 +1,18 @@
+2005-08-18  Dan Winship  <danw@novell.com>
+
+	* libstetic/Tooltips.cs: Hashtable/Gtk.Tooltips mix. (Gtk.Tooltips
+	is write-only, so we can't use it by itself.)
+
+	* libstetic/IProject.cs (Tooltips): new tooltips field
+
+	* stetic/Project.cs (Tooltips): implement
+
+	* libstetic/wrapper/objects.xml (Gtk.Widget): add Tooltip
+	property.
+
+	* libstetic/wrapper/Widget.cs (Tooltip): implement, using
+	proj.Tooltips.
+
 2005-08-17  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/objects.xml (Expander): Remove "Label",

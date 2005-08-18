@@ -19,6 +19,7 @@ libstetic_dll_sources =			\
 	Registry.cs			\
 	Set.cs				\
 	TextBox.cs			\
+	Tooltips.cs			\
 	TranslatableAttribute.cs	\
 	editor/Accelerator.cs		\
 	editor/Boolean.cs		\

@@ -8,6 +8,9 @@
 		<property name="HeightRequest" />
 		<property name="Visible" glade-override="true" />
 		<property name="Sensitive" glade-override="true" />
+		<property name="Tooltip" label="Tooltip" glade-name="tooltip"
+			  description="Tooltip for this widget"
+			  translatable="true" />
 		<property name="CanDefault" />
 		<property name="HasDefault" glade-override="true" />
 		<property name="CanFocus" />
