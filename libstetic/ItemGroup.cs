@@ -17,10 +17,10 @@ namespace Stetic {
 			label = elem.GetAttribute ("label");
 			name = elem.GetAttribute ("name");
 
-			XmlNodeList nodes = elem.ChildNodes;
+			XmlNodeList nodes = elem.SelectNodes ("property | command");
 			items = new ItemDescriptor[nodes.Count];
 			for (int i = 0; i < nodes.Count; i++) {
-				XmlElement item = (XmlElement)elem.ChildNodes[i];
+				XmlElement item = (XmlElement)nodes[i];
 				string refname = item.GetAttribute ("ref");
 				if (refname != "") {
 					if (refname.IndexOf ('.') != -1)

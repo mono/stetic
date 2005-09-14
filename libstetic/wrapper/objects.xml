@@ -96,7 +96,7 @@
 		<property name="AcceptFocus" />
 		<property name="Decorated" />
 		<property name="DestroyWithParent" />
-		<property name="FocusOnMap" />
+		<!-- 2.6 <property name="FocusOnMap" /> -->
 		<property name="Gravity" />
 		<property name="Role" />
 		<property name="SkipPagerHint" />
@@ -276,7 +276,7 @@
 			  description="The stock button ID"
 			  editor="Stetic.Editor.StockItem">
 		    <invisible-if name="Type" value="TextOnly" />
-		    <invisible-if name="Type" value="ThemedIcon" />
+		    <!-- 2.6 <invisible-if name="Type" value="ThemedIcon" /> -->
 		    <invisible-if name="Type" value="ApplicationIcon" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
@@ -285,17 +285,17 @@
 			  editor="Stetic.Editor.ImageFile">
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="TextOnly" />
-		    <invisible-if name="Type" value="ThemedIcon" />
+		    <!-- 2.6 <invisible-if name="Type" value="ThemedIcon" /> -->
 		    <invisible-if name="Type" value="Custom" />
 		</property>
-		<property name="ThemedIcon" label="Icon Name"
+		<!-- 2.6 <property name="ThemedIcon" label="Icon Name"
 			  description="The icon to display in the button"
 			  editor="Stetic.Editor.ThemedIcon">
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="TextOnly" />
 		    <invisible-if name="Type" value="ApplicationIcon" />
 		    <invisible-if name="Type" value="Custom" />
-		</property>
+		</property> -->
 		<property name="Label" translatable="true">
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="Custom" />
@@ -437,8 +437,8 @@
 			  description="The items to display in the Combo Box, one per line"
 			  editor="Stetic.Editor.Text" />
 		<property name="Active" />
-		<property name="AddTearoffs" />
-		<property name="FocusOnClick" />
+		<!-- 2.6 <property name="AddTearoffs" /> -->
+		<!-- 2.6 <property name="FocusOnClick" /> -->
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -450,8 +450,8 @@
 	    <itemgroup label="Combo Box Entry Properties">
 		<property ref="Gtk.ComboBox.Items" />
 		<property name="Active" />
-		<property name="AddTearoffs" />
-		<property name="HasFrame" />
+		<!-- 2.6 <property name="AddTearoffs" /> -->
+		<!-- 2.6 <property name="HasFrame" /> -->
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -648,20 +648,24 @@
 	    label="Image" icon="image.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Image Properties">
+		<!-- 2.6
 		<property name="Type" label="Image Type"
 			  description="Whether to use a themed icon or an application-provided image" />
+		-->
 		<property name="Stock" internal="true" />
+		<!-- 2.6
 		<property name="IconName" label="Icon name"
 			  description="The themed icon to display"
 			  editor="Stetic.Editor.ThemedIcon">
 		    <invisible-if name="Type" value="ApplicationImage" />
 		</property>
+		-->
 		<property name="IconSize">
-		    <invisible-if name="Type" value="ApplicationImage" />
+		    <!-- 2.6 <invisible-if name="Type" value="ApplicationImage" /> -->
 		</property>
 		<property name="Filename" glade-name="pixbuf"
 			  editor="Stetic.Editor.ImageFile">
-		    <invisible-if name="Type" value="ThemedIcon" />
+		    <!-- 2.6 <invisible-if name="Type" value="ThemedIcon" /> -->
 		</property>
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Misc" />
@@ -692,10 +696,10 @@
 		<property name="MnemonicWidget" glade-override="true" />
 		<property name="Justify" />
 		<property name="Selectable" />
-		<property name="Ellipsize" />
-		<property name="WidthChars" />
-		<property name="SingleLineMode" />
-		<property name="Angle" />
+		<!-- 2.6 <property name="Ellipsize" /> -->
+		<!-- 2.6 <property name="WidthChars" /> -->
+		<!-- 2.6 <property name="SingleLineMode" /> -->
+		<!-- 2.6 <property name="Angle" /> -->
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Misc" />
 	    <itemgroup ref="Gtk.Widget" />
@@ -1110,7 +1114,7 @@
 		<property ref="Gtk.Button.Type" />
 		<property ref="Gtk.Button.StockId" />
 		<property ref="Gtk.Button.ApplicationIcon" />
-		<property ref="Gtk.Button.ThemedIcon" />
+		<!-- 2.6 <property ref="Gtk.Button.ThemedIcon" /> -->
 		<property ref="Gtk.Button.Label" />
 		<property ref="Gtk.Button.UseUnderline" />
 		<property name="Active" />
@@ -1171,8 +1175,8 @@
 		<property name="RulesHint" />
 		<property name="SearchColumn" />
 		<property name="Model" />
-		<property name="HoverSelection" />
-		<property name="HoverExpand" />
+		<!-- 2.6 <property name="HoverSelection" /> -->
+		<!-- 2.6 <property name="HoverExpand" /> -->
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -1257,6 +1261,7 @@
 	</itemgroups>
     </object>
 
+<!-- 2.6
     <object type="Gtk.AboutDialog,gtk-sharp" wrapper="Stetic.Wrapper.AboutDialog"
 	    label="About Dialog" icon="aboutdialog.png" palette-category="window">
 	<itemgroups>
@@ -1283,6 +1288,7 @@
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
+-->
 
     <object type="Gtk.ColorSelection,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
 	    label="Color Selection" icon="colorselection.png" palette-category="widget"
@@ -1328,12 +1334,13 @@
 		    <disabled-if name="Action" value="Save" />
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
-		<property name="ShowHidden" />
+		<!-- 2.6 <property name="ShowHidden" /> -->
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
 
+    <!-- 2.6
     <object type="Gtk.FileChooserButton,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
 	    label="File Chooser Button" icon="fileselection.png" palette-category="widget"
 	    hexpandable="true">
@@ -1351,6 +1358,7 @@
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
+    -->
 
     <object type="Gtk.FileChooserDialog,gtk-sharp"
 	    label="File Chooser Dialog" icon="fileselection.png" palette-category="window">
@@ -1363,7 +1371,7 @@
 		    <disabled-if name="Action" value="Save" />
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
-		<property name="ShowHidden" />
+		<!-- 2.6 <property name="ShowHidden" /> -->
 		<property ref="Gtk.Window.Icon" />
 		<property ref="Gtk.Window.WindowPosition" />
 		<property ref="Gtk.Window.Modal" />

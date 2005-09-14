@@ -46,7 +46,9 @@ namespace Stetic.Editor {
 
 			combo = Gtk.ComboBox.NewText ();
 			combo.Changed += combo_Changed;
+#if GTK_SHARP_2_6
 			combo.RowSeparatorFunc = RowSeparatorFunc;
+#endif
 			combo.Show ();
 			PackStart (combo, true, true, 0);
 
@@ -60,12 +62,15 @@ namespace Stetic.Editor {
 				i++;
 			}
 
+#if GTK_SHARP_2_6
 			combo.AppendText ("");
+#endif
 
 			combo.AppendText ("Rename Group...");
 			combo.AppendText ("New Group...");
 		}
 
+#if GTK_SHARP_2_6
 		bool RowSeparatorFunc (Gtk.TreeModel model, Gtk.TreeIter iter)
 		{
 			GLib.Value val = new GLib.Value ();
@@ -74,6 +79,7 @@ namespace Stetic.Editor {
 			val.Dispose ();
 			return sep;
 		}
+#endif
 
 		public string Group {
 			get {
@@ -104,7 +110,11 @@ namespace Stetic.Editor {
 
 		void doDialog ()
 		{
+#if GTK_SHARP_2_6
 			bool rename = combo.Active == values.Count + 1;
+#else
+			bool rename = combo.Active == values.Count;
+#endif
 			Gtk.Dialog dialog = new Gtk.Dialog (
 				rename ? "Rename Group" : "New Group",
 				combo.Toplevel as Gtk.Window,

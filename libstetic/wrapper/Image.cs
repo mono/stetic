@@ -17,10 +17,12 @@ namespace Stetic.Wrapper {
 				type = ImageType.ThemedIcon;
 				iconName = image.Stock;
 				iconSize = (Gtk.IconSize)image.IconSize;
+#if GTK_SHARP_2_6
 			} else if (image.StorageType == Gtk.ImageType.IconName) {
 				type = ImageType.ThemedIcon;
 				iconName = image.IconName;
 				iconSize = (Gtk.IconSize)image.IconSize;
+#endif
 			} else {
 				type = ImageType.ApplicationImage;
 				if (filename == null)
@@ -49,10 +51,12 @@ namespace Stetic.Wrapper {
 				type = value;
 				EmitNotify ("Type");
 
+#if GTK_SHARP_2_6
 				if (type == ImageType.ThemedIcon) {
 					IconName = iconName;
 					IconSize = iconSize;
 				} else
+#endif
 					Filename = filename;
 			}
 		}
@@ -63,11 +67,17 @@ namespace Stetic.Wrapper {
 				return iconName;
 			}
 			set {
+				iconName = value;
 				Gtk.StockItem item = Gtk.Stock.Lookup (value);
 				if (item.StockId == value)
-					image.Stock = iconName = value;
+					image.Stock = iconName;
+#if GTK_SHARP_2_6
 				else
-					image.IconName = iconName = value;
+					image.IconName = iconName;
+#else
+				else
+					image.Stock = Gtk.Stock.MissingImage;
+#endif
 
 				EmitNotify ("IconName");
 			}

@@ -122,7 +122,7 @@ namespace Stetic.Editor {
 		[GLib.ConnectBefore]
 		void ButtonPressed (object o, Gtk.ButtonPressEventArgs args)
 		{
-			menu.Popup (null, null, MenuPosition, 1, args.Event.Time);
+			menu.Popup (null, null, MenuPosition, IntPtr.Zero, 1, args.Event.Time);
 			args.RetVal = true;
 		}
 

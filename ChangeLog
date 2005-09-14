@@ -1,3 +1,38 @@
+2005-09-14  Dan Winship  <danw@novell.com>
+
+	* configure.in: drop gtk# dependency down to 1.9.5
+
+	* libstetic/Makefile.am (libstetic_dll_sources): remove
+	editor/ThemedIcon.cs and wrapper/AboutDialog.cs
+
+	* libstetic/DND.cs: 
+	* libstetic/HandleWindow.cs: use gtk# 1.9.5-compatible
+	Gdk.WindowAttr fields
+
+	* libstetic/ItemGroup.cs (ItemGroup): deal with comment nodes in
+	objects.xml
+
+	* libstetic/editor/GroupPicker.cs: comment out use of
+	ComboBox.RowSeparatorFunc.
+
+	* libstetic/editor/Translatable.cs (ButtonPressed): use gtk#
+	1.9.5-compatible Gtk.Menu.Popup call.
+
+	* libstetic/wrapper/objects.xml: comment out all 2.6 widgets and
+	properties
+
+	* libstetic/wrapper/Image.cs: comment out "themed icon" support
+
+	* libstetic/wrapper/Button.cs: comment out "themed icon" buttons
+	and the use of Button.Image
+
+	* stetic/UIManager.cs: Comment out Gtk.AboutDialog usage, use
+	Gnome.About instead.
+
+	* stetic/Clipboard.cs: Comment out support for plaintext cut+paste.
+
+	* stetic/Stetic.cs: Comment out Gtk.AboutDialog-related stuff.
+
 2005-08-18  Dan Winship  <danw@novell.com>
 
 	* libstetic/Tooltips.cs: Hashtable/Gtk.Tooltips mix. (Gtk.Tooltips

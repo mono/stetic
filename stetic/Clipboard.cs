@@ -12,10 +12,16 @@ namespace Stetic {
 		static Gtk.TargetEntry[] Targets {
 			get {
 				if (targets == null) {
+#if GTK_SHARP_2_6
 					Gtk.TargetList list = new Gtk.TargetList ();
 					list.Add ((string)GladeUtils.ApplicationXGladeAtom, 0, GladeType);
 					list.AddTextTargets (TextType);
 					targets = (Gtk.TargetEntry[])list;
+#else
+					targets = new Gtk.TargetEntry[] {
+						new Gtk.TargetEntry ((string)GladeUtils.ApplicationXGladeAtom, 0, GladeType)
+					};
+#endif
 				}
 				return targets;
 			}

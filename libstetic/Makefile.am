@@ -37,9 +37,7 @@ libstetic_dll_sources =			\
 	editor/String.cs		\
 	editor/StringArray.cs		\
 	editor/Text.cs			\
-	editor/ThemedIcon.cs		\
 	editor/Translatable.cs		\
-	wrapper/AboutDialog.cs		\
 	wrapper/Box.cs			\
 	wrapper/Button.cs		\
 	wrapper/CheckButton.cs		\

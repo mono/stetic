@@ -48,9 +48,11 @@ namespace Stetic {
 			}
 			MainWindow = (Gtk.Window)Properties.Toplevel;
 
+#if GTK_SHARP_2_6
 			// This is needed for both our own About dialog and for ones
 			// the user constructs
 			Gtk.AboutDialog.SetUrlHook (ActivateUrl);
+#endif
 
 			Program.Run ();
 			return 0;
@@ -72,10 +74,12 @@ namespace Stetic {
 				return null;
 		}
 
+#if GTK_SHARP_2_6
 		static void ActivateUrl (Gtk.AboutDialog about, string url)
 		{
 			Gnome.Url.Show (url);
 		}
+#endif
 
 		internal static void Window_Delete (object obj, DeleteEventArgs args) {
 			Program.Quit ();

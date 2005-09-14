@@ -48,7 +48,7 @@ namespace Stetic {
 
 				new ActionEntry ("HelpMenu", null, "_Help", null, null, null),
 				new ActionEntry ("Contents", Stock.Help, "_Contents", "F1", "Help", Help),
-				new ActionEntry ("About", Stock.About, null, null, "About Stetic", About),
+				new ActionEntry ("About", Gnome.Stock.About, null, null, "About Stetic", About),
 			};
 
 			ActionGroup actions = new ActionGroup ("group");
@@ -175,15 +175,28 @@ namespace Stetic {
 			Console.WriteLine ("Help");
 		}
 
+		const string AppName = "Stetic";
+		const string AppVersion = "0.0.0";
+		const string AppComments = "A GNOME and Gtk GUI designer";
+		static string[] AppAuthors = new string[] { "Dan Winship" };
+		const string AppCopyright = "Copyright 2004, 2005 Novell, Inc.";
+
 		void About (object obj, EventArgs e)
 		{
+#if GTK_SHARP_2_6
 			Gtk.AboutDialog about = new Gtk.AboutDialog ();
-			about.Name = "Stetic";
-			about.Version = "0.0.0";
-			about.Comments = "A GNOME and Gtk GUI designer";
-			about.Authors = new string[] { "Dan Winship" };
-			about.Copyright = "Copyright 2004, 2005 Novell, Inc.";
+			about.Name = AppName;
+			about.Version = AppVersion;
+			about.Comments = AppComments;
+			about.Authors = AppAuthors;
+			about.Copyright = AppCopyright;
 			about.Website = "http://mono-project.com/Stetic";
+#else
+			Gnome.About about = new Gnome.About (AppName, AppVersion, AppCopyright,
+							     AppComments, AppAuthors,
+							     new string[0],
+							     null, null);
+#endif
 			about.Run ();
 		}
 
