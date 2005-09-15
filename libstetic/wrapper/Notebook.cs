@@ -72,15 +72,18 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		static ClassDescriptor labelClass;
+
 		int InsertPage (int position)
 		{
-			Gtk.Widget widget;
+			if (labelClass == null)
+				labelClass = Registry.LookupClass ("GtkLabel");
 
-			Stetic.Wrapper.Label label = new Stetic.Wrapper.Label ("page" + (notebook.NPages + 1).ToString ());
-			widget = label.Wrapped;
-			tabs.Insert (position, widget);
+			Gtk.Label label = (Gtk.Label)labelClass.NewInstance (proj);
+			label.LabelProp = "page" + (notebook.NPages + 1).ToString ();
+			tabs.Insert (position, label);
 
-			return notebook.InsertPage (CreatePlaceholder (), widget, position);
+			return notebook.InsertPage (CreatePlaceholder (), label, position);
 		}
 
 		internal void PreviousPage ()

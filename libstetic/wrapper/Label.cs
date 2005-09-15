@@ -7,11 +7,6 @@ namespace Stetic.Wrapper {
 
 		public Label () {}
 
-		public Label (string text)
-		{
-			Wrap (new Gtk.Label (text), true);
-		}
-
 		string mnem;
 		public string MnemonicWidget {
 			get {

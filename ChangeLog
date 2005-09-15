@@ -1,3 +1,11 @@
+2005-09-15  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/Label.cs: remove the custom ctor
+
+	* libstetic/wrapper/Notebook.cs (InsertPage): use the Gtk.Label
+	ClassDescriptor's NewInstace to create labels, so they end up
+	fully-constructed.
+
 2005-09-14  Dan Winship  <danw@novell.com>
 
 	* configure.in: drop gtk# dependency down to 1.9.5
