@@ -1,3 +1,9 @@
+2005-09-16  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/Container.cs (ReplaceChild):
+	EmitContentsChanged() at the end, to fix a bug with the
+	Project tree being out of sync.
+
 2005-09-15  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/Label.cs: remove the custom ctor

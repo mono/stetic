@@ -327,6 +327,7 @@ namespace Stetic.Wrapper {
 				pinfo.SetValue (cc, props[pinfo], null);
 
 			Sync ();
+			EmitContentsChanged ();
 		}
 
 		Gtk.Widget selection;
