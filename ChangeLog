@@ -4,6 +4,14 @@
 	EmitContentsChanged() at the end, to fix a bug with the
 	Project tree being out of sync.
 
+	* configure.in: bump gtk-sharp dependency back up to 2.3.91. There
+	are too many post-1.9.5 fixes we need.
+
+	* libstetic/DND.cs: 
+	* libstetic/HandleWindow.cs: 
+	* libstetic/editor/Accelerator.cs: 
+	* libstetic/editor/Translatable.cs: Revert 1.9.5 reversions
+
 2005-09-15  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/Label.cs: remove the custom ctor

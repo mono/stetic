@@ -19,7 +19,7 @@ namespace Stetic.Editor {
 
 		public Accelerator ()
 		{
-			Editable = false;
+			IsEditable = false;
 		}
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)

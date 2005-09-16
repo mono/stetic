@@ -485,8 +485,8 @@ namespace Stetic {
 			attributes = new Gdk.WindowAttr ();
 			attributes.WindowType = Gdk.WindowType.Child;
 			attributes.Wclass = wclass ;
-			attributes.visual = parent.Visual;
-			attributes.colormap = parent.Colormap;
+			attributes.Visual = parent.Visual;
+			attributes.Colormap = parent.Colormap;
 			attributes.Mask = (Gdk.EventMask.ButtonPressMask |
 					   Gdk.EventMask.ButtonMotionMask |
 					   Gdk.EventMask.ButtonReleaseMask |
