@@ -10,6 +10,7 @@ namespace Stetic {
 		static Hashtable classes_by_type = new Hashtable ();
 		static Hashtable classes_by_cname = new Hashtable ();
 		static Hashtable classes_by_csname = new Hashtable ();
+		static Hashtable enums = new Hashtable ();
 
 		static XslTransform gladeImport, gladeExport;
 
@@ -20,6 +21,11 @@ namespace Stetic {
 			XmlDocument objects = new XmlDocument ();
 			objects.Load (stream);
 			stream.Close ();
+
+			foreach (XmlElement element in objects.SelectNodes ("/objects/enum")) {
+				EnumDescriptor enm = new EnumDescriptor (element);
+				enums[enm.EnumType] = enm;
+			}
 
 			foreach (XmlElement element in objects.SelectNodes ("/objects/object")) {
 				ClassDescriptor klass = new ClassDescriptor (libstetic, element);
@@ -75,6 +81,11 @@ namespace Stetic {
 			get {
 				return gladeExport;
 			}
+		}
+
+		public static EnumDescriptor LookupEnum (Type type)
+		{
+			return (EnumDescriptor)enums[type];
 		}
 
 		public static ClassDescriptor LookupClass (Type type)

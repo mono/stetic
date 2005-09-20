@@ -215,6 +215,23 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		Gdk.EventMask events;
+		bool set_events;
+		public Gdk.EventMask Events {
+			get {
+				if (!set_events) {
+					events = Wrapped.Events;
+					set_events = true;
+				}
+				return events;
+			}
+			set {
+				events = value;
+				set_events = true;
+				EmitNotify ("Events");
+			}
+		}
+
 		void HierarchyChanged (object obj, Gtk.HierarchyChangedArgs args)
 		{
 			if (Wrapped.Toplevel != null && Wrapped.Toplevel.IsTopLevel) {

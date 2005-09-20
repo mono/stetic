@@ -41,6 +41,10 @@ namespace Stetic {
 				isWrapperProperty = propertyInfo.DeclaringType.IsSubclassOf (typeof (ObjectWrapper));
 			}
 
+			if (!IsInternal && propertyInfo.PropertyType.IsEnum &&
+			    Registry.LookupEnum (propertyInfo.PropertyType) == null)
+				throw new ArgumentException ("No EnumDescriptor for " + propertyInfo.PropertyType.FullName + "(" + klass.WrappedType.FullName + "." + propertyName + ")");
+
 			pspec = FindPSpec (propertyInfo);
 			if (isWrapperProperty && pspec == null) {
 				PropertyInfo pinfo = klass.WrappedType.GetProperty (propertyInfo.Name, flags);

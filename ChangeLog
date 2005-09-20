@@ -1,3 +1,31 @@
+2005-09-20  Dan Winship  <danw@novell.com>
+
+	* libstetic/EnumDescriptor.cs: New descriptor class for English
+	(and later localized) enum value names and descriptions.
+
+	* libstetic/Registry.cs (Registry): Create EnumDescriptors before
+	ClassDescriptors.
+	(LookupEnum): return EnumDescriptors.
+
+	* libstetic/PropertyDescriptor.cs: throw an exception if an
+	enum-valued property has no EnumDescriptor in the registry.
+
+	* libstetic/editor/Enumeration.cs: simplify using EnumDescriptor.
+	Also set the combobox's tooltip to the description of the selected
+	enum value.
+
+	* libstetic/editor/Flags.cs: editor for flags values (vbox full of
+	checkbuttons, with tooltips).
+
+	* libstetic/wrapper/Widget.cs (Events): proxy this property, since
+	it can't be changed after the widget is realized.
+
+	* libstetic/wrapper/objects.xml: add <enum> nodes for all enum
+	types we use.
+
+	* stetic/PropertyEditor.cs (PropertyEditor): Use the Flags editor
+	for flags-valued enums
+
 2005-09-16  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/Container.cs (ReplaceChild):

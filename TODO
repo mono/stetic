@@ -4,7 +4,7 @@ Application UI:
 
     - L10n/I18n
 	- Show translated property names/descriptions
-	- Make sure other UI stuff is translated (enum values)
+	- Make sure other UI stuff is translated
 	- Make Grid and other custom widgets right-to-left-able
 
 

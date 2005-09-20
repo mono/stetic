@@ -1419,4 +1419,357 @@
 	</internal-children>
     </object>
 
+    <enum type="Gdk.ExtensionMode,gdk-sharp">
+	<value name="None" label="None"
+	       description="No extension events are desired" />
+	<value name="All" label="All"
+	       description="All extension events are desired" />
+	<value name="Cursor" label="Only if cursor displayed"
+	       description="Extension events are desired only if a cursor will be displayed for the device" />
+    </enum>
+
+    <enum type="Gdk.EventMask,gdk-sharp">
+	<value name="ExposureMask" label="Expose"
+	       description="Receive expose events" />
+	<value name="PointerMotionMask" label="All pointer motion"
+	       description="Receive all pointer motion events" />
+	<value name="PointerMotionHintMask" label="Requested pointer motion"
+	       description="Receive pointer motion events when requested" />
+	<value name="ButtonMotionMask" label="Pointer motion w/ any button"
+	       description="Receive pointer motion events while any button is pressed" />
+	<value name="Button1MotionMask" label="Pointer motion w/ button 1"
+	       description="Receive pointer motion events while button 1 is pressed" />
+	<value name="Button2MotionMask" label="Pointer motion w/ button 2"
+	       description="Receive pointer motion events while button 2 is pressed" />
+	<value name="Button3MotionMask" label="Pointer motion w/ button 3"
+	       description="Receive pointer motion events while button 3 is pressed" />
+	<value name="ButtonPressMask" label="Button press"
+	       description="Receive button press events" />
+	<value name="ButtonReleaseMask" label="Button release"
+	       description="Receive button release events" />
+	<value name="KeyPressMask" label="Key press"
+	       description="Receive key press events" />
+	<value name="KeyReleaseMask" label="Key release"
+	       description="Receive key release events" />
+	<value name="EnterNotifyMask" label="Window enter"
+	       description="Receive window enter events" />
+	<value name="LeaveNotifyMask" label="Window leave"
+	       description="Receive window leave events" />
+	<value name="FocusChangeMask" label="Focus change"
+	       description="Receive focus change events" />
+	<value name="StructureMask" label="Window structure change"
+	       description="Receive events about window configuration change" />
+	<value name="PropertyChangeMask" label="Property change"
+	       description="Receive property change events" />
+	<value name="VisibilityNotifyMask" label="Visibility change"
+	       description="Receive visibility change events" />
+	<value name="ProximityInMask" label="Proximity in"
+	       description="Receive proximity in events" />
+	<value name="ProximityOutMask" label="Proximity out"
+	       description="Receive proximity out events" />
+	<value name="SubstructureMask" label="Window substructure change"
+	       description="Receive events about window configuration changes of child windows" />
+	<value name="ScrollMask" label="Scroll"
+	       description="Receive scroll events" />
+	<value name="AllEventsMask" />
+    </enum>
+
+    <enum type="Gdk.Gravity,gdk-sharp">
+	<value name="NorthWest" label="Northwest"
+	       description="The reference point is at the top left corner" />
+	<value name="North" label="North"
+	       description="The reference point is at the middle of the top edge" />
+	<value name="NorthEast" label="Northeast"
+	       description="The reference point is at the top right corner" />
+	<value name="West" label="West"
+	       description="The reference point is at the middle of the left edge" />
+	<value name="Center" label="Center"
+	       description="The reference point is at the center of the window" />
+	<value name="East" label="East"
+	       description="The reference point is at the middle of the right edge" />
+	<value name="SouthWest" label="Southwest"
+	       description="The reference point is at the lower left corner" />
+	<value name="South" label="South"
+	       description="The reference point is at the middle of the lower edge" />
+	<value name="SouthEast" label="Southeast"
+	       description="The reference point is at the lower right corner" />
+	<value name="Static" label="Static"
+	       description="The reference point is at the top left corner of the window itself, ignoring window manager decorations" />
+    </enum>
+
+    <enum type="Gdk.WindowTypeHint,gdk-sharp">
+	<value name="Normal" label="Normal"
+	       description="Normal toplevel window" />
+	<value name="Dialog" label="Dialog"
+	       description="Dialog window" />
+	<value name="Menu" label="Menu"
+	       description="Window used to implement a menu" />
+	<value name="Toolbar" label="Toolbar"
+	       description="Window used to implement a toolbar" />
+	<value name="Splashscreen" label="Splash screen"
+	       description="Window used to display a splash screen" />
+	<value name="Utility" label="Utility"
+	       description="Utility windows which are not detached toolbars or dialogs" />
+	<value name="Dock" label="Dock"
+	       description="Used for creating dock or panel windows" />
+	<value name="Desktop" label="Desktop"
+	       description="Used for creating the desktop background window" />
+    </enum>
+
+    <enum type="Gtk.ArrowType,gtk-sharp">
+	<value name="Up" label="Up"
+	       description="Up" />
+	<value name="Down" label="Down"
+	       description="Down" />
+	<value name="Left" label="Left"
+	       description="Left" />
+	<value name="Right" label="Right"
+	       description="Right" />
+    </enum>
+
+    <enum type="Gtk.AttachOptions,gtk-sharp">
+	<value name="Expand" label="Expand"
+	       description="The widget should expand to take up any extra space in its container that has been allocated" />
+	<value name="Shrink" label="Shrink"
+	       description="The widget should shrink as and when possible" />
+	<value name="Fill" label="Fill"
+	       description="The widget should fill the space allocated to it" />
+    </enum>
+
+    <enum type="Gtk.ButtonBoxStyle,gtk-sharp">
+	<value name="DefaultStyle" label="Default"
+	       description="Default packing" />
+	<value name="Spread" label="Spread"
+	       description="Buttons are evenly spread across the ButtonBox" />
+	<value name="Edge" label="Edge"
+	       description="Buttons are placed at the edges of the ButtonBox" />
+	<value name="Start" label="Start"
+	       description="Buttons are grouped towards the start (left or top) of the box" />
+	<value name="End" label="End"
+	       description="Buttons are grouped toward the end (right or bottom) of the box" />
+    </enum>
+
+    <enum type="Gtk.ButtonsType,gtk-sharp">
+	<value name="None" label="None"
+	       description="No buttons at all" />
+	<value name="Ok" label="OK"
+	       description="an OK button" />
+	<value name="Close" label="Close"
+	       description="a Close button" />
+	<value name="Cancel" label="Cancel"
+	       description="a Cancel button" />
+	<value name="YesNo" label="Yes / No"
+	       description="Yes and No buttons" />
+	<value name="OkCancel" label="OK / Cancel"
+	       description="OK and Cancel buttons" />
+    </enum>
+
+    <enum type="Gtk.CornerType,gtk-sharp">
+	<value name="TopLeft" label="Top Left"
+	       description="Place the scrollbars on the right and bottom of the contents" />
+	<value name="BottomLeft" label="Bottom Left"
+	       description="Place the scrollbrs on the top and right of the contents" />
+	<value name="TopRight" label="Top Right"
+	       description="Place the scrollbrs on the left and bottom of the contents" />
+	<value name="BottomRight" label="Bottom Right"
+	       description="Place the scrollbrs on the top and left of the contents" />
+    </enum>
+
+    <enum type="Gtk.FileChooserAction,gtk-sharp">
+	<value name="Open" label="Open"
+	       description="Open mode. The file chooser will only let the user pick an existing file." />
+	<value name="Save" label="Save"
+	       description="Save mode. The file chooser will let the user pick an existing file, or type in a new filename." />
+	<value name="SelectFolder" label="Select Folder"
+	       description="Open mode for selecting folders. The file chooser will let the user pick an existing folder." />
+	<value name="CreateFolder" label="Create Folder"
+	       description="Mode for creating a new folder. The file chooser will let the user name an existing or new folder." />
+    </enum>
+
+    <enum type="Gtk.IconSize,gtk-sharp">
+	<value name="Invalid" label="Invalid"
+	       description="Invalid" />
+	<value name="Menu" label="Menu"
+	       description="The size of an icon an a menu item" />
+	<value name="SmallToolbar" label="Small Toolbar"
+	       description="The size of an icon in a small toolbar" />
+	<value name="LargeToolbar" label="Large Toolbar"
+	       description="The size of an icon in a large toolbar" />
+	<value name="Button" label="Button"
+	       description="The size of an icon in a button" />
+	<value name="Dnd" label="Drag and Drop"
+	       description="The size of an icon in a drag-and-drop operation" />
+	<value name="Dialog" label="Dialog"
+	       description="The size of an icon in a dialog box" />
+    </enum>
+
+    <enum type="Gtk.Justification,gtk-sharp">
+	<value name="Left" label="Left"
+	       description="The text is placed at the left edge of the label" />
+	<value name="Right" label="Right"
+	       description="The text is placed at the right edge of the label" />
+	<value name="Center" label="Center"
+	       description="The text is placed in the center of the label" />
+	<value name="Fill" label="Fill"
+	       description="The text is distributed across the label" />
+    </enum>
+
+    <enum type="Gtk.MessageType,gtk-sharp">
+	<value name="Info" label="Info"
+	       description="Informational message" />
+	<value name="Warning" label="Warning"
+	       description="Non-fatal warning message" />
+	<value name="Question" label="Question"
+	       description="Question requiring a choice" />
+	<value name="Error" label="Error"
+	       description="Fatal error message" />
+    </enum>
+
+    <enum type="Gtk.Orientation,gtk-sharp">
+	<value name="Horizontal" label="Horizontal"
+	       description="The widget is in horizontal orientation" />
+	<value name="Vertical" label="Vertical"
+	       description="The widget is in vertical orientation" />
+    </enum>
+
+    <enum type="Gtk.PackType,gtk-sharp">
+	<value name="Start" label="Start"
+	       description="The child is packed into the start (left or top) of the box" />
+	<value name="End" label="End"
+	       description="The child is packed into the end (right or bottom) of the box" />
+    </enum>
+
+    <enum type="Gtk.PolicyType,gtk-sharp">
+	<value name="Always" label="Always"
+	       description="The scrollbar is always visible" />
+	<value name="Automatic" label="Automatic"
+	       description="The scrollbar will appear and disappear as necessary" />
+	<value name="Never" label="Never"
+	       description="The scrollbar will never appear" />
+    </enum>
+
+    <enum type="Gtk.PositionType,gtk-sharp">
+	<value name="Left" label="Left"
+	       description="The feature is at the left edge" />
+	<value name="Right" label="Right"
+	       description="The feature is at the right edge" />
+	<value name="Top" label="Top"
+	       description="The feature is at the top edge" />
+	<value name="Bottom" label="Bottom"
+	       description="The feature is at the bottom edge" />
+    </enum>
+
+    <enum type="Gtk.ProgressBarOrientation,gtk-sharp">
+	<value name="LeftToRight" label="Left to right"
+	       description="A horizontal progress bar growing from left to right" />
+	<value name="RightToLeft" label="Right to left"
+	       description="A horizontal progress bar growing from right to left" />
+	<value name="BottomToTop" label="Bottom to top"
+	       description="A vertical progress bar growing from bottom to top" />
+	<value name="TopToBottom" label="Top to bottom"
+	       description="A vertical progress bar growing from top to bottom" />
+    </enum>
+
+    <enum type="Gtk.ReliefStyle,gtk-sharp">
+	<value name="Normal" label="Normal"
+	       description="Draw a normal relief around the button" />
+	<value name="Half" label="Half"
+	       description="Draw a half relief around the button" />
+	<value name="None" label="None"
+	       description="Draw no relief around the button" />
+    </enum>
+
+    <enum type="Gtk.ShadowType,gtk-sharp">
+	<value name="None" label="None"
+	       description="No outline" />
+	<value name="In" label="In"
+	       description="The outline is bevelled inwards" />
+	<value name="Out" label="Out"
+	       description="The outline is bevelled outwards, like a button" />
+	<value name="EtchedIn" label="Etched in"
+	       description="" />
+	<value name="EtchedOut" label="Etched out"
+	       description="" />
+    </enum>
+
+    <enum type="Gtk.SpinButtonUpdatePolicy,gtk-sharp">
+	<value name="Always" label="Always"
+	       description="When refreshing the SpinButton, the value is always displayed" />
+	<value name="IfValid" label="If valid"
+	       description="When refreshing the SpinButton, the value is only displayed if it is within the SpinButton's bounds" />
+    </enum>
+
+    <enum type="Gtk.ToolbarStyle,gtk-sharp">
+	<value name="Icons" label="Icons"
+	       description="Buttons display only icons in the toolbar" />
+	<value name="Text" label="Text"
+	       description="Buttons display only text labels in the toolbar" />
+	<value name="Both" label="Both"
+	       description="Buttons display text and icons in the toolbar" />
+	<value name="BothHoriz" label="Both horizontally"
+	       description="Buttons display icons and text alongside each other, rather than vertically stacked" />
+    </enum>
+
+    <enum type="Gtk.UpdateType,gtk-sharp">
+	<value name="Continuous" label="Continuous"
+	       description="The range value will change continuously as the slider is moved" />
+	<value name="Discontinuous" label="Discontinuous"
+	       description="The range value will change only after the user releases the mouse button" />
+	<value name="Delayed" label="Delayed"
+	       description="The range value will change if the user stops sliding the slider for a moment" />
+    </enum>
+
+    <enum type="Gtk.WindowPosition,gtk-sharp">
+	<value name="None" label="Not specified"
+	       description="The window can be placed wherever the window manager chooses" />
+	<value name="Center" label="Centered"
+	       description="The window should be placed in the center of the screen" />
+	<value name="Mouse" label="At mouse position"
+	       description="The window should be placed at the current mouse position" />
+	<value name="CenterAlways" label="Always centered"
+	       description="The window should be kept centered even if it changes size" />
+	<value name="CenterOnParent" label="Centered on parent"
+	       description="Center the window on the parent window that it is transient for" />
+    </enum>
+
+    <enum type="Gtk.WindowType,gtk-sharp">
+	<value name="Toplevel" label="Toplevel"
+	       description="A regular window or dialog" />
+	<value name="Popup" label="Popup"
+	       description="A special window such as a tooltip" />
+    </enum>
+
+    <enum type="Gtk.WrapMode,gtk-sharp">
+	<value name="None" label="None"
+	       description="Do not wrap lines; just make the text area wider" />
+	<value name="Char" label="Character"
+	       description="Wrap text, breaking lines between any characters" />
+	<value name="Word" label="Word"
+	       description="Wrap text, breaking lines between words" />
+	<value name="WordChar" label="Word or Character"
+	       description="Wrap text, preferably breaking lines between words, but also breaking between characters if needed" />
+    </enum>
+
+    <enum type="Stetic.Wrapper.Button+ButtonType">
+	<value name="StockItem" label="Stock button"
+	       description="Button displaying stock icon and text" />
+	<value name="TextOnly" label="Text only"
+	       description="Button displaying text only" />
+	<value name="ApplicationIcon" label="Icon from file"
+	       description="Button displaying application-provided icon and text" />
+	<value name="Custom" label="Custom"
+	       description="Button with entirely custom contents" />
+    </enum>
+
+    <enum type="Stetic.Wrapper.Dialog+StandardButtons">
+	<value name="Custom" label="Custom"
+	       description="Application-selected buttons" />
+	<value name="Close" label="Close"
+	       description="A Close button" />
+	<value name="Ok" label="OK"
+	       description="An OK button" />
+	<value name="CancelOk" label="Cancel / OK"
+	       description="Cancel and OK buttons" />
+    </enum>
+
 </objects>

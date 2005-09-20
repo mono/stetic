@@ -4,6 +4,7 @@ libstetic_dll_sources =			\
 	ClassDescriptor.cs		\
 	CommandDescriptor.cs		\
 	DND.cs				\
+	EnumDescriptor.cs		\
 	GladeException.cs		\
 	GladeUtils.cs			\
 	HandleWindow.cs			\
@@ -27,6 +28,7 @@ libstetic_dll_sources =			\
 	editor/Color.cs			\
 	editor/Enumeration.cs		\
 	editor/GroupPicker.cs		\
+	editor/Flags.cs			\
 	editor/FloatRange.cs		\
 	editor/Image.cs			\
 	editor/ImageFile.cs		\
