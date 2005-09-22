@@ -12,13 +12,9 @@ UI-Designing UI:
 
     - Fix up not-fully-functional wrappers:
 
-	- ButtonBox should fill itself in with buttons, like glade
-          does, and needs to implement insert/remove commands
-
 	- Dialog
 		- "Buttons" should automatically switch to "Custom" if
 		  you add/remove them.
-		- "Buttons" menu labels need to be better
 		- action_area is currently broken on glade import
 
 	- Notebook has a few problems:

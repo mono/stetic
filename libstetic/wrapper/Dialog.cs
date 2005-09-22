@@ -93,17 +93,12 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		static ClassDescriptor buttonClass;
-
 		Gtk.Button AddButton (string stockId, Gtk.ResponseType response, bool hasDefault)
 		{
 			Stetic.Wrapper.Button wrapper;
 			Gtk.Button button;
 
-			if (buttonClass == null)
-				buttonClass = Registry.LookupClass ("GtkButton");
-
-			button = (Gtk.Button)buttonClass.NewInstance (proj);
+			button = (Gtk.Button)Registry.NewInstance (typeof (Gtk.Button), proj);
 			wrapper = (Stetic.Wrapper.Button) ObjectWrapper.Lookup (button);
 			if (stockId != null) {
 				wrapper.Type = Button.ButtonType.StockItem;

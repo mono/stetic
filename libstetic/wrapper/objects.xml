@@ -241,14 +241,23 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.ButtonBox,gtk-sharp">
+    <object type="Gtk.ButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox">
 	<itemgroups>
 	    <itemgroup label="Button Box Properties">
+		<property name="Size" label="Size"
+			  description="The number of buttons"
+			  min="0" />
 		<property name="LayoutStyle" />
 		<property name="Spacing" />
 		<property name="BorderWidth" />
 	    </itemgroup>
 	</itemgroups>
+	<contextmenu>
+	    <command name="InsertBefore" label="Insert Before"
+		     description="Insert a new button before the selected one" />
+	    <command name="InsertAfter" label="Insert After"
+		     description="Insert a new button after the selected one" />
+	</contextmenu>
     </object>
     <object type="Gtk.ButtonBox+ButtonBoxChild,gtk-sharp">
 	<itemgroups>
@@ -590,8 +599,7 @@
 	    <itemgroup ref="Gtk.ButtonBox" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
-	<contextmenu ref="Gtk.Box" />
-
+	<contextmenu ref="Gtk.ButtonBox" />
 	<glade-transform>
 	    <!-- If a child has a "response_id" of -11 (GTK_RESPONSE_HELP), it should be packed with the "secondary" property -->
 	    <import>
@@ -1198,7 +1206,7 @@
 	    <itemgroup ref="Gtk.ButtonBox" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
-	<contextmenu ref="Gtk.Box" />
+	<contextmenu ref="Gtk.ButtonBox" />
     </object>
 
     <object type="Gtk.Viewport,gtk-sharp" wrapper="Stetic.Wrapper.Viewport"

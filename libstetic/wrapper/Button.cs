@@ -6,11 +6,6 @@ namespace Stetic.Wrapper {
 
 	public class Button : Container {
 
-		public static new Gtk.Button CreateInstance ()
-		{
-			return new Gtk.Button (Gtk.Stock.Ok);
-		}
-
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);

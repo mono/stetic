@@ -72,14 +72,9 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		static ClassDescriptor labelClass;
-
 		int InsertPage (int position)
 		{
-			if (labelClass == null)
-				labelClass = Registry.LookupClass ("GtkLabel");
-
-			Gtk.Label label = (Gtk.Label)labelClass.NewInstance (proj);
+			Gtk.Label label = (Gtk.Label)Registry.NewInstance (typeof (Gtk.Label), proj);
 			label.LabelProp = "page" + (notebook.NPages + 1).ToString ();
 			tabs.Insert (position, label);
 

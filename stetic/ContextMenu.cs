@@ -46,7 +46,8 @@ namespace Stetic {
 
 			ClassDescriptor klass = Registry.LookupClass (widget.GetType ());
 			if (klass != null) {
-				foreach (CommandDescriptor cmd in klass.ContextMenu) {
+				foreach (ItemDescriptor id in klass.ContextMenu) {
+					CommandDescriptor cmd = (CommandDescriptor)id;
 					item = new MenuItem (cmd.Label);
 					if (cmd.Enabled (widget, context)) {
 						Gtk.Widget wdup = widget, cdup = context; // FIXME bxc 75689

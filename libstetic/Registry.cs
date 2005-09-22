@@ -129,5 +129,18 @@ namespace Stetic {
 				throw new ArgumentException ("No class " + classname + " for property " + propname);
 			return klass[propname];
 		}
+
+		public static ItemGroup LookupContextMenu (string classname)
+		{
+			ClassDescriptor klass = (ClassDescriptor)classes_by_csname[classname];
+			if (klass == null)
+				throw new ArgumentException ("No class for contextmenu " + classname);
+			return klass.ContextMenu;
+		}
+
+		public static object NewInstance (Type type, IProject proj)
+		{
+			return LookupClass (type).NewInstance (proj);
+		}
 	}
 }

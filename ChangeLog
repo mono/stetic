@@ -1,3 +1,44 @@
+2005-09-22  Dan Winship  <danw@novell.com>
+
+	* libstetic/ClassDescriptor.cs: Handle <contextmenu ref="..." />
+
+	* libstetic/DND.cs (Cancel): fix a crash
+
+	* libstetic/Registry.cs (LookupContextMenu): look up a context
+	menu by class name.
+	(NewInstance): Look up a class and invoke NewInstance on it
+
+	* libstetic/wrapper/ButtonBox.cs: Wrapper for ButtonBox, that
+	automatically fills in dummy buttons as needed.
+
+	* libstetic/wrapper/objects.xml (Gtk.ButtonBox): use the new
+	ButtonBox wrapper. Add a "Size" property and a context menu.
+
+	* libstetic/wrapper/Container.cs (AllowPlaceholders): new virtual
+	property saying whether or not to allow arbitrary placeholders in
+	the container.
+	(Wrap, GladeImport, Delete): Don't add placeholders if
+	!AllowPlaceholders
+	(DragEnd): Remove the dragSource placeholder after a successful
+	drag if !AllowPlaceholders
+
+	* libstetic/wrapper/Box.cs (AllowPlaceholders): false
+	(InsertBefore, InsertAfter): If invoked on the box directly
+	(rather than via the submenu from one of its children), insert
+	before the first / after the last child.
+
+	* libstetic/wrapper/Button.cs: Remove CreateInstance method;
+	default to text-only buttons like Glade does.
+
+	* libstetic/wrapper/Dialog.cs (AddButton): Use
+	Registry.NewInstance.
+
+	* libstetic/wrapper/Notebook.cs (InsertPage): Use
+	Registry.NewInstance
+
+	* stetic/ContextMenu.cs: Fix up for bxc 75689 again, since it was
+	still broken before.
+
 2005-09-20  Dan Winship  <danw@novell.com>
 
 	* libstetic/EnumDescriptor.cs: New descriptor class for English

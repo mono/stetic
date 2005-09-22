@@ -115,6 +115,9 @@ namespace Stetic {
 		// Call this from a DragEnd event to check if the widget wasn't dropped
 		public static Gtk.Widget Cancel ()
 		{
+			if (dragWidget == null)
+				return null;
+
 			Gtk.Widget w = dragWidget;
 			dragWidget = null;
 

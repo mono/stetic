@@ -22,7 +22,7 @@ namespace Stetic.Wrapper {
 					child.Name = container.Name + "_" + prop.GladeName;
 			}
 
-			if (!initialized && container.Children.Length == 0)
+			if (!initialized && container.Children.Length == 0 && AllowPlaceholders)
 				AddPlaceholder ();
 
 			container.Removed += ChildRemoved;
@@ -37,6 +37,12 @@ namespace Stetic.Wrapper {
 		Gtk.Container container {
 			get {
 				return (Gtk.Container)Wrapped;
+			}
+		}
+
+		protected virtual bool AllowPlaceholders {
+			get {
+				return true;
 			}
 		}
 
@@ -74,7 +80,7 @@ namespace Stetic.Wrapper {
 				try {
 					if (child_elem.HasAttribute ("internal-child"))
 						GladeSetInternalChild (child_elem);
-					else if (child_elem["widget"] == null)
+					else if (child_elem["widget"] == null && AllowPlaceholders)
 						AddPlaceholder ();
 					else
 						GladeImportChild (child_elem);
@@ -415,7 +421,10 @@ namespace Stetic.Wrapper {
 
 			dragSource = null;
 			if (DND.DragWidget == null) {
-				ph.SetSizeRequest (-1, -1);
+				if (AllowPlaceholders)
+					ph.SetSizeRequest (-1, -1);
+				else
+					container.Remove (ph);
 				Sync ();
 			} else
 				ReplaceChild (ph, DND.Cancel ());
@@ -429,7 +438,10 @@ namespace Stetic.Wrapper {
 
 		public void Delete (Stetic.Wrapper.Widget wrapper)
 		{
-			ReplaceChild (wrapper.Wrapped, CreatePlaceholder ());
+			if (AllowPlaceholders)
+				ReplaceChild (wrapper.Wrapped, CreatePlaceholder ());
+			else
+				container.Remove (wrapper.Wrapped);
 			wrapper.Wrapped.Destroy ();
 		}
 

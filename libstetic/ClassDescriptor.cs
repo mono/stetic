@@ -95,9 +95,13 @@ namespace Stetic {
 			}
 
 			XmlElement contextElem = elem["contextmenu"];
-			if (contextElem != null)
-				contextMenu = new ItemGroup (contextElem, this);
-			else
+			if (contextElem != null) {
+				if (contextElem.HasAttribute ("ref")) {
+					string refname = contextElem.GetAttribute ("ref");
+					contextMenu = Registry.LookupContextMenu (refname);
+				} else
+					contextMenu = new ItemGroup (contextElem, this);
+			} else
 				contextMenu = ItemGroup.Empty;
 
 			XmlElement ichildElem = elem["internal-children"];

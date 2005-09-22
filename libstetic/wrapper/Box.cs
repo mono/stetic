@@ -21,6 +21,12 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		protected override bool AllowPlaceholders {
+			get {
+				return false;
+			}
+		}
+
 		// DoSync() does two things: first, it makes sure that all of the
 		// PackStart widgets have Position numbers less than all of the
 		// PackEnd widgets. Second, it creates faults anywhere two widgets
@@ -114,28 +120,50 @@ namespace Stetic.Wrapper {
 
 		internal void InsertBefore (Gtk.Widget context)
 		{
-			Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
+			int position;
+			Gtk.PackType type;
+
+			if (context == box) {
+				position = 0;
+				type = Gtk.PackType.Start;
+			} else {
+				Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
+				position = bc.Position;
+				type = bc.PackType;
+			}
+
 			Placeholder ph = CreatePlaceholder ();
-			if (bc.PackType == Gtk.PackType.Start) {
+			if (type == Gtk.PackType.Start) {
 				box.PackStart (ph);
-				box.ReorderChild (ph, bc.Position);
+				box.ReorderChild (ph, position);
 			} else {
 				box.PackEnd (ph);
-				box.ReorderChild (ph, bc.Position + 1);
+				box.ReorderChild (ph, position + 1);
 			}
 			EmitContentsChanged ();
 		}
 
 		internal void InsertAfter (Gtk.Widget context)
 		{
-			Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
+			int position;
+			Gtk.PackType type = Gtk.PackType.Start;
+
+			if (context == box) {
+				position = 0;
+				type = Gtk.PackType.End;
+			} else {
+				Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
+				position = bc.Position;
+				type = bc.PackType;
+			}
+
 			Placeholder ph = CreatePlaceholder ();
-			if (bc.PackType == Gtk.PackType.Start) {
+			if (type == Gtk.PackType.Start) {
 				box.PackStart (ph);
-				box.ReorderChild (ph, bc.Position + 1);
+				box.ReorderChild (ph, position + 1);
 			} else {
 				box.PackEnd (ph);
-				box.ReorderChild (ph, bc.Position);
+				box.ReorderChild (ph, position);
 			}
 			EmitContentsChanged ();
 		}
