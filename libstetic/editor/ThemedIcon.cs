@@ -19,7 +19,7 @@ namespace Stetic.Editor {
 			entry.Changed += entry_Changed;
 
 			button = new Gtk.Button ();
-			Gtk.Image icon = Gtk.Image.NewFromIconName ("stock_symbol-selection", Gtk.IconSize.Button);
+			Gtk.Image icon = new Gtk.Image (Gtk.IconTheme.Default.LoadIcon ("stock_symbol-selection", 16, 0));
 			button.Add (icon);
 			PackStart (button, false, false, 0);
 			button.Clicked += button_Clicked;
@@ -51,7 +51,11 @@ namespace Stetic.Editor {
 					return;
 
 				icon = value;
-				image.SetFromIconName (icon, Gtk.IconSize.Button);
+				try {
+					image.Pixbuf = Gtk.IconTheme.Default.LoadIcon (icon, 16, 0);
+				} catch {
+					image.Stock = Gnome.Stock.Blank;
+				}
 
 				syncing = true;
 				entry.Text = icon;

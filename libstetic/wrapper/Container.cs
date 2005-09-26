@@ -80,7 +80,7 @@ namespace Stetic.Wrapper {
 				try {
 					if (child_elem.HasAttribute ("internal-child"))
 						GladeSetInternalChild (child_elem);
-					else if (child_elem["widget"] == null && AllowPlaceholders)
+					else if (child_elem["widget"] == null)
 						AddPlaceholder ();
 					else
 						GladeImportChild (child_elem);

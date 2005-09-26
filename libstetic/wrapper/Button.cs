@@ -66,17 +66,13 @@ namespace Stetic.Wrapper {
 			this.label = label.LabelProp;
 			button.UseUnderline = label.UseUnderline;
 
-#if GTK_SHARP_2_6
 			if (iwrap.Type == Image.ImageType.ThemedIcon) {
 				themedIcon = iwrap.IconName;
 				Type = ButtonType.ThemedIcon;
 			} else {
-#endif
 				applicationIcon = iwrap.Filename;
 				Type = ButtonType.ApplicationIcon;
-#if GTK_SHARP_2_6
 			}
-#endif
 		}
 
 		public override XmlElement GladeExport (XmlDocument doc)
@@ -114,9 +110,7 @@ namespace Stetic.Wrapper {
 		public enum ButtonType {
 			StockItem,
 			TextOnly,
-#if GTK_SHARP_2_6
 			ThemedIcon,
-#endif
 			ApplicationIcon,
 			Custom
 		};
@@ -137,20 +131,15 @@ namespace Stetic.Wrapper {
 				case ButtonType.TextOnly:
 					labelWidget = null;
 					button.UseStock = false;
-#if GTK_SHARP_2_6
-					button.Image = null;
-#endif
 					Label = label;
 					UseUnderline = useUnderline;
 					break;
-#if GTK_SHARP_2_6
 				case ButtonType.ThemedIcon:
 					button.UseStock = false;
 					Label = label;
 					UseUnderline = useUnderline;
 					ThemedIcon = themedIcon;
 					break;
-#endif
 				case ButtonType.ApplicationIcon:
 					button.UseStock = false;
 					Label = label;
@@ -159,9 +148,6 @@ namespace Stetic.Wrapper {
 					break;
 				case ButtonType.Custom:
 					button.UseStock = false;
-#if GTK_SHARP_2_6
-					button.Image = null;
-#endif
 					if (button.Child != null)
 						ReplaceChild (button.Child, CreatePlaceholder ());
 					break;
@@ -173,8 +159,6 @@ namespace Stetic.Wrapper {
 
 		void ConstructContents ()
 		{
-			Gtk.Image iconWidget;
-
 			if (button.Child != null)
 				button.Remove (button.Child);
 
@@ -184,23 +168,30 @@ namespace Stetic.Wrapper {
 			} else
 				labelWidget = Gtk.Label.New (label);
 
-#if GTK_SHARP_2_6
-			if (type == ButtonType.ThemedIcon)
-				iconWidget = Gtk.Image.NewFromIconName (themedIcon, Gtk.IconSize.Button);
-			else
-#endif
-				iconWidget = new Gtk.Image (applicationIcon);
+			Gtk.Image imageWidget = (Gtk.Image)Registry.NewInstance (typeof (Gtk.Image), proj);
+			Image imageWrapper = (Image)Widget.Lookup (imageWidget);
+			imageWrapper.Unselectable = true;
+			if (type == ButtonType.StockItem) {
+				imageWrapper.IconName = stockId;
+				imageWrapper.IconSize = Gtk.IconSize.Button;
+				imageWrapper.Type = Image.ImageType.ThemedIcon;
+			} else if (type == ButtonType.ThemedIcon) {
+				imageWrapper.IconName = themedIcon;
+				imageWrapper.IconSize = Gtk.IconSize.Button;
+				imageWrapper.Type = Image.ImageType.ThemedIcon;
+			} else {
+				imageWrapper.Filename = applicationIcon;
+				imageWrapper.Type = Image.ImageType.ApplicationImage;
+			}
 
 			Gtk.HBox box = new Gtk.HBox (false, 2);
-			box.PackStart (iconWidget, false, false, 0);
+			box.PackStart (imageWidget, false, false, 0);
 			box.PackEnd (labelWidget, false, false, 0);
 
 			Gtk.Alignment alignment = new Gtk.Alignment (button.Xalign, button.Yalign, 0.0f, 0.0f);
 			alignment.Add (box);
 
 			Widget wrapper = (Widget)ObjectWrapper.Create (proj, labelWidget);
-			wrapper.Unselectable = true;
-			wrapper = (Widget)ObjectWrapper.Create (proj, iconWidget);
 			wrapper.Unselectable = true;
 			wrapper = (Widget)ObjectWrapper.Create (proj, box);
 			wrapper.Unselectable = true;
@@ -246,7 +237,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-#if GTK_SHARP_2_6
 		string themedIcon;
 		public string ThemedIcon {
 			get {
@@ -258,7 +248,6 @@ namespace Stetic.Wrapper {
 				EmitNotify ("ThemedIcon");
 			}
 		}
-#endif
 
 		string label;
 		public string Label {

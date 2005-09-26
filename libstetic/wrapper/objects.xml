@@ -287,7 +287,7 @@
 			  description="The stock button ID"
 			  editor="Stetic.Editor.StockItem">
 		    <invisible-if name="Type" value="TextOnly" />
-		    <!-- 2.6 <invisible-if name="Type" value="ThemedIcon" /> -->
+		    <invisible-if name="Type" value="ThemedIcon" />
 		    <invisible-if name="Type" value="ApplicationIcon" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
@@ -296,17 +296,17 @@
 			  editor="Stetic.Editor.ImageFile">
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="TextOnly" />
-		    <!-- 2.6 <invisible-if name="Type" value="ThemedIcon" /> -->
+		    <invisible-if name="Type" value="ThemedIcon" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
-		<!-- 2.6 <property name="ThemedIcon" label="Icon Name"
+		<property name="ThemedIcon" label="Icon Name"
 			  description="The icon to display in the button"
 			  editor="Stetic.Editor.ThemedIcon">
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="TextOnly" />
 		    <invisible-if name="Type" value="ApplicationIcon" />
 		    <invisible-if name="Type" value="Custom" />
-		</property> -->
+		</property>
 		<property name="Label" translatable="true">
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="Custom" />
@@ -659,27 +659,26 @@
 	    label="Image" icon="image.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Image Properties">
-		<!-- 2.6
 		<property name="Type" label="Image Type"
 			  description="Whether to use a themed icon or an application-provided image" />
-		-->
 		<property name="Stock" internal="true" />
-		<!-- 2.6
+		<!-- 2.6: update Image.cs and remove glade-override -->
 		<property name="IconName" label="Icon name"
+			  glade-name="icon_name" glade-override="true"
 			  description="The themed icon to display"
 			  editor="Stetic.Editor.ThemedIcon">
 		    <invisible-if name="Type" value="ApplicationImage" />
 		</property>
-		-->
 		<property name="IconSize">
-		    <!-- 2.6 <invisible-if name="Type" value="ApplicationImage" /> -->
+		    <invisible-if name="Type" value="ApplicationImage" />
 		</property>
 		<property name="Filename" glade-name="pixbuf"
 			  editor="Stetic.Editor.ImageFile">
-		    <!-- 2.6 <invisible-if name="Type" value="ThemedIcon" /> -->
+		    <invisible-if name="Type" value="ThemedIcon" />
 		</property>
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Misc" />
+	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
 
@@ -828,6 +827,7 @@
 		<property name="Fraction" />
 		<property name="PulseStep" />
 	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
 
@@ -1790,10 +1790,19 @@
 	       description="Button displaying stock icon and text" />
 	<value name="TextOnly" label="Text only"
 	       description="Button displaying text only" />
+	<value name="ThemedIcon" label="Themed Icon"
+	       description="Button displaying a themed icon (and application-provided text)" />
 	<value name="ApplicationIcon" label="Icon from file"
 	       description="Button displaying application-provided icon and text" />
 	<value name="Custom" label="Custom"
 	       description="Button with entirely custom contents" />
+    </enum>
+
+    <enum type="Stetic.Wrapper.Image+ImageType">
+	<value name="ThemedIcon" label="Themed icon"
+	       description="A themed icon" />
+	<value name="ApplicationImage" label="Image from file"
+	       description="An application-provided image" />
     </enum>
 
 </objects>

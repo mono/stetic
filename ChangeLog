@@ -1,5 +1,24 @@
 2005-09-26  Dan Winship  <danw@novell.com>
 
+	* libstetic/wrapper/objects.xml: bring back ThemedIcon images and
+	buttons. Add <itemgroup ref="Gtk.Widget"> to a few classes that
+	were missing it.
+
+	* libstetic/editor/ThemedIcon.cs: Fix to work under Gtk# 2.4
+
+	* libstetic/wrapper/Button.cs: bring back ThemedIcon buttons
+
+	* libstetic/wrapper/Image.cs: bring back ThemedIcon images.
+
+	* libstetic/wrapper/Frame.cs: don't crash when importing a frame
+	with no label widget. If the LabelWidget changes, create a new
+	wrapper for it.
+
+	* libstetic/wrapper/Container.cs (GladeImport): don't crash when
+	importing a placeholder into a !AllowPlacerholders container.
+
+2005-09-26  Dan Winship  <danw@novell.com>
+
 	* libstetic/wrapper/Dialog.cs (Buttons): make this a number rather
 	than having an enum of standard button choices; the HIG prefers
 	stronger labels than "OK"/"Yes", so we shouldn't be making it

@@ -19,7 +19,16 @@ namespace Stetic.Wrapper {
 				align_wrapper.AddPlaceholder ();
 				ReplaceChild (frame.Child, (Gtk.Widget)align_wrapper.Wrapped);
 			}
-			ObjectWrapper.Create (proj, frame.LabelWidget);
+
+			if (frame.LabelWidget != null)
+				ObjectWrapper.Create (proj, frame.LabelWidget);
+			frame.AddNotification ("label-widget", LabelWidgetChanged);
+		}
+
+		void LabelWidgetChanged (object obj, GLib.NotifyArgs args)
+		{
+			if (frame.LabelWidget != null)
+				ObjectWrapper.Create (proj, frame.LabelWidget);
 		}
 
 		Gtk.Frame frame {
