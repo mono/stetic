@@ -253,17 +253,19 @@
 	    </itemgroup>
 	</itemgroups>
 	<contextmenu>
-	    <command name="InsertBefore" label="Insert Before"
+	    <command name="InsertBefore" label="Insert Button Before"
 		     description="Insert a new button before the selected one" />
-	    <command name="InsertAfter" label="Insert After"
+	    <command name="InsertAfter" label="Insert Button After"
 		     description="Insert a new button after the selected one" />
 	</contextmenu>
     </object>
-    <object type="Gtk.ButtonBox+ButtonBoxChild,gtk-sharp">
+    <object type="Gtk.ButtonBox+ButtonBoxChild,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox+ButtonBoxChild">
 	<itemgroups>
 	    <itemgroup label="Button Box Child Layout">
-		<property name="PackType" />
-		<property name="Secondary" />
+		<property name="InDialog" internal="true" />
+		<property name="Secondary">
+		    <invisible-if name="InDialog" value="true" />
+		</property>
 		<property name="Position" />
 		<property name="Expand" />
 		<property name="Fill">
@@ -313,11 +315,11 @@
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
-		<property name="HasResponseId" internal="true" />
+		<property name="IsDialogButton" internal="true" />
 		<property name="ResponseId" label="Response Id" glade-name="response_id"
 			  description="The response ID to emit when this button is clicked."
 			  editor="Stetic.Editor.ResponseId">
-		    <invisible-if name="HasResponseId" value="false" />
+		    <invisible-if name="IsDialogButton" value="false" />
 		</property>
 	    </itemgroup>
 	    <itemgroup label="Extra Button Properties" name="Extra">
@@ -471,8 +473,9 @@
 	<itemgroups>
 	    <itemgroup label="Dialog Properties">
 		<property ref="Gtk.Window.Title" />
-		<property name="Buttons" label="Buttons"
-			  description="The buttons to display" />
+		<property name="Buttons" label="Number of Buttons"
+			  description="The number of buttons"
+			  min="1" />
 		<property name="HelpButton" label="Help Button"
 			  description="Whether or not to display a 'Help' button" />
 		<property ref="Gtk.Window.Icon" />
@@ -1687,6 +1690,30 @@
 	       description="Draw no relief around the button" />
     </enum>
 
+    <enum type="Gtk.ResponseType,gtk-sharp">
+	<value name="None" label="None"
+	       description="None" />
+	<value name="Reject" label="Reject"
+	       description="Reject" />
+	<value name="Accept" label="Accept"
+	       description="Accept" />
+	<value name="DeleteEvent" />
+	<value name="Ok" label="OK"
+	       description="OK" />
+	<value name="Cancel" label="Cancel"
+	       description="Cancel" />
+	<value name="Close" label="Close"
+	       description="Close" />
+	<value name="Yes" label="Yes"
+	       description="Yes" />
+	<value name="No" label="No"
+	       description="No" />
+	<value name="Apply" label="Apply"
+	       description="Apply" />
+	<value name="Help" label="Help"
+	       description="Help" />
+    </enum>
+
     <enum type="Gtk.ShadowType,gtk-sharp">
 	<value name="None" label="None"
 	       description="No outline" />
@@ -1767,17 +1794,6 @@
 	       description="Button displaying application-provided icon and text" />
 	<value name="Custom" label="Custom"
 	       description="Button with entirely custom contents" />
-    </enum>
-
-    <enum type="Stetic.Wrapper.Dialog+StandardButtons">
-	<value name="Custom" label="Custom"
-	       description="Application-selected buttons" />
-	<value name="Close" label="Close"
-	       description="A Close button" />
-	<value name="Ok" label="OK"
-	       description="An OK button" />
-	<value name="CancelOk" label="Cancel / OK"
-	       description="Cancel and OK buttons" />
     </enum>
 
 </objects>

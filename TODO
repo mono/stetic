@@ -13,8 +13,6 @@ UI-Designing UI:
     - Fix up not-fully-functional wrappers:
 
 	- Dialog
-		- "Buttons" should automatically switch to "Custom" if
-		  you add/remove them.
 		- action_area is currently broken on glade import
 
 	- Notebook has a few problems:

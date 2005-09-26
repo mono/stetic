@@ -213,6 +213,20 @@ namespace Stetic.Wrapper {
 			return Stetic.ObjectWrapper.Create (parentWrapper.proj, cc) as ContainerChild;
 		}
 
+		protected Gtk.Container.ContainerChild ContextChildProps (Gtk.Widget context)
+		{
+			if (context == container)
+				return null;
+
+			do {
+				if (context.Parent == container)
+					return container[context];
+				context = context.Parent;
+			} while (context != null);
+
+			return null;
+		}
+
 		public delegate void ContentsChangedHandler (Container container);
 		public event ContentsChangedHandler ContentsChanged;
 

@@ -217,6 +217,9 @@ namespace Stetic.Wrapper {
 				return stockId;
 			}
 			set {
+				if (responseId == ResponseIdForStockId (stockId))
+					responseId = 0;
+
 				button.Label = stockId = value;
 				button.UseStock = true;
 				Gtk.StockItem item = Gtk.Stock.Lookup (value);
@@ -225,6 +228,9 @@ namespace Stetic.Wrapper {
 					useUnderline = true;
 				}
 				EmitNotify ("StockId");
+
+				if (responseId == 0)
+					ResponseId = ResponseIdForStockId (stockId);
 			}
 		}
 
@@ -282,12 +288,15 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public bool HasResponseId {
+		bool isDialogButton;
+		public bool IsDialogButton {
 			get {
-				Stetic.Wrapper.Widget pwrap = ParentWrapper;
-				if (pwrap == null)
-					return false;
-				return pwrap.InternalChildId == "action_area";
+				return isDialogButton;
+			}
+			set {
+				isDialogButton = value;
+				if (isDialogButton)
+					button.CanDefault = true;
 			}
 		}
 
@@ -300,6 +309,26 @@ namespace Stetic.Wrapper {
 				responseId = value;
 				EmitNotify ("ResponseId");
 			}
+		}
+
+		int ResponseIdForStockId (string stockId)
+		{
+			if (stockId == Gtk.Stock.Ok)
+				return (int)Gtk.ResponseType.Ok;
+			else if (stockId == Gtk.Stock.Cancel)
+				return (int)Gtk.ResponseType.Cancel;
+			else if (stockId == Gtk.Stock.Close)
+				return (int)Gtk.ResponseType.Close;
+			else if (stockId == Gtk.Stock.Yes)
+				return (int)Gtk.ResponseType.Yes;
+			else if (stockId == Gtk.Stock.No)
+				return (int)Gtk.ResponseType.No;
+			else if (stockId == Gtk.Stock.Apply)
+				return (int)Gtk.ResponseType.Apply;
+			else if (stockId == Gtk.Stock.Help)
+				return (int)Gtk.ResponseType.Help;
+			else
+				return 0;
 		}
 	}
 }

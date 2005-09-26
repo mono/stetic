@@ -8,6 +8,7 @@ namespace Stetic.Editor {
 
 		Gtk.ComboBoxEntry combo;
 		Gtk.Entry entry;
+		EnumDescriptor enm;
 		ArrayList values;
 
 		public ResponseId ()
@@ -20,13 +21,13 @@ namespace Stetic.Editor {
 			entry = combo.Child as Gtk.Entry;
 			entry.Changed += entry_Changed;
 
+			enm = Registry.LookupEnum (typeof (Gtk.ResponseType));
 			values = new ArrayList ();
-			foreach (int i in Enum.GetValues (typeof (Gtk.ResponseType))) {
-				Enum value = (Enum)Enum.ToObject (typeof (Gtk.ResponseType), i);
-				string name = Enum.GetName (typeof (Gtk.ResponseType), value);
-
-				combo.AppendText (name);
-				values.Add (i);
+			foreach (Enum value in enm.Values) {
+				if (enm[value].Label != "") {
+					combo.AppendText (enm[value].Label);
+					values.Add ((int)enm[value].Value);
+				}
 			}
 		}
 

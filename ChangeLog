@@ -1,3 +1,58 @@
+2005-09-26  Dan Winship  <danw@novell.com>
+
+	* libstetic/wrapper/Dialog.cs (Buttons): make this a number rather
+	than having an enum of standard button choices; the HIG prefers
+	stronger labels than "OK"/"Yes", so we shouldn't be making it
+	easier to use bad labels than good ones.
+	(HelpButton): reorder the help button to be the first child so
+	that it won't ever get deleted when you decrement Buttons
+	(ButtonsChanged): keep the Buttons and HelpButton properties in
+	sync if the user manipulates the buttonbox contents by hand
+
+	* libstetic/wrapper/Button.cs (StockId): if the button's ReponseId
+	matches its old StockId (or is unset), update it to match it's new
+	StockId.
+	(IsDialogButton): replaces HasResponseId and is now settable
+	rather than being figured out automatically. Also, set
+	button.CanDefault when turning on IsDialogButton.
+	(ResponseIdForStockId): maps Gtk.Stock values to Gtk.ResponseType
+	values.
+
+	* libstetic/wrapper/ButtonBox.cs (NewButton): if the buttonbox is
+	a dialog's action_area, set IsDialogButton on new child buttons.
+	(AllowPlaceholders): false
+	(InsertBefore, InsertAfter): Reimplement using Secondary/non-
+	Secondary rather than PackType.
+	(ButtonBoxChild): add InDialog property
+	
+	* libstetic/wrapper/Container.cs (ContextChildProps): for use in
+	context-menu ops; gets the child properties corresponding to the
+	ancestor of the widget that is a child of the container.
+
+	* libstetic/wrapper/Box.cs (AllowPlaceholders): only return false
+	if InternalChildId is unset. (Eg, we definitely want to allow
+	placeholders in a dialog box's internal vbox).
+	(InsertBefore, InsertAfter): use Container.ContextChildProps so
+	that this works regardless of what descendant widget was clicked
+	on.
+
+	* libstetic/wrapper/objects.xml (Gtk.ButtonBox): Change the
+	command labels to "Insert Button Before" and "Insert Button
+	After".
+	(Gtk.ButtonBox+ButtonBoxChild): Remove PackType, since the
+	interaction of PackType and Secondary is unnecessarily annoying.
+	Also add a new internal InDialog property and hide Secondary if
+	that's true (since we handle Help buttons specially and nothing
+	else should be secondary).
+	(Gtk.Button): s/HasResponseId/IsDialogButton/
+	(Gtk.Dialog): change the description of Buttons since it's now a
+	number, and give it a minimum value of "1".
+	(Gtk.ResponseType): add labels/descriptions for this enum
+	(Stetic.Wrapper.Dialog+StandardButtons): and kill this one
+
+	* libstetic/editor/ResponseId.cs: update this to use
+	EnumDescriptor
+
 2005-09-22  Dan Winship  <danw@novell.com>
 
 	* libstetic/ClassDescriptor.cs: Handle <contextmenu ref="..." />

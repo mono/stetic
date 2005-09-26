@@ -23,7 +23,7 @@ namespace Stetic.Wrapper {
 
 		protected override bool AllowPlaceholders {
 			get {
-				return false;
+				return InternalChildId != null;
 			}
 		}
 
@@ -127,7 +127,7 @@ namespace Stetic.Wrapper {
 				position = 0;
 				type = Gtk.PackType.Start;
 			} else {
-				Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
+				Gtk.Box.BoxChild bc = (Gtk.Box.BoxChild)ContextChildProps (context);
 				position = bc.Position;
 				type = bc.PackType;
 			}
@@ -146,13 +146,13 @@ namespace Stetic.Wrapper {
 		internal void InsertAfter (Gtk.Widget context)
 		{
 			int position;
-			Gtk.PackType type = Gtk.PackType.Start;
+			Gtk.PackType type;
 
 			if (context == box) {
 				position = 0;
 				type = Gtk.PackType.End;
 			} else {
-				Gtk.Box.BoxChild bc = box[context] as Gtk.Box.BoxChild;
+				Gtk.Box.BoxChild bc = (Gtk.Box.BoxChild)ContextChildProps (context);
 				position = bc.Position;
 				type = bc.PackType;
 			}

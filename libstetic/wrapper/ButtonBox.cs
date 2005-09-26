@@ -8,15 +8,18 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-			FillButtons ();
-		}
-
-		void FillButtons ()
-		{
 			foreach (Gtk.Widget child in buttonbox.Children) {
 				if (child is Placeholder)
-					ReplaceChild (child, (Gtk.Button)Registry.NewInstance (typeof (Gtk.Button), proj));
+					ReplaceChild (child, NewButton ());
 			}
+		}
+
+		Gtk.Button NewButton ()
+		{
+			Gtk.Button button = (Gtk.Button)Registry.NewInstance (typeof (Gtk.Button), proj);
+			if (InternalChildId == "action_area")
+				((Button)Widget.Lookup (button)).IsDialogButton = true;
+			return button;
 		}
 
 		protected Gtk.ButtonBox buttonbox {
@@ -25,16 +28,51 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		protected override bool AllowPlaceholders {
+			get {
+				return false;
+			}
+		}
 		internal new void InsertBefore (Gtk.Widget context)
 		{
-			base.InsertBefore (context);
-			FillButtons ();
+			int position;
+			bool secondary;
+
+			if (context == buttonbox) {
+				position = 0;
+				secondary = false;
+			} else {
+				Gtk.ButtonBox.ButtonBoxChild bbc = (Gtk.ButtonBox.ButtonBoxChild)ContextChildProps (context);
+				position = bbc.Position;
+				secondary = bbc.Secondary;
+			}
+
+			Gtk.Button button = NewButton ();
+			buttonbox.PackStart (button, false, false, 0);
+			buttonbox.ReorderChild (button, position);
+			buttonbox.SetChildSecondary (button, secondary);
+			EmitContentsChanged ();
 		}
 
 		internal new void InsertAfter (Gtk.Widget context)
 		{
-			base.InsertAfter (context);
-			FillButtons ();
+			int position;
+			bool secondary;
+
+			if (context == buttonbox) {
+				position = buttonbox.Children.Length - 1;
+				secondary = false;
+			} else {
+				Gtk.ButtonBox.ButtonBoxChild bbc = (Gtk.ButtonBox.ButtonBoxChild)ContextChildProps (context);
+				position = bbc.Position;
+				secondary = bbc.Secondary;
+			}
+
+			Gtk.Button button = NewButton ();
+			buttonbox.PackStart (button, false, false, 0);
+			buttonbox.ReorderChild (button, position + 1);
+			buttonbox.SetChildSecondary (button, secondary);
+			EmitContentsChanged ();
 		}
 
 		public int Size {
@@ -48,8 +86,19 @@ namespace Stetic.Wrapper {
 				while (cursize > value)
 					buttonbox.Remove (children[--cursize]);
 				while (cursize < value) {
-					buttonbox.PackStart ((Gtk.Button)Registry.NewInstance (typeof (Gtk.Button), proj), false, false, 0);
+					buttonbox.PackStart (NewButton (), false, false, 0);
 					cursize++;
+				}
+			}
+		}
+
+		public class ButtonBoxChild : Box.BoxChild {
+
+			public bool InDialog {
+				get {
+					if (ParentWrapper == null)
+						return false;
+					return ParentWrapper.InternalChildId == "action_area";
 				}
 			}
 		}
