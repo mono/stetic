@@ -1,3 +1,8 @@
+2005-09-27  Dan Winship  <danw@novell.com>
+
+	* libstetic/HandleWindow.cs (HandleEvent): hack around bgo 316871
+	(shaped windows block update events in gtk+ 2.8.0 - 2.8.3).
+
 2005-09-26  Dan Winship  <danw@novell.com>
 
 	* libstetic/wrapper/objects.xml: bring back ThemedIcon images and

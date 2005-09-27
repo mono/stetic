@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 
 namespace Stetic {
 
@@ -72,13 +73,14 @@ namespace Stetic {
 			}
 		}
 
+		Gdk.Rectangle handleAllocation;
+
 		const int handleSize = 6;
 
 		public void Shape ()
 		{
 			Gdk.GC gc;
 			Gdk.Pixmap pixmap;
-			Gdk.Rectangle handleAllocation;
 			int tlx, tly;
 
 			selection.TranslateCoordinates (selection.Toplevel, 0, 0, out tlx, out tly);
@@ -150,6 +152,13 @@ namespace Stetic {
 					Drag (evm);
 				return;
 
+			case Gdk.EventType.Expose:
+				// hack around bgo 316871 for gtk+ 2.8.0-2.8.3
+				gdk_synthesize_window_state (window.Handle, 0, 1);
+				selection.Toplevel.GdkWindow.InvalidateRect (handleAllocation, true);
+				gdk_synthesize_window_state (window.Handle, 1, 0);
+				return;
+
 			default:
 				return;
 			}
@@ -157,6 +166,10 @@ namespace Stetic {
 
 		public delegate void DragDelegate (Gdk.EventMotion evt);
 		public event DragDelegate Drag;
+
+
+		[DllImport ("libgdk-win32-2.0-0.dll")]
+		static extern void gdk_synthesize_window_state (IntPtr window, uint unset_flags, uint set_flags);
 	}
 }
 
