@@ -1,3 +1,9 @@
+2005-10-09  Dan Winship  <danw@novell.com>
+
+	* metacity-sharp: add libmetacity-private wrapper
+
+	* metacity-sharp/test-preview.cs: test program
+
 2005-09-27  Dan Winship  <danw@novell.com>
 
 	* libstetic/HandleWindow.cs (HandleEvent): hack around bgo 316871

@@ -1,0 +1,11 @@
+<gapi-parser-input>
+  <api filename="metacity-api.raw">
+    <library name="libmetacity-private.so.0">
+      <namespace name="Meta">
+        <file>../../../gnome/metacity/src/common.h</file>
+        <file>../../../gnome/metacity/src/preview-widget.h</file>
+        <file>../../../gnome/metacity/src/preview-widget.c</file>
+      </namespace>
+    </library>
+  </api>
+</gapi-parser-input>

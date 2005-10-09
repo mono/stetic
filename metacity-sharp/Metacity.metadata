@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<metadata>
+  <attr path="/api/namespace[@name='Meta']" name="name">Metacity</attr>
+  <attr path="/api/namespace/callback[@name='WindowMenuFunc']" name="hidden">1</attr>
+  <attr path="/api/namespace/enum[@name='ActionDoubleClickTitlebar']" name="hidden">1</attr>
+  <attr path="/api/namespace/enum[@name='Cursor']" name="hidden">1</attr>
+  <attr path="/api/namespace/enum[@name='FocusMode']" name="hidden">1</attr>
+  <attr path="/api/namespace/enum[@name='GrabOp']" name="hidden">1</attr>
+  <attr path="/api/namespace/enum[@name='MenuOp']" name="hidden">1</attr>
+  <attr path="/api/namespace/enum[@name='VirtualModifier']" name="hidden">1</attr>
+  <attr path="/api/namespace/struct[@name='ButtonLayout']/field" name="array_len">4</attr>
+  <attr path="/api/namespace/struct[@name='ResizePopup']" name="hidden">1</attr>
+  <attr path="/api/namespace/struct[@name='WindowMenu']" name="hidden">1</attr>
+  <add-node path="/api"><symbol type="manual" cname="MetaTheme" name="Metacity.Theme"/></add-node>
+</metadata>

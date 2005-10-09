@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<api>
+  <!--
+
+        This file was automatically generated.
+        Please DO NOT MODIFY THIS FILE, modify .metadata files instead.
+
+-->
+  <namespace name="Meta" library="libmetacity-private.so.0">
+    <enum name="ActionDoubleClickTitlebar" cname="MetaActionDoubleClickTitlebar" type="enum">
+      <member cname="META_ACTION_DOUBLE_CLICK_TITLEBAR_TOGGLE_SHADE" name="ToggleShade" />
+      <member cname="META_ACTION_DOUBLE_CLICK_TITLEBAR_TOGGLE_MAXIMIZE" name="ToggleMaximize" />
+      <member cname="META_ACTION_DOUBLE_CLICK_TITLEBAR_LAST" name="Last" />
+    </enum>
+    <enum name="ButtonFunction" cname="MetaButtonFunction" type="enum">
+      <member cname="META_BUTTON_FUNCTION_MENU" name="Menu" />
+      <member cname="META_BUTTON_FUNCTION_MINIMIZE" name="Minimize" />
+      <member cname="META_BUTTON_FUNCTION_MAXIMIZE" name="Maximize" />
+      <member cname="META_BUTTON_FUNCTION_CLOSE" name="Close" />
+      <member cname="META_BUTTON_FUNCTION_LAST" name="Last" />
+    </enum>
+    <enum name="Cursor" cname="MetaCursor" type="enum">
+      <member cname="META_CURSOR_DEFAULT" name="Default" />
+      <member cname="META_CURSOR_NORTH_RESIZE" name="NorthResize" />
+      <member cname="META_CURSOR_SOUTH_RESIZE" name="SouthResize" />
+      <member cname="META_CURSOR_WEST_RESIZE" name="WestResize" />
+      <member cname="META_CURSOR_EAST_RESIZE" name="EastResize" />
+      <member cname="META_CURSOR_SE_RESIZE" name="SeResize" />
+      <member cname="META_CURSOR_SW_RESIZE" name="SwResize" />
+      <member cname="META_CURSOR_NE_RESIZE" name="NeResize" />
+      <member cname="META_CURSOR_NW_RESIZE" name="NwResize" />
+      <member cname="META_CURSOR_MOVE_WINDOW" name="MoveWindow" />
+      <member cname="META_CURSOR_RESIZE_WINDOW" name="ResizeWindow" />
+      <member cname="META_CURSOR_BUSY" name="Busy" />
+    </enum>
+    <enum name="FocusMode" cname="MetaFocusMode" type="enum">
+      <member cname="META_FOCUS_MODE_CLICK" name="Click" />
+      <member cname="META_FOCUS_MODE_SLOPPY" name="Sloppy" />
+      <member cname="META_FOCUS_MODE_MOUSE" name="Mouse" />
+    </enum>
+    <enum name="FrameFlags" cname="MetaFrameFlags" type="flags">
+      <member cname="META_FRAME_ALLOWS_DELETE" name="AllowsDelete" value="1 &lt;&lt; 0" />
+      <member cname="META_FRAME_ALLOWS_MENU" name="AllowsMenu" value="1 &lt;&lt; 1" />
+      <member cname="META_FRAME_ALLOWS_MINIMIZE" name="AllowsMinimize" value="1 &lt;&lt; 2" />
+      <member cname="META_FRAME_ALLOWS_MAXIMIZE" name="AllowsMaximize" value="1 &lt;&lt; 3" />
+      <member cname="META_FRAME_ALLOWS_VERTICAL_RESIZE" name="AllowsVerticalResize" value="1 &lt;&lt; 4" />
+      <member cname="META_FRAME_ALLOWS_HORIZONTAL_RESIZE" name="AllowsHorizontalResize" value="1 &lt;&lt; 5" />
+      <member cname="META_FRAME_HAS_FOCUS" name="HasFocus" value="1 &lt;&lt; 6" />
+      <member cname="META_FRAME_SHADED" name="Shaded" value="1 &lt;&lt; 7" />
+      <member cname="META_FRAME_STUCK" name="Stuck" value="1 &lt;&lt; 8" />
+      <member cname="META_FRAME_MAXIMIZED" name="Maximized" value="1 &lt;&lt; 9" />
+      <member cname="META_FRAME_ALLOWS_SHADE" name="AllowsShade" value="1 &lt;&lt; 10" />
+      <member cname="META_FRAME_ALLOWS_MOVE" name="AllowsMove" value="1 &lt;&lt; 11" />
+      <member cname="META_FRAME_FULLSCREEN" name="Fullscreen" value="1 &lt;&lt; 12" />
+      <member cname="META_FRAME_IS_FLASHING" name="IsFlashing" value="1 &lt;&lt; 13" />
+    </enum>
+    <enum name="FrameType" cname="MetaFrameType" type="enum">
+      <member cname="META_FRAME_TYPE_NORMAL" name="Normal" />
+      <member cname="META_FRAME_TYPE_DIALOG" name="Dialog" />
+      <member cname="META_FRAME_TYPE_MODAL_DIALOG" name="ModalDialog" />
+      <member cname="META_FRAME_TYPE_UTILITY" name="Utility" />
+      <member cname="META_FRAME_TYPE_MENU" name="Menu" />
+      <member cname="META_FRAME_TYPE_BORDER" name="Border" />
+      <member cname="META_FRAME_TYPE_LAST" name="Last" />
+    </enum>
+    <enum name="GrabOp" cname="MetaGrabOp" type="enum">
+      <member cname="META_GRAB_OP_NONE" name="None" />
+      <member cname="META_GRAB_OP_MOVING" name="Moving" />
+      <member cname="META_GRAB_OP_RESIZING_SE" name="ResizingSe" />
+      <member cname="META_GRAB_OP_RESIZING_S" name="ResizingS" />
+      <member cname="META_GRAB_OP_RESIZING_SW" name="ResizingSw" />
+      <member cname="META_GRAB_OP_RESIZING_N" name="ResizingN" />
+      <member cname="META_GRAB_OP_RESIZING_NE" name="ResizingNe" />
+      <member cname="META_GRAB_OP_RESIZING_NW" name="ResizingNw" />
+      <member cname="META_GRAB_OP_RESIZING_W" name="ResizingW" />
+      <member cname="META_GRAB_OP_RESIZING_E" name="ResizingE" />
+      <member cname="META_GRAB_OP_KEYBOARD_MOVING" name="KeyboardMoving" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN" name="KeyboardResizingUnknown" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_S" name="KeyboardResizingS" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_N" name="KeyboardResizingN" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_W" name="KeyboardResizingW" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_E" name="KeyboardResizingE" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_SE" name="KeyboardResizingSe" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_NE" name="KeyboardResizingNe" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_SW" name="KeyboardResizingSw" />
+      <member cname="META_GRAB_OP_KEYBOARD_RESIZING_NW" name="KeyboardResizingNw" />
+      <member cname="META_GRAB_OP_KEYBOARD_TABBING_NORMAL" name="KeyboardTabbingNormal" />
+      <member cname="META_GRAB_OP_KEYBOARD_TABBING_DOCK" name="KeyboardTabbingDock" />
+      <member cname="META_GRAB_OP_KEYBOARD_ESCAPING_NORMAL" name="KeyboardEscapingNormal" />
+      <member cname="META_GRAB_OP_KEYBOARD_ESCAPING_DOCK" name="KeyboardEscapingDock" />
+      <member cname="META_GRAB_OP_KEYBOARD_WORKSPACE_SWITCHING" name="KeyboardWorkspaceSwitching" />
+      <member cname="META_GRAB_OP_CLICKING_MINIMIZE" name="ClickingMinimize" />
+      <member cname="META_GRAB_OP_CLICKING_MAXIMIZE" name="ClickingMaximize" />
+      <member cname="META_GRAB_OP_CLICKING_UNMAXIMIZE" name="ClickingUnmaximize" />
+      <member cname="META_GRAB_OP_CLICKING_DELETE" name="ClickingDelete" />
+      <member cname="META_GRAB_OP_CLICKING_MENU" name="ClickingMenu" />
+    </enum>
+    <enum name="MenuOp" cname="MetaMenuOp" type="flags">
+      <member cname="META_MENU_OP_DELETE" name="Delete" value="1 &lt;&lt; 0" />
+      <member cname="META_MENU_OP_MINIMIZE" name="Minimize" value="1 &lt;&lt; 1" />
+      <member cname="META_MENU_OP_UNMAXIMIZE" name="Unmaximize" value="1 &lt;&lt; 2" />
+      <member cname="META_MENU_OP_MAXIMIZE" name="Maximize" value="1 &lt;&lt; 3" />
+      <member cname="META_MENU_OP_UNSHADE" name="Unshade" value="1 &lt;&lt; 4" />
+      <member cname="META_MENU_OP_SHADE" name="Shade" value="1 &lt;&lt; 5" />
+      <member cname="META_MENU_OP_UNSTICK" name="Unstick" value="1 &lt;&lt; 6" />
+      <member cname="META_MENU_OP_STICK" name="Stick" value="1 &lt;&lt; 7" />
+      <member cname="META_MENU_OP_WORKSPACES" name="Workspaces" value="1 &lt;&lt; 8" />
+      <member cname="META_MENU_OP_MOVE" name="Move" value="1 &lt;&lt; 9" />
+      <member cname="META_MENU_OP_RESIZE" name="Resize" value="1 &lt;&lt; 10" />
+      <member cname="META_MENU_OP_ABOVE" name="Above" value="1 &lt;&lt; 11" />
+      <member cname="META_MENU_OP_UNABOVE" name="Unabove" value="1 &lt;&lt; 12" />
+      <member cname="META_MENU_OP_MOVE_LEFT" name="MoveLeft" value="1 &lt;&lt; 13" />
+      <member cname="META_MENU_OP_MOVE_RIGHT" name="MoveRight" value="1 &lt;&lt; 14" />
+      <member cname="META_MENU_OP_MOVE_UP" name="MoveUp" value="1 &lt;&lt; 15" />
+      <member cname="META_MENU_OP_MOVE_DOWN" name="MoveDown" value="1 &lt;&lt; 16" />
+    </enum>
+    <enum name="VirtualModifier" cname="MetaVirtualModifier" type="flags">
+      <member cname="META_VIRTUAL_SHIFT_MASK" name="ShiftMask" value="1 &lt;&lt; 5" />
+      <member cname="META_VIRTUAL_CONTROL_MASK" name="ControlMask" value="1 &lt;&lt; 6" />
+      <member cname="META_VIRTUAL_ALT_MASK" name="AltMask" value="1 &lt;&lt; 7" />
+      <member cname="META_VIRTUAL_META_MASK" name="MetaMask" value="1 &lt;&lt; 8" />
+      <member cname="META_VIRTUAL_SUPER_MASK" name="SuperMask" value="1 &lt;&lt; 9" />
+      <member cname="META_VIRTUAL_HYPER_MASK" name="HyperMask" value="1 &lt;&lt; 10" />
+      <member cname="META_VIRTUAL_MOD2_MASK" name="Mod2Mask" value="1 &lt;&lt; 11" />
+      <member cname="META_VIRTUAL_MOD3_MASK" name="Mod3Mask" value="1 &lt;&lt; 12" />
+      <member cname="META_VIRTUAL_MOD4_MASK" name="Mod4Mask" value="1 &lt;&lt; 13" />
+      <member cname="META_VIRTUAL_MOD5_MASK" name="Mod5Mask" value="1 &lt;&lt; 14" />
+    </enum>
+    <callback name="WindowMenuFunc" cname="MetaWindowMenuFunc">
+      <return-type type="void" />
+      <parameters>
+        <parameter type="MetaWindowMenu*" name="menu" />
+        <parameter type="Display*" name="xdisplay" />
+        <parameter type="Window" name="client_xwindow" />
+        <parameter type="Time" name="timestamp" />
+        <parameter type="MetaMenuOp" name="op" />
+        <parameter type="int" name="workspace" />
+        <parameter type="gpointer" name="data" />
+      </parameters>
+    </callback>
+    <object name="Preview" cname="MetaPreview" parent="GtkBin">
+      <field name="Theme" cname="theme" type="MetaTheme*" />
+      <field name="Title" cname="title" type="char*" />
+      <field name="Type" cname="type" type="MetaFrameType" />
+      <field name="Flags" cname="flags" type="MetaFrameFlags" />
+      <field name="Layout" cname="layout" type="PangoLayout*" />
+      <field name="TextHeight" cname="text_height" type="int" />
+      <field name="LeftWidth" cname="left_width" type="int" />
+      <field name="RightWidth" cname="right_width" type="int" />
+      <field name="TopHeight" cname="top_height" type="int" />
+      <field name="BottomHeight" cname="bottom_height" type="int" />
+      <field name="ButtonLayout" cname="button_layout" type="MetaButtonLayout" />
+      <method name="GetIcon" cname="meta_preview_get_icon" shared="true">
+        <return-type type="GdkPixbuf*" />
+      </method>
+      <method name="GetMiniIcon" cname="meta_preview_get_mini_icon" shared="true">
+        <return-type type="GdkPixbuf*" />
+      </method>
+      <method name="GetType" cname="meta_preview_get_type" shared="true">
+        <return-type type="GtkType" />
+      </method>
+      <constructor cname="meta_preview_new" />
+      <method name="SetButtonLayout" cname="meta_preview_set_button_layout">
+        <return-type type="void" />
+        <parameters>
+          <parameter type="const-MetaButtonLayout*" name="button_layout" />
+        </parameters>
+      </method>
+      <method name="SetFrameFlags" cname="meta_preview_set_frame_flags">
+        <return-type type="void" />
+        <parameters>
+          <parameter type="MetaFrameFlags" name="flags" />
+        </parameters>
+      </method>
+      <method name="SetFrameType" cname="meta_preview_set_frame_type">
+        <return-type type="void" />
+        <parameters>
+          <parameter type="MetaFrameType" name="type" />
+        </parameters>
+      </method>
+      <method name="SetTheme" cname="meta_preview_set_theme">
+        <return-type type="void" />
+        <parameters>
+          <parameter type="MetaTheme*" name="theme" />
+        </parameters>
+      </method>
+      <method name="SetTitle" cname="meta_preview_set_title">
+        <return-type type="void" />
+        <parameters>
+          <parameter type="const-char*" name="title" />
+        </parameters>
+      </method>
+    </object>
+    <struct name="ButtonLayout" cname="MetaButtonLayout">
+      <field name="LeftButtons" cname="left_buttons" array_len="MAX_BUTTONS_PER_CORNER" type="MetaButtonFunction" />
+      <field name="RightButtons" cname="right_buttons" array_len="MAX_BUTTONS_PER_CORNER" type="MetaButtonFunction" />
+    </struct>
+    <struct name="ResizePopup" cname="MetaResizePopup" opaque="true" />
+    <struct name="WindowMenu" cname="MetaWindowMenu" opaque="true" />
+  </namespace>
+</api>

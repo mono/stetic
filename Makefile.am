@@ -1,1 +1,1 @@
-SUBDIRS = glue libstetic stetic
+SUBDIRS = glue metacity-sharp libstetic stetic
