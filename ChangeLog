@@ -1,5 +1,15 @@
 2005-10-09  Dan Winship  <danw@novell.com>
 
+	* stetic/Canvas.cs: pseudo-window canvas
+
+	* stetic/Stetic.cs: 
+	* stetic/stetic.glade: use it
+
+	* stetic/Grid.cs: QueueResize(), not QueueDraw() when adding
+	fields.
+
+2005-10-09  Dan Winship  <danw@novell.com>
+
 	* metacity-sharp: add libmetacity-private wrapper
 
 	* metacity-sharp/test-preview.cs: test program

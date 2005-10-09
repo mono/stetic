@@ -2,6 +2,7 @@ pkglib_DATA = stetic.exe
 bin_SCRIPTS = stetic
 
 stetic_exe_sources =			\
+	Canvas.cs			\
 	Clipboard.cs			\
 	ContextMenu.cs			\
 	Glade.cs			\
@@ -20,7 +21,7 @@ RESOURCE_FILES = $(wildcard $(srcdir)/*.png) $(srcdir)/stetic.glade
 RESOURCES = $(foreach file,$(RESOURCE_FILES),-resource:$(file)$(comma)$(notdir $(file)))
 
 stetic.exe: $(stetic_exe_sources) $(RESOURCE_FILES) ../libstetic/libstetic.dll
-	$(MCS) -debug -pkg:gnome-sharp-2.0 -pkg:glade-sharp-2.0 -r:../libstetic/libstetic.dll -out:stetic.exe $(stetic_exe_sources:%=$(srcdir)/%) $(RESOURCES)
+	$(MCS) -debug $(STETIC_LIBS) -r:../libstetic/libstetic.dll -r:../metacity-sharp/metacity-sharp.dll -out:stetic.exe $(stetic_exe_sources:%=$(srcdir)/%) $(RESOURCES)
 
 stetic: stetic.in
 	sed -e "s:\@MONO\@:$(MONO):" -e "s:\@pkglibdir\@:$(pkglibdir):" $< > $@
@@ -34,13 +35,13 @@ dist-hook:
 CLEANFILES = stetic stetic.exe stetic.exe.mdb
 
 run:
-	LD_LIBRARY_PATH=../glue/.libs:$$LD_LIBRARY_PATH MONO_PATH=../libstetic $(MONO) --debug stetic.exe
+	LD_LIBRARY_PATH=../glue/.libs:$$LD_LIBRARY_PATH MONO_PATH=../libstetic:../metacity-sharp $(MONO) --debug stetic.exe
 
 trace:
-	LD_LIBRARY_PATH=../glue/.libs:$$LD_LIBRARY_PATH MONO_PATH=../libstetic $(MONO) --trace --debug stetic.exe
+	LD_LIBRARY_PATH=../glue/.libs:$$LD_LIBRARY_PATH MONO_PATH=../libstetic:../metacity-sharp $(MONO) --trace --debug stetic.exe
 
 mdb:
-	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic mdb stetic.exe
+	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic:../metacity-sharp mdb stetic.exe
 
 gdb:
-	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic gdb --args $(MONO) stetic.exe
+	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic:../metacity-sharp gdb --args $(MONO) stetic.exe

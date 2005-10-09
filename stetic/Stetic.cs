@@ -8,6 +8,7 @@ namespace Stetic {
 
 		public static Gnome.Program Program;
 
+		static Stetic.Canvas Canvas;
 		static Stetic.Palette Palette;
 		static Stetic.Project Project;
 		static Stetic.ProjectView ProjectView;
@@ -21,6 +22,7 @@ namespace Stetic {
 
 			Project = new Project ();
 
+			Canvas = new Stetic.Canvas ();
 			Palette = new Stetic.Palette (Project);
 			ProjectView = new Stetic.ProjectView (Project);
 			Properties = new Stetic.PropertyGrid (Project);
@@ -62,7 +64,9 @@ namespace Stetic {
 						       string name, string string1, string string2,
 						       int int1, int int2)
 		{
-			if (name == "Palette")
+			if (name == "Canvas")
+				return Canvas;
+			else if (name == "Palette")
 				return Palette;
 			else if (name == "ProjectView")
 				return ProjectView;

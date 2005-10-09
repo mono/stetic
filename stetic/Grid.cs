@@ -105,7 +105,7 @@ namespace Stetic {
 			tips.SetTip (w, description, null);
 
 			lines.Add (w);
-			QueueDraw ();
+			QueueResize ();
 		}
 
 		public void AppendLabel (string text)
@@ -130,7 +130,7 @@ namespace Stetic {
 		{
 			Stetic.Grid.Pair pair = new Pair (this, label, editor, description);
 			lines.Add (pair);
-			QueueDraw ();
+			QueueResize ();
 		}
 
 		protected override void OnRemoved (Widget w)
