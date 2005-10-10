@@ -3,6 +3,7 @@ using Gtk;
 using Metacity;
 
 class TestPreview {
+	static Preview preview;
 
 	public static void Main ()
 	{
@@ -43,6 +44,7 @@ class TestPreview {
 		MakeEmbeddable (dlg);
 
 		Preview prev = CreatePreview (dlg);
+		preview = prev;
 		ebox.Add (prev);
 		prev.Add (dlg);
 
@@ -85,6 +87,9 @@ class TestPreview {
 			FrameFlags.AllowsShade |
 			FrameFlags.HasFocus;
 			
+		/*if (window.IconList.Length > 0 && window.IconList[0] != null)
+			Preview.MiniIcon = window.IconList[0];*/
+
 		if (window.Resizable)
 			flags = flags | FrameFlags.AllowsMaximize;
 		
@@ -163,6 +168,9 @@ class TestPreview {
 	static void PreviewButtonPress (object obj, ButtonPressEventArgs args)
 	{
 		Console.WriteLine ("PreviewButtonPress");
+		Console.WriteLine ("{0}, {1}, {2}, {3}",
+				   preview.TopHeight, preview.LeftWidth,
+				   preview.RightWidth, preview.BottomHeight);
 	}
 
 	static void PreviewButtonRelease (object obj, ButtonReleaseEventArgs args)

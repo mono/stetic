@@ -1,3 +1,21 @@
+2005-10-10  Jeroen Zwartepoorte  <jeroen.zwartepoorte@gmail.com>
+
+	* configure.in: metacity-sharp/glue/Makefile.
+	* metacity-sharp/Makefile.am:
+	* metacity-sharp/Metacity.metadata:
+	* metacity-sharp/glue/Makefile.am:
+	* metacity-sharp/glue/generated.c:
+	* metacity-sharp/glue/metacity-private/common.h:
+	* metacity-sharp/glue/metacity-private/gradient.h:
+	* metacity-sharp/glue/metacity-private/preview-widget.h:
+	* metacity-sharp/glue/metacity-private/theme-parser.h:
+	* metacity-sharp/glue/metacity-private/theme.h:
+	* metacity-sharp/glue/metacity-private/util.h:
+	* metacity-sharp/test-preview.cs: 
+	
+	Generate code for the theme border widths. Since metacity headers
+	are really private, copy them into the glue directory (yuck!).
+
 2005-10-10  Dan Winship  <danw@novell.com>
 
 	* libstetic/EmbedWindow.cs: Hacks to embed a toplevel window as a

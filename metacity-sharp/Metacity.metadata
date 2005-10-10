@@ -8,6 +8,10 @@
   <attr path="/api/namespace/enum[@name='GrabOp']" name="hidden">1</attr>
   <attr path="/api/namespace/enum[@name='MenuOp']" name="hidden">1</attr>
   <attr path="/api/namespace/enum[@name='VirtualModifier']" name="hidden">1</attr>
+  <attr path="/api/namespace/object[@name='Preview']/field[@name='LeftWidth']" name="access">public</attr>
+  <attr path="/api/namespace/object[@name='Preview']/field[@name='RightWidth']" name="access">public</attr>
+  <attr path="/api/namespace/object[@name='Preview']/field[@name='TopHeight']" name="access">public</attr>
+  <attr path="/api/namespace/object[@name='Preview']/field[@name='BottomHeight']" name="access">public</attr>
   <attr path="/api/namespace/struct[@name='ButtonLayout']/field" name="array_len">4</attr>
   <attr path="/api/namespace/struct[@name='ResizePopup']" name="hidden">1</attr>
   <attr path="/api/namespace/struct[@name='WindowMenu']" name="hidden">1</attr>

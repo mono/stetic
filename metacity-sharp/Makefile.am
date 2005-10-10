@@ -1,3 +1,7 @@
+SUBDIRS = . glue
+
+pkg = metacity
+glue_includes = metacity-private/preview-widget.h
 GAPI_SOURCE = metacity-sources.xml
 RAW_API = metacity-api.raw
 API = metacity-api.xml
@@ -26,7 +30,10 @@ $(API): $(RAW_API) $(METADATA)
 	$(GAPI_FIXUP) --api=$(API) --metadata=$(srcdir)/$(METADATA)
 
 generated-stamp: $(API)
-	 $(GAPI_CODEGEN) --generate $(API) $(GTK_SHARP_CFLAGS) --outdir=generated --customdir=$(srcdir) --assembly-name=metacity-sharp && touch generated-stamp
+	 $(GAPI_CODEGEN) --generate $(API) $(GTK_SHARP_CFLAGS) --outdir=generated	\
+	 --customdir=$(srcdir) --assembly-name=metacity-sharp				\
+	 --gluelib-name=$(pkg)sharpglue-2 --glue-filename=glue/generated.c		\
+	 --glue-includes=$(glue_includes) && touch generated-stamp
 
 metacity-sharp.dll: $(build_sources) generated-stamp
 	$(MCS) -nowarn:169 -unsafe -target:library $(GTK_SHARP_LIBS) \

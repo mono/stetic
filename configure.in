@@ -44,6 +44,7 @@ AC_OUTPUT([
 Makefile
 glue/Makefile
 metacity-sharp/Makefile
+metacity-sharp/glue/Makefile
 libstetic/Makefile
 stetic/Makefile
 ])
