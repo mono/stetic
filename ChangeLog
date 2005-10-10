@@ -1,5 +1,9 @@
 2005-10-10  Jeroen Zwartepoorte  <jeroen.zwartepoorte@gmail.com>
 
+	* metacity-sharp/test-preview.cs: Make the Preview stuff more generic.
+
+2005-10-10  Jeroen Zwartepoorte  <jeroen.zwartepoorte@gmail.com>
+
 	* metacity-sharp/test-preview.cs: Embed an actual MessageDialog.
 
 2005-10-09  Dan Winship  <danw@novell.com>

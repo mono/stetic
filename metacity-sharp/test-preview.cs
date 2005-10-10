@@ -22,19 +22,7 @@ class TestPreview {
 		ebox.MotionNotifyEvent += PreviewDrag;
 		ebox.ButtonReleaseEvent += PreviewButtonRelease;
 
-		Preview prev = new Preview ();
-		ebox.Add (prev);
-		prev.Title = "Sample window";
-		prev.Theme = Theme.Load ("Office");
-		prev.FrameType = FrameType.Normal;
-		prev.FrameFlags =
-			FrameFlags.AllowsDelete |
-			FrameFlags.AllowsVerticalResize |
-			FrameFlags.AllowsHorizontalResize |
-			FrameFlags.AllowsMove |
-			FrameFlags.AllowsShade;
-
-		MessageDialog md = new MessageDialog
+		/*MessageDialog dlg = new MessageDialog
 			(null,
 			 DialogFlags.Modal | DialogFlags.DestroyWithParent,
 			 MessageType.Info,
@@ -42,13 +30,67 @@ class TestPreview {
 			 "{0} ({1})",
 			 "<b>Hello</b>",
 			 "<i>World!</i>");
-		md.Title = "MessageDialog";
-		MakeEmbeddable (md);
+		dlg.Title = "MessageDialog";*/
+		
+		FileChooserDialog dlg = new FileChooserDialog ("Open File",
+							       null,
+							       FileChooserAction.Open,
+							       new object[] {});
+		dlg.AddButton (Stock.Cancel, ResponseType.Cancel);
+		dlg.AddButton (Stock.Open, ResponseType.Ok);
+		dlg.DefaultResponse = ResponseType.Ok;
+		
+		MakeEmbeddable (dlg);
 
-		prev.Add (md);
+		Preview prev = CreatePreview (dlg);
+		ebox.Add (prev);
+		prev.Add (dlg);
 
 		top.ShowAll ();
 		Application.Run ();
+	}
+	
+	static Preview CreatePreview (Window window)
+	{
+		Preview prev = new Preview ();
+		prev.Title = window.Title;
+		prev.Theme = Theme.Load ("Office");
+		
+		switch (window.TypeHint) {
+			case Gdk.WindowTypeHint.Normal:
+				prev.FrameType = FrameType.Normal;
+				break;
+			case Gdk.WindowTypeHint.Dialog:
+				prev.FrameType = window.Modal ? FrameType.ModalDialog : FrameType.Dialog;	
+				break;
+			case Gdk.WindowTypeHint.Menu:
+				prev.FrameType = FrameType.Menu;
+				break;
+			case Gdk.WindowTypeHint.Splashscreen:
+				prev.FrameType = FrameType.Border;
+				break;
+			case Gdk.WindowTypeHint.Utility:
+				prev.FrameType = FrameType.Utility;
+				break;
+			default:
+				prev.FrameType = FrameType.Normal;
+				break;
+		}
+		
+		FrameFlags flags =
+			FrameFlags.AllowsDelete |
+			FrameFlags.AllowsVerticalResize |
+			FrameFlags.AllowsHorizontalResize |
+			FrameFlags.AllowsMove |
+			FrameFlags.AllowsShade |
+			FrameFlags.HasFocus;
+			
+		if (window.Resizable)
+			flags = flags | FrameFlags.AllowsMaximize;
+		
+		prev.FrameFlags = flags;
+		
+		return prev;
 	}
 	
 	static void MakeEmbeddable (Window window)
@@ -66,22 +108,11 @@ class TestPreview {
 		Window window = obj as Window;
 		Gdk.Rectangle allocation = args.Allocation;
 		
-		window.SizeAllocate (allocation);
-		
 		if (window.IsRealized) {
 			window.GdkWindow.MoveResize (allocation.X,
 						     allocation.Y,
 						     allocation.Width,
 						     allocation.Height);
-		}
-		
-		if (window.Child != null && window.Child.Visible) {
-			Gdk.Rectangle childAllocation;
-			childAllocation.X = (int) window.BorderWidth;
-			childAllocation.Y = (int) window.BorderWidth;
-			childAllocation.Width = Math.Max (1, allocation.Width - ((int) window.BorderWidth * 2));
-			childAllocation.Height = Math.Max (1, allocation.Height - ((int) window.BorderWidth * 2));
-			window.Child.SizeAllocate (childAllocation);
 		}
 	}
 
