@@ -53,9 +53,9 @@ namespace Stetic {
 					continue;
 
 				WidgetFactory factory;
-				if (klass.Category == "window")
-					factory = new WindowFactory (project, klass);
-				else
+//				if (klass.Category == "window")
+//					factory = new WindowFactory (project, klass);
+//				else
 					factory = new WidgetFactory (project, klass);
 
 				AddOrGetGroup(klass.Category).Append (factory);

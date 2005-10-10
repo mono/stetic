@@ -22,7 +22,7 @@ namespace Stetic {
 
 			Project = new Project ();
 
-			Canvas = new Stetic.Canvas ();
+			Canvas = new Stetic.Canvas (Project);
 			Palette = new Stetic.Palette (Project);
 			ProjectView = new Stetic.ProjectView (Project);
 			Properties = new Stetic.PropertyGrid (Project);

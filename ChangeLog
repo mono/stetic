@@ -1,3 +1,21 @@
+2005-10-10  Dan Winship  <danw@novell.com>
+
+	* libstetic/EmbedWindow.cs: Hacks to embed a toplevel window as a
+	non-toplevel inside a MetaPreview widget
+
+	* libstetic/DND.cs (Drag): ugly hacks to use EmbedWindow when
+	dragging windows. Partly working around a libmetacity-private bug
+	that it requires the Metacity.Preview's parent to already be
+	realized when it's added to it.
+	(Cancel): tweak a bit to return the embedded Gtk.Window, not its
+	Metacity.Preview, when dragging a window
+
+	* stetic/Canvas.cs: move some code to EmbedWindow. Add DND support.
+
+	* stetic/Palette.cs: 
+	* stetic/WidgetFactory.cs: don't use WindowFactory any more (for
+	now). Just use WidgetFactory for everything.
+
 2005-10-10  Jeroen Zwartepoorte  <jeroen.zwartepoorte@gmail.com>
 
 	* metacity-sharp/test-preview.cs: Make the Preview stuff more generic.

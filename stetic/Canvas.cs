@@ -6,43 +6,13 @@ namespace Stetic {
 
 	public class Canvas : Gtk.Layout {
 
-		public Canvas () : base (null, null)
+		Project project;
+
+		public Canvas (Project project) : base (null, null)
 		{
-			ThemeChanged += CanvasThemeChanged;
+			this.project = project;
+			DND.DestSet (this, false);
 		}
-
-		ArrayList previews = new ArrayList ();
-
-		void CanvasThemeChanged ()
-		{
-			foreach (Metacity.Preview prev in previews)
-				prev.Theme = Theme;
-		}
-
-		static Metacity.Theme theme;
-		static Metacity.Theme Theme {
-			get {
-				if (theme == null) {
-					GConf.Client client = new GConf.Client ();
-					client.AddNotify ("/apps/metacity/general", GConfNotify);
-					string themeName = (string)client.Get ("/apps/metacity/general/theme");
-					theme = Metacity.Theme.Load (themeName);
-				}
-				return theme;
-			}
-		}
-
-		static void GConfNotify (object obj, GConf.NotifyEventArgs args)
-		{
-			if (args.Key == "/apps/metacity/general/theme") {
-				theme = Metacity.Theme.Load ((string)args.Value);
-				if (ThemeChanged != null)
-					ThemeChanged ();
-			}
-		}
-
-		delegate void ThemeChangedHandler ();
-		static event ThemeChangedHandler ThemeChanged;
 
 		protected override void OnRealized ()
 		{
@@ -50,25 +20,39 @@ namespace Stetic {
 			ModifyBg (Gtk.StateType.Normal, Style.Base (Gtk.StateType.Normal));
 		}
 
-		public void Add (Window win)
+		protected override bool OnDragMotion (Gdk.DragContext context,
+						      int x, int y, uint time)
 		{
-			Metacity.Preview prev = new Metacity.Preview ();
-			prev.Title = ((Gtk.Window)win).Title;
-			prev.Theme = Theme;
-			if (win is Gtk.Dialog)
-				prev.FrameType = Metacity.FrameType.Dialog;
-			else
-				prev.FrameType = Metacity.FrameType.Normal;
-			prev.FrameFlags =
-				Metacity.FrameFlags.AllowsDelete |
-				Metacity.FrameFlags.AllowsVerticalResize |
-				Metacity.FrameFlags.AllowsHorizontalResize |
-				Metacity.FrameFlags.AllowsMove |
-				Metacity.FrameFlags.AllowsShade;
+			Gdk.Drag.Status (context, Gdk.DragAction.Move, time);
+			return true;
+		}
 
-			previews.Add (prev);
+		protected override bool OnDragDrop (Gdk.DragContext context,
+						    int x, int y, uint time)
+		{
+			Stetic.Wrapper.Widget wrapper = DND.Drop (context, this, time);
+			if (wrapper == null)
+				return false;
 
-			Put (win, 20, 20);
+			Gtk.Widget dropped = wrapper.Wrapped;
+			if (dropped is Gtk.Window)
+				dropped = EmbedWindow.Wrap ((Gtk.Window)dropped);
+			Put (dropped, x, y);
+
+			wrapper.Select ();
+			return true;
+		}
+
+		protected override void OnDragDataReceived (Gdk.DragContext context, int x, int y,
+							    Gtk.SelectionData selectionData,
+							    uint info, uint time)
+		{
+			Stetic.Wrapper.Widget dropped =
+				GladeUtils.Paste (project, selectionData);
+
+			Gtk.Drag.Finish (context, dropped != null, dropped != null, time);
+			if (dropped != null)
+				Put (dropped.Wrapped, x, y);
 		}
 	}
 }

@@ -151,7 +151,8 @@ class TestPreview {
 		window.Style = window.Style.Attach (window.GdkWindow);
 		window.Style.SetBackground (window.GdkWindow, StateType.Normal);
 		
-		window.GdkWindow.EnableSynchronizedConfigure ();
+//		FIXME: gtk-sharp 2.6
+//		window.GdkWindow.EnableSynchronizedConfigure ();
 	}
 
 	static void WindowDeleted (object obj, DeleteEventArgs args)

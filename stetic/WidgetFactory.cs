@@ -1,5 +1,4 @@
 using Gtk;
-using Gdk;
 using System;
 using System.Collections;
 using System.Reflection;
@@ -39,6 +38,7 @@ namespace Stetic {
 		}
 	}
 
+#if UNUSED
 	public class WindowFactory : WidgetFactory {
 		public WindowFactory (Project project, ClassDescriptor klass) : base (project, klass) {}
 
@@ -56,5 +56,5 @@ namespace Stetic {
 			return true;
 		}
 	}
-
+#endif
 }

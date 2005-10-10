@@ -4,6 +4,7 @@ libstetic_dll_sources =			\
 	ClassDescriptor.cs		\
 	CommandDescriptor.cs		\
 	DND.cs				\
+	EmbedWindow.cs			\
 	EnumDescriptor.cs		\
 	GladeException.cs		\
 	GladeUtils.cs			\
@@ -91,7 +92,7 @@ libstetic.dll: $(libstetic_dll_sources) $(libstetic_dll_resources)
 	@rm -f sources.rsp
 	@echo $(libstetic_dll_sources:%=$(srcdir)/%) > sources.rsp
 	@for resource in $(libstetic_dll_resources); do echo -resource:$$resource,`basename $$resource` >> sources.rsp; done
-	$(MCS) -debug -pkg:gnome-sharp-2.0 -target:library -out:$@ @sources.rsp
+	$(MCS) -debug $(STETIC_LIBS) -r:../metacity-sharp/metacity-sharp.dll -target:library -out:$@ @sources.rsp
 
 CLEANFILES = libstetic.dll libstetic.dll.mdb sources.rsp
 

@@ -68,6 +68,12 @@ namespace Stetic {
 			DND.dragWidget = dragWidget;
 
 			dragWin = new Gtk.Window (Gtk.WindowType.Popup);
+
+			if (dragWidget is Gtk.Window) {
+				dragWidget = EmbedWindow.Wrap ((Gtk.Window)dragWidget);
+				dragWin.Show ();
+			}
+
 			dragWin.Add (dragWidget);
 
 			req = dragWidget.SizeRequest ();
@@ -84,7 +90,7 @@ namespace Stetic {
 			ctx.SourceWindow.GetRootOrigin (out rx, out ry);
 
 			dragWin.Move (rx + px, ry + py);
-			dragWin.Show ();
+			dragWin.ShowAll ();
 			Gtk.Drag.SetIconWidget (ctx, dragWin, 0, 0);
 
 			if (source != null) {
@@ -122,10 +128,10 @@ namespace Stetic {
 			dragWidget = null;
 
 			// Remove the widget from its dragWindow
-			Gtk.Container parent = w.Parent as Gtk.Container;
-			if (parent != null) {
-				parent.Remove (w);
-				parent.Destroy ();
+			Gtk.Window dragWindow = w.Toplevel as Gtk.Window;
+			if (dragWindow != null) {
+				dragWindow.Remove (dragWindow.Child);
+				dragWindow.Destroy ();
 			}
 			return w;
 		}
