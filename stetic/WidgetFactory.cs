@@ -45,12 +45,10 @@ namespace Stetic {
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
 			Gtk.Window win = klass.NewInstance (project) as Gtk.Window;
-			win.Present ();
 			project.AddWindow (win, true);
-
 			return true;
 		}
-
+		
 		protected override bool OnMotionNotifyEvent (Gdk.EventMotion evt)
 		{
 			return true;

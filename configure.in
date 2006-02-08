@@ -1,5 +1,5 @@
 AC_PREREQ(2.53)
-AC_INIT(stetic, 0.0.0)
+AC_INIT(stetic, 0.1.0)
 AC_CONFIG_SRCDIR(stetic/Stetic.cs)
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 
@@ -36,4 +36,5 @@ Makefile
 glue/Makefile
 libstetic/Makefile
 stetic/Makefile
+stetic.pc
 ])

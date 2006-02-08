@@ -3,15 +3,22 @@ using System.Collections;
 
 namespace Stetic.Editor {
 
-	public class Enumeration : Gtk.HBox {
+	public class Enumeration : Gtk.HBox, IPropertyEditor {
 
 		Gtk.EventBox ebox;
 		Gtk.ComboBox combo;
 		Gtk.Tooltips tips;
 		EnumDescriptor enm;
 
-		public Enumeration (PropertyDescriptor prop) : base (false, 0)
+		public Enumeration () : base (false, 0)
 		{
+		}
+		
+		public void Initialize (PropertyDescriptor prop)
+		{
+			if (!prop.PropertyType.IsEnum)
+				throw new ApplicationException ("Enumeration editor does not support editing values of type " + prop.PropertyType);
+				
 			ebox = new Gtk.EventBox ();
 			ebox.Show ();
 			PackStart (ebox, true, true, 0);
@@ -28,18 +35,22 @@ namespace Stetic.Editor {
 				combo.AppendText (enm[value].Label);
 		}
 
+		public void AttachObject (object obj)
+		{
+		}
+		
 		public override void Dispose ()
 		{
 			tips.Destroy ();
 			base.Dispose ();
 		}
 
-		public Enum Value {
+		public object Value {
 			get {
 				return enm.Values[combo.Active];
 			}
 			set {
-				int i = Array.IndexOf (enm.Values, value);
+				int i = Array.IndexOf (enm.Values, (Enum)value);
 				if (i != -1)
 					combo.Active = i;
 			}
@@ -51,7 +62,7 @@ namespace Stetic.Editor {
 		{
 			if (ValueChanged != null)
 				ValueChanged (this, EventArgs.Empty);
-			EnumValue value = enm[Value];
+			EnumValue value = enm[(Enum)Value];
 			if (value != null)
 				tips.SetTip (ebox, value.Description, value.Description);
 			else

@@ -4,7 +4,7 @@ using System;
 namespace Stetic.Editor {
 
 	[PropertyEditor ("Value", "Changed")]
-	public class ThemedIcon : Gtk.HBox {
+	public class ThemedIcon : Gtk.HBox, IPropertyEditor {
 		Gtk.Image image;
 		Gtk.Entry entry;
 		Gtk.Button button;
@@ -25,7 +25,17 @@ namespace Stetic.Editor {
 			button.Clicked += button_Clicked;
 		}
 
-		public event EventHandler Changed;
+		public void Initialize (PropertyDescriptor prop)
+		{
+			if (prop.PropertyType != typeof(string))
+				throw new ApplicationException ("ThemedIcon editor does not support editing values of type " + prop.PropertyType);
+		}
+		
+		public void AttachObject (object ob)
+		{
+		}
+
+		public event EventHandler ValueChanged;
 
 		bool syncing;
 
@@ -42,15 +52,16 @@ namespace Stetic.Editor {
 		}
 
 		string icon;
-		public string Value {
+		public object Value {
 			get {
 				return icon; 
 			}
 			set {
-				if (icon == value)
+				val = (string) value;
+				if (icon == val)
 					return;
 
-				icon = value;
+				icon = val;
 				try {
 					image.Pixbuf = Gtk.IconTheme.Default.LoadIcon (icon, 16, 0);
 				} catch {
@@ -61,8 +72,8 @@ namespace Stetic.Editor {
 				entry.Text = icon;
 				syncing = false;
 
-				if (Changed != null)
-					Changed (this, EventArgs.Empty);
+				if (ValueChanged != null)
+					ValueChanged (this, EventArgs.Empty);
 			}
 		}
 	}

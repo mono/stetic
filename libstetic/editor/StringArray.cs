@@ -5,14 +5,19 @@ namespace Stetic.Editor {
 	[PropertyEditor ("Value", "Changed")]
 	public class StringArray : Text {
 
-		public StringArray (PropertyDescriptor prop, object obj) : base (prop, obj) {}
-
-		public new string[] Value {
+		protected override void CheckType (PropertyDescriptor prop)
+		{
+			if (prop.PropertyType != typeof(string[]))
+				throw new ApplicationException ("StringArray editor does not support editing values of type " + prop.PropertyType);
+				
+		}
+		
+		public override object Value {
 			get {
-				return base.Value.Split ('\n');
+				return ((string)base.Value).Split ('\n');
 			}
 			set {
-				base.Value = string.Join ("\n", value);
+				base.Value = string.Join ("\n", (string[]) value);
 			}
 		}
 	}

@@ -10,7 +10,9 @@ libstetic_dll_sources =			\
 	HandleWindow.cs			\
 	ItemDescriptor.cs		\
 	ItemGroup.cs			\
+	ItemGroupCollection.cs	\
 	IProject.cs			\
+	IPropertyEditor.cs			\
 	ObjectWrapper.cs		\
 	ParamSpec.cs			\
 	Placeholder.cs			\
@@ -19,6 +21,7 @@ libstetic_dll_sources =			\
 	RadioGroupManager.cs		\
 	Registry.cs			\
 	Set.cs				\
+	SignalDescriptor.cs		\
 	TextBox.cs			\
 	Tooltips.cs			\
 	TranslatableAttribute.cs	\
@@ -71,6 +74,10 @@ libstetic_dll_sources =			\
 	wrapper/Range.cs		\
 	wrapper/Scale.cs		\
 	wrapper/ScrolledWindow.cs	\
+	wrapper/Signal.cs		\
+	wrapper/SignalChangedEventHandler.cs	\
+	wrapper/SignalCollection.cs	\
+	wrapper/SignalEventHandler.cs	\
 	wrapper/SpinButton.cs		\
 	wrapper/Table.cs		\
 	wrapper/TextView.cs		\
@@ -81,6 +88,8 @@ libstetic_dll_sources =			\
 	wrapper/VScale.cs		\
 	wrapper/VScrollbar.cs		\
 	wrapper/Widget.cs		\
+	wrapper/WidgetEventHandler.cs		\
+	wrapper/WidgetNameChangedHandler.cs		\
 	wrapper/Window.cs
 
 libstetic_dll_resources =		\

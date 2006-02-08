@@ -22,10 +22,10 @@ namespace Stetic {
 				throw new ApplicationException ("Not a glade file according to node name");
 
 			project.BeginGladeImport ();
-			foreach (XmlNode toplevel in node.SelectNodes ("widget")) {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (project, (XmlElement)toplevel);
+			foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
+				Wrapper.Container wrapper = Stetic.ObjectWrapper.GladeImport (project, toplevel) as Wrapper.Container;
 				if (wrapper != null)
-					project.AddWindow ((Gtk.Window)wrapper.Wrapped);
+					project.AddWidget ((Gtk.Widget)wrapper.Wrapped);
 			}
 			project.EndGladeImport ();
 		}
@@ -39,7 +39,7 @@ namespace Stetic {
 			doc.AppendChild (toplevel);
 
 			foreach (Widget w in project.Toplevels) {
-				Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (w);
+				Stetic.Wrapper.Container wrapper = Stetic.Wrapper.Container.Lookup (w);
 				if (wrapper == null)
 					continue;
 

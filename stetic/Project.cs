@@ -7,13 +7,38 @@ namespace Stetic {
 	public class Project : IProject {
 		Hashtable nodes;
 		NodeStore store;
+		bool modified;
+		internal bool Syncing;
+		Gtk.Widget selection;
+		
+		public event Wrapper.WidgetNameChangedHandler WidgetNameChanged;
+		public event Wrapper.WidgetEventHandler WidgetAdded;
+		public event Wrapper.WidgetEventHandler WidgetRemoved;
+		
+		public event Wrapper.SignalEventHandler SignalAdded;
+		public event Wrapper.SignalEventHandler SignalRemoved;
+		public event Wrapper.SignalChangedEventHandler SignalChanged;
+		
+		public event SelectedHandler Selected;
+
+		public event EventHandler ModifiedChanged;
 
 		public Project ()
 		{
 			nodes = new Hashtable ();
 			store = new NodeStore (typeof (ProjectNode));
 		}
-
+		
+		public bool Modified {
+			get { return modified; }
+			set {
+				if (modified != value) {
+					modified = value;
+					OnModifiedChanged (EventArgs.Empty);
+				}
+			}
+		}
+		
 		public void AddWindow (Gtk.Window window)
 		{
 			AddWindow (window, false);
@@ -26,6 +51,13 @@ namespace Stetic {
 				Selection = window;
 		}
 
+		public void AddWidget (Gtk.Widget widget)
+		{
+			if (!typeof(Gtk.Container).IsInstanceOfType (widget))
+				throw new System.ArgumentException ("widget", "Only containers can be top level widgets");
+			AddWidget (widget, null, -1);
+		}
+		
 		void AddWidget (Widget widget, ProjectNode parent)
 		{
 			AddWidget (widget, parent, -1);
@@ -33,8 +65,15 @@ namespace Stetic {
 
 		void AddWidget (Widget widget, ProjectNode parent, int position)
 		{
-			if (Stetic.Wrapper.Widget.Lookup (widget) == null)
+			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (widget);
+			if (ww == null)
 				return;
+
+			ww.WidgetChanged += OnWidgetChanged;
+			ww.NameChanged += OnWidgetNameChanged;
+			ww.SignalAdded += OnSignalAdded;
+			ww.SignalRemoved += OnSignalRemoved;
+			ww.SignalChanged += OnSignalChanged;
 
 			ProjectNode node = new ProjectNode (widget);
 			nodes[widget] = node;
@@ -53,6 +92,8 @@ namespace Stetic {
 
 			parent = node;
 
+			OnWidgetAdded (new Stetic.Wrapper.WidgetEventArgs (ww));
+			
 			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (widget);
 			if (container != null) {
 				container.ContentsChanged += ContentsChanged;
@@ -63,6 +104,15 @@ namespace Stetic {
 
 		void UnhashNodeRecursive (ProjectNode node)
 		{
+			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (node.Widget);
+			ww.WidgetChanged -= OnWidgetChanged;
+			ww.NameChanged -= OnWidgetNameChanged;
+			ww.SignalAdded -= OnSignalAdded;
+			ww.SignalRemoved -= OnSignalRemoved;
+			ww.SignalChanged -= OnSignalChanged;
+			
+			OnWidgetRemoved (new Stetic.Wrapper.WidgetEventArgs (ww));
+			
 			nodes.Remove (node.Widget);
 			for (int i = 0; i < node.ChildCount; i++)
 				UnhashNodeRecursive (node[i] as ProjectNode);
@@ -84,6 +134,59 @@ namespace Stetic {
 			ProjectNode node = nodes[obj] as ProjectNode;
 			if (node != null)
 				RemoveNode (node);
+		}
+		
+		void OnWidgetChanged (object sender, Wrapper.WidgetEventArgs args)
+		{
+			if (!Syncing)
+				Modified = true;
+		}
+
+		void OnWidgetNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
+		{
+			if (!Syncing) {
+				Modified = true;
+				OnWidgetNameChanged (args);
+			}
+		}
+
+		protected virtual void OnWidgetNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args)
+		{
+			if (WidgetNameChanged != null)
+				WidgetNameChanged (this, args);
+		}
+		
+		void OnSignalAdded (object sender, Wrapper.SignalEventArgs args)
+		{
+			OnSignalAdded (args);
+		}
+
+		protected virtual void OnSignalAdded (Wrapper.SignalEventArgs args)
+		{
+			if (SignalAdded != null)
+				SignalAdded (this, args);
+		}
+
+		void OnSignalRemoved (object sender, Wrapper.SignalEventArgs args)
+		{
+			OnSignalRemoved (args);
+		}
+
+		protected virtual void OnSignalRemoved (Wrapper.SignalEventArgs args)
+		{
+			if (SignalRemoved != null)
+				SignalRemoved (this, args);
+		}
+
+		void OnSignalChanged (object sender, Wrapper.SignalChangedEventArgs args)
+		{
+			OnSignalChanged (args);
+		}
+
+		protected virtual void OnSignalChanged (Wrapper.SignalChangedEventArgs args)
+		{
+			if (SignalChanged != null)
+				SignalChanged (this, args);
 		}
 
 		void ContentsChanged (Stetic.Wrapper.Container cwrap)
@@ -121,6 +224,8 @@ namespace Stetic {
 
 			while (i < children.Count)
 				AddWidget (children[i++] as Widget, node);
+
+			Modified = true;
 		}
 
 		public IEnumerable Toplevels {
@@ -153,9 +258,6 @@ namespace Stetic {
 		}
 
 		public delegate void SelectedHandler (Gtk.Widget selection, ProjectNode node);
-		public event SelectedHandler Selected;
-
-		Gtk.Widget selection;
 
 		// IProject
 
@@ -170,6 +272,8 @@ namespace Stetic {
 				// FIXME: should there be an IsDestroyed property?
 				if (selection != null && selection.Handle != IntPtr.Zero) {
 					Stetic.Wrapper.Container parent = Stetic.Wrapper.Container.LookupParent (selection);
+					if (parent == null)
+						parent = Stetic.Wrapper.Container.Lookup (selection);
 					if (parent != null)
 						parent.UnSelect (selection);
 				}
@@ -223,6 +327,24 @@ namespace Stetic {
 			if (GladeImportComplete != null)
 				GladeImportComplete ();
 		}
+		
+		protected virtual void OnModifiedChanged (EventArgs args)
+		{
+			if (ModifiedChanged != null)
+				ModifiedChanged (this, args);
+		}
+		
+		protected virtual void OnWidgetRemoved (Stetic.Wrapper.WidgetEventArgs args)
+		{
+			if (WidgetRemoved != null)
+				WidgetRemoved (this, args);
+		}
+		
+		protected virtual void OnWidgetAdded (Stetic.Wrapper.WidgetEventArgs args)
+		{
+			if (WidgetAdded != null)
+				WidgetAdded (this, args);
+		}
 	}
 
 	[TreeNode (ColumnCount=2)]
@@ -261,6 +383,4 @@ namespace Stetic {
 			return "[ProjectNode " + GetHashCode().ToString() + " " + widget.GetType().FullName + " '" + Name + "']";
 		}
 	}
-
-
 }

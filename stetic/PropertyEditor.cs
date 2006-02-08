@@ -6,12 +6,10 @@ using System.Reflection;
 namespace Stetic {
 
 	public class PropertyEditor : VBox {
-		Widget editor;
+		IPropertyEditor propEditor;
+		
 		object obj;
 		PropertyDescriptor prop;
-
-		PropertyInfo editorProp;
-		EventInfo editorEvent;
 
 		static Hashtable editors;
 
@@ -35,89 +33,72 @@ namespace Stetic {
 			editors[typeof (string[])] = typeof (Stetic.Editor.StringArray);
 			editors[typeof (Gdk.Color)] = typeof (Stetic.Editor.Color);
 		}
-
-		public PropertyEditor (PropertyDescriptor prop, object obj) : base (false, 0)
+		
+		public PropertyEditor (PropertyDescriptor prop) : base (false, 0)
 		{
-			this.obj = obj;
 			this.prop = prop;
+			
+			propEditor = CreateEditor (prop);
+			propEditor.ValueChanged += new EventHandler (EditorValueChanged);
 
+			Add ((Gtk.Widget) propEditor);
+		}
+
+		public void AttachObject (object ob)
+		{
+			if (ob == null)
+				throw new ArgumentNullException ("ob");
+			
+			syncing = true;
+			this.obj = ob;
+			propEditor.AttachObject (obj);
+			
+			// It is the responsibility of the editor to convert value types
+			object initial = prop.GetValue (obj);
+			propEditor.Value = initial;
+			
+			syncing = false;
+		}
+		
+		public IPropertyEditor CreateEditor (PropertyDescriptor prop)
+		{
 			Type editorType;
-			object min, max, initial;
+			object min, max;
+			
+			IPropertyEditor editor = null;
 
 			min = prop.Minimum;
 			max = prop.Maximum;
-			initial = prop.GetValue (obj);
 
 			editorType = prop.EditorType;
 			if (editorType == null) {
 				if (prop.PropertyType.IsEnum) {
 					if (prop.PropertyType.IsDefined (typeof (FlagsAttribute), true))
-						editorType = typeof (Stetic.Editor.Flags);
+						editor = new Stetic.Editor.Flags ();
 					else
-						editorType = typeof (Stetic.Editor.Enumeration);
-					min = max = null;
+						editor = new Stetic.Editor.Enumeration ();
 				} else if (prop.PropertyType == typeof (int) && min != null && ((int)min == -1)) {
-					editorType = typeof (Stetic.Editor.OptIntRange);
-					min = 0;
+					editor = new Stetic.Editor.OptIntRange (0, max);
 				} else {
 					editorType = editors[prop.PropertyType] as Type;
-					if (editorType == null) {
-						Label label = new Gtk.Label ("(" + prop.PropertyType.Name + ")");
-						label.Show ();
-						Add (label);
-						syncing = true;
-						return;
-					}
+					if (editorType == null)
+						editor = new DummyEditor ();
 				}
 			}
-
-			editorProp = EditorValueProperty (editorType);
-			editorEvent = EditorValueEvent (editorType);
-
-			// If the passed in values aren't the same type as used by the
-			// editor, convert them.
-			if (editorProp.PropertyType != prop.PropertyType && !prop.PropertyType.IsEnum) {
-				if (min != null)
-					min = Convert.ChangeType (min, editorProp.PropertyType);
-				if (max != null)
-					max = Convert.ChangeType (max, editorProp.PropertyType);
-				if (initial != null)
-					initial = Convert.ChangeType (initial, editorProp.PropertyType);
+			
+			if (editor == null) {
+				editor = Activator.CreateInstance (editorType) as IPropertyEditor;
+				if (editor == null)
+					throw new Exception ("The property editor '" + editorType + "' must implement the interface IPropertyEditor");
 			}
 
-			// Find a constructor.
-			ConstructorInfo ctor = editorType.GetConstructor (new Type[] { typeof (PropertyDescriptor) });
-			if (ctor != null)
-				editor = (Widget)ctor.Invoke (new object[] { prop });
-			else {
-				// min/max
-				ctor = editorType.GetConstructor (new Type[] { typeof (object), typeof (object) });
-				if (ctor != null)
-					editor = (Widget)ctor.Invoke (new object[] { min, max });
-				else {
-					ctor = editorType.GetConstructor (new Type[] { typeof (PropertyDescriptor), typeof (object) });
-					if (ctor != null)
-						editor = (Widget)ctor.Invoke (new object[] { prop, obj });
-					else {
-						ctor = editorType.GetConstructor (new Type[0]);
-						if (ctor == null)
-							throw new ApplicationException ("No constructor for editor type " + editorType.ToString () + " for " + prop.Name);;
-						editor = (Widget)ctor.Invoke (new object[0]);
-					}
-				}
-			}
+			editor.Initialize (prop);
 
-			if (editorProp.CanWrite && initial != null)
-				editorProp.SetValue (editor, initial, null);
-
-			editor.ShowAll ();
-
-			if (prop.CanWrite && (editorEvent != null))
-				editorEvent.AddEventHandler (editor, new EventHandler (EditorValueChanged));
-			else
-				editor.Sensitive = false;
-
-			Add (editor);
+			Gtk.Widget w = editor as Gtk.Widget;
+			if (w == null)
+				throw new Exception ("The property editor '" + editorType + "' must be a Gtk Widget");
+			w.ShowAll ();
+			return editor;
 		}
 
 		bool syncing = false;
@@ -126,10 +107,7 @@ namespace Stetic {
 		{
 			if (!syncing) {
 				syncing = true;
-				object value = editorProp.GetValue (editor, null);
-				if (editorProp.PropertyType != prop.PropertyType && !prop.PropertyType.IsEnum)
-					value = Convert.ChangeType (value, prop.PropertyType);
-				prop.SetValue (obj, value);
+				prop.SetValue (obj, propEditor.Value);
 				syncing = false;
 			}
 		}
@@ -138,36 +116,28 @@ namespace Stetic {
 		{
 			if (!syncing) {
 				syncing = true;
-				object value = prop.GetValue (obj);
-				if (editorProp.PropertyType != prop.PropertyType && !prop.PropertyType.IsEnum)
-					value = Convert.ChangeType (value, editorProp.PropertyType);
-				editorProp.SetValue (editor, value, null);
+				propEditor.Value = prop.GetValue (obj);
 				syncing = false;
 			}
 		}
-
-		protected static PropertyInfo EditorValueProperty (Type editorType)
+	}
+	
+	class DummyEditor: Gtk.Label, IPropertyEditor
+	{
+		public void Initialize (PropertyDescriptor prop)
 		{
-			if (editorType.IsDefined (typeof (Stetic.PropertyEditorAttribute), false)) {
-				foreach (object attr in editorType.GetCustomAttributes (typeof (Stetic.PropertyEditorAttribute), false)) {
-					PropertyEditorAttribute peattr = (PropertyEditorAttribute)attr;
-					return editorType.GetProperty (peattr.Property);
-				}
-			}
-
-			return editorType.GetProperty ("Value");
+			Text = "(" + prop.PropertyType.Name + ")";
 		}
-
-		protected static EventInfo EditorValueEvent (Type editorType)
+		
+		public void AttachObject (object obj)
 		{
-			if (editorType.IsDefined (typeof (Stetic.PropertyEditorAttribute), false)) {
-				foreach (object attr in editorType.GetCustomAttributes (typeof (Stetic.PropertyEditorAttribute), false)) {
-					PropertyEditorAttribute peattr = (PropertyEditorAttribute)attr;
-					return editorType.GetEvent (peattr.Event);
-				}
-			}
-
-			return editorType.GetEvent ("ValueChanged");
 		}
+		
+		public object Value { 
+			get { return null; } 
+			set { }
+		}
+		
+		public event EventHandler ValueChanged { add {} remove {} }
 	}
 }

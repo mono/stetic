@@ -4,14 +4,21 @@ using System.Collections;
 
 namespace Stetic.Editor {
 
-	public class Flags : Gtk.Frame {
+	public class Flags : Gtk.Frame, IPropertyEditor {
 
 		EnumDescriptor enm;
 		Hashtable flags;
 		Gtk.Tooltips tips;
 
-		public Flags (PropertyDescriptor prop) : base (null)
+		public Flags ()
 		{
+		}
+		
+		public void Initialize (PropertyDescriptor prop)
+		{
+			if (!prop.PropertyType.IsEnum)
+				throw new ApplicationException ("Flags editor does not support editing values of type " + prop.PropertyType);
+
 			Gtk.VBox vbox = new Gtk.VBox (true, 3);
 			Add (vbox);
 
@@ -37,18 +44,22 @@ namespace Stetic.Editor {
 			vbox.ShowAll ();
 		}
 
+		public void AttachObject (object ob)
+		{
+		}
+
 		public override void Dispose ()
 		{
 			tips.Destroy ();
 			base.Dispose ();
 		}
 
-		public Enum Value {
+		public object Value {
 			get {
-				return (Enum)Enum.ToObject (enm.EnumType, UIntValue);
+				return Enum.ToObject (enm.EnumType, UIntValue);
 			}
 			set {
-				uint newVal = (uint)(int)value;
+				uint newVal = (uint)(int)(Enum)value;
 				for (uint i = 1; i <= uintValue || i <= newVal; i = i << 1) {
 					if ((uintValue & i) != (newVal & i)) {
 						Gtk.CheckButton check = (Gtk.CheckButton)flags[i];

@@ -10,6 +10,7 @@ stetic_exe_sources =			\
 	Project.cs			\
 	ProjectView.cs			\
 	PropertyEditor.cs		\
+	SignalsEditor.cs		\
 	PropertyGrid.cs			\
 	Stetic.cs			\
 	UIManager.cs			\

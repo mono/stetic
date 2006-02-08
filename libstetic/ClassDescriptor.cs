@@ -18,7 +18,9 @@ namespace Stetic {
 		Gdk.Pixbuf icon;
 		bool deprecated, hexpandable, vexpandable;
 
-		ArrayList groups = new ArrayList ();
+		ItemGroupCollection groups = new ItemGroupCollection ();
+		ItemGroupCollection signals = new ItemGroupCollection ();
+
 		int importantGroups;
 		ItemGroup contextMenu;
 		ItemGroup internalChildren;
@@ -91,6 +93,19 @@ namespace Stetic {
 							importantGroups++;
 					} else if (groups.Count == 1)
 						importantGroups++;
+				}
+			}
+
+			XmlElement signalsElem = elem["signals"];
+			if (signalsElem != null) {
+				foreach (XmlElement groupElem in signalsElem.SelectNodes ("itemgroup")) {
+					ItemGroup itemgroup;
+					if (groupElem.HasAttribute ("ref")) {
+						string refname = groupElem.GetAttribute ("ref");
+						itemgroup = Registry.LookupSignalGroup (refname);
+					} else
+						itemgroup = new ItemGroup (groupElem, this);
+					signals.Add (itemgroup);
 				}
 			}
 
@@ -216,9 +231,15 @@ namespace Stetic {
 			}
 		}
 
-		public ArrayList ItemGroups {
+		public ItemGroupCollection ItemGroups {
 			get {
 				return groups;
+			}
+		}
+
+		public ItemGroupCollection SignalGroups {
+			get {
+				return signals;
 			}
 		}
 

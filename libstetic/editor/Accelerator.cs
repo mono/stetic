@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Stetic.Editor {
 
 	[PropertyEditor ("Accel", "AccelChanged")]
-	public class Accelerator : Gtk.Entry {
+	public class Accelerator : Gtk.Entry, IPropertyEditor {
 
 		uint keyval;
 		Gdk.ModifierType mask;
@@ -22,6 +22,17 @@ namespace Stetic.Editor {
 			IsEditable = false;
 		}
 
+		public void Initialize (PropertyDescriptor descriptor)
+		{
+			if (descriptor.PropertyType != typeof(string))
+				throw new ApplicationException ("Accelerator editor does not support editing values of type " + descriptor.PropertyType);
+		}
+		
+		public void AttachObject (object obj)
+		{
+			Value = null;
+		}
+		
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
 			if (editing)
@@ -39,7 +50,7 @@ namespace Stetic.Editor {
 
 			Gdk.Keyboard.Ungrab (time);
 			Gdk.Pointer.Ungrab (time);
-			Text = Accel;
+			Text = (string) Value;
 		}
 
 		void Grab (Gdk.Window window, uint time)
@@ -95,7 +106,7 @@ namespace Stetic.Editor {
 			}
 		}
 
-		public string Accel {
+		public object Value {
 			get {
 				if (keyval != 0)
 					return Gtk.Accelerator.Name (keyval, mask);
@@ -103,22 +114,23 @@ namespace Stetic.Editor {
 					return null;
 			}
 			set {
-				if (value == null) {
+				string s = value as string;
+				if (s == null) {
 					keyval = 0;
 					mask = 0;
 				} else
-					Gtk.Accelerator.Parse (value, out keyval, out mask);
-				Text = Accel;
+					Gtk.Accelerator.Parse (s, out keyval, out mask);
+				Text = (string) Value;
 				EmitAccelChanged ();
 			}
 		}
 
-		public event EventHandler AccelChanged;
+		public event EventHandler ValueChanged;
 
 		void EmitAccelChanged ()
 		{
-			if (AccelChanged != null)
-				AccelChanged (this, EventArgs.Empty);
+			if (ValueChanged != null)
+				ValueChanged (this, EventArgs.Empty);
 		}
 	}
 }

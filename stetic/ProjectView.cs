@@ -3,8 +3,11 @@ using System;
 
 namespace Stetic {
 
-	public class ProjectView : NodeView {
-		public ProjectView (Project project) : base (project.Store)
+	public class ProjectView : NodeView 
+	{
+		Project project;
+		
+		public ProjectView ()
 		{
 			TreeViewColumn col;
 			CellRenderer renderer;
@@ -24,9 +27,26 @@ namespace Stetic {
 
 			NodeSelection.Mode = SelectionMode.Single;
 			NodeSelection.Changed += RowSelected;
-			project.Selected += WidgetSelected;
 		}
-
+		
+		public ProjectView (Project project): this ()
+		{
+			this.Project = project;
+		}
+		
+		public Project Project {
+			get { return project; }
+			set {
+				if (project != null)
+					project.Selected -= WidgetSelected;
+				project = value;
+				if (project != null) {
+					NodeStore = project.Store;
+					project.Selected += WidgetSelected;
+				}
+			}
+		}
+		
 		Stetic.Wrapper.Widget SelectedWrapper {
 			get {
 				ITreeNode[] nodes = NodeSelection.SelectedNodes;
@@ -46,8 +66,9 @@ namespace Stetic {
 			if (!syncing) {
 				syncing = true;
 				Stetic.Wrapper.Widget selection = SelectedWrapper;
-				if (selection != null)
+				if (selection != null) {
 					selection.Select ();
+				}
 				syncing = false;
 			}
 		}

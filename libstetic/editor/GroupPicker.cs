@@ -8,7 +8,7 @@ using System.Reflection;
 namespace Stetic.Editor {
 
 	[PropertyEditor ("Group", "Changed")]
-	class GroupPicker : Gtk.HBox {
+	class GroupPicker : Gtk.HBox, IPropertyEditor {
 
 		Gtk.ComboBox combo;
 		RadioGroupManager manager;
@@ -17,7 +17,11 @@ namespace Stetic.Editor {
 
 		const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
-		public GroupPicker (PropertyDescriptor prop) : base (false, 0)
+		public GroupPicker () : base (false, 0)
+		{
+		}
+		
+		public void Initialize (PropertyDescriptor prop)
 		{
 			PropertyInfo info = prop.PropertyInfo;
 			Type owner = info.DeclaringType;
@@ -29,6 +33,10 @@ namespace Stetic.Editor {
 			manager = managerInfo.GetValue (null) as RadioGroupManager;
 			manager.GroupsChanged += GroupsChanged;
 			GroupsChanged ();
+		}
+		
+		public void AttachObject (object ob)
+		{
 		}
 
 		public override void Dispose ()
@@ -81,12 +89,12 @@ namespace Stetic.Editor {
 		}
 #endif
 
-		public string Group {
+		public object Value {
 			get {
 				return group;
 			}
 			set {
-				int index = values.IndexOf (value);
+				int index = values.IndexOf ((string) value);
 				if (index != -1) {
 					combo.Active = index;
 					group = values[index] as string;
@@ -94,7 +102,7 @@ namespace Stetic.Editor {
 			}
 		}
 
-		public event EventHandler Changed;
+		public event EventHandler ValueChanged;
 
 		void combo_Changed (object o, EventArgs args)
 		{
@@ -104,8 +112,8 @@ namespace Stetic.Editor {
 			}
 
 			group = values[combo.Active] as string;
-			if (Changed != null)
-				Changed (this, EventArgs.Empty);
+			if (ValueChanged != null)
+				ValueChanged (this, EventArgs.Empty);
 		}
 
 		void doDialog ()
@@ -144,7 +152,7 @@ namespace Stetic.Editor {
 			Gtk.ResponseType response = (Gtk.ResponseType)dialog.Run ();
 			if (response == Gtk.ResponseType.Cancel || entry.Text.Length == 0) {
 				dialog.Destroy ();
-				Group = group; // reset combo.Active
+				Value = group; // reset combo.Active
 				return;
 			}
 

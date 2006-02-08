@@ -97,12 +97,12 @@ namespace Stetic {
 		{
 			return (ClassDescriptor)classes_by_cname[cname];
 		}
-
-		public static ItemGroup LookupItemGroup (string name)
+		
+		static ClassDescriptor FindGroupClass (string name, out string groupname)
 		{
 			int sep = name.LastIndexOf ('.');
 			string classname = name.Substring (0, sep);
-			string groupname = name.Substring (sep + 1);
+			groupname = name.Substring (sep + 1);
 			ClassDescriptor klass = (ClassDescriptor)classes_by_csname[classname];
 			if (klass == null) {
 				klass = (ClassDescriptor)classes_by_csname[name];
@@ -111,12 +111,31 @@ namespace Stetic {
 				classname = name;
 				groupname = "";
 			}
+			return klass;
+		}
 
-			foreach (ItemGroup group in klass.ItemGroups) {
-				if (group.Name == groupname)
-					return group;
-			}
-			throw new ArgumentException ("No itemgroup " + groupname + " in class " + classname);
+		public static ItemGroup LookupItemGroup (string name)
+		{
+			string groupname;
+			ClassDescriptor klass = FindGroupClass (name, out groupname);
+			
+			ItemGroup group = klass.ItemGroups [groupname];
+			if (group != null)
+				return group;
+			else
+				throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedType);
+		}
+
+		public static ItemGroup LookupSignalGroup (string name)
+		{
+			string groupname;
+			ClassDescriptor klass = FindGroupClass (name, out groupname);
+			
+			ItemGroup group = klass.SignalGroups [groupname];
+			if (group != null)
+				return group;
+			else
+				throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedType);
 		}
 
 		public static ItemDescriptor LookupItem (string name)

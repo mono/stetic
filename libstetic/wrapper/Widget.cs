@@ -5,10 +5,30 @@ using System.Xml;
 namespace Stetic.Wrapper {
 
 	public class Widget : Object {
+	
+		string oldName;
+		SignalCollection signals;
+		
+		public Widget ()
+		{
+			signals = new SignalCollection (this);
+		}
+	
+		// Fired when the name of the widget changes.
+		public event WidgetNameChangedHandler NameChanged;
+		
+		// Fired when any information of the object changes.
+		public event WidgetEventHandler WidgetChanged;
+		
+		public event SignalEventHandler SignalAdded;
+		public event SignalEventHandler SignalRemoved;
+		public event SignalChangedEventHandler SignalChanged;	
 
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
+			
+			oldName = ((Gtk.Widget)obj).Name;
 
 			if (!(Wrapped is Gtk.Window))
 				Wrapped.ShowAll ();
@@ -34,7 +54,7 @@ namespace Stetic.Wrapper {
 				}
 			}
 		}
-
+		
 		public new Gtk.Widget Wrapped {
 			get {
 				return (Gtk.Widget)base.Wrapped;
@@ -45,6 +65,14 @@ namespace Stetic.Wrapper {
 			get {
 				return Container.LookupParent (Wrapped);
 			}
+		}
+		
+		public bool IsTopLevel {
+			get { return Wrapped.Parent == null || Widget.Lookup (Wrapped.Parent) == null; }
+		}
+
+		public SignalCollection Signals {
+			get { return signals; }
 		}
 
 		[GLib.ConnectBefore]
@@ -255,6 +283,66 @@ namespace Stetic.Wrapper {
 				return "[" + Wrapped.GetType ().Name + " '" + Wrapped.Name + "' " + Wrapped.GetHashCode ().ToString () + "]";
 			else
 				return "[" + Wrapped.GetType ().Name + " " + Wrapped.GetHashCode ().ToString () + "]";
+		}
+		
+		protected override void EmitNotify (string propertyName)
+		{
+			base.EmitNotify (propertyName);
+			
+			// Don't notify parent change for top level widgets.
+			if (propertyName == "parent" || propertyName == "has-focus" || 
+				propertyName == "has-toplevel-focus" || propertyName == "is-active" ||
+				propertyName == "is-focus")
+				return;
+			
+			if (propertyName == "name") {
+				if (Wrapped.Name != oldName) {
+					string on = oldName;
+					oldName = Wrapped.Name;
+					OnNameChanged (new WidgetNameChangedArgs (this, on, Wrapped.Name));
+				}
+			}
+			else
+				OnWidgetChanged (new WidgetEventArgs (this));
+		}
+		
+		protected virtual void OnNameChanged (WidgetNameChangedArgs args)
+		{
+			OnWidgetChanged (args);
+			if (NameChanged != null)
+				NameChanged (this, args);
+		}
+
+		internal protected virtual void OnSignalAdded (SignalEventArgs args)
+		{
+			OnWidgetChanged (args);
+			if (SignalAdded != null)
+				SignalAdded (this, args);
+		}
+		
+		internal protected virtual void OnSignalRemoved (SignalEventArgs args)
+		{
+			OnWidgetChanged (args);
+			if (SignalRemoved != null)
+				SignalRemoved (this, args);
+		}
+		
+		internal protected virtual void OnSignalChanged (SignalChangedEventArgs args)
+		{
+			OnWidgetChanged (args);
+			if (SignalChanged != null)
+				SignalChanged (this, args);
+		}
+		
+		internal protected virtual void OnWidgetChanged (WidgetEventArgs args)
+		{
+			if (WidgetChanged != null)
+				WidgetChanged (this, args);
+		}
+		
+		protected void NotifyChanged ()
+		{
+			OnWidgetChanged (new WidgetEventArgs (this));
 		}
 	}
 

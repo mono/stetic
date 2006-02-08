@@ -20,6 +20,71 @@
 		<property name="Name" internal="true" init-with-name="true" />
 	    </itemgroup>
 	</itemgroups>
+    <signals>
+    	<itemgroup label="Common Widget Signals">
+		<signal name="AccelCanActivate" />
+		<signal name="AccelClosuresChanged" />
+		<signal name="ButtonPressEvent" />
+		<signal name="ButtonReleaseEvent" />
+		<signal name="ChildNotified" />
+		<signal name="ClientEvent" />
+		<signal name="ConfigureEvent" />
+		<signal name="DeleteEvent" />
+		<signal name="DestroyEvent" />
+		<signal name="DirectionChanged" />
+		<signal name="DragBegin" />
+		<signal name="DragDataDelete"/>
+		<signal name="DragDataGet" />
+		<signal name="DragDataReceived" />
+		<signal name="DragDrop" />
+		<signal name="DragEnd" />
+		<signal name="DragLeave" />
+		<signal name="DragMotion" />
+		<signal name="EnterNotifyEvent" />
+		<signal name="ExposeEvent" />
+		<signal name="Focused" />
+		<signal name="FocusGrabbed" />
+		<signal name="FocusInEvent" />
+		<signal name="FocusOutEvent" />
+		<signal name="GrabNotify" />
+		<signal name="HelpShown" />
+		<signal name="Hidden" />
+		<signal name="HierarchyChanged" />
+		<signal name="KeyPressEvent" />
+		<signal name="KeyReleaseEvent" />
+		<signal name="LeaveNotifyEvent" />
+		<signal name="MapEvent" />
+		<signal name="Mapped" />
+		<signal name="MnemonicActivated" />
+		<signal name="MotionNotifyEvent" />
+		<signal name="NoExposeEvent" />
+		<signal name="ParentSet" />
+		<signal name="PopupMenu" />
+		<signal name="PropertyNotifyEvent" />
+		<signal name="ProximityInEvent" />
+		<signal name="ProximityOutEvent" />
+		<signal name="Realized" />
+		<signal name="ScreenChanged" />
+		<signal name="ScrollEvent" />
+		<signal name="SelectionClearEvent" />
+		<signal name="SelectionGet" />
+		<signal name="SelectionNotifyEvent" />
+		<signal name="SelectionReceived" />
+		<signal name="SelectionRequestEvent" />
+		<signal name="Shown" />
+		<signal name="SizeAllocated" />
+		<signal name="SizeRequested" />
+		<signal name="StateChanged" />
+		<signal name="StyleSet" />
+		<signal name="UnmapEvent" />
+		<signal name="Unmapped" />
+		<signal name="Unrealized" />
+		<signal name="VisibilityNotifyEvent" />
+		<signal name="WidgetEvent" />
+		<signal name="WidgetEventAfter" />
+		<signal name="WindowStateEvent" />
+    	</itemgroup>
+    </signals>
 
 	<glade-transform>
 	    <!-- "events" property has extra spaces around "|"s -->
@@ -70,7 +135,18 @@
 	</glade-transform>
     </object>
 
-    <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container" />
+    <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container">
+	<signals>
+    	<itemgroup label="Container Signals">
+		<signal name="Added" />
+		<signal name="FocusChildSet" />
+		<signal name="Removed" />
+		<signal name="ResizeChecked" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
+    </object>
+    
     <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
 
     <object type="Gtk.Window,gtk-sharp" wrapper="Stetic.Wrapper.Window"
@@ -104,6 +180,18 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Window Signals">
+		<signal name="DefaultActivated" />
+		<signal name="FrameEvent" />
+		<signal name="FocusActivated" />
+		<signal name="KeysChanged" />
+		<signal name="MoveFocus" />
+		<signal name="SetFocus" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.Misc,gtk-sharp">
@@ -126,6 +214,17 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Paned Signals">
+		<signal name="CycleChildFocus" />
+		<signal name="ToggleHandleFocus" />
+		<signal name="AcceptPosition" />
+		<signal name="CancelPosition" />
+		<signal name="MoveHandle" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
     <object type="Gtk.Paned+PanedChild,gtk-sharp">
 	<itemgroups>
@@ -150,6 +249,14 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Range Signals">
+		<signal name="AdjustBounds" />
+		<signal name="ValueChanged" />
+		<signal name="MoveSlider" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.Scale,gtk-sharp" wrapper="Stetic.Wrapper.Scale">
@@ -173,6 +280,13 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Scale Signals">
+		<signal name="FormatValue" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Range" />
+	</signals>
     </object>
 
     <object type="Gtk.Alignment,gtk-sharp"
@@ -191,6 +305,10 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.Arrow,gtk-sharp"
@@ -203,6 +321,9 @@
 	    <itemgroup ref="Gtk.Misc" important="true" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.Bin,gtk-sharp" />
@@ -221,6 +342,10 @@
 	    <command name="InsertAfter" label="Insert After"
 		     description="Insert an empty row/column after the selected one" />
 	</contextmenu>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
     <object type="Gtk.Box+BoxChild,gtk-sharp" wrapper="Stetic.Wrapper.Box+BoxChild">
 	<itemgroups>
@@ -252,6 +377,10 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
 	<contextmenu>
 	    <command name="InsertBefore" label="Insert Button Before"
 		     description="Insert a new button before the selected one" />
@@ -331,6 +460,18 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Button Signals">
+		<signal name="Activated" />
+		<signal name="Clicked" />
+		<signal name="Entered" />
+		<signal name="Left" />
+		<signal name="Pressed" />
+		<signal name="Released" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.Calendar,gtk-sharp"
@@ -345,6 +486,18 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Calendar Signals">
+		<signal name="PrevMonth" />
+		<signal name="DaySelected" />
+		<signal name="NextMonth" />
+		<signal name="MonthChanged" />
+		<signal name="PrevYear" />
+		<signal name="DaySelectedDoubleClick" />
+		<signal name="NextYear" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.CheckButton,gtk-sharp" wrapper="Stetic.Wrapper.CheckButton"
@@ -369,6 +522,10 @@
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Button" />
+	</signals>
 	<contextmenu>
 	    <command ref="RemoveLabel" />
 	    <command ref="RestoreLabel" />
@@ -390,6 +547,19 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Menu Item Signals">
+		<signal name="Activated" />
+		<signal name="ActivateItem" />
+		<signal name="Deselected" />
+		<signal name="Selected" />
+		<signal name="Toggled" />
+		<signal name="ToggleSizeAllocated" />
+		<signal name="ToggleSizeRequested" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
 
 	<glade-transform>
 	    <!-- A regular MenuItem with no label is really a SeparatorMenuItem -->
@@ -425,6 +595,14 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Check Menu Item Signals">
+		<signal name="Toggled" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.MenuItem" />
+	</signals>
     </object>
 
     <object type="Gtk.ColorButton,gtk-sharp" wrapper="Stetic.Wrapper.ColorButton"
@@ -438,6 +616,14 @@
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Color Button Signals">
+		<signal name="ColorSet" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Button" />
+	</signals>
     </object>
 
     <object type="Gtk.ComboBox,gtk-sharp" wrapper="Stetic.Wrapper.ComboBox"
@@ -453,6 +639,13 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="ComboBox Signals">
+		<signal name="Changed" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.ComboBoxEntry,gtk-sharp" wrapper="Stetic.Wrapper.ComboBoxEntry" 
@@ -466,6 +659,11 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.ComboBox" />
+	</signals>
     </object>
 
     <object type="Gtk.Dialog,gtk-sharp" wrapper="Stetic.Wrapper.Dialog"
@@ -496,6 +694,15 @@
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Dialog Signals">
+		<signal name="Close" />
+		<signal name="Response" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Window" />
+	</signals>
 	<internal-children>
 	    <property name="VBox" glade-name="vbox" />
 	    <property name="ActionArea" glade-name="action_area" />
@@ -508,6 +715,9 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.Entry,gtk-sharp"
@@ -529,6 +739,25 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Entry Signals">
+		<signal name="InsertAtCursor" />
+		<signal name="ToggleOverwrite" />
+		<signal name="PopulatePopup" />
+		<signal name="ClipboardCopied" />
+		<signal name="ClipboardPasted" />
+		<signal name="DeleteFromCursor" />
+		<signal name="Activated" />
+		<signal name="ClipboardCut" />
+		<signal name="MoveCursor" />
+		<signal name="Changed" />
+		<signal name="TextDeleted" />
+		<signal name="TextInserted" />
+		<signal name="EditingDone" />
+		<signal name="WidgetRemoved" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.EventBox,gtk-sharp"
@@ -541,6 +770,10 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.Expander,gtk-sharp" wrapper="Stetic.Wrapper.Expander"
@@ -553,6 +786,13 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Expander Signals">
+		<signal name="Activated" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.FontButton,gtk-sharp" wrapper="Stetic.Wrapper.FontButton"
@@ -571,6 +811,14 @@
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Font Button Signals">
+		<signal name="FontSet" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Button" />
+	</signals>
     </object>
 
     <object type="Gtk.Frame,gtk-sharp" wrapper="Stetic.Wrapper.Frame"
@@ -584,6 +832,10 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.HBox,gtk-sharp"
@@ -592,6 +844,10 @@
 	    <itemgroup ref="Gtk.Box" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
 	<contextmenu ref="Gtk.Box" />
     </object>
 
@@ -602,6 +858,10 @@
 	    <itemgroup ref="Gtk.ButtonBox" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
 	<contextmenu ref="Gtk.ButtonBox" />
 	<glade-transform>
 	    <!-- If a child has a "response_id" of -11 (GTK_RESPONSE_HELP), it should be packed with the "secondary" property -->
@@ -627,6 +887,11 @@
 	    <itemgroup ref="Gtk.Paned" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Paned" />
+	</signals>
     </object>
 
     <object type="Gtk.HScale,gtk-sharp" wrapper="Stetic.Wrapper.HScale"
@@ -636,6 +901,11 @@
 	    <itemgroup ref="Gtk.Scale" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Range" />
+	    <itemgroup ref="Gtk.Scale" />
+	</signals>
     </object>
 
     <object type="Gtk.HScrollbar,gtk-sharp" wrapper="Stetic.Wrapper.HScrollbar"
@@ -645,6 +915,11 @@
 	    <itemgroup ref="Gtk.Range" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Range" />
+	    <itemgroup ref="Gtk.Scale" />
+	</signals>
     </object>
 
     <object type="Gtk.HSeparator,gtk-sharp"
@@ -653,6 +928,9 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.Image,gtk-sharp" wrapper="Stetic.Wrapper.Image"
@@ -680,6 +958,9 @@
 	    <itemgroup ref="Gtk.Misc" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.ImageMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.ImageMenuItem"
@@ -693,6 +974,11 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.MenuItem" />
+	</signals>
     </object>
 
     <object type="Gtk.Label,gtk-sharp" wrapper="Stetic.Wrapper.Label"
@@ -714,6 +1000,14 @@
 	    <itemgroup ref="Gtk.Misc" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Label Signals">
+		<signal name="CopyClipboard" />
+		<signal name="MoveCursor" />
+		<signal name="PopulatePopup" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.MenuBar,gtk-sharp"
@@ -721,6 +1015,17 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Menu Bar Signals">
+		<signal name="Deactivated" />
+		<signal name="SelectionDone" />
+		<signal name="MoveCurrent" />
+		<signal name="ActivateCurrent" />
+		<signal name="Canceled" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.Menu,gtk-sharp"
@@ -728,6 +1033,17 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Menu Signals">
+		<signal name="Deactivated" />
+		<signal name="SelectionDone" />
+		<signal name="MoveCurrent" />
+		<signal name="ActivateCurrent" />
+		<signal name="Canceled" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
     <object type="Gtk.Menu+MenuChild,gtk-sharp" />
 
@@ -753,6 +1069,12 @@
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Window" />
+	    <itemgroup ref="Gtk.Dialog" />
+	</signals>
     </object>
 
     <object type="Gtk.Notebook,gtk-sharp" wrapper="Stetic.Wrapper.Notebook"
@@ -772,6 +1094,17 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Notebook Signals">
+		<signal name="FocusTab" />
+		<signal name="ChangeCurrentPage" />
+		<signal name="MoveFocusOut" />
+		<signal name="SwitchPage" />
+		<signal name="SelectPage" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
 	<contextmenu>
 	    <command name="PreviousPage" label="Go to Previous Page"
 		     description="Show the previous page"
@@ -812,6 +1145,14 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Option Menu Signals">
+		<signal name="Changed" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Button" />
+	</signals>
 	<internal-children>
 	    <property name="Menu" glade-name="menu" />
 	</internal-children>
@@ -829,6 +1170,9 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Gtk.RadioButton,gtk-sharp" wrapper="Stetic.Wrapper.RadioButton"
@@ -849,6 +1193,15 @@
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Radio Button Signals">
+		<signal name="Toggled" />
+		<signal name="GroupChanged" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Button" />
+	</signals>
 	<contextmenu>
 	    <command ref="Gtk.CheckButton.RemoveLabel" />
 	    <command ref="Gtk.CheckButton.RestoreLabel" />
@@ -870,6 +1223,25 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Radio Menu Item Signals">
+		<signal name="Toggled" />
+		<signal name="GroupChanged" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.MenuItem" />
+	</signals>
+    </object>
+
+    <object type="Gtk.ToolItem,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
+	<signals>
+    	<itemgroup label="Tool Item Signals">
+		<signal name="ToolbarReconfigured" />
+		<signal name="CreateMenuProxy" />
+		<signal name="TooltipSet" />
+	    </itemgroup>
+	</signals>
     </object>
 
     <object type="Gtk.ToolButton,gtk-sharp" wrapper="Stetic.Wrapper.ToolButton"
@@ -884,6 +1256,14 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Tool Button Signals">
+		<signal name="Clicked" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.ToolItem" />
+	</signals>
     </object>
 
     <object type="Gtk.RadioToolButton,gtk-sharp" wrapper="Stetic.Wrapper.RadioToolButton"
@@ -900,6 +1280,15 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Radio Tool Button Signals">
+		<signal name="Toggled" />
+		<signal name="Clicked" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.ToolItem" />
+	</signals>
     </object>
 
     <object type="Gtk.ScrolledWindow,gtk-sharp" wrapper="Stetic.Wrapper.ScrolledWindow"
@@ -915,6 +1304,14 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Scrolled Window Signals">
+		<signal name="MoveFocusOut" />
+		<signal name="ScrollChild" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.SeparatorMenuItem,gtk-sharp"
@@ -922,6 +1319,11 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.MenuItem" />
+	</signals>
     </object>
 
     <object type="Gtk.SeparatorToolItem,gtk-sharp"
@@ -932,6 +1334,11 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.ToolItem" />
+	</signals>
     </object>
 
     <object type="Gtk.SpinButton,gtk-sharp" wrapper="Stetic.Wrapper.SpinButton"
@@ -955,6 +1362,16 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Spin Button Signals">
+		<signal name="ChangeValue" />
+		<signal name="Input" />
+		<signal name="ValueChanged" />
+		<signal name="Output" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Entry" />
+	</signals>
     </object>
 
     <object type="Gtk.Statusbar,gtk-sharp"
@@ -966,6 +1383,14 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Statusbar Signals">
+		<signal name="TextPopped" />
+		<signal name="TextPushed" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.Table,gtk-sharp" wrapper="Stetic.Wrapper.Table"
@@ -981,6 +1406,10 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
 	<contextmenu>
 	    <command name="InsertRowBefore" label="Insert Row Before"
 		     description="Insert an empty row above the selected row" />
@@ -1116,6 +1545,24 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Text View Signals">
+		<signal name="PasteClipboard" />
+		<signal name="InsertAtCursor" />
+		<signal name="CutClipboard" />
+		<signal name="ToggleOverwrite" />
+		<signal name="PageHorizontally" />
+		<signal name="MoveFocus" />
+		<signal name="CopyClipboard" />
+		<signal name="DeleteFromCursor" />
+		<signal name="PopulatePopup" />
+		<signal name="MoveCursor" />
+		<signal name="SetAnchor" />
+		<signal name="ScrollAdjustmentsSet" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.ToggleButton,gtk-sharp"
@@ -1134,6 +1581,14 @@
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Toggle Button Signals">
+		<signal name="Toggled" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Button" />
+	</signals>
     </object>
 
     <object type="Gtk.ToggleToolButton,gtk-sharp" wrapper="Stetic.Wrapper.ToggleToolButton"
@@ -1147,6 +1602,15 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Toggle Tool Button Signals">
+		<signal name="Toggled" />
+		<signal name="Clicked" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.ToolItem" />
+	</signals>
     </object>
 
     <object type="Gtk.Toolbar,gtk-sharp" wrapper="Stetic.Wrapper.Toolbar"
@@ -1160,6 +1624,15 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Toolbar Signals">
+		<signal name="OrientationChanged" />
+		<signal name="PopupContextMenu" />
+		<signal name="StyleChanged" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
     <object type="Gtk.Toolbar+ToolbarChild,gtk-sharp" wrapper="Stetic.Wrapper.Toolbar+ToolbarChild">
 	<itemgroups>
@@ -1191,6 +1664,28 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Tree View Signals">
+		<signal name="CursorChanged" />
+		<signal name="TestCollapseRow" />
+		<signal name="RowActivated" />
+		<signal name="ExpandCollapseCursorRow" />
+		<signal name="ColumnsChanged" />
+		<signal name="UnselectAll" />
+		<signal name="SelectCursorParent" />
+		<signal name="RowCollapsed" />
+		<signal name="SelectAll" />
+		<signal name="SelectCursorRow" />
+		<signal name="TestExpandRow" />
+		<signal name="StartInteractiveSearch" />
+		<signal name="MoveCursor" />
+		<signal name="RowExpanded" />
+		<signal name="ToggleCursorRow" />
+		<signal name="ScrollAdjustmentsSet" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.VBox,gtk-sharp"
@@ -1199,6 +1694,10 @@
 	    <itemgroup ref="Gtk.Box" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
 	<contextmenu ref="Gtk.Box" />
     </object>
 
@@ -1209,6 +1708,10 @@
 	    <itemgroup ref="Gtk.ButtonBox" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
 	<contextmenu ref="Gtk.ButtonBox" />
     </object>
 
@@ -1220,6 +1723,13 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Viewport Signals">
+		<signal name="ScrollAdjustmentsSet" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.VPaned,gtk-sharp"
@@ -1229,6 +1739,11 @@
 	    <itemgroup ref="Gtk.Paned" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Paned" />
+	</signals>
     </object>
 
     <object type="Gtk.VScale,gtk-sharp" wrapper="Stetic.Wrapper.VScale"
@@ -1238,6 +1753,11 @@
 	    <itemgroup ref="Gtk.Scale" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Range" />
+	    <itemgroup ref="Gtk.Scale" />
+	</signals>
     </object>
 
     <object type="Gtk.VScrollbar,gtk-sharp" wrapper="Stetic.Wrapper.VScrollbar"
@@ -1247,6 +1767,11 @@
 	    <itemgroup ref="Gtk.Range" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Range" />
+	    <itemgroup ref="Gtk.Scale" />
+	</signals>
     </object>
 
     <object type="Gtk.VSeparator,gtk-sharp"
@@ -1255,6 +1780,9 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
     </object>
 
     <object type="Stetic.Custom" cname="Custom"
@@ -1311,6 +1839,13 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="Color Selection Signals">
+		<signal name="ColorChanged" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.ColorSelectionDialog,gtk-sharp" wrapper="Stetic.Wrapper.Window"
@@ -1326,6 +1861,12 @@
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Window" />
+	    <itemgroup ref="Gtk.Dialog" />
+	</signals>
 	<internal-children>
 	    <property name="ColorSelection" glade-name="color_selection" />
 	    <property name="OkButton" glade-name="ok_button" />
@@ -1349,6 +1890,16 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="File Chooser Widget Signals">
+		<signal name="SelectionChanged" />
+		<signal name="FileActivated" />
+		<signal name="UpdatePreview" />
+		<signal name="CurrentFolderChanged" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <!-- 2.6
@@ -1391,6 +1942,18 @@
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="File Chooser Dialog Signals">
+		<signal name="SelectionChanged" />
+		<signal name="FileActivated" />
+		<signal name="UpdatePreview" />
+		<signal name="CurrentFolderChanged" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Window" />
+	    <itemgroup ref="Gtk.Dialog" />
+	</signals>
 	<internal-children>
 	    <property name="VBox" glade-name="vbox" />
 	    <property name="ActionArea" glade-name="action_area" />
@@ -1407,6 +1970,10 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
     </object>
 
     <object type="Gtk.FontSelectionDialog,gtk-sharp" wrapper="Stetic.Wrapper.FontSelectionDialog"
@@ -1422,6 +1989,12 @@
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	    <itemgroup ref="Gtk.Window" />
+	    <itemgroup ref="Gtk.Dialog" />
+	</signals>
 	<internal-children>
 	    <property name="FontSelection" glade-name="font_selection" />
 	    <property name="OkButton" glade-name="ok_button" />

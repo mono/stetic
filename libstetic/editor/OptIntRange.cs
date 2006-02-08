@@ -2,26 +2,53 @@ using System;
 
 namespace Stetic.Editor {
 
-	public class OptIntRange : Gtk.HBox {
+	public class OptIntRange : Gtk.HBox, IPropertyEditor {
 
 		Gtk.CheckButton check;
 		Gtk.SpinButton spin;
+		object omin, omax;
 
-		public OptIntRange (object min, object max) : base (false, 6)
+		public OptIntRange () : base (false, 6)
 		{
+		}
+		
+		public OptIntRange (object omin, object omax) : base (false, 6)
+		{
+			this.omin = omin;
+			this.omax = omax;
+		}
+		
+		public void Initialize (PropertyDescriptor prop)
+		{
+			if (prop.PropertyType != typeof(int))
+				throw new ApplicationException ("OptIntRange editor does not support editing values of type " + prop.PropertyType);
+
+			double min = (double) Int32.MinValue;
+			double max = (double) Int32.MaxValue;
+			
+			if (omin == null)
+				omin = prop.Minimum;
+			if (omax == null)
+				omax = prop.Maximum;
+			
+			if (omin != null)
+				min = (double) Convert.ChangeType (omin, typeof(double));
+			if (omax != null)
+				max = (double) Convert.ChangeType (omax, typeof(double));
+			
 			check = new Gtk.CheckButton ();
 			check.Show ();
 			check.Toggled += check_Toggled;
 			PackStart (check, false, false, 0);
 
-			if (min == null)
-				min = Int32.MinValue;
-			if (max == null)
-				max = Int32.MaxValue;
-			spin = new Gtk.SpinButton ((double)(int)min, (double)(int)max, 1.0);
+			spin = new Gtk.SpinButton (min, max, 1.0);
 			spin.Show ();
 			spin.ValueChanged += spin_ValueChanged;
 			PackStart (spin, true, true, 0);
+		}
+		
+		public void AttachObject (object ob)
+		{
 		}
 
 		void check_Toggled (object o, EventArgs args)
@@ -37,7 +64,7 @@ namespace Stetic.Editor {
 				ValueChanged (this, EventArgs.Empty);
 		}
 
-		public int Value {
+		public object Value {
 			get {
 				if (check.Active)
 					return (int)spin.Value;
@@ -45,13 +72,14 @@ namespace Stetic.Editor {
 					return -1;
 			}
 			set {
-				if (value == -1) {
+				int val = (int) value;
+				if (val == -1) {
 					check.Active = false;
 					spin.Sensitive = false;
 				} else {
 					check.Active = true;
 					spin.Sensitive = true;
-					spin.Value = (double)value;
+					spin.Value = (double)val;
 				}
 			}
 		}

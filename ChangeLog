@@ -1,3 +1,108 @@
+2006-02-07  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/ItemGroup.cs: Converted to class. Added support for
+	Signal items.
+	
+	* libstetic/wrapper/Container.cs: Added properties for storing
+	the width and height of the container (at design time).
+	
+	* libstetic/wrapper/Widget.cs: Added support for signals. 
+	Added some new events: NameChanged, WidgetChanged, SignalAdded,
+	SignalRemoved, SignalChanged.
+	
+	* libstetic/wrapper/Window.cs: Don't show the window when it's
+	selected. That's something that the hosting application has to
+	decide. The selection change event in Project can be used for this.
+	
+	* libstetic/wrapper/objects.xml: Added signals.
+	
+	* libstetic/editor/ResponseId.cs: 
+	* libstetic/editor/Translatable.cs:
+	* libstetic/editor/Char.cs:
+	* libstetic/editor/Color.cs:
+	* libstetic/editor/ThemedIcon.cs:
+	* libstetic/editor/Boolean.cs:
+	* libstetic/editor/Image.cs:
+	* libstetic/editor/FloatRange.cs:
+	* libstetic/editor/Text.cs:
+	* libstetic/editor/Accelerator.cs:
+	* libstetic/editor/Enumeration.cs:
+	* libstetic/editor/GroupPicker.cs:
+	* libstetic/editor/OptIntRange.cs:
+	* libstetic/editor/Flags.cs:
+	* libstetic/editor/StringArray.cs:
+	* libstetic/editor/String.cs:
+	* libstetic/editor/IntRange.cs:
+	  Implement the new IPropertyEditor interface.
+	
+	* libstetic/HandleWindow.cs: Use a wider focus rectangle.
+	Get the correct top level window when it's embedded in another window.
+	
+	* libstetic/GladeUtils.cs: Added helper methods for exporting and
+	importing widgets. Read/Write signal information.
+	
+	* libstetic/ClassDescriptor.cs: Added support for signals.
+	
+	* stetic/Makefile.am:
+	* libstetic/Makefile.am: Updated.
+	
+	* libstetic/Registry.cs: Added some helper methods for locating
+	groups.
+	
+	* Makefile.am:
+	* configure.in: Set version to 0.1.0. Added .pc file.
+	
+	* stetic/WidgetFactory.cs: Don't show the window when it's
+	created. The hosting app can do it by subscribing the 
+	Project.WidgetAdded event.
+	
+	* stetic/Glade.cs: Top level widgets don't need to be windows,
+	they can be containers.
+	
+	* stetic/PropertyGrid.cs: Some big changes. This widget is not a Grid
+	anymore, but a VBox of grids. There is a grid for every ItemGroup, and
+	they are reused for all widgets that share the same ItemGroup. The
+	property grid is now much faster.
+	
+	* stetic/Stetic.cs: Added the signals editor. Handle some events
+	previously handled in the widget code, but which I moved here to
+	make the code more generic.
+	
+	* libstetic/IPropertyEditor.cs: New interface to be implemented
+	by all property editors.
+	
+	* stetic/PropertyEditor.cs: Replaced all code that relied on reflection
+	to create and initialize property editors. All this is now done through
+	the new IPropertyEditor interface. Now it is also possible to reuse
+	the same PropertyEditor for different objects that share the same
+	property.
+	
+	* stetic/Palette.cs:
+	* stetic/ProjectView.cs: Added support for changing the project to
+	which those widgets are bound.
+	
+	* stetic/stetic.glade: Added the signals editor.
+	
+	* stetic/Project.cs: Added several events which are needed to
+	integrate Stetic in an IDE.
+	
+	* stetic.pc.in: Added.
+	
+	* libstetic/SignalDescriptor.cs: New descriptor for signals.
+	
+	* libstetic/wrapper/WidgetEventHandler.cs:
+	* libstetic/wrapper/WidgetNameChangedHandler.cs:
+	* libstetic/wrapper/SignalEventHandler.cs:
+	* libstetic/wrapper/SignalChangedEventHandler.cs
+	
+	* libstetic/wrapper/SignalCollection.cs:
+	* libstetic/wrapper/Signal.cs: New class. Holds information
+	about signal handlers bound to a widgets.
+	
+	* libstetic/ItemGroupCollection.cs: New collection class.
+	
+	* stetic/SignalsEditor.cs: The new signals editor.
+
 2005-09-27  Dan Winship  <danw@novell.com>
 
 	* libstetic/HandleWindow.cs (HandleEvent): hack around bgo 316871

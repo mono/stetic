@@ -5,7 +5,7 @@ using System.Reflection;
 namespace Stetic.Editor {
 
 	[PropertyEditor ("Value", "Changed")]
-	public class Image : Gtk.HBox {
+	public class Image : Gtk.HBox, IPropertyEditor {
 		Gtk.Image image;
 		Gtk.ComboBoxEntry combo;
 		Gtk.Entry entry;
@@ -118,7 +118,17 @@ namespace Stetic.Editor {
 			}
 		}
 
-		public event EventHandler Changed;
+		public void Initialize (PropertyDescriptor prop)
+		{
+			if (prop.PropertyType != typeof(string))
+				throw new ApplicationException ("Image editor does not support editing values of type " + prop.PropertyType);
+		}
+		
+		public void AttachObject (object ob)
+		{
+		}
+
+		public event EventHandler ValueChanged;
 
 		bool syncing;
 
@@ -133,8 +143,8 @@ namespace Stetic.Editor {
 				StockId = stockIds[combo.Active - 1];
 			else
 				StockId = null;
-			if (Changed != null)
-				Changed (this, EventArgs.Empty);
+			if (ValueChanged != null)
+				ValueChanged (this, EventArgs.Empty);
 			syncing = false;
 		}
 
@@ -146,8 +156,8 @@ namespace Stetic.Editor {
 			useStock = true;
 			syncing = true;
 			StockId = entry.Text;
-			if (Changed != null)
-				Changed (this, EventArgs.Empty);
+			if (ValueChanged != null)
+				ValueChanged (this, EventArgs.Empty);
 			syncing = false;
 		}
 
@@ -166,8 +176,8 @@ namespace Stetic.Editor {
 				useStock = false;
 				entry.Text = file;
 				File = file;
-				if (Changed != null)
-					Changed (this, EventArgs.Empty);
+				if (ValueChanged != null)
+					ValueChanged (this, EventArgs.Empty);
 				syncing = false;
 			}
 		}
@@ -224,7 +234,7 @@ namespace Stetic.Editor {
 			}
 		}
 
-		public string Value {
+		public object Value {
 			get {
 				if (useStock) {
 					if (StockId != null)
@@ -239,12 +249,13 @@ namespace Stetic.Editor {
 				}
 			}
 			set {
-				if (value == null)
+				string val = value as string;
+				if (val == null)
 					File = null;
-				else if (value.StartsWith ("stock:"))
-					StockId = value.Substring (6);
-				else if (value.StartsWith ("file:"))
-					File = value.Substring (5);
+				else if (val.StartsWith ("stock:"))
+					StockId = val.Substring (6);
+				else if (val.StartsWith ("file:"))
+					File = val.Substring (5);
 			}
 		}
 	}

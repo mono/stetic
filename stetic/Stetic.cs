@@ -12,6 +12,7 @@ namespace Stetic {
 		static Stetic.Project Project;
 		static Stetic.ProjectView ProjectView;
 		static Stetic.PropertyGrid Properties;
+		static Stetic.SignalsEditor Signals;
 
 		public static Stetic.UIManager UIManager;
 		public static Gtk.Window MainWindow;
@@ -20,10 +21,13 @@ namespace Stetic {
 			Program = new Gnome.Program ("Stetic", "0.0", Gnome.Modules.UI, args);
 
 			Project = new Project ();
+			Project.WidgetAdded += OnWidgetAdded;
+			Project.Selected += OnSelectionChanged;
 
 			Palette = new Stetic.Palette (Project);
 			ProjectView = new Stetic.ProjectView (Project);
 			Properties = new Stetic.PropertyGrid (Project);
+			Signals = new Stetic.SignalsEditor (Project);
 			UIManager = new Stetic.UIManager (Project);
 
 			Glade.XML.CustomHandler = CustomWidgetHandler;
@@ -68,6 +72,8 @@ namespace Stetic {
 				return ProjectView;
 			else if (name == "PropertyGrid")
 				return Properties;
+			else if (name == "SignalsEditor")
+				return Signals;
 			else if (name == "MenuBar")
 				return UIManager.MenuBar;
 			else
@@ -84,6 +90,19 @@ namespace Stetic {
 		internal static void Window_Delete (object obj, DeleteEventArgs args) {
 			Program.Quit ();
 			args.RetVal = true;
+		}
+		
+		static void OnWidgetAdded (object s, Wrapper.WidgetEventArgs args)
+		{
+			if (args.Widget is Wrapper.Window) {
+				((Gtk.Window)args.Widget.Wrapped).Present ();
+			}
+		}
+		
+		static void OnSelectionChanged (Gtk.Widget selection, ProjectNode node)
+		{
+			if (selection is Gtk.Window)
+				((Gtk.Window)selection).Present ();
 		}
 	}
 }

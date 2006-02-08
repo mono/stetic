@@ -2,16 +2,26 @@ using System;
 
 namespace Stetic.Editor {
 
-	public class Char : Gtk.Entry {
+	public class Char : Gtk.Entry, IPropertyEditor {
 
 		public Char ()
 		{
 			MaxLength = 1;
 		}
 
+		public void Initialize (PropertyDescriptor descriptor)
+		{
+			if (descriptor.PropertyType != typeof(bool))
+				throw new ApplicationException ("Char editor does not support editing values of type " + descriptor.PropertyType);
+		}
+		
+		public void AttachObject (object obj)
+		{
+		}
+		
 		char last;
 
-		public char Value {
+		public object Value {
 			get {
 				if (Text.Length == 0)
 					return last;
@@ -20,7 +30,7 @@ namespace Stetic.Editor {
 			}
 			set {
 				Text = value.ToString ();
-				last = value;
+				last = (char) value;
 			}
 		}
 

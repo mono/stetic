@@ -9,6 +9,7 @@ namespace Stetic {
 	public class Palette : Gtk.VBox, IComparer {
 
 		Hashtable groups;
+		Project project;
 
 		class Group : Gtk.Expander {
 		
@@ -34,9 +35,30 @@ namespace Stetic {
 			} 
 		}
 
-		public Palette (Project project) : base (false, 2)
+		public Palette () : base (false, 2)
 		{
 			groups = new Hashtable ();
+		}
+		
+		public Palette (Project project): this ()
+		{
+			this.Project = project;
+		}
+		
+		public Project Project {
+			get { return project; }
+			set {
+				project = value;
+				LoadWidgets (project);
+			}
+		}
+		
+		public void LoadWidgets (Project project)
+		{
+			foreach (Group g in groups.Values)
+				Remove (g);
+				
+			groups.Clear ();
 
 			AddOrGetGroup ("widget", "Widgets");
 			AddOrGetGroup ("container", "Containers");
@@ -60,9 +82,10 @@ namespace Stetic {
 
 				AddOrGetGroup(klass.Category).Append (factory);
 			}
+			ShowAll ();
 		}
 
-		public int Compare (object x, object y)
+		int IComparer.Compare (object x, object y)
 		{
 			return string.Compare (((ClassDescriptor)x).Label,
 					       ((ClassDescriptor)y).Label);

@@ -7,15 +7,23 @@ namespace Stetic.Editor {
 
 		Gtk.Entry entry;
 
-		public String (PropertyDescriptor prop, object obj) : base (prop, obj)
+		public override void Initialize (PropertyDescriptor prop)
 		{
+			base.Initialize (prop);
+			
 			entry = new Gtk.Entry ();
 			entry.Show ();
 			entry.Changed += EntryChanged;
 			Add (entry);
 		}
 
-		public string Text {
+		protected override void CheckType (PropertyDescriptor prop)
+		{
+			if (prop.PropertyType != typeof(string))
+				throw new ApplicationException ("String editor does not support editing values of type " + prop.PropertyType);
+		}
+		
+		public override object Value {
 			get {
 				return entry.Text;
 			}
@@ -23,16 +31,13 @@ namespace Stetic.Editor {
 				if (value == null)
 					entry.Text = "";
 				else
-					entry.Text = value;
+					entry.Text = (string) value;
 			}
 		}
 
 		void EntryChanged (object obj, EventArgs args)
 		{
-			if (Changed != null)
-				Changed (this, EventArgs.Empty);
+			OnValueChanged ();
 		}
-
-		public event EventHandler Changed;
 	}
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Editor {
 
-	public abstract class Translatable : Gtk.VBox {
+	public abstract class Translatable : Gtk.VBox, IPropertyEditor {
 
 		PropertyDescriptor prop;
 		object obj;
@@ -16,67 +16,50 @@ namespace Stetic.Editor {
 		Gtk.MenuItem addContextItem, remContextItem, addCommentItem, remCommentItem;
 		Gtk.Entry contextEntry;
 		Stetic.TextBox commentText;
+		bool initializing;
 
-		public Translatable (PropertyDescriptor prop, object obj) : base (false, 3)
+		public virtual void Initialize (PropertyDescriptor prop)
 		{
+			CheckType (prop);
+			
+			this.prop = prop;
+
 			mainHBox = new Gtk.HBox (false, 6);
 			PackStart (mainHBox, false, false, 0);
 
 			if (!prop.Translatable)
 				return;
 
-			this.prop = prop;
-			this.obj = obj;
-
 			button = new Gtk.Button ();
 			globe = Gdk.Pixbuf.LoadFromResource ("globe.png");
 			globe_not = Gdk.Pixbuf.LoadFromResource ("globe-not.png");
-			image = new Gtk.Image (prop.IsTranslated (obj) ? globe : globe_not);
+			image = new Gtk.Image (globe);
 			button.Add (image);
 			button.ButtonPressEvent += ButtonPressed;
 			mainHBox.PackEnd (button, false, false, 0);
 			mainHBox.ShowAll ();
-
+			
 			menu = new Gtk.Menu ();
 
 			markItem = new Gtk.CheckMenuItem ("Mark for Translation");
-			markItem.Active = prop.IsTranslated (obj);
 			markItem.Toggled += ToggleMark;
 			markItem.Show ();
 			menu.Add (markItem);
-
+			
 			addContextItem = new Gtk.MenuItem ("Add Translation Context Hint");
 			addContextItem.Activated += AddContext;
 			menu.Add (addContextItem);
 			remContextItem = new Gtk.MenuItem ("Remove Translation Context Hint");
 			remContextItem.Activated += RemoveContext;
 			menu.Add (remContextItem);
-			if (prop.IsTranslated (obj)) {
-				if (prop.TranslationContext (obj) != null)
-					remContextItem.Show ();
-				else
-					addContextItem.Show ();
-			} else {
-				addContextItem.Show ();
-				addContextItem.Sensitive = false;
-			}
-
+			
 			addCommentItem = new Gtk.MenuItem ("Add Comment for Translators");
 			addCommentItem.Activated += AddComment;
 			menu.Add (addCommentItem);
 			remCommentItem = new Gtk.MenuItem ("Remove Comment for Translators");
 			remCommentItem.Activated += RemoveComment;
 			menu.Add (remCommentItem);
-			if (prop.IsTranslated (obj)) {
-				if (prop.TranslationComment (obj) != null)
-					remCommentItem.Show ();
-				else
-					addCommentItem.Show ();
-			} else {
-				addCommentItem.Show ();
-				addCommentItem.Sensitive = false;
-			}
-
+			
 			contextBox = new Gtk.HBox (false, 6);
 			Gtk.Label contextLabel = new Gtk.Label ("Translation context");
 			contextLabel.Xalign = 0.0f;
@@ -85,10 +68,6 @@ namespace Stetic.Editor {
 			contextEntry.WidthChars = 8;
 			contextBox.PackStart (contextEntry, true, true, 0);
 			contextBox.ShowAll ();
-			if (prop.TranslationContext (obj) != null) {
-				PackStart (contextBox, false, false, 0);
-				contextEntry.Text = prop.TranslationContext (obj);
-			}
 			contextEntry.Changed += ContextChanged;
 
 			commentBox = new Gtk.VBox (false, 3);
@@ -98,13 +77,68 @@ namespace Stetic.Editor {
 			commentText = new Stetic.TextBox (3);
 			commentBox.PackStart (commentText, false, false, 0);
 			commentBox.ShowAll ();
-			if (prop.TranslationComment (obj) != null) {
-				PackEnd (commentBox, false, false, 0);
-				commentText.Text = prop.TranslationComment (obj);
-			}
 			commentText.Changed += CommentChanged;
 		}
+		
+		protected virtual void CheckType (PropertyDescriptor prop)
+		{
+		}
+		
+		public virtual void AttachObject (object ob)
+		{
+			this.obj = ob;
+			
+			if (!prop.Translatable)
+				return;
 
+			initializing = true;
+
+			if (contextBox.Parent != null)
+				Remove (contextBox);
+			if (commentBox.Parent != null)
+				Remove (commentBox);
+			
+			markItem.Active = prop.IsTranslated (obj);
+			image.Pixbuf = markItem.Active ? globe : globe_not;
+			
+			if (prop.IsTranslated (obj)) {
+				if (prop.TranslationContext (obj) != null) {
+					remContextItem.Show ();
+					PackStart (contextBox, false, false, 0);
+					contextEntry.Text = prop.TranslationContext (obj);
+				} else
+					addContextItem.Show ();
+			} else {
+				addContextItem.Show ();
+				addContextItem.Sensitive = false;
+			}
+
+			if (prop.IsTranslated (obj)) {
+				if (prop.TranslationComment (obj) != null) {
+					remCommentItem.Show ();
+					PackEnd (commentBox, false, false, 0);
+					commentText.Text = prop.TranslationComment (obj);
+				} else
+					addCommentItem.Show ();
+			} else {
+				addCommentItem.Show ();
+				addCommentItem.Sensitive = false;
+			}
+			
+			initializing = false;
+		}
+
+		
+		public abstract object Value { get; set; }
+		
+		public event EventHandler ValueChanged;
+		
+		protected virtual void OnValueChanged ()
+		{
+			if (ValueChanged != null)
+				ValueChanged (this, EventArgs.Empty);
+		}
+		
 		protected override void OnAdded (Gtk.Widget child)
 		{
 			mainHBox.PackStart (child, true, true, 0);
@@ -128,6 +162,7 @@ namespace Stetic.Editor {
 
 		void ToggleMark (object o, EventArgs args)
 		{
+			if (initializing) return;
 			if (!markItem.Active) {
 				// Make sure we're showing the "Add" menu items
 				// rather than the "Remove" ones
@@ -163,6 +198,7 @@ namespace Stetic.Editor {
 
 		void ContextChanged (object o, EventArgs args)
 		{
+			if (initializing) return;
 			prop.SetTranslationContext (obj, contextEntry.Text);
 		}
 
@@ -186,6 +222,7 @@ namespace Stetic.Editor {
 
 		void CommentChanged (object o, EventArgs args)
 		{
+			if (initializing) return;
 			prop.SetTranslationComment (obj, commentText.Text);
 		}
 	}

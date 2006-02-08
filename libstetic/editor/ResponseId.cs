@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Stetic.Editor {
 
-	public class ResponseId : Gtk.HBox {
+	public class ResponseId : Gtk.HBox, IPropertyEditor {
 
 		Gtk.ComboBoxEntry combo;
 		Gtk.Entry entry;
@@ -30,8 +30,18 @@ namespace Stetic.Editor {
 				}
 			}
 		}
+		
+		public void Initialize (PropertyDescriptor prop)
+		{
+			if (prop.PropertyType != typeof(int))
+				throw new ApplicationException ("ResponseId editor does not support editing values of type " + prop.PropertyType);
+		}
+		
+		public void AttachObject (object ob)
+		{
+		}
 
-		public int Value {
+		public object Value {
 			get {
 				if (combo.Active != -1)
 					return (int)values[combo.Active];
@@ -44,7 +54,7 @@ namespace Stetic.Editor {
 				}
 			}
 			set {
-				combo.Active = values.IndexOf (value);
+				combo.Active = values.IndexOf ((int)value);
 				if (combo.Active == -1)
 					entry.Text = value.ToString ();
 			}

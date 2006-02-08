@@ -8,6 +8,10 @@ namespace Stetic {
 	public class HandleWindow : IDisposable {
 
 		static Gdk.Color black, white;
+		Gtk.Widget topLevel;
+
+		const int handleSize = 6;
+		const int borderSize = 3;
 
 		static HandleWindow ()
 		{
@@ -21,6 +25,13 @@ namespace Stetic {
 		{
 			this.selection = selection;
 			this.dragHandles = dragHandles;
+			
+			topLevel = selection;
+			Gtk.Widget parent = topLevel;
+			while (ObjectWrapper.Lookup (parent) != null) {
+				topLevel = parent;
+				parent = topLevel.Parent;
+			}
 
 			selection.SizeAllocated += SelectionResized;
 
@@ -36,7 +47,7 @@ namespace Stetic {
 					   Gdk.EventMask.ButtonMotionMask |
 					   Gdk.EventMask.ButtonReleaseMask |
 					   Gdk.EventMask.ExposureMask);
-			window = new Gdk.Window (selection.Toplevel.GdkWindow, attributes,
+			window = new Gdk.Window (topLevel.GdkWindow, attributes,
 						 Gdk.WindowAttributesType.Visual |
 						 Gdk.WindowAttributesType.Colormap);
 			window.UserData = invis.Handle;
@@ -44,7 +55,7 @@ namespace Stetic {
 
 			Shape ();
 		}
-
+		
 		public void Dispose ()
 		{
 			if (selection != null) {
@@ -75,19 +86,19 @@ namespace Stetic {
 
 		Gdk.Rectangle handleAllocation;
 
-		const int handleSize = 6;
-
 		public void Shape ()
 		{
 			Gdk.GC gc;
 			Gdk.Pixmap pixmap;
 			int tlx, tly;
+			
+			int margin = dragHandles ? 1 : -2;
 
-			selection.TranslateCoordinates (selection.Toplevel, 0, 0, out tlx, out tly);
-			handleAllocation.X = tlx - handleSize / 2;
-			handleAllocation.Y = tly - handleSize / 2;
-			handleAllocation.Width = selection.Allocation.Width + handleSize;
-			handleAllocation.Height = selection.Allocation.Height + handleSize;
+			selection.TranslateCoordinates (topLevel, 0, 0, out tlx, out tly);
+			handleAllocation.X = tlx - handleSize / 2 - margin;
+			handleAllocation.Y = tly - handleSize / 2 - margin;
+			handleAllocation.Width = selection.Allocation.Width + handleSize + margin*2;
+			handleAllocation.Height = selection.Allocation.Height + handleSize + margin*2;
 
 			int width = handleAllocation.Width, height = handleAllocation.Height;
 
@@ -100,20 +111,28 @@ namespace Stetic {
 			gc.Foreground = black;
 
 			// Draw border
+			gc.SetDashes (0, new sbyte[] {1,1}, 2);
+			gc.SetLineAttributes (borderSize, Gdk.LineStyle.OnOffDash, Gdk.CapStyle.NotLast, Gdk.JoinStyle.Miter);
 			pixmap.DrawRectangle (gc, false, handleSize / 2, handleSize / 2,
 					      width - handleSize, height - handleSize);
 
 			if (dragHandles) {
-				pixmap.DrawRectangle (gc, true, 0, 0, handleSize, handleSize);
-				pixmap.DrawRectangle (gc, true, 0, height - handleSize, handleSize, handleSize);
-				pixmap.DrawRectangle (gc, true, width - handleSize, 0, handleSize, handleSize);
-				pixmap.DrawRectangle (gc, true, width - handleSize, height - handleSize, handleSize, handleSize);
+				gc.SetLineAttributes (1, Gdk.LineStyle.Solid, Gdk.CapStyle.NotLast, Gdk.JoinStyle.Miter);
+				DrawHandle (pixmap, gc, 0, 0);
+				DrawHandle (pixmap, gc, 0, height - handleSize);
+				DrawHandle (pixmap, gc, width - handleSize, 0);
+				DrawHandle (pixmap, gc, width - handleSize, height - handleSize);
 			}
 
 			window.Hide ();
 			window.MoveResize (handleAllocation);
 			window.ShapeCombineMask (pixmap, 0, 0);
 			window.Show ();
+		}
+		
+		void DrawHandle (Gdk.Pixmap pixmap, Gdk.GC gc, int x, int y)
+		{
+			pixmap.DrawRectangle (gc, true, x, y, handleSize, handleSize);
 		}
 
 		void SelectionResized (object obj, Gtk.SizeAllocatedArgs args)
@@ -155,7 +174,7 @@ namespace Stetic {
 			case Gdk.EventType.Expose:
 				// hack around bgo 316871 for gtk+ 2.8.0-2.8.3
 				gdk_synthesize_window_state (window.Handle, 0, 1);
-				selection.Toplevel.GdkWindow.InvalidateRect (handleAllocation, true);
+				topLevel.GdkWindow.InvalidateRect (handleAllocation, true);
 				gdk_synthesize_window_state (window.Handle, 1, 0);
 				return;
 

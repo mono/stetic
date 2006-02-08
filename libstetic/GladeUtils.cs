@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Runtime.InteropServices;
 using System.Xml;
+using Stetic.Wrapper;
 
 namespace Stetic {
 
@@ -21,11 +22,11 @@ namespace Stetic {
 		public static XmlDocument XslImportTransform (XmlDocument doc)
 		{
 			XmlDocumentType doctype = doc.DocumentType;
-			if (doctype == null ||
+/*			if (doctype == null ||
 			    doctype.Name != "glade-interface" ||
 			    doctype.SystemId != Glade20SystemId)
 				throw new GladeException ("Not a glade file according to doctype");
-
+*/
 			XmlReader reader = Registry.GladeImportXsl.Transform (doc, null, (XmlResolver)null);
 			doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
@@ -46,12 +47,12 @@ namespace Stetic {
 
 			return doc;
 		}
-
-		public static void Copy (Gtk.Widget widget, Gtk.SelectionData seldata, bool copyAsText)
+		
+		public static XmlDocument Export (Gtk.Widget widget)
 		{
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
 			if (wrapper == null)
-				return;
+				return null;
 
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
@@ -71,7 +72,7 @@ namespace Stetic {
 			if (parent == null) {
 				elem = wrapper.GladeExport (doc);
 				if (elem == null)
-					return;
+					return null;
 				if (!(widget is Gtk.Window)) {
 					XmlElement window = doc.CreateElement ("widget");
 					window.SetAttribute ("class", "GtkWindow");
@@ -98,6 +99,38 @@ namespace Stetic {
 				elem.SetAttribute ("class", "GtkWindow");
 				elem.SetAttribute ("id", "glade-dummy-container");
 			}
+			return doc;
+		}
+
+		public static Stetic.Wrapper.Widget Import (IProject project, XmlDocument doc)
+		{
+			try {
+				doc = XslImportTransform (doc);
+			} catch {
+				return null;
+			}
+
+			XmlElement elem = (XmlElement)doc.SelectSingleNode ("glade-interface/widget");
+			if (elem.GetAttribute ("class") != "GtkWindow" ||
+			    elem.GetAttribute ("id") != "glade-dummy-container") {
+				// Creating a new toplevel
+				Stetic.Wrapper.Widget toplevel = (Stetic.Wrapper.Widget)
+					Stetic.ObjectWrapper.GladeImport (project, elem);
+				if (toplevel != null) {
+					project.AddWindow ((Gtk.Window)toplevel.Wrapped);
+				}
+				return toplevel;
+			}
+
+			return (Stetic.Wrapper.Widget)
+				Stetic.ObjectWrapper.GladeImport (project, (XmlElement)elem.SelectSingleNode ("child/widget"));
+		}
+		
+		public static void Copy (Gtk.Widget widget, Gtk.SelectionData seldata, bool copyAsText)
+		{
+			XmlDocument doc = Export (widget);
+			if (doc == null)
+				return;
 
 			if (copyAsText)
 				seldata.Text = doc.OuterXml;
@@ -115,26 +148,11 @@ namespace Stetic {
 			doc.PreserveWhitespace = true;
 			try {
 				doc.LoadXml (data);
-				doc = XslImportTransform (doc);
 			} catch {
 				return null;
 			}
-
-			XmlElement elem = (XmlElement)doc.SelectSingleNode ("glade-interface/widget");
-			if (elem.GetAttribute ("class") != "GtkWindow" ||
-			    elem.GetAttribute ("id") != "glade-dummy-container") {
-				// Creating a new toplevel
-				Stetic.Wrapper.Widget toplevel = (Stetic.Wrapper.Widget)
-					Stetic.ObjectWrapper.GladeImport (project, elem);
-				if (toplevel != null) {
-					project.AddWindow ((Gtk.Window)toplevel.Wrapped);
-					toplevel.Wrapped.Show ();
-				}
-				return toplevel;
-			}
-
-			return (Stetic.Wrapper.Widget)
-				Stetic.ObjectWrapper.GladeImport (project, (XmlElement)elem.SelectSingleNode ("child/widget"));
+			
+			return Import (project, doc);
 		}
 
 		static object GetProperty (XmlElement elem, string selector, object defaultValue, bool extract)
@@ -367,6 +385,27 @@ namespace Stetic {
 			}
 		}
 
+		static void ReadSignals (ClassDescriptor klass, ObjectWrapper wrapper, XmlElement elem)
+		{
+			Stetic.Wrapper.Widget ob = wrapper as Stetic.Wrapper.Widget;
+			if (ob == null) return;
+			
+			foreach (ItemGroup group in klass.SignalGroups) {
+				foreach (SignalDescriptor signal in group) {
+					if (signal.GladeName == null)
+						continue;
+
+					XmlElement signal_elem = elem.SelectSingleNode ("signal[@name='" + signal.GladeName + "']") as XmlElement;
+					if (signal_elem == null)
+						continue;
+					
+					string handler = signal_elem.GetAttribute ("handler");
+					bool after = signal_elem.GetAttribute ("after") == "yes";
+					ob.Signals.Add (new Signal (signal, handler, after));
+				}
+			}
+		}
+		
 		static public void ImportWidget (ObjectWrapper wrapper, XmlElement elem)
 		{
 			string className = elem.GetAttribute ("class");
@@ -376,6 +415,8 @@ namespace Stetic {
 			ClassDescriptor klass = Registry.LookupClass (className);
 			if (klass == null)
 				throw new GladeException ("No stetic ClassDescriptor for " + className);
+				
+			ReadSignals (klass, wrapper, elem);
 
 			Hashtable rawProps, overrideProps;
 			ExtractProperties (klass, elem, out rawProps, out overrideProps);
@@ -393,6 +434,7 @@ namespace Stetic {
 					throw new GladeException ("Could not create widget", className);
 
 				widget = (Gtk.Widget)GLib.Object.GetObject (raw, true);
+				
 				if (widget == null) {
 					gtk_object_sink (raw);
 					throw new GladeException ("Could not create gtk# wrapper", className);
@@ -410,7 +452,7 @@ namespace Stetic {
 			SetOverrideProperties (wrapper, overrideProps);
 			MarkTranslatables (widget, overrideProps);
 		}
-
+		
 		static void SetOverrideProperties (ObjectWrapper wrapper, Hashtable overrideProps)
 		{
 			foreach (PropertyDescriptor prop in overrideProps.Keys) {
@@ -477,7 +519,7 @@ namespace Stetic {
 			SetOverrideProperties (wrapper, overrideProps);
 			MarkTranslatables (cc, overrideProps);
 		}
-
+		
 		static string PropToString (ObjectWrapper wrapper, PropertyDescriptor prop)
 		{
 			object value;
@@ -559,6 +601,7 @@ namespace Stetic {
 			elem.SetAttribute ("id", ((Gtk.Widget)wrapper.Wrapped).Name);
 
 			GetProps (wrapper, elem);
+			GetSignals (wrapper, elem);
 			return elem;
 		}
 
@@ -583,7 +626,8 @@ namespace Stetic {
 
 					XmlElement prop_elem = parent_elem.OwnerDocument.CreateElement ("property");
 					prop_elem.SetAttribute ("name", prop.GladeName);
-					prop_elem.InnerText = val;
+					if (val.Length > 0)
+						prop_elem.InnerText = val;
 
 					if (prop.Translatable && prop.IsTranslated (wrapper.Wrapped)) {
 						prop_elem.SetAttribute ("translatable", "yes");
@@ -600,6 +644,26 @@ namespace Stetic {
 			}
 		}
 
+		static public void GetSignals (ObjectWrapper wrapper, XmlElement parent_elem)
+		{
+			Stetic.Wrapper.Widget ob = wrapper as Stetic.Wrapper.Widget;
+			if (ob == null) return;
+			
+			foreach (Signal signal in ob.Signals) {
+				if (signal.SignalDescriptor.GladeName == null)
+					continue;
+				if (!signal.SignalDescriptor.VisibleFor (wrapper.Wrapped))
+					continue;
+
+				XmlElement signal_elem = parent_elem.OwnerDocument.CreateElement ("signal");
+				signal_elem.SetAttribute ("name", signal.SignalDescriptor.GladeName);
+				signal_elem.SetAttribute ("handler", signal.Handler);
+				if (signal.After)
+					signal_elem.SetAttribute ("after", "yes");
+				parent_elem.AppendChild (signal_elem);
+			}
+		}
+		
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_fundamental (IntPtr gtype);
 

@@ -6,6 +6,9 @@ using System.Xml;
 
 namespace Stetic.Wrapper {
 	public class Container : Widget {
+	
+		int designWidth;
+		int designHeight;
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -44,6 +47,16 @@ namespace Stetic.Wrapper {
 			get {
 				return true;
 			}
+		}
+		
+		public int DesignWidth {
+			get { return designWidth; }
+			set { designWidth = value; NotifyChanged (); }
+		}
+
+		public int DesignHeight {
+			get { return designHeight; }
+			set { designHeight = value; NotifyChanged (); }
 		}
 
 		int freeze;
@@ -89,6 +102,13 @@ namespace Stetic.Wrapper {
 				}
 			}
 
+			string ds = elem.GetAttribute ("design-size");
+			if (ds.Length > 0) {
+				int i = ds.IndexOf (' ');
+				DesignWidth = int.Parse (ds.Substring (0, i));
+				DesignHeight = int.Parse (ds.Substring (i+1));
+			}
+			
 			Sync ();
 		}
 
@@ -142,6 +162,8 @@ namespace Stetic.Wrapper {
 				elem.AppendChild (child_elem);
 			}
 
+			if (DesignWidth != 0 || DesignHeight != 0)
+				elem.SetAttribute ("design-size", DesignWidth + " " + DesignHeight);
 			return elem;
 		}
 
@@ -559,6 +581,7 @@ namespace Stetic.Wrapper {
 			{
 				base.EmitNotify (propertyName);
 				ParentWrapper.Sync ();
+				ParentWrapper.OnWidgetChanged (new WidgetEventArgs (ParentWrapper));
 			}
 
 			Gtk.Container.ContainerChild cc {
