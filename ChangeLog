@@ -1,3 +1,22 @@
+2006-02-09  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* stetic.pc.in: Add a reference to the new libsteticui dll.
+	* configure.in, Makefile.am: Add libsteticui dir.
+	
+	* stetic/WidgetFactory.cs:
+	* stetic/Grid.cs:
+	* stetic/missing.png:
+	* stetic/PropertyGrid.cs:
+	* stetic/PropertyEditor.cs:
+	* stetic/Palette.cs:
+	* stetic/Clipboard.cs:
+	* stetic/ProjectView.cs:
+	* stetic/Makefile.am:
+	* stetic/Project.cs:
+	* stetic/SignalsEditor.cs:
+	* stetic/ContextMenu.cs:
+	Moved files to libsteticui.
+
 2006-02-07  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/ItemGroup.cs: Converted to class. Added support for

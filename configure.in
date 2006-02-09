@@ -35,6 +35,7 @@ AC_OUTPUT([
 Makefile
 glue/Makefile
 libstetic/Makefile
+libsteticui/Makefile
 stetic/Makefile
 stetic.pc
 ])
