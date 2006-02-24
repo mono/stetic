@@ -37,14 +37,22 @@ namespace Stetic {
 		public Project Project {
 			get { return project; }
 			set {
-				if (project != null)
+				if (project != null) {
 					project.Selected -= WidgetSelected;
+					project.ProjectReloaded -= OnProjectReloaded;
+				}
 				project = value;
 				if (project != null) {
 					NodeStore = project.Store;
 					project.Selected += WidgetSelected;
+					project.ProjectReloaded += OnProjectReloaded;
 				}
 			}
+		}
+		
+		void OnProjectReloaded (object o, EventArgs a)
+		{
+			NodeStore = project.Store;
 		}
 		
 		Stetic.Wrapper.Widget SelectedWrapper {

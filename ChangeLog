@@ -1,3 +1,128 @@
+2006-02-24  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/Glade.cs: Use the new api for reading/writing.
+	* libsteticui/Palette.cs: Update the palette when the
+	  registry changes.
+	* libsteticui/ProjectView.cs: Update the project tree when
+	  the project has been reloaded (due for example to a
+	  registry change).
+	* libsteticui/Makefile.am: Updated.
+	* libsteticui/Project.cs: Make it aware of changes in the
+	  registry. When the registry changes, reload the project.
+	  Added Read/Write and Load/Save methods, based on the
+	  native format. Added ProjectReloaded event, which is fired
+	  after the project has been reloaded due to a registry change.
+	  Other minor changes.
+	* libsteticui/SignalsEditor.cs: Refresh when the project is
+	  reloaded. Addded SignalActivated, which is fired when double-
+	  clicking an event.
+	* libsteticui/ContextMenu.cs: Get class descriptors from wrappers,
+	  instead of looking up in the registry. Track some other api
+	  changes.
+	* libsteticui/PropertyGrid.cs: Refresh when the project is
+	  reloaded. Track some api changes.
+	  
+	* libstetic/ParamSpec.cs: Commented out some methods and
+	  properties which depend on P/Invoke calls.
+	* libstetic/ItemGroup.cs: Delegate item creation to the
+	  owner class.
+	* libstetic/wrapper/Button.cs:
+	* libstetic/wrapper/Container.cs: Replaced glade export/import 
+	  methods by Read/Write methods. Implemented code generation.
+	* libstetic/wrapper/Widget.cs: Select the widget when it gets
+	  the focus. Changed InternalChildId by InternalChildProperty,
+	  which has more useful information. Made Visible a wrapper
+	  property for all widgets. Replaced glade export/import 
+	  methods by Read/Write methods. Implemented code generation.
+	* libstetic/wrapper/Window.cs: Implemented code generation.
+	* libstetic/wrapper/ComboBox.cs: Removed unneeded override.
+	* libstetic/wrapper/objects.xml: Added some init-properties
+	  and wrapper attributes. 
+	* libstetic/wrapper/Table.cs: Fixed bug when setting column
+	  count.
+	* libstetic/wrapper/Dialog.cs: Track api changes. Don't throw
+	  the buttons changed event while reading from xml.
+	
+	* libstetic/wrapper/RadioMenuItem.cs:
+	* libstetic/wrapper/ImageMenuItem.cs:
+	* libstetic/wrapper/Notebook.cs:
+	* libstetic/wrapper/MenuItem.cs:
+	* libstetic/wrapper/ButtonBox.cs:
+	* libstetic/wrapper/Box.cs:
+	* libstetic/wrapper/Expander.cs:
+	* libstetic/wrapper/CheckButton.cs:
+	* libstetic/wrapper/ToolButton.cs:
+	* libstetic/wrapper/Frame.cs:
+	* libstetic/wrapper/RadioButton.cs:
+	* libstetic/wrapper/OptionMenu.cs:
+	* libstetic/editor/ResponseId.cs:
+	* libstetic/editor/Enumeration.cs:
+	* libstetic/editor/GroupPicker.cs:
+	* libstetic/editor/Flags.cs:
+	* libstetic/ItemDescriptor.cs:
+	* libstetic/wrapper/RadioToolButton.cs: Track api changes.
+	
+	* libstetic/SignalDescriptor.cs: Moved all code that depends
+	  on Type and Reflection to TypedSignalDescriptor. Added
+	  ParameterDescriptor, which replaces ParameterInfo.
+	* libstetic/CommandDescriptor.cs: Made several changes to avoid
+	  ClassDescriptor.WrapperType, which has been removed. Instead
+	  of getting the method to call from the wrapped type, it gets
+	  it from the type of the object when the command is invoked.
+	* libstetic/editor/Char.cs: Fix worng type check.
+	* libstetic/editor/Accelerator.cs: Removed glue P/Invokes.
+	* libstetic/Placeholder.cs: Looks loke GdkWindow.SetBackPixmap
+	  doesn't work very well. Draw filled rectangle instead.
+	* libstetic/HandleWindow.cs:  If the window is embedded in a
+	  preview box, use the gdk window of that box, which has more room
+	  for drawing the handles.
+	* libstetic/PropertyDescriptor.cs: Moved all code that depends
+	  on Type and Reflection to TypedPropertyDescriptor. 
+	  Added StringToValue and ValueToString methods for parsing and
+	  converting values to string.
+	
+	* libstetic/GladeUtils.cs: Track api changes. Removed dependencies
+	  to some ParamSpec properties that have been removed. The most
+	  complex one to remove is the type of the glade property. Now it
+	  is taken from the type of the corresponding class property.
+	* libstetic/EnumDescriptor.cs: Use the registry to lookup the type
+	  of the enum. The registry will look in all available libraries.
+	* libstetic/ClassDescriptor.cs: Moved all code that depends
+	  on Type and Reflection to TypedClassDescriptor.
+	* libstetic/Makefile.am: Updated.
+	* libstetic/ObjectWrapper.cs: Replaced glade export/import 
+	  methods by Read/Write methods with support for native format.
+	  Added ClassDescriptor property. There is no need to lookup
+	  for classes in the registry since it can be accessed most of
+	  the time from wrappers.
+	* libstetic/Registry.cs: Added support for external widget
+	  libraries.
+	
+	* ErrorWidget.cs:
+	* EmbedWindow.cs:
+	* Shadow.cs:
+	* TypedClassDescriptor.cs:
+	* TypedPropertyDescriptor.cs:
+	* TypedSignalDescriptor.cs:
+	* WidgetLibrary.cs:
+	* Metacity/*:
+	* wrapper/Entry.cs:
+	* WidgetUtils.cs:
+	* GeneratorContext.cs:
+	* PreviewBox.cs:
+	* AssemblyWidgetLibrary.cs:
+	* WidgetLibrary.cs: New files.
+	
+	* Makefile.am:
+	* configure.in: Removed glue directory from the build.
+	
+	* stetic/Stetic.cs: Added support for code generation from
+	the command line.
+	* stetic/stetic.in: Added debug option.
+	* stetic/Makefile.am: Updated.
+	* stetic/Glade.cs: Moved to libsteticui.
+	* stetic/UIManager.cs: Added Load and Save commands.
+
 2006-02-09  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* stetic.pc.in: Add a reference to the new libsteticui dll.

@@ -5,10 +5,17 @@ using System.Runtime.InteropServices;
 using System.Xml;
 
 namespace Stetic {
+
+	public enum FileFormat {
+		Native,
+		Glade
+	}
+
 	public abstract class ObjectWrapper : IDisposable {
 
 		protected IProject proj;
 		protected object wrapped;
+		protected ClassDescriptor classDescriptor;
 
 		public virtual void Wrap (object obj, bool initialized)
 		{
@@ -25,43 +32,50 @@ namespace Stetic {
 
 		public static ObjectWrapper Create (IProject proj, object wrapped)
 		{
-			return Create (proj, wrapped, true);
-		}
-
-		public static ObjectWrapper Create (IProject proj, object wrapped, bool initialized)
-		{
-			ClassDescriptor klass = Registry.LookupClass (wrapped.GetType ());
-			if (klass == null)
-				throw new ApplicationException ("No wrapper for " + wrapped.GetType ().FullName);
-			ObjectWrapper wrapper = Activator.CreateInstance (klass.WrapperType) as ObjectWrapper;
-			if (wrapper == null)
-				return null;
+			ClassDescriptor klass = Registry.LookupClassByName (wrapped.GetType ().FullName);
+			ObjectWrapper wrapper = klass.CreateWrapper ();
 			wrapper.proj = proj;
-
-			wrapper.Wrap (wrapped, initialized);
+			wrapper.classDescriptor = klass;
+			wrapper.Wrap (wrapped, true);
 			return wrapper;
 		}
 
-		public static ObjectWrapper GladeImport (IProject proj, XmlElement elem)
+		internal static void Bind (IProject proj, ClassDescriptor klass, ObjectWrapper wrapper, object wrapped, bool initialized)
+		{
+			wrapper.proj = proj;
+			wrapper.classDescriptor = klass;
+			wrapper.Wrap (wrapped, initialized);
+		}
+		
+		public virtual void Read (XmlElement elem, FileFormat format)
+		{
+			throw new System.NotSupportedException ();
+		}
+		
+		public virtual XmlElement Write (XmlDocument doc, FileFormat format)
+		{
+			throw new System.NotSupportedException ();
+		}
+
+		public static ObjectWrapper Read (IProject proj, XmlElement elem, FileFormat format)
 		{
 			string className = elem.GetAttribute ("class");
-			ClassDescriptor klass = Registry.LookupClass (className);
-			if (klass == null)
-				throw new GladeException ("No Stetic wrapper for type", className);
-
-			MethodInfo info = klass.WrapperType.GetMethod ("GladeImport", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			if (info == null)
-				throw new GladeException ("No Import method for type " + klass.WrapperType.FullName, className);
-
-			ObjectWrapper wrapper = Activator.CreateInstance (klass.WrapperType) as ObjectWrapper;
-			if (wrapper == null)
-				throw new GladeException ("Can't create wrapper for type " + klass.WrapperType.FullName, className);
-			wrapper.proj = proj;
-			try {
-				info.Invoke (wrapper, new object[] { elem });
-			} catch (TargetInvocationException tie) {
-				throw tie.InnerException;
+			ClassDescriptor klass;
+			if (format == FileFormat.Native)
+				klass = Registry.LookupClassByName (className);
+			else
+				klass = Registry.LookupClassByCName (className);
+			
+			if (klass == null) {
+				ErrorWidget we = new ErrorWidget (className);
+				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (proj, we);
+				wrap.Read (elem, format);
+				return wrap;
 			}
+
+			ObjectWrapper wrapper = klass.CreateWrapper ();
+			wrapper.proj = proj;
+			wrapper.Read (elem, format);
 			return wrapper;
 		}
 
@@ -85,6 +99,10 @@ namespace Stetic {
 			}
 		}
 
+		public ClassDescriptor ClassDescriptor {
+			get { return classDescriptor; }
+		}
+		
 		public delegate void WrapperNotificationDelegate (object obj, string propertyName);
 		public event WrapperNotificationDelegate Notify;
 

@@ -20,21 +20,21 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override Widget GladeImportChild (XmlElement child_elem)
+		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "tab") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (proj, child_elem["widget"]);
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
 				Gtk.Widget widget = (Gtk.Widget)wrapper.Wrapped;
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), widget);
 				tabs.Add (widget);
 				return (Widget)wrapper;
 			} else
-				return base.GladeImportChild (child_elem);
+				return base.ReadChild (child_elem, format);
 		}
 
-		public override XmlElement GladeExportChild (Widget wrapper, XmlDocument doc)
+		protected override XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)
 		{
-			XmlElement child_elem = base.GladeExportChild (wrapper, doc);
+			XmlElement child_elem = base.WriteChild (wrapper, doc, format);
 			if (tabs.Contains (wrapper.Wrapped))
 				GladeUtils.SetChildProperty (child_elem, "type", "tab");
 			return child_elem;
@@ -74,7 +74,7 @@ namespace Stetic.Wrapper {
 
 		int InsertPage (int position)
 		{
-			Gtk.Label label = (Gtk.Label)Registry.NewInstance (typeof (Gtk.Label), proj);
+			Gtk.Label label = (Gtk.Label)Registry.NewInstance ("Gtk.Label", proj);
 			label.LabelProp = "page" + (notebook.NPages + 1).ToString ();
 			tabs.Insert (position, label);
 

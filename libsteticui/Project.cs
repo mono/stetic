@@ -1,15 +1,21 @@
 using Gtk;
 using System;
+using System.Xml;
 using System.Collections;
+using System.CodeDom;
 
 namespace Stetic {
 
-	public class Project : IProject {
+	public class Project : IProject, IDisposable {
 		Hashtable nodes;
 		NodeStore store;
 		bool modified;
 		internal bool Syncing;
 		Gtk.Widget selection;
+		string id;
+		string fileName;
+		XmlDocument tempDoc;
+		bool loading;
 		
 		public event Wrapper.WidgetNameChangedHandler WidgetNameChanged;
 		public event Wrapper.WidgetEventHandler WidgetAdded;
@@ -20,13 +26,127 @@ namespace Stetic {
 		public event Wrapper.SignalChangedEventHandler SignalChanged;
 		
 		public event SelectedHandler Selected;
-
 		public event EventHandler ModifiedChanged;
+		
+		public event IProjectDelegate GladeImportComplete;
+		
+		// Fired when the project has been reloaded, due for example to
+		// a change in the registry
+		public event EventHandler ProjectReloaded;
 
 		public Project ()
 		{
 			nodes = new Hashtable ();
 			store = new NodeStore (typeof (ProjectNode));
+
+			Registry.RegistryChanging += OnRegistryChanging;
+			Registry.RegistryChanged += OnRegistryChanged;
+		}
+		
+		public void Dispose ()
+		{
+			Registry.RegistryChanging -= OnRegistryChanging;
+			Registry.RegistryChanged -= OnRegistryChanged;
+			foreach (Gtk.Widget w in Toplevels)
+				w.Destroy ();
+		}
+		
+		public string FileName {
+			get { return fileName; }
+		}
+		
+		public void Load (string fileName)
+		{
+			this.fileName = fileName;
+			
+			Id = System.IO.Path.GetFileName (fileName);
+			
+			XmlDocument doc = new XmlDocument ();
+			doc.PreserveWhitespace = true;
+			doc.Load (fileName);
+			Read (doc);
+		}
+		
+		public void Read (XmlDocument doc)
+		{
+			loading = true;
+			
+			try {
+				// Clean the existing tree
+				foreach (Gtk.Widget w in Toplevels)
+					w.Destroy ();
+
+				selection = null;
+				store.Clear ();
+				nodes.Clear ();
+				
+				XmlNode node = doc.SelectSingleNode ("/stetic-interface");
+				if (node == null)
+					throw new ApplicationException ("Not a Stetic file according to node name");
+
+				foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
+					Wrapper.Container wrapper = Stetic.ObjectWrapper.Read (this, toplevel, FileFormat.Native) as Wrapper.Container;
+					if (wrapper != null)
+						AddWidget ((Gtk.Widget)wrapper.Wrapped);
+				}
+			} finally {
+				loading = false;
+			}
+		}
+		
+		public void Save (string fileName)
+		{
+			this.fileName = fileName;
+			XmlDocument doc = Write ();
+			
+			XmlTextWriter writer = new XmlTextWriter (fileName, System.Text.Encoding.UTF8);
+			writer.Formatting = Formatting.Indented;
+			doc.Save (writer);
+			writer.Close ();
+		}
+		
+		public XmlDocument Write ()
+		{
+			XmlDocument doc = new XmlDocument ();
+			doc.PreserveWhitespace = true;
+
+			XmlElement toplevel = doc.CreateElement ("stetic-interface");
+			doc.AppendChild (toplevel);
+
+			foreach (Widget w in Toplevels) {
+				Stetic.Wrapper.Container wrapper = Stetic.Wrapper.Container.Lookup (w);
+				if (wrapper == null)
+					continue;
+
+				XmlElement elem = wrapper.Write (doc, FileFormat.Native);
+				if (elem != null)
+					toplevel.AppendChild (elem);
+			}
+			return doc;
+		}
+		
+		void OnRegistryChanging (object o, EventArgs args)
+		{
+			// Store a copy of the current tree. The tree will
+			// be recreated once the registry change is completed.
+			
+			tempDoc = Write ();
+			Selection = null;
+		}
+		
+		void OnRegistryChanged (object o, EventArgs args)
+		{
+			if (tempDoc != null) {
+				Read (tempDoc);
+				tempDoc = null;
+				if (ProjectReloaded != null)
+					ProjectReloaded (this, EventArgs.Empty);
+			}
+		}
+
+		public string Id {
+			get { return id; }
+			set { id = value; }
 		}
 		
 		public bool Modified {
@@ -68,14 +188,14 @@ namespace Stetic {
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (widget);
 			if (ww == null)
 				return;
-
+				
 			ww.WidgetChanged += OnWidgetChanged;
 			ww.NameChanged += OnWidgetNameChanged;
 			ww.SignalAdded += OnSignalAdded;
 			ww.SignalRemoved += OnSignalRemoved;
 			ww.SignalChanged += OnSignalChanged;
 
-			ProjectNode node = new ProjectNode (widget);
+			ProjectNode node = new ProjectNode (ww);
 			nodes[widget] = node;
 			if (parent == null) {
 				if (position == -1)
@@ -92,7 +212,8 @@ namespace Stetic {
 
 			parent = node;
 
-			OnWidgetAdded (new Stetic.Wrapper.WidgetEventArgs (ww));
+			if (!loading)
+				OnWidgetAdded (new Stetic.Wrapper.WidgetEventArgs (ww));
 			
 			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (widget);
 			if (container != null) {
@@ -110,14 +231,16 @@ namespace Stetic {
 			ww.SignalAdded -= OnSignalAdded;
 			ww.SignalRemoved -= OnSignalRemoved;
 			ww.SignalChanged -= OnSignalChanged;
+			((Gtk.Widget)ww.Wrapped).Destroyed -= WidgetDestroyed;
 			
-			OnWidgetRemoved (new Stetic.Wrapper.WidgetEventArgs (ww));
+			if (!loading)
+				OnWidgetRemoved (new Stetic.Wrapper.WidgetEventArgs (ww));
 			
 			nodes.Remove (node.Widget);
 			for (int i = 0; i < node.ChildCount; i++)
 				UnhashNodeRecursive (node[i] as ProjectNode);
 		}
-
+		
 		void RemoveNode (ProjectNode node)
 		{
 			UnhashNodeRecursive (node);
@@ -228,21 +351,23 @@ namespace Stetic {
 			Modified = true;
 		}
 
-		public IEnumerable Toplevels {
+		public Gtk.Widget[] Toplevels {
 			get {
 				ArrayList list = new ArrayList ();
 				foreach (Widget w in nodes.Keys) {
-					if (w is Gtk.Window)
+					Wrapper.Widget wrapper = Wrapper.Widget.Lookup (w);
+					if (wrapper != null && wrapper.IsTopLevel)
 						list.Add (w);
 				}
-				return list;
+				return (Gtk.Widget[]) list.ToArray (typeof(Gtk.Widget));
 			}
 		}
 
-		public void DeleteWindow (Widget window)
+		public void RemoveWidget (Container widget)
 		{
-			store.RemoveNode (nodes[window] as ProjectNode);
-			nodes.Remove (window);
+			ProjectNode node = nodes[widget] as ProjectNode;
+			store.RemoveNode (node);
+			UnhashNodeRecursive (node);
 		}
 
 		public NodeStore Store {
@@ -293,7 +418,7 @@ namespace Stetic {
 				return tooltips;
 			}
 		}
-
+		 
 		public void PopupContextMenu (Stetic.Wrapper.Widget wrapper)
 		{
 			Gtk.Menu m = new ContextMenu (wrapper);
@@ -314,16 +439,15 @@ namespace Stetic {
 			}
 			return null;
 		}
-
-		public event IProjectDelegate GladeImportComplete;
-
+		
 		public void BeginGladeImport ()
 		{
-			;
+			loading = true;
 		}
 
 		public void EndGladeImport ()
 		{
+			loading = false;
 			if (GladeImportComplete != null)
 				GladeImportComplete ();
 		}
@@ -352,10 +476,10 @@ namespace Stetic {
 		Widget widget;
 		ClassDescriptor klass;
 
-		public ProjectNode (Gtk.Widget widget)
+		public ProjectNode (Stetic.Wrapper.Widget wrapper)
 		{
-			this.widget = widget;
-			klass = Registry.LookupClass (widget.GetType ());
+			this.widget = (Widget) wrapper.Wrapped;
+			klass = wrapper.ClassDescriptor;
 		}
 
 		public Widget Widget {

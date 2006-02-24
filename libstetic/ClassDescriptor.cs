@@ -5,58 +5,37 @@ using System.Runtime.InteropServices;
 using System.Xml;
 
 namespace Stetic {
-	public class ClassDescriptor {
 
-		Type wrapped, wrapper;
-		GLib.GType gtype;
+	
+	public abstract class ClassDescriptor
+	{
+		protected string label, category, cname;
+		protected bool deprecated, hexpandable, vexpandable, allowChildren = true;
+		
+		protected ItemGroupCollection groups = new ItemGroupCollection ();
+		protected ItemGroupCollection signals = new ItemGroupCollection ();
 
-		MethodInfo ctorMethodInfo;
-		ConstructorInfo cinfo;
-		bool useGTypeCtor;
+		protected int importantGroups;
+		protected ItemGroup contextMenu;
+		protected ItemGroup internalChildren;
+		
+		PropertyDescriptor[] initializationProperties;
 
-		string label, category, cname;
-		Gdk.Pixbuf icon;
-		bool deprecated, hexpandable, vexpandable;
-
-		ItemGroupCollection groups = new ItemGroupCollection ();
-		ItemGroupCollection signals = new ItemGroupCollection ();
-
-		int importantGroups;
-		ItemGroup contextMenu;
-		ItemGroup internalChildren;
-
-		public ClassDescriptor (Assembly assembly, XmlElement elem)
+		protected void Load (XmlElement elem)
 		{
-			wrapped = Type.GetType (elem.GetAttribute ("type"), true);
-			if (elem.HasAttribute ("wrapper"))
-			    wrapper = Type.GetType (elem.GetAttribute ("wrapper"), true);
-			else {
-				for (Type type = wrapped.BaseType; type != null; type = type.BaseType) {
-					ClassDescriptor parent = Registry.LookupClass (type);
-					if (parent != null) {
-						wrapper = parent.WrapperType;
-						break;
-					}
-				}
-				if (wrapper == null)
-					throw new ArgumentException ("No wrapper type for class {0}", wrapped.FullName);
-			}
-
-			gtype = (GLib.GType)wrapped;
 			if (elem.HasAttribute ("cname"))
 				cname = elem.GetAttribute ("cname");
-			else
-				cname = gtype.ToString ();
+			else if (cname == null)
+				cname = elem.GetAttribute ("type");
 
 			label = elem.GetAttribute ("label");
+			if (label == "")
+				label = WrappedTypeName;
+			
+			if (elem.HasAttribute ("allow-children"))
+				allowChildren = elem.GetAttribute ("allow-children") == "yes";
+				
 			category = elem.GetAttribute ("palette-category");
-
-			string iconname = elem.GetAttribute ("icon");
-			try {
-				icon = new Gdk.Pixbuf (assembly, iconname);
-			} catch {
-				icon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
-			}
 
 			if (elem.HasAttribute ("deprecated"))
 				deprecated = true;
@@ -64,17 +43,6 @@ namespace Stetic {
 				hexpandable = true;
 			if (elem.HasAttribute ("vexpandable"))
 				vexpandable = true;
-
-			ctorMethodInfo = wrapper.GetMethod ("CreateInstance",
-							    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
-							    null, new Type[0], null);
-			if (ctorMethodInfo == null) {
-				cinfo = wrapped.GetConstructor (new Type[0]);
-				if (cinfo == null) {
-					useGTypeCtor = true;
-					cinfo = wrapped.GetConstructor (new Type[] { typeof (IntPtr) });
-				}
-			}
 
 			XmlElement groupsElem = elem["itemgroups"];
 			if (groupsElem != null) {
@@ -124,24 +92,29 @@ namespace Stetic {
 				internalChildren = new ItemGroup (ichildElem, this);
 			else
 				internalChildren = ItemGroup.Empty;
-		}
 
-		public Type WrappedType {
+			string initProps = elem.GetAttribute ("init-properties");
+			if (initProps.Length > 0) {
+				string[] props = initProps.Split (' ');
+				ArrayList list = new ArrayList ();
+				foreach (string prop in props) {
+					PropertyDescriptor idesc = this [prop] as PropertyDescriptor;
+					if (idesc == null)
+						throw new InvalidOperationException ("Initialization property not found: " + prop);
+					list.Add (idesc);
+				}
+				initializationProperties = (PropertyDescriptor[]) list.ToArray (typeof(PropertyDescriptor));
+			}
+		}
+		
+		public virtual string Name {
 			get {
-				return wrapped;
+				return WrappedTypeName;
 			}
 		}
 
-		public Type WrapperType {
-			get {
-				return wrapper;
-			}
-		}
-
-		public GLib.GType GType {
-			get {
-				return gtype;
-			}
+		public abstract string WrappedTypeName {
+			get;
 		}
 
 		public string CName {
@@ -174,10 +147,8 @@ namespace Stetic {
 			}
 		}
 
-		public Gdk.Pixbuf Icon {
-			get {
-				return icon;
-			}
+		public abstract Gdk.Pixbuf Icon {
+			get;
 		}
 
 		public string Category {
@@ -185,37 +156,22 @@ namespace Stetic {
 				return category;
 			}
 		}
-
-		[DllImport("libgobject-2.0-0.dll")]
-		static extern IntPtr g_object_new (IntPtr gtype, IntPtr dummy);
-
-		int counter;
-
+		
+		public PropertyDescriptor[] InitializationProperties {
+			get { return initializationProperties; }
+		}
+		
 		public object NewInstance (IProject proj)
 		{
-			object inst;
-
-			if (ctorMethodInfo != null)
-				inst = ctorMethodInfo.Invoke (null, new object[0]);
-			else if (!useGTypeCtor)
-				inst = cinfo.Invoke (null, new object[0]);
-			else {
-				IntPtr raw = g_object_new (gtype.Val, IntPtr.Zero);
-				inst = cinfo.Invoke (new object[] { raw });
-			}
-
-			string name = wrapped.Name.ToLower () + (++counter).ToString ();
-			foreach (ItemGroup group in groups) {
-				foreach (ItemDescriptor item in group) {
-					PropertyDescriptor prop = item as PropertyDescriptor;
-					if (prop != null && prop.InitWithName)
-						prop.SetValue (inst, name);
-				}
-			}
-
-			ObjectWrapper.Create (proj, inst, false);
-			return inst;
+			object ob = CreateInstance (proj);
+			ObjectWrapper ow = CreateWrapper ();
+			ObjectWrapper.Bind (proj, this, ow, ob, false);
+			return ob;
 		}
+		
+		public abstract object CreateInstance (IProject proj);
+		
+		public abstract ObjectWrapper CreateWrapper ();
 
 		public ItemDescriptor this[string name] {
 			get {
@@ -259,6 +215,18 @@ namespace Stetic {
 			get {
 				return internalChildren;
 			}
+		}
+		
+		public virtual bool AllowChildren {
+			get { return allowChildren; }
+		}
+		
+		internal protected virtual ItemDescriptor CreateItemDescriptor (XmlElement elem, ItemGroup group)
+		{
+			if (elem.Name == "command")
+				return new CommandDescriptor (elem, group, this);
+			else
+				throw new ApplicationException ("Bad item name " + elem.Name + " in " + WrappedTypeName);
 		}
 	}
 }

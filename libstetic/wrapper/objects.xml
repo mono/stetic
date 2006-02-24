@@ -312,7 +312,7 @@
     </object>
 
     <object type="Gtk.Arrow,gtk-sharp"
-	    label="Arrow" icon="arrow.png" palette-category="widget">
+	    label="Arrow" icon="arrow.png" palette-category="widget" init-properties="ArrowType ShadowType">
 	<itemgroups>
 	    <itemgroup label="Arrow Properties">
 		<property name="ArrowType" />
@@ -722,7 +722,7 @@
 
     <object type="Gtk.Entry,gtk-sharp"
 	    label="Entry" icon="entry.png" palette-category="widget"
-	    hexpandable="true">
+	    hexpandable="true" wrapper="Stetic.Wrapper.Entry">
 	<itemgroups>
 	    <itemgroup label="Entry Properties">
 		<property name="Text" translatable="true" />
@@ -1177,7 +1177,7 @@
 
     <object type="Gtk.RadioButton,gtk-sharp" wrapper="Stetic.Wrapper.RadioButton"
 	    label="Radio Button" icon="radiobutton.png" palette-category="widget"
-	    hexpandable="true">
+	    hexpandable="true" init-properties="Label">
 	<itemgroups>
 	    <itemgroup label="Radio Button Properties">
 		<property ref="Gtk.CheckButton.Label" />
@@ -1342,7 +1342,7 @@
     </object>
 
     <object type="Gtk.SpinButton,gtk-sharp" wrapper="Stetic.Wrapper.SpinButton"
-	    label="Spin Button" icon="spinbutton.png" palette-category="widget">
+	    label="Spin Button" icon="spinbutton.png" palette-category="widget" init-properties="Lower Upper StepIncrement">
 	<itemgroups>
 	    <itemgroup label="Range Properties">
 		<property name="Adjustment.Lower" />
@@ -1394,7 +1394,7 @@
     </object>
 
     <object type="Gtk.Table,gtk-sharp" wrapper="Stetic.Wrapper.Table"
-	    label="Table" icon="table.png" palette-category="container">
+	    label="Table" icon="table.png" palette-category="container" init-properties="NRows NColumns Homogeneous">
 	<itemgroups>
 	    <itemgroup label="Table Properties">
 		<property name="NRows" />
@@ -1877,7 +1877,7 @@
 
     <object type="Gtk.FileChooserWidget,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
 	    label="File Chooser Widget" icon="fileselection.png" palette-category="widget"
-	    hexpandable="true" vexpandable="true">
+	    hexpandable="true" vexpandable="true" init-properties="Action">
 	<itemgroups>
 	    <itemgroup label="File Chooser Widget Properties">
 		<property name="Action" />
@@ -2001,6 +2001,9 @@
 	    <property name="CancelButton" glade-name="cancel_button" />
 	    <property name="ApplyButton" glade-name="help_button" />
 	</internal-children>
+    </object>
+
+    <object type="Stetic.ErrorWidget" wrapper="Stetic.ErrorWidgetWrapper">
     </object>
 
     <enum type="Gdk.ExtensionMode,gdk-sharp">

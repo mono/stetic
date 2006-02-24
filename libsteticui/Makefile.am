@@ -1,8 +1,10 @@
-pkglib_DATA = libsteticui.dll libsteticui.dll.config
+pkglib_DATA = libsteticui.dll libsteticui.dll.config libsteticui.dll.mdb
 
 libsteticui_dll_sources =			\
 	Clipboard.cs			\
+	CodeGenerator.cs			\
 	ContextMenu.cs			\
+	Glade.cs			\
 	Grid.cs				\
 	Palette.cs			\
 	Project.cs			\

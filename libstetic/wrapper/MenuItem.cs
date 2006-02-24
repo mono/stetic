@@ -16,9 +16,9 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 		}
 
-		public override Widget GladeImportChild (XmlElement child_elem)
+		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (proj, child_elem["widget"]);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
 			menuitem.Submenu = (Gtk.Menu)wrapper.Wrapped;
 			return (Widget)wrapper;
 		}

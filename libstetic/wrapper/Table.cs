@@ -43,15 +43,15 @@ namespace Stetic.Wrapper {
 			// First fill in the placeholders in the grid. If we find any
 			// placeholders covering more than one grid square, remove them.
 			// (New ones will be created below.)
-                        foreach (Gtk.Widget child in children) {
+			foreach (Gtk.Widget child in children) {
 				if (!(child is Placeholder))
 					continue;
 
-                                tc = table[child] as Gtk.Table.TableChild;
-                                left = tc.LeftAttach;
-                                right = tc.RightAttach;
-                                top = tc.TopAttach;
-                                bottom = tc.BottomAttach;
+				tc = table[child] as Gtk.Table.TableChild;
+				left = tc.LeftAttach;
+				right = tc.RightAttach;
+				top = tc.TopAttach;
+				bottom = tc.BottomAttach;
 
 				if (right == left + 1 && bottom == top + 1)
 					grid[top,left] = child;
@@ -64,25 +64,25 @@ namespace Stetic.Wrapper {
 			// placeholders, neither will be knocked out, and the layout
 			// will probably end up wrong as well. But this situation
 			// happens at least temporarily during glade import.)
-                        foreach (Gtk.Widget child in children) {
+			foreach (Gtk.Widget child in children) {
 				if (child is Placeholder)
 					continue;
 
-                                tc = table[child] as Gtk.Table.TableChild;
-                                left = tc.LeftAttach;
-                                right = tc.RightAttach;
-                                top = tc.TopAttach;
-                                bottom = tc.BottomAttach;
-
-                                for (row = top; row < bottom; row++) {
-                                        for (col = left; col < right; col++) {
+				tc = table[child] as Gtk.Table.TableChild;
+				left = tc.LeftAttach;
+				right = tc.RightAttach;
+				top = tc.TopAttach;
+				bottom = tc.BottomAttach;
+				
+				for (row = top; row < bottom; row++) {
+					for (col = left; col < right; col++) {
 						w = grid[row,col];
 						if (w is Placeholder)
 							table.Remove (grid[row,col]);
-                                                grid[row,col] = child;
-                                        }
-                                }
-                        }
+						grid[row,col] = child;
+					}
+				}
+			}
 
 			// Scan each row; if there are any empty cells, fill them in
 			// with placeholders. If a row contains only placeholders, then
@@ -151,6 +151,12 @@ namespace Stetic.Wrapper {
 			if (addedPlaceholders)
 				EmitContentsChanged ();
 		}
+		
+		public override Placeholder AddPlaceholder ()
+		{
+			// Placeholders are added by Sync ()
+			return null;
+		}
 
 		public uint NRows {
 			get {
@@ -172,7 +178,7 @@ namespace Stetic.Wrapper {
 			set {
 				Freeze ();
 				while (value < table.NColumns)
-					DeleteColumn (table.NColumns);
+					DeleteColumn (table.NColumns - 1);
 				table.NColumns = value;
 				Thaw ();
 			}
@@ -311,7 +317,7 @@ namespace Stetic.Wrapper {
 
 			base.ChildContentsChanged (child);
 		}
-
+		
 		public class TableChild : Container.ContainerChild {
 
 			Gtk.Table.TableChild tc {

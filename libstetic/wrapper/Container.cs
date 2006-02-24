@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -14,15 +15,15 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 
-			ClassDescriptor klass = Registry.LookupClass (obj.GetType ());
+			ClassDescriptor klass = this.ClassDescriptor;
 			foreach (PropertyDescriptor prop in klass.InternalChildren) {
 				Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
 				if (child == null)
 					continue;
 				Widget wrapper = ObjectWrapper.Create (proj, child) as Stetic.Wrapper.Widget;
-				wrapper.InternalChildId = prop.GladeName;
+				wrapper.InternalChildProperty = prop;
 				if (child.Name == ((GLib.GType)child.GetType ()).ToString ())
-					child.Name = container.Name + "_" + prop.GladeName;
+					child.Name = container.Name + "_" + prop.Name;
 			}
 
 			if (!initialized && container.Children.Length == 0 && AllowPlaceholders)
@@ -36,7 +37,7 @@ namespace Stetic.Wrapper {
 			else
 				ContainerOrientation = Gtk.Orientation.Vertical;
 		}
-
+		
 		Gtk.Container container {
 			get {
 				return (Gtk.Container)Wrapped;
@@ -85,18 +86,22 @@ namespace Stetic.Wrapper {
 			freeze = 0;
 		}
 
-		public override void GladeImport (XmlElement elem)
+		public override void Read (XmlElement elem, FileFormat format)
 		{
-			base.GladeImport (elem);
-
+			base.Read (elem, format);
+			ReadChildren (elem, format);
+		}
+		
+		protected virtual void ReadChildren (XmlElement elem, FileFormat format)
+		{
 			foreach (XmlElement child_elem in elem.SelectNodes ("./child")) {
 				try {
 					if (child_elem.HasAttribute ("internal-child"))
-						GladeSetInternalChild (child_elem);
+						ReadInternalChild (child_elem, format);
 					else if (child_elem["widget"] == null)
 						AddPlaceholder ();
 					else
-						GladeImportChild (child_elem);
+						ReadChild (child_elem, format);
 				} catch (GladeException ge) {
 					Console.Error.WriteLine (ge.Message);
 				}
@@ -112,54 +117,90 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
-		public virtual Widget GladeImportChild (XmlElement child_elem)
+		protected virtual Widget ReadChild (XmlElement child_elem, FileFormat format)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (proj, child_elem["widget"]);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
 
 			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
 			AutoSize[child] = false;
 			container.Add (child);
 
-			GladeUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
+			if (format == FileFormat.Glade)
+				GladeUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
+			else
+				WidgetUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
 			return (Widget)wrapper;
 		}
 
-		public virtual Widget GladeSetInternalChild (XmlElement child_elem)
+		protected virtual Widget ReadInternalChild (XmlElement child_elem, FileFormat format)
 		{
-			ClassDescriptor klass = Registry.LookupClass (Wrapped.GetType ());
+			TypedClassDescriptor klass = base.ClassDescriptor as TypedClassDescriptor;
 			string childId = child_elem.GetAttribute ("internal-child");
-
+			
 			foreach (PropertyDescriptor prop in klass.InternalChildren) {
-				if (prop.GladeName != childId)
+				if (format == FileFormat.Glade && ((TypedPropertyDescriptor)prop).GladeName != childId)
 					continue;
-
+				else if (format == FileFormat.Native && prop.Name != childId)
+					continue;
+				
 				Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
 				Widget wrapper = Widget.Lookup (child);
 				if (wrapper != null) {
-					wrapper.GladeImport (child_elem["widget"]);
-					GladeUtils.SetPacking (ChildWrapper (wrapper), child_elem);
+					wrapper.Read (child_elem["widget"], format);
+					if (format == FileFormat.Glade)
+						GladeUtils.SetPacking (ChildWrapper (wrapper), child_elem);
+					else
+						WidgetUtils.SetPacking (ChildWrapper (wrapper), child_elem);
 					return (Widget)wrapper;
 				}
 			}
-
+			
 			throw new GladeException ("Unrecognized internal child name", Wrapped.GetType ().FullName, false, "internal-child", childId);
 		}
 
-		public override XmlElement GladeExport (XmlDocument doc)
+		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
-			XmlElement elem = base.GladeExport (doc);
+			XmlElement elem = base.Write (doc, format);
 			XmlElement child_elem;
-
-			foreach (Gtk.Widget child in GladeChildren) {
-				Widget wrapper = Widget.Lookup (child);
-				if (wrapper != null)
-					child_elem = GladeExportChild (wrapper, doc);
-				else {
-					child_elem = doc.CreateElement ("child");
-					child_elem.AppendChild (doc.CreateElement ("placeholder"));
+			
+			if (ClassDescriptor.AllowChildren || format == FileFormat.Glade) {
+				foreach (Gtk.Widget child in GladeChildren) {
+					Widget wrapper = Widget.Lookup (child);
+					
+					if (wrapper != null) {
+						// Iternal children are written later
+						if (format == FileFormat.Native && wrapper.InternalChildProperty != null)
+							continue;
+						child_elem = WriteChild (wrapper, doc, format);
+					} else {
+						child_elem = doc.CreateElement ("child");
+						child_elem.AppendChild (doc.CreateElement ("placeholder"));
+					}
+					elem.AppendChild (child_elem);
 				}
-				elem.AppendChild (child_elem);
+			}
+			
+			if (format == FileFormat.Native) {
+				foreach (PropertyDescriptor prop in this.ClassDescriptor.InternalChildren) {
+					Gtk.Widget child = prop.GetValue (Wrapped) as Gtk.Widget;
+					if (child == null)
+						continue;
+
+					child_elem = doc.CreateElement ("child");
+					Widget wrapper = Widget.Lookup (child);
+					if (wrapper == null) {
+						child_elem.AppendChild (doc.CreateElement ("placeholder"));
+						elem.AppendChild (child_elem);
+						continue;
+					}
+					
+					XmlElement widget_elem = wrapper.Write (doc, format);
+					child_elem.SetAttribute ("internal-child", prop.Name);
+					
+					child_elem.AppendChild (widget_elem);
+					elem.AppendChild (child_elem);
+				}
 			}
 
 			if (DesignWidth != 0 || DesignHeight != 0)
@@ -167,27 +208,136 @@ namespace Stetic.Wrapper {
 			return elem;
 		}
 
-		public virtual XmlElement GladeExportChild (Widget wrapper, XmlDocument doc)
+		protected virtual XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)
 		{
 			XmlElement child_elem = doc.CreateElement ("child");
-			XmlElement widget_elem = wrapper.GladeExport (doc);
+			XmlElement widget_elem = wrapper.Write (doc, format);
 			child_elem.AppendChild (widget_elem);
 
-			if (wrapper.InternalChildId != null)
-				child_elem.SetAttribute ("internal-child", wrapper.InternalChildId);
-			else {
-				ObjectWrapper childwrapper = ChildWrapper (wrapper);
-				if (childwrapper != null) {
-					XmlElement packing_elem = doc.CreateElement ("packing");
+			ObjectWrapper childwrapper = ChildWrapper (wrapper);
+			if (childwrapper != null) {
+				XmlElement packing_elem = doc.CreateElement ("packing");
+				
+				if (format == FileFormat.Glade)
 					GladeUtils.GetProps (childwrapper, packing_elem);
-					if (packing_elem.HasChildNodes)
-						child_elem.AppendChild (packing_elem);
-				}
+				else
+					WidgetUtils.GetProps (childwrapper, packing_elem);
+					
+				if (packing_elem.HasChildNodes)
+					child_elem.AppendChild (packing_elem);
 			}
 
 			return child_elem;
 		}
+		
+		public XmlElement WriteContainerChild (Widget wrapper, XmlDocument doc, FileFormat format)
+		{
+			return WriteChild (wrapper, doc, format);
+		}
+		
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		{
+			base.GenerateBuildCode (ctx, varName, statements);
+			
+			foreach (Gtk.Widget child in GladeChildren) {
+				Widget wrapper = Widget.Lookup (child);
+				
+				if (wrapper != null && wrapper.InternalChildProperty == null)
+					// Iternal children are written later
+					GenerateChildBuildCode (ctx, varName, wrapper, statements);
+			}
+			
+			foreach (TypedPropertyDescriptor prop in this.ClassDescriptor.InternalChildren) {
+				GenerateSetInternalChild (ctx, varName, prop, statements);
+			}
+		}
+		
+		protected virtual void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper, CodeStatementCollection statements)
+		{
+			ObjectWrapper childwrapper = ChildWrapper (wrapper);
+			if (childwrapper != null) {
+				statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
+				string varName = ctx.GenerateCreationCode (wrapper, statements);
+				CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
+					new CodeVariableReferenceExpression (parentVar),
+					"Add",
+					new CodeVariableReferenceExpression (varName)
+				);
+				statements.Add (invoke);
 
+				GenerateSetPacking (ctx, parentVar, varName, childwrapper, statements);
+			}
+		}
+		
+		void GenerateSetInternalChild (GeneratorContext ctx, string parentVar, TypedPropertyDescriptor prop, CodeStatementCollection statements)
+		{
+			Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
+			Widget cwrapper = Widget.Lookup (child);
+			if (cwrapper != null) {
+				statements.Add (new CodeCommentStatement ("Internal child " + Wrapped.Name + "." + prop.Name));
+				string childVar = ctx.NewId ();
+				CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (child.GetType(), childVar);
+				statements.Add (varDec);
+				varDec.InitExpression = new CodePropertyReferenceExpression (new CodeVariableReferenceExpression (parentVar), prop.Name);
+			
+				ctx.GenerateBuildCode (cwrapper, childVar, statements);
+//				GenerateSetPacking (ctx, parentVar, childVar, ChildWrapper (wrapper), statements);
+				return;
+			}
+		}
+		
+		void GenerateSetPacking (GeneratorContext ctx, string parentVar, string childVar, ObjectWrapper containerChildWrapper, CodeStatementCollection statements)
+		{
+			Gtk.Container.ContainerChild cc = containerChildWrapper.Wrapped as Gtk.Container.ContainerChild;
+			ClassDescriptor klass = containerChildWrapper.ClassDescriptor;
+			
+			// Generate a variable that holds the container child
+			
+			string contChildVar = ctx.NewId ();
+			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (cc.GetType(), contChildVar);
+			varDec.InitExpression = new CodeCastExpression ( 
+				cc.GetType (),
+				new CodeIndexerExpression (new CodeVariableReferenceExpression (parentVar), new CodeVariableReferenceExpression (childVar))
+			);
+			
+			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (contChildVar);
+			
+			// Set the container child properties
+						
+			CodeStatementCollection childStatements = new CodeStatementCollection ();
+			foreach (ItemGroup group in klass.ItemGroups) {
+				foreach (ItemDescriptor item in group) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop == null || prop.IsWrapperProperty)
+						continue;
+					GenerateChildPropertySet (ctx, childStatements, var, klass, prop, cc);
+				}
+			}
+			
+			if (childStatements.Count > 0) {
+				statements.Add (varDec);
+				statements.AddRange (childStatements);
+			}
+		}
+		
+		protected virtual void GenerateChildPropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, ClassDescriptor containerChildClass, PropertyDescriptor prop, object child)
+		{
+			if (containerChildClass.InitializationProperties != null && Array.IndexOf (containerChildClass.InitializationProperties, prop) != -1)
+				return;
+			
+			// Design time
+			if (prop.Name == "AutoSize")
+				return;
+				
+			object oval = prop.GetValue (child);
+			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))
+				return;
+				
+			CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (var, prop.Name);
+			CodeExpression val = ctx.GenerateValue (oval);
+			statements.Add (new CodeAssignStatement (cprop, val));
+		}
+		
 		public virtual Placeholder AddPlaceholder ()
 		{
 			Placeholder ph = CreatePlaceholder ();
@@ -381,7 +531,7 @@ namespace Stetic.Wrapper {
 				Select (null, false);
 				proj.Selection = null;
 			} else {
-				Select (wrapper.Wrapped, (wrapper.InternalChildId == null));
+				Select (wrapper.Wrapped, (wrapper.InternalChildProperty == null));
 				proj.Selection = wrapper.Wrapped;
 			}
 		}
@@ -403,12 +553,23 @@ namespace Stetic.Wrapper {
 			if (widget == selection)
 				return;
 
-			if (selection != null)
+			Gtk.Window win = GetParentWindow ();
+			
+			if (selection != null) {
 				selection.Destroyed -= SelectionDestroyed;
+				// Remove the focus from the window. In this way we ensure
+				// that the current selected widget will lose the focus,
+				// even if the new selection is not focusable.
+				if (win != null)
+					win.Focus = null;
+			}
 			if (handles != null)
 				handles.Dispose ();
-
+				
 			selection = widget;
+			if (win != null && widget != null && widget.CanFocus)
+				win.Focus = widget;
+				
 			if (selection != null)
 				selection.Destroyed += SelectionDestroyed;
 
@@ -416,11 +577,19 @@ namespace Stetic.Wrapper {
 			// to be. (Eg, if you select a widget in a hidden window, the window
 			// should map. If you select a widget on a non-current notebook
 			// page, the notebook should switch pages, etc.)
-			if (selection != null && selection.IsDrawable) {
+			if (selection != null && selection.IsDrawable && Visible) {
 				handles = new HandleWindow (selection, dragHandles);
 				handles.Drag += HandleWindowDrag;
 			} else 
 				handles = null;
+		}
+		
+		Gtk.Window GetParentWindow ()
+		{
+			Gtk.Container cc = Wrapped as Gtk.Container;
+			while (cc.Parent != null)
+				cc = cc.Parent as Gtk.Container;
+			return cc as Gtk.Window;
 		}
 
 		void SelectionDestroyed (object obj, EventArgs args)

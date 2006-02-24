@@ -21,7 +21,7 @@ namespace Stetic.Editor {
 			entry = combo.Child as Gtk.Entry;
 			entry.Changed += entry_Changed;
 
-			enm = Registry.LookupEnum (typeof (Gtk.ResponseType));
+			enm = Registry.LookupEnum ("Gtk.ResponseType");
 			values = new ArrayList ();
 			foreach (Enum value in enm.Values) {
 				if (enm[value].Label != "") {

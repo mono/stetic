@@ -9,6 +9,11 @@ namespace Stetic {
 		"<ui>" +
 		"    <menubar>" +
 		"	<menu action='FileMenu'>" +
+		"	    <menuitem action='Open' />" +
+		"	    <separator />" +
+		"	    <menuitem action='Save' />" +
+		"	    <menuitem action='SaveAs' />" +
+		"	    <separator />" +
 		"	    <menuitem action='ImportGlade' />" +
 		"	    <menuitem action='ExportGlade' />" +
 		"	    <separator />" +
@@ -34,8 +39,11 @@ namespace Stetic {
 		{
 			ActionEntry[] entries = new ActionEntry[] {
 				new ActionEntry ("FileMenu", null, "_File", null, null, null),
-				new ActionEntry ("ImportGlade", Stock.Open, "_Import from Glade File...", null, "Import UI from a Glade file", ImportGlade),
-				new ActionEntry ("ExportGlade", Stock.SaveAs, "_Export to Glade File...", null, "Export UI to a Glade file", ExportGlade),
+				new ActionEntry ("Open", Stock.Open, null, "<control>O", "Open a file", OpenFile),
+				new ActionEntry ("Save", Stock.Save, null, "<control>S", "Save", SaveFile),
+				new ActionEntry ("SaveAs", Stock.SaveAs, null, "<control><shift>S", "Save As", SaveFileAs),
+				new ActionEntry ("ImportGlade", null, "_Import from Glade File...", null, "Import UI from a Glade file", ImportGlade),
+				new ActionEntry ("ExportGlade", null, "_Export to Glade File...", null, "Export UI to a Glade file", ExportGlade),
 				new ActionEntry ("Quit", Stock.Quit, null, "<control>Q", "Quit", Quit),
 
 				new ActionEntry ("EditMenu", null, "_Edit", null, null, null),
@@ -93,6 +101,46 @@ namespace Stetic {
 			}
 		}
 
+		void OpenFile (object obj, EventArgs e)
+		{
+			FileChooserDialog dialog =
+				new FileChooserDialog ("Open Stetic File", null, FileChooserAction.Open,
+						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
+						       Gtk.Stock.Open, Gtk.ResponseType.Ok);
+			int response = dialog.Run ();
+			if (response == (int)Gtk.ResponseType.Ok)
+				project.Load (dialog.Filename);
+			dialog.Hide ();
+		}
+		
+		void SaveFile (object obj, EventArgs e)
+		{
+			if (project.FileName == null)
+				SaveFileAs (obj, e);
+			else
+				project.Save (project.FileName);
+		}
+		
+		void SaveFileAs (object obj, EventArgs e)
+		{
+			FileChooserDialog dialog =
+				new FileChooserDialog ("Save Stetic File As", null, FileChooserAction.Save,
+						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
+						       Gtk.Stock.Save, Gtk.ResponseType.Ok);
+
+			if (project.FileName != null)
+				dialog.CurrentName = project.FileName;
+
+			int response = dialog.Run ();
+			if (response == (int)Gtk.ResponseType.Ok) {
+				string name = dialog.Filename;
+				if (System.IO.Path.GetExtension (name) == "")
+					name = name + ".stetic";
+				project.Save (name);
+			}
+			dialog.Hide ();
+		}
+		
 		void ImportGlade (object obj, EventArgs e)
 		{
 			FileChooserDialog dialog =
@@ -250,7 +298,7 @@ namespace Stetic {
 		{
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (selection);
 			if (wrapper != null)
-				UpdateEdit (wrapper.InternalChildId == null, true, false);
+				UpdateEdit (wrapper.InternalChildProperty == null, true, false);
 			else if (selection is Placeholder)
 				UpdateEdit (false, false, true);
 			else

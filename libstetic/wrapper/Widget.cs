@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Xml;
+using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
@@ -8,6 +9,14 @@ namespace Stetic.Wrapper {
 	
 		string oldName;
 		SignalCollection signals;
+		bool hexpandable, vexpandable;
+
+		bool window_visible = true;
+		bool hasDefault;
+		Gdk.EventMask events;
+		bool set_events;
+		
+		public bool Unselectable;
 		
 		public Widget ()
 		{
@@ -34,11 +43,19 @@ namespace Stetic.Wrapper {
 				Wrapped.ShowAll ();
 
 			Wrapped.PopupMenu += PopupMenu;
+			Wrapped.FocusInEvent += OnFocusIn;
 			InterceptClicks (Wrapped);
 
-			ClassDescriptor klass = Registry.LookupClass (obj.GetType ());
-			hexpandable = klass.HExpandable;
-			vexpandable = klass.VExpandable;
+			hexpandable = this.ClassDescriptor.HExpandable;
+			vexpandable = this.ClassDescriptor.VExpandable;
+		}
+		
+		void OnFocusIn (object s, Gtk.FocusInEventArgs a)
+		{
+			if (!Unselectable)
+				Select ();
+			else if (ParentWrapper != null)
+				ParentWrapper.Select ();
 		}
 
 		void InterceptClicks (Gtk.Widget widget)
@@ -74,7 +91,7 @@ namespace Stetic.Wrapper {
 		public SignalCollection Signals {
 			get { return signals; }
 		}
-
+		
 		[GLib.ConnectBefore]
 		void WidgetEvent (object obj, Gtk.WidgetEventArgs args)
 		{
@@ -140,7 +157,7 @@ namespace Stetic.Wrapper {
 			proj.PopupContextMenu (this);
 		}
 
-		public void Select ()
+		public virtual void Select ()
 		{
 			if (ParentWrapper != null)
 				ParentWrapper.Select (this);
@@ -156,16 +173,73 @@ namespace Stetic.Wrapper {
 				Wrapped.Destroy ();
 		}
 
-		public virtual void GladeImport (XmlElement elem)
+		public override void Read (XmlElement elem, FileFormat format)
 		{
-			GladeUtils.ImportWidget (this, elem);
+			if (format == FileFormat.Native)
+				WidgetUtils.Read (this, elem);
+			else if (format == FileFormat.Glade)
+				GladeUtils.ImportWidget (this, elem);
 		}
 
-		public virtual XmlElement GladeExport (XmlDocument doc)
+		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
-			XmlElement elem = GladeUtils.ExportWidget (this, doc);
-			GladeUtils.ExtractProperty (elem, "name", "");
-			return elem;
+			if (format == FileFormat.Native) {
+				return WidgetUtils.Write (this, doc);
+			}
+			else {
+				XmlElement elem = GladeUtils.ExportWidget (this, doc);
+				GladeUtils.ExtractProperty (elem, "name", "");
+				return elem;
+			}
+		}
+		
+		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		{
+			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
+			TypedClassDescriptor klass = base.ClassDescriptor as TypedClassDescriptor;
+			if (klass == null)
+				throw new InvalidOperationException ("Can't generate code for untyped class descriptors");
+			
+			foreach (ItemGroup group in klass.ItemGroups) {
+				foreach (ItemDescriptor item in group) {
+					TypedPropertyDescriptor prop = item as TypedPropertyDescriptor;
+					if (prop == null || prop.IsWrapperProperty)
+						continue;
+					GeneratePropertySet (ctx, statements, var, prop);
+				}
+			}
+		}
+		
+		internal protected virtual CodeExpression GenerateWidgetCreation (GeneratorContext ctx, CodeStatementCollection statements)
+		{
+			if (ClassDescriptor.InitializationProperties != null) {
+				CodeExpression[] paramters = new CodeExpression [ClassDescriptor.InitializationProperties.Length];
+				for (int n=0; n < paramters.Length; n++)
+					paramters [n] = ctx.GenerateValue (ClassDescriptor.InitializationProperties [n].GetValue (Wrapped));
+				return new CodeObjectCreateExpression (Wrapped.GetType (), paramters);
+			} else
+				return new CodeObjectCreateExpression (Wrapped.GetType ());
+		}
+		
+		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, TypedPropertyDescriptor prop)
+		{
+			if (ClassDescriptor.InitializationProperties != null && Array.IndexOf (ClassDescriptor.InitializationProperties, prop) != -1)
+				return;
+			
+			object oval = prop.GetValue (Wrapped);
+			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))
+				return;
+
+			CodeExpression val = ctx.GenerateValue (oval);
+			CodeExpression cprop;
+			
+			if (prop.GladeProperty == prop) {
+				cprop = new CodePropertyReferenceExpression (var, prop.Name);
+			} else {
+				cprop = new CodePropertyReferenceExpression (var, prop.GladeProperty.Name);
+				cprop = new CodePropertyReferenceExpression (cprop, prop.Name);
+			}
+			statements.Add (new CodeAssignStatement (cprop, val));
 		}
 
 		public static new Widget Lookup (GLib.Object obj)
@@ -173,13 +247,13 @@ namespace Stetic.Wrapper {
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Widget;
 		}
 
-		string internalChildId;
-		public string InternalChildId {
+		PropertyDescriptor internalChildProperty;
+		public PropertyDescriptor InternalChildProperty {
 			get {
-				return internalChildId;
+				return internalChildProperty;
 			}
 			set {
-				internalChildId = value;
+				internalChildProperty = value;
 			}
 		}
 
@@ -188,30 +262,19 @@ namespace Stetic.Wrapper {
 			widget.Destroy ();
 		}
 
-		bool hexpandable, vexpandable;
 		public virtual bool HExpandable { get { return hexpandable; } }
 		public virtual bool VExpandable { get { return vexpandable; } }
 
-		public bool Unselectable;
-
-		bool window_visible;
 		public bool Visible {
 			get {
-				if (Wrapped is Gtk.Window)
-					return window_visible;
-				else
-					return Wrapped.Visible;
+				return window_visible;
 			}
 			set {
-				if (Wrapped is Gtk.Window) {
-					window_visible = value;
-					EmitNotify ("Visible");
-				} else
-					Wrapped.Visible = value;
+				window_visible = value;
+				EmitNotify ("Visible");
 			}
 		}
 
-		bool hasDefault;
 		public bool HasDefault {
 			get {
 				return hasDefault;
@@ -243,8 +306,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		Gdk.EventMask events;
-		bool set_events;
 		public Gdk.EventMask Events {
 			get {
 				if (!set_events) {
@@ -292,7 +353,8 @@ namespace Stetic.Wrapper {
 			// Don't notify parent change for top level widgets.
 			if (propertyName == "parent" || propertyName == "has-focus" || 
 				propertyName == "has-toplevel-focus" || propertyName == "is-active" ||
-				propertyName == "is-focus")
+				propertyName == "is-focus" || propertyName == "style" || 
+				propertyName == "visible" || propertyName == "scroll-offset")
 				return;
 			
 			if (propertyName == "name") {
@@ -302,8 +364,10 @@ namespace Stetic.Wrapper {
 					OnNameChanged (new WidgetNameChangedArgs (this, on, Wrapped.Name));
 				}
 			}
-			else
+			else {
+//				Console.WriteLine ("PROP: " + propertyName);
 				OnWidgetChanged (new WidgetEventArgs (this));
+			}
 		}
 		
 		protected virtual void OnNameChanged (WidgetNameChangedArgs args)

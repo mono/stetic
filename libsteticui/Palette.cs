@@ -38,6 +38,13 @@ namespace Stetic {
 		public Palette () : base (false, 2)
 		{
 			groups = new Hashtable ();
+			Registry.RegistryChanged += OnRegistryChanged;
+		}
+		
+		public override void Dispose ()
+		{
+			Registry.RegistryChanged -= OnRegistryChanged;
+			base.Dispose ();
 		}
 		
 		public Palette (Project project): this ()
@@ -51,6 +58,11 @@ namespace Stetic {
 				project = value;
 				LoadWidgets (project);
 			}
+		}
+		
+		void OnRegistryChanged (object o, EventArgs args)
+		{
+			LoadWidgets (project);
 		}
 		
 		public void LoadWidgets (Project project)

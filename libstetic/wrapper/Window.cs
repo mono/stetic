@@ -1,5 +1,6 @@
 using GLib;
 using System;
+using System.CodeDom;
 using System.Collections;
 
 namespace Stetic.Wrapper {
@@ -79,6 +80,34 @@ namespace Stetic.Wrapper {
 				} catch {
 					window.Icon = null;
 				}
+			}
+		}
+		
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		{
+			base.GenerateBuildCode (ctx, varName, statements);
+			if (((Gtk.Window)Wrapped).DefaultWidth == -1) {
+				statements.Add (
+					new CodeAssignStatement (
+						new CodePropertyReferenceExpression (
+							new CodeVariableReferenceExpression (varName),
+							"DefaultWidth"
+						),
+						new CodePrimitiveExpression (DesignWidth)
+					)
+				);
+			}
+				
+			if (((Gtk.Window)Wrapped).DefaultHeight == -1) {
+				statements.Add (
+					new CodeAssignStatement	 (
+						new CodePropertyReferenceExpression (
+							new CodeVariableReferenceExpression (varName),
+							"DefaultHeight"
+						),
+						new CodePrimitiveExpression (DesignHeight)
+					)
+				);
 			}
 		}
 	}

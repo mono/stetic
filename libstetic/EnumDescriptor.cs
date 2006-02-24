@@ -22,10 +22,14 @@ namespace Stetic {
 		Type enumType;
 		Hashtable values;
 		Enum[] values_array;
+		string name;
 
 		public EnumDescriptor (XmlElement elem)
 		{
-			enumType = Type.GetType (elem.GetAttribute ("type"), true);
+			string cls = elem.GetAttribute ("type");
+			enumType = Registry.GetType (cls, true);
+			this.name = enumType.FullName;
+			
 			values = new Hashtable ();
 
 			Array enumvalues = Enum.GetValues (enumType);
@@ -49,6 +53,10 @@ namespace Stetic {
 
 			if (values.Count != evalues.Count)
 				throw new ArgumentException ("<enum> node for " + enumType.FullName + " is missing some values");
+		}
+		
+		public string Name {
+			get { return name; }
 		}
 
 		public Type EnumType {

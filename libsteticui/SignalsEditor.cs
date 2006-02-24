@@ -22,6 +22,8 @@ namespace Stetic
 		const int ColSignalObject = 6;
 		const int ColSignalTextWeight = 7;
 		
+		public event EventHandler SignalActivated;
+		
 		public SignalsEditor ()
 		{
 			tree = new Gtk.TreeView ();
@@ -60,6 +62,7 @@ namespace Stetic
 					project.SignalAdded -= new SignalEventHandler (OnSignalAddedOrRemoved);
 					project.SignalRemoved -= new SignalEventHandler (OnSignalAddedOrRemoved);
 					project.SignalChanged -= new SignalChangedEventHandler (OnSignalChanged);
+					project.ProjectReloaded -= new EventHandler (OnProjectReloaded);
 				}
 					
 				project = value;
@@ -68,8 +71,24 @@ namespace Stetic
 				project.SignalAdded += new SignalEventHandler (OnSignalAddedOrRemoved);
 				project.SignalRemoved += new SignalEventHandler (OnSignalAddedOrRemoved);
 				project.SignalChanged += new SignalChangedEventHandler (OnSignalChanged);
+				project.ProjectReloaded += new EventHandler (OnProjectReloaded);
 				
 				OnWidgetSelected (null, null);
+			}
+		}
+		
+		void OnProjectReloaded (object s, EventArgs a)
+		{
+			OnWidgetSelected (null, null);
+		}
+		
+		public Signal SelectedSignal {
+			get {
+				Gtk.TreeModel foo;
+				Gtk.TreeIter iter;
+				if (!tree.Selection.GetSelected (out foo, out iter))
+					return null;
+				return GetSignal (iter);
 			}
 		}
 		
@@ -99,7 +118,7 @@ namespace Stetic
 			if (selection == null)
 				return;
 
-			ClassDescriptor klass = Registry.LookupClass (selection.Wrapped.GetType ());
+			ClassDescriptor klass = selection.ClassDescriptor;
 			
 			foreach (ItemGroup group in klass.SignalGroups) {
 				Gtk.TreeIter iter = store.AppendNode ();
@@ -168,8 +187,12 @@ namespace Stetic
 				return;
 			
 			SignalDescriptor sd = GetSignalDescriptor (iter);
-			if (sd != null)
-				AddHandler (iter, "On" + sd.Name);
+			if (sd != null) {
+				if (GetSignal (iter) == null)
+					AddHandler (iter, "On" + sd.Name);
+				else if (SignalActivated != null)
+					SignalActivated (this, EventArgs.Empty);
+			}
 		}
 		
 		void OnHandlerEdited (object sender, Gtk.EditedArgs args)

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Collections;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -70,7 +71,7 @@ namespace Stetic {
 			Stetic.Wrapper.Container parent = wrapper.ParentWrapper;
 
 			if (parent == null) {
-				elem = wrapper.GladeExport (doc);
+				elem = wrapper.Write (doc, FileFormat.Glade);
 				if (elem == null)
 					return null;
 				if (!(widget is Gtk.Window)) {
@@ -86,9 +87,9 @@ namespace Stetic {
 				elem = doc.CreateElement ("widget");
 				// Set the class correctly (temporarily) so the XSL
 				// transforms will work correctly.
-				ClassDescriptor klass = Registry.LookupClass (parent.Wrapped.GetType ());
+				ClassDescriptor klass = parent.ClassDescriptor;
 				elem.SetAttribute ("class", klass.CName);
-				elem.AppendChild (parent.GladeExportChild (wrapper, doc));
+				elem.AppendChild (parent.WriteContainerChild (wrapper, doc, FileFormat.Glade));
 			}
 			toplevel.AppendChild (elem);
 
@@ -115,7 +116,7 @@ namespace Stetic {
 			    elem.GetAttribute ("id") != "glade-dummy-container") {
 				// Creating a new toplevel
 				Stetic.Wrapper.Widget toplevel = (Stetic.Wrapper.Widget)
-					Stetic.ObjectWrapper.GladeImport (project, elem);
+					Stetic.ObjectWrapper.Read (project, elem, FileFormat.Glade);
 				if (toplevel != null) {
 					project.AddWindow ((Gtk.Window)toplevel.Wrapped);
 				}
@@ -123,7 +124,7 @@ namespace Stetic {
 			}
 
 			return (Stetic.Wrapper.Widget)
-				Stetic.ObjectWrapper.GladeImport (project, (XmlElement)elem.SelectSingleNode ("child/widget"));
+				Stetic.ObjectWrapper.Read (project, (XmlElement)elem.SelectSingleNode ("child/widget"), FileFormat.Glade);
 		}
 		
 		public static void Copy (Gtk.Widget widget, Gtk.SelectionData seldata, bool copyAsText)
@@ -293,8 +294,12 @@ namespace Stetic {
 			IntPtr gtype;
 			if (propType != null)
 				gtype = ((GLib.GType)propType).Val;
+/*
+			FIXME: ValueType is not supported right now
+
 			else if (pspec != null)
 				gtype = pspec.ValueType;
+*/
 			else
 				throw new GladeException ("Bad type");
 
@@ -306,15 +311,48 @@ namespace Stetic {
 				return ParseEnum (gtype, strval);
 			else if (typef == GLib.TypeFundamentals.TypeFlags)
 				return ParseFlags (gtype, strval);
-			else if (pspec != null && pspec.IsUnichar)
-				return ParseUnichar (strval);
+// FIXME: Enable when ParamSpec.IsUnichar is implemented.
+//			else if (pspec != null && pspec.IsUnichar)
+//				return ParseUnichar (strval);
 			else
 				return ParseBasicType (typef, strval);
 		}
 
+		static PropertyInfo FindClrProperty (Type type, string name, bool childprop)
+		{
+			if (childprop) {
+				Type[] types = type.GetNestedTypes ();
+				foreach (Type t in types) {
+					if (typeof(Gtk.Container.ContainerChild).IsAssignableFrom (t)) {
+						type = t;
+						break;
+					}
+				}
+				foreach (PropertyInfo pi in type.GetProperties ()) {
+					Gtk.ChildPropertyAttribute at = (Gtk.ChildPropertyAttribute) Attribute.GetCustomAttribute (pi, typeof(Gtk.ChildPropertyAttribute), false);
+					if (at != null && at.Name == name)
+						return pi;
+				}
+				if (typeof(GLib.Object).IsAssignableFrom (type.BaseType))
+					return FindClrProperty (type.BaseType, name, true);
+			}
+			
+			foreach (PropertyInfo pi in type.GetProperties ()) {
+				GLib.PropertyAttribute at = (GLib.PropertyAttribute) Attribute.GetCustomAttribute (pi, typeof(GLib.PropertyAttribute), false);
+				if (at != null && at.Name == name)
+					return pi;
+			}
+			return null;
+		}
+			
 		static GLib.Value ParseProperty (Type type, bool childprop, string name, string strval)
 		{
 			ParamSpec pspec;
+
+			// FIXME: this can be removed when GParamSpec supports ValueType.			
+			PropertyInfo pi = FindClrProperty (type, name, childprop);
+			if (pi == null)
+				throw new GladeException ("Unknown property", type.ToString (), childprop, name, strval);
 
 			if (childprop)
 				pspec = ParamSpec.LookupChildProperty (type, name);
@@ -324,7 +362,7 @@ namespace Stetic {
 				throw new GladeException ("Unknown property", type.ToString (), childprop, name, strval);
 
 			try {
-				return ParseProperty (pspec, null, strval);
+				return ParseProperty (pspec, pi.PropertyType, strval);
 			} catch {
 				throw new GladeException ("Could not parse property", type.ToString (), childprop, name, strval);
 			}
@@ -359,14 +397,14 @@ namespace Stetic {
 			propVals = (GLib.Value[])values.ToArray (typeof (GLib.Value));
 		}
 
-		static void ExtractProperties (ClassDescriptor klass, XmlElement elem,
+		static void ExtractProperties (TypedClassDescriptor klass, XmlElement elem,
 					       out Hashtable rawProps, out Hashtable overrideProps)
 		{
 			rawProps = new Hashtable ();
 			overrideProps = new Hashtable ();
 			foreach (ItemGroup group in klass.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
-					PropertyDescriptor prop = item as PropertyDescriptor;
+					TypedPropertyDescriptor prop = item as TypedPropertyDescriptor;
 					if (prop == null)
 						continue;
 					prop = prop.GladeProperty;
@@ -385,13 +423,13 @@ namespace Stetic {
 			}
 		}
 
-		static void ReadSignals (ClassDescriptor klass, ObjectWrapper wrapper, XmlElement elem)
+		static void ReadSignals (TypedClassDescriptor klass, ObjectWrapper wrapper, XmlElement elem)
 		{
 			Stetic.Wrapper.Widget ob = wrapper as Stetic.Wrapper.Widget;
 			if (ob == null) return;
 			
 			foreach (ItemGroup group in klass.SignalGroups) {
-				foreach (SignalDescriptor signal in group) {
+				foreach (TypedSignalDescriptor signal in group) {
 					if (signal.GladeName == null)
 						continue;
 
@@ -412,10 +450,14 @@ namespace Stetic {
 			if (className == null)
 				throw new GladeException ("<widget> node with no class name");
 
-			ClassDescriptor klass = Registry.LookupClass (className);
-			if (klass == null)
+			ClassDescriptor klassBase = Registry.LookupClassByCName (className);
+			if (klassBase == null)
 				throw new GladeException ("No stetic ClassDescriptor for " + className);
 				
+			TypedClassDescriptor klass = klassBase as TypedClassDescriptor;
+			if (klass == null)
+				throw new GladeException ("The widget class " + className + " is not supported by Glade");
+			
 			ReadSignals (klass, wrapper, elem);
 
 			Hashtable rawProps, overrideProps;
@@ -439,7 +481,7 @@ namespace Stetic {
 					gtk_object_sink (raw);
 					throw new GladeException ("Could not create gtk# wrapper", className);
 				}
-				wrapper.Wrap (widget, true);
+				ObjectWrapper.Bind (wrapper.Project, klass, wrapper, widget, true);
 			} else {
 				widget = (Gtk.Widget)wrapper.Wrapped;
 				for (int i = 0; i < propNames.Length; i++)
@@ -455,7 +497,7 @@ namespace Stetic {
 		
 		static void SetOverrideProperties (ObjectWrapper wrapper, Hashtable overrideProps)
 		{
-			foreach (PropertyDescriptor prop in overrideProps.Keys) {
+			foreach (TypedPropertyDescriptor prop in overrideProps.Keys) {
 				XmlElement prop_elem = overrideProps[prop] as XmlElement;
 
 				try {
@@ -500,9 +542,9 @@ namespace Stetic {
 
 			Gtk.Container.ContainerChild cc = wrapper.Wrapped as Gtk.Container.ContainerChild;
 
-			ClassDescriptor klass = Registry.LookupClass (cc.GetType ());
+			TypedClassDescriptor klass = wrapper.ClassDescriptor as TypedClassDescriptor;
 			if (klass == null)
-				throw new GladeException ("No stetic ClassDescriptor for " + cc.GetType ().FullName);
+				throw new GladeException ("The widget class " + cc.GetType () + " is not supported by Glade");
 
 			Hashtable rawProps, overrideProps;
 			ExtractProperties (klass, packing, out rawProps, out overrideProps);
@@ -520,7 +562,7 @@ namespace Stetic {
 			MarkTranslatables (cc, overrideProps);
 		}
 		
-		static string PropToString (ObjectWrapper wrapper, PropertyDescriptor prop)
+		static string PropToString (ObjectWrapper wrapper, TypedPropertyDescriptor prop)
 		{
 			object value;
 
@@ -530,7 +572,7 @@ namespace Stetic {
 
 				if (ccwrap != null) {
 					Gtk.Container.ContainerChild cc = (Gtk.Container.ContainerChild)ccwrap.Wrapped;
-					gval = new GLib.Value (new GLib.GType (prop.ParamSpec.ValueType));
+					gval = new GLib.Value ((GLib.GType) prop.PropertyType);
 					gtk_container_child_get_property (cc.Parent.Handle, cc.Child.Handle, prop.GladeName, ref gval);
 				} else {
 					Gtk.Widget widget = wrapper.Wrapped as Gtk.Widget;
@@ -544,7 +586,7 @@ namespace Stetic {
 				return null;
 
 			// If the property has its default value, we don't need to write it
-			if (prop.HasDefault && value.Equals (prop.ParamSpec.Default))
+			if (prop.HasDefault && prop.ParamSpec.IsDefaultValue (value))
 				return null;
 
 			if (value is Gtk.Adjustment) {
@@ -554,7 +596,7 @@ namespace Stetic {
 						      adj.StepIncrement, adj.PageIncrement,
 						      adj.PageSize);
 			} else if (value is Enum && prop.ParamSpec != null) {
-				IntPtr klass = g_type_class_ref (prop.ParamSpec.ValueType);
+				IntPtr klass = g_type_class_ref (((GLib.GType)prop.PropertyType).Val);
 
 				if (prop.PropertyType.IsDefined (typeof (FlagsAttribute), false)) {
 					System.Text.StringBuilder sb = new System.Text.StringBuilder ();
@@ -593,11 +635,8 @@ namespace Stetic {
 
 		static public XmlElement ExportWidget (ObjectWrapper wrapper, XmlDocument doc)
 		{
-			Type wrappedType = wrapper.Wrapped.GetType ();
-			ClassDescriptor klass = Registry.LookupClass (wrappedType);
-
 			XmlElement  elem = doc.CreateElement ("widget");
-			elem.SetAttribute ("class", klass.CName);
+			elem.SetAttribute ("class", wrapper.ClassDescriptor.CName);
 			elem.SetAttribute ("id", ((Gtk.Widget)wrapper.Wrapped).Name);
 
 			GetProps (wrapper, elem);
@@ -607,11 +646,11 @@ namespace Stetic {
 
 		static public void GetProps (ObjectWrapper wrapper, XmlElement parent_elem)
 		{
-			ClassDescriptor klass = Registry.LookupClass (wrapper.Wrapped.GetType ());
+			ClassDescriptor klass = wrapper.ClassDescriptor;
 
 			foreach (ItemGroup group in klass.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
-					PropertyDescriptor prop = item as PropertyDescriptor;
+					TypedPropertyDescriptor prop = item as TypedPropertyDescriptor;
 					if (prop == null)
 						continue;
 					prop = prop.GladeProperty;
@@ -650,13 +689,13 @@ namespace Stetic {
 			if (ob == null) return;
 			
 			foreach (Signal signal in ob.Signals) {
-				if (signal.SignalDescriptor.GladeName == null)
+				if (((TypedSignalDescriptor)signal.SignalDescriptor).GladeName == null)
 					continue;
 				if (!signal.SignalDescriptor.VisibleFor (wrapper.Wrapped))
 					continue;
 
 				XmlElement signal_elem = parent_elem.OwnerDocument.CreateElement ("signal");
-				signal_elem.SetAttribute ("name", signal.SignalDescriptor.GladeName);
+				signal_elem.SetAttribute ("name", ((TypedSignalDescriptor)signal.SignalDescriptor).GladeName);
 				signal_elem.SetAttribute ("handler", signal.Handler);
 				if (signal.After)
 					signal_elem.SetAttribute ("after", "yes");

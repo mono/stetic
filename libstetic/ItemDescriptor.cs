@@ -37,12 +37,7 @@ namespace Stetic {
 				if (values == null)
 					hash[prop] = values = new ArrayList ();
 
-				object val;
-				if (prop.PropertyType.IsEnum)
-					val = Enum.Parse (prop.PropertyType, value);
-				else
-					val = Convert.ChangeType (value, prop.PropertyType);
-				values.Add (val);
+				values.Add (prop.StringToValue (value));
 			}
 			return hash;
 		}

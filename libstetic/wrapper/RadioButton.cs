@@ -19,11 +19,11 @@ namespace Stetic.Wrapper {
 				Group = radiobutton.Name;
 		}
 
-		public override void GladeImport (XmlElement elem)
+		public override void Read (XmlElement elem, FileFormat format)
 		{
 			string group = (string)GladeUtils.ExtractProperty (elem, "group", "");
 			bool active = (bool)GladeUtils.ExtractProperty (elem, "active", false);
-			base.GladeImport (elem);
+			base.Read (elem, format);
 
 			if (group != "")
 				Group = group;
@@ -33,9 +33,9 @@ namespace Stetic.Wrapper {
 				((Gtk.RadioButton)Wrapped).Active = true;
 		}
 
-		public override XmlElement GladeExport (XmlDocument doc)
+		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
-			XmlElement elem = base.GladeExport (doc);
+			XmlElement elem = base.Write (doc, format);
 			string group = GroupManager.GladeGroupName (Wrapped);
 			if (group != Wrapped.Name)
 				GladeUtils.SetProperty (elem, "group", group);

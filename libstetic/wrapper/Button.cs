@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Xml;
 
@@ -26,18 +27,13 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override void GladeImport (XmlElement elem)
-		{
-			base.GladeImport (elem);
-		}
-
-		public override Widget GladeImportChild (XmlElement child_elem)
+		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			Type = ButtonType.Custom;
 
 			if (button.Child != null)
 				button.Remove (button.Child);
-			Widget wrapper = base.GladeImportChild (child_elem);
+			Widget wrapper = base.ReadChild (child_elem, format);
 			FixupGladeChildren ();
 			return wrapper;
 		}
@@ -75,9 +71,9 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override XmlElement GladeExport (XmlDocument doc)
+		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
-			XmlElement elem = base.GladeExport (doc);
+			XmlElement elem = base.Write (doc, format);
 			if (Type == ButtonType.StockItem)
 				GladeUtils.SetProperty (elem, "label", stockId);
 			return elem;
@@ -168,7 +164,7 @@ namespace Stetic.Wrapper {
 			} else
 				labelWidget = Gtk.Label.New (label);
 
-			Gtk.Image imageWidget = (Gtk.Image)Registry.NewInstance (typeof (Gtk.Image), proj);
+			Gtk.Image imageWidget = (Gtk.Image)Registry.NewInstance ("Gtk.Image", proj);
 			Image imageWrapper = (Image)Widget.Lookup (imageWidget);
 			imageWrapper.Unselectable = true;
 			if (type == ButtonType.StockItem) {
@@ -318,6 +314,15 @@ namespace Stetic.Wrapper {
 				return (int)Gtk.ResponseType.Help;
 			else
 				return 0;
+		}
+		
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		{
+			base.GenerateBuildCode (ctx, varName, statements);
+			
+			CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (new CodeVariableReferenceExpression (varName), "Label");
+			CodeExpression val = ctx.GenerateValue (button.Label);
+			statements.Add (new CodeAssignStatement (cprop, val));
 		}
 	}
 }

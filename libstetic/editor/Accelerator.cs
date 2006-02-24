@@ -71,12 +71,16 @@ namespace Stetic.Editor {
 			Text = "New Accelerator...";
 		}
 
-		[DllImport ("libsteticglue")]
-		static extern bool stetic_keycode_is_modifier (uint keycode);
+//		[DllImport ("libsteticglue")]
+//		static extern bool stetic_keycode_is_modifier (uint keycode);
 
 		protected override bool OnKeyPressEvent (Gdk.EventKey evt)
 		{
-			if (!editing || stetic_keycode_is_modifier (evt.HardwareKeycode))
+//			if (!editing || stetic_keycode_is_modifier (evt.HardwareKeycode))
+//				return base.OnKeyPressEvent (evt);
+			
+			// FIXME: check for modifier
+			if (!editing)
 				return base.OnKeyPressEvent (evt);
 
 			uint keyval;

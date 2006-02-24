@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 using System.Collections;
 
 namespace Stetic.Wrapper {
@@ -16,8 +17,8 @@ namespace Stetic.Wrapper {
 
 		Gtk.Button NewButton ()
 		{
-			Gtk.Button button = (Gtk.Button)Registry.NewInstance (typeof (Gtk.Button), proj);
-			if (InternalChildId == "action_area")
+			Gtk.Button button = (Gtk.Button)Registry.NewInstance ("Gtk.Button", proj);
+			if (InternalChildProperty != null && InternalChildProperty.Name == "ActionArea")
 				((Button)Widget.Lookup (button)).IsDialogButton = true;
 			return button;
 		}
@@ -91,6 +92,13 @@ namespace Stetic.Wrapper {
 				}
 			}
 		}
+		
+		protected override void ReadChildren (XmlElement elem, FileFormat format)
+		{
+			// Reset the button count
+			Size = 0;
+			base.ReadChildren (elem, format);
+		}
 
 		public class ButtonBoxChild : Box.BoxChild {
 
@@ -98,7 +106,7 @@ namespace Stetic.Wrapper {
 				get {
 					if (ParentWrapper == null)
 						return false;
-					return ParentWrapper.InternalChildId == "action_area";
+					return ParentWrapper.InternalChildProperty != null && ParentWrapper.InternalChildProperty.Name == "ActionArea";
 				}
 			}
 		}

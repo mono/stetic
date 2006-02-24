@@ -32,7 +32,18 @@ namespace Stetic {
 				topLevel = parent;
 				parent = topLevel.Parent;
 			}
-
+			
+			// If the window is embedded in a preview box, use
+			// the gdk window of that box, which has more room
+			// for drawing the handles.
+			while (parent != null) {
+				if (parent.Parent is PreviewBox || parent.Parent is Gtk.EventBox)
+					break;
+				parent = parent.Parent;
+			}
+			if (parent != null)
+				topLevel = parent;
+			
 			selection.SizeAllocated += SelectionResized;
 
 			invis = new Gtk.Invisible ();
@@ -114,7 +125,7 @@ namespace Stetic {
 			gc.SetDashes (0, new sbyte[] {1,1}, 2);
 			gc.SetLineAttributes (borderSize, Gdk.LineStyle.OnOffDash, Gdk.CapStyle.NotLast, Gdk.JoinStyle.Miter);
 			pixmap.DrawRectangle (gc, false, handleSize / 2, handleSize / 2,
-					      width - handleSize, height - handleSize);
+					      width - handleSize - 1, height - handleSize - 1);
 
 			if (dragHandles) {
 				gc.SetLineAttributes (1, Gdk.LineStyle.Solid, Gdk.CapStyle.NotLast, Gdk.JoinStyle.Miter);

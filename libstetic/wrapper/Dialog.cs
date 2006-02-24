@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 using System.Collections;
 
 namespace Stetic.Wrapper {
@@ -22,6 +23,14 @@ namespace Stetic.Wrapper {
 			} else
 				ButtonsChanged (ActionArea);
 
+			ActionArea.ContentsChanged += ButtonsChanged;
+		}
+		
+		protected override void ReadChildren (XmlElement elem, FileFormat format)
+		{
+			// Ignore changes in the buttons while loading
+			ActionArea.ContentsChanged -= ButtonsChanged;
+			base.ReadChildren (elem, format);
 			ActionArea.ContentsChanged += ButtonsChanged;
 		}
 
@@ -84,7 +93,7 @@ namespace Stetic.Wrapper {
 			Stetic.Wrapper.Button wrapper;
 			Gtk.Button button;
 
-			button = (Gtk.Button)Registry.NewInstance (typeof (Gtk.Button), proj);
+			button = (Gtk.Button)Registry.NewInstance ("Gtk.Button", proj);
 			wrapper = (Stetic.Wrapper.Button) ObjectWrapper.Lookup (button);
 			if (stockId != null) {
 				wrapper.Type = Button.ButtonType.StockItem;

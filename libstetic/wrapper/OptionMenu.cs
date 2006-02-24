@@ -21,10 +21,10 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 		}
 
-		public override void GladeImport (XmlElement elem)
+		public override void Read (XmlElement elem, FileFormat format)
 		{
 			int history = (int)GladeUtils.ExtractProperty (elem, "history", -1);
-			base.GladeImport (elem);
+			base.Read (elem, format);
 
 			// Fiddle with things to make the optionmenu resize itself correctly
 			Gtk.Widget menu = optionmenu.Menu;
@@ -39,18 +39,18 @@ namespace Stetic.Wrapper {
 
 		// Some versions of glade call the menu an internal child, some don't
 
-		public override Widget GladeSetInternalChild (XmlElement child_elem)
+		protected override Widget ReadInternalChild (XmlElement child_elem, FileFormat format)
 		{
 			if (child_elem.GetAttribute ("internal-child") == "menu")
-				return GladeImportChild (child_elem);
+				return ReadChild (child_elem, format);
 			else
-				return base.GladeSetInternalChild (child_elem);
+				return base.ReadInternalChild (child_elem, format);
 		}
 
-		public override Widget GladeImportChild (XmlElement child_elem)
+		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			Widget wrapper = Stetic.Wrapper.Widget.Lookup (optionmenu.Menu);
-			wrapper.GladeImport (child_elem["widget"]);
+			wrapper.Read (child_elem["widget"], format);
 			return wrapper;
 		}
 

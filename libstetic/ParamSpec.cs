@@ -58,7 +58,7 @@ namespace Stetic {
 			}
 		}
 
-		[DllImport("libsteticglue")]
+/*		[DllImport("libsteticglue")]
 		static extern bool stetic_param_spec_get_minimum (IntPtr pspec, ref GLib.Value value);
 
 		public object Minimum {
@@ -71,8 +71,14 @@ namespace Stetic {
 					return null;
 			}
 		}
+*/
+		public object Minimum {
+			get {
+				return null;
+			}
+		}
 
-		[DllImport("libsteticglue")]
+/*		[DllImport("libsteticglue")]
 		static extern bool stetic_param_spec_get_maximum (IntPtr pspec, ref GLib.Value value);
 
 		public object Maximum {
@@ -85,8 +91,20 @@ namespace Stetic {
 					return null;
 			}
 		}
+*/
+		public object Maximum {
+			get {
+				return null;
+			}
+		}
 
-		[DllImport("libsteticglue")]
+		public bool IsDefaultValue (object value)
+		{
+			GLib.Value gvalue = new GLib.Value (value);
+			return g_param_value_defaults  (Raw, ref gvalue);
+		}
+
+/*		[DllImport("libsteticglue")]
 		static extern bool stetic_param_spec_get_default (IntPtr pspec, ref GLib.Value value);
 		public object Default {
 			get {
@@ -98,7 +116,7 @@ namespace Stetic {
 					return null;
 			}
 		}
-
+		
 		[DllImport("libsteticglue")]
 		static extern IntPtr stetic_param_spec_get_value_type (IntPtr obj);
 
@@ -107,8 +125,9 @@ namespace Stetic {
 				return stetic_param_spec_get_value_type (_obj);
 			}
 		}
+*/
 
-		[DllImport("libsteticglue")]
+/*		[DllImport("libsteticglue")]
 		static extern bool stetic_param_spec_is_unichar (IntPtr pspec);
 
 		public bool IsUnichar {
@@ -116,7 +135,7 @@ namespace Stetic {
 				return stetic_param_spec_is_unichar (_obj);
 			}
 		}
-
+*/
 		static Hashtable props = new Hashtable (), childProps = new Hashtable ();
 
 		private class ParamSpecTypeHack : GLib.Object {
@@ -190,6 +209,9 @@ namespace Stetic {
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_param_spec_get_blurb (IntPtr obj);
+
+		[DllImport("libgobject-2.0-0.dll")]
+		static extern bool g_param_value_defaults (IntPtr obj, ref GLib.Value value);
 
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_type_class_ref (IntPtr gtype);

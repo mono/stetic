@@ -7,49 +7,112 @@ using System.Xml.Xsl;
 namespace Stetic {
 	public static class Registry {
 
-		static Hashtable classes_by_type = new Hashtable ();
-		static Hashtable classes_by_cname = new Hashtable ();
-		static Hashtable classes_by_csname = new Hashtable ();
-		static Hashtable enums = new Hashtable ();
-
+		static ArrayList libraries = new ArrayList ();
+		static ArrayList classes = new ArrayList ();
+		
 		static XslTransform gladeImport, gladeExport;
+		static AssemblyWidgetLibrary coreLib;
+		
+		public static event EventHandler RegistryChanging;
+		public static event EventHandler RegistryChanged;
 
 		static Registry ()
 		{
-			Assembly libstetic = Assembly.GetExecutingAssembly ();
-			System.IO.Stream stream = libstetic.GetManifestResourceStream ("objects.xml");
-			XmlDocument objects = new XmlDocument ();
-			objects.Load (stream);
-			stream.Close ();
+			coreLib = new AssemblyWidgetLibrary (Assembly.GetExecutingAssembly ());
+			RegisterWidgetLibrary (coreLib);
+		}
+		
+		public static void RegisterWidgetLibrary (WidgetLibrary library)
+		{
+			NotifyChanging ();
+			
+			libraries.Add (library);
+			library.Load ();
+			classes.AddRange (library.AllClasses);
+			UpdateGladeTransform ();
+			
+			NotifyChanged ();
+		}
 
-			foreach (XmlElement element in objects.SelectNodes ("/objects/enum")) {
-				EnumDescriptor enm = new EnumDescriptor (element);
-				enums[enm.EnumType] = enm;
-			}
+		public static void UnregisterWidgetLibrary (WidgetLibrary library)
+		{
+			if (library == coreLib)
+				return;
 
-			foreach (XmlElement element in objects.SelectNodes ("/objects/object")) {
-				ClassDescriptor klass = new ClassDescriptor (libstetic, element);
-				classes_by_type[klass.WrappedType] = klass;
-				classes_by_cname[klass.CName] = klass;
-				classes_by_csname[klass.WrappedType.FullName] = klass;
-			}
+			NotifyChanging ();
 
+			libraries.Remove (library);
+			InternalUpdate ();
+
+			NotifyChanged ();
+		}
+		
+		public static void ReloadWidgetLibrary (WidgetLibrary library)
+		{
+			NotifyChanging ();
+
+			foreach (WidgetLibrary lib in libraries)
+				if (lib != coreLib)
+					lib.Load ();
+
+			InternalUpdate ();
+			NotifyChanged ();
+		}
+		
+		public static bool IsRegistered (WidgetLibrary library)
+		{
+			return libraries.Contains (library);
+		}
+		
+		public static WidgetLibrary[] RegisteredWidgetLibraries {
+			get { return (WidgetLibrary[]) libraries.ToArray (typeof(WidgetLibrary)); }
+		}
+		
+		static void NotifyChanging ()
+		{
+			if (RegistryChanging != null)
+				RegistryChanging (null, EventArgs.Empty);
+		}
+		
+		static void NotifyChanged ()
+		{
+			if (RegistryChanged != null)
+				RegistryChanged (null, EventArgs.Empty);
+		}
+		
+		static void InternalUpdate ()
+		{
+			classes.Clear ();
+			foreach (WidgetLibrary lib in libraries)
+				classes.AddRange (lib.AllClasses);
+			UpdateGladeTransform ();
+		}
+
+		static void UpdateGladeTransform ()
+		{
 			XmlDocument doc = CreateGladeTransformBase ();
 			XmlNamespaceManager nsm = new XmlNamespaceManager (doc.NameTable);
 			nsm.AddNamespace ("xsl", "http://www.w3.org/1999/XSL/Transform");
-
-			foreach (XmlElement elem in objects.SelectNodes ("/objects/object/glade-transform/import/xsl:*", nsm))
-				doc.FirstChild.PrependChild (doc.ImportNode (elem, true));
+			
+			foreach (WidgetLibrary lib in libraries) {
+				foreach (XmlElement elem in lib.GetGladeImportTransformElements ())
+					doc.FirstChild.PrependChild (doc.ImportNode (elem, true));
+			}
+			
 			gladeImport = new XslTransform ();
 			gladeImport.Load (doc, null, null);
-
+				
 			doc = CreateGladeTransformBase ();
-			foreach (XmlElement elem in objects.SelectNodes ("/objects/object/glade-transform/export/xsl:*", nsm))
-				doc.FirstChild.PrependChild (doc.ImportNode (elem, true));
+			
+			foreach (WidgetLibrary lib in libraries) {
+				foreach (XmlElement elem in lib.GetGladeExportTransformElements ())
+					doc.FirstChild.PrependChild (doc.ImportNode (elem, true));
+			}
+			
 			gladeExport = new XslTransform ();
 			gladeExport.Load (doc, null, null);
 		}
-
+			
 		static XmlDocument CreateGladeTransformBase ()
 		{
 			XmlDocument doc = new XmlDocument ();
@@ -67,7 +130,7 @@ namespace Stetic {
 
 		public static IEnumerable AllClasses {
 			get {
-				return classes_by_type.Values;
+				return classes;
 			}
 		}
 
@@ -83,19 +146,34 @@ namespace Stetic {
 			}
 		}
 
-		public static EnumDescriptor LookupEnum (Type type)
+		public static EnumDescriptor LookupEnum (string typeName)
 		{
-			return (EnumDescriptor)enums[type];
+			foreach (WidgetLibrary lib in libraries) {
+				EnumDescriptor desc = lib.LookupEnum (typeName);
+				if (desc != null)
+					return desc;
+			}
+			return null;
 		}
 
-		public static ClassDescriptor LookupClass (Type type)
+		public static ClassDescriptor LookupClassByCName (string cname)
 		{
-			return (ClassDescriptor)classes_by_type[type];
+			foreach (WidgetLibrary lib in libraries) {
+				ClassDescriptor desc = lib.LookupClassByCName (cname);
+				if (desc != null)
+					return desc;
+			}
+			return null;
 		}
-
-		public static ClassDescriptor LookupClass (string cname)
+		
+		public static ClassDescriptor LookupClassByName (string cname)
 		{
-			return (ClassDescriptor)classes_by_cname[cname];
+			foreach (WidgetLibrary lib in libraries) {
+				ClassDescriptor desc = lib.LookupClassByName (cname);
+				if (desc != null)
+					return desc;
+			}
+			return null;
 		}
 		
 		static ClassDescriptor FindGroupClass (string name, out string groupname)
@@ -103,9 +181,9 @@ namespace Stetic {
 			int sep = name.LastIndexOf ('.');
 			string classname = name.Substring (0, sep);
 			groupname = name.Substring (sep + 1);
-			ClassDescriptor klass = (ClassDescriptor)classes_by_csname[classname];
+			ClassDescriptor klass = LookupClassByName (classname);
 			if (klass == null) {
-				klass = (ClassDescriptor)classes_by_csname[name];
+				klass = LookupClassByName (name);
 				if (klass == null)
 					throw new ArgumentException ("No class for itemgroup " + name);
 				classname = name;
@@ -123,7 +201,7 @@ namespace Stetic {
 			if (group != null)
 				return group;
 			else
-				throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedType);
+				throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedTypeName);
 		}
 
 		public static ItemGroup LookupSignalGroup (string name)
@@ -135,7 +213,7 @@ namespace Stetic {
 			if (group != null)
 				return group;
 			else
-				throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedType);
+				throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedTypeName);
 		}
 
 		public static ItemDescriptor LookupItem (string name)
@@ -143,7 +221,7 @@ namespace Stetic {
 			int sep = name.LastIndexOf ('.');
 			string classname = name.Substring (0, sep);
 			string propname = name.Substring (sep + 1);
-			ClassDescriptor klass = (ClassDescriptor)classes_by_csname[classname];
+			ClassDescriptor klass = LookupClassByName (classname);
 			if (klass == null)
 				throw new ArgumentException ("No class " + classname + " for property " + propname);
 			return klass[propname];
@@ -151,15 +229,31 @@ namespace Stetic {
 
 		public static ItemGroup LookupContextMenu (string classname)
 		{
-			ClassDescriptor klass = (ClassDescriptor)classes_by_csname[classname];
+			ClassDescriptor klass = LookupClassByName (classname);
 			if (klass == null)
 				throw new ArgumentException ("No class for contextmenu " + classname);
 			return klass.ContextMenu;
 		}
 
-		public static object NewInstance (Type type, IProject proj)
+		public static object NewInstance (string typeName, IProject proj)
 		{
-			return LookupClass (type).NewInstance (proj);
+			return LookupClassByName (typeName).NewInstance (proj);
+		}
+		
+		public static Type GetType (string typeName, bool throwOnError)
+		{
+			Type t = Type.GetType (typeName, false);
+			if (t != null) return t;
+			
+			foreach (WidgetLibrary lib in libraries) {
+				t = lib.GetType (typeName);
+				if (t != null) return t;
+			}
+			
+			if (throwOnError)
+				throw new TypeLoadException ("Could not load type '" + typeName + "'");
+				
+			return null;
 		}
 	}
 }

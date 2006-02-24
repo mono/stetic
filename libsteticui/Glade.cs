@@ -15,19 +15,23 @@ namespace Stetic {
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
 			doc.Load (filename);
+			project.Id = System.IO.Path.GetFileName (filename);
 			doc = GladeUtils.XslImportTransform (doc);
 
 			XmlNode node = doc.SelectSingleNode ("/glade-interface");
 			if (node == null)
 				throw new ApplicationException ("Not a glade file according to node name");
 
-			project.BeginGladeImport ();
-			foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
-				Wrapper.Container wrapper = Stetic.ObjectWrapper.GladeImport (project, toplevel) as Wrapper.Container;
-				if (wrapper != null)
-					project.AddWidget ((Gtk.Widget)wrapper.Wrapped);
+			try {
+				project.BeginGladeImport ();
+				foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
+					Wrapper.Container wrapper = Stetic.ObjectWrapper.Read (project, toplevel, FileFormat.Glade) as Wrapper.Container;
+					if (wrapper != null)
+						project.AddWidget ((Gtk.Widget)wrapper.Wrapped);
+				}
+			} finally {
+				project.EndGladeImport ();
 			}
-			project.EndGladeImport ();
 		}
 
 		public static void Export (Project project, string filename)
@@ -43,11 +47,11 @@ namespace Stetic {
 				if (wrapper == null)
 					continue;
 
-				XmlElement elem = wrapper.GladeExport (doc);
+				XmlElement elem = wrapper.Write (doc, FileFormat.Glade);
 				if (elem != null)
 					toplevel.AppendChild (elem);
 			}
-
+	
 			doc = GladeUtils.XslExportTransform (doc);
 
 			// FIXME; if you use UTF8, it starts with a BOM???

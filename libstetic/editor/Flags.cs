@@ -25,7 +25,7 @@ namespace Stetic.Editor {
 			tips = new Gtk.Tooltips ();
 			flags = new Hashtable ();
 
-			enm = Registry.LookupEnum (prop.PropertyType);
+			enm = Registry.LookupEnum (prop.PropertyType.FullName);
 			foreach (Enum value in enm.Values) {
 				EnumValue eval = enm[value];
 				if (eval.Label == "")

@@ -10,12 +10,6 @@ namespace Stetic.Wrapper {
 			return Gtk.ComboBox.NewText ();
 		}
 
-		public override void GladeImport (XmlElement elem)
-		{
-			Wrap (CreateInstance (), false);
-			base.GladeImport (elem);
-		}
-
 		string items = "";
 		string[] item = new string[0];
 

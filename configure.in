@@ -33,7 +33,6 @@ AC_SUBST(STETIC_LIBS)
 
 AC_OUTPUT([
 Makefile
-glue/Makefile
 libstetic/Makefile
 libsteticui/Makefile
 stetic/Makefile

@@ -5,12 +5,12 @@ namespace Stetic.Wrapper {
 
 	public class CheckButton : Container {
 
-		public override Widget GladeImportChild (XmlElement child_elem)
+		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			hasLabel = false;
 			if (checkbutton.Child != null)
 				checkbutton.Remove (checkbutton.Child);
-			return base.GladeImportChild (child_elem);
+			return base.ReadChild (child_elem, format);
 		}
 
 		public Gtk.CheckButton checkbutton {

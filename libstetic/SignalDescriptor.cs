@@ -4,32 +4,22 @@ using System.Xml;
 
 namespace Stetic
 {
-	
-	public class SignalDescriptor: ItemDescriptor
+	public abstract class SignalDescriptor: ItemDescriptor
 	{
-		string name, label, description;
-		EventInfo eventInfo;
-		MethodInfo handler;
-		string gladeName;
-		
-		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+		protected string name, label, description;
+		protected string handlerTypeName;
+		protected string handlerReturnTypeName;
+		protected ParameterDescriptor[] handlerParameters;
 		
 		public SignalDescriptor (XmlElement elem, ItemGroup group, ClassDescriptor klass) : base (elem, group, klass)
+		{
+		}
+		
+		protected virtual void Load (XmlElement elem)
 		{
 			name = elem.GetAttribute ("name");
 			label = elem.GetAttribute ("label");
 			description = elem.GetAttribute ("description");
-
-			eventInfo = FindEvent (klass.WrapperType, klass.WrappedType, name);
-			handler = eventInfo.EventHandlerType.GetMethod ("Invoke");
-			
-			if (elem.HasAttribute ("glade-name"))
-				gladeName = elem.GetAttribute ("glade-name");
-			else {
-				object[] att = eventInfo.GetCustomAttributes (typeof(GLib.SignalAttribute), true);
-				if (att.Length > 0)
-					gladeName = ((GLib.SignalAttribute)att[0]).CName;
-			}
 		}
 		
 		public override string Name {
@@ -44,38 +34,36 @@ namespace Stetic
 			get { return description; }
 		}
 		
-		public string GladeName {
-			get { return gladeName; }
-		}
-
-		public Type HandlerType {
-			get { return eventInfo.EventHandlerType; }
+		public string HandlerTypeName {
+			get { return handlerTypeName; }
 		}
 		
-		public Type HandlerReturnType {
-			get { return handler.ReturnType; }
+		public string HandlerReturnTypeName {
+			get { return handlerReturnTypeName; }
 		}
 
-		public ParameterInfo[] HandlerParameters {
-			get { return handler.GetParameters (); }
+		public ParameterDescriptor[] HandlerParameters {
+			get { return handlerParameters; }
 		}
+	}	
 
-		static EventInfo FindEvent (Type wrapperType, Type objectType, string name)
+	[Serializable]
+	public class ParameterDescriptor
+	{
+		string name, type;
+		
+		public ParameterDescriptor (string name, string type)
 		{
-			EventInfo info;
-
-			if (wrapperType != null) {
-				info = wrapperType.GetEvent (name, flags);
-				if (info != null)
-					return info;
-			}
-
-			info = objectType.GetEvent (name, flags);
-			if (info != null)
-				return info;
-
-			throw new ArgumentException ("Invalid event name " + objectType.Name + "." + name);
+			this.name = name;
+			this.type = type;
+		}
+		
+		public string Name {
+			get { return name; }
+		}
+		
+		public string TypeName {
+			get { return type; }
 		}
 	}
-	
 }

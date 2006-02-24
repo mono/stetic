@@ -27,7 +27,7 @@ namespace Stetic.Wrapper {
 
 		void LabelWidgetChanged (object obj, GLib.NotifyArgs args)
 		{
-			if (frame.LabelWidget != null)
+			if (frame.LabelWidget != null && !(frame.LabelWidget is Stetic.Placeholder))
 				ObjectWrapper.Create (proj, frame.LabelWidget);
 		}
 
@@ -37,19 +37,19 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override Widget GladeImportChild (XmlElement child_elem)
+		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "label_item") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.GladeImport (proj, child_elem["widget"]);
+				ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
 				frame.LabelWidget = (Gtk.Widget)wrapper.Wrapped;
 				return (Widget)wrapper;
 			} else
-				return base.GladeImportChild (child_elem);
+				return base.ReadChild (child_elem, format);
 		}
 
-		public override XmlElement GladeExportChild (Widget wrapper, XmlDocument doc)
+		protected override XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)
 		{
-			XmlElement child_elem = base.GladeExportChild (wrapper, doc);
+			XmlElement child_elem = base.WriteChild (wrapper, doc, format);
 			if (wrapper.Wrapped == frame.LabelWidget)
 				GladeUtils.SetChildProperty (child_elem, "type", "label_item");
 			return child_elem;

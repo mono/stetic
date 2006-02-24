@@ -7,9 +7,7 @@ namespace Stetic {
 
 	public class CommandDescriptor : ItemDescriptor {
 
-		string name, label, description;
-		bool needsContext;
-		MethodInfo checkInfo, doInfo;
+		string name, checkName, label, description;
 
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
@@ -18,20 +16,7 @@ namespace Stetic {
 			name = elem.GetAttribute ("name");
 			label = elem.GetAttribute ("label");
 			description = elem.GetAttribute ("description");
-
-			doInfo = klass.WrapperType.GetMethod (name, flags, null, new Type[] { typeof (Gtk.Widget) }, null);
-			if (doInfo != null)
-				needsContext = true;
-			else
-				doInfo = klass.WrapperType.GetMethod (name, flags, null, new Type[0], null);
-			if (doInfo == null)
-				throw new ArgumentException ("Invalid command name " + klass.WrapperType.Name + "." + name);
-
-			if (elem.GetAttribute ("check") != "") {
-				checkInfo = klass.WrapperType.GetMethod (elem.GetAttribute ("check"), flags, null, needsContext ? new Type[] { typeof (Gtk.Widget) } : new Type[0], null);
-				if (checkInfo == null)
-					throw new ArgumentException ("Invalid checker name " + elem.GetAttribute ("check") + " for command " + klass.WrapperType.Name + "." + name);
-			}
+			checkName = elem.GetAttribute ("check");
 		}
 
 		public override string Name {
@@ -52,44 +37,47 @@ namespace Stetic {
 			}
 		}
 
-		public bool NeedsContext {
-			get {
-				return needsContext;
-			}
-		}
-
 		public bool Enabled (object obj)
 		{
-			if (checkInfo == null)
+			if (checkName == "")
 				return EnabledFor (obj);
 			else
-				return (bool)checkInfo.Invoke (ObjectWrapper.Lookup (obj), new object[0]);
+				return (bool) InvokeMethod (ObjectWrapper.Lookup (obj), checkName, null, false);
 		}
 
 		public bool Enabled (object obj, Gtk.Widget context)
 		{
-			if (checkInfo == null)
+			if (checkName == "")
 				return EnabledFor (obj);
 
 			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
-			if (needsContext)
-				return (bool)checkInfo.Invoke (wrapper, new object[] { context });
-			else
-				return (bool)checkInfo.Invoke (wrapper, new object[0]);
+			return (bool) InvokeMethod (wrapper, checkName, context, true);
 		}
 
 		public void Run (object obj)
 		{
-			doInfo.Invoke (ObjectWrapper.Lookup (obj), new object[0]);
+			InvokeMethod (ObjectWrapper.Lookup (obj), name, null, false);
 		}
 
 		public void Run (object obj, Gtk.Widget context)
 		{
 			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
-			if (needsContext)
-				doInfo.Invoke (wrapper, new object[] { context });
-			else
-				doInfo.Invoke (wrapper, new object[0]);
+			InvokeMethod (wrapper, name, context, true);
+		}
+		
+		object InvokeMethod (object target, string name, object context, bool withContext)
+		{
+			if (withContext) {
+				MethodInfo metc = target.GetType().GetMethod (name, flags, null, new Type[] {typeof(Gtk.Widget)}, null);
+				if (metc != null)
+					return metc.Invoke (target, new object[] { context });
+			}
+			
+			MethodInfo met = target.GetType().GetMethod (name, flags, null, Type.EmptyTypes, null);
+			if (met != null)
+				return met.Invoke (target, new object[0]);
+			
+			throw new ArgumentException ("Invalid command or checker name. Method '" + name +"' not found in class '" + target.GetType() + "'");
 		}
 	}
 }

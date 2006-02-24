@@ -1,8 +1,7 @@
-pkglib_DATA = stetic.exe
+pkglib_DATA = stetic.exe stetic.exe.mdb
 bin_SCRIPTS = stetic
 
 stetic_exe_sources =			\
-	Glade.cs			\
 	Stetic.cs			\
 	UIManager.cs
 

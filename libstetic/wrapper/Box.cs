@@ -23,7 +23,7 @@ namespace Stetic.Wrapper {
 
 		protected override bool AllowPlaceholders {
 			get {
-				return InternalChildId != null;
+				return InternalChildProperty != null;
 			}
 		}
 

@@ -14,6 +14,7 @@ namespace Stetic.Editor {
 		RadioGroupManager manager;
 		ArrayList values;
 		string group;
+		PropertyDescriptor prop;
 
 		const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
@@ -23,20 +24,21 @@ namespace Stetic.Editor {
 		
 		public void Initialize (PropertyDescriptor prop)
 		{
-			PropertyInfo info = prop.PropertyInfo;
-			Type owner = info.DeclaringType;
-
-			FieldInfo managerInfo = owner.GetField (info.Name + "Manager", flags);
-			if (managerInfo == null || managerInfo.FieldType != typeof (Stetic.RadioGroupManager))
-				throw new ArgumentException ("No 'static RadioGroupManager " + info.Name + "Manager' property on " + owner.FullName);
-
-			manager = managerInfo.GetValue (null) as RadioGroupManager;
-			manager.GroupsChanged += GroupsChanged;
-			GroupsChanged ();
+			this.prop = prop;
 		}
 		
 		public void AttachObject (object ob)
 		{
+			ob = ObjectWrapper.Lookup (ob);
+			Type owner = ob.GetType ();
+
+			FieldInfo managerInfo = owner.GetField (prop.Name + "Manager", flags);
+			if (managerInfo == null || managerInfo.FieldType != typeof (Stetic.RadioGroupManager))
+				throw new ArgumentException ("No 'static RadioGroupManager " + prop.Name + "Manager' property on " + owner.FullName);
+
+			manager = managerInfo.GetValue (null) as RadioGroupManager;
+			manager.GroupsChanged += GroupsChanged;
+			GroupsChanged ();
 		}
 
 		public override void Dispose ()

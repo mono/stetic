@@ -11,7 +11,7 @@ namespace Stetic.Editor {
 
 		public void Initialize (PropertyDescriptor descriptor)
 		{
-			if (descriptor.PropertyType != typeof(bool))
+			if (descriptor.PropertyType != typeof(char))
 				throw new ApplicationException ("Char editor does not support editing values of type " + descriptor.PropertyType);
 		}
 		

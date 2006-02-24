@@ -29,6 +29,8 @@ namespace Stetic {
 			lab.Markup = "<i>No selection</i>";
 			PackStart (lab, false, false, 0);
 			noSelection = lab;
+			
+			Stetic.Registry.RegistryChanging += new EventHandler (OnRegistryChanging);
 		}
 		
 		public PropertyGrid (Project project): this ()
@@ -36,6 +38,20 @@ namespace Stetic {
 			this.Project = project;
 		}
 		
+		public override void Dispose ()
+		{
+			base.Dispose ();
+		}
+		
+		void OnRegistryChanging (object o, EventArgs args)
+		{
+			cachedGroups.Clear ();
+			Clear ();
+			foreach (Gtk.Widget w in Children)
+				if (! (w is PropertyGridHeader))
+					Remove (w);
+		}
+
 		public Project Project {
 			get { return project; }
 			set {
@@ -47,7 +63,7 @@ namespace Stetic {
 				Selected (null, null);
 			}
 		}
-
+		
 		void Clear ()
 		{
 			if (selection != null) {
@@ -55,7 +71,6 @@ namespace Stetic {
 				selection = null;
 			}
 			foreach (Gtk.Widget w in Children)
-//				Remove (w);
 				w.Hide ();
 		}
 
@@ -82,7 +97,7 @@ namespace Stetic {
 			
 			selection = newSelection;
 
-			if (selection == null) {
+			if (selection == null || selection.Wrapped is ErrorWidget) {
 				noSelection.Show ();
 				return false;
 			}
@@ -91,14 +106,14 @@ namespace Stetic {
 
 			selection.Notify += Notified;
 
-			klass = Registry.LookupClass (selection.Wrapped.GetType ());
+			klass = selection.ClassDescriptor;
 
 			header.AttachObject (selection.Wrapped);
 			AppendItemGroups (klass, selection.Wrapped);
 
 			packingSelection = Stetic.Wrapper.Container.ChildWrapper (selection);
 			if (packingSelection != null) {
-				klass = Registry.LookupClass (packingSelection.Wrapped.GetType ());
+				klass = packingSelection.ClassDescriptor;
 				if (klass.ItemGroups.Count > 0) {
 					AppendItemGroups (klass, packingSelection.Wrapped);
 					packingSelection.Notify += Notified;
@@ -167,9 +182,8 @@ namespace Stetic {
 		{
 			PropertyEditor rep = new PropertyEditor (prop);
 
+			// FIXME: Make sure all notify events are based on prop names, not propspec
 			editors[prop.Name] = rep;
-			if (prop.ParamSpec != null)
-				editors[prop.ParamSpec.Name] = rep;
 
 			AppendPair (prop.Label, rep, prop.Description);
 			rep.ShowAll ();
@@ -237,7 +251,7 @@ namespace Stetic {
 		
 		public PropertyGridHeader ()
 		{
-			name = (PropertyDescriptor)Registry.LookupClass ("GtkWidget") ["Name"];
+			name = (PropertyDescriptor)Registry.LookupClassByName ("Gtk.Widget") ["Name"];
 			AppendProperty (name);
 
 			Gtk.HBox box = new Gtk.HBox (false, 6);
@@ -253,8 +267,9 @@ namespace Stetic {
 		{
 			base.AttachObject (ob);
 			Gtk.Widget w = (Gtk.Widget) ob;
-			image.Pixbuf = Registry.LookupClass (w.GetType ()).Icon;
-			label.Text = w.GetType().FullName;
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (w);
+			image.Pixbuf = wrapper.ClassDescriptor.Icon;
+			label.Text = wrapper.ClassDescriptor.WrappedTypeName;
 		}
 	}
 }

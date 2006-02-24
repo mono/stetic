@@ -1,6 +1,9 @@
 using Gtk;
 using System;
+using System.Collections;
 using System.Reflection;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 
 namespace Stetic {
 
@@ -16,10 +19,73 @@ namespace Stetic {
 
 		public static Stetic.UIManager UIManager;
 		public static Gtk.Window MainWindow;
+		
+		static string language = "C#";
+		static ArrayList libraries = new ArrayList ();
+		
 
-		public static int Main (string[] args) {
+		public static int Main (string[] args)
+		{
 			Program = new Gnome.Program ("Stetic", "0.0", Gnome.Modules.UI, args);
-
+			
+			int n = 0;
+			
+			while (n < args.Length) {
+				string arg = args[n];
+				if (arg.StartsWith ("--language:"))
+					language = arg.Substring (11);
+				else if (arg.StartsWith ("-l:"))
+					language = arg.Substring (3);
+				else if (arg.StartsWith ("-lib:"))
+					libraries.Add (arg.Substring (5));
+				else if (arg.StartsWith ("--library:"))
+					libraries.Add (arg.Substring (10));
+				else if (arg == "--generate" || arg == "-g")
+					break;
+				n++;
+			}
+			
+			if (args.Length - n > 2) {
+				if (args [n] == "--generate" || args [n] == "-g")
+					return GenerateCode (args [n+1], args, n+2);
+			}
+			
+			if (args.Length == 1 && args [0] == "--help") {
+				Console.WriteLine ("Stetic - A GTK User Interface Builder"); 
+				Console.WriteLine ("Usage:");
+				Console.WriteLine ("\tstetic [<file>]");
+				Console.WriteLine ("\tstetic [--language:<language>] [-lib:<library>...] --generate <sourceFile> <projectFile> ...");
+				return 0;
+			}
+			
+			return RunApp (args);
+		}
+		
+		static int GenerateCode (string file, string[] args, int n)
+		{
+			foreach (string lib in libraries)
+				Registry.RegisterWidgetLibrary (new AssemblyWidgetLibrary (lib));
+	
+			Project[] projects = new Project [args.Length - n];
+			for (int i=n; i<args.Length; i++) {
+				projects [i - n] = new Project ();
+				if (System.IO.Path.GetExtension (args [i]) == ".glade")
+					GladeFiles.Import (projects [i - n], args [i]);
+				else
+					projects [i - n].Load (args [i]);
+			}
+			CodeDomProvider provider = GetProvider (language);
+			CodeGenerator.GenerateProjectCode (file, "Stetic", provider, projects);
+			return 0;
+		}
+		
+		static CodeDomProvider GetProvider (string language)
+		{
+			return new Microsoft.CSharp.CSharpCodeProvider ();
+		}
+		
+		static int RunApp (string[] args)
+		{
 			Project = new Project ();
 			Project.WidgetAdded += OnWidgetAdded;
 			Project.Selected += OnSelectionChanged;

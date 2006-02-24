@@ -11,7 +11,7 @@ namespace Stetic.Wrapper {
 			return new Gtk.ImageMenuItem ("");
 		}
 
-		public override void GladeImport (XmlElement elem)
+		public override void Read (XmlElement elem, FileFormat format)
 		{
 			Gtk.StockItem stockItem = Gtk.StockItem.Zero;
 			bool use_stock = (bool)GladeUtils.ExtractProperty (elem, "use_stock", false);
@@ -21,7 +21,7 @@ namespace Stetic.Wrapper {
 				if (stockItem.Label != null)
 					GladeUtils.ExtractProperty (elem, "label", "");
 			}
-			base.GladeImport (elem);
+			base.Read (elem, format);
 
 			if (stockItem.StockId != null)
 				Image = "stock:" + stockItem.StockId;

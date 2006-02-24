@@ -35,7 +35,7 @@ namespace Stetic {
 			widget = wrapper.Wrapped;
 
 			if (widget == context) {
-				item = LabelItem (context);
+				item = LabelItem (widget);
 				item.Sensitive = false;
 				Add (item);
 			}
@@ -44,7 +44,7 @@ namespace Stetic {
 			item.Activated += DoSelect;
 			Add (item);
 
-			ClassDescriptor klass = Registry.LookupClass (widget.GetType ());
+			ClassDescriptor klass = wrapper.ClassDescriptor;
 			if (klass != null) {
 				foreach (ItemDescriptor id in klass.ContextMenu) {
 					CommandDescriptor cmd = (CommandDescriptor)id;
@@ -60,7 +60,7 @@ namespace Stetic {
 				}
 			}
 
-			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildId != null, widget == context, context);
+			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildProperty != null, widget == context, context);
 		}
 
 		void BuildContextMenu (Stetic.Wrapper.Widget parentWrapper, bool occupied, bool isInternal, bool top, Widget context)
@@ -146,21 +146,25 @@ namespace Stetic {
 		{
 			ImageMenuItem item;
 			Label label;
-
+			
 			label = new Label (widget is Placeholder ? "Placeholder" : widget.Name);
 			label.UseUnderline = false;
 			label.SetAlignment (0.0f, 0.5f);
 			item = new ImageMenuItem ();
 			item.Add (label);
 
-			ClassDescriptor klass = Registry.LookupClass (widget.GetType ());
-			if (klass != null) {
-				Gdk.Pixbuf pixbuf = klass.Icon;
-				int width, height;
-				Gtk.Icon.SizeLookup (Gtk.IconSize.Menu, out width, out height);
-				item.Image = new Gtk.Image (pixbuf.ScaleSimple (width, height, Gdk.InterpType.Bilinear));
+			Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
+			
+			if (wrapper != null) {
+				ClassDescriptor klass = wrapper.ClassDescriptor;
+				if (klass != null) {
+					Gdk.Pixbuf pixbuf = klass.Icon;
+					int width, height;
+					Gtk.Icon.SizeLookup (Gtk.IconSize.Menu, out width, out height);
+					item.Image = new Gtk.Image (pixbuf.ScaleSimple (width, height, Gdk.InterpType.Bilinear));
+				}
 			}
-
+			
 			return item;
 		}
 	}

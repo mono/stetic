@@ -19,10 +19,10 @@ namespace Stetic.Wrapper {
 				icon = "stock:" + toolbutton.StockId;
 		}
 
-		public override void GladeImport (XmlElement elem)
+		public override void Read (XmlElement elem, FileFormat format)
 		{
 			string icon = (string)GladeUtils.ExtractProperty (elem, "icon", "");
-			base.GladeImport (elem);
+			base.Read (elem, format);
 			if (icon != "")
 				Icon = "file:" + icon;
 			else if (((Gtk.ToolButton)Wrapped).StockId == null)

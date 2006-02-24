@@ -1,4 +1,4 @@
-SUBDIRS = glue libstetic libsteticui stetic
+SUBDIRS = libstetic libsteticui stetic
 
 pkgconfigdir = $(prefix)/lib/pkgconfig
 pkgconfig_DATA = stetic.pc

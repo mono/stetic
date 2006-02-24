@@ -30,7 +30,7 @@ namespace Stetic.Editor {
 
 			tips = new Gtk.Tooltips ();
 
-			enm = Registry.LookupEnum (prop.PropertyType);
+			enm = Registry.LookupEnum (prop.PropertyType.FullName);
 			foreach (Enum value in enm.Values)
 				combo.AppendText (enm[value].Label);
 		}

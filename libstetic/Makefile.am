@@ -1,10 +1,14 @@
-pkglib_DATA = libstetic.dll libstetic.dll.config
+pkglib_DATA = libstetic.dll libstetic.dll.config libstetic.dll.mdb
 
 libstetic_dll_sources =			\
+	AssemblyWidgetLibrary.cs 	\
 	ClassDescriptor.cs		\
 	CommandDescriptor.cs		\
 	DND.cs				\
+	ErrorWidget.cs		\
 	EnumDescriptor.cs		\
+	EmbedWindow.cs		\
+	GeneratorContext.cs			\
 	GladeException.cs		\
 	GladeUtils.cs			\
 	HandleWindow.cs			\
@@ -16,15 +20,22 @@ libstetic_dll_sources =			\
 	ObjectWrapper.cs		\
 	ParamSpec.cs			\
 	Placeholder.cs			\
+	PreviewBox.cs		\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
 	RadioGroupManager.cs		\
 	Registry.cs			\
 	Set.cs				\
+	Shadow.cs				\
 	SignalDescriptor.cs		\
 	TextBox.cs			\
 	Tooltips.cs			\
 	TranslatableAttribute.cs	\
+	TypedClassDescriptor.cs		\
+	TypedPropertyDescriptor.cs		\
+	TypedSignalDescriptor.cs		\
+	WidgetLibrary.cs	\
+	WidgetUtils.cs		\
 	editor/Accelerator.cs		\
 	editor/Boolean.cs		\
 	editor/Char.cs			\
@@ -43,6 +54,13 @@ libstetic_dll_sources =			\
 	editor/StringArray.cs		\
 	editor/Text.cs			\
 	editor/Translatable.cs		\
+	Metacity/ButtonFunction.cs \
+	Metacity/ButtonLayout.cs \
+	Metacity/FrameFlags.cs \
+	Metacity/FrameType.cs \
+	Metacity/ObjectManager.cs \
+	Metacity/Preview.cs \
+	Metacity/Theme.cs \
 	wrapper/Box.cs			\
 	wrapper/Button.cs		\
 	wrapper/ButtonBox.cs		\
@@ -53,6 +71,7 @@ libstetic_dll_sources =			\
 	wrapper/Container.cs		\
 	wrapper/Custom.cs		\
 	wrapper/Dialog.cs		\
+	wrapper/Entry.cs		\
 	wrapper/Expander.cs		\
 	wrapper/FontButton.cs		\
 	wrapper/FontSelectionDialog.cs	\
@@ -100,7 +119,7 @@ libstetic.dll: $(libstetic_dll_sources) $(libstetic_dll_resources)
 	@rm -f sources.rsp
 	@echo $(libstetic_dll_sources:%=$(srcdir)/%) > sources.rsp
 	@for resource in $(libstetic_dll_resources); do echo -resource:$$resource,`basename $$resource` >> sources.rsp; done
-	$(MCS) -debug -pkg:gnome-sharp-2.0 -target:library -out:$@ @sources.rsp
+	$(MCS) -debug -unsafe -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -target:library -out:$@ @sources.rsp
 
 CLEANFILES = libstetic.dll libstetic.dll.mdb sources.rsp
 
