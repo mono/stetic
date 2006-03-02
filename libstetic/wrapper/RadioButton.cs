@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Xml;
+using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
@@ -40,6 +41,20 @@ namespace Stetic.Wrapper {
 			if (group != Wrapped.Name)
 				GladeUtils.SetProperty (elem, "group", group);
 			return elem;
+		}
+		
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, TypedPropertyDescriptor prop)
+		{
+			if (prop.Name == "Group") {
+				CodeExpression groupExp = GroupManager.GenerateGroupExpression (ctx, (Gtk.Widget) Wrapped);
+				statements.Add (
+					new CodeAssignStatement (
+						new CodePropertyReferenceExpression (var, "Group"),
+						groupExp)
+				);
+			}
+			else
+				base.GeneratePropertySet (ctx, statements, var, prop);
 		}
 
 		public string Group {

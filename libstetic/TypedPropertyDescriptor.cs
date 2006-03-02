@@ -8,14 +8,17 @@ namespace Stetic
 {
 	public class TypedPropertyDescriptor : PropertyDescriptor {
 
-		PropertyInfo memberInfo, propertyInfo;
+		PropertyInfo memberInfo, propertyInfo, runtimePropertyInfo, runtimeMemberInfo;
 		ParamSpec pspec;
 		TypedPropertyDescriptor gladeProperty;
+		bool isWrapperProperty;
+		TypedClassDescriptor klass;
 
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
 		public TypedPropertyDescriptor (XmlElement elem, ItemGroup group, TypedClassDescriptor klass) : base (elem, group, klass)
 		{
+			this.klass = klass;
 			string propertyName = elem.GetAttribute ("name");
 			int dot = propertyName.IndexOf ('.');
 
@@ -30,6 +33,11 @@ namespace Stetic
 				propertyInfo = FindProperty (klass.WrapperType, klass.WrappedType, propertyName);
 				isWrapperProperty = propertyInfo.DeclaringType.IsSubclassOf (typeof (ObjectWrapper));
 			}
+			
+			// Wrapper properties that override widgets properties (using the same name)
+			// must be considered runtime properties (will be available at run-time).
+			if (!isWrapperProperty || klass.WrappedType.GetProperty (propertyName) != null)
+				isRuntimeProperty = true;
 			
 			if (!IsInternal && propertyInfo.PropertyType.IsEnum &&
 			    Registry.LookupEnum (propertyInfo.PropertyType.FullName) == null)
@@ -188,6 +196,41 @@ namespace Stetic
 			propertyInfo.SetValue (obj, value, null);
 		}
 
+		public override void SetRuntimeValue (object obj, object value)
+		{
+			if (runtimePropertyInfo == null)
+				SetupRuntimeProperties ();
+			if (runtimeMemberInfo != null)
+				obj = runtimeMemberInfo.GetValue (obj, null);
+			
+			if (runtimePropertyInfo.PropertyType.IsInstanceOfType (value))
+				runtimePropertyInfo.SetValue (obj, value, null);
+		}
+		
+		public override object GetRuntimeValue (object obj)
+		{
+			if (runtimePropertyInfo == null)
+				SetupRuntimeProperties ();
+			if (runtimeMemberInfo != null)
+				obj = runtimeMemberInfo.GetValue (obj, null);
+			return runtimePropertyInfo.GetValue (obj, null);
+		}
+		
+		void SetupRuntimeProperties ()
+		{
+			if (isWrapperProperty) {
+				Type t = klass.WrappedType;
+				if (memberInfo != null) {
+					runtimeMemberInfo = t.GetProperty (memberInfo.Name, flags);
+					t = runtimeMemberInfo.PropertyType;
+				}
+				runtimePropertyInfo = t.GetProperty (propertyInfo.Name, flags);
+			} else {
+				runtimeMemberInfo = memberInfo;
+				runtimePropertyInfo = propertyInfo;
+			}
+		}
+		
 		public virtual bool GladeOverride {
 			get {
 				return gladeOverride;

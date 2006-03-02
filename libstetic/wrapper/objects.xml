@@ -326,7 +326,15 @@
 	</signals>
     </object>
 
-    <object type="Gtk.Bin,gtk-sharp" />
+    <object type="Gtk.Bin,gtk-sharp" wrapper="Stetic.Wrapper.Bin"
+    	label="Bin" icon="custom.png" palette-category="widget">
+	<itemgroups>
+	    <itemgroup ref="Gtk.Widget" />
+	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	</signals>
+    </object>
 
     <object type="Gtk.Box,gtk-sharp" wrapper="Stetic.Wrapper.Box">
 	<itemgroups>

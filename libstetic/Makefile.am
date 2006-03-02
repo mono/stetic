@@ -4,6 +4,7 @@ libstetic_dll_sources =			\
 	AssemblyWidgetLibrary.cs 	\
 	ClassDescriptor.cs		\
 	CommandDescriptor.cs		\
+	CustomWidget.cs		\
 	DND.cs				\
 	ErrorWidget.cs		\
 	EnumDescriptor.cs		\
@@ -61,6 +62,7 @@ libstetic_dll_sources =			\
 	Metacity/ObjectManager.cs \
 	Metacity/Preview.cs \
 	Metacity/Theme.cs \
+	wrapper/Bin.cs			\
 	wrapper/Box.cs			\
 	wrapper/Button.cs		\
 	wrapper/ButtonBox.cs		\

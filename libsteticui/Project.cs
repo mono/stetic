@@ -442,14 +442,17 @@ namespace Stetic {
 		
 		public void BeginGladeImport ()
 		{
-			loading = true;
 		}
 
 		public void EndGladeImport ()
 		{
-			loading = false;
 			if (GladeImportComplete != null)
 				GladeImportComplete ();
+		}
+		
+		internal ProjectNode GetNode (object widget)
+		{
+			return (ProjectNode) nodes[widget];
 		}
 		
 		protected virtual void OnModifiedChanged (EventArgs args)

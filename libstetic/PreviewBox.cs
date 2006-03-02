@@ -136,22 +136,24 @@ namespace Stetic
 		protected override void OnParentSet (Gtk.Widget previousParent)
 		{
 			base.OnParentSet (previousParent);
-			if (Parent != null) {
-				if (Parent.IsRealized)
-					ShowAll ();
-				else
-					Parent.Realized += OnParentRealized;
-			}
+			
+			if (previousParent != null)
+				previousParent.Realized -= OnParentRealized;
+			
+			if (Parent != null)
+				Parent.Realized += OnParentRealized;
 		}
 		
 		void OnParentRealized (object s, EventArgs args)
 		{
-			Parent.Realized -= OnParentRealized;
-			ShowAll ();
-			
-			// Make sure everything is in place before continuing
-			while (Gtk.Application.EventsPending ())
-				Gtk.Application.RunIteration ();
+			if (Parent != null) {
+				Parent.Realized -= OnParentRealized;
+				ShowAll ();
+				
+				// Make sure everything is in place before continuing
+				while (Gtk.Application.EventsPending ())
+					Gtk.Application.RunIteration ();
+			}
 		}
 		
 		void OnResized (object s, Gtk.SizeAllocatedArgs a)

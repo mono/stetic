@@ -25,7 +25,17 @@ namespace Stetic.Wrapper {
 
 		void NotifyHandler (object obj, GLib.NotifyArgs args)
 		{
-			EmitNotify (args.Property);
+			// Translate gtk names into descriptor names.
+			
+			foreach (ItemGroup group in ClassDescriptor.ItemGroups) {
+				foreach (ItemDescriptor item in group) {
+					TypedPropertyDescriptor prop = item as TypedPropertyDescriptor;
+					if (prop != null && prop.GladeName == args.Property) {
+						EmitNotify (prop.Name);
+						return;
+					}
+				}
+			}
 		}
 	}
 }

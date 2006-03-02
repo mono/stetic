@@ -10,6 +10,8 @@ namespace Stetic {
 
 		Hashtable groups;
 		Project project;
+		WidgetLibrary[] libraries;
+		ArrayList visibleGroups = new ArrayList ();
 
 		class Group : Gtk.Expander {
 		
@@ -39,6 +41,11 @@ namespace Stetic {
 		{
 			groups = new Hashtable ();
 			Registry.RegistryChanged += OnRegistryChanged;
+			
+			ShowGroup ("widget", "Widgets");
+			ShowGroup ("container", "Containers");
+			ShowGroup ("toolbaritem", "Toolbar Items");
+			ShowGroup ("window", "Windows");
 		}
 		
 		public override void Dispose ()
@@ -60,6 +67,33 @@ namespace Stetic {
 			}
 		}
 		
+		public WidgetLibrary[] WidgetLibraries {
+			get { return libraries; }
+			set { 
+				libraries = value; 
+				LoadWidgets (project);
+			}
+		}
+		
+		public void ShowGroup (string name, string label)
+		{
+			visibleGroups.Add (new string[] { name, label });
+			if (project != null)
+				LoadWidgets (project);
+		}
+		
+		public void HideGroup (string name)
+		{
+			for (int n=0; n < visibleGroups.Count; n++) {
+				if (((string[])visibleGroups[n])[0] == name) {
+					visibleGroups.RemoveAt (n);
+					if (project != null)
+						LoadWidgets (project);
+					return;
+				}
+			}
+		}
+		
 		void OnRegistryChanged (object o, EventArgs args)
 		{
 			LoadWidgets (project);
@@ -71,21 +105,30 @@ namespace Stetic {
 				Remove (g);
 				
 			groups.Clear ();
-
-			AddOrGetGroup ("widget", "Widgets");
-			AddOrGetGroup ("container", "Containers");
-			AddOrGetGroup ("toolbaritem", "Toolbar Items");
-			AddOrGetGroup ("window", "Windows");
+			
+			foreach (string[] grp in visibleGroups)
+				AddOrGetGroup (grp[0], grp[1]);
 
 			ArrayList classes = new ArrayList ();
-			foreach (ClassDescriptor klass in Registry.AllClasses)
-				classes.Add (klass);
+			if (libraries == null) {
+				foreach (ClassDescriptor klass in Registry.AllClasses)
+					classes.Add (klass);
+			} else {
+				classes.AddRange (Registry.CoreWidgetLibrary.AllClasses);
+				foreach (WidgetLibrary lib in libraries)
+					if (lib != Registry.CoreWidgetLibrary)
+						classes.AddRange (lib.AllClasses);
+			}
+			
 			classes.Sort (this);
 
 			foreach (ClassDescriptor klass in classes) {
 				if (klass.Deprecated || klass.Category == "")
 					continue;
 
+				if (!groups.Contains (klass.Category))
+					continue;
+					
 				WidgetFactory factory;
 				if (klass.Category == "window")
 					factory = new WindowFactory (project, klass);

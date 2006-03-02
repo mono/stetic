@@ -47,9 +47,41 @@ namespace Stetic
 			bool multiProject = projects.Length > 1;
 			
 			CodeTypeDeclaration type = new CodeTypeDeclaration ("Gui");
+			type.Attributes = MemberAttributes.Private;
+			type.TypeAttributes = TypeAttributes.NestedAssembly;
 			cns.Types.Add (type);
 			
+			// Buid method overload that takes a type as parameter.
+			
 			CodeMemberMethod met = new CodeMemberMethod ();
+			met.Name = "Build";
+			type.Members.Add (met);
+			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(object), "obj"));
+			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(Type), "type"));
+			if (multiProject)
+				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "file"));
+			met.ReturnType = new CodeTypeReference (typeof(void));
+			met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
+			
+			CodeMethodInvokeExpression call = new CodeMethodInvokeExpression (
+					new CodeMethodReferenceExpression (
+						new CodeTypeReferenceExpression (cns.Name + ".Gui"),
+						"Build"
+					),
+					new CodeVariableReferenceExpression ("obj"),
+					new CodePropertyReferenceExpression (
+						new CodeVariableReferenceExpression ("type"),
+						"FullName"
+					)
+			);
+			if (multiProject)
+				call.Parameters.Add (new CodeVariableReferenceExpression ("file"));
+				
+			met.Statements.Add (call);
+			
+			// Generate the build method
+			
+			met = new CodeMemberMethod ();
 			met.Name = "Build";
 			type.Members.Add (met);
 			
@@ -101,13 +133,14 @@ namespace Stetic
 					);
 					widgetCol.Add (cond);
 					
-					CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (w.GetType(), "cobj");
-					varDec.InitExpression = new CodeCastExpression (w.GetType(), cobj);
+					Stetic.Wrapper.Widget wwidget = Stetic.Wrapper.Widget.Lookup (w);
+					
+					CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (wwidget.ClassDescriptor.WrappedTypeName, "cobj");
+					varDec.InitExpression = new CodeCastExpression (wwidget.ClassDescriptor.WrappedTypeName, cobj);
 					cond.TrueStatements.Add (varDec);
 
-					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateBuildCode (w, "cobj", cond.TrueStatements);
+					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateBuildCode (cns, w, "cobj", cond.TrueStatements);
 					
-					Stetic.Wrapper.Widget wwidget = Stetic.Wrapper.Widget.Lookup (w);
 					BindSignalHandlers (wwidget, wwidget, map, cond.TrueStatements);
 					
 					widgetCol = cond.FalseStatements;
@@ -230,10 +263,10 @@ namespace Stetic
 			}
 		}
 		
-		public static WidgetMap GenerateBuildCode (Gtk.Widget w, string widgetVarName, CodeStatementCollection statements)
+		public static WidgetMap GenerateBuildCode (CodeNamespace cns, Gtk.Widget w, string widgetVarName, CodeStatementCollection statements)
 		{
 			statements.Add (new CodeCommentStatement ("Widget " + w.Name));
-			GeneratorContext ctx = new ProjectGeneratorContext ();
+			GeneratorContext ctx = new ProjectGeneratorContext (cns);
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (w);
 			ctx.GenerateBuildCode (ww, widgetVarName, statements);
 			return ctx.WidgetMap;
@@ -242,7 +275,7 @@ namespace Stetic
 	
 	class ProjectGeneratorContext: GeneratorContext
 	{
-		public ProjectGeneratorContext (): base ("w")
+		public ProjectGeneratorContext (CodeNamespace cns): base (cns, "w")
 		{
 		}
 		

@@ -20,6 +20,9 @@ namespace Stetic {
 		protected ItemGroup internalChildren;
 		
 		PropertyDescriptor[] initializationProperties;
+		static PropertyDescriptor[] emptyPropArray = new PropertyDescriptor[0];
+
+		int counter;
 
 		protected void Load (XmlElement elem)
 		{
@@ -104,7 +107,8 @@ namespace Stetic {
 					list.Add (idesc);
 				}
 				initializationProperties = (PropertyDescriptor[]) list.ToArray (typeof(PropertyDescriptor));
-			}
+			} else
+				initializationProperties = emptyPropArray;
 		}
 		
 		public virtual string Name {
@@ -164,6 +168,19 @@ namespace Stetic {
 		public object NewInstance (IProject proj)
 		{
 			object ob = CreateInstance (proj);
+			
+			string name = WrappedTypeName.ToLower () + (++counter).ToString ();
+			int i = name.IndexOf ('.');
+			if (i != -1) name = name.Substring (i+1);
+			
+			foreach (ItemGroup group in groups) {
+				foreach (ItemDescriptor item in group) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop != null && prop.InitWithName)
+						prop.SetValue (ob, name);
+				}
+			}
+			
 			ObjectWrapper ow = CreateWrapper ();
 			ObjectWrapper.Bind (proj, this, ow, ob, false);
 			return ob;

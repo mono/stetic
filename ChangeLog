@@ -1,3 +1,53 @@
+2006-03-02  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/CodeGenerator.cs: Generated class is not internal.
+	  Generate a new Build overload, which takes a type instead of
+	  an id as parameter. Other minor fixes.
+	* libsteticui/Palette.cs: Added methods for showing/hiding groups.
+	  Added property for setting the widget libraries to show in
+	  the palette.
+	* libsteticui/Clipboard.cs: Use the native format to make copies
+	  of widgets.
+	* libsteticui/ProjectView.cs: Redraw the tree when widget names
+	  change.
+	* libsteticui/Project.cs: Added method for getting a node.
+	* libstetic/PreviewBox.cs: Added some null checks.
+	
+	* libstetic/wrapper/RadioToolButton.cs:
+	* libstetic/wrapper/RadioButton.cs:
+	* libstetic/wrapper/RadioMenuItem.cs:
+	* libstetic/RadioGroupManager.cs: Added support for code generation.
+	
+	* libstetic/Registry.cs: Added getter for the core widget library.
+	* libstetic/wrapper/Container.cs: Generate code only for properties
+	  available at run time.
+	* libstetic/wrapper/Widget.cs: Same as previous. Also use the wrapped
+	  type name specified by the class descriptor, instead of using the
+	  real type of the object, since it may be a design-time only object.
+	* libstetic/wrapper/Object.cs: Translate gtk property names to managed
+	  names when firing the notify event.
+	* libstetic/wrapper/Custom.cs: Don't use GdkWindow.SetBackPixmap since
+	  it seems to fail for some widget sizes.
+	* libstetic/wrapper/objects.xml: Specified a custom wrapper for Bin.
+	  Added references to Gtk.Widget properties and signals.
+	  
+	* libstetic/PropertyDescriptor.cs: Added some methods for handling
+	  property values at run-time.
+	* libstetic/TypedPropertyDescriptor.cs: Added support for run-time
+	  properties.
+	* libstetic/GeneratorContext.cs: Added CodeNamespace property.
+	
+	* libstetic/WidgetUtils.cs: Use XmlElement instead of XmlDocument
+	  for exporting/importing widgets (its more generic). Implemented
+	  Copy/Paste methods based on native format serialization.
+	  Added some BuildWidget methods (which are not used right now).
+	
+	* libstetic/ClassDescriptor.cs: Properly initialize the name of the
+	  widget.
+	* libstetic/TypedClassDescriptor.cs: Moved name initialization to
+	  base class.
+	* libstetic/Makefile.am: Updated.
+
 2006-02-24  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/Glade.cs: Use the new api for reading/writing.

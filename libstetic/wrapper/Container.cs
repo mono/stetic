@@ -308,7 +308,7 @@ namespace Stetic.Wrapper {
 			foreach (ItemGroup group in klass.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
-					if (prop == null || prop.IsWrapperProperty)
+					if (prop == null || !prop.IsRuntimeProperty)
 						continue;
 					GenerateChildPropertySet (ctx, childStatements, var, klass, prop, cc);
 				}

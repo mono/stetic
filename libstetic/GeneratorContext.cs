@@ -6,16 +6,22 @@ namespace Stetic
 {
 	public class GeneratorContext
 	{
+		CodeNamespace cns;
 		int n;
 		string idPrefix;
 		Hashtable vars = new Hashtable ();
 		Hashtable widgets = new Hashtable ();
 		WidgetMap map;
 		
-		public GeneratorContext (string idPrefix)
+		public GeneratorContext (CodeNamespace cns, string idPrefix)
 		{
+			this.cns = cns;
 			this.idPrefix = idPrefix;
 			map = new WidgetMap (vars, widgets);
+		}
+		
+		public CodeNamespace CodeNamespace {
+			get { return cns; }
 		}
 		
 		public string NewId ()
@@ -27,7 +33,7 @@ namespace Stetic
 		{
 			string varName = NewId ();
 			
-			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (widget.Wrapped.GetType (), varName);
+			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (widget.ClassDescriptor.WrappedTypeName, varName);
 			statements.Add (varDec);
 			varDec.InitExpression = widget.GenerateWidgetCreation (this, statements);
 			GenerateBuildCode (widget, varName, statements);

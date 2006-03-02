@@ -22,6 +22,10 @@ namespace Stetic {
 			RegisterWidgetLibrary (coreLib);
 		}
 		
+		public static WidgetLibrary CoreWidgetLibrary {
+			get { return coreLib; }
+		}
+		
 		public static void RegisterWidgetLibrary (WidgetLibrary library)
 		{
 			NotifyChanging ();

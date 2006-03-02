@@ -94,8 +94,6 @@ namespace Stetic
 		[DllImport("libgobject-2.0-0.dll")]
 		static extern IntPtr g_object_new (IntPtr gtype, IntPtr dummy);
 
-		int counter;
-
 		public override object CreateInstance (IProject proj)
 		{
 			object inst;
@@ -109,14 +107,6 @@ namespace Stetic
 				inst = cinfo.Invoke (new object[] { raw });
 			}
 
-			string name = wrapped.Name.ToLower () + (++counter).ToString ();
-			foreach (ItemGroup group in groups) {
-				foreach (ItemDescriptor item in group) {
-					PropertyDescriptor prop = item as PropertyDescriptor;
-					if (prop != null && prop.InitWithName)
-						prop.SetValue (inst, name);
-				}
-			}
 			return inst;
 		}
 		

@@ -40,12 +40,14 @@ namespace Stetic {
 				if (project != null) {
 					project.Selected -= WidgetSelected;
 					project.ProjectReloaded -= OnProjectReloaded;
+					project.WidgetNameChanged -= OnWidgetNameChanged;
 				}
 				project = value;
 				if (project != null) {
 					NodeStore = project.Store;
 					project.Selected += WidgetSelected;
 					project.ProjectReloaded += OnProjectReloaded;
+					project.WidgetNameChanged += OnWidgetNameChanged;
 				}
 			}
 		}
@@ -112,6 +114,9 @@ namespace Stetic {
 				return base.OnPopupMenu ();
 		}
 
-
+		void OnWidgetNameChanged (object s, Wrapper.WidgetNameChangedArgs args)
+		{
+			QueueDraw ();
+		}
 	}
 }

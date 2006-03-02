@@ -16,7 +16,7 @@ namespace Stetic {
 		protected string label, description, gladeName;
 		protected bool gladeOverride;
 		
-		protected bool isWrapperProperty, hasDefault, initWithName;
+		protected bool isRuntimeProperty, hasDefault, initWithName;
 		protected Type editorType;
 		protected object minimum, maximum;
 		protected object defaultValue;
@@ -127,6 +127,12 @@ namespace Stetic {
 		// Gets the value of the property on @obj
 		public abstract object GetValue (object obj);
 
+		// Gets the value of the property on @obj, bypassing the wrapper.
+		public virtual object GetRuntimeValue (object obj)
+		{
+			return GetValue (obj);
+		}
+
 		// Whether or not the property is writable
 		public virtual bool CanWrite {
 			get { return true; }
@@ -134,6 +140,12 @@ namespace Stetic {
 
 		// Sets the value of the property on @obj
 		public abstract void SetValue (object obj, object value);
+
+		// Sets the value of the property on @obj, bypassing the wrapper.
+		public virtual void SetRuntimeValue (object obj, object value)
+		{
+			SetValue (obj, value);
+		}
 		
 		// Parses a string an returns a value valid for this property
 		public virtual object StringToValue (string value)
@@ -156,8 +168,8 @@ namespace Stetic {
 			}
 		}
 		
-		public virtual bool IsWrapperProperty {
-			get { return isWrapperProperty; }
+		public virtual bool IsRuntimeProperty {
+			get { return isRuntimeProperty; }
 		}
 
 		public virtual bool Translatable {

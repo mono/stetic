@@ -203,7 +203,7 @@ namespace Stetic.Wrapper {
 			foreach (ItemGroup group in klass.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
 					TypedPropertyDescriptor prop = item as TypedPropertyDescriptor;
-					if (prop == null || prop.IsWrapperProperty)
+					if (prop == null || !prop.IsRuntimeProperty)
 						continue;
 					GeneratePropertySet (ctx, statements, var, prop);
 				}
@@ -216,9 +216,9 @@ namespace Stetic.Wrapper {
 				CodeExpression[] paramters = new CodeExpression [ClassDescriptor.InitializationProperties.Length];
 				for (int n=0; n < paramters.Length; n++)
 					paramters [n] = ctx.GenerateValue (ClassDescriptor.InitializationProperties [n].GetValue (Wrapped));
-				return new CodeObjectCreateExpression (Wrapped.GetType (), paramters);
+				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, paramters);
 			} else
-				return new CodeObjectCreateExpression (Wrapped.GetType ());
+				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName);
 		}
 		
 		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, TypedPropertyDescriptor prop)
@@ -354,10 +354,10 @@ namespace Stetic.Wrapper {
 			if (propertyName == "parent" || propertyName == "has-focus" || 
 				propertyName == "has-toplevel-focus" || propertyName == "is-active" ||
 				propertyName == "is-focus" || propertyName == "style" || 
-				propertyName == "visible" || propertyName == "scroll-offset")
+				propertyName == "Visible" || propertyName == "scroll-offset")
 				return;
 			
-			if (propertyName == "name") {
+			if (propertyName == "Name") {
 				if (Wrapped.Name != oldName) {
 					string on = oldName;
 					oldName = Wrapped.Name;
@@ -373,8 +373,9 @@ namespace Stetic.Wrapper {
 		protected virtual void OnNameChanged (WidgetNameChangedArgs args)
 		{
 			OnWidgetChanged (args);
-			if (NameChanged != null)
+			if (NameChanged != null) {
 				NameChanged (this, args);
+			}
 		}
 
 		internal protected virtual void OnSignalAdded (SignalEventArgs args)

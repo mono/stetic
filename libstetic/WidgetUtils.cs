@@ -8,7 +8,17 @@ namespace Stetic
 {
 	public static class WidgetUtils
 	{
-		public static XmlDocument ExportWidget (Gtk.Widget widget)
+		static Gdk.Atom steticAtom;
+		
+		public static Gdk.Atom ApplicationXSteticAtom {
+			get {
+				if (steticAtom == null)
+					steticAtom = Gdk.Atom.Intern ("application/x-stetic", false);
+				return steticAtom;
+			}
+		}
+
+		public static XmlElement ExportWidget (Gtk.Widget widget)
 		{
 			XmlDocument doc = new XmlDocument ();
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
@@ -17,12 +27,12 @@ namespace Stetic
 				
 			XmlElement elem = wrapper.Write (doc, FileFormat.Native);
 			doc.AppendChild (elem);
-			return doc;
+			return doc.DocumentElement;
 		}
 		
-		public static Gtk.Widget ImportWidget (IProject project, XmlDocument doc)
+		public static Gtk.Widget ImportWidget (IProject project, XmlElement element)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (project, doc.DocumentElement, FileFormat.Native);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (project, element, FileFormat.Native);
 			return wrapper.Wrapped as Gtk.Widget;
 		}
 		
@@ -48,7 +58,7 @@ namespace Stetic
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null)
 						continue;
-					if (!prop.VisibleFor (wrapper.Wrapped) || !prop.CanWrite)
+					if (!prop.VisibleFor (wrapper.Wrapped) || !prop.CanWrite || prop.Name == "Name")	// Name is written in the id attribute
 						continue;
 
 					object value = prop.GetValue (wrapper.Wrapped);
@@ -194,6 +204,128 @@ namespace Stetic
 			Gtk.Container.ContainerChild cc = wrapper.Wrapped as Gtk.Container.ContainerChild;
 			ClassDescriptor klass = wrapper.ClassDescriptor;
 			ReadProperties (klass, wrapper, cc, packing);
+		}
+		
+		
+		public static void Copy (Gtk.Widget widget, Gtk.SelectionData seldata, bool copyAsText)
+		{
+			XmlElement elem = ExportWidget (widget);
+			if (elem == null)
+				return;
+
+			if (copyAsText)
+				seldata.Text = elem.OuterXml;
+			else
+				seldata.Set (ApplicationXSteticAtom, 8, System.Text.Encoding.UTF8.GetBytes (elem.OuterXml));
+		}
+
+		public static Stetic.Wrapper.Widget Paste (IProject project, Gtk.SelectionData seldata)
+		{
+			if (seldata.Type.Name != ApplicationXSteticAtom.Name)
+				return null;
+				
+			string data = System.Text.Encoding.UTF8.GetString (seldata.Data);
+			XmlDocument doc = new XmlDocument ();
+			doc.PreserveWhitespace = true;
+			try {
+				doc.LoadXml (data);
+			} catch {
+				return null;
+			}
+			
+			Gtk.Widget w = ImportWidget (project, doc.DocumentElement);
+			return Wrapper.Widget.Lookup (w);
+		}
+		
+		public static Gtk.Widget BuildWidget (XmlDocument doc)
+		{
+			return BuildWidget (doc.DocumentElement);
+		}
+
+		public static Gtk.Widget BuildWidget (XmlElement elem)
+		{
+			string className = elem.GetAttribute ("class");
+			ClassDescriptor klass = Registry.LookupClassByName (className);
+			if (klass == null) return null;
+			
+			Gtk.Widget widget = (Gtk.Widget) klass.CreateInstance (null);
+			widget.Name = elem.GetAttribute ("id");
+			
+			ReadProperties (klass, widget, elem);
+			
+			if (widget is Gtk.Container)
+				BuildChildren (klass, widget as Gtk.Container, elem);
+
+			return widget;
+		}
+		
+		static void ReadProperties (ClassDescriptor klass, object widget, XmlElement elem)
+		{
+			foreach (ItemGroup group in klass.ItemGroups) {
+				foreach (ItemDescriptor item in group) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop == null || !prop.CanWrite || !prop.IsRuntimeProperty)
+						continue;
+
+					XmlElement prop_node = (XmlElement) elem.SelectSingleNode ("property[@name='" + prop.Name + "']");
+					if (prop_node == null)
+						continue;
+					
+					string strval = prop_node.InnerText;
+					
+					object value = prop.StringToValue (strval);
+					prop.SetRuntimeValue (widget, value);
+				}
+			}
+		}
+		
+		static void BuildChildren (ClassDescriptor klass, Gtk.Container widget, XmlElement elem)
+		{
+			foreach (XmlElement child_elem in elem.SelectNodes ("./child")) {
+				if (child_elem.HasAttribute ("internal-child"))
+					BuildInternalChild (klass, widget, child_elem);
+				else if (child_elem["widget"] != null)
+					BuildChild (widget, child_elem);
+			}
+		}
+
+		static void BuildChild (Gtk.Container container, XmlElement child_elem)
+		{
+			Gtk.Widget child = BuildWidget (child_elem["widget"]);
+			container.Add (child);
+
+			XmlElement packing = child_elem["packing"];
+			if (packing == null)
+				return;
+
+			while (child != null && child.Parent != container)
+				child = child.Parent;
+
+			if (child == null)
+				return;
+
+			Gtk.Container.ContainerChild cc = container[child];
+			ClassDescriptor childClass = Registry.LookupClassByName (cc.GetType().FullName);
+			if (childClass != null)
+				ReadProperties (childClass, cc, packing);
+		}
+
+		static void BuildInternalChild (ClassDescriptor klass, Gtk.Container container, XmlElement child_elem)
+		{
+			string childId = child_elem.GetAttribute ("internal-child");
+			
+			foreach (PropertyDescriptor prop in klass.InternalChildren) {
+				if (prop.Name != childId)
+					continue;
+				
+				Gtk.Widget child = prop.GetRuntimeValue (container) as Gtk.Widget;
+				XmlElement widgetElem = child_elem["widget"];
+				
+				string className = widgetElem.GetAttribute ("class");
+				ClassDescriptor childClass = Registry.LookupClassByName (className);
+				ReadProperties (childClass, child, widgetElem);
+				return;
+			}
 		}
 	}
 }

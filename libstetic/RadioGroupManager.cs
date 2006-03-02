@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
+using System.CodeDom;
 
 // The stetic representation of "radio widget" (Gtk.RadioButton,
 // Gtk.RadioToolButton, and Gtk.RadioMenuItem) groups is that the
@@ -168,6 +169,40 @@ namespace Stetic {
 
 			Gtk.Widget leader = (Gtk.Widget)group.Widgets[0];
 			return leader.Name;
+		}
+		
+		public CodeExpression GenerateGroupExpression (GeneratorContext ctx, Gtk.Widget widget)
+		{
+			// Returns and expression that represents the group to which the radio belongs.
+			// This expression can be an empty SList, if this is the first radio of the
+			// group that has been generated, or an SList taken from previously generated
+			// radios from the same group.
+			
+			RadioGroup group = widgets[widget] as RadioGroup;
+			string var = null;
+			
+			foreach (Gtk.Widget radio in group.Widgets) {
+				if (radio == widget)
+					continue;
+				var = ctx.WidgetMap.GetWidgetId (radio.Name);
+				if (var != null)
+					break;
+			}
+			
+			if (var == null) {
+				return new CodeObjectCreateExpression (
+					"GLib.SList",
+					new CodePropertyReferenceExpression (
+						new CodeTypeReferenceExpression (typeof(IntPtr)),
+						"Zero"
+					)
+				);
+			} else {
+				return new CodePropertyReferenceExpression (
+					new CodeVariableReferenceExpression (var),
+					"Group"
+				);
+			}
 		}
 	}
 }

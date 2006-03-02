@@ -5,7 +5,7 @@ namespace Stetic {
 
 	public static class Clipboard {
 
-		const int GladeType = 0;
+		const int SteticType = 0;
 		const int TextType = 1;
 
 		static Gtk.TargetEntry[] targets;
@@ -14,12 +14,12 @@ namespace Stetic {
 				if (targets == null) {
 #if GTK_SHARP_2_6
 					Gtk.TargetList list = new Gtk.TargetList ();
-					list.Add ((string)GladeUtils.ApplicationXGladeAtom, 0, GladeType);
+					list.Add ((string)WidgetUtils.ApplicationXSteticAtom, 0, SteticType);
 					list.AddTextTargets (TextType);
 					targets = (Gtk.TargetEntry[])list;
 #else
 					targets = new Gtk.TargetEntry[] {
-						new Gtk.TargetEntry ((string)GladeUtils.ApplicationXGladeAtom, 0, GladeType)
+						new Gtk.TargetEntry ((string)WidgetUtils.ApplicationXSteticAtom, 0, SteticType)
 					};
 #endif
 				}
@@ -38,7 +38,7 @@ namespace Stetic {
 		static void ClipboardGet (Gtk.Clipboard clipboard, Gtk.SelectionData seldata, uint info)
 		{
 			if (selection != null)
-				GladeUtils.Copy (selection, seldata, info == TextType);
+				WidgetUtils.Copy (selection, seldata, info == TextType);
 		}
 
 		static void ClipboardClear (Gtk.Clipboard clipboard)
@@ -68,7 +68,7 @@ namespace Stetic {
 			if (parent == null)
 				return;
 
-			Stetic.Wrapper.Widget wrapper = GladeUtils.Paste (parent.Project, seldata);
+			Stetic.Wrapper.Widget wrapper = WidgetUtils.Paste (parent.Project, seldata);
 			if (wrapper == null)
 				return;
 
@@ -79,7 +79,7 @@ namespace Stetic {
 		public static void Paste (Placeholder target)
 		{
 			Clipboard.target = target;
-			MainClipboard.RequestContents (GladeUtils.ApplicationXGladeAtom, ClipboardPaste);
+			MainClipboard.RequestContents (WidgetUtils.ApplicationXSteticAtom, ClipboardPaste);
 		}
 	}
 }
