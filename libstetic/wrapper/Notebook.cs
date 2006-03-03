@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Xml;
 
@@ -39,6 +40,71 @@ namespace Stetic.Wrapper {
 				GladeUtils.SetChildProperty (child_elem, "type", "tab");
 			return child_elem;
 		}
+
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper, CodeStatementCollection statements)
+		{
+			Gtk.Widget child = (Gtk.Widget) wrapper.Wrapped;
+			
+			if (notebook.PageNum (child) == -1) {
+				// It's a tab
+				
+				CodeVariableReferenceExpression parentExp = new CodeVariableReferenceExpression (parentVar);
+				
+				statements.Add (new CodeCommentStatement ("Notebook tab"));
+				Gtk.Widget page = null;
+				string pageVarName;
+				
+				// Look for the page widget contained in this tab
+				for (int n=0; n < notebook.NPages; n++) {
+					if (notebook.GetTabLabel (notebook.GetNthPage (n)) == child) {
+						page = notebook.GetNthPage (n);
+						break;
+					}
+				}
+				
+				// If the page contains a placeholder, generate a dummy page
+				if (page is Stetic.Placeholder) {
+					CodeVariableDeclarationStatement dvar = new CodeVariableDeclarationStatement (
+						"Gtk.Label",
+						ctx.NewId (),
+						new CodeObjectCreateExpression ("Gtk.Label")
+					);
+					statements.Add (dvar);
+					statements.Add (
+						new CodeAssignStatement (
+							new CodePropertyReferenceExpression (
+								new CodeVariableReferenceExpression (dvar.Name),
+								"Visible"
+							),
+							new CodePrimitiveExpression (true)
+						)
+					);
+					statements.Add (
+						new CodeMethodInvokeExpression (
+							parentExp,
+							"Add",
+							new CodeVariableReferenceExpression (dvar.Name)
+						)
+					);
+					pageVarName = dvar.Name;
+				} else
+					pageVarName = ctx.WidgetMap.GetWidgetId (page.Name);
+				
+				// Generate code for the tab
+				string varName = ctx.GenerateCreationCode (wrapper, statements);
+				
+				// Assign the tab to the page
+				CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
+					parentExp,
+					"SetTabLabel",
+					new CodeVariableReferenceExpression (pageVarName),
+					new CodeVariableReferenceExpression (varName)
+				);
+				statements.Add (invoke);
+			} else
+				base.GenerateChildBuildCode (ctx, parentVar, wrapper, statements);
+		}
+
 
 		private Gtk.Notebook notebook {
 			get {

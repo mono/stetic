@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Collections;
 using Stetic.Wrapper;
 
@@ -189,10 +190,31 @@ namespace Stetic
 			SignalDescriptor sd = GetSignalDescriptor (iter);
 			if (sd != null) {
 				if (GetSignal (iter) == null)
-					AddHandler (iter, "On" + sd.Name);
+					AddHandler (iter, GetHandlerName (sd.Name));
 				else if (SignalActivated != null)
 					SignalActivated (this, EventArgs.Empty);
 			}
+		}
+		
+		string GetHandlerName (string signalName)
+		{
+			string name = selection.Wrapped.Name;
+			StringBuilder sb = new StringBuilder ();
+			if (!selection.IsTopLevel) {
+				bool wstart = true;
+				foreach (char c in name) {
+					if (c == '_' || c == '-' || c == ' ' || !char.IsLetterOrDigit (c)) {
+						wstart = true;
+						continue;
+					}
+					if (wstart) {
+						sb.Append (char.ToUpper (c));
+						wstart = false;
+					} else
+						sb.Append (c);
+				}
+			}
+			return "On" + sb.ToString() + signalName;
 		}
 		
 		void OnHandlerEdited (object sender, Gtk.EditedArgs args)
