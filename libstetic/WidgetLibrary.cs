@@ -51,7 +51,7 @@ namespace Stetic
 				exportElems [n] = (XmlElement) nodes[n];
 		}
 		
-		public void Dispose ()
+		public virtual void Dispose ()
 		{
 		}
 		

@@ -289,8 +289,8 @@
 	</signals>
     </object>
 
-    <object type="Gtk.Alignment,gtk-sharp"
-	    label="Alignment" icon="alignment.png" palette-category="container">
+    <object type="Gtk.Alignment,gtk-sharp" label="Alignment" icon="alignment.png" 
+    		 init-properties="Xalign Yalign Xscale Yscale" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Alignment Properties">
 		<property name="Xscale" />

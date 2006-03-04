@@ -239,12 +239,14 @@ namespace Stetic.Wrapper {
 		{
 			base.GenerateBuildCode (ctx, varName, statements);
 			
-			foreach (Gtk.Widget child in GladeChildren) {
-				Widget wrapper = Widget.Lookup (child);
-				
-				if (wrapper != null && wrapper.InternalChildProperty == null)
-					// Iternal children are written later
-					GenerateChildBuildCode (ctx, varName, wrapper, statements);
+			if (ClassDescriptor.AllowChildren) {
+				foreach (Gtk.Widget child in GladeChildren) {
+					Widget wrapper = Widget.Lookup (child);
+					
+					if (wrapper != null && wrapper.InternalChildProperty == null)
+						// Iternal children are written later
+						GenerateChildBuildCode (ctx, varName, wrapper, statements);
+				}
 			}
 			
 			foreach (TypedPropertyDescriptor prop in this.ClassDescriptor.InternalChildren) {

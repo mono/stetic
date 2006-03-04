@@ -196,13 +196,10 @@ namespace Stetic.Wrapper {
 		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
 		{
 			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
-			TypedClassDescriptor klass = base.ClassDescriptor as TypedClassDescriptor;
-			if (klass == null)
-				throw new InvalidOperationException ("Can't generate code for untyped class descriptors");
 			
-			foreach (ItemGroup group in klass.ItemGroups) {
+			foreach (ItemGroup group in base.ClassDescriptor.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
-					TypedPropertyDescriptor prop = item as TypedPropertyDescriptor;
+					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null || !prop.IsRuntimeProperty)
 						continue;
 					GeneratePropertySet (ctx, statements, var, prop);
@@ -221,7 +218,7 @@ namespace Stetic.Wrapper {
 				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName);
 		}
 		
-		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, TypedPropertyDescriptor prop)
+		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, PropertyDescriptor prop)
 		{
 			if (ClassDescriptor.InitializationProperties != null && Array.IndexOf (ClassDescriptor.InitializationProperties, prop) != -1)
 				return;
@@ -233,10 +230,11 @@ namespace Stetic.Wrapper {
 			CodeExpression val = ctx.GenerateValue (oval);
 			CodeExpression cprop;
 			
-			if (prop.GladeProperty == prop) {
+			TypedPropertyDescriptor tprop = prop as TypedPropertyDescriptor;
+			if (tprop == null || tprop.GladeProperty == prop) {
 				cprop = new CodePropertyReferenceExpression (var, prop.Name);
 			} else {
-				cprop = new CodePropertyReferenceExpression (var, prop.GladeProperty.Name);
+				cprop = new CodePropertyReferenceExpression (var, tprop.GladeProperty.Name);
 				cprop = new CodePropertyReferenceExpression (cprop, prop.Name);
 			}
 			statements.Add (new CodeAssignStatement (cprop, val));

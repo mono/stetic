@@ -1,3 +1,22 @@
+2006-03-03  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/WidgetLibrary.cs: Made Dispose virtual.
+	* libstetic/wrapper/objects.xml: Declared initializer properties.
+	* libstetic/wrapper/Container.cs: Don't generate code for building
+	  children if children are not allowed.
+	* libstetic/wrapper/Widget.cs: Support generating code for untyped
+	  class descriptors.
+	* libstetic/TypedClassDescriptor.cs: When looking for a static
+	  CreateInstance method, look for an overload that takes
+	  a ClassDescriptor as parameter.
+	* libstetic/wrapper/Bin.cs: In CreateInstance, return the
+	  CustomWidget instance only if the class is a Gtk.Bin.
+	  Don't do it for subclasses of Bin.
+	  
+	* libstetic/wrapper/RadioButton.cs:
+	* libstetic/wrapper/RadioMenuItem.cs:
+	* libstetic/wrapper/RadioToolButton.cs: Track api changes.
+
 2006-03-03  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/SignalsEditor.cs: Add the name of the widget

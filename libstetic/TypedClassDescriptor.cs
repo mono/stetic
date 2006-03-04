@@ -12,6 +12,7 @@ namespace Stetic
 		GLib.GType gtype;
 
 		MethodInfo ctorMethodInfo;
+		MethodInfo ctorMethodInfoWithClass;
 		ConstructorInfo cinfo;
 		bool useGTypeCtor;
 		Gdk.Pixbuf icon;
@@ -44,16 +45,21 @@ namespace Stetic
 			} catch {
 				icon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
 			}
+			
+			BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+						
 
-			ctorMethodInfo = wrapper.GetMethod ("CreateInstance",
-							    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly,
-							    null, new Type[0], null);
-			if (ctorMethodInfo == null) {
-				cinfo = wrapped.GetConstructor (new Type[0]);
-				if (cinfo == null) {
-					useGTypeCtor = true;
-					cinfo = wrapped.GetConstructor (new Type[] { typeof (IntPtr) });
-				}
+			ctorMethodInfoWithClass = wrapper.GetMethod ("CreateInstance", flags, null, new Type[] { typeof(ClassDescriptor)}, null);
+			if (ctorMethodInfoWithClass == null) {
+				ctorMethodInfo = wrapper.GetMethod ("CreateInstance", flags, null, Type.EmptyTypes, null);
+			}
+			
+			// Look for a constructor even if a CreateInstance method was
+			// found, since it may return null.
+			cinfo = wrapped.GetConstructor (Type.EmptyTypes);
+			if (cinfo == null) {
+				useGTypeCtor = true;
+				cinfo = wrapped.GetConstructor (new Type[] { typeof (IntPtr) });
 			}
 			Load (elem);
 		}
@@ -98,9 +104,15 @@ namespace Stetic
 		{
 			object inst;
 
-			if (ctorMethodInfo != null)
+			if (ctorMethodInfoWithClass != null) {
+				inst = ctorMethodInfoWithClass.Invoke (null, new object[] { this });
+				if (inst != null) return inst;
+			}
+			if (ctorMethodInfo != null) {
 				inst = ctorMethodInfo.Invoke (null, new object[0]);
-			else if (!useGTypeCtor)
+				if (inst != null) return inst;
+			}
+			if (!useGTypeCtor)
 				inst = cinfo.Invoke (null, new object[0]);
 			else {
 				IntPtr raw = g_object_new (gtype.Val, IntPtr.Zero);

@@ -48,7 +48,7 @@ namespace Stetic.Wrapper {
 			return elem;
 		}
 		
-		protected override void GeneratePropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, TypedPropertyDescriptor prop)
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, PropertyDescriptor prop)
 		{
 			if (prop.Name == "Group") {
 				CodeExpression groupExp = GroupManager.GenerateGroupExpression (ctx, (Gtk.Widget) Wrapped);

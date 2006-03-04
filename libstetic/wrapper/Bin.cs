@@ -6,9 +6,12 @@ namespace Stetic.Wrapper
 {
 	public class Bin: Container
 	{
-		public static new Gtk.Bin CreateInstance ()
+		public static new Gtk.Bin CreateInstance (ClassDescriptor klass)
 		{
-			return new CustomWidget ();
+			if (klass.Name == "Gtk.Bin")
+				return new CustomWidget ();
+			else
+				return null;
 		}
 		
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
