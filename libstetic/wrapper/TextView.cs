@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections;
 
 namespace Stetic.Wrapper {
@@ -23,6 +24,31 @@ namespace Stetic.Wrapper {
 		public void Buffer_Changed (object obj, EventArgs args)
 		{
 			EmitNotify ("Text");
+		}
+		
+		protected override bool AllowPlaceholders {
+			get {
+				return false;
+			}
+		}
+		
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		{
+			if (Text.Length > 0) {
+				ctx.Statements.Add (
+					new CodeAssignStatement (
+						new CodePropertyReferenceExpression (
+							new CodePropertyReferenceExpression (
+								new CodeVariableReferenceExpression (varName),
+								"Buffer"
+							),
+							"Text"
+						),
+						new CodePrimitiveExpression (Text)
+					)
+				);
+			}
+			base.GenerateBuildCode (ctx, varName);
 		}
 	}
 }

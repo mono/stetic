@@ -41,7 +41,7 @@ namespace Stetic.Wrapper {
 			return child_elem;
 		}
 
-		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper, CodeStatementCollection statements)
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
 		{
 			Gtk.Widget child = (Gtk.Widget) wrapper.Wrapped;
 			
@@ -50,7 +50,7 @@ namespace Stetic.Wrapper {
 				
 				CodeVariableReferenceExpression parentExp = new CodeVariableReferenceExpression (parentVar);
 				
-				statements.Add (new CodeCommentStatement ("Notebook tab"));
+				ctx.Statements.Add (new CodeCommentStatement ("Notebook tab"));
 				Gtk.Widget page = null;
 				string pageVarName;
 				
@@ -69,8 +69,8 @@ namespace Stetic.Wrapper {
 						ctx.NewId (),
 						new CodeObjectCreateExpression ("Gtk.Label")
 					);
-					statements.Add (dvar);
-					statements.Add (
+					ctx.Statements.Add (dvar);
+					ctx.Statements.Add (
 						new CodeAssignStatement (
 							new CodePropertyReferenceExpression (
 								new CodeVariableReferenceExpression (dvar.Name),
@@ -79,7 +79,7 @@ namespace Stetic.Wrapper {
 							new CodePrimitiveExpression (true)
 						)
 					);
-					statements.Add (
+					ctx.Statements.Add (
 						new CodeMethodInvokeExpression (
 							parentExp,
 							"Add",
@@ -91,7 +91,7 @@ namespace Stetic.Wrapper {
 					pageVarName = ctx.WidgetMap.GetWidgetId (page.Name);
 				
 				// Generate code for the tab
-				string varName = ctx.GenerateCreationCode (wrapper, statements);
+				string varName = ctx.GenerateCreationCode (wrapper);
 				
 				// Assign the tab to the page
 				CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
@@ -100,9 +100,9 @@ namespace Stetic.Wrapper {
 					new CodeVariableReferenceExpression (pageVarName),
 					new CodeVariableReferenceExpression (varName)
 				);
-				statements.Add (invoke);
+				ctx.Statements.Add (invoke);
 			} else
-				base.GenerateChildBuildCode (ctx, parentVar, wrapper, statements);
+				base.GenerateChildBuildCode (ctx, parentVar, wrapper);
 		}
 
 

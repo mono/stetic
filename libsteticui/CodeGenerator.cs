@@ -266,23 +266,24 @@ namespace Stetic
 		public static WidgetMap GenerateBuildCode (CodeNamespace cns, Gtk.Widget w, string widgetVarName, CodeStatementCollection statements)
 		{
 			statements.Add (new CodeCommentStatement ("Widget " + w.Name));
-			GeneratorContext ctx = new ProjectGeneratorContext (cns);
+			GeneratorContext ctx = new ProjectGeneratorContext (cns, statements);
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (w);
-			ctx.GenerateBuildCode (ww, widgetVarName, statements);
+			ctx.GenerateBuildCode (ww, widgetVarName);
+			ctx.EndGeneration ();
 			return ctx.WidgetMap;
 		}
 	}
 	
 	class ProjectGeneratorContext: GeneratorContext
 	{
-		public ProjectGeneratorContext (CodeNamespace cns): base (cns, "w")
+		public ProjectGeneratorContext (CodeNamespace cns, CodeStatementCollection statements): base (cns, "w", statements)
 		{
 		}
 		
-		public override void GenerateBuildCode (Wrapper.Widget widget, string varName, CodeStatementCollection statements)
+		public override void GenerateBuildCode (Wrapper.Widget widget, string varName)
 		{
-			base.GenerateBuildCode (widget, varName, statements);
-			statements.Add (
+			base.GenerateBuildCode (widget, varName);
+			Statements.Add (
 				new CodeAssignStatement (
 					new CodeIndexerExpression (
 						new CodeVariableReferenceExpression ("widgets"),

@@ -1,3 +1,67 @@
+2006-03-14  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/CodeGenerator.cs: Moved statements collection into
+	  the GeneratorContext class.
+	* libsteticui/PropertyEditor.cs: Register new image editor.
+	
+	* libstetic/IProject.cs:
+	* libsteticui/Project.cs: Added property for IResourceProvider.
+	
+	* libstetic/ObjectWrapper.cs: Generate an error widget if something
+	  fails while loading the project.
+	* libstetic/Registry.cs: In LookupItem, throw an exception if the
+	  item can't be found.
+	* libstetic/wrapper/Button.cs: Use the new ImageInfo class for
+	  storing the pixbuf.
+	* libstetic/wrapper/Label.cs: Generate specific code for setting
+	  the MnemonicWidget property.
+	* libstetic/wrapper/TextView.cs: Don't allow placeholders in a
+	  text view. Generate code for setting the text of the buffer.
+	
+	* libstetic/wrapper/Widget.cs: The Visible property is the last
+	  one to be set, in this way nothing is shown until everything
+	  is built.
+	* libstetic/wrapper/Toolbar.cs: Put placeholders inside a ToolItem.
+	* libstetic/wrapper/Image.cs: Simplified the code by using an ImageInfo
+	  object for storing the pixbuf.
+	
+	* libstetic/wrapper/ComboBox.cs:
+	* libstetic/wrapper/ComboBoxEntry.cs: If some items have been
+	  added at design time, generate a text combo box.
+	  
+	* libstetic/wrapper/RadioToolButton.cs:
+	* libstetic/wrapper/RadioButton.cs:
+	* libstetic/wrapper/Window.cs:
+	* libstetic/wrapper/Notebook.cs:
+	* libstetic/wrapper/RadioMenuItem.cs:
+	* libstetic/wrapper/Bin.cs:
+	* libstetic/wrapper/Container.cs: Moved statements collection into
+	  the GeneratorContext class.
+	
+	* libstetic/wrapper/objects.xml: Added some min values. Removed the
+	  Bin control from the palette. Track changes in Image and Button
+	  image properties.
+	* libstetic/wrapper/CheckButton.cs: In the generated code, remove
+	  the default label child widget if not needed.
+	* libstetic/wrapper/ToolButton.cs: Simplified the code by using a n
+	  ImageInfo object for storing the pixbuf.
+	* libstetic/editor/ThemedIcon.cs: Fixed some compilation problems.
+	  Moved ThemedIconList to its own file.
+	* libstetic/PropertyDescriptor.cs: Added support for type converters.
+	* libstetic/TypedPropertyDescriptor.cs: Implemented RuntimePropertyType.
+	
+	* libstetic/GeneratorContext.cs: Added the statements collection that
+	  will contain all generated code. Added EndGeneration, which
+	  runs all post build generation methods.
+	* libstetic/ErrorWidget.cs: Added support for reporting load errors.
+	
+	* libstetic/editor/FlagsSelectorDialog.cs:
+	* libstetic/editor/Flags.cs: When there are more than 5 flag values,
+	  use a dialog to select them, since the checkbox list takes too
+	  much space.
+	
+	* libstetic/Makefile.am: Updated.
+	
 2006-03-03  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/WidgetLibrary.cs: Made Dispose virtual.

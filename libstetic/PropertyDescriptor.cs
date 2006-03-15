@@ -20,6 +20,7 @@ namespace Stetic {
 		protected Type editorType;
 		protected object minimum, maximum;
 		protected object defaultValue;
+		protected TypeConverter typeConverter;
 
 		protected Hashtable translationInfo;
 		
@@ -59,6 +60,12 @@ namespace Stetic {
 
 			if (elem.HasAttribute ("translatable"))
 				translationInfo = new Hashtable ();
+				
+			string convTypeName = elem.GetAttribute ("type-converter");
+			if (convTypeName.Length > 0) {
+				Type type = Registry.GetType (convTypeName, true);
+				typeConverter = (TypeConverter) Activator.CreateInstance (type);
+			}
 		}
 
 		// The property's user-visible name
@@ -124,6 +131,11 @@ namespace Stetic {
 			return false;
 		}
 
+		// The property's type at run time
+		public virtual Type RuntimePropertyType {
+			get { return PropertyType; }
+		}
+		
 		// Gets the value of the property on @obj
 		public abstract object GetValue (object obj);
 
@@ -150,8 +162,12 @@ namespace Stetic {
 		// Parses a string an returns a value valid for this property
 		public virtual object StringToValue (string value)
 		{
-			if (PropertyType.IsEnum)
+			if (typeConverter != null && typeConverter.CanConvertFrom (typeof(string)))
+				return typeConverter.ConvertFromString (value);
+			else if (PropertyType.IsEnum)
 				return Enum.Parse (PropertyType, value);
+			else if (PropertyType == typeof(ImageInfo))
+				return ImageInfo.FromString (value);
 			else
 				return Convert.ChangeType (value, PropertyType);
 		}
@@ -159,7 +175,10 @@ namespace Stetic {
 		// Returns a string representation of the provided property value
 		public virtual string ValueToString (object value)
 		{
-			return value.ToString ();
+			if (typeConverter != null && typeConverter.CanConvertTo (typeof(string)))
+				return typeConverter.ConvertToString (value);
+			else
+				return value.ToString ();
 		}
 
 		public virtual bool InitWithName {

@@ -14,7 +14,7 @@ namespace Stetic.Wrapper
 				return null;
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
 			if (ClassDescriptor.WrappedTypeName == "Gtk.Bin") {
 			
@@ -33,7 +33,7 @@ namespace Stetic.Wrapper
 				if (!found)
 					GenerateHelperClass (ctx);
 				
-				statements.Add (
+				ctx.Statements.Add (
 					new CodeMethodInvokeExpression (
 						new CodeTypeReferenceExpression ("BinContainer"),
 						"Attach",
@@ -41,7 +41,7 @@ namespace Stetic.Wrapper
 					)
 				);
 			}
-			base.GenerateBuildCode (ctx, varName, statements);
+			base.GenerateBuildCode (ctx, varName);
 		}
 		
 		void GenerateHelperClass (GeneratorContext ctx)

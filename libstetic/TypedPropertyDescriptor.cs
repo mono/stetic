@@ -64,7 +64,9 @@ namespace Stetic
 				gladeOverride = true;
 			}
 
-			editorType = Registry.GetType (elem.GetAttribute ("editor"), false);
+			string typeName = elem.GetAttribute ("editor");
+			if (typeName.Length > 0)
+				editorType = Registry.GetType (typeName, false);
 			
 			// Look for a default value attribute
 			
@@ -196,6 +198,15 @@ namespace Stetic
 			propertyInfo.SetValue (obj, value, null);
 		}
 
+		// The property's type at run time
+		public override Type RuntimePropertyType {
+			get {
+				if (runtimePropertyInfo == null)
+					SetupRuntimeProperties ();
+				return runtimePropertyInfo.PropertyType;
+			}
+		}
+		
 		public override void SetRuntimeValue (object obj, object value)
 		{
 			if (runtimePropertyInfo == null)

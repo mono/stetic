@@ -16,6 +16,7 @@ namespace Stetic {
 		string fileName;
 		XmlDocument tempDoc;
 		bool loading;
+		IResourceProvider resourceProvider;
 		
 		public event Wrapper.WidgetNameChangedHandler WidgetNameChanged;
 		public event Wrapper.WidgetEventHandler WidgetAdded;
@@ -53,6 +54,16 @@ namespace Stetic {
 		
 		public string FileName {
 			get { return fileName; }
+		}
+		
+		public IResourceProvider ResourceProvider { 
+			get { return resourceProvider; }
+			set { resourceProvider = value; }
+		}
+		
+		internal void SetFileName (string fileName)
+		{
+			this.fileName = fileName;
 		}
 		
 		public void Load (string fileName)

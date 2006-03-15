@@ -6,7 +6,9 @@ using System.Xml;
 namespace Stetic.Wrapper {
 
 	public class Button : Container {
-
+		
+		ImageInfo imageInfo;
+		
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
@@ -62,13 +64,8 @@ namespace Stetic.Wrapper {
 			this.label = label.LabelProp;
 			button.UseUnderline = label.UseUnderline;
 
-			if (iwrap.Type == Image.ImageType.ThemedIcon) {
-				themedIcon = iwrap.IconName;
-				Type = ButtonType.ThemedIcon;
-			} else {
-				applicationIcon = iwrap.Filename;
-				Type = ButtonType.ApplicationIcon;
-			}
+			imageInfo = iwrap.Pixbuf;
+			Type = ButtonType.TextAndIcon;
 		}
 
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
@@ -106,8 +103,7 @@ namespace Stetic.Wrapper {
 		public enum ButtonType {
 			StockItem,
 			TextOnly,
-			ThemedIcon,
-			ApplicationIcon,
+			TextAndIcon,
 			Custom
 		};
 
@@ -130,17 +126,11 @@ namespace Stetic.Wrapper {
 					Label = label;
 					UseUnderline = useUnderline;
 					break;
-				case ButtonType.ThemedIcon:
+				case ButtonType.TextAndIcon:
 					button.UseStock = false;
 					Label = label;
 					UseUnderline = useUnderline;
-					ThemedIcon = themedIcon;
-					break;
-				case ButtonType.ApplicationIcon:
-					button.UseStock = false;
-					Label = label;
-					UseUnderline = useUnderline;
-					ApplicationIcon = applicationIcon;
+					Icon = imageInfo;
 					break;
 				case ButtonType.Custom:
 					button.UseStock = false;
@@ -148,6 +138,15 @@ namespace Stetic.Wrapper {
 						ReplaceChild (button.Child, CreatePlaceholder ());
 					break;
 				}
+			}
+		}
+
+		public ImageInfo Icon {
+			get { return imageInfo; }
+			set { 
+				imageInfo = value;
+				ConstructContents ();
+				EmitNotify ("Image");
 			}
 		}
 
@@ -167,17 +166,8 @@ namespace Stetic.Wrapper {
 			Gtk.Image imageWidget = (Gtk.Image)Registry.NewInstance ("Gtk.Image", proj);
 			Image imageWrapper = (Image)Widget.Lookup (imageWidget);
 			imageWrapper.Unselectable = true;
-			if (type == ButtonType.StockItem) {
-				imageWrapper.IconName = stockId;
-				imageWrapper.IconSize = Gtk.IconSize.Button;
-				imageWrapper.Type = Image.ImageType.ThemedIcon;
-			} else if (type == ButtonType.ThemedIcon) {
-				imageWrapper.IconName = themedIcon;
-				imageWrapper.IconSize = Gtk.IconSize.Button;
-				imageWrapper.Type = Image.ImageType.ThemedIcon;
-			} else {
-				imageWrapper.Filename = applicationIcon;
-				imageWrapper.Type = Image.ImageType.ApplicationImage;
+			if (type != ButtonType.StockItem) {
+				imageWrapper.Pixbuf = imageInfo;
 			}
 
 			Gtk.HBox box = new Gtk.HBox (false, 2);
@@ -207,10 +197,13 @@ namespace Stetic.Wrapper {
 				if (responseId == ResponseIdForStockId (stockId))
 					responseId = 0;
 
-				button.Label = stockId = value;
+				string sid = value;
+				if (sid.StartsWith ("stock:"))
+					sid = sid.Substring (6);
+				button.Label = stockId = sid;
 				button.UseStock = true;
-				Gtk.StockItem item = Gtk.Stock.Lookup (value);
-				if (item.StockId == value) {
+				Gtk.StockItem item = Gtk.Stock.Lookup (sid);
+				if (item.StockId == sid) {
 					label = item.Label;
 					useUnderline = true;
 				}
@@ -218,30 +211,6 @@ namespace Stetic.Wrapper {
 
 				if (responseId == 0)
 					ResponseId = ResponseIdForStockId (stockId);
-			}
-		}
-
-		string applicationIcon;
-		public string ApplicationIcon {
-			get {
-				return applicationIcon;
-			}
-			set {
-				applicationIcon = value;
-				ConstructContents ();
-				EmitNotify ("ApplicationIcon");
-			}
-		}
-
-		string themedIcon;
-		public string ThemedIcon {
-			get {
-				return themedIcon;
-			}
-			set {
-				themedIcon = value;
-				ConstructContents ();
-				EmitNotify ("ThemedIcon");
 			}
 		}
 
@@ -316,13 +285,21 @@ namespace Stetic.Wrapper {
 				return 0;
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
-			base.GenerateBuildCode (ctx, varName, statements);
+			base.GenerateBuildCode (ctx, varName);
 			
-			CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (new CodeVariableReferenceExpression (varName), "Label");
-			CodeExpression val = ctx.GenerateValue (button.Label);
-			statements.Add (new CodeAssignStatement (cprop, val));
+			if (Type != ButtonType.TextAndIcon) {
+				CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (new CodeVariableReferenceExpression (varName), "Label");
+				CodeExpression val = ctx.GenerateValue (button.Label, typeof(string));
+				ctx.Statements.Add (new CodeAssignStatement (cprop, val));
+			}
+		}
+		
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		{
+			if (prop.Name != "Label")
+				base.GeneratePropertySet (ctx, var, prop);
 		}
 	}
 }

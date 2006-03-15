@@ -122,6 +122,13 @@ namespace Stetic.Wrapper {
 		{
 			ToolItemize (newChild, ToolDeItemize (oldChild));
 		}
+		
+		public override Placeholder AddPlaceholder ()
+		{
+			Placeholder ph = CreatePlaceholder ();
+			ToolItemize (ph, 0);
+			return ph;
+		}
 
 		int dragIndex;
 

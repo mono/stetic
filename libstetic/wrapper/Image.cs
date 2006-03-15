@@ -1,31 +1,56 @@
 using System;
+using System.Xml;
 using System.Collections;
 
 namespace Stetic.Wrapper {
 
 	public class Image : Widget {
+	
+		ImageInfo imageInfo;
 
 		public static new Gtk.Image CreateInstance ()
 		{
 			return new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog);
 		}
-
-		public override void Wrap (object obj, bool initialized)
+		
+		public override void Read (XmlElement elem, FileFormat format)
 		{
-			base.Wrap (obj, initialized);
-
-			iconSize = (Gtk.IconSize)image.IconSize;
-
-			if (image.StorageType == Gtk.ImageType.Stock) {
-				iconName = image.Stock;
-				Type = ImageType.ThemedIcon;
-#if GTK_SHARP_2_6
-			} else if (image.StorageType == Gtk.ImageType.IconName) {
-				iconName = image.IconName;
-				Type = ImageType.ThemedIcon;
-#endif
+			if (format == FileFormat.Glade) {
+				string file = (string)GladeUtils.ExtractProperty (elem, "pixbuf", "");
+				string stock = (string)GladeUtils.ExtractProperty (elem, "stock", "");
+				string iconSize = (string)GladeUtils.ExtractProperty (elem, "icon_size", "");
+				base.Read (elem, format);
+				
+				if (stock != null && stock.Length > 0) {
+					Pixbuf = ImageInfo.FromTheme (stock, (Gtk.IconSize) int.Parse (iconSize));
+				} else if (file != null && file != "") {
+					Pixbuf = ImageInfo.FromFile (file);
+				}
 			} else
-				Type = ImageType.ApplicationImage;
+				base.Read (elem, format);
+		}
+		
+		public override XmlElement Write (XmlDocument doc, FileFormat format)
+		{
+			XmlElement elem = base.Write (doc, format);
+			if (imageInfo != null) {
+				if (format == FileFormat.Glade) {
+					// The generated pixbuf property doesn't have a valid value, it needs to be replaced.
+					GladeUtils.ExtractProperty (elem, "pixbuf", "");
+					switch (imageInfo.Source) {
+						case ImageSource.File:
+							GladeUtils.SetProperty (elem, "pixbuf", imageInfo.Name);
+							break;
+						case ImageSource.Theme:
+							GladeUtils.SetProperty (elem, "stock", imageInfo.Name);
+							GladeUtils.SetProperty (elem, "icon_size", ((int)imageInfo.ThemeIconSize).ToString ());
+							break;
+						default:
+							throw new System.NotSupportedException ("Image source not supported by Glade.");
+					}
+				}
+			}
+			return elem;
 		}
 
 		Gtk.Image image {
@@ -40,100 +65,15 @@ namespace Stetic.Wrapper {
 			image.Stock = Gtk.Stock.MissingImage;
 		}
 
-		public enum ImageType {
-			ThemedIcon,
-			ApplicationImage,
-		}
-
-		ImageType type;
-		public ImageType Type {
-			get {
-				return type;
-			}
+		public ImageInfo Pixbuf {
+			get { return imageInfo; }
 			set {
-				type = value;
-				EmitNotify ("Type");
-
-				if (type == ImageType.ThemedIcon) {
-					IconName = iconName;
-					IconSize = iconSize;
-				} else
-					Filename = filename;
-			}
-		}
-
-		string iconName;
-		public string IconName {
-			get {
-				return iconName;
-			}
-			set {
-				iconName = value;
-				EmitNotify ("IconName");
-
-				if (value == null) {
+				imageInfo = value;
+				if (imageInfo == null)
 					BreakImage ();
-					return;
-				}
-
-				if (type != ImageType.ThemedIcon)
-					type = ImageType.ThemedIcon;
-
-				Gtk.StockItem item = Gtk.Stock.Lookup (iconName);
-				if (item.StockId == iconName)
-					image.Stock = iconName;
-#if GTK_SHARP_2_6
 				else
-					image.IconName = iconName;
-#endif
-				IconSize = iconSize;
-			}
-		}
-
-		Gtk.IconSize iconSize;
-		public Gtk.IconSize IconSize {
-			get {
-				return iconSize;
-			}
-			set {
-				iconSize = value;
-				EmitNotify ("IconSize");
-
-				if (iconName == null)
-					return;
-
-#if !GTK_SHARP_2_6
-				if (image.StorageType != Gtk.ImageType.Stock) {
-					bool ok = false;
-
-					try {
-						int w, h;
-						Gtk.Icon.SizeLookup (iconSize, out w, out h);
-						image.Pixbuf = Gtk.IconTheme.Default.LoadIcon (iconName, h, 0);
-						ok = true;
-					} catch {}
-
-					if (!ok)
-						BreakImage ();
-				} else
-#endif
-					image.IconSize = (int)iconSize;
-			}
-		}
-
-		string filename;
-		public string Filename {
-			get {
-				return filename;
-			}
-			set {
-				if (value == "" || value == null) {
-					BreakImage ();
-					filename = null;
-				} else
-					image.File = filename = value;
-
-				EmitNotify ("Filename");
+					image.Pixbuf = imageInfo.GetImage (Project);
+				EmitNotify ("Pixbuf");
 			}
 		}
 	}

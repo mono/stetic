@@ -1,5 +1,6 @@
 using System;
 using System.Xml;
+using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
@@ -7,7 +8,11 @@ namespace Stetic.Wrapper {
 
 		public static new Gtk.ComboBox CreateInstance ()
 		{
-			return Gtk.ComboBox.NewText ();
+			Gtk.ComboBox c = Gtk.ComboBox.NewText ();
+			// Make sure all children are created, so the mouse events can be
+			// bound and the widget can be selected.
+			c.EnsureStyle ();
+			return c;
 		}
 
 		string items = "";
@@ -58,6 +63,32 @@ namespace Stetic.Wrapper {
 
 				EmitNotify ("Items");
 			}
+		}
+		
+		internal protected override CodeExpression GenerateWidgetCreation (GeneratorContext ctx)
+		{
+			if (Items != null && Items.Length > 0) {
+				return new CodeMethodInvokeExpression (
+					new CodeTypeReferenceExpression ("Gtk.ComboBox"),
+					"NewText"
+				);
+			} else
+				return base.GenerateWidgetCreation (ctx);
+		}
+		
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		{
+			if (Items != null && Items.Length > 0) {
+				foreach (string str in item) {
+					ctx.Statements.Add (new CodeMethodInvokeExpression (
+						new CodeVariableReferenceExpression (varName),
+						"AppendText",
+						new CodePrimitiveExpression (str)
+					));
+				}
+			}
+			
+			base.GenerateBuildCode (ctx, varName);
 		}
 	}
 }

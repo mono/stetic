@@ -32,6 +32,7 @@ namespace Stetic {
 			editors[typeof (string)] = typeof (Stetic.Editor.String);
 			editors[typeof (string[])] = typeof (Stetic.Editor.StringArray);
 			editors[typeof (Gdk.Color)] = typeof (Stetic.Editor.Color);
+			editors[typeof (Stetic.ImageInfo)] = typeof (Stetic.Editor.ImageSelector);
 		}
 		
 		public PropertyEditor (PropertyDescriptor prop) : base (false, 0)
@@ -108,6 +109,9 @@ namespace Stetic {
 			if (!syncing) {
 				syncing = true;
 				prop.SetValue (obj, propEditor.Value);
+				Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (obj) as Stetic.Wrapper.Widget;
+				if (wrapper != null)
+					wrapper.NotifyChanged ();
 				syncing = false;
 			}
 		}

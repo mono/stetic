@@ -4,7 +4,12 @@ namespace Stetic {
 	public delegate void IProjectDelegate ();
 
 	public interface IProject {
+	
+		string FileName { get; }
+		
 		Gtk.Widget Selection { get; set; }
+		
+		IResourceProvider ResourceProvider { get; set; }
 
 		Stetic.Tooltips Tooltips { get; }
 

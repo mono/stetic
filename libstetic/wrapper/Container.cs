@@ -173,11 +173,12 @@ namespace Stetic.Wrapper {
 						if (format == FileFormat.Native && wrapper.InternalChildProperty != null)
 							continue;
 						child_elem = WriteChild (wrapper, doc, format);
-					} else {
+						elem.AppendChild (child_elem);
+					} else if (child is Stetic.Placeholder) {
 						child_elem = doc.CreateElement ("child");
 						child_elem.AppendChild (doc.CreateElement ("placeholder"));
+						elem.AppendChild (child_elem);
 					}
-					elem.AppendChild (child_elem);
 				}
 			}
 			
@@ -235,9 +236,9 @@ namespace Stetic.Wrapper {
 			return WriteChild (wrapper, doc, format);
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
-			base.GenerateBuildCode (ctx, varName, statements);
+			base.GenerateBuildCode (ctx, varName);
 			
 			if (ClassDescriptor.AllowChildren) {
 				foreach (Gtk.Widget child in GladeChildren) {
@@ -245,50 +246,49 @@ namespace Stetic.Wrapper {
 					
 					if (wrapper != null && wrapper.InternalChildProperty == null)
 						// Iternal children are written later
-						GenerateChildBuildCode (ctx, varName, wrapper, statements);
+						GenerateChildBuildCode (ctx, varName, wrapper);
 				}
 			}
 			
 			foreach (TypedPropertyDescriptor prop in this.ClassDescriptor.InternalChildren) {
-				GenerateSetInternalChild (ctx, varName, prop, statements);
+				GenerateSetInternalChild (ctx, varName, prop);
 			}
 		}
 		
-		protected virtual void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper, CodeStatementCollection statements)
+		protected virtual void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
 		{
 			ObjectWrapper childwrapper = ChildWrapper (wrapper);
 			if (childwrapper != null) {
-				statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
-				string varName = ctx.GenerateCreationCode (wrapper, statements);
+				ctx.Statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
+				string varName = ctx.GenerateCreationCode (wrapper);
 				CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
 					new CodeVariableReferenceExpression (parentVar),
 					"Add",
 					new CodeVariableReferenceExpression (varName)
 				);
-				statements.Add (invoke);
+				ctx.Statements.Add (invoke);
 
-				GenerateSetPacking (ctx, parentVar, varName, childwrapper, statements);
+				GenerateSetPacking (ctx, parentVar, varName, childwrapper);
 			}
 		}
 		
-		void GenerateSetInternalChild (GeneratorContext ctx, string parentVar, TypedPropertyDescriptor prop, CodeStatementCollection statements)
+		void GenerateSetInternalChild (GeneratorContext ctx, string parentVar, TypedPropertyDescriptor prop)
 		{
 			Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
 			Widget cwrapper = Widget.Lookup (child);
 			if (cwrapper != null) {
-				statements.Add (new CodeCommentStatement ("Internal child " + Wrapped.Name + "." + prop.Name));
+				ctx.Statements.Add (new CodeCommentStatement ("Internal child " + Wrapped.Name + "." + prop.Name));
 				string childVar = ctx.NewId ();
 				CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (child.GetType(), childVar);
-				statements.Add (varDec);
+				ctx.Statements.Add (varDec);
 				varDec.InitExpression = new CodePropertyReferenceExpression (new CodeVariableReferenceExpression (parentVar), prop.Name);
 			
-				ctx.GenerateBuildCode (cwrapper, childVar, statements);
-//				GenerateSetPacking (ctx, parentVar, childVar, ChildWrapper (wrapper), statements);
+				ctx.GenerateBuildCode (cwrapper, childVar);
 				return;
 			}
 		}
 		
-		void GenerateSetPacking (GeneratorContext ctx, string parentVar, string childVar, ObjectWrapper containerChildWrapper, CodeStatementCollection statements)
+		void GenerateSetPacking (GeneratorContext ctx, string parentVar, string childVar, ObjectWrapper containerChildWrapper)
 		{
 			Gtk.Container.ContainerChild cc = containerChildWrapper.Wrapped as Gtk.Container.ContainerChild;
 			ClassDescriptor klass = containerChildWrapper.ClassDescriptor;
@@ -305,24 +305,25 @@ namespace Stetic.Wrapper {
 			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (contChildVar);
 			
 			// Set the container child properties
-						
-			CodeStatementCollection childStatements = new CodeStatementCollection ();
+
+			ctx.Statements.Add (varDec);
+			int count = ctx.Statements.Count;
+			
 			foreach (ItemGroup group in klass.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null || !prop.IsRuntimeProperty)
 						continue;
-					GenerateChildPropertySet (ctx, childStatements, var, klass, prop, cc);
+					GenerateChildPropertySet (ctx, var, klass, prop, cc);
 				}
 			}
 			
-			if (childStatements.Count > 0) {
-				statements.Add (varDec);
-				statements.AddRange (childStatements);
+			if (ctx.Statements.Count == count) {
+				ctx.Statements.Remove (varDec);
 			}
 		}
 		
-		protected virtual void GenerateChildPropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, ClassDescriptor containerChildClass, PropertyDescriptor prop, object child)
+		protected virtual void GenerateChildPropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, ClassDescriptor containerChildClass, PropertyDescriptor prop, object child)
 		{
 			if (containerChildClass.InitializationProperties != null && Array.IndexOf (containerChildClass.InitializationProperties, prop) != -1)
 				return;
@@ -336,8 +337,8 @@ namespace Stetic.Wrapper {
 				return;
 				
 			CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (var, prop.Name);
-			CodeExpression val = ctx.GenerateValue (oval);
-			statements.Add (new CodeAssignStatement (cprop, val));
+			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType);
+			ctx.Statements.Add (new CodeAssignStatement (cprop, val));
 		}
 		
 		public virtual Placeholder AddPlaceholder ()

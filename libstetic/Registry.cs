@@ -228,7 +228,10 @@ namespace Stetic {
 			ClassDescriptor klass = LookupClassByName (classname);
 			if (klass == null)
 				throw new ArgumentException ("No class " + classname + " for property " + propname);
-			return klass[propname];
+			ItemDescriptor idesc = klass[propname];
+			if (idesc == null)
+				throw new ArgumentException ("Property '" + propname + "' not found in class '" + classname + "'");
+			return idesc;
 		}
 
 		public static ItemGroup LookupContextMenu (string classname)

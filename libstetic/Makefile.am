@@ -13,11 +13,13 @@ libstetic_dll_sources =			\
 	GladeException.cs		\
 	GladeUtils.cs			\
 	HandleWindow.cs			\
+	ImageInfo.cs 			\
 	ItemDescriptor.cs		\
 	ItemGroup.cs			\
 	ItemGroupCollection.cs	\
 	IProject.cs			\
 	IPropertyEditor.cs			\
+	IResourceProvider.cs 	\
 	ObjectWrapper.cs		\
 	ParamSpec.cs			\
 	Placeholder.cs			\
@@ -44,17 +46,23 @@ libstetic_dll_sources =			\
 	editor/Enumeration.cs		\
 	editor/GroupPicker.cs		\
 	editor/Flags.cs			\
+	editor/FlagsSelectorDialog.cs			\
 	editor/FloatRange.cs		\
 	editor/Image.cs			\
 	editor/ImageFile.cs		\
+	editor/ImageSelector.cs		\
 	editor/IntRange.cs		\
 	editor/OptIntRange.cs		\
 	editor/ResponseId.cs		\
+	editor/SelectImageDialog.cs	\
 	editor/StockItem.cs		\
 	editor/String.cs		\
 	editor/StringArray.cs		\
 	editor/Text.cs			\
+	editor/ThemedIcon.cs			\
+	editor/ThemedIconList.cs			\
 	editor/Translatable.cs		\
+	editor/WidgetSelector.cs		\
 	Metacity/ButtonFunction.cs \
 	Metacity/ButtonLayout.cs \
 	Metacity/FrameFlags.cs \
@@ -114,6 +122,7 @@ libstetic_dll_sources =			\
 	wrapper/Window.cs
 
 libstetic_dll_resources =		\
+	stetic.glade				\
 	wrapper/pixmaps/*.png		\
 	wrapper/objects.xml
 
@@ -121,7 +130,7 @@ libstetic.dll: $(libstetic_dll_sources) $(libstetic_dll_resources)
 	@rm -f sources.rsp
 	@echo $(libstetic_dll_sources:%=$(srcdir)/%) > sources.rsp
 	@for resource in $(libstetic_dll_resources); do echo -resource:$$resource,`basename $$resource` >> sources.rsp; done
-	$(MCS) -debug -unsafe -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -target:library -out:$@ @sources.rsp
+	$(MCS) -debug -unsafe -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -pkg:glade-sharp-2.0 -target:library -out:$@ @sources.rsp
 
 CLEANFILES = libstetic.dll libstetic.dll.mdb sources.rsp
 

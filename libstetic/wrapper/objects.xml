@@ -4,8 +4,8 @@
     <object type="Gtk.Widget,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
 	<itemgroups>
 	    <itemgroup label="Common Widget Properties">
-		<property name="WidthRequest" />
-		<property name="HeightRequest" />
+		<property name="WidthRequest" min="-1" />
+		<property name="HeightRequest" min="-1" />
 		<property name="Visible" glade-override="true" />
 		<property name="Sensitive" glade-override="true" />
 		<property name="Tooltip" label="Tooltip" glade-name="tooltip"
@@ -165,8 +165,8 @@
 		<property name="Resizable" />
 		<property name="AllowGrow" />
 		<property name="AllowShrink" />
-		<property name="DefaultWidth" />
-		<property name="DefaultHeight" />
+		<property name="DefaultWidth" min="-1"/>
+		<property name="DefaultHeight" min="-1"/>
 	    </itemgroup>
 	    <itemgroup label="Miscellaneous Window Properties" name="Misc">
 		<property name="AcceptFocus" />
@@ -327,7 +327,7 @@
     </object>
 
     <object type="Gtk.Bin,gtk-sharp" wrapper="Stetic.Wrapper.Bin"
-    	label="Bin" icon="custom.png" palette-category="widget">
+    	label="Bin" icon="custom.png">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -424,24 +424,14 @@
 			  description="The stock button ID"
 			  editor="Stetic.Editor.StockItem">
 		    <invisible-if name="Type" value="TextOnly" />
-		    <invisible-if name="Type" value="ThemedIcon" />
-		    <invisible-if name="Type" value="ApplicationIcon" />
+		    <invisible-if name="Type" value="TextAndIcon" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
-		<property name="ApplicationIcon" label="Icon Filename"
+		<property name="Icon" label="Icon"
 			  description="The icon to display in the button"
-			  editor="Stetic.Editor.ImageFile">
+			  editor="Stetic.Editor.ImageSelector">
 		    <invisible-if name="Type" value="StockItem" />
 		    <invisible-if name="Type" value="TextOnly" />
-		    <invisible-if name="Type" value="ThemedIcon" />
-		    <invisible-if name="Type" value="Custom" />
-		</property>
-		<property name="ThemedIcon" label="Icon Name"
-			  description="The icon to display in the button"
-			  editor="Stetic.Editor.ThemedIcon">
-		    <invisible-if name="Type" value="StockItem" />
-		    <invisible-if name="Type" value="TextOnly" />
-		    <invisible-if name="Type" value="ApplicationIcon" />
 		    <invisible-if name="Type" value="Custom" />
 		</property>
 		<property name="Label" translatable="true">
@@ -641,7 +631,7 @@
 		<property name="Items" translatable="true" label="Items" glade-name="items"
 			  description="The items to display in the Combo Box, one per line"
 			  editor="Stetic.Editor.Text" />
-		<property name="Active" />
+		<property name="Active" min="-1"/>
 		<!-- 2.6 <property name="AddTearoffs" /> -->
 		<!-- 2.6 <property name="FocusOnClick" /> -->
 	    </itemgroup>
@@ -661,7 +651,7 @@
 	<itemgroups>
 	    <itemgroup label="Combo Box Entry Properties">
 		<property ref="Gtk.ComboBox.Items" />
-		<property name="Active" />
+		<property name="Active" min="-1"/>
 		<!-- 2.6 <property name="AddTearoffs" /> -->
 		<!-- 2.6 <property name="HasFrame" /> -->
 	    </itemgroup>
@@ -735,7 +725,7 @@
 	    <itemgroup label="Entry Properties">
 		<property name="Text" translatable="true" />
 		<property name="Editable" />
-		<property name="WidthChars" />
+		<property name="WidthChars" min="-1"/>
 		<property name="MaxLength" />
 		<property name="HasFrame" />
 		<property name="ActivatesDefault" />
@@ -945,23 +935,7 @@
 	    label="Image" icon="image.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Image Properties">
-		<property name="Type" label="Image Type"
-			  description="Whether to use a themed icon or an application-provided image" />
-		<property name="Stock" internal="true" />
-		<!-- 2.6: update Image.cs and remove glade-override -->
-		<property name="IconName" label="Icon name"
-			  glade-name="icon_name" glade-override="true"
-			  description="The themed icon to display"
-			  editor="Stetic.Editor.ThemedIcon">
-		    <invisible-if name="Type" value="ApplicationImage" />
-		</property>
-		<property name="IconSize">
-		    <invisible-if name="Type" value="ApplicationImage" />
-		</property>
-		<property name="Filename" glade-name="pixbuf"
-			  editor="Stetic.Editor.ImageFile">
-		    <invisible-if name="Type" value="ThemedIcon" />
-		</property>
+		<property name="Pixbuf" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Misc" />
 	    <itemgroup ref="Gtk.Widget" />
@@ -997,7 +971,7 @@
 		<property name="UseMarkup" />
 		<property name="UseUnderline" />
 		<property name="Wrap" />
-		<property name="MnemonicWidget" glade-override="true" />
+		<property name="MnemonicWidget" glade-override="true" editor="Stetic.Editor.WidgetSelector"/>
 		<property name="Justify" />
 		<property name="Selectable" />
 		<!-- 2.6 <property name="Ellipsize" /> -->
@@ -1256,11 +1230,22 @@
 	    label="Toolbar Button" icon="button.png" palette-category="toolbaritem">
 	<itemgroups>
 	    <itemgroup label="Toolbar Button Properties">
+		<property name="Type" label="Button Type"
+			  description="The type of button" />
+		<property name="StockId" label="Stock Item"
+			  description="The stock button ID"
+			  editor="Stetic.Editor.StockItem">
+		    <invisible-if name="Type" value="TextAndIcon" />
+		</property>
 		<property name="Icon" label="Icon"
 			  description="The icon to display in the button"
-			  editor="Stetic.Editor.Image" />
+			  editor="Stetic.Editor.ImageSelector">
+		    <invisible-if name="Type" value="StockItem" />
+		</property>
 		<property name="Label" translatable="true" />
-		<property name="UseUnderline" />
+		<property name="UseUnderline">
+		    <invisible-if name="Type" value="StockItem" />
+		</property>
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -1579,7 +1564,7 @@
 	    <itemgroup label="Toggle Button Properties">
 		<property ref="Gtk.Button.Type" />
 		<property ref="Gtk.Button.StockId" />
-		<property ref="Gtk.Button.ApplicationIcon" />
+		<property ref="Gtk.Button.Icon" />
 		<!-- 2.6 <property ref="Gtk.Button.ThemedIcon" /> -->
 		<property ref="Gtk.Button.Label" />
 		<property ref="Gtk.Button.UseUnderline" />
@@ -1665,7 +1650,7 @@
 		<property name="HeadersVisible" />
 		<property name="Reorderable" />
 		<property name="RulesHint" />
-		<property name="SearchColumn" />
+		<property name="SearchColumn" min="-1"/>
 		<property name="Model" />
 		<!-- 2.6 <property name="HoverSelection" /> -->
 		<!-- 2.6 <property name="HoverExpand" /> -->
@@ -2374,19 +2359,17 @@
 	       description="Button displaying stock icon and text" />
 	<value name="TextOnly" label="Text only"
 	       description="Button displaying text only" />
-	<value name="ThemedIcon" label="Themed Icon"
-	       description="Button displaying a themed icon (and application-provided text)" />
-	<value name="ApplicationIcon" label="Icon from file"
-	       description="Button displaying application-provided icon and text" />
+	<value name="TextAndIcon" label="Text and Icon"
+	       description="Button displaying an icon and application-provided text" />
 	<value name="Custom" label="Custom"
 	       description="Button with entirely custom contents" />
     </enum>
 
-    <enum type="Stetic.Wrapper.Image+ImageType">
-	<value name="ThemedIcon" label="Themed icon"
-	       description="A themed icon" />
-	<value name="ApplicationImage" label="Image from file"
-	       description="An application-provided image" />
+    <enum type="Stetic.Wrapper.ToolButton+ButtonType">
+	<value name="StockItem" label="Stock button"
+	       description="Button displaying stock icon and text" />
+	<value name="TextAndIcon" label="Text and Icon"
+	       description="Button displaying an icon and application-provided text" />
     </enum>
 
 </objects>

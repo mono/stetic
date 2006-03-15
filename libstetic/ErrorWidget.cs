@@ -10,11 +10,21 @@ namespace Stetic
 	{
 		readonly string className;
 		
+		public ErrorWidget (Exception ex)
+		{
+			Init ("Load Error: " + ex.Message);
+		}
+		
 		public ErrorWidget (string className)
 		{
 			this.className = className;
+			Init ("Unknown widget: " + className);
+		}
+		
+		void Init (string message)
+		{
 			Gtk.Label lab = new Gtk.Label ();
-			lab.Markup = "<b><span foreground='red'>Unknown widget: " + className + "</span></b>";
+			lab.Markup = "<b><span foreground='red'>" + message + "</span></b>";
 			this.CanFocus = false;
 			Add (lab);
 			this.ShadowType = Gtk.ShadowType.In;
@@ -45,7 +55,7 @@ namespace Stetic
 			return (XmlElement) doc.ImportNode (elementData, true);
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
 			ErrorWidget ew = (ErrorWidget) Wrapped;
 			throw new InvalidOperationException ("Can't generate code for unknown type: " + ew.ClassName);

@@ -11,12 +11,15 @@ namespace Stetic
 		string idPrefix;
 		Hashtable vars = new Hashtable ();
 		Hashtable widgets = new Hashtable ();
+		ArrayList generatedWrappers = new ArrayList ();
 		WidgetMap map;
+		CodeStatementCollection statements;
 		
-		public GeneratorContext (CodeNamespace cns, string idPrefix)
+		public GeneratorContext (CodeNamespace cns, string idPrefix, CodeStatementCollection statements)
 		{
 			this.cns = cns;
 			this.idPrefix = idPrefix;
+			this.statements = statements;
 			map = new WidgetMap (vars, widgets);
 		}
 		
@@ -24,40 +27,50 @@ namespace Stetic
 			get { return cns; }
 		}
 		
+		public CodeStatementCollection Statements {
+			get { return statements; }
+		}
+		
 		public string NewId ()
 		{
 			return idPrefix + (++n);
 		}
 		
-		public string GenerateCreationCode (Wrapper.Widget widget, CodeStatementCollection statements)
+		public string GenerateCreationCode (Wrapper.Widget widget)
 		{
 			string varName = NewId ();
 			
 			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (widget.ClassDescriptor.WrappedTypeName, varName);
 			statements.Add (varDec);
-			varDec.InitExpression = widget.GenerateWidgetCreation (this, statements);
-			GenerateBuildCode (widget, varName, statements);
+			varDec.InitExpression = widget.GenerateWidgetCreation (this);
+			GenerateBuildCode (widget, varName);
 			return varName;
 		}
 		
-		public virtual void GenerateBuildCode (Wrapper.Widget widget, string varName, CodeStatementCollection statements)
+		public virtual void GenerateBuildCode (Wrapper.Widget widget, string varName)
 		{
 			vars [widget.Wrapped.Name] = varName;
 			widgets [varName] = widget.Wrapped;
-			widget.GenerateBuildCode (this, varName, statements);
+			widget.GenerateBuildCode (this, varName);
+			generatedWrappers.Add (widget);
 		}
 		
-		public CodeExpression GenerateValue (object value)
+		public CodeExpression GenerateValue (object value, Type type)
 		{
 			if (value == null)
 				return new CodePrimitiveExpression (value);
 				
 			if (value.GetType ().IsEnum) {
-				long ival = (long) Convert.ChangeType (value, typeof(long));
-				return new CodeCastExpression (
-					new CodeTypeReference (value.GetType ()), 
-					new CodePrimitiveExpression (ival)
-				);
+				if (!type.IsEnum) {
+					object ival = Convert.ChangeType (value, type);
+					return new CodePrimitiveExpression (ival);
+				} else {
+					long ival = (long) Convert.ChangeType (value, typeof(long));
+					return new CodeCastExpression (
+						new CodeTypeReference (value.GetType ()), 
+						new CodePrimitiveExpression (ival)
+					);
+				}
 			}
 			
 			if (value is Gtk.Adjustment) {
@@ -83,6 +96,9 @@ namespace Stetic
 					new CodePrimitiveExpression (value.ToString ()));
 			}
 			
+			if (value is ImageInfo && typeof(Gdk.Pixbuf).IsAssignableFrom (type))
+				return ((ImageInfo)value).ToCodeExpression ();
+			
 			return new CodePrimitiveExpression (value);
 		}
 		
@@ -90,9 +106,20 @@ namespace Stetic
 			get { return map; }
 		}
 		
+		public void EndGeneration ()
+		{
+			foreach (Stetic.Wrapper.Widget w in generatedWrappers) {
+				string v = (string) vars [w.Wrapped.Name];
+				w.GeneratePostBuildCode (this, v);
+			}
+		}
+		
 		public void Reset ()
 		{
 			vars.Clear ();
+			widgets.Clear ();
+			generatedWrappers.Clear ();
+			map = new WidgetMap (vars, widgets);
 			n = 0;
 		}
 	}

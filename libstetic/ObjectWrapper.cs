@@ -75,7 +75,15 @@ namespace Stetic {
 
 			ObjectWrapper wrapper = klass.CreateWrapper ();
 			wrapper.proj = proj;
-			wrapper.Read (elem, format);
+			try {
+				wrapper.Read (elem, format);
+			} catch (Exception ex) {
+				ErrorWidget we = new ErrorWidget (ex);
+				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (proj, we);
+				wrap.Read (elem, format);
+				Console.WriteLine (ex);
+				return wrap;
+			}
 			return wrapper;
 		}
 

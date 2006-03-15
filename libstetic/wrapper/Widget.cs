@@ -14,7 +14,6 @@ namespace Stetic.Wrapper {
 		bool window_visible = true;
 		bool hasDefault;
 		Gdk.EventMask events;
-		bool set_events;
 		
 		public bool Unselectable;
 		
@@ -38,6 +37,7 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 			
 			oldName = ((Gtk.Widget)obj).Name;
+			events = Wrapped.Events;
 
 			if (!(Wrapped is Gtk.Window))
 				Wrapped.ShowAll ();
@@ -193,7 +193,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, string varName, CodeStatementCollection statements)
+		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
 			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
 			
@@ -202,23 +202,38 @@ namespace Stetic.Wrapper {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null || !prop.IsRuntimeProperty)
 						continue;
-					GeneratePropertySet (ctx, statements, var, prop);
+					GeneratePropertySet (ctx, var, prop);
 				}
 			}
 		}
 		
-		internal protected virtual CodeExpression GenerateWidgetCreation (GeneratorContext ctx, CodeStatementCollection statements)
+		internal protected virtual void GeneratePostBuildCode (GeneratorContext ctx, string varName)
+		{
+			PropertyDescriptor prop = ClassDescriptor ["Visible"] as PropertyDescriptor;
+			if (prop != null && prop.PropertyType == typeof(bool) && (bool) prop.GetValue (Wrapped)) {
+				ctx.Statements.Add (
+					new CodeMethodInvokeExpression (
+						new CodeVariableReferenceExpression (varName), 
+						"Show"
+					)
+				);
+			}
+		}
+		
+		internal protected virtual CodeExpression GenerateWidgetCreation (GeneratorContext ctx)
 		{
 			if (ClassDescriptor.InitializationProperties != null) {
 				CodeExpression[] paramters = new CodeExpression [ClassDescriptor.InitializationProperties.Length];
-				for (int n=0; n < paramters.Length; n++)
-					paramters [n] = ctx.GenerateValue (ClassDescriptor.InitializationProperties [n].GetValue (Wrapped));
+				for (int n=0; n < paramters.Length; n++) {
+					PropertyDescriptor prop = ClassDescriptor.InitializationProperties [n];
+					paramters [n] = ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType);
+				}
 				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, paramters);
 			} else
 				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName);
 		}
 		
-		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeStatementCollection statements, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
 		{
 			if (ClassDescriptor.InitializationProperties != null && Array.IndexOf (ClassDescriptor.InitializationProperties, prop) != -1)
 				return;
@@ -227,7 +242,7 @@ namespace Stetic.Wrapper {
 			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))
 				return;
 
-			CodeExpression val = ctx.GenerateValue (oval);
+			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType);
 			CodeExpression cprop;
 			
 			TypedPropertyDescriptor tprop = prop as TypedPropertyDescriptor;
@@ -237,7 +252,11 @@ namespace Stetic.Wrapper {
 				cprop = new CodePropertyReferenceExpression (var, tprop.GladeProperty.Name);
 				cprop = new CodePropertyReferenceExpression (cprop, prop.Name);
 			}
-			statements.Add (new CodeAssignStatement (cprop, val));
+			
+			// The Visible property is set after everything is built
+			
+			if (prop.Name != "Visible")
+				ctx.Statements.Add (new CodeAssignStatement (cprop, val));
 		}
 
 		public static new Widget Lookup (GLib.Object obj)
@@ -306,15 +325,10 @@ namespace Stetic.Wrapper {
 
 		public Gdk.EventMask Events {
 			get {
-				if (!set_events) {
-					events = Wrapped.Events;
-					set_events = true;
-				}
 				return events;
 			}
 			set {
 				events = value;
-				set_events = true;
 				EmitNotify ("Events");
 			}
 		}
@@ -403,7 +417,7 @@ namespace Stetic.Wrapper {
 				WidgetChanged (this, args);
 		}
 		
-		protected void NotifyChanged ()
+		public void NotifyChanged ()
 		{
 			OnWidgetChanged (new WidgetEventArgs (this));
 		}
