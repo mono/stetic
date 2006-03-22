@@ -18,6 +18,8 @@ namespace Stetic
 		Gdk.Pixbuf icon;
 		
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+		
+		static Gdk.Pixbuf missingIcon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
 
 		public TypedClassDescriptor (Assembly assembly, XmlElement elem)
 		{
@@ -40,11 +42,16 @@ namespace Stetic
 			cname = gtype.ToString ();
 
 			string iconname = elem.GetAttribute ("icon");
-			try {
-				icon = new Gdk.Pixbuf (assembly, iconname);
-			} catch {
-				icon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
-			}
+			if (iconname.Length > 0) {
+				try {
+					// Using the pixbuf resource constructor generates a gdk warning.
+					Gdk.PixbufLoader loader = new Gdk.PixbufLoader (assembly, iconname);
+					icon = loader.Pixbuf;
+				} catch {
+					icon = missingIcon;
+				}
+			} else
+				icon = missingIcon;
 			
 			BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 						
@@ -63,7 +70,7 @@ namespace Stetic
 			}
 			Load (elem);
 		}
-
+		
 		public override Gdk.Pixbuf Icon {
 			get {
 				return icon;

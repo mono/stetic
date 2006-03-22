@@ -2,16 +2,39 @@ using System;
 using System.Collections;
 using System.Reflection;
 
-namespace Stetic.Editor {
+namespace Stetic.Editor 
+{
+	public class ResponseId: PropertyEditorCell
+	{
+		protected override string GetValueText ()
+		{
+			if (Value == null)
+				return "";
 
-	public class ResponseId : Gtk.HBox, IPropertyEditor {
+			int val = (int) Value;
+			EnumDescriptor enm = Registry.LookupEnum ("Gtk.ResponseType");
+			foreach (Enum value in enm.Values) {
+				if ((int) enm[value].Value == val) {
+					return enm[value].Label;
+				}
+			}
+			return val.ToString ();
+		}
+		
+		protected override IPropertyEditor CreateEditor (Gdk.Rectangle cell_area, Gtk.StateType state)
+		{
+			return new ResponseIdEditor ();
+		}
+	}
+
+	public class ResponseIdEditor : Gtk.HBox, IPropertyEditor {
 
 		Gtk.ComboBoxEntry combo;
 		Gtk.Entry entry;
 		EnumDescriptor enm;
 		ArrayList values;
 
-		public ResponseId ()
+		public ResponseIdEditor ()
 		{
 			combo = Gtk.ComboBoxEntry.NewText ();
 			combo.Changed += combo_Changed;

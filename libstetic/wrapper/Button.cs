@@ -197,16 +197,21 @@ namespace Stetic.Wrapper {
 				if (responseId == ResponseIdForStockId (stockId))
 					responseId = 0;
 
-				string sid = value;
-				if (sid.StartsWith ("stock:"))
-					sid = sid.Substring (6);
-				button.Label = stockId = sid;
-				button.UseStock = true;
-				Gtk.StockItem item = Gtk.Stock.Lookup (sid);
-				if (item.StockId == sid) {
-					label = item.Label;
-					useUnderline = true;
+				if (value != null) {
+					string sid = value;
+					if (sid.StartsWith ("stock:"))
+						sid = sid.Substring (6);
+					button.Label = stockId = sid;
+					button.UseStock = true;
+					Gtk.StockItem item = Gtk.Stock.Lookup (sid);
+					if (item.StockId == sid) {
+						label = item.Label;
+						useUnderline = true;
+					}
+				} else {
+					stockId = value;
 				}
+				
 				EmitNotify ("StockId");
 
 				if (responseId == 0)

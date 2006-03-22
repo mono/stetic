@@ -26,6 +26,11 @@ namespace Stetic.Wrapper {
 				return (Gtk.Table)Wrapped;
 			}
 		}
+		
+		public override void Delete (Stetic.Placeholder ph)
+		{
+			// Placeholders are deleted using commands.
+		}
 
 		protected override void DoSync ()
 		{

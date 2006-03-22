@@ -2,8 +2,28 @@ using System;
 
 namespace Stetic.Editor {
 
+	public class Boolean : PropertyEditorCell 
+	{
+		public override void GetSize (int availableWidth, out int width, out int height)
+		{
+			width = 20;
+			height = 20;
+		}
+		
+		public override void Render (Gdk.Drawable window, Gdk.Rectangle bounds, Gtk.StateType state)
+		{
+			Gtk.ShadowType sh = (bool) Value ? Gtk.ShadowType.In : Gtk.ShadowType.Out;
+			Gtk.Style.PaintCheck (Container.Style, window, state, sh, bounds, Container, null, bounds.X, bounds.Y, bounds.Width, bounds.Height);
+		}
+		
+		protected override IPropertyEditor CreateEditor (Gdk.Rectangle cell_area, Gtk.StateType state)
+		{
+			return new BooleanEditor ();
+		}
+	}
+	
 	[PropertyEditor ("Active", "Toggled")]
-	public class Boolean : Gtk.CheckButton, IPropertyEditor 
+	public class BooleanEditor : Gtk.CheckButton, IPropertyEditor 
 	{
 		public void Initialize (PropertyDescriptor descriptor)
 		{

@@ -644,13 +644,23 @@ namespace Stetic.Wrapper {
 				handles.Shape ();
 		}
 
-		public void Delete (Stetic.Wrapper.Widget wrapper)
+		public virtual void Delete (Stetic.Wrapper.Widget wrapper)
 		{
 			if (AllowPlaceholders)
 				ReplaceChild (wrapper.Wrapped, CreatePlaceholder ());
 			else
 				container.Remove (wrapper.Wrapped);
 			wrapper.Wrapped.Destroy ();
+		}
+
+		public virtual void Delete (Stetic.Placeholder ph)
+		{
+			if (AllowPlaceholders) {
+				container.Remove (ph);
+				ph.Destroy ();
+				if (container.Children.Length == 0)
+					Delete ();
+			}
 		}
 
 		protected bool ChildHExpandable (Gtk.Widget child)

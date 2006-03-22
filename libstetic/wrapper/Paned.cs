@@ -29,5 +29,10 @@ namespace Stetic.Wrapper {
 				paned.Add2 (newChild);
 			}
 		}
+		
+		public override void Delete (Stetic.Placeholder ph)
+		{
+			// Don't allow deleting placeholders
+		}
 	}
 }

@@ -26,7 +26,7 @@ namespace Stetic {
 		public event Wrapper.SignalEventHandler SignalRemoved;
 		public event Wrapper.SignalChangedEventHandler SignalChanged;
 		
-		public event SelectedHandler Selected;
+		public event Wrapper.WidgetEventHandler SelectionChanged;
 		public event EventHandler ModifiedChanged;
 		
 		public event IProjectDelegate GladeImportComplete;
@@ -393,8 +393,6 @@ namespace Stetic {
 			store = new NodeStore (typeof (ProjectNode));
 		}
 
-		public delegate void SelectedHandler (Gtk.Widget selection, ProjectNode node);
-
 		// IProject
 
 		public Gtk.Widget Selection {
@@ -416,8 +414,8 @@ namespace Stetic {
 
 				selection = value;
 
-				if (Selected != null)
-					Selected (selection, selection == null ? null : nodes[selection] as ProjectNode);
+				if (SelectionChanged != null)
+					SelectionChanged (this, new Wrapper.WidgetEventArgs (Wrapper.Widget.Lookup (selection)));
 			}
 		}
 

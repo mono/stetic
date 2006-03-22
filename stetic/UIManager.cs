@@ -86,15 +86,15 @@ namespace Stetic {
 			}
 			set {
 				if (project != null)
-					project.Selected -= Selected;
+					project.SelectionChanged -= Selected;
 
 				project = value;
 
 				if (project != null) {
-					project.Selected += Selected;
-					Selected (project.Selection, null);
+					project.SelectionChanged += Selected;
+					UpdateEdit (project.Selection);
 				} else
-					Selected (null, null);
+					UpdateEdit (null);
 
 				GetAction ("/menubar/FileMenu/ImportGlade").Sensitive = (project != null);
 				GetAction ("/menubar/FileMenu/ExportGlade").Sensitive = (project != null);
@@ -305,9 +305,9 @@ namespace Stetic {
 				UpdateEdit (false, false, false);
 		}
 
-		void Selected (Gtk.Widget selection, ProjectNode node)
+		void Selected (object s, Wrapper.WidgetEventArgs args)
 		{
-			UpdateEdit (selection);
+			UpdateEdit (args.Widget != null ? args.Widget.Wrapped : null);
 		}
 	}
 }

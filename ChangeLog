@@ -1,3 +1,83 @@
+2006-03-22  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/WidgetTreeCombo.cs: A combo that shows the
+	  tree of widgets of a window.
+	* libsteticui/WidgetPropertyTree.cs:
+	* libsteticui/PropertyTree.cs: A TreeView based property
+	  editor.
+	* libsteticui/WidgetActionBar.cs: A toolbar that shows
+	  the tree of widgets on a combo and some commands
+	  available for the selected widget.
+	* libsteticui/Project.cs: Replaced the Selected event by
+	  SelectionChanged, which uses a standard signature
+	  for event handlers.
+	* libsteticui/PropertyGrid.cs: 
+	  Track changes in the widget selected event.
+	* libsteticui/PropertyEditor.cs: Moved most of code to
+	  PropertyEditorCell.
+	* libsteticui/Palette.cs: Show windows before widgets, since
+	  windows are the first thing an user is going to create.
+	* libsteticui/ProjectView.cs: Track changes in the widget 
+	  selected event. Added WidgetActivated event.
+	* libsteticui/SignalsEditor.cs: Make columns resizable.
+	  Track changes in the widget selected event.
+	  
+	* libsteticui/ContextMenu.cs: Show the Delete command for
+	  placeholders. Delete placeholders through their container.
+	  
+	* libsteticui/Makefile.am: Updated.
+	
+	* libstetic/PropertyEditorCell.cs: New file. Implements the base
+	  class for property editors that need custom rendering.
+	* libstetic/IProject.cs: Added SelectionChanged event.
+	* libstetic/ItemDescriptor.cs: HasDependencies now returns true
+	  if there are visibility dependencies, not only sensitivity.
+	* libstetic/stetic.glade: Added text editor dialog.
+	
+	* libstetic/wrapper/Button.cs: Added null check.
+	* libstetic/wrapper/Container.cs: When the last placeholder of
+	  a container is delete, delete the container.
+	* libstetic/wrapper/Paned.cs: Don't allow deleting placeholders.
+	* libstetic/wrapper/Box.cs: Removed AllowPlaceholders override,
+	  now will always return true. Why was this override needed?
+	* libstetic/wrapper/Window.cs: Store the window icon in an ImageInfo
+	  instance.
+	* libstetic/wrapper/objects.xml: Fixed some editor references.
+	  Removed icons that don't exist. Moved scrollbar and separator
+	  widgets to the "widget" palette category.
+	* libstetic/wrapper/Table.cs: Make sure placeholders can only be
+	  deleted using the delete row/column commands.
+	  
+	* libstetic/editor/Color.cs:
+	* libstetic/editor/Boolean.cs:
+	* libstetic/editor/ImageSelector.cs:
+	* libstetic/editor/Enumeration.cs:
+	* libstetic/editor/Flags.cs:
+	* libstetic/editor/StockItem.cs:
+	* libstetic/editor/IntRange.cs:
+	* libstetic/editor/ResponseId.cs: Implemented as a PropertyEditorCell,
+	  since it needs custom rendering.
+	  
+	* libstetic/editor/Text.cs: Implemented as a subclass of TextEditor.
+	* libstetic/editor/Image.cs: Make the editor visible.
+	* libstetic/editor/StringArray.cs: New implementation based on the
+	  TextEditor dialog.
+	  
+	* libstetic/editor/TextEditorDialog.cs:
+	* libstetic/editor/TextEditor.cs: A new editor for strings.
+	
+	* libstetic/DND.cs:
+	* libstetic/WidgetUtils.cs: Added some null checks.
+	
+	* libstetic/TypedClassDescriptor.cs: Properly handle errors while
+	  loading widget icons.
+	* libstetic/Makefile.am: Updated.
+	
+	* stetic/stetic.glade:
+	* stetic/UIManager.cs:
+	* stetic/Stetic.cs: Implemented a new interface model. Design windows are
+	  now embedded, instead of floating around. Using the new property tree.
+
 2006-03-14  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libsteticui/CodeGenerator.cs: Moved statements collection into

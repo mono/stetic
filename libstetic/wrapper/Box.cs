@@ -21,12 +21,14 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+/*
+		FIXME: why was this needed?
 		protected override bool AllowPlaceholders {
 			get {
 				return InternalChildProperty != null;
 			}
 		}
-
+*/
 		// DoSync() does two things: first, it makes sure that all of the
 		// PackStart widgets have Position numbers less than all of the
 		// PackEnd widgets. Second, it creates faults anywhere two widgets

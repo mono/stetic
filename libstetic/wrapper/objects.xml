@@ -154,7 +154,7 @@
 	<itemgroups>
 	    <itemgroup label="Window Properties">
 		<property name="Title" init-with-name="true" translatable="true" />
-		<property name="Icon" editor="Stetic.Editor.ImageFile" />
+		<property name="Icon" />
 		<property name="Type" glade-override="true" />
 		<property name="TypeHint" glade-override="true" />
 		<property name="WindowPosition" />
@@ -531,7 +531,7 @@
     </object>
 
     <object type="Gtk.MenuItem,gtk-sharp" wrapper="Stetic.Wrapper.MenuItem"
-	    label="Menu Item" icon="menuitem.png">
+	    label="Menu Item">
 	<itemgroups>
 	    <itemgroup label="Menu Item Properties">
 		<property name="Label" translatable="true" glade-name="label" label="Label"
@@ -581,8 +581,7 @@
 	</glade-transform>
     </object>
 
-    <object type="Gtk.CheckMenuItem,gtk-sharp"
-	    label="Check Menu Item" icon="checkmenuitem.png">
+    <object type="Gtk.CheckMenuItem,gtk-sharp" label="Check Menu Item">
 	<itemgroups>
 	    <itemgroup label="Check Menu Item Properties">
 		<property ref="Gtk.MenuItem.Label" />
@@ -647,7 +646,7 @@
     </object>
 
     <object type="Gtk.ComboBoxEntry,gtk-sharp" wrapper="Stetic.Wrapper.ComboBoxEntry" 
-	    label="Combo Box Entry" icon="comboboxentry.png" palette-category="widget">
+	    label="Combo Box Entry" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Combo Box Entry Properties">
 		<property ref="Gtk.ComboBox.Items" />
@@ -775,7 +774,7 @@
     </object>
 
     <object type="Gtk.Expander,gtk-sharp" wrapper="Stetic.Wrapper.Expander"
-	    label="Expander" icon="expander.png" palette-category="container">
+	    label="Expander" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Expander Properties">
 		<property name="Expanded" />
@@ -893,7 +892,7 @@
     </object>
 
     <object type="Gtk.HScale,gtk-sharp" wrapper="Stetic.Wrapper.HScale"
-	    label="Horizontal Scale" icon="hscale.png" palette-category="container"
+	    label="Horizontal Scale" icon="hscale.png" palette-category="widget"
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Scale" />
@@ -907,7 +906,7 @@
     </object>
 
     <object type="Gtk.HScrollbar,gtk-sharp" wrapper="Stetic.Wrapper.HScrollbar"
-	    label="Horizontal Scrollbar" icon="hscrollbar.png" palette-category="container"
+	    label="Horizontal Scrollbar" icon="hscrollbar.png" palette-category="widget"
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Range" />
@@ -921,7 +920,7 @@
     </object>
 
     <object type="Gtk.HSeparator,gtk-sharp"
-	    label="Horizontal Separator" icon="hseparator.png" palette-category="container"
+	    label="Horizontal Separator" icon="hseparator.png" palette-category="widget"
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
@@ -946,7 +945,7 @@
     </object>
 
     <object type="Gtk.ImageMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.ImageMenuItem"
-	    label="Image Menu Item" icon="imagemenuitem.png">
+	    label="Image Menu Item">
 	<itemgroups>
 	    <itemgroup label="Image Menu Item Properties">
 		<property name="Image" editor="Stetic.Editor.Image" />
@@ -1010,8 +1009,7 @@
 	</signals>
     </object>
 
-    <object type="Gtk.Menu,gtk-sharp"
-	    label="Menu" icon="menu.png">
+    <object type="Gtk.Menu,gtk-sharp" label="Menu" icon="menu.png">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
 	</itemgroups>
@@ -1191,7 +1189,7 @@
     </object>
 
     <object type="Gtk.RadioMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.RadioMenuItem"
-	    label="Radio Menu Item" icon="radiomenuitem.png">
+	    label="Radio Menu Item">
 	<itemgroups>
 	    <itemgroup label="Radio Menu Item Properties">
 		<property ref="Gtk.MenuItem.Label" />
@@ -1740,7 +1738,7 @@
     </object>
 
     <object type="Gtk.VScale,gtk-sharp" wrapper="Stetic.Wrapper.VScale"
-	    label="Vertical Scale" icon="vscale.png" palette-category="container"
+	    label="Vertical Scale" icon="vscale.png" palette-category="widget"
 	    vexpandable="true">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Scale" />
@@ -1754,7 +1752,7 @@
     </object>
 
     <object type="Gtk.VScrollbar,gtk-sharp" wrapper="Stetic.Wrapper.VScrollbar"
-	    label="Vertical Scrollbar" icon="vscrollbar.png" palette-category="container"
+	    label="Vertical Scrollbar" icon="vscrollbar.png" palette-category="widget"
 	    vexpandable="true">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Range" />
@@ -1768,7 +1766,7 @@
     </object>
 
     <object type="Gtk.VSeparator,gtk-sharp"
-	    label="Vertical Separator" icon="vseparator.png" palette-category="container"
+	    label="Vertical Separator" icon="vseparator.png" palette-category="widget"
 	    vexpandable="true">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />

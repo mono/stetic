@@ -221,7 +221,7 @@ namespace Stetic
 
 		public static Stetic.Wrapper.Widget Paste (IProject project, Gtk.SelectionData seldata)
 		{
-			if (seldata.Type.Name != ApplicationXSteticAtom.Name)
+			if (seldata == null || seldata.Type == null || seldata.Type.Name != ApplicationXSteticAtom.Name)
 				return null;
 				
 			string data = System.Text.Encoding.UTF8.GetString (seldata.Data);

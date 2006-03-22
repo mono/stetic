@@ -45,7 +45,9 @@ namespace Stetic
 			tree.AppendColumn ("Signal", crtSignal, "text", ColSignal, "weight", ColSignalTextWeight);
 			tree.AppendColumn ("Handler", crtHandler, "markup", ColHandler, "visible", ColIsSignal);
 			tree.AppendColumn ("After", crtogAfter, "active", ColAfter, "visible", ColHasHandler);
-			
+			tree.Columns[0].Resizable = true;
+			tree.Columns[1].Resizable = true;
+			tree.Columns[2].Resizable = true;
 			Add (tree);
 			ShowAll ();
 		}
@@ -59,7 +61,7 @@ namespace Stetic
 			get { return project; }
 			set {
 				if (project != null) {
-					project.Selected -= OnWidgetSelected;
+					project.SelectionChanged -= OnWidgetSelected;
 					project.SignalAdded -= new SignalEventHandler (OnSignalAddedOrRemoved);
 					project.SignalRemoved -= new SignalEventHandler (OnSignalAddedOrRemoved);
 					project.SignalChanged -= new SignalChangedEventHandler (OnSignalChanged);
@@ -68,7 +70,7 @@ namespace Stetic
 					
 				project = value;
 				
-				project.Selected += OnWidgetSelected;
+				project.SelectionChanged += OnWidgetSelected;
 				project.SignalAdded += new SignalEventHandler (OnSignalAddedOrRemoved);
 				project.SignalRemoved += new SignalEventHandler (OnSignalAddedOrRemoved);
 				project.SignalChanged += new SignalChangedEventHandler (OnSignalChanged);
@@ -93,9 +95,9 @@ namespace Stetic
 			}
 		}
 		
-		void OnWidgetSelected (Gtk.Widget widget, ProjectNode node)
+		void OnWidgetSelected (object s, Wrapper.WidgetEventArgs args)
 		{
-			selection = Stetic.Wrapper.Widget.Lookup (widget);
+			selection = args != null ? args.Widget : null;
 			RefreshTree ();
 		}
 		

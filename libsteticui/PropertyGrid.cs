@@ -56,10 +56,10 @@ namespace Stetic {
 			get { return project; }
 			set {
 				if (project != null)
-					project.Selected -= Selected;
+					project.SelectionChanged -= Selected;
 					
 				project = value;
-				project.Selected += Selected;
+				project.SelectionChanged += Selected;
 				Selected (null, null);
 			}
 		}
@@ -83,9 +83,9 @@ namespace Stetic {
 			}
 		}
 
-		void Selected (Gtk.Widget widget, ProjectNode node)
+		void Selected (object s, Wrapper.WidgetEventArgs args)
 		{
-			newSelection = Stetic.Wrapper.Widget.Lookup (widget);
+			newSelection = args != null ? args.Widget : null;
 			GLib.Timeout.Add (50, new GLib.TimeoutHandler (SelectedHandler));
 		}
 		

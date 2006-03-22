@@ -3,14 +3,35 @@ using System.Collections;
 
 namespace Stetic.Editor {
 
-	public class Enumeration : Gtk.HBox, IPropertyEditor {
+	public class Enumeration: PropertyEditorCell
+	{
+		protected override string GetValueText ()
+		{
+			if (Value == null)
+				return "";
+
+			EnumDescriptor enm = Registry.LookupEnum (Property.PropertyType.FullName);
+			EnumValue ev = enm [(Enum)Value];
+			if (ev != null)
+				return ev.Label;
+			else
+				return "";
+		}
+		
+		protected override IPropertyEditor CreateEditor (Gdk.Rectangle cell_area, Gtk.StateType state)
+		{
+			return new EnumerationEditor ();
+		}
+	}
+	
+	public class EnumerationEditor : Gtk.HBox, IPropertyEditor {
 
 		Gtk.EventBox ebox;
 		Gtk.ComboBox combo;
 		Gtk.Tooltips tips;
 		EnumDescriptor enm;
 
-		public Enumeration () : base (false, 0)
+		public EnumerationEditor () : base (false, 0)
 		{
 		}
 		

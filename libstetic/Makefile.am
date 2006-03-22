@@ -26,6 +26,7 @@ libstetic_dll_sources =			\
 	PreviewBox.cs		\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
+	PropertyEditorCell.cs	\
 	RadioGroupManager.cs		\
 	Registry.cs			\
 	Set.cs				\
@@ -59,6 +60,8 @@ libstetic_dll_sources =			\
 	editor/String.cs		\
 	editor/StringArray.cs		\
 	editor/Text.cs			\
+	editor/TextEditor.cs			\
+	editor/TextEditorDialog.cs			\
 	editor/ThemedIcon.cs			\
 	editor/ThemedIconList.cs			\
 	editor/Translatable.cs		\

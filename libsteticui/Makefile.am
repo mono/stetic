@@ -12,7 +12,11 @@ libsteticui_dll_sources =			\
 	PropertyEditor.cs		\
 	SignalsEditor.cs		\
 	PropertyGrid.cs			\
-	WidgetFactory.cs
+	PropertyTree.cs			\
+	WidgetActionBar.cs		\
+	WidgetFactory.cs		\
+	WidgetPropertyTree.cs	\
+	WidgetTreeCombo.cs
 
 libsteticui_dll_resources =		\
 	missing.png

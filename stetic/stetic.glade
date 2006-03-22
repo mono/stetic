@@ -4,13 +4,15 @@
 <glade-interface>
 
 <widget class="GtkWindow" id="MainWindow">
+  <property name="width_request">800</property>
+  <property name="height_request">600</property>
   <property name="events">GDK_BUTTON_PRESS_MASK</property>
   <property name="title">Stetic</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
   <property name="modal">False</property>
-  <property name="default_width">640</property>
-  <property name="default_height">480</property>
+  <property name="default_width">700</property>
+  <property name="default_height">400</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
   <property name="decorated">True</property>
@@ -43,25 +45,24 @@
       </child>
 
       <child>
-	<widget class="GtkHBox" id="hbox1">
+	<widget class="GtkHPaned" id="hpaned1">
 	  <property name="visible">True</property>
-	  <property name="homogeneous">False</property>
-	  <property name="spacing">6</property>
+	  <property name="can_focus">True</property>
+	  <property name="position">172</property>
 
 	  <child>
-	    <widget class="GtkScrolledWindow" id="scrolledwindow4">
+	    <widget class="GtkScrolledWindow" id="scrolledwindow7">
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
-	      <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+	      <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
 	      <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-	      <property name="shadow_type">GTK_SHADOW_IN</property>
+	      <property name="shadow_type">GTK_SHADOW_NONE</property>
 	      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
 
 	      <child>
-		<widget class="GtkViewport" id="viewport1">
+		<widget class="GtkViewport" id="viewport4">
 		  <property name="visible">True</property>
-		  <property name="events">GDK_BUTTON_PRESS_MASK</property>
-		  <property name="shadow_type">GTK_SHADOW_NONE</property>
+		  <property name="shadow_type">GTK_SHADOW_IN</property>
 
 		  <child>
 		    <widget class="Custom" id="Palette">
@@ -76,52 +77,19 @@
 	      </child>
 	    </widget>
 	    <packing>
-	      <property name="padding">0</property>
-	      <property name="expand">False</property>
-	      <property name="fill">True</property>
+	      <property name="shrink">True</property>
+	      <property name="resize">False</property>
 	    </packing>
 	  </child>
 
 	  <child>
-	    <widget class="GtkVPaned" id="vpaned1">
+	    <widget class="GtkHPaned" id="hpaned2">
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
+	      <property name="position">300</property>
 
 	      <child>
-		<widget class="GtkScrolledWindow" id="scrolledwindow5">
-		  <property name="visible">True</property>
-		  <property name="can_focus">True</property>
-		  <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
-		  <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-		  <property name="shadow_type">GTK_SHADOW_IN</property>
-		  <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
-
-		  <child>
-		    <widget class="GtkViewport" id="viewport2">
-		      <property name="visible">True</property>
-		      <property name="events">GDK_BUTTON_PRESS_MASK</property>
-		      <property name="shadow_type">GTK_SHADOW_NONE</property>
-
-		      <child>
-			<widget class="Custom" id="ProjectView">
-			  <property name="visible">True</property>
-			  <property name="events">GDK_BUTTON_PRESS_MASK</property>
-			  <property name="int1">0</property>
-			  <property name="int2">0</property>
-			  <property name="last_modification_time">Wed, 01 Jun 2005 15:17:33 GMT</property>
-			</widget>
-		      </child>
-		    </widget>
-		  </child>
-		</widget>
-		<packing>
-		  <property name="shrink">False</property>
-		  <property name="resize">False</property>
-		</packing>
-	      </child>
-
-	      <child>
-		<widget class="GtkNotebook" id="notebook1">
+		<widget class="GtkNotebook" id="notebook">
 		  <property name="visible">True</property>
 		  <property name="can_focus">True</property>
 		  <property name="show_tabs">True</property>
@@ -129,24 +97,36 @@
 		  <property name="tab_pos">GTK_POS_TOP</property>
 		  <property name="scrollable">False</property>
 		  <property name="enable_popup">False</property>
+		</widget>
+		<packing>
+		  <property name="shrink">True</property>
+		  <property name="resize">True</property>
+		</packing>
+	      </child>
+
+	      <child>
+		<widget class="GtkVPaned" id="vpaned1">
+		  <property name="visible">True</property>
+		  <property name="can_focus">True</property>
+		  <property name="position">300</property>
 
 		  <child>
-		    <widget class="GtkScrolledWindow" id="scrolledwindow6">
+		    <widget class="GtkScrolledWindow" id="scrolledwindow5">
 		      <property name="visible">True</property>
 		      <property name="can_focus">True</property>
 		      <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
 		      <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-		      <property name="shadow_type">GTK_SHADOW_NONE</property>
+		      <property name="shadow_type">GTK_SHADOW_IN</property>
 		      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
 
 		      <child>
-			<widget class="GtkViewport" id="viewport3">
+			<widget class="GtkViewport" id="viewport2">
 			  <property name="visible">True</property>
 			  <property name="events">GDK_BUTTON_PRESS_MASK</property>
 			  <property name="shadow_type">GTK_SHADOW_NONE</property>
 
 			  <child>
-			    <widget class="Custom" id="PropertyGrid">
+			    <widget class="Custom" id="ProjectView">
 			      <property name="visible">True</property>
 			      <property name="events">GDK_BUTTON_PRESS_MASK</property>
 			      <property name="int1">0</property>
@@ -158,80 +138,128 @@
 		      </child>
 		    </widget>
 		    <packing>
-		      <property name="tab_expand">False</property>
-		      <property name="tab_fill">True</property>
+		      <property name="shrink">False</property>
+		      <property name="resize">False</property>
 		    </packing>
 		  </child>
 
 		  <child>
-		    <widget class="GtkLabel" id="label1">
+		    <widget class="GtkNotebook" id="notebook1">
 		      <property name="visible">True</property>
-		      <property name="label" translatable="yes">Properties</property>
-		      <property name="use_underline">False</property>
-		      <property name="use_markup">False</property>
-		      <property name="justify">GTK_JUSTIFY_LEFT</property>
-		      <property name="wrap">False</property>
-		      <property name="selectable">False</property>
-		      <property name="xalign">0.5</property>
-		      <property name="yalign">0.5</property>
-		      <property name="xpad">0</property>
-		      <property name="ypad">0</property>
-		      <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
-		      <property name="width_chars">-1</property>
-		      <property name="single_line_mode">False</property>
-		      <property name="angle">0</property>
-		    </widget>
-		    <packing>
-		      <property name="type">tab</property>
-		    </packing>
-		  </child>
+		      <property name="can_focus">True</property>
+		      <property name="show_tabs">True</property>
+		      <property name="show_border">True</property>
+		      <property name="tab_pos">GTK_POS_TOP</property>
+		      <property name="scrollable">False</property>
+		      <property name="enable_popup">False</property>
 
-		  <child>
-		    <widget class="Custom" id="SignalsEditor">
-		      <property name="visible">True</property>
-		      <property name="int1">0</property>
-		      <property name="int2">0</property>
-		      <property name="last_modification_time">Sun, 29 Jan 2006 20:20:46 GMT</property>
-		    </widget>
-		    <packing>
-		      <property name="tab_expand">False</property>
-		      <property name="tab_fill">True</property>
-		    </packing>
-		  </child>
+		      <child>
+			<widget class="GtkScrolledWindow" id="scrolledwindow6">
+			  <property name="visible">True</property>
+			  <property name="can_focus">True</property>
+			  <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+			  <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+			  <property name="shadow_type">GTK_SHADOW_NONE</property>
+			  <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
 
-		  <child>
-		    <widget class="GtkLabel" id="label2">
-		      <property name="visible">True</property>
-		      <property name="label" translatable="yes">Signals</property>
-		      <property name="use_underline">False</property>
-		      <property name="use_markup">False</property>
-		      <property name="justify">GTK_JUSTIFY_LEFT</property>
-		      <property name="wrap">False</property>
-		      <property name="selectable">False</property>
-		      <property name="xalign">0.5</property>
-		      <property name="yalign">0.5</property>
-		      <property name="xpad">0</property>
-		      <property name="ypad">0</property>
-		      <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
-		      <property name="width_chars">-1</property>
-		      <property name="single_line_mode">False</property>
-		      <property name="angle">0</property>
+			  <child>
+			    <widget class="GtkViewport" id="viewport3">
+			      <property name="visible">True</property>
+			      <property name="events">GDK_BUTTON_PRESS_MASK</property>
+			      <property name="shadow_type">GTK_SHADOW_NONE</property>
+
+			      <child>
+				<widget class="Custom" id="PropertyGrid">
+				  <property name="visible">True</property>
+				  <property name="events">GDK_BUTTON_PRESS_MASK</property>
+				  <property name="int1">0</property>
+				  <property name="int2">0</property>
+				  <property name="last_modification_time">Wed, 01 Jun 2005 15:17:33 GMT</property>
+				</widget>
+			      </child>
+			    </widget>
+			  </child>
+			</widget>
+			<packing>
+			  <property name="tab_expand">False</property>
+			  <property name="tab_fill">True</property>
+			</packing>
+		      </child>
+
+		      <child>
+			<widget class="GtkLabel" id="label1">
+			  <property name="visible">True</property>
+			  <property name="label" translatable="yes">Properties</property>
+			  <property name="use_underline">False</property>
+			  <property name="use_markup">False</property>
+			  <property name="justify">GTK_JUSTIFY_LEFT</property>
+			  <property name="wrap">False</property>
+			  <property name="selectable">False</property>
+			  <property name="xalign">0.5</property>
+			  <property name="yalign">0.5</property>
+			  <property name="xpad">0</property>
+			  <property name="ypad">0</property>
+			  <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
+			  <property name="width_chars">-1</property>
+			  <property name="single_line_mode">False</property>
+			  <property name="angle">0</property>
+			</widget>
+			<packing>
+			  <property name="type">tab</property>
+			</packing>
+		      </child>
+
+		      <child>
+			<widget class="Custom" id="SignalsEditor">
+			  <property name="visible">True</property>
+			  <property name="int1">0</property>
+			  <property name="int2">0</property>
+			  <property name="last_modification_time">Sun, 29 Jan 2006 20:20:46 GMT</property>
+			</widget>
+			<packing>
+			  <property name="tab_expand">False</property>
+			  <property name="tab_fill">True</property>
+			</packing>
+		      </child>
+
+		      <child>
+			<widget class="GtkLabel" id="label2">
+			  <property name="visible">True</property>
+			  <property name="label" translatable="yes">Signals</property>
+			  <property name="use_underline">False</property>
+			  <property name="use_markup">False</property>
+			  <property name="justify">GTK_JUSTIFY_LEFT</property>
+			  <property name="wrap">False</property>
+			  <property name="selectable">False</property>
+			  <property name="xalign">0.5</property>
+			  <property name="yalign">0.5</property>
+			  <property name="xpad">0</property>
+			  <property name="ypad">0</property>
+			  <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
+			  <property name="width_chars">-1</property>
+			  <property name="single_line_mode">False</property>
+			  <property name="angle">0</property>
+			</widget>
+			<packing>
+			  <property name="type">tab</property>
+			</packing>
+		      </child>
 		    </widget>
 		    <packing>
-		      <property name="type">tab</property>
+		      <property name="shrink">True</property>
+		      <property name="resize">True</property>
 		    </packing>
 		  </child>
 		</widget>
 		<packing>
 		  <property name="shrink">True</property>
-		  <property name="resize">True</property>
+		  <property name="resize">False</property>
 		</packing>
 	      </child>
 	    </widget>
 	    <packing>
-	      <property name="padding">0</property>
-	      <property name="expand">True</property>
-	      <property name="fill">True</property>
+	      <property name="shrink">True</property>
+	      <property name="resize">True</property>
 	    </packing>
 	  </child>
 	</widget>

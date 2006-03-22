@@ -7,6 +7,8 @@ namespace Stetic {
 	{
 		Project project;
 		
+		public event Wrapper.WidgetEventHandler WidgetActivated;
+		
 		public ProjectView ()
 		{
 			TreeViewColumn col;
@@ -38,14 +40,14 @@ namespace Stetic {
 			get { return project; }
 			set {
 				if (project != null) {
-					project.Selected -= WidgetSelected;
+					project.SelectionChanged -= WidgetSelected;
 					project.ProjectReloaded -= OnProjectReloaded;
 					project.WidgetNameChanged -= OnWidgetNameChanged;
 				}
 				project = value;
 				if (project != null) {
 					NodeStore = project.Store;
-					project.Selected += WidgetSelected;
+					project.SelectionChanged += WidgetSelected;
 					project.ProjectReloaded += OnProjectReloaded;
 					project.WidgetNameChanged += OnWidgetNameChanged;
 				}
@@ -83,12 +85,15 @@ namespace Stetic {
 			}
 		}
 
-		void WidgetSelected (Gtk.Widget selection, ProjectNode node)
+		void WidgetSelected (object s, Wrapper.WidgetEventArgs args)
 		{
 			if (!syncing) {
 				syncing = true;
-				if (node != null)
-					NodeSelection.SelectNode (node);
+				if (args.Widget != null) {
+					ProjectNode node = project.GetNode (args.Widget.Wrapped);
+					if (node != null)
+						NodeSelection.SelectNode (node);
+				}
 				else
 					NodeSelection.UnselectAll ();
 				syncing = false;
@@ -117,6 +122,14 @@ namespace Stetic {
 		void OnWidgetNameChanged (object s, Wrapper.WidgetNameChangedArgs args)
 		{
 			QueueDraw ();
+		}
+		
+		protected override void OnRowActivated (TreePath path, TreeViewColumn col)
+		{
+			base.OnRowActivated (path, col);
+			Stetic.Wrapper.Widget w = SelectedWrapper;
+			if (w != null && WidgetActivated != null)
+				WidgetActivated (this, new Wrapper.WidgetEventArgs (w));
 		}
 	}
 }

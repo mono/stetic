@@ -42,10 +42,10 @@ namespace Stetic {
 			groups = new Hashtable ();
 			Registry.RegistryChanged += OnRegistryChanged;
 			
+			ShowGroup ("window", "Windows");
 			ShowGroup ("widget", "Widgets");
 			ShowGroup ("container", "Containers");
 			ShowGroup ("toolbaritem", "Toolbar Items");
-			ShowGroup ("window", "Windows");
 		}
 		
 		public override void Dispose ()

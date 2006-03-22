@@ -116,6 +116,7 @@ namespace Stetic.Editor {
 				PackStart (button, false, false, 0);
 				button.Clicked += button_Clicked;
 			}
+			ShowAll ();
 		}
 
 		public void Initialize (PropertyDescriptor prop)
@@ -234,7 +235,7 @@ namespace Stetic.Editor {
 			}
 		}
 
-		public object Value {
+		public virtual object Value {
 			get {
 				if (useStock) {
 					if (StockId != null)

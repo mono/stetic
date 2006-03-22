@@ -89,7 +89,7 @@ namespace Stetic {
 			Add (item);
 
 			item = new ImageMenuItem (Gtk.Stock.Delete, null);
-			if (occupied && !isInternal)
+			if (!isInternal)
 				item.Activated += DoDelete;
 			else
 				item.Sensitive = false;
@@ -138,8 +138,16 @@ namespace Stetic {
 		void DoDelete (object obj, EventArgs args)
 		{
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			if (wrapper != null)
+			if (wrapper != null) {
 				wrapper.Delete ();
+			} else {
+				Placeholder ph = widget as Placeholder;
+				if (ph != null) {
+					Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.LookupParent (ph);
+					if (wc != null)
+						wc.Delete (ph);
+				}
+			}
 		}
 
 		static MenuItem LabelItem (Gtk.Widget widget)

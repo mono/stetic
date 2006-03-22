@@ -67,8 +67,8 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		string icon;
-		public string Icon {
+		ImageInfo icon;
+		public ImageInfo Icon {
 			get {
 				return icon;
 			}
@@ -76,13 +76,16 @@ namespace Stetic.Wrapper {
 				icon = value;
 				Gtk.Window window = (Gtk.Window)Wrapped;
 				try {
-					window.Icon = new Gdk.Pixbuf (icon);
+					if (icon != null)
+						window.Icon = icon.GetImage (Project);
+					else
+						window.Icon = null;
 				} catch {
 					window.Icon = null;
 				}
 			}
 		}
-		
+
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
 			base.GenerateBuildCode (ctx, varName);

@@ -3,7 +3,85 @@ using System;
 
 namespace Stetic.Editor
 {
-	public class ImageSelector: Gtk.HBox, IPropertyEditor
+	public class BaseImageCell: PropertyEditorCell
+	{
+		const int imgSize = 24;
+		const int imgPad = 2;
+		const int spacing = 5;
+		Gdk.Pixbuf image;
+		
+		protected Gdk.Pixbuf Image {
+			get { return image; }
+			set { image = value; }
+		}
+		
+		protected int ImageSize {
+			get { return imgSize - imgPad*2; }
+		}
+		
+		public override void GetSize (int availableWidth, out int width, out int height)
+		{
+			base.GetSize (availableWidth, out width, out height);
+			width += imgSize + spacing;
+			height = Math.Max (imgSize, height);
+		}
+		
+		public override void Render (Gdk.Drawable window, Gdk.Rectangle bounds, Gtk.StateType state)
+		{
+			int iy = bounds.Y + (bounds.Height - imgSize) / 2;
+			
+			if (image != null) {
+				int dy = (imgSize - image.Height) / 2;
+				int dx = (imgSize - image.Width) / 2;
+				window.DrawPixbuf (Container.Style.BackgroundGC (state), image, 0, 0, bounds.X + dx, iy + dy, -1, -1, Gdk.RgbDither.None, 0, 0);
+			}
+			
+			window.DrawRectangle (Container.Style.DarkGC (state), false, bounds.X, iy, imgSize - 1, imgSize - 1);
+			
+			bounds.X += imgSize + spacing;
+			base.Render (window, bounds, state);
+		}
+	}
+	
+	public class ImageSelector: BaseImageCell
+	{
+		Gdk.Pixbuf image;
+		IProject project;
+		ImageInfo imageInfo;
+		
+		protected override void Initialize ()
+		{
+			base.Initialize ();
+			
+			if (Property.PropertyType != typeof(ImageInfo))
+				throw new ApplicationException ("ImageSelector editor does not support editing values of type " + Property.PropertyType);
+			
+			if (Instance == null)
+				return;
+
+			Stetic.ObjectWrapper w = Stetic.ObjectWrapper.Lookup (Instance);
+			project = w.Project;
+			imageInfo = (ImageInfo)Value;
+			if (imageInfo != null)
+				Image = imageInfo.GetThumbnail (project, ImageSize);
+			else
+				Image = null;
+		}
+		
+		protected override string GetValueText ()
+		{
+			if (imageInfo == null)
+				return "";
+			return imageInfo.Label;
+		}
+		
+		protected override IPropertyEditor CreateEditor (Gdk.Rectangle cell_area, Gtk.StateType state)
+		{
+			return new ImageSelectorEditor ();
+		}
+	}
+	
+	public class ImageSelectorEditor: Gtk.HBox, IPropertyEditor
 	{
 		Gtk.Image image;
 		Gtk.Label entry;
@@ -13,7 +91,7 @@ namespace Stetic.Editor
 		IProject project;
 		Gtk.Frame imageFrame;
 		
-		public ImageSelector()
+		public ImageSelectorEditor()
 		{
 			Spacing = 3;
 			imageFrame = new Gtk.Frame ();
@@ -41,6 +119,7 @@ namespace Stetic.Editor
 			button.Add (icon);
 			PackStart (button, false, false, 0);
 			button.Clicked += button_Clicked;
+			ShowAll ();
 		}
 
 		void button_Clicked (object obj, EventArgs args)

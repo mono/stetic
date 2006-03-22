@@ -14,14 +14,17 @@ namespace Stetic {
 		static Stetic.Palette Palette;
 		static Stetic.Project Project;
 		static Stetic.ProjectView ProjectView;
-		static Stetic.PropertyGrid Properties;
 		static Stetic.SignalsEditor Signals;
+		static Gtk.Notebook WidgetNotebook; 
+		static Stetic.WidgetPropertyTree propertyTree;
 
 		public static Stetic.UIManager UIManager;
 		public static Gtk.Window MainWindow;
 		
 		static string language = "C#";
 		static ArrayList libraries = new ArrayList ();
+		
+		static Hashtable openWindows = new Hashtable ();
 		
 
 		public static int Main (string[] args)
@@ -88,13 +91,13 @@ namespace Stetic {
 		{
 			Project = new Project ();
 			Project.WidgetAdded += OnWidgetAdded;
-			Project.Selected += OnSelectionChanged;
+			Project.SelectionChanged += OnSelectionChanged;
 
 			Palette = new Stetic.Palette (Project);
 			ProjectView = new Stetic.ProjectView (Project);
-			Properties = new Stetic.PropertyGrid (Project);
 			Signals = new Stetic.SignalsEditor (Project);
 			UIManager = new Stetic.UIManager (Project);
+			propertyTree = new Stetic.WidgetPropertyTree (Project);
 
 			Glade.XML.CustomHandler = CustomWidgetHandler;
 			Glade.XML glade = new Glade.XML ("stetic.glade", null);
@@ -116,7 +119,9 @@ namespace Stetic {
 					win.ShowAll ();
 				}
 			}
-			MainWindow = (Gtk.Window)Properties.Toplevel;
+			MainWindow = (Gtk.Window)Palette.Toplevel;
+			WidgetNotebook = (Gtk.Notebook) glade ["notebook"];
+			ProjectView.WidgetActivated += OnWidgetActivated;
 
 #if GTK_SHARP_2_6
 			// This is needed for both our own About dialog and for ones
@@ -137,7 +142,7 @@ namespace Stetic {
 			else if (name == "ProjectView")
 				return ProjectView;
 			else if (name == "PropertyGrid")
-				return Properties;
+				return propertyTree;
 			else if (name == "SignalsEditor")
 				return Signals;
 			else if (name == "MenuBar")
@@ -160,15 +165,64 @@ namespace Stetic {
 		
 		static void OnWidgetAdded (object s, Wrapper.WidgetEventArgs args)
 		{
-			if (args.Widget is Wrapper.Window) {
-				((Gtk.Window)args.Widget.Wrapped).Present ();
+			if (args.Widget.IsTopLevel) {
+				OpenWindow (args.Widget.Wrapped as Gtk.Container);
 			}
 		}
 		
-		static void OnSelectionChanged (Gtk.Widget selection, ProjectNode node)
+		static void OnSelectionChanged (object s, Wrapper.WidgetEventArgs args)
 		{
-			if (selection is Gtk.Window)
-				((Gtk.Window)selection).Present ();
+			Stetic.Wrapper.Container wc = args.Widget as Stetic.Wrapper.Container;
+			if (wc != null && wc.IsTopLevel && IsWindowOpen ((Gtk.Container) args.Widget.Wrapped))
+				OpenWindow ((Gtk.Container) args.Widget.Wrapped);
+		}
+		
+		static void OnWidgetActivated (object s, Wrapper.WidgetEventArgs args)
+		{
+			Stetic.Wrapper.Widget w = args.Widget;
+			while (!w.IsTopLevel)
+				w = Stetic.Wrapper.Container.LookupParent (w.Wrapped);
+			OpenWindow ((Gtk.Container) w.Wrapped);
+		}
+		
+		static bool IsWindowOpen (Gtk.Container widget)
+		{
+			Gtk.Widget w = openWindows [widget] as Gtk.Widget;
+			return w != null && w.Visible;
+		}
+		
+		static void OpenWindow (Gtk.Container widget)
+		{
+			Gtk.Widget page = (Gtk.Widget) openWindows [widget];
+			if (page != null) {
+				page.Show ();
+				WidgetNotebook.Page = WidgetNotebook.PageNum (page);
+			}
+			else {
+				Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.Lookup (widget);
+				Gtk.Widget design = EmbedWindow.Wrap (widget, wc.DesignWidth, wc.DesignHeight);
+				VBox box = new VBox ();
+				box.BorderWidth = 3;
+				box.PackStart (new WidgetActionBar (wc), false, false, 0);
+				box.PackStart (design, true, true, 3);
+				
+				HBox tabLabel = new HBox ();
+				tabLabel.PackStart (new Label (widget.Name), true, true, 0);
+				Button b = new Button (new Gtk.Image ("gtk-close", IconSize.SmallToolbar));
+				b.Relief = Gtk.ReliefStyle.None;
+				b.WidthRequest = b.HeightRequest = 24;
+				
+				b.Clicked += delegate (object s, EventArgs a) {
+					box.Hide ();
+				};
+				
+				tabLabel.PackStart (b, false, false, 3);
+				tabLabel.ShowAll ();
+				int p = WidgetNotebook.AppendPage (box, tabLabel);
+				box.ShowAll ();
+				WidgetNotebook.Page = p;
+				openWindows [widget] = box;
+			}
 		}
 	}
 }

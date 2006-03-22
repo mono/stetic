@@ -4,7 +4,36 @@ using System.Collections;
 
 namespace Stetic.Editor {
 
-	public class Flags : Gtk.HBox, IPropertyEditor {
+	public class Flags: PropertyEditorCell
+	{
+		protected override string GetValueText ()
+		{
+			if (Value == null)
+				return "";
+
+			uint value = (uint)(int)(Enum)Value;
+			EnumDescriptor enm = Registry.LookupEnum (Property.PropertyType.FullName);
+			string txt = "";
+			foreach (Enum val in enm.Values) {
+				EnumValue eval = enm[val];
+				if (eval.Label == "")
+					continue;
+				
+				if ((value & (uint)(int)(Enum) eval.Value) != 0) {
+					if (txt.Length > 0) txt += ", ";
+					txt += eval.Label;
+				}
+			}
+			return txt;
+		}
+		
+		protected override IPropertyEditor CreateEditor (Gdk.Rectangle cell_area, Gtk.StateType state)
+		{
+			return new FlagsEditor ();
+		}
+	}
+	
+	public class FlagsEditor : Gtk.HBox, IPropertyEditor {
 
 		EnumDescriptor enm;
 		Hashtable flags;
@@ -12,7 +41,7 @@ namespace Stetic.Editor {
 		Gtk.Entry flagsLabel;
 		string property;
 
-		public Flags ()
+		public FlagsEditor ()
 		{
 		}
 		

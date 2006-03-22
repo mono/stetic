@@ -47,7 +47,7 @@ namespace Stetic {
 
 		public bool HasDependencies {
 			get {
-				return deps != null;
+				return deps != null || visdeps != null;
 			}
 		}
 

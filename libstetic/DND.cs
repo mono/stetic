@@ -61,6 +61,9 @@ namespace Stetic {
 		// Drag function for automatic sources, called from DragBegin
 		public static void Drag (Gtk.Widget source, Gdk.DragContext ctx, Gtk.Widget dragWidget)
 		{
+			if (ctx == null)
+				return;
+
 			Gtk.Window dragWin;
 			Gtk.Requisition req;
 
