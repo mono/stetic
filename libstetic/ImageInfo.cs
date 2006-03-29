@@ -122,8 +122,12 @@ namespace Stetic
 				case ImageSource.Theme:
 					int w, h;
 					Gtk.Icon.SizeLookup (size, out w, out h);
-					Console.WriteLine ("IMAGE THEME n:" + name + " s:" + w);
-					return image = Gtk.IconTheme.Default.LoadIcon (name, w, 0);
+					try {
+						return image = Gtk.IconTheme.Default.LoadIcon (name, w, 0);
+					} catch {
+						// Icon not in theme
+						return Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
+					}
 					
 				case ImageSource.File:
 					try {
@@ -132,7 +136,6 @@ namespace Stetic
 							file = Path.Combine (Path.GetDirectoryName (project.FileName), "pixmaps");
 							file = Path.Combine (file, name);
 						}
-						Console.WriteLine ("IMAGE FILE:" + file);
 						return image = new Gdk.Pixbuf (file);
 					} catch {
 						return Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
