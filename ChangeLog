@@ -1,3 +1,11 @@
+2006-03-31  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/PropertyTree.cs: Changed the way instance
+	  information is stored. The value is now stored in
+	  the tree store instead of a hashtable.
+	* libstetic/wrapper/Table.cs: Added a flag to avoid
+	  recursively notifying changes in properties.
+
 2006-03-29  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/ImageInfo.cs: Don't crash if an icon is not

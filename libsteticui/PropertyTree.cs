@@ -11,7 +11,6 @@ namespace Stetic
 		Gtk.TreeStore store;
 		InternalTree tree;
 		TreeViewColumn editorColumn;
-		Hashtable instances = new Hashtable ();
 		Hashtable propertyRows;
 		Hashtable sensitives, invisibles;
 		TreeModelFilter filter;
@@ -23,7 +22,7 @@ namespace Stetic
 			sensitives = new Hashtable ();
 			invisibles = new Hashtable ();
 			
-			store = new TreeStore (typeof (string), typeof(object), typeof(bool));
+			store = new TreeStore (typeof (string), typeof(object), typeof(bool), typeof(object));
 			
 			TreeModelFilterVisibleFunc filterFunct = new TreeModelFilterVisibleFunc (FilterHiddenProperties); 
 			filter = new TreeModelFilter (store, null);
@@ -99,7 +98,6 @@ namespace Stetic
 		public virtual void Clear ()
 		{
 			store.Clear ();
-			instances.Clear ();
 			propertyRows.Clear ();
 			sensitives.Clear ();
 			invisibles.Clear ();
@@ -146,14 +144,15 @@ namespace Stetic
 		
 		public void AddGroup (ItemGroup igroup, object instance)
 		{
-			TreeIter iter = store.AppendValues (igroup.Label, null, true);
-			instances [store.GetStringFromIter (iter)] = instance;
+			InstanceData idata = new InstanceData (instance);
+			
+			TreeIter iter = store.AppendValues (igroup.Label, null, true, idata);
 			
 			foreach (ItemDescriptor item in igroup) {
 				if (item.IsInternal)
 					continue;
 				if (item is PropertyDescriptor)
-					AppendProperty (iter, (PropertyDescriptor)item, instance);
+					AppendProperty (iter, (PropertyDescriptor)item, idata);
 				else if (item is CommandDescriptor)
 					AppendCommand ((CommandDescriptor)item);
 			}
@@ -161,17 +160,21 @@ namespace Stetic
 		
 		protected void AppendProperty (PropertyDescriptor prop, object instance)
 		{
-			AppendProperty (TreeIter.Zero, prop, instance);
+			AppendProperty (TreeIter.Zero, prop, new InstanceData (instance));
 		}
 		
 		protected void AppendProperty (TreeIter piter, PropertyDescriptor prop, object instance)
 		{
+			AppendProperty (piter, prop, new InstanceData (instance));
+		}
+		
+		void AppendProperty (TreeIter piter, PropertyDescriptor prop, InstanceData idata)
+		{
 			TreeIter iter;
 			if (piter.Equals (TreeIter.Zero))
-				iter = store.AppendValues (prop.Label, prop, false);
+				iter = store.AppendValues (prop.Label, prop, false, idata);
 			else
-				iter = store.AppendValues (piter, prop.Label, prop, false);
-			instances [store.GetStringFromIter (iter)] = instance;
+				iter = store.AppendValues (piter, prop.Label, prop, false, idata);
 			if (prop.HasDependencies)
 				sensitives[prop] = prop;
 			if (prop.HasVisibility)
@@ -201,9 +204,9 @@ namespace Stetic
 			} else {
 				PropertyDescriptor prop = (PropertyDescriptor) model.GetValue (iter, 1);
 				PropertyEditorCell propCell = PropertyEditorCell.GetPropertyCell (prop);
-				object instance = instances [model.GetStringFromIter (iter)];
-				propCell.Initialize (tree, prop, instance);
-				rc.SetData (instance, prop, propCell);
+				InstanceData idata = (InstanceData) model.GetValue (iter, 3);
+				propCell.Initialize (tree, prop, idata.Instance);
+				rc.SetData (idata.Instance, prop, propCell);
 			}
 		}
 		
@@ -215,8 +218,8 @@ namespace Stetic
 			
 			PropertyDescriptor prop = (PropertyDescriptor) model.GetValue (iter, 1);
 			if (prop != null) {
-				object instance = instances [model.GetStringFromIter (iter)];
-				rc.SensitiveProperty = prop.EnabledFor (instance);
+				InstanceData idata = (InstanceData) model.GetValue (iter, 3);
+				rc.SensitiveProperty = prop.EnabledFor (idata.Instance);
 			} else
 				rc.SensitiveProperty = true;
 		}
@@ -226,11 +229,11 @@ namespace Stetic
 			PropertyDescriptor prop = (PropertyDescriptor) model.GetValue (iter, 1);
 			if (prop == null)
 				return true;
-			object instance = instances [model.GetStringFromIter (iter)];
-			if (instance == null)
+			InstanceData idata = (InstanceData) model.GetValue (iter, 3);
+			if (idata == null || idata.Instance == null)
 				return true;
 			
-			return prop.VisibleFor (instance);
+			return prop.VisibleFor (idata.Instance);
 		}
 	}
 	
@@ -517,5 +520,15 @@ namespace Stetic
 			box.SizeRequest ();
 			box.Allocation = allocation;
 		}
+	}
+	
+	class InstanceData 
+	{
+		public InstanceData (object instance) 
+		{
+			Instance = instance;
+		}
+		
+		public object Instance;
 	}
 }

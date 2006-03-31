@@ -325,6 +325,8 @@ namespace Stetic.Wrapper {
 		
 		public class TableChild : Container.ContainerChild {
 
+			bool freeze;
+			
 			Gtk.Table.TableChild tc {
 				get {
 					return (Gtk.Table.TableChild)Wrapped;
@@ -336,10 +338,12 @@ namespace Stetic.Wrapper {
 					return (tc.XOptions & Gtk.AttachOptions.Expand) != 0;
 				}
 				set {
+					freeze = true;
 					if (value)
 						tc.XOptions |= Gtk.AttachOptions.Expand;
 					else
 						tc.XOptions &= ~Gtk.AttachOptions.Expand;
+					freeze = false;
 					EmitNotify ("XExpand");
 				}
 			}
@@ -349,10 +353,12 @@ namespace Stetic.Wrapper {
 					return (tc.XOptions & Gtk.AttachOptions.Fill) != 0;
 				}
 				set {
+					freeze = true;
 					if (value)
 						tc.XOptions |= Gtk.AttachOptions.Fill;
 					else
 						tc.XOptions &= ~Gtk.AttachOptions.Fill;
+					freeze = false;
 					EmitNotify ("XFill");
 				}
 			}
@@ -362,10 +368,12 @@ namespace Stetic.Wrapper {
 					return (tc.XOptions & Gtk.AttachOptions.Shrink) != 0;
 				}
 				set {
+					freeze = true;
 					if (value)
 						tc.XOptions |= Gtk.AttachOptions.Shrink;
 					else
 						tc.XOptions &= ~Gtk.AttachOptions.Shrink;
+					freeze = false;
 					EmitNotify ("XShrink");
 				}
 			}
@@ -375,10 +383,12 @@ namespace Stetic.Wrapper {
 					return (tc.YOptions & Gtk.AttachOptions.Expand) != 0;
 				}
 				set {
+					freeze = true;
 					if (value)
 						tc.YOptions |= Gtk.AttachOptions.Expand;
 					else
 						tc.YOptions &= ~Gtk.AttachOptions.Expand;
+					freeze = false;
 					EmitNotify ("YExpand");
 				}
 			}
@@ -388,10 +398,12 @@ namespace Stetic.Wrapper {
 					return (tc.YOptions & Gtk.AttachOptions.Fill) != 0;
 				}
 				set {
+					freeze = true;
 					if (value)
 						tc.YOptions |= Gtk.AttachOptions.Fill;
 					else
 						tc.YOptions &= ~Gtk.AttachOptions.Fill;
+					freeze = false;
 					EmitNotify ("YFill");
 				}
 			}
@@ -401,16 +413,20 @@ namespace Stetic.Wrapper {
 					return (tc.YOptions & Gtk.AttachOptions.Shrink) != 0;
 				}
 				set {
+					freeze = true;
 					if (value)
 						tc.YOptions |= Gtk.AttachOptions.Shrink;
 					else
 						tc.YOptions &= ~Gtk.AttachOptions.Shrink;
+					freeze = false;
 					EmitNotify ("YShrink");
 				}
 			}
 
 			protected override void EmitNotify (string propertyName)
 			{
+				if (freeze) return;
+
 				if (propertyName == "x-options" || propertyName == "AutoSize") {
 					base.EmitNotify ("XExpand");
 					base.EmitNotify ("XFill");
