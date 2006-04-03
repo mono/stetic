@@ -1,3 +1,25 @@
+2006-04-03  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/WidgetTreeCombo.cs: Don't show children
+	  for widgets which don't allow children.
+	* libsteticui/ProjectView.cs: Allow deleting top level
+	  widgets from the project view.
+	* libsteticui/ContextMenu.cs: Don't allow deleting or
+	  cutting top level widgets.
+	* libstetic/CustomWidget.cs: Use EventBox as base class.
+	  A gdk window is required to make child widgets selectable.
+	* libstetic/wrapper/Container.cs: Minor change in focus
+	  handling. Don't allow deleting the only placeholder of a 
+	  top level container.
+	* libstetic/wrapper/Widget.cs: Avoid handling the FocusIn
+	  event fired by an internal Select call.
+	* libstetic/wrapper/objects.xml: Removed some read-only
+	  properties.
+	* libstetic/TypedPropertyDescriptor.cs: Provide defaults only
+	  for primitive type properties.
+	* stetic/Stetic.cs: When deleting a top level widget, hide the
+	  corresponding tab.
+
 2006-03-31  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libsteticui/PropertyTree.cs: Changed the way instance

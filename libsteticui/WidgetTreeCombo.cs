@@ -102,7 +102,7 @@ namespace Stetic
 			menu.Append (item);
 			
 			Gtk.Container cc = widget as Gtk.Container;
-			if (cc != null) {
+			if (cc != null && wrapper.ClassDescriptor.AllowChildren) {
 				foreach (Gtk.Widget child in cc.Children)
 					FillCombo (menu, child, level + 1);
 			}

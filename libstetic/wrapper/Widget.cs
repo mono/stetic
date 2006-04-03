@@ -8,6 +8,7 @@ namespace Stetic.Wrapper {
 	public class Widget : Object {
 	
 		string oldName;
+		bool settingFocus;
 		SignalCollection signals;
 		bool hexpandable, vexpandable;
 
@@ -41,7 +42,7 @@ namespace Stetic.Wrapper {
 
 			if (!(Wrapped is Gtk.Window))
 				Wrapped.ShowAll ();
-
+			
 			Wrapped.PopupMenu += PopupMenu;
 			Wrapped.FocusInEvent += OnFocusIn;
 			InterceptClicks (Wrapped);
@@ -52,6 +53,9 @@ namespace Stetic.Wrapper {
 		
 		void OnFocusIn (object s, Gtk.FocusInEventArgs a)
 		{
+			if (settingFocus)
+				return;
+
 			if (!Unselectable)
 				Select ();
 			else if (ParentWrapper != null)
@@ -159,10 +163,17 @@ namespace Stetic.Wrapper {
 
 		public virtual void Select ()
 		{
+			// Select() will bring the focus to this widget.
+			// This flags avoids calling Select() again
+			// when the focusIn event is received.
+			settingFocus = true;
+			
 			if (ParentWrapper != null)
 				ParentWrapper.Select (this);
 			else if (this is Stetic.Wrapper.Container)
 				((Container)this).Select (this);
+				
+			settingFocus = false;
 		}
 
 		public void Delete ()

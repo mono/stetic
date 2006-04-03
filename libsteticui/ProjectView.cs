@@ -113,6 +113,15 @@ namespace Stetic {
 
 			if (selection != null) {
 				Menu m = new ContextMenu (selection);
+				if (selection.IsTopLevel) {
+					// Allow deleting top levels from the project view
+					ImageMenuItem item = new ImageMenuItem (Gtk.Stock.Delete, null);
+					item.Activated += delegate (object obj, EventArgs args) {
+						selection.Delete ();
+					};
+					item.Show ();
+					m.Add (item);
+				}
 				m.Popup ();
 				return true;
 			} else

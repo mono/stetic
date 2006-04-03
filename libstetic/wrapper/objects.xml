@@ -209,8 +209,6 @@
 	<itemgroups>
 	    <itemgroup label="Pane Properties">
 		<property name="Position" />
-		<property name="MinPosition" />
-		<property name="MaxPosition" />
 		<property name="BorderWidth" />
 	    </itemgroup>
 	</itemgroups>

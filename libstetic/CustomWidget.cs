@@ -6,28 +6,18 @@ namespace Stetic
 	// This widget is used at design-time to represent a Gtk.Bin container.
 	// Gtk.Bin is the base class for custom widgets.
 	
-	public class CustomWidget: Gtk.Bin
+	public class CustomWidget: Gtk.EventBox
 	{
-		Gtk.Widget child;
-		
-		protected override void OnSizeRequested (ref Gtk.Requisition req)
+		public CustomWidget ()
 		{
-			if (child != null)
-				req = child.SizeRequest ();
+			this.VisibleWindow = false;
+			this.Events |= Gdk.EventMask.ButtonPressMask;
 		}
 		
-		protected override void OnSizeAllocated (Gdk.Rectangle allocation)
+		protected override bool OnButtonPressEvent (Gdk.EventButton ev)
 		{
-			base.OnSizeAllocated (allocation);
-			if (child != null)
-				child.Allocation = allocation;
-		}
-		
-		protected override void OnAdded (Gtk.Widget widget)
-		{
-			base.OnAdded (widget);
-			child = widget;
+			// Avoid forwarding event to parent widget
+			return true;
 		}
 	}
-	
 }

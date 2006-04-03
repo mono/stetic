@@ -558,20 +558,23 @@ namespace Stetic.Wrapper {
 
 			Gtk.Window win = GetParentWindow ();
 			
-			if (selection != null) {
+			if (selection != null)
 				selection.Destroyed -= SelectionDestroyed;
-				// Remove the focus from the window. In this way we ensure
-				// that the current selected widget will lose the focus,
-				// even if the new selection is not focusable.
-				if (win != null)
-					win.Focus = null;
-			}
+			
 			if (handles != null)
 				handles.Dispose ();
 				
 			selection = widget;
-			if (win != null && widget != null && widget.CanFocus)
-				win.Focus = widget;
+			if (win != null) {
+				if (widget != null && widget.CanFocus)
+					win.Focus = widget;
+				else {
+					// Remove the focus from the window. In this way we ensure
+					// that the current selected widget will lose the focus,
+					// even if the new selection is not focusable.
+					win.Focus = null;
+				}
+			}
 				
 			if (selection != null)
 				selection.Destroyed += SelectionDestroyed;
@@ -656,8 +659,12 @@ namespace Stetic.Wrapper {
 		public virtual void Delete (Stetic.Placeholder ph)
 		{
 			if (AllowPlaceholders) {
+				// Don't allow deleting the only placeholder of a top level container
+				if (IsTopLevel && container.Children.Length == 1)
+					return;
 				container.Remove (ph);
 				ph.Destroy ();
+				// If there aren't more placeholders in this container, just delete the container
 				if (container.Children.Length == 0)
 					Delete ();
 			}

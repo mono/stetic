@@ -68,7 +68,7 @@ namespace Stetic {
 			MenuItem item;
 
 			item = new ImageMenuItem (Gtk.Stock.Cut, null);
-			if (occupied && !isInternal)
+			if (occupied && !isInternal && parentWrapper != null)
 				item.Activated += DoCut;
 			else
 				item.Sensitive = false;
@@ -88,12 +88,11 @@ namespace Stetic {
 				item.Sensitive = false;
 			Add (item);
 
-			item = new ImageMenuItem (Gtk.Stock.Delete, null);
-			if (!isInternal)
+			if (!isInternal && parentWrapper != null) {
+				item = new ImageMenuItem (Gtk.Stock.Delete, null);
 				item.Activated += DoDelete;
-			else
-				item.Sensitive = false;
-			Add (item);
+				Add (item);
+			}
 
 			if (top) {
 				for (; parentWrapper != null; parentWrapper = parentWrapper.ParentWrapper) {

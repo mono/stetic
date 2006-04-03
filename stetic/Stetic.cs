@@ -91,6 +91,7 @@ namespace Stetic {
 		{
 			Project = new Project ();
 			Project.WidgetAdded += OnWidgetAdded;
+			Project.WidgetRemoved += OnWidgetRemoved;
 			Project.SelectionChanged += OnSelectionChanged;
 
 			Palette = new Stetic.Palette (Project);
@@ -170,6 +171,13 @@ namespace Stetic {
 			}
 		}
 		
+		static void OnWidgetRemoved (object s, Wrapper.WidgetEventArgs args)
+		{
+			if (args.Widget.IsTopLevel) {
+				CloseWindow (args.Widget.Wrapped as Gtk.Container);
+			}
+		}
+		
 		static void OnSelectionChanged (object s, Wrapper.WidgetEventArgs args)
 		{
 			Stetic.Wrapper.Container wc = args.Widget as Stetic.Wrapper.Container;
@@ -214,6 +222,7 @@ namespace Stetic {
 				
 				b.Clicked += delegate (object s, EventArgs a) {
 					box.Hide ();
+					WidgetNotebook.QueueResize ();
 				};
 				
 				tabLabel.PackStart (b, false, false, 3);
@@ -222,6 +231,15 @@ namespace Stetic {
 				box.ShowAll ();
 				WidgetNotebook.Page = p;
 				openWindows [widget] = box;
+			}
+		}
+		
+		static void CloseWindow (Gtk.Container widget)
+		{
+			Gtk.Widget page = (Gtk.Widget) openWindows [widget];
+			if (page != null) {
+				WidgetNotebook.Remove (page);
+				openWindows.Remove (widget);
 			}
 		}
 	}
