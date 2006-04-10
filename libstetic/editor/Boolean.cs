@@ -13,7 +13,7 @@ namespace Stetic.Editor {
 		public override void Render (Gdk.Drawable window, Gdk.Rectangle bounds, Gtk.StateType state)
 		{
 			Gtk.ShadowType sh = (bool) Value ? Gtk.ShadowType.In : Gtk.ShadowType.Out;
-			Gtk.Style.PaintCheck (Container.Style, window, state, sh, bounds, Container, null, bounds.X, bounds.Y, bounds.Width, bounds.Height);
+			Gtk.Style.PaintCheck (Container.Style, window, state, sh, bounds, Container, "", bounds.X, bounds.Y, bounds.Width, bounds.Height);
 		}
 		
 		protected override IPropertyEditor CreateEditor (Gdk.Rectangle cell_area, Gtk.StateType state)
