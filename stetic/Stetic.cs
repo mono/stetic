@@ -173,9 +173,7 @@ namespace Stetic {
 		
 		static void OnWidgetRemoved (object s, Wrapper.WidgetEventArgs args)
 		{
-			if (args.Widget.IsTopLevel) {
-				CloseWindow (args.Widget.Wrapped as Gtk.Container);
-			}
+			CloseWindow (args.Widget.Wrapped as Gtk.Container);
 		}
 		
 		static void OnSelectionChanged (object s, Wrapper.WidgetEventArgs args)
@@ -236,10 +234,12 @@ namespace Stetic {
 		
 		static void CloseWindow (Gtk.Container widget)
 		{
-			Gtk.Widget page = (Gtk.Widget) openWindows [widget];
-			if (page != null) {
-				WidgetNotebook.Remove (page);
-				openWindows.Remove (widget);
+			if (widget != null) {
+				Gtk.Widget page = (Gtk.Widget) openWindows [widget];
+				if (page != null) {
+					WidgetNotebook.Remove (page);
+					openWindows.Remove (widget);
+				}
 			}
 		}
 	}

@@ -1,3 +1,10 @@
+2006-04-18  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/wrapper/objects.xml:
+	* libstetic/wrapper/Notebook.cs: Disable "Insert Before" and
+	  "Delete Page" commands when there are no pages in the notebook.
+	* stetic/Stetic.cs: Fix crash when deleting a widget.
+
 2006-04-18  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/wrapper/Widget.cs:

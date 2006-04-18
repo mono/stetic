@@ -1066,6 +1066,7 @@
 		<property name="Scrollable" />
 		<property name="BorderWidth" />
 		<command name="InsertBefore" label="Insert Page Before"
+			 check="CheckInsertBefore"
 			 description="Insert a blank page before this one" />
 		<command name="InsertAfter" label="Insert Page After"
 			 description="Insert a blank page after this one" />
@@ -1091,7 +1092,8 @@
 		     description="Show the next page"
 		     check="CheckNextPage" />
 	    <command name="DeletePage" label="Delete Page"
-		     description="Delete the current page" />
+		     description="Delete the current page"
+		     check="CheckDeletePage" />
 	    <command name="SwapPrevious" label="Swap with Previous Page"
 		     description="Swap the contents of this page with the contents of the previous page"
 		     check="CheckPreviousPage" />

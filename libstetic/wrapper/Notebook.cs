@@ -172,6 +172,11 @@ namespace Stetic.Wrapper {
 			tabs.RemoveAt (notebook.CurrentPage);
 			notebook.RemovePage (notebook.CurrentPage);
 		}
+		
+		internal bool CheckDeletePage ()
+		{
+			return notebook.NPages > 0;
+		}
 
 		internal void SwapPrevious ()
 		{
@@ -186,6 +191,11 @@ namespace Stetic.Wrapper {
 		internal void InsertBefore ()
 		{
 			notebook.CurrentPage = InsertPage (notebook.CurrentPage);
+		}
+
+		internal bool CheckInsertBefore ()
+		{
+			return notebook.NPages > 0;
 		}
 
 		internal void InsertAfter ()
