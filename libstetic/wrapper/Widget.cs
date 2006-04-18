@@ -45,10 +45,18 @@ namespace Stetic.Wrapper {
 			
 			Wrapped.PopupMenu += PopupMenu;
 			Wrapped.FocusInEvent += OnFocusIn;
+			Wrapped.ParentSet += OnParentSet;
 			InterceptClicks (Wrapped);
 
 			hexpandable = this.ClassDescriptor.HExpandable;
 			vexpandable = this.ClassDescriptor.VExpandable;
+			
+			if (ParentWrapper != null) {
+				// Make sure the widget's name is not already being used.
+				string nn = ParentWrapper.GetValidWidgetName (Wrapped);
+				if (nn != Wrapped.Name)
+					Wrapped.Name = nn;
+			}
 		}
 		
 		void OnFocusIn (object s, Gtk.FocusInEventArgs a)
@@ -60,6 +68,16 @@ namespace Stetic.Wrapper {
 				Select ();
 			else if (ParentWrapper != null)
 				ParentWrapper.Select ();
+		}
+		
+		void OnParentSet (object o, Gtk.ParentSetArgs args)
+		{
+			if (ParentWrapper != null) {
+				// Make sure the widget's name is not already being used.
+				string nn = ParentWrapper.GetValidWidgetName (Wrapped);
+				if (nn != Wrapped.Name)
+					Wrapped.Name = nn;
+			}
 		}
 
 		void InterceptClicks (Gtk.Widget widget)
@@ -94,6 +112,14 @@ namespace Stetic.Wrapper {
 
 		public SignalCollection Signals {
 			get { return signals; }
+		}
+		
+		public Container GetTopLevel ()
+		{
+			Widget c = this;
+			while (!c.IsTopLevel)
+				c = c.ParentWrapper;
+			return c as Container;
 		}
 		
 		[GLib.ConnectBefore]
@@ -222,12 +248,14 @@ namespace Stetic.Wrapper {
 		{
 			PropertyDescriptor prop = ClassDescriptor ["Visible"] as PropertyDescriptor;
 			if (prop != null && prop.PropertyType == typeof(bool) && (bool) prop.GetValue (Wrapped)) {
-				ctx.Statements.Add (
-					new CodeMethodInvokeExpression (
-						new CodeVariableReferenceExpression (varName), 
-						"Show"
-					)
-				);
+				if ((bool) prop.GetValue (Wrapped)) {
+					ctx.Statements.Add (
+						new CodeMethodInvokeExpression (
+							new CodeVariableReferenceExpression (varName), 
+							"Show"
+						)
+					);
+				}
 			}
 		}
 		
@@ -382,6 +410,14 @@ namespace Stetic.Wrapper {
 			
 			if (propertyName == "Name") {
 				if (Wrapped.Name != oldName) {
+					if (ParentWrapper != null) {
+						string nn = ParentWrapper.GetValidWidgetName (Wrapped);
+						if (nn != Wrapped.Name) {
+							Wrapped.Name = nn;
+							return;
+						}
+					}
+					
 					string on = oldName;
 					oldName = Wrapped.Name;
 					OnNameChanged (new WidgetNameChangedArgs (this, on, Wrapped.Name));

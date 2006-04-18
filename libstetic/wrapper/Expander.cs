@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Xml;
+using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
@@ -52,6 +53,27 @@ namespace Stetic.Wrapper {
 				expander.LabelWidget = newChild;
 			else
 				base.ReplaceChild (oldChild, newChild);
+		}
+		
+		internal protected override CodeExpression GenerateWidgetCreation (GeneratorContext ctx)
+		{
+			return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, new CodePrimitiveExpression (null));
+		}
+
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
+		{
+			if (wrapper.Wrapped == expander.LabelWidget) {
+				string varName = ctx.GenerateCreationCode (wrapper);
+				CodeAssignStatement assign = new CodeAssignStatement (
+					new CodePropertyReferenceExpression (
+						new CodeVariableReferenceExpression (parentVar),
+						"LabelWidget"
+					),
+					new CodeVariableReferenceExpression (varName)
+				);
+				ctx.Statements.Add (assign);
+			} else
+				base.GenerateChildBuildCode (ctx, parentVar, wrapper);
 		}
 	}
 }

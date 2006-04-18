@@ -1,3 +1,12 @@
+2006-04-18  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/wrapper/Widget.cs:
+	* libstetic/wrapper/Container.cs: When adding a widget to a container,
+	  make sure the identifiers are not duplicated.
+	* libstetic/wrapper/Frame.cs: Fixed code generation for
+	  the label widget.
+	* libstetic/wrapper/Expander.cs: Fix code generation. Fixes bug #78090.
+
 2006-04-10  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/editor/Boolean.cs: Fix nullref in some themes.

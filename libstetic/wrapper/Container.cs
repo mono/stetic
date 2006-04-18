@@ -31,11 +31,21 @@ namespace Stetic.Wrapper {
 
 			container.Removed += ChildRemoved;
 			container.SizeAllocated += SizeAllocated;
+			container.ParentSet += OnParentSet;
 
 			if (Wrapped.GetType ().ToString ()[0] == 'H')
 				ContainerOrientation = Gtk.Orientation.Horizontal;
 			else
 				ContainerOrientation = Gtk.Orientation.Vertical;
+			
+			ValidateChildNames ();
+		}
+		
+		void OnParentSet (object o, Gtk.ParentSetArgs args)
+		{
+			// Make sure children's IDs don't conflict with other widgets
+			// in the parent container.
+			ValidateChildNames ();
 		}
 		
 		Gtk.Container container {
@@ -738,7 +748,106 @@ namespace Stetic.Wrapper {
 				return (ContainerOrientation == Gtk.Orientation.Horizontal);
 			}
 		}
+		
+		void ValidateChildNames ()
+		{
+			if (!IsTopLevel) {
+				ParentWrapper.ValidateChildNames ();
+				return;
+			}
+				
+			Hashtable names = new Hashtable ();
+			ValidateChildNames (names, container);
+		}
 
+		void ValidateChildNames (Hashtable names, Gtk.Container parent)
+		{
+			foreach (Gtk.Widget w in parent.AllChildren) {
+				if (names.Contains (w.Name)) {
+					// There is a widget with the same name. If the widget
+					// has a numeric suffix, just increase it.
+					string name; int idx;
+					ParseWidgetName (w.Name, out name, out idx);
+					
+					string compName = idx != 0 ? name + idx : name;
+					while (names.Contains (compName)) {
+						idx++;
+						compName = name + idx;
+					}
+					w.Name = compName;
+				}
+				names [w.Name] = w;
+				
+				if (w is Gtk.Container) {
+					ValidateChildNames (names, (Gtk.Container)w);
+				}
+			}
+		}
+		
+		void ParseWidgetName (string name, out string baseName, out int idx)
+		{
+			// Extract a numeric sufix from the name
+			
+			int n;
+			for (n = name.Length - 1; n >= 0 && char.IsDigit (name [n]); n--)
+				;
+				
+			if (n < name.Length - 1) {
+				baseName = name.Substring (0, n + 1);
+				idx = int.Parse (name.Substring (n + 1));
+			} else {
+				baseName = name;
+				idx = 0;
+			}
+		}
+
+		internal string GetValidWidgetName (Gtk.Widget widget)
+		{
+			// Get a valid name for a widget (a name that doesn't
+			// exist in the parent container.
+
+			if (!IsTopLevel)
+				return ParentWrapper.GetValidWidgetName (widget);
+
+			string name;
+			int idx;
+
+			ParseWidgetName (widget.Name, out name, out idx);
+			
+			string compName = idx != 0 ? name + idx : name;
+			
+			Gtk.Widget fw = FindWidget (compName, widget);
+			while (fw != null) {
+				idx++;
+				compName = name + idx;
+				fw = FindWidget (compName, widget);
+			}
+			
+			return compName;
+		}
+		
+		Gtk.Widget FindWidget (string name, Gtk.Widget skipwidget)
+		{
+			if (Wrapped != skipwidget && Wrapped.Name == name)
+				return Wrapped;
+			else
+				return FindWidget ((Gtk.Container)Wrapped, name, skipwidget);
+		}
+		
+		Gtk.Widget FindWidget (Gtk.Container parent, string name, Gtk.Widget skipwidget)
+		{
+			foreach (Gtk.Widget w in parent.AllChildren) {
+				if (w.Name == name && w != skipwidget)
+					return w;
+				if (w is Gtk.Container) {
+					Gtk.Widget res = FindWidget ((Gtk.Container)w, name, skipwidget);
+					if (res != null)
+						return res;
+				}
+			}
+			return null;
+		}
+		
 		public class ContainerChild : Stetic.ObjectWrapper {
 
 			internal static void Register ()
