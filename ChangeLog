@@ -1,3 +1,11 @@
+2006-04-21  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/wrapper/VScale.cs:
+	* libstetic/wrapper/HScrollbar.cs:
+	* libstetic/wrapper/HScale.cs:
+	* libstetic/wrapper/VScrollbar.cs: Generate valid construction
+	  expressions.
+
 2006-04-18  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/wrapper/objects.xml:
