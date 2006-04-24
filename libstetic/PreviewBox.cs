@@ -66,14 +66,11 @@ namespace Stetic
 				try {
 					metacityPreview = CreateMetacityPreview (window);
 					preview = metacityPreview;
-				} catch (DllNotFoundException ex) {
-					if (ex.Message.IndexOf ("libmetacity") != -1) {
-						// If metacity is not available, use a regular box.
-						EventBox eventBox = new EventBox ();
-						eventBox.Add (container);
-						preview = eventBox;
-					} else
-						throw;
+				} catch {
+					// If metacity is not available, use a regular box.
+					EventBox eventBox = new EventBox ();
+					eventBox.Add (container);
+					preview = eventBox;
 				}
 
 			} else {

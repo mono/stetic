@@ -170,7 +170,7 @@ namespace Stetic.Wrapper {
 			set {
 				Freeze ();
 				while (value < table.NRows)
-					DeleteRow (table.NRows);
+					DeleteRow (table.NRows - 1);
 				table.NRows = value;
 				Thaw ();
 			}

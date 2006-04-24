@@ -1,3 +1,14 @@
+2006-04-24  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/PreviewBox.cs: When handling the case of metacity
+	  not being installed, don't specifically check for
+	  a DllNotFoundException, since the exception may be wrapped
+	  in another exception.
+	* libstetic/EmbedWindow.cs: Don't crash if the metacity
+	  libs can't be found.
+	* libstetic/wrapper/Table.cs: Fix hang when loading project
+	  which contains a table (bug #78167).
+
 2006-04-21  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/wrapper/VScale.cs:

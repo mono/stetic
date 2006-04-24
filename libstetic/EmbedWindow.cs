@@ -88,7 +88,12 @@ namespace Stetic {
 					GConf.Client client = new GConf.Client ();
 //					client.AddNotify ("/apps/metacity/general", GConfNotify);
 					string themeName = (string)client.Get ("/apps/metacity/general/theme");
-					theme = Metacity.Theme.Load (themeName);
+					try {
+						theme = Metacity.Theme.Load (themeName);
+					} catch {
+						// Don't crash if metacity is not available
+						return null;
+					}
 				}
 				return theme;
 			}
