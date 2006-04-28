@@ -1,12 +1,12 @@
 
-namespace Stetic.Wrapper
+namespace Stetic
 {
 	public class Signal
 	{
 		SignalDescriptor descriptor;
 		string handlerName;
 		bool after;
-		internal Wrapper.Widget Owner;
+		internal ObjectWrapper Owner;
 		
 		public Signal (SignalDescriptor descriptor): this (descriptor, null, false)
 		{

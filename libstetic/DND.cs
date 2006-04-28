@@ -103,7 +103,7 @@ namespace Stetic {
 		}
 
 		// Call this from a DragDrop event to receive the dragged widget
-		public static Stetic.Wrapper.Widget Drop (Gdk.DragContext ctx, Gtk.Widget target, uint time)
+		public static Gtk.Widget Drop (Gdk.DragContext ctx, Gtk.Widget target, uint time)
 		{
 			if (dragWidget == null) {
 				Gtk.Drag.GetData (target, ctx, GladeUtils.ApplicationXGladeAtom, time);
@@ -112,7 +112,7 @@ namespace Stetic {
 
 			Gtk.Widget w = Cancel ();
 			Gtk.Drag.Finish (ctx, true, true, time);
-			return Stetic.Wrapper.Widget.Lookup (w);
+			return w;
 		}
 
 		// Call this from a DragEnd event to check if the widget wasn't dropped
@@ -462,7 +462,8 @@ namespace Stetic {
 
 		static void FaultDragDrop (object obj, Gtk.DragDropArgs args)
 		{
-			Stetic.Wrapper.Widget dropped = DND.Drop (args.Context, (Gtk.Widget)obj, args.Time);
+			Gtk.Widget w = DND.Drop (args.Context, (Gtk.Widget)obj, args.Time);
+			Stetic.Wrapper.Widget dropped = Stetic.Wrapper.Widget.Lookup (w);
 			if (dropped != null) {
 				FaultDrop (dropped, args.X, args.Y);
 				args.RetVal = true;

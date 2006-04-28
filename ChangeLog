@@ -1,3 +1,53 @@
+2006-04-28  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/WidgetFactory.cs: Added PaletteItemFactory class,
+	  as a base class for palette factories. Added InstanceWidgetFactory,
+	  to support Action palette items.
+	  
+	* libsteticui/SignalsEditor.cs:
+	* libsteticui/CodeGenerator.cs: Track api changes in signal handling.
+	  
+	* libsteticui/Palette.cs: Add action groups to the palette.
+	* libsteticui/PropertyTree.cs: After editing a property,
+	  notify the change to the wrapper.
+	  
+	* libsteticui/Project.cs: Added action group collection.
+	  Track api changes in signal handling.
+	* libsteticui/WidgetPropertyTree.cs: Allow showing properties of any
+	  kind of wrapper, not only widgets.
+	* libstetic/PreviewBox.cs: Implemented IDesignArea. Implemented a new
+	  way of drawing the widget selection box.
+	
+	* libstetic/wrapper/Widget.cs:
+	* libstetic/ObjectWrapper.cs: Moved signal properties and the notify
+	  event from Widget to ObjectWrapper.
+	  
+	* libstetic/wrapper/SignalCollection.cs:
+	* libstetic/wrapper/Signal.cs:
+	* libstetic/wrapper/SignalEventHandler.cs:
+	* libstetic/wrapper/SignalChangedEventHandler.cs:
+	* libstetic/wrapper/Container.cs: Use the new selection box system,
+	  based in IDesignArea.
+	  
+	* libstetic/wrapper/objects.xml: Added Action class.
+	
+	* libstetic/DND.cs: Some minor changes to allow dragging widgets which
+	  don't have a wrapper.
+	  
+	* libstetic/Makefile.am: Updated.
+	
+	* libstetic/IDesignArea.cs: New class for providing some designer
+	  services to widget wrappers.
+	* libstetic/ObjectWrapperEventHandler.cs: New handler for
+	  ObjectWrapper events.
+	* libstetic/wrapper/Action.cs: Wrapper for Gtk.Action.
+	* libstetic/wrapper/ActionMenu.cs: Widget for editing a Menu.
+	* libstetic/wrapper/ActionMenuItem.cs: An action menu item editor.
+	* libstetic/wrapper/ActionGroup.cs: Wrapper for Gtk.ActionGruoup.
+	* libstetic/wrapper/ActionTree.cs: An action tree structure (menu or
+	  toolbar).
+	* libstetic/wrapper/MenuBar.cs: Wrapper for Gtk.MenuBar.
+
 2006-04-24  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/PreviewBox.cs: When handling the case of metacity

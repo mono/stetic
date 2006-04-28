@@ -5,13 +5,13 @@ using Stetic.Wrapper;
 
 namespace Stetic
 {
-	public class SignalsEditor: Gtk.ScrolledWindow
+	public class SignalsEditor: Gtk.ScrolledWindow, IObjectViewer
 	{
 		Gtk.TreeView tree;
 		Gtk.TreeStore store;
 		
 		Project project;
-		Stetic.Wrapper.Widget selection;
+		ObjectWrapper selection;
 		bool internalChange;
 		
 		const int ColSignal = 0;
@@ -27,6 +27,8 @@ namespace Stetic
 		
 		public SignalsEditor ()
 		{
+			PreviewBox.DefaultSignalsViewer = this;
+			
 			tree = new Gtk.TreeView ();
 			store = new Gtk.TreeStore (typeof(string), typeof(string), typeof(bool), typeof(bool), typeof(bool), typeof(SignalDescriptor), typeof(Signal), typeof(int));
 			tree.Model = store;
@@ -95,6 +97,14 @@ namespace Stetic
 			}
 		}
 		
+		public object TargetObject {
+			get { return selection.Wrapped; }
+			set {
+				selection = ObjectWrapper.Lookup (value);
+				RefreshTree ();
+			}
+		}
+		
 		void OnWidgetSelected (object s, Wrapper.WidgetEventArgs args)
 		{
 			selection = args != null ? args.Widget : null;
@@ -103,13 +113,13 @@ namespace Stetic
 		
 		void OnSignalAddedOrRemoved (object sender, SignalEventArgs args)
 		{
-			if (!internalChange && args.Widget == selection)
+			if (!internalChange && args.Wrapper == selection)
 				RefreshTree ();
 		}
 
 		void OnSignalChanged (object sender, SignalChangedEventArgs args)
 		{
-			if (!internalChange && args.Widget == selection)
+			if (!internalChange && args.Wrapper == selection)
 				RefreshTree ();
 		}
 		
@@ -200,23 +210,29 @@ namespace Stetic
 		
 		string GetHandlerName (string signalName)
 		{
-			string name = selection.Wrapped.Name;
-			StringBuilder sb = new StringBuilder ();
-			if (!selection.IsTopLevel) {
-				bool wstart = true;
-				foreach (char c in name) {
-					if (c == '_' || c == '-' || c == ' ' || !char.IsLetterOrDigit (c)) {
-						wstart = true;
-						continue;
+			Wrapper.Widget selWidget = selection as Wrapper.Widget;
+			if (selWidget != null) {
+				string name = selWidget.Wrapped.Name;
+				
+				StringBuilder sb = new StringBuilder ();
+				if (!selWidget.IsTopLevel) {
+					bool wstart = true;
+					foreach (char c in name) {
+						if (c == '_' || c == '-' || c == ' ' || !char.IsLetterOrDigit (c)) {
+							wstart = true;
+							continue;
+						}
+						if (wstart) {
+							sb.Append (char.ToUpper (c));
+							wstart = false;
+						} else
+							sb.Append (c);
 					}
-					if (wstart) {
-						sb.Append (char.ToUpper (c));
-						wstart = false;
-					} else
-						sb.Append (c);
 				}
+				return "On" + sb.ToString() + signalName;
+			} else {
+				return "On" + signalName;
 			}
-			return "On" + sb.ToString() + signalName;
 		}
 		
 		void OnHandlerEdited (object sender, Gtk.EditedArgs args)

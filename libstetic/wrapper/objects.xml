@@ -989,7 +989,7 @@
 	</signals>
     </object>
 
-    <object type="Gtk.MenuBar,gtk-sharp"
+    <object type="Gtk.MenuBar,gtk-sharp" wrapper="Stetic.Wrapper.MenuBar"
 	    label="Menu Bar" icon="menubar.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
@@ -1997,6 +1997,41 @@
     <object type="Stetic.ErrorWidget" wrapper="Stetic.ErrorWidgetWrapper">
     </object>
 
+    <object type="Gtk.Action,gtk-sharp" label="Action" wrapper="Stetic.Wrapper.Action">
+	<itemgroups>
+	    <itemgroup label="Action Properties">
+		<property name="Type" />
+		<property name="HideIfEmpty" />
+		<property name="IsImportant" />
+		<property name="Label" />
+		<property name="Sensitive" />
+		<property name="ShortLabel" />
+		<property name="StockId" editor="Stetic.Editor.StockItem"/>
+		<property name="Tooltip" />
+		<property name="Visible" />
+		<property name="VisibleHorizontal" />
+		<property name="VisibleVertical" />
+		<property name="DrawAsRadio">
+		    <invisible-if name="Type" value="Action" />
+		</property>
+		<property name="Active">
+		    <invisible-if name="Type" value="Action" />
+		</property>
+		<property name="Value">
+		    <invisible-if name="Type" value="Action" />
+		    <invisible-if name="Type" value="Toggle" />
+		</property>
+	    </itemgroup>
+	</itemgroups>
+    <signals>
+    	<itemgroup label="Action Signals">
+		<signal name="Activated" />
+		<signal name="Changed" />
+		<signal name="Toggled" />
+		</itemgroup>
+	</signals>
+    </object>
+
     <enum type="Gdk.ExtensionMode,gdk-sharp">
 	<value name="None" label="None"
 	       description="No extension events are desired" />
@@ -2368,6 +2403,15 @@
 	       description="Button displaying stock icon and text" />
 	<value name="TextAndIcon" label="Text and Icon"
 	       description="Button displaying an icon and application-provided text" />
+    </enum>
+
+    <enum type="Stetic.Wrapper.Action+ActionType">
+	<value name="Action" label="Action"
+	       description="An normal action" />
+	<value name="Toggle" label="Toggle Action"
+	       description="The action can be toggled between two states" />
+	<value name="Radio" label="Radio Action"
+	       description="The action is controlled by a radio button" />
     </enum>
 
 </objects>

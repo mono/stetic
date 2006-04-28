@@ -1,17 +1,17 @@
 using System;
 using System.Collections;
 
-namespace Stetic.Wrapper
+namespace Stetic
 {
 	public class SignalCollection: CollectionBase
 	{
-		Wrapper.Widget owner;
+		ObjectWrapper owner;
 		
 		public SignalCollection ()
 		{
 		}
 		
-		internal SignalCollection (Wrapper.Widget owner)
+		internal SignalCollection (ObjectWrapper owner)
 		{
 			this.owner = owner;
 		}

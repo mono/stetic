@@ -17,14 +17,15 @@ namespace Stetic {
 		XmlDocument tempDoc;
 		bool loading;
 		IResourceProvider resourceProvider;
+		Stetic.Wrapper.ActionGroupCollection actionGroups;
 		
 		public event Wrapper.WidgetNameChangedHandler WidgetNameChanged;
 		public event Wrapper.WidgetEventHandler WidgetAdded;
 		public event Wrapper.WidgetEventHandler WidgetRemoved;
 		
-		public event Wrapper.SignalEventHandler SignalAdded;
-		public event Wrapper.SignalEventHandler SignalRemoved;
-		public event Wrapper.SignalChangedEventHandler SignalChanged;
+		public event SignalEventHandler SignalAdded;
+		public event SignalEventHandler SignalRemoved;
+		public event SignalChangedEventHandler SignalChanged;
 		
 		public event Wrapper.WidgetEventHandler SelectionChanged;
 		public event EventHandler ModifiedChanged;
@@ -39,6 +40,7 @@ namespace Stetic {
 		{
 			nodes = new Hashtable ();
 			store = new NodeStore (typeof (ProjectNode));
+			actionGroups = new Stetic.Wrapper.ActionGroupCollection ();
 
 			Registry.RegistryChanging += OnRegistryChanging;
 			Registry.RegistryChanged += OnRegistryChanged;
@@ -59,6 +61,10 @@ namespace Stetic {
 		public IResourceProvider ResourceProvider { 
 			get { return resourceProvider; }
 			set { resourceProvider = value; }
+		}
+		
+		public Stetic.Wrapper.ActionGroupCollection ActionGroups {
+			get { return actionGroups; }
 		}
 		
 		internal void SetFileName (string fileName)
@@ -200,7 +206,7 @@ namespace Stetic {
 			if (ww == null)
 				return;
 				
-			ww.WidgetChanged += OnWidgetChanged;
+			ww.ObjectChanged += OnObjectChanged;
 			ww.NameChanged += OnWidgetNameChanged;
 			ww.SignalAdded += OnSignalAdded;
 			ww.SignalRemoved += OnSignalRemoved;
@@ -237,7 +243,7 @@ namespace Stetic {
 		void UnhashNodeRecursive (ProjectNode node)
 		{
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (node.Widget);
-			ww.WidgetChanged -= OnWidgetChanged;
+			ww.ObjectChanged -= OnObjectChanged;
 			ww.NameChanged -= OnWidgetNameChanged;
 			ww.SignalAdded -= OnSignalAdded;
 			ww.SignalRemoved -= OnSignalRemoved;
@@ -270,7 +276,7 @@ namespace Stetic {
 				RemoveNode (node);
 		}
 		
-		void OnWidgetChanged (object sender, Wrapper.WidgetEventArgs args)
+		void OnObjectChanged (object sender, ObjectWrapperEventArgs args)
 		{
 			if (!Syncing)
 				Modified = true;
@@ -290,34 +296,34 @@ namespace Stetic {
 				WidgetNameChanged (this, args);
 		}
 		
-		void OnSignalAdded (object sender, Wrapper.SignalEventArgs args)
+		void OnSignalAdded (object sender, SignalEventArgs args)
 		{
 			OnSignalAdded (args);
 		}
 
-		protected virtual void OnSignalAdded (Wrapper.SignalEventArgs args)
+		protected virtual void OnSignalAdded (SignalEventArgs args)
 		{
 			if (SignalAdded != null)
 				SignalAdded (this, args);
 		}
 
-		void OnSignalRemoved (object sender, Wrapper.SignalEventArgs args)
+		void OnSignalRemoved (object sender, SignalEventArgs args)
 		{
 			OnSignalRemoved (args);
 		}
 
-		protected virtual void OnSignalRemoved (Wrapper.SignalEventArgs args)
+		protected virtual void OnSignalRemoved (SignalEventArgs args)
 		{
 			if (SignalRemoved != null)
 				SignalRemoved (this, args);
 		}
 
-		void OnSignalChanged (object sender, Wrapper.SignalChangedEventArgs args)
+		void OnSignalChanged (object sender, SignalChangedEventArgs args)
 		{
 			OnSignalChanged (args);
 		}
 
-		protected virtual void OnSignalChanged (Wrapper.SignalChangedEventArgs args)
+		protected virtual void OnSignalChanged (SignalChangedEventArgs args)
 		{
 			if (SignalChanged != null)
 				SignalChanged (this, args);

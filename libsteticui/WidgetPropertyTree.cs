@@ -3,19 +3,23 @@ using System;
 
 namespace Stetic
 {
-	public class WidgetPropertyTree: PropertyTree
+	public class WidgetPropertyTree: PropertyTree, IObjectViewer
 	{
 		Project project;
-		Stetic.Wrapper.Widget selection;
-		Stetic.Wrapper.Widget newSelection;
+		Stetic.ObjectWrapper selection;
+		Stetic.ObjectWrapper newSelection;
 		Stetic.Wrapper.Container.ContainerChild packingSelection;
+		
+		public event EventHandler ObjectChanged;
 		
 		public WidgetPropertyTree (): this (null)
 		{
+			PreviewBox.DefaultPropertyViewer = this;
 		}
 		
 		public WidgetPropertyTree (Project project)
 		{
+			PreviewBox.DefaultPropertyViewer = this;
 			Stetic.Registry.RegistryChanging += new EventHandler (OnRegistryChanging);
 			Project = project;
 		}
@@ -37,16 +41,30 @@ namespace Stetic
 		public override void Clear ()
 		{
 			base.Clear ();
-			if (selection != null)
-				selection.Notify -= Notified;
+			Wrapper.Widget selWidget = selection as Wrapper.Widget;
+			if (selWidget != null)
+				selWidget.Notify -= Notified;
 			if (packingSelection != null)
 				packingSelection.Notify -= Notified;
 		}
 		
+		protected override void OnObjectChanged ()
+		{
+			if (selection != null)
+				selection.NotifyChanged ();
+		}
+		
+		public object TargetObject {
+			get { return selection.Wrapped; }
+			set {
+				newSelection = ObjectWrapper.Lookup (value);
+				GLib.Timeout.Add (50, new GLib.TimeoutHandler (SelectedHandler));
+			}
+		}
+		
 		void Selected (object s, Wrapper.WidgetEventArgs args)
 		{
-			newSelection = args != null ? args.Widget : null;
-			GLib.Timeout.Add (50, new GLib.TimeoutHandler (SelectedHandler));
+			TargetObject = args != null && args.Widget != null? args.Widget.Wrapped : null;
 		}
 		
 		bool SelectedHandler ()
@@ -60,19 +78,24 @@ namespace Stetic
 				return false;
 			}
 
-			selection.Notify += Notified;
+			Wrapper.Widget selWidget = selection as Wrapper.Widget;
+			if (selWidget != null) {
+				selWidget.Notify += Notified;
 			
-			PropertyDescriptor name = (PropertyDescriptor)Registry.LookupClassByName ("Gtk.Widget") ["Name"];
-			AppendProperty (name, selection.Wrapped);
+				PropertyDescriptor name = (PropertyDescriptor)Registry.LookupClassByName ("Gtk.Widget") ["Name"];
+				AppendProperty (name, selection.Wrapped);
+			}
 
 			AddProperties (selection.ClassDescriptor.ItemGroups, selection.Wrapped);
 			
-			packingSelection = Stetic.Wrapper.Container.ChildWrapper (selection);
-			if (packingSelection != null) {
-				ClassDescriptor childklass = packingSelection.ClassDescriptor;
-				if (childklass.ItemGroups.Count > 0) {
-					AddProperties (childklass.ItemGroups, packingSelection.Wrapped);
-					packingSelection.Notify += Notified;
+			if (selWidget != null) {
+				packingSelection = Stetic.Wrapper.Container.ChildWrapper (selWidget);
+				if (packingSelection != null) {
+					ClassDescriptor childklass = packingSelection.ClassDescriptor;
+					if (childklass.ItemGroups.Count > 0) {
+						AddProperties (childklass.ItemGroups, packingSelection.Wrapped);
+						packingSelection.Notify += Notified;
+					}
 				}
 			}
 			

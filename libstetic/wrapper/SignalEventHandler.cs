@@ -1,13 +1,13 @@
 
-namespace Stetic.Wrapper
+namespace Stetic
 {
 	public delegate void SignalEventHandler (object sender, SignalEventArgs args);
 	
-	public class SignalEventArgs: WidgetEventArgs
+	public class SignalEventArgs: ObjectWrapperEventArgs
 	{
 		public Signal signal;
 		
-		public SignalEventArgs (Widget widget, Signal signal): base (widget)
+		public SignalEventArgs (ObjectWrapper wrapper, Signal signal): base (wrapper)
 		{
 			this.signal = signal;
 		}

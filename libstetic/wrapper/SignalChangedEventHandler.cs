@@ -1,5 +1,5 @@
 
-namespace Stetic.Wrapper
+namespace Stetic
 {
 	public delegate void SignalChangedEventHandler (object sender, SignalChangedEventArgs args);
 	
@@ -7,7 +7,7 @@ namespace Stetic.Wrapper
 	{
 		public Signal oldSignal;
 		
-		public SignalChangedEventArgs (Wrapper.Widget widget, Signal oldSignal, Signal signal): base (widget, signal)
+		public SignalChangedEventArgs (ObjectWrapper wrapper, Signal oldSignal, Signal signal): base (wrapper, signal)
 		{
 			this.oldSignal = oldSignal;
 		}

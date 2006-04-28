@@ -9,30 +9,22 @@ namespace Stetic.Wrapper {
 	
 		string oldName;
 		bool settingFocus;
-		SignalCollection signals;
 		bool hexpandable, vexpandable;
 
 		bool window_visible = true;
 		bool hasDefault;
 		Gdk.EventMask events;
+		ActionGroup actionGroup;
 		
 		public bool Unselectable;
 		
 		public Widget ()
 		{
-			signals = new SignalCollection (this);
 		}
 	
 		// Fired when the name of the widget changes.
 		public event WidgetNameChangedHandler NameChanged;
 		
-		// Fired when any information of the object changes.
-		public event WidgetEventHandler WidgetChanged;
-		
-		public event SignalEventHandler SignalAdded;
-		public event SignalEventHandler SignalRemoved;
-		public event SignalChangedEventHandler SignalChanged;	
-
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
@@ -110,16 +102,24 @@ namespace Stetic.Wrapper {
 			get { return Wrapped.Parent == null || Widget.Lookup (Wrapped.Parent) == null; }
 		}
 
-		public SignalCollection Signals {
-			get { return signals; }
-		}
-		
 		public Container GetTopLevel ()
 		{
 			Widget c = this;
 			while (!c.IsTopLevel)
 				c = c.ParentWrapper;
 			return c as Container;
+		}
+		
+		public ActionGroup LocalActionGroup {
+			get {
+				if (IsTopLevel) {
+					if (actionGroup == null)
+						actionGroup = new ActionGroup ();
+					return actionGroup;
+				} else {
+					return ParentWrapper.LocalActionGroup;
+				}
+			}
 		}
 		
 		[GLib.ConnectBefore]
@@ -187,7 +187,7 @@ namespace Stetic.Wrapper {
 			proj.PopupContextMenu (this);
 		}
 
-		public virtual void Select ()
+		public void Select ()
 		{
 			// Select() will bring the focus to this widget.
 			// This flags avoids calling Select() again
@@ -200,6 +200,14 @@ namespace Stetic.Wrapper {
 				((Container)this).Select (this);
 				
 			settingFocus = false;
+		}
+		
+		internal protected virtual void OnSelected ()
+		{
+		}
+
+		internal protected virtual void OnUnselected ()
+		{
 		}
 
 		public void Delete ()
@@ -397,6 +405,18 @@ namespace Stetic.Wrapper {
 				return "[" + Wrapped.GetType ().Name + " " + Wrapped.GetHashCode ().ToString () + "]";
 		}
 		
+		public IDesignArea GetDesignArea ()
+		{
+			return GetDesignArea (Wrapped);
+		}
+		
+		protected IDesignArea GetDesignArea (Gtk.Widget w)
+		{
+			while (w != null && !(w is IDesignArea))
+				w = w.Parent;
+			return w as IDesignArea;
+		}
+		
 		protected override void EmitNotify (string propertyName)
 		{
 			base.EmitNotify (propertyName);
@@ -425,48 +445,15 @@ namespace Stetic.Wrapper {
 			}
 			else {
 //				Console.WriteLine ("PROP: " + propertyName);
-				OnWidgetChanged (new WidgetEventArgs (this));
+				NotifyChanged ();
 			}
 		}
 		
 		protected virtual void OnNameChanged (WidgetNameChangedArgs args)
 		{
-			OnWidgetChanged (args);
-			if (NameChanged != null) {
+			NotifyChanged ();
+			if (NameChanged != null)
 				NameChanged (this, args);
-			}
-		}
-
-		internal protected virtual void OnSignalAdded (SignalEventArgs args)
-		{
-			OnWidgetChanged (args);
-			if (SignalAdded != null)
-				SignalAdded (this, args);
-		}
-		
-		internal protected virtual void OnSignalRemoved (SignalEventArgs args)
-		{
-			OnWidgetChanged (args);
-			if (SignalRemoved != null)
-				SignalRemoved (this, args);
-		}
-		
-		internal protected virtual void OnSignalChanged (SignalChangedEventArgs args)
-		{
-			OnWidgetChanged (args);
-			if (SignalChanged != null)
-				SignalChanged (this, args);
-		}
-		
-		internal protected virtual void OnWidgetChanged (WidgetEventArgs args)
-		{
-			if (WidgetChanged != null)
-				WidgetChanged (this, args);
-		}
-		
-		public void NotifyChanged ()
-		{
-			OnWidgetChanged (new WidgetEventArgs (this));
 		}
 	}
 

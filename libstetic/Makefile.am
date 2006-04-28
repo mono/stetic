@@ -13,6 +13,7 @@ libstetic_dll_sources =			\
 	GladeException.cs		\
 	GladeUtils.cs			\
 	HandleWindow.cs			\
+	IDesignArea.cs		\
 	ImageInfo.cs 			\
 	ItemDescriptor.cs		\
 	ItemGroup.cs			\
@@ -21,6 +22,7 @@ libstetic_dll_sources =			\
 	IPropertyEditor.cs			\
 	IResourceProvider.cs 	\
 	ObjectWrapper.cs		\
+	ObjectWrapperEventHandler.cs		\
 	ParamSpec.cs			\
 	Placeholder.cs			\
 	PreviewBox.cs		\
@@ -73,6 +75,11 @@ libstetic_dll_sources =			\
 	Metacity/ObjectManager.cs \
 	Metacity/Preview.cs \
 	Metacity/Theme.cs \
+	wrapper/Action.cs			\
+	wrapper/ActionMenu.cs			\
+	wrapper/ActionMenuItem.cs			\
+	wrapper/ActionGroup.cs			\
+	wrapper/ActionTree.cs			\
 	wrapper/Bin.cs			\
 	wrapper/Box.cs			\
 	wrapper/Button.cs		\
@@ -95,6 +102,7 @@ libstetic_dll_sources =			\
 	wrapper/ImageMenuItem.cs	\
 	wrapper/Label.cs		\
 	wrapper/MessageDialog.cs	\
+	wrapper/MenuBar.cs		\
 	wrapper/MenuItem.cs		\
 	wrapper/Notebook.cs		\
 	wrapper/Object.cs		\

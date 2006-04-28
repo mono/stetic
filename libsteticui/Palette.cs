@@ -12,6 +12,8 @@ namespace Stetic {
 		Project project;
 		WidgetLibrary[] libraries;
 		ArrayList visibleGroups = new ArrayList ();
+		Group localActionGroup;
+		Wrapper.Widget selection;
 
 		class Group : Gtk.Expander {
 		
@@ -62,7 +64,11 @@ namespace Stetic {
 		public Project Project {
 			get { return project; }
 			set {
+				if (project != null)
+					project.SelectionChanged -= OnSelectionChanged;
 				project = value;
+				if (project != null)
+					project.SelectionChanged += OnSelectionChanged;
 				LoadWidgets (project);
 			}
 		}
@@ -73,6 +79,12 @@ namespace Stetic {
 				libraries = value; 
 				LoadWidgets (project);
 			}
+		}
+		
+		void OnSelectionChanged (object ob, Stetic.Wrapper.WidgetEventArgs args)
+		{
+			selection = args.Widget;
+			FillLocalActionGroup (localActionGroup);
 		}
 		
 		public void ShowGroup (string name, string label)
@@ -137,6 +149,12 @@ namespace Stetic {
 
 				AddOrGetGroup(klass.Category).Append (factory);
 			}
+			
+			localActionGroup = AddOrGetGroup ("action-group - local", "Actions");
+			FillLocalActionGroup (localActionGroup);
+			foreach (Stetic.Wrapper.ActionGroup group in project.ActionGroups) {
+				ShowActionGroup (group);
+			}
 			ShowAll ();
 		}
 
@@ -144,6 +162,33 @@ namespace Stetic {
 		{
 			return string.Compare (((ClassDescriptor)x).Label,
 					       ((ClassDescriptor)y).Label);
+		}
+		
+		void ShowActionGroup (Stetic.Wrapper.ActionGroup group)
+		{
+			Group g = AddOrGetGroup ("action-group " + group.Name, group.Name);
+			FillActionGroup (g, group);
+		}
+		
+		void FillLocalActionGroup (Group widgetGroup)
+		{
+			Stetic.Wrapper.ActionPaletteItem it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menuitem, null, null);
+			widgetGroup.Append (new InstanceWidgetFactory ("Empty Action", null, it));
+			
+			it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menu, null, null);
+			widgetGroup.Append (new InstanceWidgetFactory ("Action Menu", null, it));
+			
+			if (selection != null && selection.LocalActionGroup != null)
+				FillActionGroup (widgetGroup, selection.LocalActionGroup);
+		}
+		
+		void FillActionGroup (Group widgetGroup, Stetic.Wrapper.ActionGroup group)
+		{
+			foreach (Stetic.Wrapper.Action action in group.Actions) {
+				Gdk.Pixbuf icon = Gtk.IconTheme.Default.LoadIcon (action.GtkAction.StockId, 16, 0);
+				Stetic.Wrapper.ActionPaletteItem it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menuitem, null, action);
+				widgetGroup.Append (new InstanceWidgetFactory (action.GtkAction.Label, icon, it));
+			}
 		}
 
 		private Group AddOrGetGroup (string id, string name)

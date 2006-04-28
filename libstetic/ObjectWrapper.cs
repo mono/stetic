@@ -16,7 +16,16 @@ namespace Stetic {
 		protected IProject proj;
 		protected object wrapped;
 		protected ClassDescriptor classDescriptor;
+		SignalCollection signals;
 
+		public SignalCollection Signals {
+			get {
+				if (signals == null)
+					signals = new SignalCollection (this);
+				return signals;
+			}
+		}
+		
 		public virtual void Wrap (object obj, bool initialized)
 		{
 			this.wrapped = obj;
@@ -111,13 +120,52 @@ namespace Stetic {
 			get { return classDescriptor; }
 		}
 		
+		public void NotifyChanged ()
+		{
+			OnObjectChanged (new ObjectWrapperEventArgs (this));
+		}
+		
 		public delegate void WrapperNotificationDelegate (object obj, string propertyName);
+		
 		public event WrapperNotificationDelegate Notify;
+		public event SignalEventHandler SignalAdded;
+		public event SignalEventHandler SignalRemoved;
+		public event SignalChangedEventHandler SignalChanged;
+		
+		// Fired when any information of the object changes.
+		public event ObjectWrapperEventHandler ObjectChanged;
 
+		internal protected virtual void OnObjectChanged (ObjectWrapperEventArgs args)
+		{
+			if (ObjectChanged != null)
+				ObjectChanged (this, args);
+		}
+		
 		protected virtual void EmitNotify (string propertyName)
 		{
 			if (Notify != null)
 				Notify (this, propertyName);
+		}
+
+		internal protected virtual void OnSignalAdded (SignalEventArgs args)
+		{
+			OnObjectChanged (args);
+			if (SignalAdded != null)
+				SignalAdded (this, args);
+		}
+		
+		internal protected virtual void OnSignalRemoved (SignalEventArgs args)
+		{
+			OnObjectChanged (args);
+			if (SignalRemoved != null)
+				SignalRemoved (this, args);
+		}
+		
+		internal protected virtual void OnSignalChanged (SignalChangedEventArgs args)
+		{
+			OnObjectChanged (args);
+			if (SignalChanged != null)
+				SignalChanged (this, args);
 		}
 	}
 }

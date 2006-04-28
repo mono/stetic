@@ -6,25 +6,28 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class WidgetFactory : EventBox {
-
-		protected Project project;
-		protected ClassDescriptor klass;
-
-		public WidgetFactory (Project project, ClassDescriptor klass)
+	// This is the base class for palette items. Implements the basic
+	// functionality for showing the icon and label of the item.
+	
+	public class PaletteItemFactory : EventBox 
+	{
+		public PaletteItemFactory ()
 		{
-			this.project = project;
-			this.klass = klass;
+		}
+		
+		public void Initialize (string name, Gdk.Pixbuf icon)
+		{
 			DND.SourceSet (this);
-
 			AboveChild = true;
 
 			Gtk.HBox hbox = new HBox (false, 6);
 
-			Gdk.Pixbuf icon = klass.Icon.ScaleSimple (16, 16, Gdk.InterpType.Bilinear);
-			hbox.PackStart (new Gtk.Image (icon), false, false, 0);
+			if (icon != null) {
+				icon = icon.ScaleSimple (16, 16, Gdk.InterpType.Bilinear);
+				hbox.PackStart (new Gtk.Image (icon), false, false, 0);
+			}
 
-			Gtk.Label label = new Gtk.Label ("<small>" + klass.Label + "</small>");
+			Gtk.Label label = new Gtk.Label ("<small>" + name + "</small>");
 			label.UseMarkup = true;
 			label.Justify = Justification.Left;
 			label.Xalign = 0;
@@ -35,7 +38,34 @@ namespace Stetic {
 
 		protected override void OnDragBegin (Gdk.DragContext ctx)
 		{
-			DND.Drag (this, ctx, klass.NewInstance (project) as Widget);
+			Gtk.Widget ob = CreateItemWidget ();
+			if (ob != null)
+				DND.Drag (this, ctx, ob);
+		}
+		
+		protected virtual Gtk.Widget CreateItemWidget ()
+		{
+			return null;
+		}
+	}
+
+
+	// Palette item factory which creates a widget.
+	public class WidgetFactory : PaletteItemFactory {
+
+		protected Project project;
+		protected ClassDescriptor klass;
+
+		public WidgetFactory (Project project, ClassDescriptor klass)
+		{
+			this.project = project;
+			this.klass = klass;
+			Initialize (klass.Label, klass.Icon);
+		}
+
+		protected override Gtk.Widget CreateItemWidget ()
+		{
+			return klass.NewInstance (project) as Widget;
 		}
 	}
 
@@ -54,5 +84,21 @@ namespace Stetic {
 			return true;
 		}
 	}
+	
+	// Palette item factory which allows dragging an already existing object.
+	public class InstanceWidgetFactory : PaletteItemFactory 
+	{
+		Gtk.Widget instance;
+		
+		public InstanceWidgetFactory (string name, Gdk.Pixbuf icon, Gtk.Widget instance)
+		{
+			this.instance = instance;
+			Initialize (name, icon);
+		}
 
+		protected override Gtk.Widget CreateItemWidget ()
+		{
+			return instance;
+		}
+	}
 }

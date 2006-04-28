@@ -230,7 +230,7 @@ namespace Stetic
 		
 		static void BindSignalHandlers (Stetic.Wrapper.Widget rootWidget, Stetic.Wrapper.Widget widget, Stetic.WidgetMap map, CodeStatementCollection statements)
 		{
-			foreach (Stetic.Wrapper.Signal signal in widget.Signals) {
+			foreach (Signal signal in widget.Signals) {
 				TypedSignalDescriptor descriptor = signal.SignalDescriptor as TypedSignalDescriptor;
 				if (descriptor == null) continue;
 				

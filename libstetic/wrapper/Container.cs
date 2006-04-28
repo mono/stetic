@@ -462,7 +462,8 @@ namespace Stetic.Wrapper {
 		void PlaceholderDragDrop (object obj, Gtk.DragDropArgs args)
 		{
 			Placeholder ph = (Placeholder)obj;
-			Widget dropped = DND.Drop (args.Context, ph, args.Time);
+			Gtk.Widget w = DND.Drop (args.Context, ph, args.Time);
+			Widget dropped = Stetic.Wrapper.Widget.Lookup (w);
 			if (dropped != null) {
 				PlaceholderDrop (ph, dropped);
 				args.RetVal = true;
@@ -568,12 +569,14 @@ namespace Stetic.Wrapper {
 
 			Gtk.Window win = GetParentWindow ();
 			
-			if (selection != null)
+			if (selection != null) {
 				selection.Destroyed -= SelectionDestroyed;
+				HideSelectionBox (selection);
+				Widget wr = Widget.Lookup (selection);
+				if (wr != null)
+					wr.OnUnselected ();
+			}
 			
-			if (handles != null)
-				handles.Dispose ();
-				
 			selection = widget;
 			if (win != null) {
 				if (widget != null && widget.CanFocus)
@@ -586,18 +589,49 @@ namespace Stetic.Wrapper {
 				}
 			}
 				
-			if (selection != null)
+			if (selection != null) {
 				selection.Destroyed += SelectionDestroyed;
 
-			// FIXME: if the selection isn't mapped, we should try to force it
-			// to be. (Eg, if you select a widget in a hidden window, the window
-			// should map. If you select a widget on a non-current notebook
-			// page, the notebook should switch pages, etc.)
-			if (selection != null && selection.IsDrawable && Visible) {
-				handles = new HandleWindow (selection, dragHandles);
-				handles.Drag += HandleWindowDrag;
-			} else 
+				// FIXME: if the selection isn't mapped, we should try to force it
+				// to be. (Eg, if you select a widget in a hidden window, the window
+				// should map. If you select a widget on a non-current notebook
+				// page, the notebook should switch pages, etc.)
+				if (selection.IsDrawable && Visible)
+					ShowSelectionBox (selection, dragHandles);
+				
+				Widget wr = Widget.Lookup (selection);
+				if (wr != null)
+					wr.OnSelected ();
+			}
+		}
+		
+		void ShowSelectionBox (Gtk.Widget widget, bool dragHandles)
+		{
+			HideSelectionBox (selection);
+
+			IDesignArea designArea = GetDesignArea (widget);
+			if (designArea != null) {
+				IObjectSelection sel = designArea.SetSelection (widget, widget);
+				sel.Drag += HandleWindowDrag;
+				return;
+			}
+			
+			handles = new HandleWindow (selection, dragHandles);
+			handles.Drag += HandleWindowDrag;
+		}
+		
+		void HideSelectionBox (Gtk.Widget widget)
+		{
+			if (handles != null) {
+				handles.Dispose ();
 				handles = null;
+			}
+			
+			if (widget != null) {
+				IDesignArea designArea = GetDesignArea (widget);
+				if (designArea != null)
+					designArea.ResetSelection (widget);
+			}
 		}
 		
 		Gtk.Window GetParentWindow ()
@@ -879,7 +913,7 @@ namespace Stetic.Wrapper {
 			{
 				base.EmitNotify (propertyName);
 				ParentWrapper.Sync ();
-				ParentWrapper.OnWidgetChanged (new WidgetEventArgs (ParentWrapper));
+				ParentWrapper.NotifyChanged ();
 			}
 
 			Gtk.Container.ContainerChild cc {

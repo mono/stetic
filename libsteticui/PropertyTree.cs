@@ -28,7 +28,7 @@ namespace Stetic
 			filter = new TreeModelFilter (store, null);
             filter.VisibleFunc = filterFunct;
 			
-			tree = new InternalTree (filter);
+			tree = new InternalTree (this, filter);
 
 			CellRendererText crt;
 			
@@ -187,12 +187,21 @@ namespace Stetic
 			// Ignore commands for now. They are added to the widget action bar
 		}
 		
-		public void OnSelectionChanged (object s, EventArgs a)
+		protected virtual void OnObjectChanged ()
+		{
+		}
+		
+		void OnSelectionChanged (object s, EventArgs a)
 		{
 			TreePath[] rows = tree.Selection.GetSelectedRows ();
 			if (rows != null && rows.Length > 0) {
 				tree.SetCursor (rows[0], editorColumn, true);
 			}
+		}
+		
+		internal void NotifyChanged ()
+		{
+			OnObjectChanged ();
 		}
 		
 		void PropertyData (Gtk.TreeViewColumn tree_column, Gtk.CellRenderer cell, Gtk.TreeModel model, Gtk.TreeIter iter)
@@ -242,10 +251,11 @@ namespace Stetic
 		internal ArrayList Groups = new ArrayList ();
 		Pango.Layout layout;
 		bool editing;
+		PropertyTree tree;
 		
-		public InternalTree (TreeModel model): base (model)
+		public InternalTree (PropertyTree tree, TreeModel model): base (model)
 		{
-	//		RulesHint = true;
+			this.tree = tree;
 			layout = new Pango.Layout (this.PangoContext);
 			layout.Wrap = Pango.WrapMode.Char;
 			Pango.FontDescription des = this.Style.FontDescription.Copy();
@@ -254,7 +264,7 @@ namespace Stetic
 		
 		public bool Editing {
 			get { return editing; }
-			set { editing = value; Update (); }
+			set { editing = value; Update (); tree.NotifyChanged (); }
 		}
 		
 		protected override bool OnExposeEvent (Gdk.EventExpose e)
