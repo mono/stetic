@@ -13,6 +13,8 @@ namespace Stetic {
 
 	public abstract class ObjectWrapper : IDisposable {
 
+		static Hashtable wrappers = new Hashtable ();
+
 		protected IProject proj;
 		protected object wrapped;
 		protected ClassDescriptor classDescriptor;
@@ -29,15 +31,13 @@ namespace Stetic {
 		public virtual void Wrap (object obj, bool initialized)
 		{
 			this.wrapped = obj;
-			wrappers[obj] = this;
+			wrappers [GetIndentityObject (obj)] = this;
 		}
 
 		public virtual void Dispose ()
 		{
-			wrappers.Remove (wrapped);
+			wrappers.Remove (GetIndentityObject (wrapped));
 		}
-
-		static Hashtable wrappers = new Hashtable ();
 
 		public static ObjectWrapper Create (IProject proj, object wrapped)
 		{
@@ -101,7 +101,7 @@ namespace Stetic {
 			if (obj == null)
 				return null;
 			else
-				return wrappers[obj] as Stetic.ObjectWrapper;
+				return wrappers [GetIndentityObject (obj)] as Stetic.ObjectWrapper;
 		}
 
 		public object Wrapped {
@@ -123,6 +123,22 @@ namespace Stetic {
 		public void NotifyChanged ()
 		{
 			OnObjectChanged (new ObjectWrapperEventArgs (this));
+		}
+		
+		static object GetIndentityObject (object ob)
+		{
+			if (ob is Gtk.Container.ContainerChild) {
+				// We handle ContainerChild in a special way here since
+				// the Gtk.Container indexer always returns a new ContainerChild
+				// instance. We register its wrapper using ContainerChildHashItem
+				// to make sure that two different instance of the same ContainerChild
+				// can be found equal.
+				ContainerChildHashItem p = new ContainerChildHashItem ();
+				p.ContainerChild = (Gtk.Container.ContainerChild) ob;
+				return p;
+			}
+			else
+				return ob;
 		}
 		
 		public delegate void WrapperNotificationDelegate (object obj, string propertyName);
@@ -166,6 +182,23 @@ namespace Stetic {
 			OnObjectChanged (args);
 			if (SignalChanged != null)
 				SignalChanged (this, args);
+		}
+	}
+	
+	// Wraps a ContainerChild, and properly implements GetHashCode() and Equals()
+	struct ContainerChildHashItem
+	{
+		public Gtk.Container.ContainerChild ContainerChild;
+		
+		public override int GetHashCode ()
+		{
+			return ContainerChild.Parent.GetHashCode () + ContainerChild.Child.GetHashCode ();
+		}
+		
+		public override bool Equals (object ob)
+		{
+			ContainerChildHashItem ot = (ContainerChildHashItem) ob;
+			return ot.ContainerChild.Child == ContainerChild.Child && ot.ContainerChild.Parent == ContainerChild.Parent;
 		}
 	}
 }

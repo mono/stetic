@@ -11,6 +11,7 @@ namespace Stetic
 
 		void AddWidget (Gtk.Widget w, int x, int y);
 		void RemoveWidget (Gtk.Widget w);
+		void MoveWidget (Gtk.Widget w, int x, int y);
 		Gdk.Rectangle GetCoordinates (Gtk.Widget w);
 	}
 	

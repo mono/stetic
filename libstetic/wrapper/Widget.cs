@@ -37,7 +37,6 @@ namespace Stetic.Wrapper {
 			
 			Wrapped.PopupMenu += PopupMenu;
 			Wrapped.FocusInEvent += OnFocusIn;
-			Wrapped.ParentSet += OnParentSet;
 			InterceptClicks (Wrapped);
 
 			hexpandable = this.ClassDescriptor.HExpandable;
@@ -62,16 +61,6 @@ namespace Stetic.Wrapper {
 				ParentWrapper.Select ();
 		}
 		
-		void OnParentSet (object o, Gtk.ParentSetArgs args)
-		{
-			if (ParentWrapper != null) {
-				// Make sure the widget's name is not already being used.
-				string nn = ParentWrapper.GetValidWidgetName (Wrapped);
-				if (nn != Wrapped.Name)
-					Wrapped.Name = nn;
-			}
-		}
-
 		void InterceptClicks (Gtk.Widget widget)
 		{
 			widget.Events |= Gdk.EventMask.ButtonPressMask;
@@ -113,8 +102,10 @@ namespace Stetic.Wrapper {
 		public ActionGroup LocalActionGroup {
 			get {
 				if (IsTopLevel) {
+#if ACTIONS
 					if (actionGroup == null)
 						actionGroup = new ActionGroup ();
+#endif
 					return actionGroup;
 				} else {
 					return ParentWrapper.LocalActionGroup;
@@ -220,8 +211,14 @@ namespace Stetic.Wrapper {
 
 		public override void Read (XmlElement elem, FileFormat format)
 		{
-			if (format == FileFormat.Native)
+			if (format == FileFormat.Native) {
+				XmlElement groupElem = elem ["action-group"];
+				if (groupElem != null) {
+					actionGroup = new ActionGroup ();
+					actionGroup.Read (Project, groupElem);
+				}
 				WidgetUtils.Read (this, elem);
+			}
 			else if (format == FileFormat.Glade)
 				GladeUtils.ImportWidget (this, elem);
 		}
@@ -229,7 +226,10 @@ namespace Stetic.Wrapper {
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
 			if (format == FileFormat.Native) {
-				return WidgetUtils.Write (this, doc);
+				XmlElement elem = WidgetUtils.Write (this, doc);
+				if (actionGroup != null)
+					elem.InsertBefore (actionGroup.Write (doc, format), elem.FirstChild);
+				return elem;
 			}
 			else {
 				XmlElement elem = GladeUtils.ExportWidget (this, doc);

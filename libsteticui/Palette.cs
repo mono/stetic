@@ -12,33 +12,9 @@ namespace Stetic {
 		Project project;
 		WidgetLibrary[] libraries;
 		ArrayList visibleGroups = new ArrayList ();
-		Group localActionGroup;
 		Wrapper.Widget selection;
-
-		class Group : Gtk.Expander {
+		ArrayList actionGroups = new ArrayList ();
 		
-			private Gtk.Alignment align;
-			private Gtk.VBox vbox;
-			
-			public Group (string name) : base ("<b>" + name + "</b>")
-			{
-				vbox = new VBox (false, 5);
-				
-				align = new Gtk.Alignment (0, 0, 0, 0);
-				align.SetPadding (0, 0, 20, 0);
-				align.Child = vbox;
-
-				UseMarkup = true;
-				Expanded = true;
-				Child = align;
-			}
-			
-			public void Append (Widget w)
-			{
-				vbox.PackStart (w, false, false, 0);
-			} 
-		}
-
 		public Palette () : base (false, 2)
 		{
 			groups = new Hashtable ();
@@ -84,7 +60,10 @@ namespace Stetic {
 		void OnSelectionChanged (object ob, Stetic.Wrapper.WidgetEventArgs args)
 		{
 			selection = args.Widget;
-			FillLocalActionGroup (localActionGroup);
+#if ACTIONS			
+			FillLocalActionGroup ();
+			ShowAll ();
+#endif
 		}
 		
 		public void ShowGroup (string name, string label)
@@ -113,9 +92,16 @@ namespace Stetic {
 		
 		public void LoadWidgets (Project project)
 		{
-			foreach (Group g in groups.Values)
+			foreach (PaletteGroup g in groups.Values)
 				Remove (g);
 				
+			// Unsubscribe events from old action groups
+			foreach (Wrapper.ActionGroup g in actionGroups) {
+				g.ActionAdded -= OnActionGroupChanged;
+				g.ActionRemoved -= OnActionGroupChanged;
+			}
+			actionGroups.Clear ();
+
 			groups.Clear ();
 			
 			foreach (string[] grp in visibleGroups)
@@ -149,12 +135,15 @@ namespace Stetic {
 
 				AddOrGetGroup(klass.Category).Append (factory);
 			}
-			
-			localActionGroup = AddOrGetGroup ("action-group - local", "Actions");
-			FillLocalActionGroup (localActionGroup);
-			foreach (Stetic.Wrapper.ActionGroup group in project.ActionGroups) {
-				ShowActionGroup (group);
+
+#if ACTIONS			
+			if (project != null) {
+				FillLocalActionGroup ();
+				foreach (Stetic.Wrapper.ActionGroup group in project.ActionGroups) {
+					ShowActionGroup (group);
+				}
 			}
+#endif			
 			ShowAll ();
 		}
 
@@ -166,37 +155,54 @@ namespace Stetic {
 		
 		void ShowActionGroup (Stetic.Wrapper.ActionGroup group)
 		{
-			Group g = AddOrGetGroup ("action-group " + group.Name, group.Name);
+			PaletteGroup g = AddOrGetActionGroup ("action-group " + group.Name, group.Name, group);
 			FillActionGroup (g, group);
 		}
 		
-		void FillLocalActionGroup (Group widgetGroup)
+		void FillLocalActionGroup ()
 		{
-			Stetic.Wrapper.ActionPaletteItem it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menuitem, null, null);
-			widgetGroup.Append (new InstanceWidgetFactory ("Empty Action", null, it));
-			
-			it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menu, null, null);
-			widgetGroup.Append (new InstanceWidgetFactory ("Action Menu", null, it));
-			
-			if (selection != null && selection.LocalActionGroup != null)
+			if (selection != null && selection.LocalActionGroup != null) {
+				PaletteGroup widgetGroup = AddOrGetActionGroup ("action-group - local", "Actions", selection.LocalActionGroup);
+				widgetGroup.Clear ();
 				FillActionGroup (widgetGroup, selection.LocalActionGroup);
+			} else {
+				PaletteGroup pg = (PaletteGroup) groups ["action-group - local"];
+				if (pg != null)
+					pg.Clear ();
+			}
 		}
 		
-		void FillActionGroup (Group widgetGroup, Stetic.Wrapper.ActionGroup group)
+		void FillActionGroup (PaletteGroup widgetGroup, Stetic.Wrapper.ActionGroup group)
 		{
+			if (!actionGroups.Contains (group)) {
+				actionGroups.Add (group);
+				group.ActionAdded += OnActionGroupChanged;
+				group.ActionRemoved += OnActionGroupChanged;
+			}
+			
 			foreach (Stetic.Wrapper.Action action in group.Actions) {
-				Gdk.Pixbuf icon = Gtk.IconTheme.Default.LoadIcon (action.GtkAction.StockId, 16, 0);
+				Gdk.Pixbuf icon;
+				try {
+					icon = Gtk.IconTheme.Default.LoadIcon (action.GtkAction.StockId, 16, 0);
+				} catch {
+					icon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
+				}
 				Stetic.Wrapper.ActionPaletteItem it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menuitem, null, action);
 				widgetGroup.Append (new InstanceWidgetFactory (action.GtkAction.Label, icon, it));
 			}
 		}
-
-		private Group AddOrGetGroup (string id, string name)
+		
+		void OnActionGroupChanged (object s, Stetic.Wrapper.ActionEventArgs args)
 		{
-			Group group = (Group) groups[id];
+			LoadWidgets (project);
+		}
+
+		private PaletteGroup AddOrGetGroup (string id, string name)
+		{
+			PaletteGroup group = (PaletteGroup) groups[id];
 
 			if (group == null) {
-				group = new Group (name);
+				group = new PaletteGroup (name);
 				PackStart (group, false, false, 0);
 				groups.Add (id, group);
 			}
@@ -204,9 +210,90 @@ namespace Stetic {
 			return group;
 		}
 
-		private Group AddOrGetGroup (string name)
+		private PaletteGroup AddOrGetActionGroup (string id, string name, Wrapper.ActionGroup group)
+		{
+			PaletteGroup pg = (PaletteGroup) groups[id];
+
+			if (pg == null) {
+				pg = new ActionPaletteGroup (name, group);
+				PackStart (pg, false, false, 0);
+				groups.Add (id, pg);
+			}
+
+			return pg;
+		}
+
+		private PaletteGroup AddOrGetGroup (string name)
 		{
 			return AddOrGetGroup (name, name);
 		}
 	}
+
+	class PaletteGroup : Gtk.Expander
+	{
+		private Gtk.Alignment align;
+		private Gtk.VBox vbox;
+		Gtk.Label emptyLabel;
+		bool isEmpty = true;
+		
+		public PaletteGroup (string name) : base ("<b>" + name + "</b>")
+		{
+			vbox = new VBox (false, 5);
+			emptyLabel = new Gtk.Label ();
+			emptyLabel.Markup = "<small><i><span foreground='darkgrey'>  Empty</span></i></small>";
+			vbox.PackStart (emptyLabel, false, false, 0);
+			
+			align = new Gtk.Alignment (0, 0, 0, 0);
+			align.SetPadding (0, 0, 20, 0);
+			align.Child = vbox;
+
+			UseMarkup = true;
+			Expanded = true;
+			Child = align;
+		}
+		
+		public void Append (Widget w)
+		{
+			if (isEmpty) {
+				vbox.Remove (emptyLabel);
+				isEmpty = false;
+			}
+			vbox.PackStart (w, false, false, 0);
+		} 
+	
+		public void Clear ()
+		{
+			foreach (Gtk.Widget w in vbox.Children)
+				vbox.Remove (w);
+
+			isEmpty = true;
+			vbox.PackStart (emptyLabel, false, false, 0);
+		}
+	}
+	
+	class ActionPaletteGroup : PaletteGroup 
+	{
+		Wrapper.ActionGroup group;
+		
+		public ActionPaletteGroup (string name, Wrapper.ActionGroup group): base (name)
+		{
+			DND.DestSet (this, true);
+			this.group = group;
+		}
+		
+		protected override bool OnDragDrop (Gdk.DragContext context, int x,	int y, uint time)
+		{
+			Wrapper.ActionPaletteItem dropped = DND.Drop (context, null, time) as Wrapper.ActionPaletteItem;
+			if (dropped == null)
+				return false;
+
+			if (dropped.Node.Action.ActionGroup != group) {
+				dropped.Node.Action.ActionGroup.Actions.Remove (dropped.Node.Action);
+				group.Actions.Add (dropped.Node.Action);
+			}
+
+			return base.OnDragDrop (context, x,	y, time);
+		}
+	}
+
 }

@@ -41,6 +41,10 @@ namespace Stetic {
 			nodes = new Hashtable ();
 			store = new NodeStore (typeof (ProjectNode));
 			actionGroups = new Stetic.Wrapper.ActionGroupCollection ();
+			
+			Wrapper.ActionGroup globalGroup = new Wrapper.ActionGroup ();
+			globalGroup.Name = "Global";
+			actionGroups.Add (globalGroup);
 
 			Registry.RegistryChanging += OnRegistryChanging;
 			Registry.RegistryChanged += OnRegistryChanged;

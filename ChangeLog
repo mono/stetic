@@ -1,3 +1,41 @@
+2006-05-03  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/Palette.cs: Added support for drag&drop between
+	  action groups. Temporarily disabled action group support.
+	* libsteticui/Project.cs: Create a global action group by
+	  default.
+	* libstetic/IDesignArea.cs: Added MoveWidget method.
+	* libstetic/IProject.cs: Added ActionGroups property.
+	* libstetic/PreviewBox.cs: Update the preview window title when
+	  the wrapped window title changes. Implemented IDesignArea.MoveWidget.
+	* libstetic/ObjectWrapper.cs: For Gtk.Container.ContainerChild objects,
+	  store the object in the wrapper hashtable using a special container
+	  objects which properly implements the GetHashCode and Equals methods.
+	  This is needed since every call to the Gtk.Container indexer returns
+	  a new instance of the container child.
+	* libstetic/wrapper/Action.cs: Implemented Read/Write methods. Added
+	  some missing events. Improved ActionCollection.
+	* libstetic/wrapper/Container.cs: Fixed some issues with name conflict
+	  checking. Checks can't be done in the ParentSet event, since when
+	  it is fired the child is not yet shown as a child of the container.
+	  Properly dispose container child wrappers.
+	* libstetic/wrapper/Widget.cs: Same as before. Implemented read/write
+	  support for action groups, but it is disabled for now.
+	* libstetic/wrapper/Box.cs: In the ChildContentsChanged method, avoid
+	  setting Expand and Fill properties if the values don't change.
+	  This avoids firing some unneeded change events.
+	* libstetic/wrapper/ActionGroup.cs: Implemented.
+	* libstetic/wrapper/objects.xml: Added some 'min' values to properties.
+	* libstetic/wrapper/ActionTree.cs: Implemented read/write methods. Added
+	  some events.
+	* libstetic/WidgetUtils.cs: Added support for reading/writing properties
+	  of arbitrary objects, not only widgets.
+	  
+	* libstetic/wrapper/MenuBar.cs:
+	* libstetic/wrapper/ActionMenu.cs:
+	* libstetic/wrapper/ActionMenuItem.cs: Support editing of menu items in
+	  a menu bar. Bug fixes and improvements.
+
 2006-04-28  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libsteticui/WidgetFactory.cs: Added PaletteItemFactory class,

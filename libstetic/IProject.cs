@@ -20,6 +20,8 @@ namespace Stetic {
 
 		void AddWindow (Gtk.Window window);
 		
+		Wrapper.ActionGroupCollection ActionGroups { get; }
+		
 		event IProjectDelegate GladeImportComplete;
 		event Wrapper.WidgetEventHandler SelectionChanged;
 	}

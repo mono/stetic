@@ -1388,8 +1388,8 @@
 	    label="Table" icon="table.png" palette-category="container" init-properties="NRows NColumns Homogeneous">
 	<itemgroups>
 	    <itemgroup label="Table Properties">
-		<property name="NRows" />
-		<property name="NColumns" />
+		<property name="NRows" min="1"/>
+		<property name="NColumns" min="1"/>
 		<property name="Homogeneous" />
 		<property name="RowSpacing" />
 		<property name="ColumnSpacing" />

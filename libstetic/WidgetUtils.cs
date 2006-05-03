@@ -91,13 +91,10 @@ namespace Stetic
 			}
 		}
 
-		static void GetSignals (ObjectWrapper wrapper, XmlElement parent_elem)
+		public static void GetSignals (ObjectWrapper ob, XmlElement parent_elem)
 		{
-			Stetic.Wrapper.Widget ob = wrapper as Stetic.Wrapper.Widget;
-			if (ob == null) return;
-			
 			foreach (Signal signal in ob.Signals) {
-				if (!signal.SignalDescriptor.VisibleFor (wrapper.Wrapped))
+				if (!signal.SignalDescriptor.VisibleFor (ob.Wrapped))
 					continue;
 
 				XmlElement signal_elem = parent_elem.OwnerDocument.CreateElement ("signal");
@@ -135,11 +132,8 @@ namespace Stetic
 				widget.ShowAll ();
 		}
 
-		static void ReadSignals (ClassDescriptor klass, ObjectWrapper wrapper, XmlElement elem)
+		public static void ReadSignals (ClassDescriptor klass, ObjectWrapper ob, XmlElement elem)
 		{
-			Stetic.Wrapper.Widget ob = wrapper as Stetic.Wrapper.Widget;
-			if (ob == null) return;
-			
 			foreach (ItemGroup group in klass.SignalGroups) {
 				foreach (SignalDescriptor signal in group) {
 					XmlElement signal_elem = elem.SelectSingleNode ("signal[@name='" + signal.Name + "']") as XmlElement;
@@ -153,7 +147,7 @@ namespace Stetic
 			}
 		}
 		
-		static void ReadProperties (ClassDescriptor klass, ObjectWrapper wrapper, object wrapped, XmlElement elem)
+		public static void ReadProperties (ClassDescriptor klass, ObjectWrapper wrapper, object wrapped, XmlElement elem)
 		{
 			foreach (ItemGroup group in klass.ItemGroups) {
 				foreach (ItemDescriptor item in group) {

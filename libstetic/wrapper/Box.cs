@@ -175,7 +175,11 @@ namespace Stetic.Wrapper {
 
 			if (widget != null && AutoSize[widget]) {
 				Gtk.Box.BoxChild bc = box[widget] as Gtk.Box.BoxChild;
-				bc.Expand = bc.Fill = (ContainerOrientation == Gtk.Orientation.Horizontal) ? ChildHExpandable (widget) : ChildVExpandable (widget);
+				bool newExp = (ContainerOrientation == Gtk.Orientation.Horizontal) ? ChildHExpandable (widget) : ChildVExpandable (widget);
+				if (newExp != bc.Expand)
+					bc.Expand = newExp;
+				if (newExp != bc.Fill)
+					bc.Fill = newExp;
 			}
 			base.ChildContentsChanged (child);
 		}

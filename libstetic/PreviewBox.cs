@@ -85,6 +85,9 @@ namespace Stetic
 				try {
 					metacityPreview = CreateMetacityPreview (window);
 					preview = metacityPreview;
+					ObjectWrapper wrapper = ObjectWrapper.Lookup (window);
+					if (wrapper != null)
+						wrapper.Notify += OnWindowPropChange;
 				} catch {
 					// If metacity is not available, use a regular box.
 					EventBox eventBox = new EventBox ();
@@ -117,6 +120,13 @@ namespace Stetic
 		public IObjectViewer SignalsViewer {
 			get { return resizableFixed.SignalsViewer; }
 			set { resizableFixed.SignalsViewer = value; }
+		}
+		
+		void OnWindowPropChange (object ob, string name)
+		{
+			if (name == "Title") {
+				Title = ((Gtk.Window)((ObjectWrapper)ob).Wrapped).Title;
+			}
 		}
 		
 		Metacity.Preview CreateMetacityPreview (Gtk.Window window)
@@ -223,6 +233,7 @@ namespace Stetic
 		Gtk.Widget selectionWidget;
 		ObjectSelection currentObjectSelection;
 		ArrayList topLevels = new ArrayList ();
+		ArrayList trackingSize = new ArrayList ();
 		
 		internal IObjectViewer PropertyViewer;
 		internal IObjectViewer SignalsViewer;
@@ -273,8 +284,10 @@ namespace Stetic
 		void PlaceSelectionBox (Gtk.Widget widget)
 		{
 			if (selectionWidget != null) {
-				selectionWidget.SizeAllocated -= SelectionSizeAllocated;
+				foreach (Gtk.Widget sw in trackingSize)
+					sw.SizeAllocated -= SelectionSizeAllocated;
 				selectionWidget.Destroyed -= SelectionDestroyed;
+				trackingSize.Clear ();
 			}
 			
 			selectionWidget = widget;
@@ -285,7 +298,14 @@ namespace Stetic
 				while (Gtk.Application.EventsPending ())
 					Gtk.Application.RunIteration ();
 
-				selectionWidget.SizeAllocated += SelectionSizeAllocated;
+				// Track the size changes of the widget and all its parents
+				Gtk.Widget sw = selectionWidget;
+				while (sw != this && sw != null) {
+					sw.SizeAllocated += SelectionSizeAllocated;
+					trackingSize.Add (sw);
+					sw = sw.Parent;
+				}
+				
 				selectionWidget.Destroyed += SelectionDestroyed;
 				PlaceSelectionBoxInternal (selectionWidget);
 				selectionBox.ObjectSelection = currentObjectSelection;
@@ -322,6 +342,18 @@ namespace Stetic
 				if (info.Child == w) {
 					w.Unparent ();
 					topLevels.Remove (info);
+					break;
+				}
+			}
+		}
+		
+		public void MoveWidget (Gtk.Widget w, int x, int y)
+		{
+			foreach (TopLevelChild info in topLevels) {
+				if (info.Child == w) {
+					info.X = x;
+					info.Y = y;
+					QueueResize ();
 					break;
 				}
 			}
@@ -415,7 +447,7 @@ namespace Stetic
 			
 			foreach (TopLevelChild child in topLevels) {
 				Gtk.Requisition req = child.Child.SizeRequest ();
-				child.Child.Allocation = new Gdk.Rectangle (rect.X + child.X, rect.Y + child.Y, req.Width, req.Height);
+				child.Child.SizeAllocate (new Gdk.Rectangle (rect.X + child.X, rect.Y + child.Y, req.Width, req.Height));
 			}
 		}
 		

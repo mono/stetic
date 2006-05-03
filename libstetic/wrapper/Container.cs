@@ -31,21 +31,21 @@ namespace Stetic.Wrapper {
 
 			container.Removed += ChildRemoved;
 			container.SizeAllocated += SizeAllocated;
-			container.ParentSet += OnParentSet;
+			container.Added += OnChildAdded;
 
 			if (Wrapped.GetType ().ToString ()[0] == 'H')
 				ContainerOrientation = Gtk.Orientation.Horizontal;
 			else
 				ContainerOrientation = Gtk.Orientation.Vertical;
 			
-			ValidateChildNames ();
+			ValidateChildNames (Wrapped);
 		}
 		
-		void OnParentSet (object o, Gtk.ParentSetArgs args)
+		void OnChildAdded (object o, Gtk.AddedArgs args)
 		{
 			// Make sure children's IDs don't conflict with other widgets
 			// in the parent container.
-			ValidateChildNames ();
+			ValidateChildNames ((Gtk.Widget)o);
 		}
 		
 		Gtk.Container container {
@@ -395,7 +395,11 @@ namespace Stetic.Wrapper {
 				return null;
 
 			Gtk.Container.ContainerChild cc = parent[child];
-			return Stetic.ObjectWrapper.Create (parentWrapper.proj, cc) as ContainerChild;
+			Container.ContainerChild cwrap = ObjectWrapper.Lookup (cc) as Container.ContainerChild;
+			if (cwrap != null)
+				return cwrap;
+			else
+				return Stetic.ObjectWrapper.Create (parentWrapper.proj, cc) as ContainerChild;
 		}
 
 		protected Gtk.Container.ContainerChild ContextChildProps (Gtk.Widget context)
@@ -783,38 +787,53 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		void ValidateChildNames ()
+		void ValidateChildNames (Gtk.Widget newWidget)
 		{
+			// newWidget is the widget which triggered the name check.
+			// It will be the last widget to check, so if there are
+			// name conflicts, the name to change to avoid the conflict
+			// will be the name of that widget.
+			
 			if (!IsTopLevel) {
-				ParentWrapper.ValidateChildNames ();
+				ParentWrapper.ValidateChildNames (newWidget);
 				return;
 			}
 				
 			Hashtable names = new Hashtable ();
-			ValidateChildNames (names, container);
+			
+			// Validate all names excluding the new widget
+			ValidateChildName (names, container, newWidget);
+			
+			if (newWidget != null) {
+				// Now validate names in the new widget.
+				ValidateChildName (names, newWidget, null);
+			}
 		}
 
-		void ValidateChildNames (Hashtable names, Gtk.Container parent)
+		void ValidateChildName (Hashtable names, Gtk.Widget w, Gtk.Widget newWidget)
 		{
-			foreach (Gtk.Widget w in parent.AllChildren) {
-				if (names.Contains (w.Name)) {
-					// There is a widget with the same name. If the widget
-					// has a numeric suffix, just increase it.
-					string name; int idx;
-					ParseWidgetName (w.Name, out name, out idx);
-					
-					string compName = idx != 0 ? name + idx : name;
-					while (names.Contains (compName)) {
-						idx++;
-						compName = name + idx;
-					}
-					w.Name = compName;
-				}
-				names [w.Name] = w;
+			if (w == newWidget)
+				return;
+
+			if (names.Contains (w.Name)) {
+				// There is a widget with the same name. If the widget
+				// has a numeric suffix, just increase it.
+				string name; int idx;
+				ParseWidgetName (w.Name, out name, out idx);
 				
-				if (w is Gtk.Container) {
-					ValidateChildNames (names, (Gtk.Container)w);
+				string compName = idx != 0 ? name + idx : name;
+				while (names.Contains (compName)) {
+					idx++;
+					compName = name + idx;
 				}
+				w.Name = compName;
+			}
+			
+			names [w.Name] = w;
+			
+			if (w is Gtk.Container) {
+				foreach (Gtk.Widget cw in ((Gtk.Container)w).AllChildren)
+					ValidateChildName (names, cw, newWidget);
 			}
 		}
 		
@@ -893,8 +912,18 @@ namespace Stetic.Wrapper {
 			{
 				base.Wrap (obj, initialized);
 				cc.Child.ChildNotified += ChildNotifyHandler;
-
-				// FIXME; arrange for wrapper disposal?
+				cc.Child.ParentSet += OnParentSet;
+			}
+			
+			[GLib.ConnectBefore]
+			void OnParentSet (object ob, Gtk.ParentSetArgs args)
+			{
+				// Dispose the wrapper if the child is removed from the parent
+				Gtk.Widget w = (Gtk.Widget)ob;
+				if (w.Parent == null) {
+					Dispose ();
+					w.ParentSet -= OnParentSet;
+				}
 			}
 
 			public override void Dispose ()
@@ -902,7 +931,7 @@ namespace Stetic.Wrapper {
 				cc.Child.ChildNotified -= ChildNotifyHandler;
 				base.Dispose ();
 			}
-
+			
 			protected virtual void ChildNotifyHandler (object obj, Gtk.ChildNotifiedArgs args)
 			{
 				ParamSpec pspec = new ParamSpec (args.Pspec);
