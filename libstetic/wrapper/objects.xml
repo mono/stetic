@@ -357,7 +357,7 @@
 	<itemgroups>
 	    <itemgroup label="Box Child Layout">
 		<property name="PackType" />
-		<property name="Position" />
+		<property name="Position" ignore-default="true"/>
 		<property name="AutoSize" label="Auto Size"
 			  description="If set, the other packing properties for this cell will be automatically adjusted as other widgets are added to and removed from the container" />
 		<property name="Expand">

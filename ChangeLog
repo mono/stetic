@@ -1,3 +1,9 @@
+2006-05-05  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/wrapper/objects.xml: Ignore the default for the
+	  Position property of BoxChild. The position always needs to
+	  be set, even if it's 0. Fixes bug #78307.
+
 2006-05-03  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libsteticui/Palette.cs: Added support for drag&drop between
