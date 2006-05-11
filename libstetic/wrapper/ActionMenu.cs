@@ -1,10 +1,11 @@
 
 using System;
 using System.Collections;
+using Stetic.Wrapper;
 
-namespace Stetic.Wrapper
+namespace Stetic.Editor
 {
-	public class ActionMenu: Gtk.EventBox
+	public class ActionMenu: Gtk.EventBox, IMenuItemContainer
 	{
 		ActionTreeNode parentNode;
 		ActionTreeNodeCollection nodes;
@@ -14,15 +15,17 @@ namespace Stetic.Wrapper
 		Widget wrapper;
 		int dropPosition = -1;
 		int dropIndex;
-		Gtk.Label emptyLabel;
+		Gtk.EventBox emptyLabel;
+		IMenuItemContainer parentMenu;
 		
 		public ActionMenu (IntPtr p): base (p)
 		{}
 		
-		public ActionMenu (Widget wrapper, ActionTreeNode node)
+		internal ActionMenu (Widget wrapper, IMenuItemContainer parentMenu, ActionTreeNode node)
 		{
 			DND.DestSet (this, true);
 			parentNode = node;
+			this.parentMenu = parentMenu;
 			this.wrapper = wrapper;
 			this.nodes = node.Children;
 			table = new Gtk.Table (0, 0, false);
@@ -45,8 +48,28 @@ namespace Stetic.Wrapper
 			parentNode.ChildNodeRemoved -= OnChildRemoved;
 		}
 		
+		public void Select (ActionTreeNode node)
+		{
+			if (node != null) {
+				ActionMenuItem item = FindMenuItem (node);
+				if (item != null)
+					item.Select ();
+			} else {
+				if (menuItems.Count > 0)
+					((ActionMenuItem)menuItems [0]).Select ();
+			}
+		}
+		
 		public ActionTreeNode ParentNode {
 			get { return parentNode; }
+		}
+		
+		bool IMenuItemContainer.IsTopMenu { 
+			get { return false; } 
+		}
+		
+		Gtk.Widget IMenuItemContainer.Widget { 
+			get { return this; }
 		}
 		
 		public void TrackWidgetPosition (Gtk.Widget refWidget, bool topMenu)
@@ -81,14 +104,19 @@ namespace Stetic.Wrapper
 			if (nodes.Count > 0) {
 				foreach (ActionTreeNode node in nodes) {
 					ActionMenuItem item = new ActionMenuItem (wrapper, this, node);
-					item.Attach (table, n++);
+					item.KeyPressEvent += OnItemKeyPress;
+					item.Attach (table, n++, 0);
 					menuItems.Add (item);
 				}
 			}
 			
-			emptyLabel = new Gtk.Label ();
-			emptyLabel.Xalign = 0;
-			emptyLabel.Markup = "<i><span foreground='grey'>Click to create action</span></i>";
+			emptyLabel = new Gtk.EventBox ();
+			emptyLabel.VisibleWindow = false;
+			Gtk.Label label = new Gtk.Label ();
+			label.Xalign = 0;
+			label.Markup = "<i><span foreground='darkgrey'>Click to create action</span></i>";
+			emptyLabel.Add (label);
+			emptyLabel.ButtonPressEvent += OnAddClicked;
 			table.Attach (emptyLabel, 1, 2, n, n + 1);
 			
 			ShowAll ();
@@ -138,6 +166,7 @@ namespace Stetic.Wrapper
 			item.EditingDone += OnEditingDone;
 			item.Select ();
 			item.StartEditing ();
+			emptyLabel.Hide ();
 		}
 		
 		void OnEditingDone (object ob, EventArgs args)
@@ -196,14 +225,13 @@ namespace Stetic.Wrapper
 		
 		protected override bool OnButtonPressEvent (Gdk.EventButton ev)
 		{
-			if (menuItems.Count > 0) {
-				ActionMenuItem mi = (ActionMenuItem) menuItems [menuItems.Count - 1];
-				if (mi.Allocation.Top < ev.Y)
-					InsertAction (menuItems.Count);
-			} else
-				InsertAction (0);
-			
 			return true;
+		}
+		
+		void OnAddClicked (object s, Gtk.ButtonPressEventArgs args)
+		{
+			InsertAction (menuItems.Count);
+			args.RetVal = true;
 		}
 
 		protected override bool OnDragMotion (Gdk.DragContext context, int x, int y, uint time)
@@ -303,6 +331,59 @@ namespace Stetic.Wrapper
 			return base.OnDragDrop (context, x,	y, time);
 		}
 		
+		void OnItemKeyPress (object s, Gtk.KeyPressEventArgs args)
+		{
+			int pos = menuItems.IndexOf (s);
+			ActionMenuItem item = (ActionMenuItem) s;
+			
+			switch (args.Event.Key) {
+				case Gdk.Key.Up:
+					if (pos > 0)
+						((ActionMenuItem)menuItems[pos - 1]).Select ();
+					else if (parentMenu.Widget is ActionMenuBar) {
+						ActionMenuBar bar = (ActionMenuBar) parentMenu.Widget;
+						bar.Select (parentNode);
+					}
+					break;
+				case Gdk.Key.Down:
+					if (pos < menuItems.Count - 1)
+						((ActionMenuItem)menuItems[pos + 1]).Select ();
+					else if (pos == menuItems.Count - 1) {
+						InsertAction (menuItems.Count);
+					}
+					break;
+				case Gdk.Key.Right:
+					if (item.HasSubmenu) {
+						item.ShowSubmenu ();
+						if (openSubmenu != null)
+							openSubmenu.Select (null);
+					} else if (parentNode != null) {
+						ActionMenuBar parentMB = parentMenu.Widget as ActionMenuBar;
+						if (parentMB != null) {
+							int i = parentNode.ParentNode.Children.IndexOf (parentNode);
+							if (i < parentNode.ParentNode.Children.Count - 1)
+								parentMB.DropMenu (parentNode.ParentNode.Children [i + 1]);
+						}
+					}
+					break;
+				case Gdk.Key.Left:
+					if (parentNode != null) {
+						ActionMenu parentAM = parentMenu.Widget as ActionMenu;
+						if (parentAM != null) {
+							parentAM.Select (parentNode);
+						}
+						ActionMenuBar parentMB = parentMenu.Widget as ActionMenuBar;
+						if (parentMB != null) {
+							int i = parentNode.ParentNode.Children.IndexOf (parentNode);
+							if (i > 0)
+								parentMB.DropMenu (parentNode.ParentNode.Children [i - 1]);
+						}
+					}
+					break;
+			}
+			args.RetVal = true;
+		}
+		
 		ActionMenuItem LocateWidget (int x, int y)
 		{
 			foreach (ActionMenuItem mi in menuItems) {
@@ -320,5 +401,12 @@ namespace Stetic.Wrapper
 			}
 			return null;
 		}
+	}
+	
+	interface IMenuItemContainer
+	{
+		ActionMenu OpenSubmenu { get; set; }
+		bool IsTopMenu { get; }
+		Gtk.Widget Widget { get; }
 	}
 }

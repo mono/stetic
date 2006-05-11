@@ -321,5 +321,12 @@ namespace Stetic
 				return;
 			}
 		}
+		
+		public static IDesignArea GetDesignArea (Gtk.Widget w)
+		{
+			while (w != null && !(w is IDesignArea))
+				w = w.Parent;
+			return w as IDesignArea;
+		}
 	}
 }

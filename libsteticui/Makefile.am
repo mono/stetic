@@ -1,6 +1,7 @@
 pkglib_DATA = libsteticui.dll libsteticui.dll.config libsteticui.dll.mdb
 
 libsteticui_dll_sources =			\
+	ActionGroupToolbar.cs \
 	Clipboard.cs			\
 	CodeGenerator.cs			\
 	ContextMenu.cs			\

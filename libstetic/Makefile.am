@@ -43,6 +43,8 @@ libstetic_dll_sources =			\
 	WidgetLibrary.cs	\
 	WidgetUtils.cs		\
 	editor/Accelerator.cs		\
+	editor/ActionGroupEditor.cs		\
+	editor/ActionMenuBar.cs		\
 	editor/Boolean.cs		\
 	editor/Char.cs			\
 	editor/Color.cs			\

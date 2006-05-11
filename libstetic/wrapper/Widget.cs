@@ -14,7 +14,7 @@ namespace Stetic.Wrapper {
 		bool window_visible = true;
 		bool hasDefault;
 		Gdk.EventMask events;
-		ActionGroup actionGroup;
+		ActionGroupCollection actionGroups;
 		
 		public bool Unselectable;
 		
@@ -99,20 +99,62 @@ namespace Stetic.Wrapper {
 			return c as Container;
 		}
 		
+		public ActionGroupCollection LocalActionGroups {
+			get {
+				if (IsTopLevel) {
+					if (actionGroups == null) {
+						actionGroups = new ActionGroupCollection ();
+						actionGroups.ActionGroupAdded += OnGroupAdded;
+						actionGroups.ActionGroupRemoved += OnGroupRemoved;
+					}
+					return actionGroups;
+				} else {
+					return ParentWrapper.LocalActionGroups;
+				}
+			}
+		}
+		
 		public ActionGroup LocalActionGroup {
 			get {
 				if (IsTopLevel) {
-#if ACTIONS
-					if (actionGroup == null)
-						actionGroup = new ActionGroup ();
-#endif
-					return actionGroup;
+					if (LocalActionGroups.Count == 0)
+						LocalActionGroups.Add (new ActionGroup ("Default"));
+					return LocalActionGroups [0];
 				} else {
 					return ParentWrapper.LocalActionGroup;
 				}
 			}
 		}
 		
+		void OnGroupAdded (object s, Stetic.Wrapper.ActionGroupEventArgs args)
+		{
+			args.ActionGroup.SignalAdded += OnSignalAdded;
+			args.ActionGroup.SignalRemoved += OnSignalRemoved;
+			args.ActionGroup.SignalChanged += OnSignalChanged;
+		}
+		
+		void OnGroupRemoved (object s, Stetic.Wrapper.ActionGroupEventArgs args)
+		{
+			args.ActionGroup.SignalAdded -= OnSignalAdded;
+			args.ActionGroup.SignalRemoved -= OnSignalRemoved;
+			args.ActionGroup.SignalChanged -= OnSignalChanged;
+		}
+		
+		void OnSignalAdded (object sender, SignalEventArgs args)
+		{
+			OnSignalAdded (args);
+		}
+
+		void OnSignalRemoved (object sender, SignalEventArgs args)
+		{
+			OnSignalRemoved (args);
+		}
+
+		void OnSignalChanged (object sender, SignalChangedEventArgs args)
+		{
+			OnSignalChanged (args);
+		}
+
 		[GLib.ConnectBefore]
 		void WidgetEvent (object obj, Gtk.WidgetEventArgs args)
 		{
@@ -212,10 +254,12 @@ namespace Stetic.Wrapper {
 		public override void Read (XmlElement elem, FileFormat format)
 		{
 			if (format == FileFormat.Native) {
-				XmlElement groupElem = elem ["action-group"];
-				if (groupElem != null) {
-					actionGroup = new ActionGroup ();
+				foreach (XmlElement groupElem in elem.SelectNodes ("action-group")) {
+					ActionGroup actionGroup = new ActionGroup ();
 					actionGroup.Read (Project, groupElem);
+					if (actionGroups == null)
+						actionGroups = new ActionGroupCollection ();
+					actionGroups.Add (actionGroup); 
 				}
 				WidgetUtils.Read (this, elem);
 			}
@@ -227,8 +271,10 @@ namespace Stetic.Wrapper {
 		{
 			if (format == FileFormat.Native) {
 				XmlElement elem = WidgetUtils.Write (this, doc);
-				if (actionGroup != null)
-					elem.InsertBefore (actionGroup.Write (doc, format), elem.FirstChild);
+				if (actionGroups != null) {
+					foreach (ActionGroup actionGroup in actionGroups)
+						elem.InsertBefore (actionGroup.Write (doc, format), elem.FirstChild);
+				}
 				return elem;
 			}
 			else {

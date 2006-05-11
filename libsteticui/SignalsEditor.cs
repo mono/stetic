@@ -212,27 +212,37 @@ namespace Stetic
 		{
 			Wrapper.Widget selWidget = selection as Wrapper.Widget;
 			if (selWidget != null) {
-				string name = selWidget.Wrapped.Name;
-				
-				StringBuilder sb = new StringBuilder ();
-				if (!selWidget.IsTopLevel) {
-					bool wstart = true;
-					foreach (char c in name) {
-						if (c == '_' || c == '-' || c == ' ' || !char.IsLetterOrDigit (c)) {
-							wstart = true;
-							continue;
-						}
-						if (wstart) {
-							sb.Append (char.ToUpper (c));
-							wstart = false;
-						} else
-							sb.Append (c);
-					}
-				}
-				return "On" + sb.ToString() + signalName;
-			} else {
-				return "On" + signalName;
+				if (selWidget.IsTopLevel)
+					return "On" + signalName;
+				else
+					return "On" + GetIdentifier (selWidget.Wrapped.Name) + signalName;
 			}
+			
+			Wrapper.Action action = selection as Wrapper.Action;
+			if (action != null) {
+				return "On" + GetIdentifier (action.Name) + signalName;
+			}
+			
+			return "On" + signalName;
+		}
+		
+		string GetIdentifier (string name)
+		{
+			StringBuilder sb = new StringBuilder ();
+			
+			bool wstart = true;
+			foreach (char c in name) {
+				if (c == '_' || c == '-' || c == ' ' || !char.IsLetterOrDigit (c)) {
+					wstart = true;
+					continue;
+				}
+				if (wstart) {
+					sb.Append (char.ToUpper (c));
+					wstart = false;
+				} else
+					sb.Append (c);
+			}
+			return sb.ToString ();
 		}
 		
 		void OnHandlerEdited (object sender, Gtk.EditedArgs args)

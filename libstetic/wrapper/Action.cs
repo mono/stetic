@@ -1,5 +1,6 @@
 
 using System;
+using System.Text;
 using System.Xml;
 using System.Collections;
 
@@ -29,7 +30,11 @@ namespace Stetic.Wrapper
 		}
 		
 		public string Name {
-			get { return name; }
+			get {
+				if (name == null || name.Length == 0)
+					return GetIdentifier (GtkAction.Label);
+				return name;
+			}
 			set { name = value; }
 		}
 		
@@ -85,9 +90,55 @@ namespace Stetic.Wrapper
 			WidgetUtils.ReadSignals (klass, this, elem);
 		}
 		
+		public Action Clone ()
+		{
+			Action a = (Action) ObjectWrapper.Create (Project, new Gtk.Action ("", ""));
+			a.CopyFrom (this);
+			return a;
+		}
+		
+		public void CopyFrom (Action action)
+		{
+			type = action.type;
+			drawAsRadio = action.drawAsRadio;
+			radioValue = action.radioValue;
+			active = action.active;
+			name = action.name;
+			GtkAction.HideIfEmpty = action.GtkAction.HideIfEmpty;
+			GtkAction.IsImportant = action.GtkAction.IsImportant;
+			GtkAction.Label = action.GtkAction.Label;
+			GtkAction.Sensitive = action.GtkAction.Sensitive;
+			GtkAction.ShortLabel = action.GtkAction.ShortLabel;
+			GtkAction.StockId = action.GtkAction.StockId;
+			GtkAction.Tooltip = action.GtkAction.Tooltip;
+			GtkAction.Visible = action.GtkAction.Visible;
+			GtkAction.VisibleHorizontal = action.GtkAction.VisibleHorizontal;
+			GtkAction.VisibleVertical = action.GtkAction.VisibleVertical;
+			NotifyChanged ();
+		}
+		
 		internal void SetActionGroup (ActionGroup g)
 		{
 			group = g;
+		}
+		
+		string GetIdentifier (string name)
+		{
+			StringBuilder sb = new StringBuilder ();
+			
+			bool wstart = false;
+			foreach (char c in name) {
+				if ((c == '-' || c == ' ' || !char.IsLetterOrDigit (c)) && c != '_') {
+					wstart = true;
+					continue;
+				}
+				if (wstart) {
+					sb.Append (char.ToUpper (c));
+					wstart = false;
+				} else
+					sb.Append (c);
+			}
+			return sb.ToString ();
 		}
 	}
 	
@@ -116,6 +167,11 @@ namespace Stetic.Wrapper
 		public void Remove (Action action)
 		{
 			List.Remove (action);
+		}
+		
+		public bool Contains (Action action)
+		{
+			return List.Contains (action);
 		}
 
 		protected override void OnInsertComplete (int index, object val)

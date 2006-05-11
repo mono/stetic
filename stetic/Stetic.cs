@@ -206,11 +206,37 @@ namespace Stetic {
 			}
 			else {
 				Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.Lookup (widget);
+				
+				// Widget design tab
+				
 				Gtk.Widget design = EmbedWindow.Wrap (widget, wc.DesignWidth, wc.DesignHeight);
 				VBox box = new VBox ();
 				box.BorderWidth = 3;
 				box.PackStart (new WidgetActionBar (wc), false, false, 0);
 				box.PackStart (design, true, true, 3);
+				
+				// Actions design tab
+				
+				Editor.ActionGroupEditor agroupEditor = new Editor.ActionGroupEditor ();
+				agroupEditor.Project = Project;
+				Gtk.Widget groupDesign = EmbedWindow.Wrap (agroupEditor, -1, -1);
+				
+				VBox actionbox = new VBox ();
+				actionbox.BorderWidth = 3;
+				ActionGroupToolbar groupToolbar = new ActionGroupToolbar (wc.LocalActionGroups);
+				groupToolbar.Bind (agroupEditor);
+				
+				actionbox.PackStart (groupToolbar, false, false, 0);
+				actionbox.PackStart (groupDesign, true, true, 3);
+				
+				// Designers tab
+				
+				Gtk.Notebook winActionsBook = new Gtk.Notebook ();
+				winActionsBook.AppendPage (box, new Gtk.Label ("Designer"));
+				winActionsBook.AppendPage (actionbox, new Gtk.Label ("Actions"));
+				winActionsBook.TabPos = Gtk.PositionType.Bottom;
+				
+				// Tab label
 				
 				HBox tabLabel = new HBox ();
 				tabLabel.PackStart (new Label (widget.Name), true, true, 0);
@@ -225,10 +251,15 @@ namespace Stetic {
 				
 				tabLabel.PackStart (b, false, false, 3);
 				tabLabel.ShowAll ();
-				int p = WidgetNotebook.AppendPage (box, tabLabel);
-				box.ShowAll ();
+				
+				// Notebook page
+				
+				int p = WidgetNotebook.AppendPage (winActionsBook, tabLabel);
+				winActionsBook.ShowAll ();
 				WidgetNotebook.Page = p;
 				openWindows [widget] = box;
+				
+				agroupEditor.ActionGroup = wc.LocalActionGroup;
 			}
 		}
 		

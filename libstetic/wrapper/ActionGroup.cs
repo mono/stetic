@@ -10,9 +10,21 @@ namespace Stetic.Wrapper
 		string name;
 		ActionCollection actions;
 		
+		public event ActionEventHandler ActionAdded;
+		public event ActionEventHandler ActionRemoved;
+		public event EventHandler Changed;
+		public event SignalEventHandler SignalAdded;
+		public event SignalEventHandler SignalRemoved;
+		public event SignalChangedEventHandler SignalChanged;
+		
 		public ActionGroup ()
 		{
 			actions = new ActionCollection (this);
+		}
+		
+		public ActionGroup (string name): this ()
+		{
+			this.name = name;
 		}
 		
 		public ActionCollection Actions {
@@ -21,7 +33,10 @@ namespace Stetic.Wrapper
 		
 		public string Name {
 			get { return name; }
-			set { name = value; }
+			set { 
+				name = value;
+				NotifyChanged ();
+			}
 		}
 		
 		public Action GetAction (string name)
@@ -54,6 +69,10 @@ namespace Stetic.Wrapper
 		internal void NotifyActionAdded (Action ac)
 		{
 			ac.SetActionGroup (this);
+			ac.SignalAdded += OnSignalAdded;
+			ac.SignalRemoved += OnSignalRemoved;
+			ac.SignalChanged += OnSignalChanged;
+			
 			if (ActionAdded != null)
 				ActionAdded (this, new ActionEventArgs (ac));
 		}
@@ -61,12 +80,37 @@ namespace Stetic.Wrapper
 		internal void NotifyActionRemoved (Action ac)
 		{
 			ac.SetActionGroup (null);
+			ac.SignalAdded -= OnSignalAdded;
+			ac.SignalRemoved -= OnSignalRemoved;
+			ac.SignalChanged -= OnSignalChanged;
+
 			if (ActionRemoved != null)
 				ActionRemoved (this, new ActionEventArgs (ac));
 		}
 		
-		public event ActionEventHandler ActionAdded;
-		public event ActionEventHandler ActionRemoved;
+		void NotifyChanged ()
+		{
+			if (Changed != null)
+				Changed (this, EventArgs.Empty);
+		}
+		
+		void OnSignalAdded (object s, SignalEventArgs args)
+		{
+			if (SignalAdded != null)
+				SignalAdded (this, args);
+		}
+		
+		void OnSignalRemoved (object s, SignalEventArgs args)
+		{
+			if (SignalRemoved != null)
+				SignalRemoved (this, args);
+		}
+		
+		void OnSignalChanged (object s, SignalChangedEventArgs args)
+		{
+			if (SignalChanged != null)
+				SignalChanged (this, args);
+		}
 	}
 	
 	public class ActionGroupCollection: CollectionBase
@@ -79,7 +123,49 @@ namespace Stetic.Wrapper
 		public ActionGroup this [int n] {
 			get { return (ActionGroup) List [n]; }
 		}
+		
+
+		protected override void OnInsertComplete (int index, object val)
+		{
+			NotifyGroupAdded ((ActionGroup) val);
+		}
+		
+		protected override void OnRemoveComplete (int index, object val)
+		{
+			NotifyGroupRemoved ((ActionGroup)val);
+		}
+		
+		protected override void OnSetComplete (int index, object oldv, object newv)
+		{
+			NotifyGroupRemoved ((ActionGroup) oldv);
+			NotifyGroupAdded ((ActionGroup) newv);
+		}
+		
+		void NotifyGroupAdded (ActionGroup grp)
+		{
+			grp.Changed += OnGroupChanged;
+			if (ActionGroupAdded != null)
+				ActionGroupAdded (this, new ActionGroupEventArgs (grp));
+		}
+		
+		void NotifyGroupRemoved (ActionGroup grp)
+		{
+			grp.Changed -= OnGroupChanged;
+			if (ActionGroupRemoved != null)
+				ActionGroupRemoved (this, new ActionGroupEventArgs (grp));
+		}
+		
+		void OnGroupChanged (object s, EventArgs a)
+		{
+			if (ActionGroupChanged != null)
+				ActionGroupChanged (this, new ActionGroupEventArgs ((ActionGroup)s));
+		}
+		
+		public event ActionGroupEventHandler ActionGroupAdded;
+		public event ActionGroupEventHandler ActionGroupRemoved;
+		public event ActionGroupEventHandler ActionGroupChanged;
 	}
+	
 	
 	public delegate void ActionEventHandler (object sender, ActionEventArgs args);
 	
@@ -93,6 +179,22 @@ namespace Stetic.Wrapper
 		}
 		
 		public Action Action {
+			get { return action; }
+		}
+	}
+	
+	public delegate void ActionGroupEventHandler (object sender, ActionGroupEventArgs args);
+	
+	public class ActionGroupEventArgs: EventArgs
+	{
+		readonly ActionGroup action;
+		
+		public ActionGroupEventArgs (ActionGroup ac)
+		{
+			action = ac;
+		}
+		
+		public ActionGroup ActionGroup {
 			get { return action; }
 		}
 	}

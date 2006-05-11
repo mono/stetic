@@ -1,13 +1,14 @@
 
 using System;
+using Stetic.Wrapper;
 
-namespace Stetic.Wrapper
+namespace Stetic.Editor
 {
 	public class ActionMenuItem: Gtk.EventBox
 	{
 		ActionTreeNode node;
 		Widget wrapper;
-		object parentMenu;
+		IMenuItemContainer parentMenu;
 		
 		Gtk.Widget icon;
 		Gtk.Widget label;
@@ -19,6 +20,12 @@ namespace Stetic.Wrapper
 		bool editOnRelease;
 		bool motionDrag;
 		CustomMenuBarItem menuBarItem;
+		uint itemSpacing;
+		int minWidth;
+		
+		// To use in the action editor
+		IDesignArea designArea;
+		IProject project;
 		
 		public event EventHandler EditingDone;
 		
@@ -28,7 +35,19 @@ namespace Stetic.Wrapper
 			removeMenuImage = Gdk.Pixbuf.LoadFromResource ("remove-menu.png");
 		}
 		
-		public ActionMenuItem (Widget wrapper, object parent, ActionTreeNode node)
+		internal ActionMenuItem (Widget wrapper, IMenuItemContainer parent, ActionTreeNode node)
+		: this (wrapper, parent, node, 0)
+		{
+		}
+		
+		internal ActionMenuItem (IDesignArea designArea, IProject project, IMenuItemContainer parent, ActionTreeNode node)
+		: this (null, parent, node, 6)
+		{
+			this.project = project;
+			this.designArea = designArea;
+		}
+		
+		internal ActionMenuItem (Widget wrapper, IMenuItemContainer parent, ActionTreeNode node, uint itemSpacing)
 		{
 			DND.SourceSet (this);
 			this.parentMenu = parent;
@@ -36,8 +55,11 @@ namespace Stetic.Wrapper
 			this.node = node;
 			if (node.Action != null)
 				node.Action.ObjectChanged += OnActionChanged;
-			CreateControls ();
 			this.VisibleWindow = false;
+			this.CanFocus = true;
+			this.Events |= Gdk.EventMask.KeyPressMask;
+			this.itemSpacing = itemSpacing;
+			CreateControls ();
 		}
 		
 		public override void Dispose ()
@@ -58,6 +80,16 @@ namespace Stetic.Wrapper
 			get { return node.Type == Gtk.UIManagerItemType.Menu; }
 		}
 		
+		public uint ItemSpacing {
+			get { return itemSpacing; }
+			set { itemSpacing = value; }
+		}
+		
+		public int MinWidth {
+			get { return minWidth; }
+			set { minWidth = value; }
+		}
+		
 		public void StartEditing ()
 		{
 			if (!editing) {
@@ -76,9 +108,11 @@ namespace Stetic.Wrapper
 				while (Gtk.Application.EventsPending ())
 					Gtk.Application.RunIteration ();
 				if (node.Type == Gtk.UIManagerItemType.Menu) {
-					IDesignArea area = wrapper.GetDesignArea ();
-					if (area != null)
-						ShowSubmenu (area, this);
+					if (wrapper != null) {
+						IDesignArea area = wrapper.GetDesignArea ();
+						if (area != null)
+							ShowSubmenu (area, this);
+					}
 				}
 				if (EditingDone != null)
 					EditingDone (this, EventArgs.Empty);
@@ -87,34 +121,47 @@ namespace Stetic.Wrapper
 		
 		public void Select ()
 		{
-			IDesignArea area = wrapper.GetDesignArea ();
+			IDesignArea area = GetDesignArea ();
 			IObjectSelection sel = area.SetSelection (this, node.Action.GtkAction);
 			sel.Drag += HandleItemDrag;
 			sel.Disposed += OnSelectionDisposed;
 			
-			if (parentMenu is ActionMenu)
-				((ActionMenu)parentMenu).OpenSubmenu = null;
-			else
-				((ActionMenuBar)parentMenu).OpenSubmenu = null;
+			parentMenu.OpenSubmenu = null;
 				
 			if (HasSubmenu)
 				ShowSubmenu (area, this);
+			GrabFocus ();
 		}
 		
-		public void Attach (Gtk.Table table, uint row)
+		public void Attach (Gtk.Table table, uint row, uint col)
 		{
-			AttachChildren (table, row);
-			table.Attach (this, 0, 3, row, row + 1);
+			table.Attach (this, col, col + 3, row, row + 1);
+			Show ();
+			AttachChildren (table, row, col);
 		}
 		
-		void AttachChildren (Gtk.Table table, uint row)
+		void AttachChildren (Gtk.Table table, uint row, uint col)
 		{
-			if (icon != null)
-				table.Attach (icon, 0, 1, row, row + 1);
-			if (label != null)
-				table.Attach (label, 1, 2, row, row + 1);
+			if (icon != null) {
+				table.Attach (icon, col, col + 1, row, row + 1);
+				Gtk.Table.TableChild tc = (Gtk.Table.TableChild) table [icon];
+				if (!editing)
+					tc.YPadding = itemSpacing;
+			}
+			if (label != null) {
+				table.Attach (label, col + 1, col + 2, row, row + 1);
+				Gtk.Table.TableChild tc = (Gtk.Table.TableChild) table [label];
+				if (!editing)
+					tc.YPadding = itemSpacing;
+				label.GrabFocus ();
+			}
 			if (accel != null)
-				table.Attach (accel, 2, 3, row, row + 1);
+				table.Attach (accel, col + 2, col + 3, row, row + 1);
+
+			if (minWidth > 0) {
+				if (label.SizeRequest().Width < minWidth)
+					label.WidthRequest = minWidth;
+			}
 		}
 		
 		void CreateControls ()
@@ -123,7 +170,7 @@ namespace Stetic.Wrapper
 				return;
 
 			Gtk.Action gaction = node.Action.GtkAction;
-			bool barItem = parentMenu is ActionMenuBar;
+			bool barItem = parentMenu.IsTopMenu;
 		
 			string text = gaction.Label;
 			string stock = gaction.StockId;
@@ -177,12 +224,10 @@ namespace Stetic.Wrapper
 				entry.Changed += OnLabelChanged;
 				entry.Activated += OnLabelActivated;
 				entry.HasFrame = false;
-				GetParentWindow ().Focus = entry;
-				entry.GrabFocus ();
-				entry.HasFocus = true;
 				this.label = entry;
+				tooltips.SetTip (entry, "Action label", "");
 				
-				if (!barItem) {
+				if (!barItem && wrapper != null) {
 					// Add a button for creating / deleting a submenu
 					Gdk.Pixbuf img;
 					string tip;
@@ -215,6 +260,14 @@ namespace Stetic.Wrapper
 				arrow.Xalign = 1;
 				this.accel = arrow;
 			}
+			
+			if (itemSpacing > 0) {
+				// Add some padding to the left of the icon
+				Gtk.Alignment a = new Gtk.Alignment (0, 0.5f, 0, 0);
+				a.LeftPadding = itemSpacing;
+				a.Add (icon);
+				icon = a;
+			}
 		}
 		
 		public void Detach ()
@@ -237,7 +290,7 @@ namespace Stetic.Wrapper
 			if (entry.Text.Length > 0) {
 				if (node.Action == null) {
 					Gtk.Action ac = new Gtk.Action (entry.Text, entry.Text);
-					Action wac = (Action) ObjectWrapper.Create (wrapper.Project, ac);
+					Action wac = (Action) ObjectWrapper.Create (GetProject(), ac);
 					node.Action = wac;
 				}
 					
@@ -326,7 +379,7 @@ namespace Stetic.Wrapper
 		
 		void OnSetStockActionType (object ob, EventArgs args)
 		{
-			Stetic.Editor.SelectImageDialog dialog = new Stetic.Editor.SelectImageDialog (null, wrapper.Project);
+			Stetic.Editor.SelectImageDialog dialog = new Stetic.Editor.SelectImageDialog (null, GetProject());
 			using (dialog)
 			{
 				if (dialog.Run () != (int) Gtk.ResponseType.Ok)
@@ -354,7 +407,8 @@ namespace Stetic.Wrapper
 
 			icon = label = accel = null;
 			CreateControls ();
-			AttachChildren (table, ((Gtk.Table.TableChild)table[this]).TopAttach);
+			Gtk.Table.TableChild tc = (Gtk.Table.TableChild)table[this];
+			AttachChildren (table, tc.TopAttach, tc.LeftAttach);
 			table.ShowAll ();
 		}
 		
@@ -373,7 +427,7 @@ namespace Stetic.Wrapper
 		void OnMenuItemPress (object ob, Gtk.ButtonPressEventArgs args)
 		{
 			Gtk.Widget mit = (Gtk.Widget) ob;
-			if (wrapper.Project.Selection != mit.Parent) {
+			if (wrapper != null && wrapper.Project.Selection != mit.Parent) {
 				wrapper.Select ();
 				args.RetVal = true;
 				return;
@@ -407,7 +461,7 @@ namespace Stetic.Wrapper
 		public bool ProcessButtonPress (Gdk.EventButton ev)
 		{
 			if (ev.Button == 1) {
-				IDesignArea area = wrapper.GetDesignArea ();
+				IDesignArea area = GetDesignArea ();
 				if (area == null)
 					return true;
 
@@ -449,9 +503,9 @@ namespace Stetic.Wrapper
 			editOnRelease = false;
 			ActionPaletteItem item = new ActionPaletteItem (node);
 			if (ctx != null)
-				DND.Drag ((Gtk.Widget) parentMenu, ctx, item);
+				DND.Drag (parentMenu.Widget, ctx, item);
 			else
-				DND.Drag ((Gtk.Widget) parentMenu, evt, item);
+				DND.Drag (parentMenu.Widget, evt, item);
 		}
 		
 		void OnActionChanged (object ob, ObjectWrapperEventArgs a)
@@ -465,35 +519,32 @@ namespace Stetic.Wrapper
 			EndEditing ();
 		}
 		
+		public void ShowSubmenu ()
+		{
+			ShowSubmenu (wrapper.GetDesignArea (), this);
+		}
+		
 		public void ShowSubmenu (IDesignArea area, Gtk.Widget refWidget)
 		{
 			HideSubmenu ();
 			Gdk.Rectangle rect = area.GetCoordinates (refWidget);
-			ActionMenu menu = new ActionMenu (wrapper, node);
+			ActionMenu menu = new ActionMenu (wrapper, parentMenu, node);
 			menu.ShowAll ();
 			area.AddWidget (menu, rect.Right, rect.Top);
-			menu.TrackWidgetPosition (refWidget, (parentMenu is ActionMenuBar));
+			menu.TrackWidgetPosition (refWidget, parentMenu.IsTopMenu);
 			
-			if (parentMenu is ActionMenu) {
-				((ActionMenu)parentMenu).OpenSubmenu = menu;
-			} else if (parentMenu is ActionMenuBar) {
-				((ActionMenuBar)parentMenu).OpenSubmenu = menu;
-			}
+			parentMenu.OpenSubmenu = menu;
 		}
 		
 		void HideSubmenu ()
 		{
-			if (parentMenu is ActionMenu) {
-				((ActionMenu)parentMenu).OpenSubmenu = null;
-			} else if (parentMenu is ActionMenuBar) {
-				((ActionMenuBar)parentMenu).OpenSubmenu = null;
-			}
+			parentMenu.OpenSubmenu = null;
 		}
 		
 		void HandleItemDrag (Gdk.EventMotion evt)
 		{
 			ActionPaletteItem item = new ActionPaletteItem (node);
-			DND.Drag ((Gtk.Widget) parentMenu, evt, item);
+			DND.Drag (parentMenu.Widget, evt, item);
 		}
 		
 		Gtk.Window GetParentWindow ()
@@ -502,6 +553,22 @@ namespace Stetic.Wrapper
 			while (cc != null && !(cc is Gtk.Window))
 				cc = cc.Parent as Gtk.Container;
 			return cc as Gtk.Window;
+		}
+		
+		IDesignArea GetDesignArea ()
+		{
+			if (wrapper != null)
+				return wrapper.GetDesignArea ();
+			else
+				return designArea;
+		}
+		
+		IProject GetProject ()
+		{
+			if (wrapper != null)
+				return wrapper.Project;
+			else
+				return project;
 		}
 	}
 	

@@ -40,11 +40,11 @@ namespace Stetic {
 		{
 			nodes = new Hashtable ();
 			store = new NodeStore (typeof (ProjectNode));
-			actionGroups = new Stetic.Wrapper.ActionGroupCollection ();
 			
+			ActionGroups = new Stetic.Wrapper.ActionGroupCollection ();
 			Wrapper.ActionGroup globalGroup = new Wrapper.ActionGroup ();
-			globalGroup.Name = "Global";
-			actionGroups.Add (globalGroup);
+			globalGroup.Name = "GlobalActionGroup";
+			ActionGroups.Add (globalGroup);
 
 			Registry.RegistryChanging += OnRegistryChanging;
 			Registry.RegistryChanged += OnRegistryChanged;
@@ -52,6 +52,7 @@ namespace Stetic {
 		
 		public void Dispose ()
 		{
+			ActionGroups = null;
 			Registry.RegistryChanging -= OnRegistryChanging;
 			Registry.RegistryChanged -= OnRegistryChanged;
 			foreach (Gtk.Widget w in Toplevels)
@@ -69,6 +70,17 @@ namespace Stetic {
 		
 		public Stetic.Wrapper.ActionGroupCollection ActionGroups {
 			get { return actionGroups; }
+			set {
+				if (actionGroups != null) {
+					actionGroups.ActionGroupAdded -= OnGroupAdded;
+					actionGroups.ActionGroupRemoved -= OnGroupRemoved;
+				}
+				actionGroups = value;
+				if (actionGroups != null) {
+					actionGroups.ActionGroupAdded += OnGroupAdded;
+					actionGroups.ActionGroupRemoved += OnGroupRemoved;
+				}
+			}
 		}
 		
 		internal void SetFileName (string fileName)
@@ -472,6 +484,20 @@ namespace Stetic {
 		internal ProjectNode GetNode (object widget)
 		{
 			return (ProjectNode) nodes[widget];
+		}
+		
+		void OnGroupAdded (object s, Stetic.Wrapper.ActionGroupEventArgs args)
+		{
+			args.ActionGroup.SignalAdded += OnSignalAdded;
+			args.ActionGroup.SignalRemoved += OnSignalRemoved;
+			args.ActionGroup.SignalChanged += OnSignalChanged;
+		}
+		
+		void OnGroupRemoved (object s, Stetic.Wrapper.ActionGroupEventArgs args)
+		{
+			args.ActionGroup.SignalAdded -= OnSignalAdded;
+			args.ActionGroup.SignalRemoved -= OnSignalRemoved;
+			args.ActionGroup.SignalChanged -= OnSignalChanged;
 		}
 		
 		protected virtual void OnModifiedChanged (EventArgs args)

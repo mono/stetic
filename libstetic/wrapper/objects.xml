@@ -2000,6 +2000,7 @@
     <object type="Gtk.Action,gtk-sharp" label="Action" wrapper="Stetic.Wrapper.Action">
 	<itemgroups>
 	    <itemgroup label="Action Properties">
+		<property name="Name" />
 		<property name="Type" />
 		<property name="HideIfEmpty" />
 		<property name="IsImportant" />

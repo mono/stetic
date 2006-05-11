@@ -105,8 +105,14 @@ namespace Stetic
 		//	Gtk.Fixed realFixed = new Gtk.Fixed ();
 		//	realFixed.Put (fixd, 0, 0);
 
-			preview.WidthRequest = designWidth;
-			preview.HeightRequest = designHeight;
+			if (designWidth != -1) {
+				preview.WidthRequest = designWidth;
+				preview.HeightRequest = designHeight;
+				resizableFixed.AllowResize = true;
+			} else {
+				resizableFixed.AllowResize = false;
+			}
+
 			preview.SizeAllocated += new Gtk.SizeAllocatedHandler (OnResized);
 
 			AddWithViewport (resizableFixed);
@@ -237,6 +243,9 @@ namespace Stetic
 		
 		internal IObjectViewer PropertyViewer;
 		internal IObjectViewer SignalsViewer;
+		internal bool AllowResize;
+		
+		public event EventHandler SelectionChanged;
 		
 		public ResizableFixed ()
 		{
@@ -262,6 +271,19 @@ namespace Stetic
 			return selectionWidget == widget;
 		}
 		
+		public IObjectSelection GetSelection (Gtk.Widget widget)
+		{
+			if (selectionWidget == widget)
+				return currentObjectSelection;
+			else
+				return null;
+		}
+		
+		public IObjectSelection GetSelection ()
+		{
+			return currentObjectSelection;
+		}
+		
 		public IObjectSelection SetSelection (Gtk.Widget widget, object obj)
 		{
 			if (currentObjectSelection != null) {
@@ -270,7 +292,7 @@ namespace Stetic
 			}
 
 			if (widget != null)
-				currentObjectSelection = new ObjectSelection (this, widget);
+				currentObjectSelection = new ObjectSelection (this, widget, obj);
 			
 			PlaceSelectionBox (widget);
 			if (PropertyViewer != null)
@@ -278,6 +300,9 @@ namespace Stetic
 			if (SignalsViewer != null)
 				SignalsViewer.TargetObject = obj;
 
+			if (SelectionChanged != null)
+				SelectionChanged (this, EventArgs.Empty);
+			
 			return currentObjectSelection;
 		}
 		
@@ -295,6 +320,8 @@ namespace Stetic
 			if (widget != null) {
 				selectionBox.Hide ();
 				
+				// This call ensures that the old selection box is removed
+				// before the new one is shown
 				while (Gtk.Application.EventsPending ())
 					Gtk.Application.RunIteration ();
 
@@ -396,6 +423,12 @@ namespace Stetic
 		
 		void OnSizeReq (object o, SizeRequestedArgs a)
 		{
+			if (!AllowResize) {
+				a.RetVal = false;
+				QueueDraw ();
+				return;
+			}
+
 			currentSizeRequest = a.Requisition;
 			
 			Rectangle alloc = child.Allocation;
@@ -474,7 +507,7 @@ namespace Stetic
 					child.HeightRequest = nh;
 				}
 				QueueDraw ();
-			} else {
+			} else if (AllowResize) {
 				if (GetAreaResizeXY ().Contains ((int) ev.X, (int) ev.Y))
 					GdkWindow.Cursor = cursorXY;
 				else if (GetAreaResizeX ().Contains ((int) ev.X, (int) ev.Y))
@@ -495,32 +528,38 @@ namespace Stetic
 			
 			if (rectArea.Contains ((int) ev.X, (int) ev.Y)) {
 				Stetic.Wrapper.Widget gw = Stetic.Wrapper.Widget.Lookup (container);
-				gw.Select ();
-				
-				Rectangle rect = GetAreaResizeXY ();
-				if (rect.Contains ((int) ev.X, (int) ev.Y)) {
-					resizingX = resizingY = true;
-					difX = (int) (ev.X - rect.X);
-					difY = (int) (ev.Y - rect.Y);
-					GdkWindow.Cursor = cursorXY;
-				}
-				
-				rect = GetAreaResizeY ();
-				if (rect.Contains ((int) ev.X, (int) ev.Y)) {
-					resizingY = true;
-					difY = (int) (ev.Y - rect.Y);
-					GdkWindow.Cursor = cursorY;
-				}
-				
-				rect = GetAreaResizeX ();
-				if (rect.Contains ((int) ev.X, (int) ev.Y)) {
-					resizingX = true;
-					difX = (int) (ev.X - rect.X);
-					GdkWindow.Cursor = cursorX;
+				if (gw != null)
+					gw.Select ();
+				else
+					ResetSelection (null);
+					
+				if (AllowResize) {
+					Rectangle rect = GetAreaResizeXY ();
+					if (rect.Contains ((int) ev.X, (int) ev.Y)) {
+						resizingX = resizingY = true;
+						difX = (int) (ev.X - rect.X);
+						difY = (int) (ev.Y - rect.Y);
+						GdkWindow.Cursor = cursorXY;
+					}
+					
+					rect = GetAreaResizeY ();
+					if (rect.Contains ((int) ev.X, (int) ev.Y)) {
+						resizingY = true;
+						difY = (int) (ev.Y - rect.Y);
+						GdkWindow.Cursor = cursorY;
+					}
+					
+					rect = GetAreaResizeX ();
+					if (rect.Contains ((int) ev.X, (int) ev.Y)) {
+						resizingX = true;
+						difX = (int) (ev.X - rect.X);
+						GdkWindow.Cursor = cursorX;
+					}
 				}
 			} else {
 				Stetic.Wrapper.Widget gw = Stetic.Wrapper.Widget.Lookup (container);
-				gw.Project.Selection = null;
+				if (gw != null)
+					gw.Project.Selection = null;
 			}
 			
 			return base.OnButtonPressEvent (ev);
@@ -777,11 +816,21 @@ namespace Stetic
 	{
 		ResizableFixed box;
 		Gtk.Widget widget;
+		object dataObject;
 		
-		public ObjectSelection (ResizableFixed box, Gtk.Widget widget)
+		public ObjectSelection (ResizableFixed box, Gtk.Widget widget, object dataObject)
 		{
 			this.box = box;
 			this.widget = widget;
+			this.dataObject = dataObject;
+		}
+		
+		public Gtk.Widget Widget {
+			get { return widget; }
+		}
+		
+		public object DataObject {
+			get { return dataObject; }
 		}
 		
 		public void Dispose ()

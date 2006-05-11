@@ -1,3 +1,33 @@
+2006-05-11  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/Palette.cs: Show all action groups inside
+	  an "Actions" section.
+	* libsteticui/Makefile.am: Updated.
+	* libsteticui/ActionGroupToolbar.cs: Toolbar for the ActionGroup
+	  designer.
+	* libsteticui/Project.cs: Forwards events fired when changing action
+	  signals.
+	* libsteticui/SignalsEditor.cs: Include the action name in generated
+	  handlers.
+	  
+	* libstetic/IDesignArea.cs: Added some methods for getting the
+	  current selection.
+	* libstetic/PreviewBox.cs: Implemented the new IDesignArea methods.
+	* libstetic/wrapper/Action.cs: Implemented clone and copy methods.
+	* libstetic/wrapper/ActionMenuItem.cs: Many fixes.
+	* libstetic/wrapper/Widget.cs: Allow more than one local action group.
+	  Forward signal change events from the action groups.
+	* libstetic/wrapper/ActionGroup.cs: Added several events.
+	* libstetic/wrapper/ActionMenu.cs: Implemented keyboard support.
+	* libstetic/wrapper/objects.xml: Added name property to gtk.Action.
+	* libstetic/wrapper/MenuBar.cs: Moved ActionMenuBar to its own file.
+	* libstetic/WidgetUtils.cs: Added common GetDesignArea method.
+	* libstetic/Makefile.am: Updated.
+	* libstetic/editor/ActionGroupEditor.cs: Implemented an editor for
+	  action groups.
+	
+	* stetic/Stetic.cs: Added some support for the new action group editor.
+
 2006-05-05  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/wrapper/objects.xml: Ignore the default for the
