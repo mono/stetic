@@ -1,3 +1,9 @@
+2006-05-11  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/wrapper/ActionMenuItem.cs:
+	* libstetic/wrapper/ActionMenu.cs: Moved to /editor
+	* libstetic/Makefile.am: Updated.
+
 2006-05-11  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libsteticui/Palette.cs: Show all action groups inside

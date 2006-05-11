@@ -43,6 +43,8 @@ libstetic_dll_sources =			\
 	WidgetLibrary.cs	\
 	WidgetUtils.cs		\
 	editor/Accelerator.cs		\
+	editor/ActionMenu.cs			\
+	editor/ActionMenuItem.cs			\
 	editor/ActionGroupEditor.cs		\
 	editor/ActionMenuBar.cs		\
 	editor/Boolean.cs		\
@@ -78,8 +80,6 @@ libstetic_dll_sources =			\
 	Metacity/Preview.cs \
 	Metacity/Theme.cs \
 	wrapper/Action.cs			\
-	wrapper/ActionMenu.cs			\
-	wrapper/ActionMenuItem.cs			\
 	wrapper/ActionGroup.cs			\
 	wrapper/ActionTree.cs			\
 	wrapper/Bin.cs			\
