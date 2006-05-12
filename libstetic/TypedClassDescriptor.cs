@@ -19,7 +19,7 @@ namespace Stetic
 		
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 		
-		static Gdk.Pixbuf missingIcon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
+		static Gdk.Pixbuf missingIcon;
 
 		public TypedClassDescriptor (Assembly assembly, XmlElement elem)
 		{
@@ -137,6 +137,13 @@ namespace Stetic
 				return new TypedSignalDescriptor (elem, group, this);
 			else
 				return base.CreateItemDescriptor (elem, group);
+		}
+		
+		Gdk.Pixbuf GetDefaultIcon ()
+		{
+			if (missingIcon == null)
+				missingIcon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
+			return missingIcon;
 		}
 	}
 }

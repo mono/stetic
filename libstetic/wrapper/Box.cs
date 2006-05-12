@@ -205,10 +205,10 @@ namespace Stetic.Wrapper {
 
 			Freeze ();
 			if (pos >= 0) {
-				box.PackStart (w);
+				box.Add (w);
 				box.ReorderChild (w, pos);
 			} else {
-				box.PackEnd (w);
+				box.Add (w);
 				box.ReorderChild (w, -pos);
 			}
 			EmitContentsChanged ();

@@ -1,5 +1,6 @@
 
 using System;
+using System.CodeDom;
 using System.Xml;
 using System.Collections;
 
@@ -42,7 +43,7 @@ namespace Stetic.Wrapper
 		public Action GetAction (string name)
 		{
 			foreach (Action ac in actions)
-				if (ac.GtkAction.Name == "name")
+				if (ac.Name == name)
 					return ac;
 			return null;
 		}
@@ -63,6 +64,37 @@ namespace Stetic.Wrapper
 				Action ac = new Action ();
 				ac.Read (project, child);
 				actions.Add (ac);
+			}
+		}
+		
+		internal CodeExpression GenerateObjectCreation (GeneratorContext ctx)
+		{
+			return new CodeObjectCreateExpression (
+				typeof(Gtk.ActionGroup),
+				new CodePrimitiveExpression (Name)
+			);
+		}
+		
+		internal void GenerateBuildCode (GeneratorContext ctx, string varName)
+		{
+			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
+			foreach (Action action in Actions) {
+				// Create the action
+				string acVar = ctx.NewId ();
+				CodeVariableDeclarationStatement uidec = new CodeVariableDeclarationStatement (
+					typeof (Gtk.Action),
+					acVar,
+					action.GenerateObjectCreation (ctx)
+				);
+				ctx.Statements.Add (uidec);
+				action.GenerateBuildCode (ctx, acVar);
+				ctx.Statements.Add (
+					new CodeMethodInvokeExpression (
+						var,
+						"Add",
+						new CodeVariableReferenceExpression (acVar)
+					)
+				);
 			}
 		}
 		

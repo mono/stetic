@@ -41,8 +41,8 @@ namespace Stetic
 			string varName = NewId ();
 			
 			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (widget.ClassDescriptor.WrappedTypeName, varName);
+			varDec.InitExpression = widget.GenerateObjectCreation (this);
 			statements.Add (varDec);
-			varDec.InitExpression = widget.GenerateWidgetCreation (this);
 			GenerateBuildCode (widget, varName);
 			return varName;
 		}

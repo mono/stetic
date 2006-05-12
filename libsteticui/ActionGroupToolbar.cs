@@ -97,6 +97,7 @@ namespace Stetic
 			agroupEditor.SelectionChanged += delegate (object s, EventArgs args) {
 				UpdateActionCommands (agroupEditor.SelectedAction);
 			};
+			agroupEditor.ActionGroup = ActiveGroup;
 		}
 		
 		public ActionGroup ActiveGroup {
@@ -174,7 +175,6 @@ namespace Stetic
 		
 		void UpdateActionCommands (Action action)
 		{
-			Console.WriteLine ("UpdateActionCommands");
 			foreach (Gtk.Widget w in Children) {
 				if (!internalButtons.Contains (w))
 					Remove (w);

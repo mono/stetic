@@ -28,6 +28,12 @@ namespace Stetic.Editor
 			}
 			
 			this.actionTree = actionTree;
+			if (actionTree == null) {
+				Insert (new Gtk.MenuItem (""), -1);
+				ShowAll ();
+				return;
+			}
+				
 			actionTree.ChildNodeAdded += OnChildAdded;
 			actionTree.ChildNodeRemoved += OnChildRemoved;
 			
@@ -44,7 +50,7 @@ namespace Stetic.Editor
 				AddItem (aitem, -1);
 				menuItems.Add (aitem);
 			}
-			
+
 			if (showPlaceholder) {
 				Gtk.Label emptyLabel = new Gtk.Label ();
 				emptyLabel.Xalign = 0;
@@ -54,6 +60,10 @@ namespace Stetic.Editor
 				mit.ButtonPressEvent += OnNewItemPress;
 				Insert (mit, -1);
 				mit.ShowAll ();
+			} else if (actionTree.Children.Count == 0) {
+				// Give some height to the toolbar
+				Insert (new Gtk.MenuItem (""), -1);
+				ShowAll ();
 			}
 		}
 		
@@ -77,6 +87,21 @@ namespace Stetic.Editor
 			set { showPlaceholder = value; Refresh (); }
 		}
 		
+		public void Unselect ()
+		{
+			// Unselects any selected item and hides any open submenu menu
+			OpenSubmenu = null;
+			Widget wrapper = Widget.Lookup (this);
+			IDesignArea area = wrapper.GetDesignArea ();
+			if (area != null) {
+				foreach (Gtk.Widget w in Children) {
+					CustomMenuBarItem it = w as CustomMenuBarItem;
+					if (it != null)
+						area.ResetSelection (it.ActionMenuItem);
+				}
+			}
+		}
+		
 		void OnChildAdded (object ob, ActionTreeNodeArgs args)
 		{
 			Refresh ();
@@ -91,6 +116,9 @@ namespace Stetic.Editor
 		{
 			Widget wrapper = Widget.Lookup (this);
 			IDesignArea area = wrapper.GetDesignArea ();
+			if (area == null)
+				return;
+
 			ActionTreeNode selNode = null;
 			
 			foreach (Gtk.Widget w in Children) {
@@ -104,9 +132,11 @@ namespace Stetic.Editor
 			
 			FillMenu (actionTree);
 			
-			ActionMenuItem mi = FindMenuItem (selNode);
-			if (mi != null)
-				mi.Select ();
+			if (selNode != null) {
+				ActionMenuItem mi = FindMenuItem (selNode);
+				if (mi != null)
+					mi.Select ();
+			}
 		}
 		
 		[GLib.ConnectBeforeAttribute]
@@ -124,7 +154,7 @@ namespace Stetic.Editor
 			actionTree.Children.Insert (pos, node);
 
 			ActionMenuItem aitem = FindMenuItem (node);
-			aitem.EditingDone -= OnEditingDone;
+			aitem.EditingDone += OnEditingDone;
 			aitem.Select ();
 			aitem.StartEditing ();
 		}
@@ -140,7 +170,7 @@ namespace Stetic.Editor
 				area.ResetSelection (item);
 				actionTree.Children.Remove (item.Node);
 			} else {
-				wrapper.LocalActionGroup.Actions.Add (item.Node.Action);
+				wrapper.LocalActionGroups[0].Actions.Add (item.Node.Action);
 			}
 		}
 		
@@ -241,23 +271,24 @@ namespace Stetic.Editor
 			if (dropped == null)
 				return false;
 
-			if (dropped.Node.ParentNode != null) {
-				if (dropIndex < actionTree.Children.Count) {
-					// Do nothing if trying to drop the node over the same node
-					ActionTreeNode dropNode = actionTree.Children [dropIndex];
-					if (dropNode == dropped.Node)
-						return false;
-					dropped.Node.ParentNode.Children.Remove (dropped.Node);
+			if (dropIndex < actionTree.Children.Count) {
+				// Do nothing if trying to drop the node over the same node
+				ActionTreeNode dropNode = actionTree.Children [dropIndex];
+				if (dropNode == dropped.Node)
+					return false;
 					
-					// The drop position may have changed after removing the dropped node,
-					// so get it again.
-					dropIndex = actionTree.Children.IndexOf (dropNode);
-					actionTree.Children.Insert (dropIndex, dropped.Node);
-				} else {
+				if (dropped.Node.ParentNode != null)
 					dropped.Node.ParentNode.Children.Remove (dropped.Node);
-					actionTree.Children.Add (dropped.Node);
-					dropIndex = actionTree.Children.Count - 1;
-				}
+				
+				// The drop position may have changed after removing the dropped node,
+				// so get it again.
+				dropIndex = actionTree.Children.IndexOf (dropNode);
+				actionTree.Children.Insert (dropIndex, dropped.Node);
+			} else {
+				if (dropped.Node.ParentNode != null)
+					dropped.Node.ParentNode.Children.Remove (dropped.Node);
+				actionTree.Children.Add (dropped.Node);
+				dropIndex = actionTree.Children.Count - 1;
 			}
 			
 			// Select the dropped node

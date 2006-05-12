@@ -29,8 +29,6 @@ namespace Stetic {
 
 		public static int Main (string[] args)
 		{
-			Program = new Gnome.Program ("Stetic", "0.0", Gnome.Modules.UI, args);
-			
 			int n = 0;
 			
 			while (n < args.Length) {
@@ -60,6 +58,8 @@ namespace Stetic {
 				Console.WriteLine ("\tstetic [--language:<language>] [-lib:<library>...] --generate <sourceFile> <projectFile> ...");
 				return 0;
 			}
+			
+			Program = new Gnome.Program ("Stetic", "0.0", Gnome.Modules.UI, args);
 			
 			return RunApp (args);
 		}
@@ -258,8 +258,6 @@ namespace Stetic {
 				winActionsBook.ShowAll ();
 				WidgetNotebook.Page = p;
 				openWindows [widget] = box;
-				
-				agroupEditor.ActionGroup = wc.LocalActionGroup;
 			}
 		}
 		

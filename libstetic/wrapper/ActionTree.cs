@@ -1,6 +1,8 @@
 
 using System;
+using System.Text;
 using System.Xml;
+using System.CodeDom;
 using System.Collections;
 
 namespace Stetic.Wrapper
@@ -10,6 +12,21 @@ namespace Stetic.Wrapper
 	{
 		public ActionTree()
 		{
+		}
+		
+		public void GenerateBuildCode (GeneratorContext ctx, CodeVariableReferenceExpression uiManager)
+		{
+			StringBuilder sb = new StringBuilder ();
+			sb.Append ("<ui>");
+			GenerateUiString (sb);
+			sb.Append ("</ui>");
+			
+			CodeMethodInvokeExpression exp = new CodeMethodInvokeExpression (
+				uiManager,
+				"AddUiFromString",
+				new CodePrimitiveExpression (sb.ToString ())
+			);
+			ctx.Statements.Add (exp);
 		}
 	}
 	
@@ -43,7 +60,8 @@ namespace Stetic.Wrapper
 			if (name != null && name.Length > 0)
 				elem.SetAttribute ("name", name);
 			elem.SetAttribute ("type", type.ToString ());
-			elem.SetAttribute ("action", action.GtkAction.Name);
+			if (action != null)
+				elem.SetAttribute ("action", action.Name);
 			
 			if (children != null) {
 				foreach (ActionTreeNode child in children)
@@ -60,11 +78,15 @@ namespace Stetic.Wrapper
 			
 			string aname = elem.GetAttribute ("action");
 			if (aname.Length > 0) {
-				action = baseWidget.LocalActionGroup.GetAction (aname);
+				foreach (ActionGroup grp in baseWidget.LocalActionGroups) {
+					action = grp.GetAction (aname);
+					if (action != null)
+						break;
+				}
 				if (action == null) {
 					foreach (ActionGroup group in baseWidget.Project.ActionGroups) {
 						action = group.GetAction (aname);
-						if (action == null)
+						if (action != null)
 							break;
 					}
 				}
@@ -74,6 +96,53 @@ namespace Stetic.Wrapper
 				node.Read (baseWidget, child);
 				Children.Add (node);
 			}
+		}
+		
+		public virtual void GenerateBuildCode (GeneratorContext ctx, CodeVariableReferenceExpression uiManager, string path)
+		{
+			CodeMethodInvokeExpression exp = new CodeMethodInvokeExpression (
+				uiManager,
+				"AddUi",
+				new CodePrimitiveExpression (0),
+				new CodePrimitiveExpression (path),
+				new CodePrimitiveExpression (name),
+				new CodePrimitiveExpression (action != null ? action.Name : null),
+				new CodeFieldReferenceExpression (
+					new CodeTypeReferenceExpression (typeof(Gtk.UIManagerItemType)),
+					type.ToString()
+				),
+				new CodePrimitiveExpression (false)
+			);
+			ctx.Statements.Add (exp);
+			
+			string localName = (name != null && name.Length > 0 ? name : (action != null ? action.Name : null));
+			if (localName != null) {
+				if (path != "/")
+					path = path + "/" + localName;
+				else
+					path += localName;
+			}
+			
+			foreach (ActionTreeNode node in Children)
+				node.GenerateBuildCode (ctx, uiManager, path);
+		}
+		
+		public void GenerateUiString (StringBuilder sb)
+		{
+			string localName = (name != null && name.Length > 0 ? name : (action != null ? action.Name : null));
+			sb.Append ('<').Append (type.ToString().ToLower());
+			if (name != null && name.Length > 0)
+				sb.Append (' ').Append ("name='").Append (name).Append ("'");
+			if (action != null)
+				sb.Append (' ').Append ("action='").Append (action.Name).Append ("'");
+				
+			if (Children.Count > 0) {
+				sb.Append ('>');
+				foreach (ActionTreeNode node in Children)
+					node.GenerateUiString (sb);
+				sb.Append ("</").Append (type.ToString().ToLower()).Append ('>');
+			} else
+				sb.Append ("/>");
 		}
 		
 		public Gtk.UIManagerItemType Type {

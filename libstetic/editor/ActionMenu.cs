@@ -43,6 +43,11 @@ namespace Stetic.Editor
 		
 		public override void Dispose ()
 		{
+			foreach (Gtk.Widget w in table.Children) {
+				table.Remove (w);
+				w.Destroy ();
+			}
+			
 			base.Dispose ();
 			parentNode.ChildNodeAdded -= OnChildAdded;
 			parentNode.ChildNodeRemoved -= OnChildRemoved;
@@ -178,7 +183,7 @@ namespace Stetic.Editor
 				area.ResetSelection (item);
 				nodes.Remove (item.Node);
 			} else {
-				wrapper.LocalActionGroup.Actions.Add (item.Node.Action);
+				wrapper.LocalActionGroups [0].Actions.Add (item.Node.Action);
 			}
 		}
 		

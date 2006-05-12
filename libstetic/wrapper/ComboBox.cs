@@ -65,7 +65,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		internal protected override CodeExpression GenerateWidgetCreation (GeneratorContext ctx)
+		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
 			if (Items != null && Items.Length > 0) {
 				return new CodeMethodInvokeExpression (
@@ -73,7 +73,7 @@ namespace Stetic.Wrapper {
 					"NewText"
 				);
 			} else
-				return base.GenerateWidgetCreation (ctx);
+				return base.GenerateObjectCreation (ctx);
 		}
 		
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)

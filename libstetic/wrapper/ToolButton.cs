@@ -72,7 +72,7 @@ namespace Stetic.Wrapper {
 			return elem;
 		}
 		
-		internal protected override CodeExpression GenerateWidgetCreation (GeneratorContext ctx)
+		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
 			return new CodeObjectCreateExpression (
 				ClassDescriptor.WrappedTypeName, 

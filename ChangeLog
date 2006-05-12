@@ -1,3 +1,53 @@
+2006-05-12  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/ActionGroupToolbar.cs: Initialize the action group
+	  editor after binding it.
+	* libstetic/PreviewBox.cs: Call OnDesignerAttach when attaching
+	  a widget for editing.
+	* libstetic/wrapper/Widget.cs:
+	* libstetic/ObjectWrapper.cs: Moved basic code generation methods
+	  here from Widget.cs, since generic objects may also need to
+	  support it (for example, Gtk.Action).
+	  Added OnDesignerAttach, which is called when a widget is attached
+	  to a designer.
+	* libstetic/wrapper/Container.cs: Implement OnDesignerAttach.
+	* libstetic/wrapper/Action.cs: Implemented CopyTo in ActionCollection.
+	* libstetic/wrapper/Box.cs: Use Add insted of PackStart to add a widget
+	  from drag-drop. Looks like PackStart does not fire the ChildAdded
+	  event?
+	* libstetic/editor/ActionMenuItem.cs: Grab the keyboard focus after editing
+	  is done.
+	* libstetic/editor/ActionMenuBar.cs: Show a dummy menu item when none is
+	  defined, so the menubar has a proper height. Unselec any selected
+	  item when the bar is unselected. Allow dropping actions from the
+	  palette.
+	* libstetic/editor/ActionGroupEditor.cs: Sort action alphabetically.
+	* libstetic/editor/ActionMenu.cs: Destroy menu items when the menu
+	  is disposed.
+	* libstetic/GeneratorContext.cs: In GenerateCreationCode, added the variable
+	  for the new object to the statements collections after calling
+	  GenerateObjectCreation, so statements needed for the object creation
+	  are added before the declaration.
+	* libstetic/TypedClassDescriptor.cs: Lazily initialize the missingIcon
+	  static variable.
+	* stetic/Stetic.cs: Show stetic help before standard gnome app help.
+	  
+	* libstetic/wrapper/ActionTree.cs:
+	* libstetic/wrapper/MenuBar.cs:
+	* libstetic/wrapper/ActionGroup.cs: Added code generation support.
+	  
+	* libstetic/wrapper/HScale.cs:
+	* libstetic/wrapper/Expander.cs:
+	* libstetic/wrapper/ToolButton.cs:
+	* libstetic/wrapper/VScrollbar.cs:
+	* libstetic/wrapper/ComboBoxEntry.cs:
+	* libstetic/wrapper/ComboBox.cs:
+	* libstetic/wrapper/HScrollbar.cs:
+	* libstetic/wrapper/VScale.cs: Renamed GenerateWidgetCreation to
+	  a more generic GenerateObjectCreation.
+	
+	* libstetic/wrapper/objects.xml: Defined some initialization properties.
+
 2006-05-11  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/wrapper/ActionMenuItem.cs:

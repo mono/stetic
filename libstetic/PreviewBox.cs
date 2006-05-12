@@ -38,6 +38,7 @@ namespace Stetic
 		
 	public class PreviewBox: ScrolledWindow
 	{
+		ObjectWrapper wrapper;
 		Gtk.Widget preview;
 		Metacity.Preview metacityPreview;
 		ResizableFixed resizableFixed;
@@ -79,13 +80,13 @@ namespace Stetic
 			resizableFixed.PropertyViewer = defaultPropertyViewer;
 			resizableFixed.SignalsViewer = defaultSignalsViewer;
 			
+			wrapper = ObjectWrapper.Lookup (container);
 			Gtk.Window window = container as Gtk.Window;
 			
 			if (window != null) {
 				try {
 					metacityPreview = CreateMetacityPreview (window);
 					preview = metacityPreview;
-					ObjectWrapper wrapper = ObjectWrapper.Lookup (window);
 					if (wrapper != null)
 						wrapper.Notify += OnWindowPropChange;
 				} catch {
@@ -116,6 +117,16 @@ namespace Stetic
 			preview.SizeAllocated += new Gtk.SizeAllocatedHandler (OnResized);
 
 			AddWithViewport (resizableFixed);
+			
+			if (wrapper != null)
+				wrapper.OnDesignerAttach (resizableFixed);
+		}
+		
+		public override void Dispose ()
+		{
+			if (wrapper != null)
+				wrapper.OnDesignerDetach (resizableFixed);
+			base.Dispose ();
 		}
 		
 		public IObjectViewer PropertyViewer {
@@ -293,6 +304,8 @@ namespace Stetic
 
 			if (widget != null)
 				currentObjectSelection = new ObjectSelection (this, widget, obj);
+			else
+				currentObjectSelection = null;
 			
 			PlaceSelectionBox (widget);
 			if (PropertyViewer != null)

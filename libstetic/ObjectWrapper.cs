@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.CodeDom;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -95,7 +96,61 @@ namespace Stetic {
 			}
 			return wrapper;
 		}
+		
+		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, string varName)
+		{
+			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
+			
+			// Write the widget properties
+			foreach (ItemGroup group in ClassDescriptor.ItemGroups) {
+				foreach (ItemDescriptor item in group) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop == null || !prop.IsRuntimeProperty)
+						continue;
+					GeneratePropertySet (ctx, var, prop);
+				}
+			}
+		}
+		
+		internal protected virtual void GeneratePostBuildCode (GeneratorContext ctx, string varName)
+		{
+		}
+		
+		internal protected virtual CodeExpression GenerateObjectCreation (GeneratorContext ctx)
+		{
+			if (ClassDescriptor.InitializationProperties != null) {
+				CodeExpression[] paramters = new CodeExpression [ClassDescriptor.InitializationProperties.Length];
+				for (int n=0; n < paramters.Length; n++) {
+					PropertyDescriptor prop = ClassDescriptor.InitializationProperties [n];
+					paramters [n] = ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType);
+				}
+				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, paramters);
+			} else
+				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName);
+		}
+		
+		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		{
+			if (ClassDescriptor.InitializationProperties != null && Array.IndexOf (ClassDescriptor.InitializationProperties, prop) != -1)
+				return;
+			
+			object oval = prop.GetValue (Wrapped);
+			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))
+				return;
 
+			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType);
+			CodeExpression cprop;
+			
+			TypedPropertyDescriptor tprop = prop as TypedPropertyDescriptor;
+			if (tprop == null || tprop.GladeProperty == prop) {
+				cprop = new CodePropertyReferenceExpression (var, prop.Name);
+			} else {
+				cprop = new CodePropertyReferenceExpression (var, tprop.GladeProperty.Name);
+				cprop = new CodePropertyReferenceExpression (cprop, prop.Name);
+			}
+			ctx.Statements.Add (new CodeAssignStatement (cprop, val));
+		}
+		
 		public static ObjectWrapper Lookup (object obj)
 		{
 			if (obj == null)
@@ -182,6 +237,14 @@ namespace Stetic {
 			OnObjectChanged (args);
 			if (SignalChanged != null)
 				SignalChanged (this, args);
+		}
+		
+		internal protected virtual void OnDesignerAttach (IDesignArea designer)
+		{
+		}
+		
+		internal protected virtual void OnDesignerDetach (IDesignArea designer)
+		{
 		}
 	}
 	

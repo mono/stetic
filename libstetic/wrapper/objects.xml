@@ -1997,7 +1997,8 @@
     <object type="Stetic.ErrorWidget" wrapper="Stetic.ErrorWidgetWrapper">
     </object>
 
-    <object type="Gtk.Action,gtk-sharp" label="Action" wrapper="Stetic.Wrapper.Action">
+    <object type="Gtk.Action,gtk-sharp" label="Action" wrapper="Stetic.Wrapper.Action"
+    	init-properties="Name Label Tooltip StockId" >
 	<itemgroups>
 	    <itemgroup label="Action Properties">
 		<property name="Name" />

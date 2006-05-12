@@ -10,6 +10,7 @@ namespace Stetic.Wrapper {
 	
 		int designWidth;
 		int designHeight;
+		IDesignArea designer;
 
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -46,6 +47,11 @@ namespace Stetic.Wrapper {
 			// Make sure children's IDs don't conflict with other widgets
 			// in the parent container.
 			ValidateChildNames ((Gtk.Widget)o);
+			if (designer != null) {
+				ObjectWrapper w = ObjectWrapper.Lookup (o);
+				if (w != null)
+					w.OnDesignerAttach (designer);
+			}
 		}
 		
 		Gtk.Container container {
@@ -351,6 +357,26 @@ namespace Stetic.Wrapper {
 			ctx.Statements.Add (new CodeAssignStatement (cprop, val));
 		}
 		
+		internal protected override void OnDesignerAttach (IDesignArea designer)
+		{
+			this.designer = designer;
+			foreach (Gtk.Widget w in RealChildren) {
+				ObjectWrapper wr = ObjectWrapper.Lookup (w);
+				if (wr != null)
+					wr.OnDesignerAttach (designer);
+			}
+		}
+		
+		internal protected override void OnDesignerDetach (IDesignArea designer)
+		{
+			foreach (Gtk.Widget w in RealChildren) {
+				ObjectWrapper wr = ObjectWrapper.Lookup (w);
+				if (wr != null)
+					wr.OnDesignerDetach (designer);
+			}
+			this.designer = null;
+		}
+		
 		public virtual Placeholder AddPlaceholder ()
 		{
 			Placeholder ph = CreatePlaceholder ();
@@ -489,6 +515,11 @@ namespace Stetic.Wrapper {
 
 		void ChildRemoved (object obj, Gtk.RemovedArgs args)
 		{
+			if (designer != null) {
+				ObjectWrapper w = ObjectWrapper.Lookup (args.Widget);
+				if (w != null)
+					w.OnDesignerDetach (designer);
+			}
 			ChildRemoved (args.Widget);
 		}
 

@@ -114,6 +114,7 @@ namespace Stetic.Editor
 							ShowSubmenu (area, this);
 					}
 				}
+				GrabFocus ();
 				if (EditingDone != null)
 					EditingDone (this, EventArgs.Empty);
 			}
@@ -227,7 +228,7 @@ namespace Stetic.Editor
 				this.label = entry;
 				tooltips.SetTip (entry, "Action label", "");
 				
-				if (!barItem && wrapper != null) {
+				if (wrapper != null) {
 					// Add a button for creating / deleting a submenu
 					Gdk.Pixbuf img;
 					string tip;

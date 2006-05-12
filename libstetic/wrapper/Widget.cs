@@ -15,6 +15,7 @@ namespace Stetic.Wrapper {
 		bool hasDefault;
 		Gdk.EventMask events;
 		ActionGroupCollection actionGroups;
+		string uiManagerName;
 		
 		public bool Unselectable;
 		
@@ -90,6 +91,10 @@ namespace Stetic.Wrapper {
 		public bool IsTopLevel {
 			get { return Wrapped.Parent == null || Widget.Lookup (Wrapped.Parent) == null; }
 		}
+		
+		public string UIManagerName {
+			get { return uiManagerName; }
+		}
 
 		public Container GetTopLevel ()
 		{
@@ -104,24 +109,14 @@ namespace Stetic.Wrapper {
 				if (IsTopLevel) {
 					if (actionGroups == null) {
 						actionGroups = new ActionGroupCollection ();
+						ActionGroup grp = new ActionGroup ("Default");
+						actionGroups.Add (grp);
 						actionGroups.ActionGroupAdded += OnGroupAdded;
 						actionGroups.ActionGroupRemoved += OnGroupRemoved;
 					}
 					return actionGroups;
 				} else {
 					return ParentWrapper.LocalActionGroups;
-				}
-			}
-		}
-		
-		public ActionGroup LocalActionGroup {
-			get {
-				if (IsTopLevel) {
-					if (LocalActionGroups.Count == 0)
-						LocalActionGroups.Add (new ActionGroup ("Default"));
-					return LocalActionGroups [0];
-				} else {
-					return ParentWrapper.LocalActionGroup;
 				}
 			}
 		}
@@ -257,8 +252,12 @@ namespace Stetic.Wrapper {
 				foreach (XmlElement groupElem in elem.SelectNodes ("action-group")) {
 					ActionGroup actionGroup = new ActionGroup ();
 					actionGroup.Read (Project, groupElem);
-					if (actionGroups == null)
+					if (actionGroups == null) {
 						actionGroups = new ActionGroupCollection ();
+						actionGroups.ActionGroupAdded += OnGroupAdded;
+						actionGroups.ActionGroupRemoved += OnGroupRemoved;
+					} else
+						actionGroups.Clear ();
 					actionGroups.Add (actionGroup); 
 				}
 				WidgetUtils.Read (this, elem);
@@ -284,22 +283,54 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
-			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
-			
-			foreach (ItemGroup group in base.ClassDescriptor.ItemGroups) {
-				foreach (ItemDescriptor item in group) {
-					PropertyDescriptor prop = item as PropertyDescriptor;
-					if (prop == null || !prop.IsRuntimeProperty)
-						continue;
-					GeneratePropertySet (ctx, var, prop);
+			if (actionGroups != null) {
+				// Create an UI manager
+				uiManagerName = ctx.NewId ();
+				CodeVariableDeclarationStatement uidec = new CodeVariableDeclarationStatement (
+					typeof (Gtk.UIManager),
+					uiManagerName,
+					 new CodeObjectCreateExpression (typeof (Gtk.UIManager))
+				);
+				CodeVariableReferenceExpression uixp = new CodeVariableReferenceExpression (uiManagerName);
+				ctx.Statements.Add (uidec);
+				
+				// Generate action group creation
+				int pos = 0;
+				foreach (ActionGroup actionGroup in actionGroups) {
+				
+					// Create the action group
+					string grpVar = ctx.NewId ();
+					uidec = new CodeVariableDeclarationStatement (
+						typeof (Gtk.ActionGroup),
+						grpVar,
+						actionGroup.GenerateObjectCreation (ctx)
+					);
+					ctx.Statements.Add (uidec);
+					actionGroup.GenerateBuildCode (ctx, grpVar);
+					
+					// Insert the action group in the UIManager
+					CodeMethodInvokeExpression mi = new CodeMethodInvokeExpression (
+						uixp,
+						"InsertActionGroup",
+						new CodeVariableReferenceExpression (grpVar),
+						new CodePrimitiveExpression (pos++)
+					);
+					ctx.Statements.Add (mi);
 				}
 			}
+			
+			base.GenerateBuildCode (ctx, varName);
 		}
 		
-		internal protected virtual void GeneratePostBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GeneratePostBuildCode (GeneratorContext ctx, string varName)
 		{
+			base.GeneratePostBuildCode (ctx, varName);
+			
+			// The visible property is generated here to ensure that widgets are made visible
+			// after they have been fully built
+			
 			PropertyDescriptor prop = ClassDescriptor ["Visible"] as PropertyDescriptor;
 			if (prop != null && prop.PropertyType == typeof(bool) && (bool) prop.GetValue (Wrapped)) {
 				if ((bool) prop.GetValue (Wrapped)) {
@@ -313,43 +344,10 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		internal protected virtual CodeExpression GenerateWidgetCreation (GeneratorContext ctx)
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
 		{
-			if (ClassDescriptor.InitializationProperties != null) {
-				CodeExpression[] paramters = new CodeExpression [ClassDescriptor.InitializationProperties.Length];
-				for (int n=0; n < paramters.Length; n++) {
-					PropertyDescriptor prop = ClassDescriptor.InitializationProperties [n];
-					paramters [n] = ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType);
-				}
-				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, paramters);
-			} else
-				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName);
-		}
-		
-		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
-		{
-			if (ClassDescriptor.InitializationProperties != null && Array.IndexOf (ClassDescriptor.InitializationProperties, prop) != -1)
-				return;
-			
-			object oval = prop.GetValue (Wrapped);
-			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))
-				return;
-
-			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType);
-			CodeExpression cprop;
-			
-			TypedPropertyDescriptor tprop = prop as TypedPropertyDescriptor;
-			if (tprop == null || tprop.GladeProperty == prop) {
-				cprop = new CodePropertyReferenceExpression (var, prop.Name);
-			} else {
-				cprop = new CodePropertyReferenceExpression (var, tprop.GladeProperty.Name);
-				cprop = new CodePropertyReferenceExpression (cprop, prop.Name);
-			}
-			
-			// The Visible property is set after everything is built
-			
 			if (prop.Name != "Visible")
-				ctx.Statements.Add (new CodeAssignStatement (cprop, val));
+				base.GeneratePropertySet (ctx, var, prop);
 		}
 
 		public static new Widget Lookup (GLib.Object obj)

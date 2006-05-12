@@ -10,7 +10,7 @@ namespace Stetic.Wrapper {
 			return new Gtk.HScale (0.0, 100.0, 1.0);
 		}
 		
-		internal protected override CodeExpression GenerateWidgetCreation (GeneratorContext ctx)
+		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
 			return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, new CodePrimitiveExpression (null));
 		}

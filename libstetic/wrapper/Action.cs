@@ -173,6 +173,11 @@ namespace Stetic.Wrapper
 		{
 			return List.Contains (action);
 		}
+		
+		public void CopyTo (Action[] array, int index)
+		{
+			List.CopyTo (array, index);
+		}
 
 		protected override void OnInsertComplete (int index, object val)
 		{

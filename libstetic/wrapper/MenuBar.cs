@@ -1,5 +1,6 @@
 
 using System;
+using System.CodeDom;
 using System.Xml;
 using System.Collections;
 using Stetic.Editor;
@@ -9,6 +10,7 @@ namespace Stetic.Wrapper
 	public class MenuBar: Container
 	{
 		ActionTree actionTree;
+		XmlElement menuInfo;
 		
 		public MenuBar()
 		{
@@ -26,46 +28,7 @@ namespace Stetic.Wrapper
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-			
 			actionTree = new ActionTree ();
-			
-			Action ac1 = (Action) ObjectWrapper.Create (Project, new Gtk.Action ("File", "File", null, Gtk.Stock.Open));
-			Action ac2 = (Action) ObjectWrapper.Create (Project, new Gtk.Action ("Open", null, null, Gtk.Stock.Open));
-			Action ac3 = (Action) ObjectWrapper.Create (Project, new Gtk.Action ("Close", "Close", null, null));
-			ac3.Type = Action.ActionType.Toggle;
-			Action ac4 = (Action) ObjectWrapper.Create (Project, new Gtk.Action ("Documents", "Documents", null, null));
-			Action ac5 = (Action) ObjectWrapper.Create (Project, new Gtk.Action ("Doc1", "Doc1", null, null));
-			ac5.Type = Action.ActionType.Radio;
-			Action ac6 = (Action) ObjectWrapper.Create (Project, new Gtk.Action ("MoreDocs", "MoreDocs", null, null));
-			Action ac7 = (Action) ObjectWrapper.Create (Project, new Gtk.Action ("Doc2", "Doc2", null, null));
-			
-			ActionTreeNode node = new ActionTreeNode (Gtk.UIManagerItemType.Menu, null, ac1);
-			actionTree.Children.Add (node);
-			ActionTreeNode cnode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac2);
-			node.Children.Add (cnode);
-			cnode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac3);
-			node.Children.Add (cnode);
-			cnode = new ActionTreeNode (Gtk.UIManagerItemType.Menu, null, ac4);
-			node.Children.Add (cnode);
-			
-			node = cnode;
-			cnode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac5);
-			node.Children.Add (cnode);
-			ActionTreeNode cnode2 = new ActionTreeNode (Gtk.UIManagerItemType.Menu, null, ac6);
-			node.Children.Add (cnode2);
-			cnode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac7);
-			node.Children.Add (cnode);
-			
-			cnode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac5);
-			cnode2.Children.Add (cnode);
-			cnode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac7);
-			cnode2.Children.Add (cnode);
-			
-			node = new ActionTreeNode (Gtk.UIManagerItemType.Menu, null, ac4);
-			actionTree.Children.Add (node);
-			cnode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac5);
-			node.Children.Add (cnode);
-			menu.FillMenu (actionTree);
 		}
 		
 		internal protected override void OnSelected ()
@@ -76,23 +39,67 @@ namespace Stetic.Wrapper
 		internal protected override void OnUnselected ()
 		{
 			base.OnUnselected ();
-			menu.OpenSubmenu = null;
 			menu.ShowInsertPlaceholder = false;
+			menu.Unselect ();
 		}
 		
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
 			XmlElement elem = base.Write (doc, format);
-			elem.AppendChild (actionTree.Write (doc, format));
+			if (menuInfo != null)
+				elem.AppendChild (doc.ImportNode (menuInfo, true));
+			else
+				elem.AppendChild (actionTree.Write (doc, format));
 			return elem;
 		}
 		
 		public override void Read (XmlElement elem, FileFormat format)
 		{
 			base.Read (elem, format);
-			actionTree = new ActionTree ();
-			actionTree.Read (this, elem);
+			menuInfo = elem ["node"];
+		}
+		
+		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
+		{
+			BuildTree ();
+			string uiName = GetTopLevel ().UIManagerName;
+			if (uiName != null) {
+				CodeVariableReferenceExpression uiManager = new CodeVariableReferenceExpression (uiName);
+				actionTree.Type = Gtk.UIManagerItemType.Menubar;
+				actionTree.Name = Wrapped.Name;
+				actionTree.GenerateBuildCode (ctx, uiManager);
+				
+				return new CodeCastExpression (
+					typeof(Gtk.MenuBar),
+					new CodeMethodInvokeExpression (
+						uiManager,
+						"GetWidget",
+						new CodePrimitiveExpression ("/" + Wrapped.Name)
+					)
+				);
+			}
+			return base.GenerateObjectCreation (ctx);
+		}
+		
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		{
+			base.GenerateBuildCode (ctx, varName);
+		}
+		
+		internal protected override void OnDesignerAttach (IDesignArea designer)
+		{
+			base.OnDesignerAttach (designer);
+			BuildTree ();
 			menu.FillMenu (actionTree);
+		}
+		
+		void BuildTree ()
+		{
+			if (menuInfo != null) {
+				actionTree = new ActionTree ();
+				actionTree.Read (this, menuInfo);
+				menuInfo = null;
+			}
 		}
 	}
 	

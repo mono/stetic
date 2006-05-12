@@ -116,12 +116,16 @@ namespace Stetic.Editor
 				if (designArea.IsSelected (item))
 					selAction = item.Node.Action;
 				item.Detach ();
+				item.Destroy ();
 			}
 			items.Clear ();
 			
 			if (actionGroup != null) {
-				for (int n = 0; n < actionGroup.Actions.Count; n++) {
-					Action action = (Action) actionGroup.Actions [n];
+				Action[] sortedActions = new Action [actionGroup.Actions.Count];
+				actionGroup.Actions.CopyTo (sortedActions, 0);
+				Array.Sort (sortedActions, new ActionComparer ());
+				for (int n = 0; n < sortedActions.Length; n++) {
+					Action action = (Action) sortedActions [n];
 					ActionMenuItem item = InsertAction (action, n);
 					if (selAction == action)
 						item.Select ();
@@ -324,6 +328,14 @@ namespace Stetic.Editor
 		
 		Gtk.Widget IMenuItemContainer.Widget {
 			get { return this; }
+		}
+		
+		class ActionComparer: IComparer
+		{
+			public int Compare (object x, object y)
+			{
+				return string.Compare (((Action)x).GtkAction.Label, ((Action)y).GtkAction.Label);
+			}
 		}
 	}
 	
