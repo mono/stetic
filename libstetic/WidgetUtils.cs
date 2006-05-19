@@ -328,5 +328,22 @@ namespace Stetic
 				w = w.Parent;
 			return w as IDesignArea;
 		}
+		
+		internal static void ParseWidgetName (string name, out string baseName, out int idx)
+		{
+			// Extract a numeric sufix from the name
+			
+			int n;
+			for (n = name.Length - 1; n >= 0 && char.IsDigit (name [n]); n--)
+				;
+				
+			if (n < name.Length - 1) {
+				baseName = name.Substring (0, n + 1);
+				idx = int.Parse (name.Substring (n + 1));
+			} else {
+				baseName = name;
+				idx = 0;
+			}
+		}
 	}
 }

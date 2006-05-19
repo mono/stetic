@@ -18,8 +18,10 @@ namespace Stetic {
 		bool loading;
 		IResourceProvider resourceProvider;
 		Stetic.Wrapper.ActionGroupCollection actionGroups;
+		Stetic.ProjectIconFactory iconFactory;
 		
 		public event Wrapper.WidgetNameChangedHandler WidgetNameChanged;
+		public event Wrapper.WidgetNameChangedHandler WidgetMemberNameChanged;
 		public event Wrapper.WidgetEventHandler WidgetAdded;
 		public event Wrapper.WidgetEventHandler WidgetRemoved;
 		
@@ -42,12 +44,11 @@ namespace Stetic {
 			store = new NodeStore (typeof (ProjectNode));
 			
 			ActionGroups = new Stetic.Wrapper.ActionGroupCollection ();
-			Wrapper.ActionGroup globalGroup = new Wrapper.ActionGroup ();
-			globalGroup.Name = "GlobalActionGroup";
-			ActionGroups.Add (globalGroup);
 
 			Registry.RegistryChanging += OnRegistryChanging;
 			Registry.RegistryChanged += OnRegistryChanged;
+			
+			iconFactory = new ProjectIconFactory ();
 		}
 		
 		public void Dispose ()
@@ -83,6 +84,11 @@ namespace Stetic {
 			}
 		}
 		
+		public Stetic.ProjectIconFactory IconFactory {
+			get { return iconFactory; }
+			set { iconFactory = value; }
+		}
+		
 		internal void SetFileName (string fileName)
 		{
 			this.fileName = fileName;
@@ -116,7 +122,18 @@ namespace Stetic {
 				XmlNode node = doc.SelectSingleNode ("/stetic-interface");
 				if (node == null)
 					throw new ApplicationException ("Not a Stetic file according to node name");
-
+				
+				actionGroups.Clear ();
+				foreach (XmlElement groupElem in node.SelectNodes ("action-group")) {
+					Wrapper.ActionGroup actionGroup = new Wrapper.ActionGroup ();
+					actionGroup.Read (this, groupElem);
+					actionGroups.Add (actionGroup);
+				}
+				
+				XmlElement iconsElem = node.SelectSingleNode ("icon-factory") as XmlElement;
+				if (iconsElem != null)
+					iconFactory.Read (this, iconsElem);
+				
 				foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
 					Wrapper.Container wrapper = Stetic.ObjectWrapper.Read (this, toplevel, FileFormat.Native) as Wrapper.Container;
 					if (wrapper != null)
@@ -145,6 +162,14 @@ namespace Stetic {
 
 			XmlElement toplevel = doc.CreateElement ("stetic-interface");
 			doc.AppendChild (toplevel);
+
+			foreach (Wrapper.ActionGroup agroup in actionGroups) {
+				XmlElement elem = agroup.Write (doc, FileFormat.Native);
+				toplevel.AppendChild (elem);
+			}
+			
+			if (iconFactory.Icons.Count > 0)
+				toplevel.AppendChild (iconFactory.Write (doc));
 
 			foreach (Widget w in Toplevels) {
 				Stetic.Wrapper.Container wrapper = Stetic.Wrapper.Container.Lookup (w);
@@ -224,6 +249,7 @@ namespace Stetic {
 				
 			ww.ObjectChanged += OnObjectChanged;
 			ww.NameChanged += OnWidgetNameChanged;
+			ww.MemberNameChanged += OnWidgetMemberNameChanged;
 			ww.SignalAdded += OnSignalAdded;
 			ww.SignalRemoved += OnSignalRemoved;
 			ww.SignalChanged += OnSignalChanged;
@@ -261,6 +287,7 @@ namespace Stetic {
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (node.Widget);
 			ww.ObjectChanged -= OnObjectChanged;
 			ww.NameChanged -= OnWidgetNameChanged;
+			ww.MemberNameChanged -= OnWidgetMemberNameChanged;
 			ww.SignalAdded -= OnSignalAdded;
 			ww.SignalRemoved -= OnSignalRemoved;
 			ww.SignalChanged -= OnSignalChanged;
@@ -310,6 +337,20 @@ namespace Stetic {
 		{
 			if (WidgetNameChanged != null)
 				WidgetNameChanged (this, args);
+		}
+		
+		void OnWidgetMemberNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
+		{
+			if (!Syncing) {
+				Modified = true;
+				OnWidgetMemberNameChanged (args);
+			}
+		}
+
+		protected virtual void OnWidgetMemberNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args)
+		{
+			if (WidgetMemberNameChanged != null)
+				WidgetMemberNameChanged (this, args);
 		}
 		
 		void OnSignalAdded (object sender, SignalEventArgs args)

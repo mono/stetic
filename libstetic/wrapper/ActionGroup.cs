@@ -13,6 +13,7 @@ namespace Stetic.Wrapper
 		
 		public event ActionEventHandler ActionAdded;
 		public event ActionEventHandler ActionRemoved;
+		public event ActionEventHandler ActionChanged;
 		public event EventHandler Changed;
 		public event SignalEventHandler SignalAdded;
 		public event SignalEventHandler SignalRemoved;
@@ -46,6 +47,29 @@ namespace Stetic.Wrapper
 				if (ac.Name == name)
 					return ac;
 			return null;
+		}
+		
+		internal string GetValidName (Action reqAction, string name)
+		{
+			int max = 0;
+			bool found = false;
+			foreach (Action ac in Actions) {
+				if (ac == reqAction)
+					continue;
+					
+				string bname;
+				int index;
+				WidgetUtils.ParseWidgetName (ac.Name, out bname, out index);
+				
+				if (name == ac.Name)
+					found = true;
+				if (name == bname && index > max)
+					max = index;
+			}
+			if (found)
+				return name + (max+1);
+			else
+				return name;
 		}
 		
 		public XmlElement Write (XmlDocument doc, FileFormat format)
@@ -87,7 +111,7 @@ namespace Stetic.Wrapper
 					action.GenerateObjectCreation (ctx)
 				);
 				ctx.Statements.Add (uidec);
-				action.GenerateBuildCode (ctx, acVar);
+				ctx.GenerateBuildCode (action, acVar);
 				ctx.Statements.Add (
 					new CodeMethodInvokeExpression (
 						var,
@@ -101,9 +125,12 @@ namespace Stetic.Wrapper
 		internal void NotifyActionAdded (Action ac)
 		{
 			ac.SetActionGroup (this);
+			ac.ObjectChanged += OnActionChanged;
 			ac.SignalAdded += OnSignalAdded;
 			ac.SignalRemoved += OnSignalRemoved;
 			ac.SignalChanged += OnSignalChanged;
+			
+			ac.UpdateNameIndex ();
 			
 			if (ActionAdded != null)
 				ActionAdded (this, new ActionEventArgs (ac));
@@ -112,6 +139,7 @@ namespace Stetic.Wrapper
 		internal void NotifyActionRemoved (Action ac)
 		{
 			ac.SetActionGroup (null);
+			ac.ObjectChanged -= OnActionChanged;
 			ac.SignalAdded -= OnSignalAdded;
 			ac.SignalRemoved -= OnSignalRemoved;
 			ac.SignalChanged -= OnSignalChanged;
@@ -124,6 +152,12 @@ namespace Stetic.Wrapper
 		{
 			if (Changed != null)
 				Changed (this, EventArgs.Empty);
+		}
+		
+		void OnActionChanged (object s, ObjectWrapperEventArgs args)
+		{
+			if (ActionChanged != null)
+				ActionChanged (this, new ActionEventArgs ((Action) args.Wrapper));
 		}
 		
 		void OnSignalAdded (object s, SignalEventArgs args)
@@ -156,6 +190,10 @@ namespace Stetic.Wrapper
 			get { return (ActionGroup) List [n]; }
 		}
 		
+		public int IndexOf (ActionGroup group)
+		{
+			return List.IndexOf (group);
+		}
 
 		protected override void OnInsertComplete (int index, object val)
 		{

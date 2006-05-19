@@ -2,11 +2,12 @@
 using System;
 using System.Text;
 using System.Xml;
+using System.CodeDom;
 using System.Collections;
 
 namespace Stetic.Wrapper
 {
-	public class Action: ObjectWrapper
+	public class Action: Stetic.Wrapper.Object
 	{
 		ActionType type;
 		bool drawAsRadio;
@@ -15,6 +16,9 @@ namespace Stetic.Wrapper
 		string name;
 		ActionGroup group;
 		
+		string oldDefaultName;
+		string nameRoot;
+
 		public enum ActionType {
 			Action,
 			Toggle,
@@ -31,11 +35,47 @@ namespace Stetic.Wrapper
 		
 		public string Name {
 			get {
-				if (name == null || name.Length == 0)
-					return GetIdentifier (GtkAction.Label);
+				if (name == null || name.Length == 0) {
+					name = nameRoot = oldDefaultName = GetDefaultName ();
+					if (group != null)
+						name = group.GetValidName (this, name);
+				}
 				return name;
 			}
-			set { name = value; }
+			set {
+				name = nameRoot = value;
+				if (group != null)
+					name = group.GetValidName (this, name);
+				EmitNotify ("Name");
+			}
+		}
+		
+		internal void UpdateNameIndex ()
+		{
+			// Adds a number to the action name if the current name already
+			// exists in the action group.
+			
+			string vname = group.GetValidName (this, Name);
+			if (vname != Name) {
+				name = vname;
+				EmitNotify ("Name");
+			}
+		}
+
+		string GetDefaultName ()
+		{
+			if (GtkAction.Label != null && GtkAction.Label.Length > 0)
+				return GetIdentifier (GtkAction.Label);
+
+			if (GtkAction.StockId != null) {
+				string s = GtkAction.StockId.Replace ("gtk-", "");
+				return GetIdentifier (s.Replace ("gnome-stock-", ""));
+			}
+			return null;
+		}
+		
+		bool HasDefaultName {
+			get { return name == GetDefaultName (); }
 		}
 		
 		public ActionType Type {
@@ -66,8 +106,37 @@ namespace Stetic.Wrapper
 			}
 		}
 		
+		public string MenuLabel {
+			get {
+				if (GtkAction.Label != null && GtkAction.Label.Length > 0)
+					return GtkAction.Label;
+
+				if (GtkAction.StockId == null)
+					return "";
+
+				Gtk.StockItem item = Gtk.Stock.Lookup (GtkAction.StockId);
+				if (item.Label != null)
+					return item.Label;
+
+				return "";
+			}
+		}
+		
 		public ActionGroup ActionGroup {
 			get { return group; }
+		}
+		
+		protected override void EmitNotify (string propertyName)
+		{
+			Console.WriteLine ("propertyName: " + propertyName);
+			if (propertyName == "Label" || propertyName == "StockId") {
+				// If the current name is a name generated from label or stockid,
+				// we update here the name again
+				if (nameRoot == oldDefaultName)
+					Name = GetDefaultName ();
+				oldDefaultName = GetDefaultName ();
+			}
+			base.EmitNotify (propertyName);
 		}
 		
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
@@ -117,6 +186,59 @@ namespace Stetic.Wrapper
 			NotifyChanged ();
 		}
 		
+		public Gtk.Widget CreateIcon (Gtk.IconSize size)
+		{
+			Gdk.Pixbuf px = Project.IconFactory.RenderIcon (Project, GtkAction.StockId, size);
+			if (px != null)
+				return new Gtk.Image (px);
+			else
+				return GtkAction.CreateIcon (size);
+		}
+		
+		public Gdk.Pixbuf RenderIcon (Gtk.IconSize size)
+		{
+			Gdk.Pixbuf px = Project.IconFactory.RenderIcon (Project, GtkAction.StockId, size);
+			if (px != null)
+				return px;
+			
+			int w, h;
+			Gtk.Icon.SizeLookup (size, out w, out h);
+			
+			try {
+				return Gtk.IconTheme.Default.LoadIcon (GtkAction.StockId, h, 0);
+			} catch {
+				return Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, h, 0);
+			}
+		}
+		
+		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
+		{
+			CodeObjectCreateExpression exp = new CodeObjectCreateExpression ();
+			
+			PropertyDescriptor prop = (PropertyDescriptor) ClassDescriptor ["Name"];
+			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));
+			
+			prop = (PropertyDescriptor) ClassDescriptor ["Label"];
+			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));
+			
+			prop = (PropertyDescriptor) ClassDescriptor ["Tooltip"];
+			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));
+			
+			prop = (PropertyDescriptor) ClassDescriptor ["StockId"];
+			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));
+			
+			if (type == ActionType.Action)
+				exp.CreateType = new CodeTypeReference ("Gtk.Action");
+			else if (type == ActionType.Toggle)
+				exp.CreateType = new CodeTypeReference ("Gtk.ToggleAction");
+			else {
+				exp.CreateType = new CodeTypeReference ("Gtk.RadioAction");
+				prop = (PropertyDescriptor) ClassDescriptor ["Value"];
+				exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), typeof(int)));
+			}
+			return exp;
+		}
+		
 		internal void SetActionGroup (ActionGroup g)
 		{
 			group = g;
@@ -128,7 +250,9 @@ namespace Stetic.Wrapper
 			
 			bool wstart = false;
 			foreach (char c in name) {
-				if ((c == '-' || c == ' ' || !char.IsLetterOrDigit (c)) && c != '_') {
+				if (c == '_' || (int)c > 127)	// No underline, no unicode
+					continue;
+				if (c == '-' || c == ' ' || !char.IsLetterOrDigit (c)) {
 					wstart = true;
 					continue;
 				}

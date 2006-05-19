@@ -48,10 +48,10 @@ namespace Stetic
 					Gdk.PixbufLoader loader = new Gdk.PixbufLoader (assembly, iconname);
 					icon = loader.Pixbuf;
 				} catch {
-					icon = missingIcon;
+					icon = GetDefaultIcon ();
 				}
 			} else
-				icon = missingIcon;
+				icon = GetDefaultIcon ();
 			
 			BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 						

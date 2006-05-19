@@ -71,13 +71,13 @@ namespace Stetic
 				}
 					
 				project = value;
-				
-				project.SelectionChanged += OnWidgetSelected;
-				project.SignalAdded += new SignalEventHandler (OnSignalAddedOrRemoved);
-				project.SignalRemoved += new SignalEventHandler (OnSignalAddedOrRemoved);
-				project.SignalChanged += new SignalChangedEventHandler (OnSignalChanged);
-				project.ProjectReloaded += new EventHandler (OnProjectReloaded);
-				
+				if (project != null) {
+					project.SelectionChanged += OnWidgetSelected;
+					project.SignalAdded += new SignalEventHandler (OnSignalAddedOrRemoved);
+					project.SignalRemoved += new SignalEventHandler (OnSignalAddedOrRemoved);
+					project.SignalChanged += new SignalChangedEventHandler (OnSignalChanged);
+					project.ProjectReloaded += new EventHandler (OnProjectReloaded);
+				}
 				OnWidgetSelected (null, null);
 			}
 		}

@@ -139,6 +139,14 @@ namespace Stetic
 			set { resizableFixed.SignalsViewer = value; }
 		}
 		
+		public void UpdateObjectViewers ()
+		{
+			// This method has to be called to ensure that the property
+			// and signal viewers show information about the object
+			// selected in this designer.
+			resizableFixed.UpdateObjectViewers ();
+		}
+		
 		void OnWindowPropChange (object ob, string name)
 		{
 			if (name == "Title") {
@@ -364,6 +372,21 @@ namespace Stetic
 					currentObjectSelection = null;
 				}
 			}
+		}
+		
+		public void UpdateObjectViewers ()
+		{
+			object obj;
+			
+			if (currentObjectSelection == null)
+				obj = null;
+			else
+				obj = currentObjectSelection.DataObject;
+			
+			if (PropertyViewer != null)
+				PropertyViewer.TargetObject = obj;
+			if (SignalsViewer != null)
+				SignalsViewer.TargetObject = obj;
 		}
 		
 		public void AddWidget (Gtk.Widget w, int x, int y)

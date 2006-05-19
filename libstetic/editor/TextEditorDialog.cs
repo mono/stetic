@@ -47,7 +47,7 @@ namespace Stetic.Editor
 			}
 		}
 		
-		void OnTranslatableToggled (object s, EventArgs a)
+		protected void OnTranslatableToggled (object s, EventArgs a)
 		{
 			entryContext.Sensitive = checkTranslatable.Active;
 			entryComment.Sensitive = checkTranslatable.Active;

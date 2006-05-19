@@ -22,8 +22,8 @@ namespace Stetic {
 
 		public static XmlDocument XslImportTransform (XmlDocument doc)
 		{
-			XmlDocumentType doctype = doc.DocumentType;
-/*			if (doctype == null ||
+/*			XmlDocumentType doctype = doc.DocumentType;
+			if (doctype == null ||
 			    doctype.Name != "glade-interface" ||
 			    doctype.SystemId != Glade20SystemId)
 				throw new GladeException ("Not a glade file according to doctype");
@@ -503,7 +503,7 @@ namespace Stetic {
 				try {
 					GLib.Value value = ParseProperty (prop.ParamSpec, prop.PropertyType, prop_elem.InnerText);
 					prop.SetValue (wrapper.Wrapped, value.Val);
-				} catch (Exception e) {
+				} catch {
 					throw new GladeException ("Could not parse property", wrapper.GetType ().ToString (), wrapper is Stetic.Wrapper.Container.ContainerChild, prop.GladeName, prop_elem.InnerText);
 				}
 			}

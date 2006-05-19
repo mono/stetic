@@ -62,25 +62,16 @@ namespace Stetic.Wrapper
 		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
 			BuildTree ();
-			string uiName = GetTopLevel ().UIManagerName;
-			if (uiName != null) {
-				CodeVariableReferenceExpression uiManager = new CodeVariableReferenceExpression (uiName);
-				actionTree.Type = Gtk.UIManagerItemType.Menubar;
-				actionTree.Name = Wrapped.Name;
-				actionTree.GenerateBuildCode (ctx, uiManager);
-				
-				return new CodeCastExpression (
-					typeof(Gtk.MenuBar),
-					new CodeMethodInvokeExpression (
-						uiManager,
-						"GetWidget",
-						new CodePrimitiveExpression ("/" + Wrapped.Name)
-					)
-				);
-			}
-			return base.GenerateObjectCreation (ctx);
+			actionTree.Type = Gtk.UIManagerItemType.Menubar;
+			actionTree.Name = Wrapped.Name;
+			
+			CodeExpression exp = GenerateUiManagerElement (ctx, actionTree);
+			if (exp != null)
+				return new CodeCastExpression (typeof(Gtk.MenuBar),	exp);
+			else
+				return base.GenerateObjectCreation (ctx);
 		}
-		
+
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
 			base.GenerateBuildCode (ctx, varName);
@@ -91,6 +82,9 @@ namespace Stetic.Wrapper
 			base.OnDesignerAttach (designer);
 			BuildTree ();
 			menu.FillMenu (actionTree);
+			
+			if (LocalActionGroups.Count == 0)
+				LocalActionGroups.Add (new ActionGroup ("Default"));
 		}
 		
 		void BuildTree ()
@@ -126,8 +120,10 @@ namespace Stetic.Wrapper
 				PackStart (new Gtk.Label ("Menu"), true, true, 0);
 			} else if (node.Action != null && node.Action.GtkAction != null) {
 				if (node.Action.GtkAction.StockId != null)
-					PackStart (node.Action.GtkAction.CreateIcon (Gtk.IconSize.Menu), true, true, 0);
+					PackStart (node.Action.CreateIcon (Gtk.IconSize.Menu), true, true, 0);
 				PackStart (new Gtk.Label (node.Action.GtkAction.Label), true, true, 0);
+			} else if (node.Type == Gtk.UIManagerItemType.Separator) {
+				PackStart (new Gtk.Label ("Separator"), true, true, 0);
 			} else {
 				PackStart (new Gtk.Label ("Empty Action"), true, true, 0);
 			}

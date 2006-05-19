@@ -12,10 +12,17 @@ namespace Stetic
 		bool updating;
 		ActionGroup currentGroup;
 		ArrayList internalButtons = new ArrayList ();
+		bool singleGroupMode;
+		
+		public ActionGroupToolbar (bool singleGroupMode)
+		{
+			Initialize (null, singleGroupMode);
+		}
 		
 		public ActionGroupToolbar (Wrapper.ActionGroup actionGroup)
 		{
-			Initialize (actionGroups, true);
+			currentGroup = actionGroup;
+			Initialize (null, true);
 		}
 		
 		public ActionGroupToolbar (Wrapper.ActionGroupCollection actionGroups)
@@ -25,6 +32,7 @@ namespace Stetic
 		
 		void Initialize (Wrapper.ActionGroupCollection actionGroups, bool singleGroupMode)
 		{
+			this.singleGroupMode = singleGroupMode;
 			IconSize = Gtk.IconSize.SmallToolbar;
 			Orientation = Gtk.Orientation.Horizontal;
 			ToolbarStyle = Gtk.ToolbarStyle.BothHoriz;
@@ -35,7 +43,10 @@ namespace Stetic
 				combo.Changed += OnActiveChanged;
 
 				Gtk.ToolItem comboItem = new Gtk.ToolItem ();
-				comboItem.Add (combo);
+				Gtk.HBox cbox = new Gtk.HBox ();
+				cbox.PackStart (new Gtk.Label ("Action Group: "), false, false, 3);
+				cbox.PackStart (combo, true, true, 3);
+				comboItem.Add (cbox);
 				comboItem.ShowAll ();
 				Insert (comboItem, -1);
 				internalButtons.Add (comboItem);
@@ -49,12 +60,14 @@ namespace Stetic
 				but.Clicked += OnRemoveGroup;
 				Insert (but, -1);
 				internalButtons.Add (but);
+				
+				ActionGroups = actionGroups;
+				
+				if (actionGroups != null && actionGroups.Count > 0)
+					combo.Active = 0;
+			} else {
+				UpdateActionCommands (null);
 			}
-			
-			ActionGroups = actionGroups;
-			
-			if (!singleGroupMode && actionGroups.Count > 0)
-				combo.Active = 0;
 
 			ShowAll ();
 		}
@@ -68,6 +81,9 @@ namespace Stetic
 		public Wrapper.ActionGroupCollection ActionGroups {
 			get { return actionGroups; }
 			set {
+				if (singleGroupMode)
+					throw new InvalidOperationException ("ActionGroups can't be set in single group mode");
+
 				if (actionGroups != null) {
 					actionGroups.ActionGroupAdded -= OnCollectionChanged;
 					actionGroups.ActionGroupRemoved -= OnCollectionChanged;
@@ -104,10 +120,25 @@ namespace Stetic
 			get {
 				return currentGroup;
 			}
+			set {
+				if (singleGroupMode) {
+					currentGroup = value;
+					UpdateActionCommands (null);
+					if (ActiveGroupChanged != null)
+						ActiveGroupChanged (this, new ActionGroupEventArgs (ActiveGroup));
+				} else {
+					int i = actionGroups.IndexOf (value);
+					if (i != -1)
+						combo.Active = i;
+				}
+			}
 		}
 		
 		void Refresh ()
 		{
+			if (singleGroupMode)
+				return;
+
 			while (combo.Model.IterNChildren () > 0)
 				combo.RemoveText (0);
 			if (actionGroups != null) {

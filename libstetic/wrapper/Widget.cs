@@ -8,6 +8,7 @@ namespace Stetic.Wrapper {
 	public class Widget : Object {
 	
 		string oldName;
+		string oldMemberName;
 		bool settingFocus;
 		bool hexpandable, vexpandable;
 
@@ -15,7 +16,12 @@ namespace Stetic.Wrapper {
 		bool hasDefault;
 		Gdk.EventMask events;
 		ActionGroupCollection actionGroups;
+		string member;
+		
+		// Name of the generated UIManager
 		string uiManagerName;
+		// List of groups added to the UIManager
+		ArrayList includedActionGroups;
 		
 		public bool Unselectable;
 		
@@ -25,6 +31,8 @@ namespace Stetic.Wrapper {
 	
 		// Fired when the name of the widget changes.
 		public event WidgetNameChangedHandler NameChanged;
+		// Fired when the member name of the widget changes.
+		public event WidgetNameChangedHandler MemberNameChanged;
 		
 		public override void Wrap (object obj, bool initialized)
 		{
@@ -95,6 +103,11 @@ namespace Stetic.Wrapper {
 		public string UIManagerName {
 			get { return uiManagerName; }
 		}
+		
+		public string MemberName {
+			get { return member != null ? member : ""; }
+			set { member = value; EmitNotify ("MemberName"); }
+		}
 
 		public Container GetTopLevel ()
 		{
@@ -109,8 +122,6 @@ namespace Stetic.Wrapper {
 				if (IsTopLevel) {
 					if (actionGroups == null) {
 						actionGroups = new ActionGroupCollection ();
-						ActionGroup grp = new ActionGroup ("Default");
-						actionGroups.Add (grp);
 						actionGroups.ActionGroupAdded += OnGroupAdded;
 						actionGroups.ActionGroupRemoved += OnGroupRemoved;
 					}
@@ -296,10 +307,11 @@ namespace Stetic.Wrapper {
 				CodeVariableReferenceExpression uixp = new CodeVariableReferenceExpression (uiManagerName);
 				ctx.Statements.Add (uidec);
 				
-				// Generate action group creation
-				int pos = 0;
-				foreach (ActionGroup actionGroup in actionGroups) {
+				includedActionGroups = new ArrayList ();
 				
+				// Generate action group creation
+				foreach (ActionGroup actionGroup in actionGroups) {
+					
 					// Create the action group
 					string grpVar = ctx.NewId ();
 					uidec = new CodeVariableDeclarationStatement (
@@ -315,9 +327,11 @@ namespace Stetic.Wrapper {
 						uixp,
 						"InsertActionGroup",
 						new CodeVariableReferenceExpression (grpVar),
-						new CodePrimitiveExpression (pos++)
+						new CodePrimitiveExpression (includedActionGroups.Count)
 					);
 					ctx.Statements.Add (mi);
+				
+					includedActionGroups.Add (actionGroup);
 				}
 			}
 			
@@ -348,6 +362,42 @@ namespace Stetic.Wrapper {
 		{
 			if (prop.Name != "Visible")
 				base.GeneratePropertySet (ctx, var, prop);
+		}
+		
+		protected CodeExpression GenerateUiManagerElement (GeneratorContext ctx, ActionTree tree)
+		{
+			Widget topLevel = GetTopLevel ();
+			string uiName = topLevel.UIManagerName;
+			if (uiName != null) {
+				CodeVariableReferenceExpression uiManager = new CodeVariableReferenceExpression (uiName);
+				if (topLevel.includedActionGroups == null)
+					topLevel.includedActionGroups = new ArrayList ();
+				
+				// Add to the uimanager all action groups required by the 
+				// actions of the tree
+				
+				foreach (ActionGroup grp in tree.GetRequiredGroups ()) {
+					if (!topLevel.includedActionGroups.Contains (grp)) {
+						// Insert the action group in the UIManager
+						CodeMethodInvokeExpression mi = new CodeMethodInvokeExpression (
+							uiManager,
+							"InsertActionGroup",
+							ctx.GenerateValue (grp, typeof(ActionGroup)),
+							new CodePrimitiveExpression (topLevel.includedActionGroups.Count)
+						);
+						ctx.Statements.Add (mi);
+						topLevel.includedActionGroups.Add (grp);
+					}
+				}
+				
+				tree.GenerateBuildCode (ctx, uiManager);
+				return new CodeMethodInvokeExpression (
+					uiManager,
+					"GetWidget",
+					new CodePrimitiveExpression ("/" + Wrapped.Name)
+				);
+			}
+			return null;
 		}
 
 		public static new Widget Lookup (GLib.Object obj)
@@ -481,10 +531,21 @@ namespace Stetic.Wrapper {
 							return;
 						}
 					}
-					
+						
 					string on = oldName;
 					oldName = Wrapped.Name;
 					OnNameChanged (new WidgetNameChangedArgs (this, on, Wrapped.Name));
+					
+					// Keep the member name in sync with the widget name
+					if (on == MemberName)
+						MemberName = Wrapped.Name;
+				}
+			}
+			else if (propertyName == "MemberName") {
+				if (MemberName != oldMemberName) {
+					string on = oldMemberName;
+					oldMemberName = MemberName;
+					OnMemberNameChanged (new WidgetNameChangedArgs (this, on, MemberName));
 				}
 			}
 			else {
@@ -498,6 +559,13 @@ namespace Stetic.Wrapper {
 			NotifyChanged ();
 			if (NameChanged != null)
 				NameChanged (this, args);
+		}
+		
+		protected virtual void OnMemberNameChanged (WidgetNameChangedArgs args)
+		{
+			NotifyChanged ();
+			if (MemberNameChanged != null)
+				MemberNameChanged (this, args);
 		}
 	}
 

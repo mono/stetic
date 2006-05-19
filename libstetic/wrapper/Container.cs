@@ -850,7 +850,7 @@ namespace Stetic.Wrapper {
 				// There is a widget with the same name. If the widget
 				// has a numeric suffix, just increase it.
 				string name; int idx;
-				ParseWidgetName (w.Name, out name, out idx);
+				WidgetUtils.ParseWidgetName (w.Name, out name, out idx);
 				
 				string compName = idx != 0 ? name + idx : name;
 				while (names.Contains (compName)) {
@@ -868,23 +868,6 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		void ParseWidgetName (string name, out string baseName, out int idx)
-		{
-			// Extract a numeric sufix from the name
-			
-			int n;
-			for (n = name.Length - 1; n >= 0 && char.IsDigit (name [n]); n--)
-				;
-				
-			if (n < name.Length - 1) {
-				baseName = name.Substring (0, n + 1);
-				idx = int.Parse (name.Substring (n + 1));
-			} else {
-				baseName = name;
-				idx = 0;
-			}
-		}
-
 		internal string GetValidWidgetName (Gtk.Widget widget)
 		{
 			// Get a valid name for a widget (a name that doesn't
@@ -896,7 +879,7 @@ namespace Stetic.Wrapper {
 			string name;
 			int idx;
 
-			ParseWidgetName (widget.Name, out name, out idx);
+			WidgetUtils.ParseWidgetName (widget.Name, out name, out idx);
 			
 			string compName = idx != 0 ? name + idx : name;
 			

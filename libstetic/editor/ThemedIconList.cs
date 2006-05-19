@@ -1,142 +1,29 @@
 
 using System;
+using System.Collections;
 using Gtk;
 
 namespace Stetic.Editor
 {
-	// This is the internal class the represents the actual two-column
-	// icon list. This can't just be handled as an HBox inside the main
-	// window, because we need to override SetScrollAdjustments.
-	class ThemedIconList : Gtk.HBox 
+	class ThemedIconList : IconList 
 	{
-		ThemedIconColumn left, right;
-
-		public ThemedIconList () : base (true, 0)
+		public ThemedIconList ()
 		{
-			left = new ThemedIconColumn ();
-			PackStart (left);
-			right = new ThemedIconColumn ();
-			PackStart (right);
-
-			left.Selection.Changed += LeftSelectionChanged;
-			right.Selection.Changed += RightSelectionChanged;
-			left.RowActivated += RowActivated;
-			right.RowActivated += RowActivated;
-			left.KeyPressEvent += ColumnKeyPressEvent;
-			right.KeyPressEvent += ColumnKeyPressEvent;
-
 			Gtk.IconTheme theme = Gtk.IconTheme.Default;
-			for (int i = 0; i < IconNames.Length; i++) {
-				if (i % 2 == 0)
-					left.Append (theme, IconNames[i]);
-				else
-					right.Append (theme, IconNames[i]);
-			}
+			foreach (string icon in ThemeIconNames)
+				AddIcon (icon, GetPixbuf (theme, icon), icon);
 		}
-
-		public event EventHandler Activated;
-
-		void RowActivated (object obj, RowActivatedArgs args)
+		
+		Gdk.Pixbuf GetPixbuf (Gtk.IconTheme theme, string name)
 		{
-			if (Activated != null)
-				Activated (this, EventArgs.Empty);
-		}
-
-		public int SelectionIndex {
-			get {
-				Gtk.TreePath[] selection;
-				selection = left.Selection.GetSelectedRows ();
-				if (selection.Length > 0)
-					return selection[0].Indices[0] * 2;
-				selection = right.Selection.GetSelectedRows ();
-				if (selection.Length > 0)
-					return selection[0].Indices[0] * 2 + 1;
-				return -1;
-			}
-			set {
-				if (value != -1) {
-					if (value % 2 == 0)
-						left.SelectRow (value / 2);
-					else
-						right.SelectRow (value / 2);
-				} else {
-					left.Selection.UnselectAll ();
-					right.Selection.UnselectAll ();
-				}
+			try {
+				return theme.LoadIcon (name, 16, 0);
+			} catch {
+				return RenderIcon (name, Gtk.IconSize.Menu, null);
 			}
 		}
 		
-		public string Selection {
-			get {
-				int i = SelectionIndex;
-				if (i != -1)
-					return IconNames [i];
-				else
-					return null;
-			}
-			set {
-				if (value != null)
-					SelectionIndex = Array.IndexOf (IconNames, value);
-				else
-					SelectionIndex = -1;
-			}
-		}
-
-		public event EventHandler SelectionChanged;
-
-		public void Find (string text)
-		{
-			int selection = SelectionIndex;
-			for (int i = (selection + 1) % IconNames.Length; i != selection; i = (i + 1) % IconNames.Length) {
-				if (IconNames[i].IndexOf (text) != -1) {
-					SelectionIndex = i;
-					return;
-				}
-			}
-			SelectionIndex = -1;
-		}
-
-		void LeftSelectionChanged (object obj, EventArgs args)
-		{
-			if (left.Selection.GetSelectedRows().Length != 0)
-				right.Selection.UnselectAll ();
-			if (SelectionChanged != null)
-				SelectionChanged (this, EventArgs.Empty);
-		}
-
-		void RightSelectionChanged (object obj, EventArgs args)
-		{
-			if (right.Selection.GetSelectedRows().Length != 0)
-				left.Selection.UnselectAll ();
-			if (SelectionChanged != null)
-				SelectionChanged (this, EventArgs.Empty);
-		}
-
-		[GLib.ConnectBefore]
-		void ColumnKeyPressEvent (object obj, KeyPressEventArgs args)
-		{
-			if (args.Event.Key == Gdk.Key.Right) {
-				if (obj == (object)left) {
-					SelectionIndex++;
-					right.GrabFocus ();
-				}
-				args.RetVal = true;
-			} else if (args.Event.Key == Gdk.Key.Left) {
-				if (obj == (object)right) {
-					SelectionIndex--;
-					left.GrabFocus ();
-				}
-				args.RetVal = true;
-			}
-		}
-
-		protected override void OnSetScrollAdjustments (Gtk.Adjustment hadj, Gtk.Adjustment vadj)
-		{
-			left.SetScrollAdjustments (null, vadj);
-			right.SetScrollAdjustments (null, vadj);
-		}
-
-		public static string[] IconNames = new string[] {
+		public static string[] ThemeIconNames = new string[] {
 			// Gtk 2.6 stock icons
 			"gtk-about",
 			"gtk-add",
@@ -1126,58 +1013,6 @@ namespace Stetic.Editor
 			"stock_zoom-shift",
 		};
 	}
-	
-	// Another internal class. This is a single column of the ThemedIconList
-	class ThemedIconColumn : Gtk.TreeView {
-		public ThemedIconColumn ()
-		{
-			Model = store = new Gtk.ListStore (typeof (Gdk.Pixbuf),
-							   typeof (string));
-			HeadersVisible = false;
-			EnableSearch = false;
-
-			TreeViewColumn col;
-			CellRenderer renderer;
-
-			col = new TreeViewColumn ();
-			renderer = new CellRendererPixbuf ();
-			col.PackStart (renderer, false);
-			col.AddAttribute (renderer, "pixbuf", 0);
-			renderer = new CellRendererText ();
-			col.PackStart (renderer, false);
-			col.AddAttribute (renderer, "text", 1);
-			AppendColumn (col);
-		}
-
-		Gtk.ListStore store;
-
-		public void Append (Gtk.IconTheme theme, string name)
-		{
-			Gdk.Pixbuf pixbuf;
-			try {
-				pixbuf = theme.LoadIcon (name, 16, 0);
-			} catch {
-				pixbuf = RenderIcon (name, Gtk.IconSize.Menu, null);
-			}
-			if (name.Length > 30)
-				name = name.Substring (0, 30) + "...";
-			store.AppendValues (pixbuf, name);
-		}
-
-		public void SelectRow (int row)
-		{
-			Gtk.TreeIter iter;
-			if (store.IterNthChild (out iter, row)) {
-				Gtk.TreePath path = store.GetPath (iter);
-
-				SetCursor (path, null, false);
-
-				// We want the initial selection to be centered
-				if (!IsRealized)
-					ScrollToCell (path, null, true, 0.5f, 0.0f);
-			}
-		}
-	}		
 }
 
 

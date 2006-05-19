@@ -15,13 +15,14 @@ namespace Stetic.Editor
 		Gtk.Widget accel;
 		bool editing;
 		bool localUpdate;
-		static Gdk.Pixbuf addMenuImage;
-		static Gdk.Pixbuf removeMenuImage;
 		bool editOnRelease;
 		bool motionDrag;
 		CustomMenuBarItem menuBarItem;
 		uint itemSpacing;
 		int minWidth;
+		
+		static Gdk.Pixbuf addMenuImage;
+		static Gdk.Pixbuf removeMenuImage;
 		
 		// To use in the action editor
 		IDesignArea designArea;
@@ -123,7 +124,9 @@ namespace Stetic.Editor
 		public void Select ()
 		{
 			IDesignArea area = GetDesignArea ();
-			IObjectSelection sel = area.SetSelection (this, node.Action.GtkAction);
+			if (area.IsSelected (this))
+				return;
+			IObjectSelection sel = area.SetSelection (this, node.Action != null ? node.Action.GtkAction : null);
 			sel.Drag += HandleItemDrag;
 			sel.Disposed += OnSelectionDisposed;
 			
@@ -132,6 +135,21 @@ namespace Stetic.Editor
 			if (HasSubmenu)
 				ShowSubmenu (area, this);
 			GrabFocus ();
+		}
+		
+		public void Copy ()
+		{
+		}
+		
+		public void Cut ()
+		{
+		}
+		
+		public void Delete ()
+		{
+			if (node.ParentNode != null)
+				node.ParentNode.Children.Remove (node);
+			Destroy ();
 		}
 		
 		public void Attach (Gtk.Table table, uint row, uint col)
@@ -159,7 +177,7 @@ namespace Stetic.Editor
 			if (accel != null)
 				table.Attach (accel, col + 2, col + 3, row, row + 1);
 
-			if (minWidth > 0) {
+			if (minWidth > 0 && label != null) {
 				if (label.SizeRequest().Width < minWidth)
 					label.WidthRequest = minWidth;
 			}
@@ -167,8 +185,27 @@ namespace Stetic.Editor
 		
 		void CreateControls ()
 		{
+			if (node.Type == Gtk.UIManagerItemType.Separator) {
+				Gtk.Widget sep;
+				if (parentMenu.IsTopMenu) {
+					sep = new Gtk.VSeparator ();
+					sep.WidthRequest = 6;
+				} else {
+					sep = new Gtk.HSeparator ();
+					sep.HeightRequest = 6;
+				}
+				Add (sep);
+				ShowAll ();
+				return;
+			} else {
+				if (Child != null && Child is Gtk.Separator)
+					Remove (Child);
+			}
+			
 			if (node.Action == null)
 				return;
+				
+			bool isGlobal = wrapper != null && wrapper.Project.ActionGroups.IndexOf (node.Action.ActionGroup) != -1;
 
 			Gtk.Action gaction = node.Action.GtkAction;
 			bool barItem = parentMenu.IsTopMenu;
@@ -200,12 +237,14 @@ namespace Stetic.Editor
 				}
 				
 				if (icon == null && !barItem)
-					icon = node.Action.GtkAction.CreateIcon (Gtk.IconSize.Menu);
+					icon = node.Action.CreateIcon (Gtk.IconSize.Menu);
 			}
 			
-			if (editing) {
-				Gtk.Tooltips tooltips = new Gtk.Tooltips ();
-				
+			Gtk.Tooltips tooltips = null;
+			if (editing)
+				tooltips = new Gtk.Tooltips ();
+			
+			if (editing && !isGlobal) {
 				if (!barItem) {
 					Gtk.HBox bbox = new Gtk.HBox ();
 					if (icon != null) {
@@ -227,34 +266,35 @@ namespace Stetic.Editor
 				entry.HasFrame = false;
 				this.label = entry;
 				tooltips.SetTip (entry, "Action label", "");
-				
-				if (wrapper != null) {
-					// Add a button for creating / deleting a submenu
-					Gdk.Pixbuf img;
-					string tip;
-					if (node.Type != Gtk.UIManagerItemType.Menu) {
-						img = addMenuImage;
-						tip = "Add submenu";
-					} else {
-						img = removeMenuImage;
-						tip = "Remove submenu";
-					}
-						
-					Gtk.Button sb = new Gtk.Button (new Gtk.Image (img));
-					tooltips.SetTip (sb, tip, "");
-					sb.Relief = Gtk.ReliefStyle.None;
-					sb.Clicked += OnCreateDeleteSubmenu;
-					
-					// Make sure the button is alligned to the right of the column
-					Gtk.HBox bbox = new Gtk.HBox ();
-					bbox.PackEnd (sb, false, false, 0);
-					accel = bbox;
-				}
 			} else {
 				Gtk.Label label = new Gtk.Label (text);
 				label.Xalign = 0;
 				this.label = label;
 			}
+			
+			if (editing && wrapper != null) {
+				// Add a button for creating / deleting a submenu
+				Gdk.Pixbuf img;
+				string tip;
+				if (node.Type != Gtk.UIManagerItemType.Menu) {
+					img = addMenuImage;
+					tip = "Add submenu";
+				} else {
+					img = removeMenuImage;
+					tip = "Remove submenu";
+				}
+					
+				Gtk.Button sb = new Gtk.Button (new Gtk.Image (img));
+				tooltips.SetTip (sb, tip, "");
+				sb.Relief = Gtk.ReliefStyle.None;
+				sb.Clicked += OnCreateDeleteSubmenu;
+				
+				// Make sure the button is alligned to the right of the column
+				Gtk.HBox bbox = new Gtk.HBox ();
+				bbox.PackEnd (sb, false, false, 0);
+				accel = bbox;
+			}
+			
 			
 			if (node.Type == Gtk.UIManagerItemType.Menu && !editing && !barItem) {
 				Gtk.Arrow arrow = new Gtk.Arrow (Gtk.ArrowType.Right, Gtk.ShadowType.None);
@@ -288,13 +328,7 @@ namespace Stetic.Editor
 			localUpdate = true;
 			
 			Gtk.Entry entry = ob as Gtk.Entry;
-			if (entry.Text.Length > 0) {
-				if (node.Action == null) {
-					Gtk.Action ac = new Gtk.Action (entry.Text, entry.Text);
-					Action wac = (Action) ObjectWrapper.Create (GetProject(), ac);
-					node.Action = wac;
-				}
-					
+			if (entry.Text.Length > 0 || node.Action.GtkAction.StockId != null) {
 				node.Action.GtkAction.Label = entry.Text;
 				node.Action.NotifyChanged ();
 			}
@@ -323,28 +357,35 @@ namespace Stetic.Editor
 		void OnSelectIcon (object sender, Gtk.ButtonPressEventArgs e)
 		{
 			Gtk.Menu menu = new Gtk.Menu ();
-			Gtk.HBox box = new Gtk.HBox ();
-			box.PackStart (new CheckActionIcon (false, true), false, false, 0);
-			box.PackStart (new Gtk.Label ("Toggle"), false, false, 3);
-			Gtk.MenuItem it = new Gtk.MenuItem ();
-			it.Child = box;
-			it.Activated += OnSetToggleType;
-			menu.Insert (it, -1);
 			
-			box = new Gtk.HBox ();
-			box.PackStart (new CheckActionIcon (true, true), false, false, 0);
-			box.PackStart (new Gtk.Label ("Radio"), false, false, 3);
-			it = new Gtk.MenuItem ();
-			it.Child = box;
-			it.Activated += OnSetRadioType;
-			menu.Insert (it, -1);
+			Gtk.CheckMenuItem item = new Gtk.CheckMenuItem ("Action");
+			item.DrawAsRadio = true;
+			item.Active = (node.Action.Type == Action.ActionType.Action);
+			item.Activated += OnSetActionType;
+			menu.Insert (item, -1);
 			
-			it = new Gtk.MenuItem ("Action");
-			it.Activated += OnSetActionType;
-			menu.Insert (it, -1);
+			item = new Gtk.CheckMenuItem ("Radio Action");
+			item.DrawAsRadio = true;
+			item.Active = (node.Action.Type == Action.ActionType.Radio);
+			item.Activated += OnSetRadioType;
+			menu.Insert (item, -1);
 			
-			it = new Gtk.MenuItem ("Stock Action...");
+			item = new Gtk.CheckMenuItem ("Toggle Action");
+			item.DrawAsRadio = true;
+			item.Active = (node.Action.Type == Action.ActionType.Toggle);
+			item.Activated += OnSetToggleType;
+			menu.Insert (item, -1);
+			
+			menu.Insert (new Gtk.SeparatorMenuItem (), -1);
+			
+			Gtk.MenuItem it = new Gtk.MenuItem ("Select Icon / Stock...");
+			it.Sensitive = (node.Action.Type == Action.ActionType.Action);
 			it.Activated += OnSetStockActionType;
+			menu.Insert (it, -1);
+			
+			it = new Gtk.MenuItem ("Clear Icon");
+			it.Sensitive = (node.Action.Type == Action.ActionType.Action);
+			it.Activated += OnClearIcon;
 			menu.Insert (it, -1);
 			
 			menu.ShowAll ();
@@ -380,17 +421,23 @@ namespace Stetic.Editor
 		
 		void OnSetStockActionType (object ob, EventArgs args)
 		{
-			Stetic.Editor.SelectImageDialog dialog = new Stetic.Editor.SelectImageDialog (null, GetProject());
+			Stetic.Editor.SelectIconDialog dialog = new Stetic.Editor.SelectIconDialog (null, GetProject());
 			using (dialog)
 			{
 				if (dialog.Run () != (int) Gtk.ResponseType.Ok)
 					return;
 
 				node.Action.Type = Action.ActionType.Action;
-				node.Action.GtkAction.StockId = dialog.Icon.Name;
+				node.Action.GtkAction.StockId = dialog.Icon;
 				node.Action.NotifyChanged ();
 			}
 			
+		}
+		
+		void OnClearIcon (object on, EventArgs args)
+		{
+			node.Action.GtkAction.StockId = null;
+			node.Action.NotifyChanged ();
 		}
 		
 		public void Refresh ()
@@ -471,6 +518,8 @@ namespace Stetic.Editor
 					editOnRelease = true;
 					return true;
 				}
+			} else if (ev.Button == 3) {
+				parentMenu.ShowContextMenu (this);
 			}
 			
 			Select ();
@@ -546,14 +595,6 @@ namespace Stetic.Editor
 		{
 			ActionPaletteItem item = new ActionPaletteItem (node);
 			DND.Drag (parentMenu.Widget, evt, item);
-		}
-		
-		Gtk.Window GetParentWindow ()
-		{
-			Gtk.Widget cc = Parent;
-			while (cc != null && !(cc is Gtk.Window))
-				cc = cc.Parent as Gtk.Container;
-			return cc as Gtk.Window;
 		}
 		
 		IDesignArea GetDesignArea ()

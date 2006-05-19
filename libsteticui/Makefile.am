@@ -14,6 +14,7 @@ libsteticui_dll_sources =			\
 	SignalsEditor.cs		\
 	PropertyGrid.cs			\
 	PropertyTree.cs			\
+	UserInterface.cs		\
 	WidgetActionBar.cs		\
 	WidgetFactory.cs		\
 	WidgetPropertyTree.cs	\

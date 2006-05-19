@@ -165,11 +165,13 @@ namespace Stetic.Editor
 			item.EditingDone -= OnEditingDone;
 			Widget wrapper = Widget.Lookup (this);
 			
-			if (item.Node.Action.GtkAction.Label.Length == 0) {
+			if (item.Node.Action.GtkAction.Label.Length == 0 && item.Node.Action.GtkAction.StockId == null) {
 				IDesignArea area = wrapper.GetDesignArea ();
 				area.ResetSelection (item);
 				actionTree.Children.Remove (item.Node);
 			} else {
+				if (wrapper.LocalActionGroups.Count == 0)
+					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
 				wrapper.LocalActionGroups[0].Actions.Add (item.Node.Action);
 			}
 		}
@@ -335,6 +337,66 @@ namespace Stetic.Editor
 					break;
 			}
 			args.RetVal = true;
+		}
+		
+		void InsertActionAt (ActionMenuItem item, bool after, bool separator)
+		{
+			int pos = menuItems.IndexOf (item);
+			if (pos == -1)
+				return;
+			
+			if (after)
+				pos++;
+
+			if (separator) {
+				ActionTreeNode newNode = new ActionTreeNode (Gtk.UIManagerItemType.Separator, null, null);
+				actionTree.Children.Insert (pos, newNode);
+			} else
+				InsertAction (pos);
+		}
+		
+		void Paste (ActionMenuItem item)
+		{
+		}
+		
+		public void ShowContextMenu (ActionMenuItem menuItem)
+		{
+			Gtk.Menu m = new Gtk.Menu ();
+			Gtk.MenuItem item = new Gtk.MenuItem ("Insert Before");
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				InsertActionAt (menuItem, false, false);
+			};
+			item = new Gtk.MenuItem ("Insert After");
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				InsertActionAt (menuItem, true, false);
+			};
+			
+			m.Add (new Gtk.SeparatorMenuItem ());
+			
+			item = new Gtk.ImageMenuItem (Gtk.Stock.Cut, null);
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				menuItem.Cut ();
+			};
+			item = new Gtk.ImageMenuItem (Gtk.Stock.Copy, null);
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				menuItem.Copy ();
+			};
+			item = new Gtk.ImageMenuItem (Gtk.Stock.Paste, null);
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				Paste (menuItem);
+			};
+			item = new Gtk.ImageMenuItem (Gtk.Stock.Delete, null);
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				menuItem.Delete ();
+			};
+			m.ShowAll ();
+			m.Popup ();
 		}
 		
 		ActionMenuItem LocateWidget (int x, int y)

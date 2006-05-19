@@ -45,7 +45,6 @@ namespace Stetic.Editor
 	
 	public class ImageSelector: BaseImageCell
 	{
-		Gdk.Pixbuf image;
 		IProject project;
 		ImageInfo imageInfo;
 		

@@ -46,11 +46,6 @@ namespace Stetic {
 				n++;
 			}
 			
-			if (args.Length - n > 2) {
-				if (args [n] == "--generate" || args [n] == "-g")
-					return GenerateCode (args [n+1], args, n+2);
-			}
-			
 			if (args.Length == 1 && args [0] == "--help") {
 				Console.WriteLine ("Stetic - A GTK User Interface Builder"); 
 				Console.WriteLine ("Usage:");
@@ -60,6 +55,11 @@ namespace Stetic {
 			}
 			
 			Program = new Gnome.Program ("Stetic", "0.0", Gnome.Modules.UI, args);
+			
+			if (args.Length - n > 2) {
+				if (args [n] == "--generate" || args [n] == "-g")
+					return GenerateCode (args [n+1], args, n+2);
+			}
 			
 			return RunApp (args);
 		}
@@ -90,6 +90,7 @@ namespace Stetic {
 		static int RunApp (string[] args)
 		{
 			Project = new Project ();
+			Project.ActionGroups.Add (new Stetic.Wrapper.ActionGroup ("Global"));
 			Project.WidgetAdded += OnWidgetAdded;
 			Project.WidgetRemoved += OnWidgetRemoved;
 			Project.SelectionChanged += OnSelectionChanged;

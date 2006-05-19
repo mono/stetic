@@ -33,7 +33,8 @@ namespace Stetic
 				project = value;
 				if (project != null)
 					project.SelectionChanged += Selected;
-					
+				
+				newSelection = null;
 				Selected (null, null);
 			}
 		}

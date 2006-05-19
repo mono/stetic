@@ -28,6 +28,9 @@ namespace Stetic {
 		"	    <menuitem action='Paste' />" +
 		"	    <menuitem action='Delete' />" +
 		"	</menu>" +
+		"	<menu action='ProjectMenu'>" +
+		"	    <menuitem action='EditProjectIcons' />" +
+		"	</menu>" +
 		"	<menu action='HelpMenu'>" +
 		"	    <menuitem action='Contents' />" +
 		"	    <menuitem action='About' />" +
@@ -53,6 +56,9 @@ namespace Stetic {
 				new ActionEntry ("Copy", Stock.Copy, null, "<control>C", "Copy selection to clipboard", Copy),
 				new ActionEntry ("Paste", Stock.Paste, null, "<control>V", "Paste from clipboard", Paste),
 				new ActionEntry ("Delete", Stock.Delete, null, "Delete", "Delete selection", Delete),
+
+				new ActionEntry ("ProjectMenu", null, "Project", null, null, null),
+				new ActionEntry ("EditProjectIcons", null, "Project Icons...", null, null, EditIcons),
 
 				new ActionEntry ("HelpMenu", null, "_Help", null, null, null),
 				new ActionEntry ("Contents", Stock.Help, "_Contents", "F1", "Help", Help),
@@ -223,6 +229,13 @@ namespace Stetic {
 			Console.WriteLine ("Help");
 		}
 
+		void EditIcons (object obj, EventArgs e)
+		{
+			using (Stetic.Editor.EditIconFactoryDialog dlg = new Stetic.Editor.EditIconFactoryDialog (null, project, project.IconFactory)) {
+				dlg.Run ();
+			}
+		}
+		
 		const string AppName = "Stetic";
 		const string AppVersion = "0.0.0";
 		const string AppComments = "A GNOME and Gtk GUI designer";

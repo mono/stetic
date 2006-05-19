@@ -1,3 +1,79 @@
+2006-05-19  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/WidgetFactory.cs: Highlight the item on mouse over.
+	* libsteticui/ActionGroupToolbar.cs: Implemente a single group
+	  mode, to be used when editing global action groups.
+	* libsteticui/CodeGenerator.cs: Generate code for actions and
+	  icon factories.
+	* libsteticui/Palette.cs: Adjusted some margins. Update actions
+	  when they change.
+	* libsteticui/ProjectView.cs: Clean the tree when no project
+	  is selected.
+	* libsteticui/Makefile.am: Added UserInterface.cs.
+	* libsteticui/Project.cs: Added IconFactory property.
+	* libsteticui/SignalsEditor.cs: Added missing null check.
+	* libstetic/Metacity/ButtonLayout.cs:
+	* libsteticui/WidgetPropertyTree.cs: Minor fix.
+	
+	* libstetic/IProject.cs: Added Modified and IconFactory properties.
+	* libstetic/PreviewBox.cs: Implemented UpdateObjectViewers.
+	* libstetic/stetic.glade: Added icon selector and icon factory editor.
+	* libstetic/RadioGroupManager.cs: 
+	
+	* libstetic/wrapper/MenuBar.cs:
+	* libstetic/wrapper/ActionTree.cs:
+	* libstetic/wrapper/ActionGroup.cs:
+	* libstetic/wrapper/Action.cs: Implemented code generation. Avoid name
+	  duplication inside action groups. 
+	* libstetic/wrapper/Container.cs: Moved method ParseWidgetName into
+	  WidgetUtils.
+	* libstetic/wrapper/Widget.cs: Added some methods for supporting code
+	  action generation.
+	* libstetic/wrapper/ActionGroup.cs: Added memberName property.
+	
+	* libstetic/editor/ImageSelector.cs:
+	* libstetic/editor/StockItem.cs:
+	* libstetic/GladeUtils.cs:
+	* libstetic/editor/TextEditorDialog.cs: Fix warning.
+	
+	* libstetic/editor/ThemedIconList.cs: Factorized some code into the
+	  new base class IconList.
+	* libstetic/editor/ActionMenuItem.cs: Added context menu. Added support
+	  for separators. Use the new icon selector for selecting action items.
+	* libstetic/editor/SelectImageDialog.cs: Improved disabling of OK button when
+	  nothing is selected.
+	  
+	* libstetic/editor/ActionGroupEditor.cs:
+	* libstetic/editor/ActionMenu.cs:
+	* libstetic/editor/ActionMenuBar.cs: Implemented some context menu commands.
+	
+	* libstetic/GeneratorContext.cs: Support generating code for ActionGroups.
+	  Make WidgetMap work for non-widget objects (e.g. Action).
+	* libstetic/WidgetUtils.cs: Moved from Container.cs.
+	
+	* libstetic/Makefile.am: Updated. Added Mono.Unix reference.
+	
+	* libstetic/editor/IconList.cs: Base class for two-column icon lists.
+	* libstetic/ProjectIconFactory.cs: Holds information about icons defined
+	  in a project.
+	* libstetic/editor/ProjectIconList.cs: IconList subclass that shows 
+	  icons from a project icon factory.
+	* libstetic/editor/EditIconDialog.cs: Dialog for editing icons.
+	* libstetic/editor/StockIconList.cs: IconList subclass that shows 
+	  stock icons only.
+	* libstetic/editor/EditIconFactoryDialog.cs: Dialog for editing an
+	  icon factory.
+	* libstetic/editor/SelectIconDialog.cs: Dialog for selecting an icon.
+	
+	* libstetic/editor/TreeViewCellContainer.cs: Bridge widget to be used for
+	  cell rederers with custom editors.
+	* libstetic/editor/CellRendererComboBox.cs: A combo cell renderer.
+	
+	* stetic/Stetic.cs: Make sure Gtk is properly initialized before trying
+	  to generate code.
+	* stetic/UIManager.cs: Added EditProjectIcons command.
+	
+
 2006-05-12  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/ActionGroupToolbar.cs: Initialize the action group

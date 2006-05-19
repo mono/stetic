@@ -16,7 +16,7 @@ namespace Stetic {
 		ActionGroupBox localActionsBox;
 		ActionGroupBox globalActionsBox;
 		
-		public Palette () : base (false, 2)
+		public Palette () : base (false, 0)
 		{
 			groups = new Hashtable ();
 			Registry.RegistryChanged += OnRegistryChanged;
@@ -141,9 +141,11 @@ namespace Stetic {
 			widgetGroup.Append (globalActionsBox);
 			
 			if (project != null) {
+				widgetGroup.Sensitive = true;
 				localActionsBox.SetActionGroups (selection != null ? selection.LocalActionGroups : null);
 				globalActionsBox.SetActionGroups (project.ActionGroups);
 			} else {
+				widgetGroup.Sensitive = false;
 				localActionsBox.SetActionGroups (null);
 				globalActionsBox.SetActionGroups (null);
 			}
@@ -184,7 +186,7 @@ namespace Stetic {
 		
 		public PaletteGroup (string name) : base ("<b>" + name + "</b>")
 		{
-			vbox = new VBox (false, 5);
+			vbox = new VBox (false, 0);
 			emptyLabel = new Gtk.Label ();
 			emptyLabel.Markup = "<small><i><span foreground='darkgrey'>  Empty</span></i></small>";
 			vbox.PackStart (emptyLabel, false, false, 0);
@@ -232,6 +234,7 @@ namespace Stetic {
 			this.group = group;
 			group.ActionAdded += OnActionGroupChanged;
 			group.ActionRemoved += OnActionGroupChanged;
+			group.ActionChanged += OnActionGroupChanged;
 			group.Changed += OnActionGroupChanged;
 			Fill ();
 		}
@@ -245,20 +248,16 @@ namespace Stetic {
 			base.Dispose ();
 			group.ActionAdded -= OnActionGroupChanged;
 			group.ActionRemoved -= OnActionGroupChanged;
+			group.ActionChanged -= OnActionGroupChanged;
 			group.Changed -= OnActionGroupChanged;
 		}
 		
 		public void Fill ()
 		{
 			foreach (Stetic.Wrapper.Action action in group.Actions) {
-				Gdk.Pixbuf icon;
-				try {
-					icon = Gtk.IconTheme.Default.LoadIcon (action.GtkAction.StockId, 16, 0);
-				} catch {
-					icon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
-				}
+				Gdk.Pixbuf icon = action.RenderIcon (Gtk.IconSize.Menu);
 				Stetic.Wrapper.ActionPaletteItem it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menuitem, null, action);
-				Append (new InstanceWidgetFactory (action.GtkAction.Label, icon, it));
+				Append (new InstanceWidgetFactory (action.MenuLabel, icon, it));
 			}
 		}
 		

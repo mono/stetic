@@ -44,12 +44,28 @@ namespace Stetic
 		
 		public static void GenerateProjectCode (CodeNamespace cns, params Project[] projects)
 		{
+			GenerateProjectGuiCode (cns, projects);
+			GenerateProjectActionsCode (cns, projects);
+		}
+		
+		static void GenerateProjectGuiCode (CodeNamespace cns, params Project[] projects)
+		{
 			bool multiProject = projects.Length > 1;
 			
 			CodeTypeDeclaration type = new CodeTypeDeclaration ("Gui");
 			type.Attributes = MemberAttributes.Private;
 			type.TypeAttributes = TypeAttributes.NestedAssembly;
 			cns.Types.Add (type);
+			
+			// Create the project initialization method
+			// This method will only be added at the end if there
+			// is actualy something to initialize
+			
+			CodeMemberMethod initMethod = new CodeMemberMethod ();
+			initMethod.Name = "Initialize";
+			initMethod.ReturnType = new CodeTypeReference (typeof(void));
+			initMethod.Attributes = MemberAttributes.Private | MemberAttributes.Static;
+			GeneratorContext initContext = new ProjectGeneratorContext (cns, initMethod.Statements);
 			
 			// Buid method overload that takes a type as parameter.
 			
@@ -96,7 +112,7 @@ namespace Stetic
 			CodeVariableReferenceExpression cfile = new CodeVariableReferenceExpression ("file");
 			CodeVariableReferenceExpression cid = new CodeVariableReferenceExpression ("id");
 			
-			CodeVariableDeclarationStatement varDecHash = new CodeVariableDeclarationStatement (typeof(System.Collections.Hashtable), "widgets");
+			CodeVariableDeclarationStatement varDecHash = new CodeVariableDeclarationStatement (typeof(System.Collections.Hashtable), "bindings");
 			met.Statements.Add (varDecHash);
 			varDecHash.InitExpression = new CodeObjectCreateExpression (
 				typeof(System.Collections.Hashtable),
@@ -104,6 +120,8 @@ namespace Stetic
 			);
 			
 			CodeStatementCollection projectCol = met.Statements;
+			
+			// Generate code for each project
 			
 			foreach (Project gp in projects) {
 			
@@ -124,6 +142,13 @@ namespace Stetic
 					widgetCol = projectCol;
 				}
 				
+				// Generate widget factory creation
+				
+				if (gp.IconFactory.Icons.Count > 0)
+					gp.IconFactory.GenerateBuildCode (initContext);
+				
+				// Generate top levels
+				
 				foreach (Gtk.Widget w in gp.Toplevels) {
 					CodeConditionStatement cond = new CodeConditionStatement ();
 					cond.Condition = new CodeBinaryOperatorExpression (
@@ -141,7 +166,30 @@ namespace Stetic
 
 					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateBuildCode (cns, w, "cobj", cond.TrueStatements);
 					
-					BindSignalHandlers (wwidget, wwidget, map, cond.TrueStatements);
+					CodeVariableReferenceExpression targetObjectVar = new CodeVariableReferenceExpression ("cobj");
+					BindSignalHandlers (targetObjectVar, wwidget, map, cond.TrueStatements);
+					
+					widgetCol = cond.FalseStatements;
+				}
+				
+				foreach (Wrapper.ActionGroup agroup in gp.ActionGroups) {
+					CodeConditionStatement cond = new CodeConditionStatement ();
+					cond.Condition = new CodeBinaryOperatorExpression (
+						cid, 
+						CodeBinaryOperatorType.IdentityEquality,
+						new CodePrimitiveExpression (agroup.Name)
+					);
+					widgetCol.Add (cond);
+					
+					CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement ("Gtk.ActionGroup", "cobj");
+					varDec.InitExpression = new CodeCastExpression ("Gtk.ActionGroup", cobj);
+					cond.TrueStatements.Add (varDec);
+					
+					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateBuildCode (cns, agroup, "cobj", cond.TrueStatements);
+					
+					CodeVariableReferenceExpression targetObjectVar = new CodeVariableReferenceExpression ("cobj");
+					foreach (Wrapper.Action ac in agroup.Actions)
+						BindSignalHandlers (targetObjectVar, ac, map, cond.TrueStatements);
 					
 					widgetCol = cond.FalseStatements;
 				}
@@ -193,7 +241,7 @@ namespace Stetic
 			CodeVariableDeclarationStatement varDecWidget = new CodeVariableDeclarationStatement (typeof(object), "widget");
 			iteration.Statements.Add (varDecWidget);
 			varDecWidget.InitExpression = new CodeIndexerExpression (
-				new CodeVariableReferenceExpression ("widgets"),
+				new CodeVariableReferenceExpression ("bindings"),
 				new CodePropertyReferenceExpression (varField, "Name")
 			);
 			CodeVariableReferenceExpression varWidget = new CodeVariableReferenceExpression ("widget");
@@ -226,11 +274,40 @@ namespace Stetic
 					varWidget
 				)
 			);
+			
+			// Final step. If there is some initialization code, add all needed infrastructure
+			
+			if (initMethod.Statements.Count > 0) {
+				type.Members.Add (initMethod);
+				
+				CodeMemberField initField = new CodeMemberField (typeof(bool), "initialized");
+				initField.Attributes = MemberAttributes.Private | MemberAttributes.Static;
+				type.Members.Add (initField);
+				
+				CodeFieldReferenceExpression initVar = new CodeFieldReferenceExpression (
+					new CodeTypeReferenceExpression (cns.Name + ".Gui"),
+					"initialized"
+				);
+				
+				CodeConditionStatement initCondition = new CodeConditionStatement ();
+				initCondition.Condition = new CodeBinaryOperatorExpression (
+					initVar, 
+					CodeBinaryOperatorType.IdentityEquality,
+					new CodePrimitiveExpression (false)
+				);
+				initCondition.TrueStatements.Add (
+					new CodeMethodInvokeExpression (
+						new CodeTypeReferenceExpression (cns.Name + ".Gui"),
+						"Initialize"
+					)
+				);
+				met.Statements.Insert (0, initCondition);
+			}
 		}
 		
-		static void BindSignalHandlers (Stetic.Wrapper.Widget rootWidget, Stetic.Wrapper.Widget widget, Stetic.WidgetMap map, CodeStatementCollection statements)
+		static void BindSignalHandlers (CodeExpression targetObjectVar, ObjectWrapper wrapper, Stetic.WidgetMap map, CodeStatementCollection statements)
 		{
-			foreach (Signal signal in widget.Signals) {
+			foreach (Signal signal in wrapper.Signals) {
 				TypedSignalDescriptor descriptor = signal.SignalDescriptor as TypedSignalDescriptor;
 				if (descriptor == null) continue;
 				
@@ -239,27 +316,150 @@ namespace Stetic
 						new CodeTypeReferenceExpression (typeof(Delegate)),
 						"CreateDelegate",
 						new CodeTypeOfExpression (descriptor.HandlerTypeName),
-						new CodeVariableReferenceExpression (map.GetWidgetId (rootWidget.Wrapped.Name)),
+						targetObjectVar,
 						new CodePrimitiveExpression (signal.Handler));
 				
 				createDelegate = new CodeCastExpression (descriptor.HandlerTypeName, createDelegate);
 				
 				CodeAttachEventStatement cevent = new CodeAttachEventStatement (
 					new CodeEventReferenceExpression (
-						new CodeVariableReferenceExpression (map.GetWidgetId (widget.Wrapped.Name)),
+						new CodeVariableReferenceExpression (map.GetWidgetId (wrapper)),
 						descriptor.Name),
 					createDelegate);
 				
 				statements.Add (cevent);
 			}
 			
-			Gtk.Container cont = widget.Wrapped as Gtk.Container;
+			Wrapper.Widget widget = wrapper as Wrapper.Widget;
+			if (widget != null && widget.IsTopLevel) {
+				// Bind local action signals
+				foreach (Wrapper.ActionGroup grp in widget.LocalActionGroups) {
+					foreach (Wrapper.Action ac in grp.Actions)
+						BindSignalHandlers (targetObjectVar, ac, map, statements);
+				}
+			}
+			
+			Gtk.Container cont = wrapper.Wrapped as Gtk.Container;
 			if (cont != null) {
 				foreach (Gtk.Widget child in cont.AllChildren) {
 					Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (child);
 					if (ww != null)
-						BindSignalHandlers (rootWidget, ww, map, statements);
+						BindSignalHandlers (targetObjectVar, ww, map, statements);
 				}
+			}
+			
+		}
+		
+		static void GenerateProjectActionsCode (CodeNamespace cns, params Project[] projects)
+		{
+			bool multiProject = projects.Length > 1;
+			
+			CodeTypeDeclaration type = new CodeTypeDeclaration ("ActionGroups");
+			type.Attributes = MemberAttributes.Private;
+			type.TypeAttributes = TypeAttributes.NestedAssembly;
+			cns.Types.Add (type);
+
+			// Generate the global action group getter
+			
+			CodeMemberMethod met = new CodeMemberMethod ();
+			met.Name = "GetActionGroup";
+			type.Members.Add (met);
+			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(Type), "type"));
+			if (multiProject)
+				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "file"));
+			met.ReturnType = new CodeTypeReference (typeof(Gtk.ActionGroup));
+			met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
+
+			CodeMethodInvokeExpression call = new CodeMethodInvokeExpression (
+					new CodeMethodReferenceExpression (
+						new CodeTypeReferenceExpression (cns.Name + ".ActionGroups"),
+						"GetActionGroup"
+					),
+					new CodePropertyReferenceExpression (
+						new CodeVariableReferenceExpression ("type"),
+						"FullName"
+					)
+			);
+			if (multiProject)
+				call.Parameters.Add (new CodeVariableReferenceExpression ("file"));
+				
+			met.Statements.Add (new CodeMethodReturnStatement (call));
+
+			// Generate the global action group getter (overload)
+			
+			met = new CodeMemberMethod ();
+			met.Name = "GetActionGroup";
+			type.Members.Add (met);
+			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "name"));
+			if (multiProject)
+				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "file"));
+			met.ReturnType = new CodeTypeReference (typeof(Gtk.ActionGroup));
+			met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
+			
+			CodeVariableReferenceExpression cfile = new CodeVariableReferenceExpression ("file");
+			CodeVariableReferenceExpression cid = new CodeVariableReferenceExpression ("name");
+			
+			CodeStatementCollection projectCol = met.Statements;
+			int n=1;
+			
+			foreach (Project gp in projects) {
+			
+				CodeStatementCollection widgetCol;
+				
+				if (multiProject) {
+					CodeConditionStatement pcond = new CodeConditionStatement ();
+					pcond.Condition = new CodeBinaryOperatorExpression (
+						cfile, 
+						CodeBinaryOperatorType.IdentityEquality,
+						new CodePrimitiveExpression (gp.Id)
+					);
+					projectCol.Add (pcond);
+					
+					widgetCol = pcond.TrueStatements;
+					projectCol = pcond.FalseStatements;
+				} else {
+					widgetCol = projectCol;
+				}
+				
+				foreach (Wrapper.ActionGroup grp in gp.ActionGroups) {
+					string fname = "group" + (n++);
+					CodeMemberField grpField = new CodeMemberField (typeof(Gtk.ActionGroup), fname);
+					grpField.Attributes |= MemberAttributes.Static;
+					type.Members.Add (grpField);
+					CodeFieldReferenceExpression grpVar = new CodeFieldReferenceExpression (
+						new CodeTypeReferenceExpression (cns.Name + ".ActionGroups"),
+						fname
+					);
+					
+					CodeConditionStatement pcond = new CodeConditionStatement ();
+					pcond.Condition = new CodeBinaryOperatorExpression (
+						cid, 
+						CodeBinaryOperatorType.IdentityEquality,
+						new CodePrimitiveExpression (grp.Name)
+					);
+					widgetCol.Add (pcond);
+					
+					// If the group has not yet been created, create it
+					CodeConditionStatement pcondGrp = new CodeConditionStatement ();
+					pcondGrp.Condition = new CodeBinaryOperatorExpression (
+						grpVar, 
+						CodeBinaryOperatorType.IdentityEquality,
+						new CodePrimitiveExpression (null)
+					);
+					
+					pcondGrp.TrueStatements.Add (
+						new CodeAssignStatement (
+							grpVar,
+							new CodeObjectCreateExpression (grp.Name)
+						)
+					);
+					
+					pcond.TrueStatements.Add (pcondGrp);
+					pcond.TrueStatements.Add (new CodeMethodReturnStatement (grpVar));
+					
+					widgetCol = pcond.FalseStatements;
+				}
+				widgetCol.Add (new CodeMethodReturnStatement (new CodePrimitiveExpression (null)));
 			}
 		}
 		
@@ -272,6 +472,15 @@ namespace Stetic
 			ctx.EndGeneration ();
 			return ctx.WidgetMap;
 		}
+		
+		public static WidgetMap GenerateBuildCode (CodeNamespace cns, Wrapper.ActionGroup grp, string groupVarName, CodeStatementCollection statements)
+		{
+			statements.Add (new CodeCommentStatement ("Action group " + grp.Name));
+			GeneratorContext ctx = new ProjectGeneratorContext (cns, statements);
+			ctx.GenerateBuildCode (grp, groupVarName);
+			ctx.EndGeneration ();
+			return ctx.WidgetMap;
+		}
 	}
 	
 	class ProjectGeneratorContext: GeneratorContext
@@ -280,18 +489,27 @@ namespace Stetic
 		{
 		}
 		
-		public override void GenerateBuildCode (Wrapper.Widget widget, string varName)
+		public override void GenerateBuildCode (ObjectWrapper wrapper, string varName)
 		{
-			base.GenerateBuildCode (widget, varName);
-			Statements.Add (
-				new CodeAssignStatement (
-					new CodeIndexerExpression (
-						new CodeVariableReferenceExpression ("widgets"),
-						new CodePrimitiveExpression (widget.Wrapped.Name)
-					),
-					new CodeVariableReferenceExpression (varName)
-				)
-			);
+			base.GenerateBuildCode (wrapper, varName);
+			
+			string memberName = null;
+			if (wrapper is Wrapper.Widget)
+				memberName = ((Wrapper.Widget) wrapper).Wrapped.Name;
+			else if (wrapper is Wrapper.Action)
+				memberName = ((Wrapper.Action) wrapper).Name;
+				
+			if (memberName != null) {
+				Statements.Add (
+					new CodeAssignStatement (
+						new CodeIndexerExpression (
+							new CodeVariableReferenceExpression ("bindings"),
+							new CodePrimitiveExpression (memberName)
+						),
+						new CodeVariableReferenceExpression (varName)
+					)
+				);
+			}
 		}
 	}
 }

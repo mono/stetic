@@ -47,12 +47,19 @@ namespace Stetic
 			return varName;
 		}
 		
-		public virtual void GenerateBuildCode (Wrapper.Widget widget, string varName)
+		public virtual void GenerateBuildCode (ObjectWrapper wrapper, string varName)
 		{
-			vars [widget.Wrapped.Name] = varName;
-			widgets [varName] = widget.Wrapped;
-			widget.GenerateBuildCode (this, varName);
-			generatedWrappers.Add (widget);
+			vars [wrapper] = varName;
+			widgets [varName] = wrapper.Wrapped;
+			wrapper.GenerateBuildCode (this, varName);
+			generatedWrappers.Add (wrapper);
+		}
+		
+		public virtual void GenerateBuildCode (Wrapper.ActionGroup agroup, string varName)
+		{
+			vars [agroup] = varName;
+			widgets [varName] = agroup;
+			agroup.GenerateBuildCode (this, varName);
 		}
 		
 		public CodeExpression GenerateValue (object value, Type type)
@@ -99,6 +106,16 @@ namespace Stetic
 			if (value is ImageInfo && typeof(Gdk.Pixbuf).IsAssignableFrom (type))
 				return ((ImageInfo)value).ToCodeExpression ();
 			
+			if (value is Wrapper.ActionGroup) {
+				return new CodeMethodInvokeExpression (
+					new CodeMethodReferenceExpression (
+						new CodeTypeReferenceExpression (CodeNamespace.Name + ".ActionGroups"),
+						"GetActionGroup"
+					),
+					new CodePrimitiveExpression (((Wrapper.ActionGroup)value).Name)
+				);
+			}
+			
 			return new CodePrimitiveExpression (value);
 		}
 		
@@ -108,8 +125,8 @@ namespace Stetic
 		
 		public void EndGeneration ()
 		{
-			foreach (Stetic.Wrapper.Widget w in generatedWrappers) {
-				string v = (string) vars [w.Wrapped.Name];
+			foreach (ObjectWrapper w in generatedWrappers) {
+				string v = (string) vars [w];
 				w.GeneratePostBuildCode (this, v);
 			}
 		}
@@ -135,14 +152,23 @@ namespace Stetic
 			this.widgets = widgets;
 		}
 		
-		public string GetWidgetId (string widgetName)
+		public string GetWidgetId (ObjectWrapper wrapper)
 		{
-			return (string) vars [widgetName];
+			return (string) vars [wrapper];
 		}
 		
-		public Gtk.Widget GetWidgetFromId (string widgetId)
+		public string GetWidgetId (object wrapped)
 		{
-			return (Gtk.Widget) widgets [widgetId];
+			ObjectWrapper w = ObjectWrapper.Lookup (wrapped);
+			if (w != null)
+				return GetWidgetId (w);
+			else
+				return null;
+		}
+		
+		public ObjectWrapper GetWidgetFromId (string widgetId)
+		{
+			return (ObjectWrapper) widgets [widgetId];
 		}
 	}
 }

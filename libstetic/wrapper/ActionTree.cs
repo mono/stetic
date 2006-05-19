@@ -28,6 +28,13 @@ namespace Stetic.Wrapper
 			);
 			ctx.Statements.Add (exp);
 		}
+		
+		public ActionGroup[] GetRequiredGroups ()
+		{
+			ArrayList list = new ArrayList ();
+			GetRequiredGroups (list);
+			return (ActionGroup[]) list.ToArray (typeof(ActionGroup));
+		}
 	}
 	
 	public class ActionTreeNode
@@ -129,7 +136,6 @@ namespace Stetic.Wrapper
 		
 		public void GenerateUiString (StringBuilder sb)
 		{
-			string localName = (name != null && name.Length > 0 ? name : (action != null ? action.Name : null));
 			sb.Append ('<').Append (type.ToString().ToLower());
 			if (name != null && name.Length > 0)
 				sb.Append (' ').Append ("name='").Append (name).Append ("'");
@@ -143,6 +149,14 @@ namespace Stetic.Wrapper
 				sb.Append ("</").Append (type.ToString().ToLower()).Append ('>');
 			} else
 				sb.Append ("/>");
+		}
+		
+		protected void GetRequiredGroups (ArrayList list)
+		{
+			if (action != null && action.ActionGroup != null && !list.Contains (action.ActionGroup))
+				list.Add (action.ActionGroup);
+			foreach (ActionTreeNode node in Children)
+				node.GetRequiredGroups (list);
 		}
 		
 		public Gtk.UIManagerItemType Type {

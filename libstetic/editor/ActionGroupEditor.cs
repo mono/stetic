@@ -40,7 +40,7 @@ namespace Stetic.Editor
 			Gtk.Label grpLabel = new Gtk.Label ();
 			grpLabel.Xalign = 0;
 			grpLabel.Markup = "<small><i>Action Group</i></small>";
-			vbox.PackStart (grpLabel, false, false, 0);
+//			vbox.PackStart (grpLabel, false, false, 0);
 			vbox.PackStart (headerLabel, false, false, 3);
 			vbox.BorderWidth = 12;
 			ebox.Add (vbox);
@@ -94,6 +94,12 @@ namespace Stetic.Editor
 					return ObjectWrapper.Lookup (sel.DataObject) as Action;
 				else
 					return null;
+			}
+			set {
+				foreach (ActionMenuItem item in items) {
+					if (item.Node.Action == value)
+						item.Select ();
+				}
 			}
 		}
 		
@@ -235,7 +241,7 @@ namespace Stetic.Editor
 		{
 			ActionMenuItem item = (ActionMenuItem) sender;
 			item.EditingDone -= OnEditDone;
-			if (item.Node.Action.GtkAction.Label.Length > 0) {
+			if (item.Node.Action.GtkAction.Label.Length > 0 || item.Node.Action.GtkAction.StockId != null) {
 				actionGroup.Actions.Add (item.Node.Action);
 			} else {
 				IDesignArea designArea = GetDesignArea ();
@@ -282,18 +288,6 @@ namespace Stetic.Editor
 			}
 		}
 		
-		void OnHeadLabelClick (object s, Gtk.ButtonPressEventArgs args)
-		{
-			IDesignArea d = GetDesignArea ();
-			if (d.IsSelected (headerLabel)) {
-				if (headerLabel.Child is Gtk.Label) {
-					headerLabel.Remove (headerLabel.Child);
-				}
-			} else {
-				d.SetSelection (headerLabel, null);
-			}
-		}
-		
 		void OnGroupNameChanged (object s, EventArgs args)
 		{
 			if (actionGroup != null)
@@ -302,10 +296,52 @@ namespace Stetic.Editor
 		
 		void OnSelectionChanged (object s, EventArgs args)
 		{
-			Console.WriteLine ("OnSelectionChanged p1");
 			if (SelectionChanged != null)
 				SelectionChanged (this, args);
 		}
+		
+		void Cut (ActionMenuItem menuItem)
+		{
+		}
+		
+		void Copy (ActionMenuItem menuItem)
+		{
+		}
+		
+		void Paste (ActionMenuItem menuItem)
+		{
+		}
+		
+		void Delete (ActionMenuItem menuItem)
+		{
+		}
+		
+		public void ShowContextMenu (ActionMenuItem menuItem)
+		{
+			Gtk.Menu m = new Gtk.Menu ();
+			Gtk.MenuItem item = new Gtk.ImageMenuItem (Gtk.Stock.Cut, null);
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				Cut (menuItem);
+			};
+			item = new Gtk.ImageMenuItem (Gtk.Stock.Copy, null);
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				Copy (menuItem);
+			};
+			item = new Gtk.ImageMenuItem (Gtk.Stock.Paste, null);
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				Paste (menuItem);
+			};
+			item = new Gtk.ImageMenuItem (Gtk.Stock.Delete, null);
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				Delete (menuItem);
+			};
+			m.ShowAll ();
+			m.Popup ();
+		}		
 		
 		IDesignArea GetDesignArea ()
 		{

@@ -4,7 +4,6 @@ namespace Stetic.Editor {
 
 	public class StockItem: BaseImageCell
 	{
-		Gdk.Pixbuf image;
 		string label;
 		
 		protected override void Initialize ()

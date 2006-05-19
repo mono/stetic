@@ -50,6 +50,8 @@ namespace Stetic {
 					project.SelectionChanged += WidgetSelected;
 					project.ProjectReloaded += OnProjectReloaded;
 					project.WidgetNameChanged += OnWidgetNameChanged;
+				} else {
+					NodeStore = null;
 				}
 			}
 		}

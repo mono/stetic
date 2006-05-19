@@ -73,6 +73,17 @@ namespace Stetic.Editor
 			
 			if (project.FileName != null)
 				fileChooser.SetCurrentFolder (Path.GetDirectoryName (project.FileName));
+
+			fileChooser.SelectionChanged += delegate (object s, EventArgs a) {
+				UpdateButtons ();
+			};
+
+			fileChooser.FileActivated += delegate (object s, EventArgs a) {
+				if (Icon != null)
+					dialog.Respond (Gtk.ResponseType.Ok);
+			};
+
+			UpdateButtons ();
 		}
 		
 		public int Run ()
@@ -98,7 +109,7 @@ namespace Stetic.Editor
 						return null;
 					return ImageInfo.FromResource (resourceNameEntry.Text);
 				} else {
-					if (fileChooser.Filename == null || fileChooser.Filename.Length == 0)
+					if (fileChooser.Filename == null || fileChooser.Filename.Length == 0 || !File.Exists (fileChooser.Filename))
 						return null;
 					return ImageInfo.FromFile (fileChooser.Filename);
 				}
@@ -130,7 +141,7 @@ namespace Stetic.Editor
 			okButton.Sensitive = Icon != null;
 		}
 		
-		protected void OnCurrentPageChanged (object s, Gtk.ChangeCurrentPageArgs args)
+		protected void OnCurrentPageChanged (object s, Gtk.SwitchPageArgs args)
 		{
 			UpdateButtons ();
 		}

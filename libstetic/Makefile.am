@@ -26,6 +26,7 @@ libstetic_dll_sources =			\
 	ParamSpec.cs			\
 	Placeholder.cs			\
 	PreviewBox.cs		\
+	ProjectIconFactory.cs			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
 	PropertyEditorCell.cs	\
@@ -48,20 +49,27 @@ libstetic_dll_sources =			\
 	editor/ActionGroupEditor.cs		\
 	editor/ActionMenuBar.cs		\
 	editor/Boolean.cs		\
+	editor/CellRendererComboBox.cs			\
 	editor/Char.cs			\
 	editor/Color.cs			\
 	editor/Enumeration.cs		\
 	editor/GroupPicker.cs		\
+	editor/EditIconFactoryDialog.cs	\
+	editor/EditIconDialog.cs	\
 	editor/Flags.cs			\
 	editor/FlagsSelectorDialog.cs			\
 	editor/FloatRange.cs		\
+	editor/IconList.cs		\
 	editor/Image.cs			\
 	editor/ImageFile.cs		\
 	editor/ImageSelector.cs		\
 	editor/IntRange.cs		\
 	editor/OptIntRange.cs		\
+	editor/ProjectIconList.cs		\
 	editor/ResponseId.cs		\
+	editor/SelectIconDialog.cs	\
 	editor/SelectImageDialog.cs	\
+	editor/StockIconList.cs		\
 	editor/StockItem.cs		\
 	editor/String.cs		\
 	editor/StringArray.cs		\
@@ -71,6 +79,7 @@ libstetic_dll_sources =			\
 	editor/ThemedIcon.cs			\
 	editor/ThemedIconList.cs			\
 	editor/Translatable.cs		\
+	editor/TreeViewCellContainer.cs	\
 	editor/WidgetSelector.cs		\
 	Metacity/ButtonFunction.cs \
 	Metacity/ButtonLayout.cs \
@@ -143,7 +152,7 @@ libstetic.dll: $(libstetic_dll_sources) $(libstetic_dll_resources)
 	@rm -f sources.rsp
 	@echo $(libstetic_dll_sources:%=$(srcdir)/%) > sources.rsp
 	@for resource in $(libstetic_dll_resources); do echo -resource:$$resource,`basename $$resource` >> sources.rsp; done
-	$(MCS) -debug -unsafe -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -pkg:glade-sharp-2.0 -target:library -out:$@ @sources.rsp
+	$(MCS) -debug -unsafe -r:Mono.Posix -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -pkg:glade-sharp-2.0 -target:library -out:$@ @sources.rsp
 
 CLEANFILES = libstetic.dll libstetic.dll.mdb sources.rsp
 

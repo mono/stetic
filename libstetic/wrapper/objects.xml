@@ -4,6 +4,7 @@
     <object type="Gtk.Widget,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
 	<itemgroups>
 	    <itemgroup label="Common Widget Properties">
+		<property name="MemberName" description="Name of the member to which this widget is bound." />
 		<property name="WidthRequest" min="-1" />
 		<property name="HeightRequest" min="-1" />
 		<property name="Visible" glade-override="true" />

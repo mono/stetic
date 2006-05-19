@@ -27,7 +27,7 @@ namespace Metacity {
 			return self;
 		}
 
-		private static GLib.GType GType {
+		internal static GLib.GType GType {
 			get { return GLib.GType.Pointer; }
 		}
 #endregion
