@@ -71,6 +71,8 @@ namespace Stetic.Editor
 				menuBarItem.ButtonReleaseEvent -= OnMemuItemRelease;
 				menuBarItem.MotionNotifyEvent -= OnMotionNotify;
 			}
+			if (node.Action != null)
+				node.Action.ObjectChanged -= OnActionChanged;
 		}
 		
 		public ActionTreeNode Node {
@@ -302,7 +304,7 @@ namespace Stetic.Editor
 				this.accel = arrow;
 			}
 			
-			if (itemSpacing > 0) {
+			if (itemSpacing > 0 && icon != null) {
 				// Add some padding to the left of the icon
 				Gtk.Alignment a = new Gtk.Alignment (0, 0.5f, 0, 0);
 				a.LeftPadding = itemSpacing;
@@ -378,13 +380,14 @@ namespace Stetic.Editor
 			
 			menu.Insert (new Gtk.SeparatorMenuItem (), -1);
 			
-			Gtk.MenuItem it = new Gtk.MenuItem ("Select Icon / Stock...");
-			it.Sensitive = (node.Action.Type == Action.ActionType.Action);
-			it.Activated += OnSetStockActionType;
-			menu.Insert (it, -1);
+			Gtk.MenuItem itIcons = new Gtk.MenuItem ("Select Icon");
+			menu.Insert (itIcons, -1);
+			IconSelectorMenu menuIcons = new IconSelectorMenu (GetProject ());
+			menuIcons.IconSelected += OnStockSelected;
+			itIcons.Submenu = menuIcons;
 			
-			it = new Gtk.MenuItem ("Clear Icon");
-			it.Sensitive = (node.Action.Type == Action.ActionType.Action);
+			Gtk.MenuItem it = new Gtk.MenuItem ("Clear Icon");
+			it.Sensitive = (node.Action.GtkAction.StockId != null);
 			it.Activated += OnClearIcon;
 			menu.Insert (it, -1);
 			
@@ -399,6 +402,12 @@ namespace Stetic.Editor
 			x += this.Allocation.X;
 			y += this.Allocation.Y + this.Allocation.Height;
 			pushIn = true;
+		}
+		
+		void OnStockSelected (object s, IconEventArgs args)
+		{
+			node.Action.GtkAction.StockId = args.IconId;
+			node.Action.NotifyChanged ();
 		}
 		
 		void OnSetToggleType (object ob, EventArgs args)
@@ -417,21 +426,6 @@ namespace Stetic.Editor
 		{
 			node.Action.Type = Action.ActionType.Action;
 			node.Action.NotifyChanged ();
-		}
-		
-		void OnSetStockActionType (object ob, EventArgs args)
-		{
-			Stetic.Editor.SelectIconDialog dialog = new Stetic.Editor.SelectIconDialog (null, GetProject());
-			using (dialog)
-			{
-				if (dialog.Run () != (int) Gtk.ResponseType.Ok)
-					return;
-
-				node.Action.Type = Action.ActionType.Action;
-				node.Action.GtkAction.StockId = dialog.Icon;
-				node.Action.NotifyChanged ();
-			}
-			
 		}
 		
 		void OnClearIcon (object on, EventArgs args)

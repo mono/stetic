@@ -124,6 +124,7 @@ namespace Stetic.Wrapper {
 						actionGroups = new ActionGroupCollection ();
 						actionGroups.ActionGroupAdded += OnGroupAdded;
 						actionGroups.ActionGroupRemoved += OnGroupRemoved;
+						actionGroups.ActionGroupChanged += OnGroupChanged;
 					}
 					return actionGroups;
 				} else {
@@ -144,6 +145,11 @@ namespace Stetic.Wrapper {
 			args.ActionGroup.SignalAdded -= OnSignalAdded;
 			args.ActionGroup.SignalRemoved -= OnSignalRemoved;
 			args.ActionGroup.SignalChanged -= OnSignalChanged;
+		}
+		
+		void OnGroupChanged (object s, Stetic.Wrapper.ActionGroupEventArgs args)
+		{
+			NotifyChanged ();
 		}
 		
 		void OnSignalAdded (object sender, SignalEventArgs args)
@@ -267,6 +273,7 @@ namespace Stetic.Wrapper {
 						actionGroups = new ActionGroupCollection ();
 						actionGroups.ActionGroupAdded += OnGroupAdded;
 						actionGroups.ActionGroupRemoved += OnGroupRemoved;
+						actionGroups.ActionGroupChanged += OnGroupChanged;
 					} else
 						actionGroups.Clear ();
 					actionGroups.Add (actionGroup); 
@@ -333,6 +340,18 @@ namespace Stetic.Wrapper {
 				
 					includedActionGroups.Add (actionGroup);
 				}
+				
+				// Adds the accel group to the window
+				Window w = GetTopLevel () as Window;
+				CodeMethodInvokeExpression ami = new CodeMethodInvokeExpression (
+					new CodeVariableReferenceExpression (ctx.WidgetMap.GetWidgetId (w)),
+					"AddAccelGroup",
+					new CodePropertyReferenceExpression (
+						uixp,
+						"AccelGroup"
+					)
+				);
+				ctx.Statements.Add (ami);
 			}
 			
 			base.GenerateBuildCode (ctx, varName);

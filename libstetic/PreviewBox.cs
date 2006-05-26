@@ -316,10 +316,7 @@ namespace Stetic
 				currentObjectSelection = null;
 			
 			PlaceSelectionBox (widget);
-			if (PropertyViewer != null)
-				PropertyViewer.TargetObject = obj;
-			if (SignalsViewer != null)
-				SignalsViewer.TargetObject = obj;
+			UpdateObjectViewers ();
 
 			if (SelectionChanged != null)
 				SelectionChanged (this, EventArgs.Empty);
@@ -370,6 +367,7 @@ namespace Stetic
 				if (currentObjectSelection != null) {
 					currentObjectSelection.FireDisposed ();
 					currentObjectSelection = null;
+					UpdateObjectViewers ();
 				}
 			}
 		}
@@ -441,7 +439,7 @@ namespace Stetic
 		
 		void SelectionDestroyed (object obj, EventArgs args)
 		{
-			ResetSelection (null);
+			ResetSelection ((Gtk.Widget)obj);
 		}
 
 		void PlaceSelectionBoxInternal (Gtk.Widget widget)

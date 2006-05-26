@@ -150,15 +150,41 @@ namespace Stetic
 			if (pix == null)
 				return null;
 
-			if (pix.Width > pix.Height) {
-				if (pix.Width > thumbnailSize) {
+			if (pix.Width > pix.Height && pix.Width > thumbnailSize) {
+				return ScaleImage (pix, thumbnailSize, thumbnailSize);
+			} else if (pix.Height > pix.Width && pix.Height > thumbnailSize) {
+				return ScaleImage (pix, thumbnailSize, thumbnailSize);
+			}
+			return pix;
+		}
+		
+		public Gdk.Pixbuf GetScaledImage (IProject project, Gtk.IconSize size)
+		{
+			int w, h;
+			Gtk.Icon.SizeLookup (size, out w, out h);
+			return GetScaledImage (project, w, h);
+		}
+		
+		public Gdk.Pixbuf GetScaledImage (IProject project, int width, int height)
+		{
+			Gdk.Pixbuf pix = GetImage (project);
+			if (pix == null)
+				return null;
+			else
+				return ScaleImage (pix, width, height);
+		}
+		
+		Gdk.Pixbuf ScaleImage (Gdk.Pixbuf pix, int width, int height)
+		{
+			if ((pix.Width - width) > (pix.Height - height)) {
+				if (pix.Width != width) {
 					float prop = (float) pix.Height / (float) pix.Width;
-					return pix.ScaleSimple (thumbnailSize, (int)(thumbnailSize * prop), Gdk.InterpType.Bilinear);
+					return pix.ScaleSimple (width, (int)(width * prop), Gdk.InterpType.Bilinear);
 				}
 			} else {
-				if (pix.Height > thumbnailSize) {
+				if (pix.Height != height) {
 					float prop = (float) pix.Width / (float) pix.Height;
-					return pix.ScaleSimple ((int)(thumbnailSize * prop), thumbnailSize, Gdk.InterpType.Bilinear);
+					return pix.ScaleSimple ((int)(height * prop), height, Gdk.InterpType.Bilinear);
 				}
 			}
 			return pix;

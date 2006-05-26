@@ -61,6 +61,9 @@ namespace Stetic {
 			if (elem.HasAttribute ("translatable"))
 				translationInfo = new Hashtable ();
 				
+			if (elem.HasAttribute ("default"))
+				defaultValue = StringToValue (elem.GetAttribute ("default"));
+				
 			string convTypeName = elem.GetAttribute ("type-converter");
 			if (convTypeName.Length > 0) {
 				Type type = Registry.GetType (convTypeName, true);

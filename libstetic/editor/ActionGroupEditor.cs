@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using Stetic.Wrapper;
+using Mono.Unix;
 
 namespace Stetic.Editor
 {
@@ -121,6 +122,7 @@ namespace Stetic.Editor
 			foreach (ActionMenuItem item in items) {
 				if (designArea.IsSelected (item))
 					selAction = item.Node.Action;
+				item.Node.Dispose ();
 				item.Detach ();
 				item.Destroy ();
 			}
@@ -144,7 +146,7 @@ namespace Stetic.Editor
 				PlaceAddLabel (actionGroup.Actions.Count);
 			} else {
 				HideAddLabel ();
-				headerLabel.Text = "<No selection>";
+				headerLabel.Text = "No selection";
 				headerLabel.Sensitive = false;
 			}
 			ShowAll ();
@@ -247,6 +249,7 @@ namespace Stetic.Editor
 				IDesignArea designArea = GetDesignArea ();
 				designArea.ResetSelection (item);
 				item.Detach ();
+				item.Node.Dispose ();
 				items.Remove (item);
 				PlaceAddLabel (actionGroup.Actions.Count);
 				ShowAll ();
@@ -314,6 +317,12 @@ namespace Stetic.Editor
 		
 		void Delete (ActionMenuItem menuItem)
 		{
+			string msg = string.Format (Catalog.GetString ("Are you sure you want to delete the action '{0}'? It will be removed from all menus and toolbars."), menuItem.Node.Action.Name);
+			Gtk.MessageDialog md = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Question, Gtk.ButtonsType.YesNo, msg);
+			if (md.Run () == (int) Gtk.ResponseType.Yes) {
+				menuItem.Node.Action.Delete ();
+			}
+			md.Destroy ();
 		}
 		
 		public void ShowContextMenu (ActionMenuItem menuItem)
@@ -324,16 +333,19 @@ namespace Stetic.Editor
 			item.Activated += delegate (object s, EventArgs a) {
 				Cut (menuItem);
 			};
+			item.Visible = false;	// No copy & paste for now
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Copy, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				Copy (menuItem);
 			};
+			item.Visible = false;	// No copy & paste for now
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Paste, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				Paste (menuItem);
 			};
+			item.Visible = false;	// No copy & paste for now
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Delete, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {

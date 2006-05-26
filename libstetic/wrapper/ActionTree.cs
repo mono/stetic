@@ -10,6 +10,8 @@ namespace Stetic.Wrapper
 	
 	public class ActionTree: ActionTreeNode
 	{
+		public event EventHandler Changed;
+		
 		public ActionTree()
 		{
 		}
@@ -35,9 +37,15 @@ namespace Stetic.Wrapper
 			GetRequiredGroups (list);
 			return (ActionGroup[]) list.ToArray (typeof(ActionGroup));
 		}
+		
+		internal override void NotifyChanged ()
+		{
+			if (Changed != null)
+				Changed (this, EventArgs.Empty);
+		}
 	}
 	
-	public class ActionTreeNode
+	public class ActionTreeNode: IDisposable
 	{
 		Gtk.UIManagerItemType type;
 		string name;
@@ -59,8 +67,28 @@ namespace Stetic.Wrapper
 			this.type = type;
 			this.name = name;
 			this.action = action;
+			if (this.action != null)
+				this.action.Deleted += OnActionDeleted;
+		}
+		
+		public virtual void Dispose ()
+		{
+			if (action != null)
+				action.Deleted -= OnActionDeleted;
+		}
+		
+		void OnActionDeleted (object s, EventArgs args)
+		{
+			if (parentNode != null)
+				parentNode.Children.Remove (this);
 		}
 
+		internal virtual void NotifyChanged ()
+		{
+			if (parentNode != null)
+				parentNode.NotifyChanged ();
+		}
+		
 		public XmlElement Write (XmlDocument doc, FileFormat format)
 		{
 			XmlElement elem = doc.CreateElement ("node");
@@ -97,6 +125,8 @@ namespace Stetic.Wrapper
 							break;
 					}
 				}
+				if (action != null)
+					action.Deleted += OnActionDeleted;
 			}
 			foreach (XmlElement child in elem.SelectNodes ("node")) {
 				ActionTreeNode node = new ActionTreeNode ();
@@ -161,17 +191,16 @@ namespace Stetic.Wrapper
 		
 		public Gtk.UIManagerItemType Type {
 			get { return type; }
-			set { type = value; }
+			set { type = value; NotifyChanged (); }
 		}
 		
 		public string Name {
 			get { return name; }
-			set { name = value; }
+			set { name = value; NotifyChanged (); }
 		}
 		
 		public Action Action {
 			get { return action; }
-			set { action = value; }
 		}
 		
 		public ActionTreeNode ParentNode {
@@ -189,6 +218,7 @@ namespace Stetic.Wrapper
 		internal void NotifyChildAdded (ActionTreeNode node)
 		{
 			node.parentNode = this;
+			NotifyChanged ();
 			if (ChildNodeAdded != null)
 				ChildNodeAdded (this, new ActionTreeNodeArgs (node));
 		}
@@ -196,6 +226,7 @@ namespace Stetic.Wrapper
 		internal void NotifyChildRemoved (ActionTreeNode node)
 		{
 			node.parentNode = null;
+			NotifyChanged ();
 			if (ChildNodeRemoved != null)
 				ChildNodeRemoved (this, new ActionTreeNodeArgs (node));
 		}

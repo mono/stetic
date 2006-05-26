@@ -7,12 +7,12 @@ using Stetic.Editor;
 
 namespace Stetic.Wrapper
 {
-	public class MenuBar: Container
+	public class ActionToolbarWrapper: Container
 	{
 		ActionTree actionTree;
-		XmlElement menuInfo;
+		XmlElement toolbarInfo;
 		
-		public MenuBar()
+		public ActionToolbarWrapper()
 		{
 		}
 		
@@ -21,18 +21,19 @@ namespace Stetic.Wrapper
 			base.Dispose ();
 			DisposeTree ();
 		}
-		
-		public static new Gtk.MenuBar CreateInstance ()
+
+		public static new Gtk.Toolbar CreateInstance ()
 		{
-			return new ActionMenuBar ();
+			ActionToolbar t = new ActionToolbar ();
+			return t;
+		}
+		
+		ActionToolbar toolbar {
+			get { return (ActionToolbar) Wrapped; }
 		}
 		
 		protected override bool AllowPlaceholders {
 			get { return false; }
-		}
-		
-		ActionMenuBar menu {
-			get { return (ActionMenuBar) Wrapped; }
 		}
 		
 		public override void Wrap (object obj, bool initialized)
@@ -41,23 +42,55 @@ namespace Stetic.Wrapper
 			CreateTree ();
 		}
 		
+		public override bool HExpandable {
+			get {
+				return toolbar.Orientation == Gtk.Orientation.Horizontal;
+			}
+		}
+
+		public override bool VExpandable {
+			get {
+				return toolbar.Orientation == Gtk.Orientation.Vertical;
+			}
+		}
+
+		public Gtk.Orientation Orientation {
+			get {
+				return toolbar.Orientation;
+			}
+			set {
+				toolbar.Orientation = value;
+				EmitContentsChanged ();
+			}
+		}
+		
+		public Gtk.IconSize IconSize {
+			get { return toolbar.IconSize; }
+			set { toolbar.IconSize = value; EmitNotify ("IconSize"); }
+		}
+		
+		public Gtk.ToolbarStyle ToolbarStyle {
+			get { return toolbar.ToolbarStyle; }
+			set { toolbar.ToolbarStyle = value; EmitNotify ("ToolbarStyle"); }
+		}
+		
 		internal protected override void OnSelected ()
 		{
-			menu.ShowInsertPlaceholder = true;
+			toolbar.ShowInsertPlaceholder = true;
 		}
 		
 		internal protected override void OnUnselected ()
 		{
 			base.OnUnselected ();
-			menu.ShowInsertPlaceholder = false;
-			menu.Unselect ();
+			toolbar.ShowInsertPlaceholder = false;
+			toolbar.Unselect ();
 		}
 		
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
 			XmlElement elem = base.Write (doc, format);
-			if (menuInfo != null)
-				elem.AppendChild (doc.ImportNode (menuInfo, true));
+			if (toolbarInfo != null)
+				elem.AppendChild (doc.ImportNode (toolbarInfo, true));
 			else
 				elem.AppendChild (actionTree.Write (doc, format));
 			return elem;
@@ -66,7 +99,7 @@ namespace Stetic.Wrapper
 		public override void Read (XmlElement elem, FileFormat format)
 		{
 			base.Read (elem, format);
-			menuInfo = elem ["node"];
+			toolbarInfo = elem ["node"];
 		}
 		
 		protected override void OnNameChanged (WidgetNameChangedArgs args)
@@ -79,9 +112,12 @@ namespace Stetic.Wrapper
 		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
 			BuildTree ();
+			actionTree.Type = Gtk.UIManagerItemType.Toolbar;
+			actionTree.Name = Wrapped.Name;
+			
 			CodeExpression exp = GenerateUiManagerElement (ctx, actionTree);
 			if (exp != null)
-				return new CodeCastExpression (typeof(Gtk.MenuBar),	exp);
+				return new CodeCastExpression (typeof(Gtk.Toolbar),	exp);
 			else
 				return base.GenerateObjectCreation (ctx);
 		}
@@ -95,19 +131,25 @@ namespace Stetic.Wrapper
 		{
 			base.OnDesignerAttach (designer);
 			BuildTree ();
-			menu.FillMenu (actionTree);
+			toolbar.FillMenu (actionTree);
 			
 			if (LocalActionGroups.Count == 0)
 				LocalActionGroups.Add (new ActionGroup ("Default"));
 		}
 		
+		protected override void EmitNotify (string propertyName)
+		{
+			base.EmitNotify (propertyName);
+			toolbar.FillMenu (actionTree);
+		}
+		
 		void BuildTree ()
 		{
-			if (menuInfo != null) {
+			if (toolbarInfo != null) {
 				DisposeTree ();
 				CreateTree ();
-				actionTree.Read (this, menuInfo);
-				menuInfo = null;
+				actionTree.Read (this, toolbarInfo);
+				toolbarInfo = null;
 			}
 		}
 		
@@ -131,44 +173,6 @@ namespace Stetic.Wrapper
 		void OnTreeChanged (object s, EventArgs a)
 		{
 			NotifyChanged ();
-		}
-	}
-	
-	class CustomMenuBarItem: Gtk.MenuItem
-	{
-		public ActionMenuItem ActionMenuItem;
-		public ActionTreeNode Node;
-	}
-		
-	public class ActionPaletteItem: Gtk.HBox
-	{
-		ActionTreeNode node;
-		
-		public ActionPaletteItem (Gtk.UIManagerItemType type, string name, Action action) 
-		: this (new ActionTreeNode (type, name, action))
-		{
-		}
-		
-		public ActionPaletteItem (ActionTreeNode node)
-		{
-			this.node = node;
-			Spacing = 3;
-			if (node.Type == Gtk.UIManagerItemType.Menu) {
-				PackStart (new Gtk.Label ("Menu"), true, true, 0);
-			} else if (node.Action != null && node.Action.GtkAction != null) {
-				if (node.Action.GtkAction.StockId != null)
-					PackStart (node.Action.CreateIcon (Gtk.IconSize.Menu), true, true, 0);
-				PackStart (new Gtk.Label (node.Action.GtkAction.Label), true, true, 0);
-			} else if (node.Type == Gtk.UIManagerItemType.Separator) {
-				PackStart (new Gtk.Label ("Separator"), true, true, 0);
-			} else {
-				PackStart (new Gtk.Label ("Empty Action"), true, true, 0);
-			}
-			ShowAll ();
-		}
-		
-		public ActionTreeNode Node {
-			get { return node; }
 		}
 	}
 }

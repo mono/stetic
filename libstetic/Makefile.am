@@ -48,6 +48,8 @@ libstetic_dll_sources =			\
 	editor/ActionMenuItem.cs			\
 	editor/ActionGroupEditor.cs		\
 	editor/ActionMenuBar.cs		\
+	editor/ActionToolbar.cs		\
+	editor/ActionToolItem.cs		\
 	editor/Boolean.cs		\
 	editor/CellRendererComboBox.cs			\
 	editor/Char.cs			\
@@ -60,16 +62,21 @@ libstetic_dll_sources =			\
 	editor/FlagsSelectorDialog.cs			\
 	editor/FloatRange.cs		\
 	editor/IconList.cs		\
+	editor/IconSelectorItem.cs		\
+	editor/IconSelectorMenu.cs		\
+	editor/IconSelectorMenuItem.cs		\
 	editor/Image.cs			\
 	editor/ImageFile.cs		\
 	editor/ImageSelector.cs		\
 	editor/IntRange.cs		\
 	editor/OptIntRange.cs		\
 	editor/ProjectIconList.cs		\
+	editor/ProjectIconSelectorItem.cs		\
 	editor/ResponseId.cs		\
 	editor/SelectIconDialog.cs	\
 	editor/SelectImageDialog.cs	\
 	editor/StockIconList.cs		\
+	editor/StockIconSelectorItem.cs		\
 	editor/StockItem.cs		\
 	editor/String.cs		\
 	editor/StringArray.cs		\
@@ -91,6 +98,7 @@ libstetic_dll_sources =			\
 	wrapper/Action.cs			\
 	wrapper/ActionGroup.cs			\
 	wrapper/ActionTree.cs			\
+	wrapper/ActionToolbarWrapper.cs			\
 	wrapper/Bin.cs			\
 	wrapper/Box.cs			\
 	wrapper/Button.cs		\

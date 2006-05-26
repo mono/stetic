@@ -105,8 +105,16 @@ namespace Stetic.Wrapper
 			foreach (Action action in Actions) {
 				// Create the action
 				string acVar = ctx.NewId ();
+				Type atype;
+				if (action.Type == Action.ActionType.Action)
+					atype = typeof (Gtk.Action);
+				else if (action.Type == Action.ActionType.Radio)
+					atype = typeof(Gtk.RadioAction);
+				else
+					atype = typeof(Gtk.ToggleAction);
+					
 				CodeVariableDeclarationStatement uidec = new CodeVariableDeclarationStatement (
-					typeof (Gtk.Action),
+					atype,
 					acVar,
 					action.GenerateObjectCreation (ctx)
 				);
@@ -116,7 +124,8 @@ namespace Stetic.Wrapper
 					new CodeMethodInvokeExpression (
 						var,
 						"Add",
-						new CodeVariableReferenceExpression (acVar)
+						new CodeVariableReferenceExpression (acVar),
+						new CodePrimitiveExpression (action.Accelerator)
 					)
 				);
 			}
@@ -132,6 +141,8 @@ namespace Stetic.Wrapper
 			
 			ac.UpdateNameIndex ();
 			
+			NotifyChanged ();
+			
 			if (ActionAdded != null)
 				ActionAdded (this, new ActionEventArgs (ac));
 		}
@@ -144,6 +155,8 @@ namespace Stetic.Wrapper
 			ac.SignalRemoved -= OnSignalRemoved;
 			ac.SignalChanged -= OnSignalChanged;
 
+			NotifyChanged ();
+			
 			if (ActionRemoved != null)
 				ActionRemoved (this, new ActionEventArgs (ac));
 		}
@@ -156,24 +169,28 @@ namespace Stetic.Wrapper
 		
 		void OnActionChanged (object s, ObjectWrapperEventArgs args)
 		{
+			NotifyChanged ();
 			if (ActionChanged != null)
 				ActionChanged (this, new ActionEventArgs ((Action) args.Wrapper));
 		}
 		
 		void OnSignalAdded (object s, SignalEventArgs args)
 		{
+			NotifyChanged ();
 			if (SignalAdded != null)
 				SignalAdded (this, args);
 		}
 		
 		void OnSignalRemoved (object s, SignalEventArgs args)
 		{
+			NotifyChanged ();
 			if (SignalRemoved != null)
 				SignalRemoved (this, args);
 		}
 		
 		void OnSignalChanged (object s, SignalChangedEventArgs args)
 		{
+			NotifyChanged ();
 			if (SignalChanged != null)
 				SignalChanged (this, args);
 		}
@@ -181,6 +198,8 @@ namespace Stetic.Wrapper
 	
 	public class ActionGroupCollection: CollectionBase
 	{
+		ActionGroup[] toClear;
+		
 		public void Add (ActionGroup group)
 		{
 			List.Add (group);
@@ -209,6 +228,19 @@ namespace Stetic.Wrapper
 		{
 			NotifyGroupRemoved ((ActionGroup) oldv);
 			NotifyGroupAdded ((ActionGroup) newv);
+		}
+		
+		protected override void OnClear ()
+		{
+			toClear = new ActionGroup [Count];
+			List.CopyTo (toClear, 0);
+		}
+		
+		protected override void OnClearComplete ()
+		{
+			foreach (ActionGroup a in toClear)
+				NotifyGroupRemoved (a);
+			toClear = null;
 		}
 		
 		void NotifyGroupAdded (ActionGroup grp)

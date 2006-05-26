@@ -1188,7 +1188,7 @@
 	    <command ref="Gtk.CheckButton.RestoreLabel" />
 	</contextmenu>
     </object>
-
+<!--
     <object type="Gtk.RadioMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.RadioMenuItem"
 	    label="Radio Menu Item">
 	<itemgroups>
@@ -1282,6 +1282,7 @@
 	    <itemgroup ref="Gtk.ToolItem" />
 	</signals>
     </object>
+-->
 
     <object type="Gtk.ScrolledWindow,gtk-sharp" wrapper="Stetic.Wrapper.ScrolledWindow"
 	    label="Scrolled Window" icon="scrolledwindow.png" palette-category="container"
@@ -1318,7 +1319,7 @@
 	</signals>
     </object>
 
-    <object type="Gtk.SeparatorToolItem,gtk-sharp"
+<!--    <object type="Gtk.SeparatorToolItem,gtk-sharp"
 	    label="Toolbar Separator" icon="vseparator.png" palette-category="toolbaritem">
 	<itemgroups>
 	    <itemgroup label="Toolbar Separator Properties">
@@ -1332,6 +1333,7 @@
 	    <itemgroup ref="Gtk.ToolItem" />
 	</signals>
     </object>
+-->
 
     <object type="Gtk.SpinButton,gtk-sharp" wrapper="Stetic.Wrapper.SpinButton"
 	    label="Spin Button" icon="spinbutton.png" palette-category="widget" init-properties="Lower Upper StepIncrement">
@@ -1583,7 +1585,7 @@
 	</signals>
     </object>
 
-    <object type="Gtk.ToggleToolButton,gtk-sharp" wrapper="Stetic.Wrapper.ToggleToolButton"
+<!--    <object type="Gtk.ToggleToolButton,gtk-sharp" wrapper="Stetic.Wrapper.ToggleToolButton"
 	    label="Toolbar Toggle Button" icon="checkbutton.png" palette-category="toolbaritem">
 	<itemgroups>
 	    <itemgroup label="Toolbar Toggle Button Properties">
@@ -1604,8 +1606,8 @@
 	    <itemgroup ref="Gtk.ToolItem" />
 	</signals>
     </object>
-
-    <object type="Gtk.Toolbar,gtk-sharp" wrapper="Stetic.Wrapper.Toolbar"
+-->
+    <object type="Gtk.Toolbar,gtk-sharp" wrapper="Stetic.Wrapper.ActionToolbarWrapper"
 	    label="Toolbar" icon="toolbar.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Tool Bar Properties">
@@ -1613,6 +1615,7 @@
 		<property name="ShowArrow" />
 		<property name="ToolbarStyle" />
 		<property name="Tooltips" />
+		<property name="IconSize" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
@@ -1626,6 +1629,7 @@
 	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
+<!--
     <object type="Gtk.Toolbar+ToolbarChild,gtk-sharp" wrapper="Stetic.Wrapper.Toolbar+ToolbarChild">
 	<itemgroups>
 	    <itemgroup label="Tool Bar Child Properties">
@@ -1638,7 +1642,7 @@
 	    </itemgroup>
 	</itemgroups>
     </object>
-
+-->
     <object type="Gtk.TreeView,gtk-sharp"
 	    label="Tree View" icon="treeview.png" palette-category="widget"
 	    hexpandable="true" vexpandable="true">
@@ -2004,11 +2008,12 @@
 	    <itemgroup label="Action Properties">
 		<property name="Name" />
 		<property name="Type" />
+		<property name="Accelerator" editor="Stetic.Editor.Accelerator" />
 		<property name="HideIfEmpty" />
 		<property name="IsImportant" />
 		<property name="Label" />
 		<property name="Sensitive" />
-		<property name="ShortLabel" />
+		<property name="ShortLabel" default=""/>
 		<property name="StockId" editor="Stetic.Editor.StockItem"/>
 		<property name="Tooltip" />
 		<property name="Visible" />

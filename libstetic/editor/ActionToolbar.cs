@@ -6,19 +6,19 @@ using Stetic.Wrapper;
 
 namespace Stetic.Editor
 {
-	class ActionMenuBar: Gtk.MenuBar, IMenuItemContainer
+	class ActionToolbar: Gtk.Toolbar
 	{
-		ActionMenu openSubmenu;
 		ActionTree actionTree;
 		int dropPosition = -1;
 		int dropIndex;
-		ArrayList menuItems = new ArrayList ();
-		bool showPlaceholder;
+		ArrayList toolItems = new ArrayList ();
+		bool showPlaceholder = true;
 		Gtk.Widget addLabel;
 		
-		public ActionMenuBar ()
+		public ActionToolbar ()
 		{
 			DND.DestSet (this, true);
+			this.ShowArrow = false;
 		}
 		
 		public void FillMenu (ActionTree actionTree)
@@ -32,7 +32,9 @@ namespace Stetic.Editor
 			
 			this.actionTree = actionTree;
 			if (actionTree == null) {
-				Insert (new Gtk.MenuItem (""), -1);
+				Gtk.ToolButton tb = new Gtk.ToolButton (Gnome.Stock.Blank);
+				Insert (tb, -1);
+				this.HeightRequest = tb.SizeRequest().Height;
 				ShowAll ();
 				return;
 			}
@@ -40,53 +42,60 @@ namespace Stetic.Editor
 			actionTree.ChildNodeAdded += OnChildAdded;
 			actionTree.ChildNodeRemoved += OnChildRemoved;
 			
-			menuItems.Clear ();
+			toolItems.Clear ();
 			Widget wrapper = Widget.Lookup (this);
 			
 			foreach (Gtk.Widget w in Children) {
 				Remove (w);
 				w.Dispose ();
+				w.Destroy ();
 			}
 
 			foreach (ActionTreeNode node in actionTree.Children) {
-				ActionMenuItem aitem = new ActionMenuItem (wrapper, this, node);
+				ActionToolItem aitem = new ActionToolItem (wrapper, this, node);
 				AddItem (aitem, -1);
-				menuItems.Add (aitem);
+				toolItems.Add (aitem);
 			}
 
 			if (showPlaceholder) {
 				AddCreateItemLabel ();
-			} else if (actionTree.Children.Count == 0) {
-				// Give some height to the toolbar
-				Insert (new Gtk.MenuItem (""), -1);
-				ShowAll ();
 			}
+			
+			if (actionTree.Children.Count == 0) {
+				// If there are no buttons in the toolbar, give it some height so it is selectable.
+				Gtk.ToolButton tb = new Gtk.ToolButton (Gnome.Stock.Blank);
+				if (Orientation == Gtk.Orientation.Horizontal)
+					this.HeightRequest = tb.SizeRequest().Height;
+				else
+					this.WidthRequest = tb.SizeRequest().Width;
+			} else
+				this.HeightRequest = this.WidthRequest = -1;
 		}
 		
 		void AddCreateItemLabel ()
 		{
+			Gtk.EventBox ebox = new Gtk.EventBox ();
+			ebox.VisibleWindow = false;
 			Gtk.Label emptyLabel = new Gtk.Label ();
 			emptyLabel.Xalign = 0;
-			emptyLabel.Markup = "<i><span foreground='darkgrey'>Click to create menu</span></i>";
-			Gtk.MenuItem mit = new Gtk.MenuItem ();
-			mit.Child = emptyLabel;
-			mit.ButtonPressEvent += OnNewItemPress;
+			emptyLabel.Markup = "<i><span foreground='darkgrey'>Click to create button</span></i>";
+			ebox.BorderWidth = 3;
+			ebox.Add (emptyLabel);
+			Gtk.ToolItem mit = new Gtk.ToolItem ();
+			mit.Child = ebox;
+			ebox.ButtonPressEvent += OnNewItemPress;
 			Insert (mit, -1);
 			mit.ShowAll ();
 			addLabel = mit;
 		}
 		
-		void AddItem (ActionMenuItem aitem, int pos)
+		void AddItem (ActionToolItem aitem, int pos)
 		{
-			Gtk.Table t = new Gtk.Table (1, 3, false);
-			aitem.Attach (t, 0, 0);
 			aitem.KeyPressEvent += OnItemKeyPress;
-			t.ShowAll ();
 			
-			CustomMenuBarItem it = new CustomMenuBarItem ();
-			it.ActionMenuItem = aitem;
-			aitem.Bind (it);
-			it.Child = t;
+			CustomToolbarItem it = new CustomToolbarItem ();
+			it.ActionToolItem = aitem;
+			it.Child = aitem;
 			it.ShowAll ();
 			Insert (it, pos);
 		}
@@ -106,15 +115,14 @@ namespace Stetic.Editor
 		
 		public void Unselect ()
 		{
-			// Unselects any selected item and hides any open submenu menu
-			OpenSubmenu = null;
+			// Unselects any selected item
 			Widget wrapper = Widget.Lookup (this);
 			IDesignArea area = wrapper.GetDesignArea ();
 			if (area != null) {
 				foreach (Gtk.Widget w in Children) {
-					CustomMenuBarItem it = w as CustomMenuBarItem;
+					CustomToolbarItem it = w as CustomToolbarItem;
 					if (it != null)
-						area.ResetSelection (it.ActionMenuItem);
+						area.ResetSelection (it.ActionToolItem);
 				}
 			}
 		}
@@ -127,9 +135,9 @@ namespace Stetic.Editor
 		void OnChildRemoved (object ob, ActionTreeNodeArgs args)
 		{
 			foreach (Gtk.Widget w in Children) {
-				if (w is CustomMenuBarItem && ((CustomMenuBarItem)w).ActionMenuItem.Node == args.Node) {
+				if (w is CustomToolbarItem && ((CustomToolbarItem)w).ActionToolItem.Node == args.Node) {
 					Remove (w);
-					menuItems.Remove (((CustomMenuBarItem)w).ActionMenuItem);
+					toolItems.Remove (((CustomToolbarItem)w).ActionToolItem);
 					break;
 				}
 			}
@@ -145,18 +153,20 @@ namespace Stetic.Editor
 			ActionTreeNode selNode = null;
 			
 			foreach (Gtk.Widget w in Children) {
-				CustomMenuBarItem it = w as CustomMenuBarItem;
-				if (it != null && area.IsSelected (it.ActionMenuItem)) {
-					selNode = it.ActionMenuItem.Node;
-					area.ResetSelection (it.ActionMenuItem);
+				CustomToolbarItem it = w as CustomToolbarItem;
+				if (it != null && area.IsSelected (it.ActionToolItem)) {
+					selNode = it.ActionToolItem.Node;
+					area.ResetSelection (it.ActionToolItem);
 				}
 				Remove (w);
+				w.Dispose ();
+				w.Destroy ();
 			}
 			
 			FillMenu (actionTree);
 			
 			if (selNode != null) {
-				ActionMenuItem mi = FindMenuItem (selNode);
+				ActionToolItem mi = FindMenuItem (selNode);
 				if (mi != null)
 					mi.Select ();
 			}
@@ -165,7 +175,7 @@ namespace Stetic.Editor
 		[GLib.ConnectBeforeAttribute]
 		void OnNewItemPress (object ob, Gtk.ButtonPressEventArgs args)
 		{
-			InsertAction (menuItems.Count);
+			InsertAction (toolItems.Count);
 			args.RetVal = true;
 		}
 		
@@ -173,23 +183,27 @@ namespace Stetic.Editor
 		{
 			Widget wrapper = Widget.Lookup (this);
 			Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
-			ActionTreeNode node = new ActionTreeNode (Gtk.UIManagerItemType.Menu, "", ac);
+			ActionTreeNode node = new ActionTreeNode (Gtk.UIManagerItemType.Toolitem, "", ac);
 			actionTree.Children.Insert (pos, node);
 
-			ActionMenuItem aitem = FindMenuItem (node);
+			ActionToolItem aitem = FindMenuItem (node);
 			aitem.EditingDone += OnEditingDone;
 			aitem.Select ();
-			aitem.StartEditing ();
+			aitem.StartEditing (false);
+			ShowInsertPlaceholder = false;
 		}
 		
 		void OnEditingDone (object ob, EventArgs args)
 		{
-			ActionMenuItem item = (ActionMenuItem) ob;
-			item.EditingDone -= OnEditingDone;
 			Widget wrapper = Widget.Lookup (this);
+			IDesignArea area = wrapper.GetDesignArea ();
+			if (area == null)	// The toolbar may be disposed before ending editing
+				return;
+				
+			ActionToolItem item = (ActionToolItem) ob;
+			item.EditingDone -= OnEditingDone;
 			
 			if (item.Node.Action.GtkAction.Label.Length == 0 && item.Node.Action.GtkAction.StockId == null) {
-				IDesignArea area = wrapper.GetDesignArea ();
 				area.ResetSelection (item);
 				actionTree.Children.Remove (item.Node);
 			} else {
@@ -197,83 +211,44 @@ namespace Stetic.Editor
 					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
 				wrapper.LocalActionGroups[0].Actions.Add (item.Node.Action);
 			}
+			ShowInsertPlaceholder = true;
 		}
 		
 		public void Select (ActionTreeNode node)
 		{
-			ActionMenuItem item = FindMenuItem (node);
+			ActionToolItem item = FindMenuItem (node);
 			if (item != null)
 				item.Select ();
 		}
-		
-		public void DropMenu (ActionTreeNode node)
-		{
-			ActionMenuItem item = FindMenuItem (node);
-			if (item != null) {
-				if (item.HasSubmenu) {
-					item.ShowSubmenu ();
-					if (openSubmenu != null)
-						openSubmenu.Select (null);
-				}
-				else
-					item.Select ();
-			}
-		}
-		
-		public ActionMenu OpenSubmenu {
-			get { return openSubmenu; }
-			set {
-				if (openSubmenu != null) {
-					openSubmenu.OpenSubmenu = null;
-					Widget wrapper = Widget.Lookup (this);
-					IDesignArea area = wrapper.GetDesignArea ();
-					if (area != null)
-						area.RemoveWidget (openSubmenu);
-					openSubmenu.Dispose ();
-				}
-				openSubmenu = value;
-			}
-		}
 
-		bool IMenuItemContainer.IsTopMenu { 
-			get { return true; } 
-		}
-		
-		Gtk.Widget IMenuItemContainer.Widget { 
-			get { return this; }
-		}
-		
 		protected override bool OnDragMotion (Gdk.DragContext context, int x, int y, uint time)
 		{
 			ActionPaletteItem dragItem = DND.DragWidget as ActionPaletteItem;
 			if (dragItem == null)
 				return false;
+				
+			x += Allocation.X;
+			y += Allocation.Y;
 			
 			if (actionTree.Children.Count > 0) {
-				ActionMenuItem item = LocateWidget (x, y);
+				ActionToolItem item = LocateWidget (x, y);
 				if (item != null) {
-					Widget wrapper = Widget.Lookup (this);
-				
-					// Show the submenu to allow droping to it, but avoid
-					// droping a submenu inside itself
-					if (item.HasSubmenu && item.Node != dragItem.Node)
-						item.ShowSubmenu (wrapper.GetDesignArea(), item);
-					
 					// Look for the index where to insert the new item
 					dropIndex = actionTree.Children.IndexOf (item.Node);
-					int mpos = item.Allocation.X + item.Allocation.Width / 2;
-					if (x > mpos)
+					int spos = (Orientation == Gtk.Orientation.Horizontal) ? x : y;
+					int mpos = GetButtonPos (item) + GetButtonSize (item) / 2;
+					if (spos > mpos)
 						dropIndex++;
 					
 					// Calculate the drop position, used to show the drop bar
 					if (dropIndex == 0)
-						dropPosition = item.Allocation.X;
-					else if (dropIndex == menuItems.Count)
-						dropPosition = item.Allocation.Right;
+						dropPosition = GetButtonPos (item);
+					else if (dropIndex == toolItems.Count)
+						dropPosition = GetButtonEndPos (item);
 					else {
-						item = (ActionMenuItem) menuItems [dropIndex];
-						ActionMenuItem prevItem = (ActionMenuItem) menuItems [dropIndex - 1];
-						dropPosition = prevItem.Allocation.Right + (item.Allocation.X - prevItem.Allocation.Right)/2;
+						item = (ActionToolItem) toolItems [dropIndex];
+						ActionToolItem prevItem = (ActionToolItem) toolItems [dropIndex - 1];
+						dropPosition = GetButtonEndPos (prevItem) + (GetButtonPos (item) - GetButtonEndPos (prevItem))/2;
 					}
 				}
 			} else
@@ -281,6 +256,21 @@ namespace Stetic.Editor
 
 			QueueDraw ();
 			return base.OnDragMotion (context, x, y, time);
+		}
+		
+		int GetButtonPos (Gtk.Widget w)
+		{
+			return (Orientation == Gtk.Orientation.Horizontal) ? w.Allocation.X : w.Allocation.Y;
+		}
+		
+		int GetButtonEndPos (Gtk.Widget w)
+		{
+			return (Orientation == Gtk.Orientation.Horizontal) ? w.Allocation.Right : w.Allocation.Bottom;
+		}
+		
+		int GetButtonSize (Gtk.Widget w)
+		{
+			return (Orientation == Gtk.Orientation.Horizontal) ? w.Allocation.Width : w.Allocation.Height;
 		}
 		
 		protected override void OnDragLeave (Gdk.DragContext context, uint time)
@@ -297,21 +287,20 @@ namespace Stetic.Editor
 				return false;
 
 			if (dropped.Node.Type != Gtk.UIManagerItemType.Menuitem && 
-				dropped.Node.Type != Gtk.UIManagerItemType.Menu &&
 				dropped.Node.Type != Gtk.UIManagerItemType.Toolitem &&
 				dropped.Node.Type != Gtk.UIManagerItemType.Separator)
 				return false;
-				
+			
 			ActionTreeNode newNode = dropped.Node;
-			if (dropped.Node.Type == Gtk.UIManagerItemType.Toolitem) {
+			if (dropped.Node.Type == Gtk.UIManagerItemType.Menuitem) {
 				newNode = newNode.Clone ();
-				newNode.Type = Gtk.UIManagerItemType.Menuitem;
+				newNode.Type = Gtk.UIManagerItemType.Toolitem;
 			}
 
 			if (dropIndex < actionTree.Children.Count) {
 				// Do nothing if trying to drop the node over the same node
 				ActionTreeNode dropNode = actionTree.Children [dropIndex];
-				if (dropNode == dropped.Node)
+				if (dropNode == newNode)
 					return false;
 					
 				if (newNode.ParentNode != null)
@@ -329,7 +318,7 @@ namespace Stetic.Editor
 			}
 			
 			// Select the dropped node
-			ActionMenuItem mi = (ActionMenuItem) menuItems [dropIndex];
+			ActionToolItem mi = (ActionToolItem) toolItems [dropIndex];
 			mi.Select ();
 			
 			return base.OnDragDrop (context, x,	y, time);
@@ -337,46 +326,39 @@ namespace Stetic.Editor
 		protected override bool OnExposeEvent (Gdk.EventExpose ev)
 		{
 			bool r = base.OnExposeEvent (ev);
-			int w, h;
-			this.GdkWindow.GetSize (out w, out h);
-			if (dropPosition != -1)
-				GdkWindow.DrawRectangle (this.Style.BlackGC, true, dropPosition, 0, 3, h);
+			if (dropPosition != -1) {
+				if (this.Orientation == Gtk.Orientation.Horizontal)
+					GdkWindow.DrawRectangle (this.Style.BlackGC, true, dropPosition, Allocation.Y, 3, Allocation.Height);
+				else
+					GdkWindow.DrawRectangle (this.Style.BlackGC, true, Allocation.X, dropPosition, Allocation.Width, 3);
+			}
 			return r;
 		}
 		
 		void OnItemKeyPress (object s, Gtk.KeyPressEventArgs args)
 		{
-			int pos = menuItems.IndexOf (s);
-			ActionMenuItem item = (ActionMenuItem) s;
+			int pos = toolItems.IndexOf (s);
+			args.RetVal = false;
 			
 			switch (args.Event.Key) {
 				case Gdk.Key.Left:
+					args.RetVal = true;
 					if (pos > 0)
-						((ActionMenuItem)menuItems[pos - 1]).Select ();
+						((ActionToolItem)toolItems[pos - 1]).Select ();
 					break;
 				case Gdk.Key.Right:
-					if (pos < menuItems.Count - 1)
-						((ActionMenuItem)menuItems[pos + 1]).Select ();
-					else if (pos == menuItems.Count - 1)
-						InsertAction (menuItems.Count);
-					break;
-				case Gdk.Key.Down:
-					if (item.HasSubmenu) {
-						item.ShowSubmenu ();
-						if (openSubmenu != null)
-							openSubmenu.Select (null);
-					}
-					break;
-				case Gdk.Key.Up:
-					OpenSubmenu = null;
+					args.RetVal = true;
+					if (pos < toolItems.Count - 1)
+						((ActionToolItem)toolItems[pos + 1]).Select ();
+					else if (pos == toolItems.Count - 1)
+						InsertAction (toolItems.Count);
 					break;
 			}
-			args.RetVal = true;
 		}
 		
-		void InsertActionAt (ActionMenuItem item, bool after, bool separator)
+		void InsertActionAt (ActionToolItem item, bool after, bool separator)
 		{
-			int pos = menuItems.IndexOf (item);
+			int pos = toolItems.IndexOf (item);
 			if (pos == -1)
 				return;
 			
@@ -390,11 +372,11 @@ namespace Stetic.Editor
 				InsertAction (pos);
 		}
 		
-		void Paste (ActionMenuItem item)
+		void Paste (ActionToolItem item)
 		{
 		}
 		
-		public void ShowContextMenu (ActionMenuItem menuItem)
+		public void ShowContextMenu (ActionToolItem menuItem)
 		{
 			Gtk.Menu m = new Gtk.Menu ();
 			Gtk.MenuItem item = new Gtk.MenuItem ("Insert Before");
@@ -407,6 +389,16 @@ namespace Stetic.Editor
 			item.Activated += delegate (object s, EventArgs a) {
 				InsertActionAt (menuItem, true, false);
 			};
+			item = new Gtk.MenuItem ("Insert Separator Before");
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				InsertActionAt (menuItem, false, true);
+			};
+			item = new Gtk.MenuItem ("Insert Separator After");
+			m.Add (item);
+			item.Activated += delegate (object s, EventArgs a) {
+				InsertActionAt (menuItem, true, true);
+			};
 			
 			m.Add (new Gtk.SeparatorMenuItem ());
 			
@@ -415,19 +407,16 @@ namespace Stetic.Editor
 			item.Activated += delegate (object s, EventArgs a) {
 				menuItem.Cut ();
 			};
-			item.Visible = false;	// No copy & paste for now
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Copy, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				menuItem.Copy ();
 			};
-			item.Visible = false;	// No copy & paste for now
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Paste, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				Paste (menuItem);
 			};
-			item.Visible = false;	// No copy & paste for now
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Delete, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
@@ -437,22 +426,33 @@ namespace Stetic.Editor
 			m.Popup ();
 		}
 		
-		ActionMenuItem LocateWidget (int x, int y)
+		ActionToolItem LocateWidget (int x, int y)
 		{
-			foreach (ActionMenuItem mi in menuItems) {
+			foreach (ActionToolItem mi in toolItems) {
 				if (mi.Allocation.Contains (x, y))
 					return mi;
 			}
 			return null;
 		}
 		
-		ActionMenuItem FindMenuItem (ActionTreeNode node)
+		ActionToolItem FindMenuItem (ActionTreeNode node)
 		{
-			foreach (ActionMenuItem mi in menuItems) {
+			foreach (ActionToolItem mi in toolItems) {
 				if (mi.Node == node)
 					return mi;
 			}
 			return null;
 		}
+	}
+	
+	class CustomToolbarItem: Gtk.ToolItem
+	{
+		public override void Dispose ()
+		{
+			ActionToolItem.Dispose ();
+			base.Dispose ();
+		}
+		
+		public ActionToolItem ActionToolItem;
 	}
 }

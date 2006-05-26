@@ -78,12 +78,19 @@ namespace Stetic
 				
 			foreach (ProjectIconSource src in icon.Sources) {
 				if (src.SizeWildcarded || src.Size == size)
-					return src.Image.GetImage (project);
+					return src.Image.GetScaledImage (project, size);
 			}
 			
-			int w, h;
-			Gtk.Icon.SizeLookup (size, out w, out h);
-			return icon.Sources [0].Image.GetThumbnail (project, h);
+			return icon.Sources [0].Image.GetScaledImage (project, size);
+		}
+		
+		public Gdk.Pixbuf RenderIcon (IProject project, string name, int size)
+		{
+			ProjectIconSet icon = GetIcon (name);
+			if (icon == null)
+				return null;
+				
+			return icon.Sources [0].Image.GetScaledImage (project, size, size);
 		}
 	}
 	

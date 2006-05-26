@@ -14,6 +14,7 @@ namespace Stetic.Wrapper
 		int radioValue;
 		bool active;
 		string name;
+		string accelerator;
 		ActionGroup group;
 		
 		string oldDefaultName;
@@ -28,6 +29,7 @@ namespace Stetic.Wrapper
 		public event EventHandler Activated;
 		public event EventHandler Toggled;
 		public event Gtk.ChangedHandler Changed;
+		public event EventHandler Deleted;
 		
 		public Gtk.Action GtkAction {
 			get { return (Gtk.Action) Wrapped; }
@@ -74,23 +76,24 @@ namespace Stetic.Wrapper
 			return null;
 		}
 		
-		bool HasDefaultName {
-			get { return name == GetDefaultName (); }
-		}
-		
 		public ActionType Type {
 			get { return type; }
-			set { type = value; }
+			set { type = value; EmitNotify ("Type"); }
 		}
 		
 		public bool DrawAsRadio {
 			get { return drawAsRadio; }
-			set { drawAsRadio = value; }
+			set { drawAsRadio = value; EmitNotify ("DrawAsRadio"); }
 		}
 		
 		public int Value {
 			get { return radioValue; }
-			set { radioValue = value; }
+			set { radioValue = value; EmitNotify ("Value"); }
+		}
+		
+		public string Accelerator {
+			get { return accelerator; }
+			set { accelerator = value; EmitNotify ("Accelerator"); }
 		}
 		
 		public bool Active {
@@ -122,13 +125,30 @@ namespace Stetic.Wrapper
 			}
 		}
 		
+		public string ToolLabel {
+			get {
+				if (GtkAction.ShortLabel != null && GtkAction.ShortLabel.Length > 0)
+					return GtkAction.ShortLabel;
+				else
+					return MenuLabel;
+			}
+		}
+		
 		public ActionGroup ActionGroup {
 			get { return group; }
 		}
 		
+		public void Delete ()
+		{
+			if (group != null)
+				group.Actions.Remove (this);
+			if (Deleted != null)
+				Deleted (this, EventArgs.Empty);
+			Dispose ();
+		}
+		
 		protected override void EmitNotify (string propertyName)
 		{
-			Console.WriteLine ("propertyName: " + propertyName);
 			if (propertyName == "Label" || propertyName == "StockId") {
 				// If the current name is a name generated from label or stockid,
 				// we update here the name again
@@ -188,6 +208,9 @@ namespace Stetic.Wrapper
 		
 		public Gtk.Widget CreateIcon (Gtk.IconSize size)
 		{
+			if (GtkAction.StockId == null)
+				return null;
+
 			Gdk.Pixbuf px = Project.IconFactory.RenderIcon (Project, GtkAction.StockId, size);
 			if (px != null)
 				return new Gtk.Image (px);
@@ -197,6 +220,9 @@ namespace Stetic.Wrapper
 		
 		public Gdk.Pixbuf RenderIcon (Gtk.IconSize size)
 		{
+			if (GtkAction.StockId == null)
+				return null;
+
 			Gdk.Pixbuf px = Project.IconFactory.RenderIcon (Project, GtkAction.StockId, size);
 			if (px != null)
 				return px;
@@ -219,7 +245,9 @@ namespace Stetic.Wrapper
 			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));
 			
 			prop = (PropertyDescriptor) ClassDescriptor ["Label"];
-			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));
+			string lab = (string) prop.GetValue (Wrapped);
+			if (lab == "") lab = null;
+			exp.Parameters.Add (ctx.GenerateValue (lab, prop.RuntimePropertyType));
 			
 			prop = (PropertyDescriptor) ClassDescriptor ["Tooltip"];
 			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));

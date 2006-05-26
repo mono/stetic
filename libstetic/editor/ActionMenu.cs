@@ -210,7 +210,6 @@ namespace Stetic.Editor
 					if (tc.BottomAttach > row)
 						tc.BottomAttach--;
 				}
-//				RepositionSubmenu ();
 				GLib.Timeout.Add (50, new GLib.TimeoutHandler (RepositionSubmenu));
 			}
 		}
@@ -297,9 +296,17 @@ namespace Stetic.Editor
 			if (dropped == null)
 				return false;
 
+			if (dropped.Node.Type != Gtk.UIManagerItemType.Menuitem && 
+				dropped.Node.Type != Gtk.UIManagerItemType.Menu &&
+				dropped.Node.Type != Gtk.UIManagerItemType.Toolitem &&
+				dropped.Node.Type != Gtk.UIManagerItemType.Separator)
+				return false;
+			
 			ActionTreeNode newNode = null;
 			
-			if (dropped.Node.ParentNode != null) {
+			// Toolitems are copied, not moved
+			
+			if (dropped.Node.ParentNode != null && dropped.Node.Type != Gtk.UIManagerItemType.Toolitem) {
 				if (dropIndex < nodes.Count) {
 					// Do nothing if trying to drop the node over the same node
 					ActionTreeNode dropNode = nodes [dropIndex];
@@ -316,17 +323,7 @@ namespace Stetic.Editor
 					nodes.Add (dropped.Node);
 					dropIndex = nodes.Count - 1;
 				}
-			} else if (dropped.Node.Action == null && dropped.Node.Type == Gtk.UIManagerItemType.Menuitem) {
-				Gtk.Action ac = new Gtk.Action ("newAction", "New Action");
-				Action wac = (Action) ObjectWrapper.Create (wrapper.Project, ac);
-				newNode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, wac);
-				nodes.Insert (dropIndex, newNode);
-			} else if (dropped.Node.Action == null && dropped.Node.Type == Gtk.UIManagerItemType.Menu) {
-				Gtk.Action ac = new Gtk.Action ("newMenu", "New Menu");
-				Action wac = (Action) ObjectWrapper.Create (wrapper.Project, ac);
-				newNode = new ActionTreeNode (Gtk.UIManagerItemType.Menu, null, wac);
-				nodes.Insert (dropIndex, newNode);
-			} else if (dropped.Node.Type == Gtk.UIManagerItemType.Menuitem) {
+			} else {
 				newNode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, dropped.Node.Action);
 				nodes.Insert (dropIndex, newNode);
 			}
@@ -442,16 +439,20 @@ namespace Stetic.Editor
 			item.Activated += delegate (object s, EventArgs a) {
 				menuItem.Cut ();
 			};
+			item.Visible = false;	// No copy & paste for now
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Copy, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				menuItem.Copy ();
 			};
+			item.Visible = false;
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Paste, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				Paste (menuItem);
 			};
+			item.Visible = false;
+			
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Delete, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
