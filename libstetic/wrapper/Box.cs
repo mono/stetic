@@ -197,6 +197,21 @@ namespace Stetic.Wrapper {
 		{
 			Sync ();
 		}
+		
+		public override IEnumerable GladeChildren {
+			get {
+				// Return childs using the position order.
+				// This is needed to make sure children are
+				// added in the right order to the box while loading
+				// or building the box.
+				object[] obs = new object [box.Children.Length];
+				foreach (Gtk.Widget child in box.Children) {
+					Gtk.Box.BoxChild bc = (Gtk.Box.BoxChild) box [child];
+					obs [bc.Position] = child;
+				}
+				return obs;
+			}
+		}
 
 		public override void Drop (Gtk.Widget w, object faultId)
 		{

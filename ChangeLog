@@ -1,3 +1,58 @@
+2006-05-08  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/wrapper/Box.cs: In GladeChildren return children
+	  based on the order of their positions. Fixes bug #78160.
+
+2006-05-26  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/Palette.cs: Don't show the toolitems section,
+	  since it's not being used right now. Show a default icon
+	  for actions which don't have an icon.
+	* libsteticui/PropertyTree.cs: If the property tree only
+	  has one group, allways expand it.
+	* libsteticui/Makefile.am: Added resource.
+	* libsteticui/WidgetPropertyTree.cs: There is no need to delay
+	  the tree filling when the selection is null.
+	* libstetic/PreviewBox.cs: Minor fixes.
+	* libstetic/ImageInfo.cs: Added some image scaling methods.
+	* libstetic/ProjectIconFactory.cs: Added RenderIcon method.
+	* libstetic/wrapper/Action.cs: Added Accelerator property.
+	  Other minor fixes.
+	* libstetic/wrapper/Widget.cs: Notify changes in the local
+	  action groups. Register the accel group of the generated
+	  UIManager.
+	* libstetic/wrapper/objects.xml: Disabled the old toolbar
+	  model. Use the action based toolbar instead.
+	* libstetic/wrapper/ActionTree.cs: Added Changed event.
+	* libstetic/editor/ActionMenuItem.cs: Use the new icon
+	  selection menu.
+	* libstetic/editor/StockItem.cs: Implemented a new editor
+	  which uses the new icon selector menu.
+	* libstetic/PropertyDescriptor.cs: Added support for
+	  specifying a default value for a property in the xml file.
+	* libstetic/Makefile.am: Updated.
+	
+	* wrapper/ActionToolbarWrapper.cs:
+	* editor/ActionToolbar.cs:
+	* editor/ActionToolItem.cs: New toolbar designer.
+	
+	* editor/IconSelectorItem.cs:
+	* editor/IconSelectorMenu.cs:
+	* editor/IconSelectorMenuItem.cs:
+	* editor/ProjectIconSelectorItem.cs:
+	* editor/StockIconSelectorItem.cs: New menu for selecting icons.
+
+	* libstetic/wrapper/MenuBar.cs:
+	* libstetic/editor/ActionMenu.cs:
+	* libstetic/editor/ActionGroupEditor.cs:
+	* libstetic/editor/ActionMenuBar.cs:
+	* libstetic/wrapper/ActionGroup.cs: Several fixes.
+	
+	* stetic/stetic.glade:
+	* stetic/UIManager.cs:
+	* stetic/Stetic.cs: Added a toolbar to the UI.
+	
+	
 2006-05-19  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/WidgetFactory.cs: Highlight the item on mouse over.

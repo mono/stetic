@@ -30,12 +30,40 @@
       <property name="spacing">6</property>
 
       <child>
-	<widget class="Custom" id="MenuBar">
-	  <property name="height_request">24</property>
+	<widget class="GtkVBox" id="vbox2">
 	  <property name="visible">True</property>
-	  <property name="int1">0</property>
-	  <property name="int2">0</property>
-	  <property name="last_modification_time">Tue, 07 Jun 2005 14:54:47 GMT</property>
+	  <property name="homogeneous">False</property>
+	  <property name="spacing">0</property>
+
+	  <child>
+	    <widget class="Custom" id="MenuBar">
+	      <property name="height_request">24</property>
+	      <property name="visible">True</property>
+	      <property name="int1">0</property>
+	      <property name="int2">0</property>
+	      <property name="last_modification_time">Tue, 07 Jun 2005 14:54:47 GMT</property>
+	    </widget>
+	    <packing>
+	      <property name="padding">0</property>
+	      <property name="expand">False</property>
+	      <property name="fill">False</property>
+	    </packing>
+	  </child>
+
+	  <child>
+	    <widget class="Custom" id="Toolbar">
+	      <property name="height_request">24</property>
+	      <property name="visible">True</property>
+	      <property name="int1">0</property>
+	      <property name="int2">0</property>
+	      <property name="last_modification_time">Tue, 07 Jun 2005 14:54:47 GMT</property>
+	    </widget>
+	    <packing>
+	      <property name="padding">0</property>
+	      <property name="expand">False</property>
+	      <property name="fill">False</property>
+	    </packing>
+	  </child>
 	</widget>
 	<packing>
 	  <property name="padding">0</property>

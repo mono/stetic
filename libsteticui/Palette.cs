@@ -24,7 +24,7 @@ namespace Stetic {
 			ShowGroup ("window", "Windows");
 			ShowGroup ("widget", "Widgets");
 			ShowGroup ("container", "Containers");
-			ShowGroup ("toolbaritem", "Toolbar Items");
+//			ShowGroup ("toolbaritem", "Toolbar Items");
 			ShowGroup ("actions", "Actions");
 		}
 		
@@ -227,6 +227,12 @@ namespace Stetic {
 	class ActionPaletteGroup : PaletteGroup 
 	{
 		Wrapper.ActionGroup group;
+		static Gdk.Pixbuf defaultActionIcon;
+		
+		static ActionPaletteGroup ()
+		{
+			defaultActionIcon = Gdk.Pixbuf.LoadFromResource ("action.png");
+		}
 		
 		public ActionPaletteGroup (string name, Wrapper.ActionGroup group): base (name)
 		{
@@ -256,6 +262,7 @@ namespace Stetic {
 		{
 			foreach (Stetic.Wrapper.Action action in group.Actions) {
 				Gdk.Pixbuf icon = action.RenderIcon (Gtk.IconSize.Menu);
+				if (icon == null) icon = defaultActionIcon;
 				Stetic.Wrapper.ActionPaletteItem it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menuitem, null, action);
 				Append (new InstanceWidgetFactory (action.MenuLabel, icon, it));
 			}

@@ -36,6 +36,18 @@ namespace Stetic {
 		"	    <menuitem action='About' />" +
 		"	</menu>" +
 		"    </menubar>" +
+		"    <toolbar>" +
+		"	    <toolitem action='Open' />" +
+		"	    <toolitem action='Save' />" +
+		"	    <separator />" +
+		"	    <toolitem action='Undo' />" +
+		"	    <toolitem action='Redo' />" +
+		"	    <separator />" +
+		"	    <toolitem action='Cut' />" +
+		"	    <toolitem action='Copy' />" +
+		"	    <toolitem action='Paste' />" +
+		"	    <toolitem action='Delete' />" +
+		"    </toolbar>" +
 		"</ui>";
 
 		public UIManager (Project project)
@@ -269,6 +281,12 @@ namespace Stetic {
 		public Gtk.MenuBar MenuBar {
 			get {
 				return (Gtk.MenuBar) GetWidget ("/menubar");
+			}
+		}
+
+		public Gtk.Toolbar Toolbar {
+			get {
+				return (Gtk.Toolbar) GetWidget ("/toolbar");
 			}
 		}
 

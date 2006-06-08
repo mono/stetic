@@ -88,6 +88,13 @@ namespace Stetic
 			if (!tree.Model.GetIterFirst (out iter))
 				return;
 			
+			// If the tree only has one group, show it always exapnded
+			TreeIter iter2 = iter;
+			if (!tree.Model.IterNext (ref iter2)) {
+				tree.ExpandRow (tree.Model.GetPath (iter), true);
+				return;
+			}
+			
 			do {
 				object grp = tree.Model.GetValue (iter, 0);
 				if (expandStatus.Contains (grp))

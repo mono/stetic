@@ -59,7 +59,10 @@ namespace Stetic
 			get { return selection.Wrapped; }
 			set {
 				newSelection = ObjectWrapper.Lookup (value);
-				GLib.Timeout.Add (50, new GLib.TimeoutHandler (SelectedHandler));
+				if (newSelection != null)
+					GLib.Timeout.Add (50, new GLib.TimeoutHandler (SelectedHandler));
+				else
+					SelectedHandler ();
 			}
 		}
 		

@@ -149,6 +149,8 @@ namespace Stetic {
 				return Signals;
 			else if (name == "MenuBar")
 				return UIManager.MenuBar;
+			else if (name == "Toolbar")
+				return UIManager.Toolbar;
 			else
 				return null;
 		}
@@ -257,8 +259,8 @@ namespace Stetic {
 				
 				int p = WidgetNotebook.AppendPage (winActionsBook, tabLabel);
 				winActionsBook.ShowAll ();
+				openWindows [widget] = winActionsBook;
 				WidgetNotebook.Page = p;
-				openWindows [widget] = box;
 			}
 		}
 		

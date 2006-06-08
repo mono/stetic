@@ -21,6 +21,7 @@ libsteticui_dll_sources =			\
 	WidgetTreeCombo.cs
 
 libsteticui_dll_resources =		\
+	action.png		\
 	missing.png
 
 libsteticui.dll: $(libsteticui_dll_sources) $(libsteticui_dll_resources)
