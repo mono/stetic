@@ -49,6 +49,11 @@ namespace Stetic
 			}
 			return null;
 		}
+		
+		public override System.IO.Stream GetResource (string name)
+		{
+			return assembly.GetManifestResourceStream (name);
+		}
 	}
 	
 }

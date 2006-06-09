@@ -33,6 +33,7 @@ namespace Stetic
 			foreach (XmlElement element in objects.SelectNodes ("/objects/object")) {
 				ClassDescriptor klass = LoadClassDescriptor (element);
 				if (klass == null) continue;
+				klass.SetLibrary (this);
 				classes_by_cname[klass.CName] = klass;
 				classes_by_csname[klass.WrappedTypeName] = klass;
 			}
@@ -90,6 +91,11 @@ namespace Stetic
 		}
 		
 		public virtual Type GetType (string typeName)
+		{
+			return null;
+		}
+		
+		public virtual System.IO.Stream GetResource (string name)
 		{
 			return null;
 		}

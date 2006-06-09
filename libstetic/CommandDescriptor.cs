@@ -7,7 +7,7 @@ namespace Stetic {
 
 	public class CommandDescriptor : ItemDescriptor {
 
-		string name, checkName, label, description;
+		string name, checkName, label, description, icon;
 
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
@@ -17,6 +17,7 @@ namespace Stetic {
 			label = elem.GetAttribute ("label");
 			description = elem.GetAttribute ("description");
 			checkName = elem.GetAttribute ("check");
+			icon = elem.GetAttribute ("icon");
 		}
 
 		public override string Name {
@@ -34,6 +35,55 @@ namespace Stetic {
 		public string Description {
 			get {
 				return description;
+			}
+		}
+		
+		public bool IsToggleCommand (object obj)
+		{
+			object target;
+			return (FindBoolProperty (obj, out target) != null);
+		}
+		
+		public bool IsToogled (object obj)
+		{
+			object target;
+			PropertyInfo prop = FindBoolProperty (obj, out target);
+			return (bool) prop.GetValue (target, null);
+		}
+		
+		PropertyInfo FindBoolProperty (object obj, out object target)
+		{
+			PropertyInfo prop = obj.GetType().GetProperty (name, flags);
+			if (prop != null && prop.PropertyType == typeof(bool)) {
+				target = obj;
+				return prop;
+			}
+			
+			ObjectWrapper wrap = ObjectWrapper.Lookup (obj);
+			if (wrap != null) {
+				prop = wrap.GetType().GetProperty (name, flags);
+				if (prop != null && prop.PropertyType == typeof(bool)) {
+					target = wrap;
+					return prop;
+				}
+			}
+			target = null;
+			return null;
+		}
+		
+		public Gtk.Image GetImage ()
+		{
+			if (icon == null)
+				return null;
+			if (icon.StartsWith ("res:")) {
+				System.IO.Stream s = this.ClassDescriptor.Library.GetResource (icon.Substring (4));
+				if (s == null)
+					return null;
+				using (s) {
+					return new Gtk.Image (new Gdk.Pixbuf (s));
+				}
+			} else {
+				return new Gtk.Image (icon, Gtk.IconSize.SmallToolbar);
 			}
 		}
 
@@ -67,6 +117,13 @@ namespace Stetic {
 		
 		object InvokeMethod (object target, string name, object context, bool withContext)
 		{
+			object ptarget;
+			PropertyInfo prop = FindBoolProperty (target, out ptarget);
+			if (prop != null) {
+				prop.SetValue (ptarget, !(bool)prop.GetValue (ptarget, null), null);
+				return null;
+			}
+			
 			if (withContext) {
 				MethodInfo metc = target.GetType().GetMethod (name, flags, null, new Type[] {typeof(Gtk.Widget)}, null);
 				if (metc != null)

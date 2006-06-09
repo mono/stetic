@@ -57,7 +57,7 @@ namespace Stetic.Editor
 		
 		public void StartEditing (bool doClick)
 		{
-			if (!editing) {
+			if (!editing && node.Action != null) {
 				// Don't allow efiting global actions
 				if (wrapper != null && wrapper.Project.ActionGroups.IndexOf (node.Action.ActionGroup) != -1)
 					return;

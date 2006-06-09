@@ -231,6 +231,22 @@ namespace Stetic.Wrapper {
 		}
 
 		public class BoxChild : Container.ContainerChild {
+		
+			public bool BoxExpand {
+				get { return ((Gtk.Box.BoxChild)Wrapped).Expand; }
+				set { 
+					AutoSize = false;
+					((Gtk.Box.BoxChild)Wrapped).Expand = value;
+				}
+			}
+
+			public bool BoxFill {
+				get { return ((Gtk.Box.BoxChild)Wrapped).Fill; }
+				set { 
+					AutoSize = false;
+					((Gtk.Box.BoxChild)Wrapped).Fill = value;
+				}
+			}
 
 			protected override void EmitNotify (string propertyName)
 			{

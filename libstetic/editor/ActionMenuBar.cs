@@ -15,6 +15,7 @@ namespace Stetic.Editor
 		ArrayList menuItems = new ArrayList ();
 		bool showPlaceholder;
 		Gtk.Widget addLabel;
+		Gtk.Widget spacerItem;
 		
 		public ActionMenuBar ()
 		{
@@ -32,8 +33,7 @@ namespace Stetic.Editor
 			
 			this.actionTree = actionTree;
 			if (actionTree == null) {
-				Insert (new Gtk.MenuItem (""), -1);
-				ShowAll ();
+				AddSpacerItem ();
 				return;
 			}
 				
@@ -58,13 +58,13 @@ namespace Stetic.Editor
 				AddCreateItemLabel ();
 			} else if (actionTree.Children.Count == 0) {
 				// Give some height to the toolbar
-				Insert (new Gtk.MenuItem (""), -1);
-				ShowAll ();
+				AddSpacerItem ();
 			}
 		}
 		
 		void AddCreateItemLabel ()
 		{
+			HideSpacerItem ();
 			Gtk.Label emptyLabel = new Gtk.Label ();
 			emptyLabel.Xalign = 0;
 			emptyLabel.Markup = "<i><span foreground='darkgrey'>Click to create menu</span></i>";
@@ -74,6 +74,24 @@ namespace Stetic.Editor
 			Insert (mit, -1);
 			mit.ShowAll ();
 			addLabel = mit;
+		}
+		
+		void AddSpacerItem ()
+		{
+			if (spacerItem == null) {
+				Gtk.MenuItem mi = new Gtk.MenuItem ("");
+				Insert (mi, -1);
+				spacerItem = mi;
+				ShowAll ();
+			}
+		}
+		
+		void HideSpacerItem ()
+		{
+			if (spacerItem != null) {
+				Remove (spacerItem);
+				spacerItem = null;
+			}
 		}
 		
 		void AddItem (ActionMenuItem aitem, int pos)
@@ -100,6 +118,8 @@ namespace Stetic.Editor
 				} else if (!value && addLabel != null) {
 					Remove (addLabel);
 					addLabel = null;
+					if (menuItems.Count == 0)
+						AddSpacerItem ();
 				}
 			}
 		}
@@ -130,6 +150,8 @@ namespace Stetic.Editor
 				if (w is CustomMenuBarItem && ((CustomMenuBarItem)w).ActionMenuItem.Node == args.Node) {
 					Remove (w);
 					menuItems.Remove (((CustomMenuBarItem)w).ActionMenuItem);
+					if (menuItems.Count == 0 && !showPlaceholder)
+						AddSpacerItem ();
 					break;
 				}
 			}

@@ -4,11 +4,14 @@ using System.Runtime.InteropServices;
 namespace Stetic.Editor {
 
 	[PropertyEditor ("Accel", "AccelChanged")]
-	public class Accelerator : Gtk.Entry, IPropertyEditor {
+	public class Accelerator : Gtk.HBox, IPropertyEditor {
 
 		uint keyval;
 		Gdk.ModifierType mask;
 		bool editing;
+		
+		Gtk.Button clearButton;
+		Gtk.Entry entry;
 
 		const Gdk.ModifierType AcceleratorModifierMask = ~(
 			Gdk.ModifierType.Button1Mask |
@@ -19,7 +22,17 @@ namespace Stetic.Editor {
 
 		public Accelerator ()
 		{
-			IsEditable = false;
+			entry = new Gtk.Entry ();
+			clearButton = new Gtk.Button (new Gtk.Image (Gtk.Stock.Clear, Gtk.IconSize.Menu));
+			PackStart (entry, true, true, 0);
+			PackStart (clearButton, false, false, 3);
+			clearButton.Clicked += delegate (object s, EventArgs args) {
+				Value = null;
+			};
+			entry.IsEditable = false;
+			entry.ButtonPressEvent += OnButtonPressEvent;
+			entry.KeyPressEvent += OnKeyPressEvent;
+			ShowAll ();
 		}
 
 		public void Initialize (PropertyDescriptor descriptor)
@@ -33,13 +46,14 @@ namespace Stetic.Editor {
 			Value = null;
 		}
 		
-		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
+		[GLib.ConnectBefore]
+		void OnButtonPressEvent (object s, Gtk.ButtonPressEventArgs args)
 		{
 			if (editing)
-				Ungrab (evt.Time);
+				Ungrab (args.Event.Time);
 			else
-				Grab (evt.Window, evt.Time);
-			return true;
+				Grab (args.Event.Window, args.Event.Time);
+			args.RetVal = true;
 		}
 
 		void Ungrab (uint time)
@@ -50,7 +64,10 @@ namespace Stetic.Editor {
 
 			Gdk.Keyboard.Ungrab (time);
 			Gdk.Pointer.Ungrab (time);
-			Text = (string) Value;
+			if (Value != null)
+				entry.Text = (string) Value;
+			else
+				entry.Text = "";
 		}
 
 		void Grab (Gdk.Window window, uint time)
@@ -65,28 +82,24 @@ namespace Stetic.Editor {
 				Gdk.Keyboard.Ungrab (time);
 				return;
 			}
-			GrabFocus ();
+			entry.GrabFocus ();
 
 			editing = true;
-			Text = "New Accelerator...";
+			entry.Text = "Press a key...";
 		}
 
-//		[DllImport ("libsteticglue")]
-//		static extern bool stetic_keycode_is_modifier (uint keycode);
-
-		protected override bool OnKeyPressEvent (Gdk.EventKey evt)
+		[GLib.ConnectBefore]
+		void OnKeyPressEvent (object s, Gtk.KeyPressEventArgs args)
 		{
-//			if (!editing || stetic_keycode_is_modifier (evt.HardwareKeycode))
-//				return base.OnKeyPressEvent (evt);
+			Gdk.EventKey evt = args.Event;
 			
-			// FIXME: check for modifier
-			if (!editing)
-				return base.OnKeyPressEvent (evt);
-
+			if (!editing || !Gtk.Accelerator.Valid (evt.KeyValue, evt.State))
+				return;
+			
 			uint keyval;
 			int effectiveGroup, level;
 			Gdk.ModifierType consumedMods, mask;
-
+			
 			// We know this will succeed, since we're already here...
 			Gdk.Keymap.Default.TranslateKeyboardState (evt.HardwareKeycode, evt.State, evt.Group, out keyval, out effectiveGroup, out level, out consumedMods);
 			mask = evt.State & AcceleratorModifierMask & ~consumedMods;
@@ -95,19 +108,12 @@ namespace Stetic.Editor {
 				this.keyval = keyval;
 				this.mask = mask;
 			}
+			
+			clearButton.Sensitive = true;
 
 			Ungrab (evt.Time);
 			EmitAccelChanged ();
-			return true;
-		}
-
-		public new string Text {
-			set {
-				if (value == null)
-					base.Text = "";
-				else
-					base.Text = value;
-			}
+			args.RetVal = true;
 		}
 
 		public object Value {
@@ -122,9 +128,15 @@ namespace Stetic.Editor {
 				if (s == null) {
 					keyval = 0;
 					mask = 0;
-				} else
+					clearButton.Sensitive = false;
+				} else {
 					Gtk.Accelerator.Parse (s, out keyval, out mask);
-				Text = (string) Value;
+					clearButton.Sensitive = true;
+				}
+				if (Value != null)
+					entry.Text = (string) Value;
+				else
+					entry.Text = "";
 				EmitAccelChanged ();
 			}
 		}

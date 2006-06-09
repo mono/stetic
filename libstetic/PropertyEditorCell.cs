@@ -110,7 +110,7 @@ namespace Stetic
 		
 		protected virtual void Initialize ()
 		{
-			layout.SetMarkup (GetNormalizedText ());
+			layout.SetText (GetNormalizedText ());
 		}
 		
 		public virtual void GetSize (int availableWidth, out int width, out int height)

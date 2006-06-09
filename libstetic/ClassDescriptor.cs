@@ -19,6 +19,7 @@ namespace Stetic {
 		protected ItemGroup contextMenu;
 		protected ItemGroup internalChildren;
 		
+		WidgetLibrary library;
 		PropertyDescriptor[] initializationProperties;
 		static PropertyDescriptor[] emptyPropArray = new PropertyDescriptor[0];
 
@@ -234,6 +235,10 @@ namespace Stetic {
 			}
 		}
 		
+		public WidgetLibrary Library {
+			get { return library; }
+		}
+		
 		public virtual bool AllowChildren {
 			get { return allowChildren; }
 		}
@@ -244,6 +249,11 @@ namespace Stetic {
 				return new CommandDescriptor (elem, group, this);
 			else
 				throw new ApplicationException ("Bad item name " + elem.Name + " in " + WrappedTypeName);
+		}
+		
+		internal void SetLibrary (WidgetLibrary library)
+		{
+			this.library = library;
 		}
 	}
 }

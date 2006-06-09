@@ -1,3 +1,32 @@
+2006-05-09  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/CommandDescriptor.cs:
+	* libsteticui/WidgetActionBar.cs: Add support for icon based
+	  commands and for toogle commands.
+	  
+	* libstetic/ItemDescriptor.cs: invisible-if and disable-if elements
+	  now support calling a method to get the check value.
+	* libstetic/WidgetLibrary.cs: Assign the widget library to
+	  class descriptors.
+	* libstetic/wrapper/Container.cs: Implemented IncBorder and DecBorder
+	  commands.
+	* libstetic/wrapper/Box.cs: Implemented BoxExpand and BoxFill toggle
+	  commands.
+	* libstetic/wrapper/objects.xml: Added IncBorder and DecBorder commands
+	  to containers. Added BoxExpand and BoxFill to box child.
+	* libstetic/editor/Accelerator.cs: Fixed. Added button for clearing
+	  the accelerator.
+	  
+	* libstetic/editor/ActionToolbar.cs:
+	* libstetic/editor/ActionMenuBar.cs: Make sure the menu has some height
+	  when there are no items, so it can be easily selected.
+	  
+	* libstetic/editor/ActionToolItem.cs: Don't allow editing separators.
+	* libstetic/PropertyEditorCell.cs: Paint text, not markup.
+	* libstetic/ClassDescriptor.cs: Added property which returns the widget
+	  library that implements the class descriptor.
+	* libstetic/AssemblyWidgetLibrary.cs: Implemented GetResource method.
+
 2006-05-08  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/wrapper/Box.cs: In GladeChildren return children

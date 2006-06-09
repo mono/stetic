@@ -137,12 +137,18 @@
     </object>
 
     <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container">
+	<itemgroups>
+    	<itemgroup name="Commands">
+			<command name="IncreaseBorderWidth" label="Increase Border Width" icon="res:inc-border.png" />
+			<command name="DecreaseBorderWidth" label="Decrease Border Width" icon="res:dec-border.png" />
+	    </itemgroup>
+	</itemgroups>
 	<signals>
     	<itemgroup label="Container Signals">
-		<signal name="Added" />
-		<signal name="FocusChildSet" />
-		<signal name="Removed" />
-		<signal name="ResizeChecked" />
+			<signal name="Added" />
+			<signal name="FocusChildSet" />
+			<signal name="Removed" />
+			<signal name="ResizeChecked" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
 	</signals>
@@ -180,6 +186,7 @@
 		<property name="SkipTaskbarHint" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Window Signals">
@@ -212,6 +219,7 @@
 		<property name="Position" />
 		<property name="BorderWidth" />
 	    </itemgroup>
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Paned Signals">
@@ -303,6 +311,7 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -329,6 +338,7 @@
     	label="Bin" icon="custom.png">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -338,9 +348,9 @@
     <object type="Gtk.Box,gtk-sharp" wrapper="Stetic.Wrapper.Box">
 	<itemgroups>
 	    <itemgroup label="Box Properties">
-		<property name="Homogeneous" />
-		<property name="Spacing" />
-		<property name="BorderWidth" />
+			<property name="Homogeneous" />
+			<property name="Spacing" />
+			<property name="BorderWidth" />
 	    </itemgroup>
 	</itemgroups>
 	<contextmenu>
@@ -354,6 +364,7 @@
 	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
+    
     <object type="Gtk.Box+BoxChild,gtk-sharp" wrapper="Stetic.Wrapper.Box+BoxChild">
 	<itemgroups>
 	    <itemgroup label="Box Child Layout">
@@ -369,6 +380,8 @@
 		    <disabled-if name="Expand" value="false" />
 		</property>
 		<property name="Padding" />
+		<command name="BoxExpand" label="Expand" icon="res:box-expand.png" />
+		<command name="BoxFill" label="Fill" icon="res:box-fill.png" />
 	    </itemgroup>
 	</itemgroups>
     </object>
@@ -383,6 +396,7 @@
 		<property name="Spacing" />
 		<property name="BorderWidth" />
 	    </itemgroup>
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -456,6 +470,7 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Button Signals">
@@ -507,13 +522,13 @@
 		<property name="Inconsistent" />
 		<property name="DrawIndicator" />
 		<property name="HasLabel" internal="true" />
-		<command name="RemoveLabel" label="Remove Label"
-			 description="Remove the button's label">
-		    <disabled-if name="HasLabel" value="false" />
-		</command>
-		<command name="RestoreLabel" label="Restore Label"
+		<command name="RestoreLabel" label="Restore Label" icon="res:add-check-label.png"
 			 description="Restore the button's label">
 		    <disabled-if name="HasLabel" value="true" />
+		</command>
+		<command name="RemoveLabel" label="Remove Label" icon="res:remove-check-label.png"
+			 description="Remove the button's label">
+		    <disabled-if name="HasLabel" value="false" />
 		</command>
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
@@ -611,6 +626,7 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Color Button Signals">
@@ -689,6 +705,7 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Dialog Signals">
@@ -765,6 +782,7 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -781,6 +799,7 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Expander Signals">
@@ -806,6 +825,7 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Font Button Signals">
@@ -827,6 +847,7 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -839,6 +860,7 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Box" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -853,6 +875,7 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.ButtonBox" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -882,6 +905,7 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Paned" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -994,6 +1018,7 @@
 	    label="Menu Bar" icon="menubar.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup ref="Gtk.Widget" important="false" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Menu Bar Signals">
@@ -1047,6 +1072,7 @@
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -1067,12 +1093,14 @@
 		<property name="Scrollable" />
 		<property name="BorderWidth" />
 		<command name="InsertBefore" label="Insert Page Before"
-			 check="CheckInsertBefore"
-			 description="Insert a blank page before this one" />
+			 description="Insert a blank page before this one">
+		    <disabled-if check="CheckInsertBefore" />
+		</command>
 		<command name="InsertAfter" label="Insert Page After"
 			 description="Insert a blank page after this one" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Notebook Signals">
@@ -1087,20 +1115,25 @@
 	</signals>
 	<contextmenu>
 	    <command name="PreviousPage" label="Go to Previous Page"
-		     description="Show the previous page"
-		     check="CheckPreviousPage" />
+		     description="Show the previous page">
+		    <disabled-if check="CheckPreviousPage" />
+		</command>
 	    <command name="NextPage" label="Go to Next Page"
-		     description="Show the next page"
-		     check="CheckNextPage" />
+		     description="Show the next page">
+		    <disabled-if check="CheckNextPage" />
+		</command>
 	    <command name="DeletePage" label="Delete Page"
-		     description="Delete the current page"
-		     check="CheckDeletePage" />
+		     description="Delete the current page">
+		    <disabled-if check="CheckDeletePage" />
+		</command>
 	    <command name="SwapPrevious" label="Swap with Previous Page"
-		     description="Swap the contents of this page with the contents of the previous page"
-		     check="CheckPreviousPage" />
+		     description="Swap the contents of this page with the contents of the previous page">
+		    <disabled-if check="CheckPreviousPage" />
+		</command>
 	    <command name="SwapNext" label="Swap with Next Page"
-		     description="Swap the contents of this page with the contents of the next page"
-		     check="CheckNextPage" />
+		     description="Swap the contents of this page with the contents of the next page">
+		    <disabled-if check="CheckNextPage" />
+		</command>
 	    <command ref="InsertBefore" />
 	    <command ref="InsertAfter" />
 	</contextmenu>
@@ -1125,6 +1158,7 @@
 			  description="The active menu item" min="0" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Option Menu Signals">
@@ -1296,6 +1330,7 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Scrolled Window Signals">
@@ -1376,6 +1411,7 @@
 		<property name="HasResizeGrip" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Statusbar Signals">
@@ -1399,6 +1435,7 @@
 		<property name="BorderWidth" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -1574,6 +1611,7 @@
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Toggle Button Signals">
@@ -1618,6 +1656,7 @@
 		<property name="IconSize" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Toolbar Signals">
@@ -1659,6 +1698,7 @@
 		<!-- 2.6 <property name="HoverExpand" /> -->
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Tree View Signals">
@@ -1689,6 +1729,7 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Box" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -1703,6 +1744,7 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.ButtonBox" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -1718,6 +1760,7 @@
 		<property name="ShadowType" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Viewport Signals">
@@ -1734,6 +1777,7 @@
 	<itemgroups>
 	    <itemgroup ref="Gtk.Paned" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -1834,6 +1878,7 @@
 		<property name="HasOpacityControl" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Color Selection Signals">
@@ -1856,6 +1901,7 @@
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -1885,6 +1931,7 @@
 		<!-- 2.6 <property name="ShowHidden" /> -->
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="File Chooser Widget Signals">
@@ -1937,6 +1984,7 @@
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="File Chooser Dialog Signals">
@@ -1965,6 +2013,7 @@
 		<property name="PreviewText" translatable="true" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />
@@ -1984,6 +2033,7 @@
 	    <itemgroup ref="Gtk.Dialog.Misc" />
 	    <itemgroup ref="Gtk.Window.Size" />
 	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
 	    <itemgroup ref="Gtk.Widget" />

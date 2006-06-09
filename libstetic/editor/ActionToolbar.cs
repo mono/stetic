@@ -14,6 +14,7 @@ namespace Stetic.Editor
 		ArrayList toolItems = new ArrayList ();
 		bool showPlaceholder = true;
 		Gtk.Widget addLabel;
+		Gtk.Widget spacerItem;
 		
 		public ActionToolbar ()
 		{
@@ -32,10 +33,7 @@ namespace Stetic.Editor
 			
 			this.actionTree = actionTree;
 			if (actionTree == null) {
-				Gtk.ToolButton tb = new Gtk.ToolButton (Gnome.Stock.Blank);
-				Insert (tb, -1);
-				this.HeightRequest = tb.SizeRequest().Height;
-				ShowAll ();
+				AddSpacerItem ();
 				return;
 			}
 				
@@ -56,29 +54,28 @@ namespace Stetic.Editor
 				AddItem (aitem, -1);
 				toolItems.Add (aitem);
 			}
+			
+			if (actionTree.Children.Count == 0) {
+				// If there are no buttons in the toolbar, give it some height so it is selectable.
+				AddSpacerItem ();
+			}
 
 			if (showPlaceholder) {
 				AddCreateItemLabel ();
 			}
-			
-			if (actionTree.Children.Count == 0) {
-				// If there are no buttons in the toolbar, give it some height so it is selectable.
-				Gtk.ToolButton tb = new Gtk.ToolButton (Gnome.Stock.Blank);
-				if (Orientation == Gtk.Orientation.Horizontal)
-					this.HeightRequest = tb.SizeRequest().Height;
-				else
-					this.WidthRequest = tb.SizeRequest().Width;
-			} else
-				this.HeightRequest = this.WidthRequest = -1;
 		}
 		
 		void AddCreateItemLabel ()
 		{
+			HideSpacerItem ();
 			Gtk.EventBox ebox = new Gtk.EventBox ();
 			ebox.VisibleWindow = false;
 			Gtk.Label emptyLabel = new Gtk.Label ();
 			emptyLabel.Xalign = 0;
-			emptyLabel.Markup = "<i><span foreground='darkgrey'>Click to create button</span></i>";
+			if (this.Orientation == Gtk.Orientation.Vertical)
+				emptyLabel.Markup = "<i><span foreground='darkgrey'>New\nbutton</span></i>";
+			else
+				emptyLabel.Markup = "<i><span foreground='darkgrey'>New button</span></i>";
 			ebox.BorderWidth = 3;
 			ebox.Add (emptyLabel);
 			Gtk.ToolItem mit = new Gtk.ToolItem ();
@@ -87,6 +84,25 @@ namespace Stetic.Editor
 			Insert (mit, -1);
 			mit.ShowAll ();
 			addLabel = mit;
+		}
+		
+		void AddSpacerItem ()
+		{
+			if (spacerItem == null) {
+				Gtk.ToolItem tb = new Gtk.ToolItem ();
+				tb.Child = new Gtk.Label ("   ");
+				Insert (tb, -1);
+				ShowAll ();
+				spacerItem = tb;
+			}
+		}
+		
+		void HideSpacerItem ()
+		{
+			if (spacerItem != null) {
+				Remove (spacerItem);
+				spacerItem = null;
+			}
 		}
 		
 		void AddItem (ActionToolItem aitem, int pos)
@@ -103,12 +119,16 @@ namespace Stetic.Editor
 		public bool ShowInsertPlaceholder {
 			get { return showPlaceholder; }
 			set {
+				Console.WriteLine ("ShowInsertPlaceholder: " + value);
 				showPlaceholder = value;
 				if (value && addLabel == null) {
 					AddCreateItemLabel ();
 				} else if (!value && addLabel != null) {
 					Remove (addLabel);
 					addLabel = null;
+					Console.WriteLine ("actionTree.Children.Count: " + actionTree.Children.Count);
+					if (actionTree.Children.Count == 0)
+						AddSpacerItem ();
 				}
 			}
 		}
@@ -138,6 +158,8 @@ namespace Stetic.Editor
 				if (w is CustomToolbarItem && ((CustomToolbarItem)w).ActionToolItem.Node == args.Node) {
 					Remove (w);
 					toolItems.Remove (((CustomToolbarItem)w).ActionToolItem);
+					if (!showPlaceholder && toolItems.Count == 0)
+						AddSpacerItem ();
 					break;
 				}
 			}
@@ -190,7 +212,7 @@ namespace Stetic.Editor
 			aitem.EditingDone += OnEditingDone;
 			aitem.Select ();
 			aitem.StartEditing (false);
-			ShowInsertPlaceholder = false;
+			//ShowInsertPlaceholder = false;
 		}
 		
 		void OnEditingDone (object ob, EventArgs args)
@@ -211,7 +233,6 @@ namespace Stetic.Editor
 					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
 				wrapper.LocalActionGroups[0].Actions.Add (item.Node.Action);
 			}
-			ShowInsertPlaceholder = true;
 		}
 		
 		public void Select (ActionTreeNode node)

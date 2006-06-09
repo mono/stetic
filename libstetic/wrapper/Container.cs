@@ -75,7 +75,20 @@ namespace Stetic.Wrapper {
 			get { return designHeight; }
 			set { designHeight = value; NotifyChanged (); }
 		}
+		
+		public void IncreaseBorderWidth () 
+		{
+			container.BorderWidth += 3;
+		}
 
+		public void DecreaseBorderWidth () 
+		{
+			if (container.BorderWidth >= 3)
+				container.BorderWidth -= 3;
+			else
+				container.BorderWidth = 0;
+		}
+		
 		int freeze;
 		protected void Freeze ()
 		{

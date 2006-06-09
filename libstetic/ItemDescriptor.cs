@@ -1,45 +1,62 @@
 using System;
 using System.Collections;
 using System.Xml;
+using System.Reflection;
 
 namespace Stetic {
 
 	public abstract class ItemDescriptor {
 
-		Hashtable deps, visdeps;
+		ArrayList deps, visdeps;
 		bool isInternal;
+		ClassDescriptor klass;
 
 		protected ItemDescriptor () {}
 
 		protected ItemDescriptor (XmlElement elem, ItemGroup group, ClassDescriptor klass)
 		{
+			this.klass = klass;
 			isInternal = elem.HasAttribute ("internal");
 			deps = AddSubprops (elem.SelectNodes ("./disabled-if"), group, klass);
 			visdeps = AddSubprops (elem.SelectNodes ("./invisible-if"), group, klass);
 		}
 
-		Hashtable AddSubprops (XmlNodeList nodes, ItemGroup group, ClassDescriptor klass)
+		ArrayList AddSubprops (XmlNodeList nodes, ItemGroup group, ClassDescriptor klass)
 		{
-			Hashtable hash = null;
+			ArrayList list = null;
+			
+			// Sub-properties can have a name+value (which checks for the value of a
+			// property) or a method name, which should return true if the item has
+			// to be disabled/hidden.
 
 			foreach (XmlElement elem in nodes) {
 				string name = elem.GetAttribute ("name");
-				string value = elem.GetAttribute ("value");
+				if (name.Length > 0) {
+					string value = elem.GetAttribute ("value");
 
-				PropertyDescriptor prop = (PropertyDescriptor)group[name];
-				if (prop == null)
-					prop = (PropertyDescriptor)klass[name];
-				if (prop == null)
-					throw new ArgumentException ("Bad sub-prop " + name);
-				if (hash == null)
-					hash = new Hashtable ();
-				ArrayList values = (ArrayList)hash[prop];
-				if (values == null)
-					hash[prop] = values = new ArrayList ();
-
-				values.Add (prop.StringToValue (value));
+					PropertyDescriptor prop = (PropertyDescriptor)group[name];
+					if (prop == null)
+						prop = (PropertyDescriptor)klass[name];
+					if (prop == null)
+						throw new ArgumentException ("Bad sub-prop " + name);
+					if (list == null)
+						list = new ArrayList ();
+						
+					DepInfo info = new DepInfo ();
+					info.Property = prop;
+					info.Value = prop.StringToValue (value);
+					list.Add (info);
+				} else if ((name = elem.GetAttribute ("check")).Length > 0) {
+					DepInfo info = new DepInfo ();
+					info.CheckName = name;
+					if (list == null)
+						list = new ArrayList ();
+					list.Add (info);
+				} else {
+					throw new ArgumentException ("Bad sub-prop");
+				}
 			}
-			return hash;
+			return list;
 		}
 
 		// The property's display name
@@ -56,12 +73,9 @@ namespace Stetic {
 			if (deps == null)
 				return true;
 
-			foreach (PropertyDescriptor dep in deps.Keys) {
-				object depValue = dep.GetValue (obj);
-				foreach (object value in (ArrayList)deps[dep]) {
-					if (value.Equals (depValue))
-						return false;
-				}
+			foreach (DepInfo dep in deps) {
+				if (dep.Check (obj))
+					return false;
 			}
 			return true;
 		}
@@ -77,12 +91,9 @@ namespace Stetic {
 			if (visdeps == null)
 				return true;
 
-			foreach (PropertyDescriptor dep in visdeps.Keys) {
-				object depValue = dep.GetValue (obj);
-				foreach (object value in (ArrayList)visdeps[dep]) {
-					if (value.Equals (depValue))
-						return false;
-				}
+			foreach (DepInfo dep in visdeps) {
+				if (dep.Check (obj))
+					return false;
 			}
 			return true;
 		}
@@ -90,6 +101,29 @@ namespace Stetic {
 		public bool IsInternal {
 			get {
 				return isInternal;
+			}
+		}
+		
+		public ClassDescriptor ClassDescriptor {
+			get { return klass; }
+		}
+		
+		class DepInfo
+		{
+			public string CheckName;
+			public PropertyDescriptor Property;
+			public object Value;
+			
+			public bool Check (object obj)
+			{
+				if (Property != null) {
+					object depValue = Property.GetValue (obj);
+					return Value.Equals (depValue);
+				} else {
+					object wrapper = ObjectWrapper.Lookup (obj);
+					object res = obj.GetType().InvokeMember (CheckName, BindingFlags.Public | BindingFlags.NonPublic, null, wrapper, null);
+					return (bool) res;
+				}
 			}
 		}
 	}
