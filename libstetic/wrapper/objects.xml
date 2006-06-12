@@ -791,7 +791,7 @@
     </object>
 
     <object type="Gtk.Expander,gtk-sharp" wrapper="Stetic.Wrapper.Expander"
-	    label="Expander" palette-category="container">
+	    label="Expander" icon="expander.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Expander Properties">
 		<property name="Expanded" />

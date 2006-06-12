@@ -13,6 +13,7 @@ namespace Stetic
 		WidgetTreeCombo combo;
 		ToolItem comboItem;
 		Stetic.Wrapper.Widget selection;
+		Stetic.Wrapper.Container.ContainerChild packingSelection;
 		Hashtable editors, wrappers;
 		Hashtable sensitives, invisibles;
 		ArrayList toggles;
@@ -68,12 +69,12 @@ namespace Stetic
 		{
 			if (selection != null) {
 				selection.Notify -= Notified;
-				Stetic.Wrapper.Container.ContainerChild packingSelection = Stetic.Wrapper.Container.ChildWrapper (selection);
 				if (packingSelection != null)
 					packingSelection.Notify -= Notified;
 			}
 			
 			selection = null;
+			packingSelection = null;
 			
 			editors.Clear ();
 			wrappers.Clear ();
@@ -109,7 +110,7 @@ namespace Stetic
 			combo.SetSelection (selection);
 			
 			selection.Notify += Notified;
-			Stetic.Wrapper.Container.ContainerChild packingSelection = Stetic.Wrapper.Container.ChildWrapper (selection);
+			packingSelection = Stetic.Wrapper.Container.ChildWrapper (selection);
 			if (packingSelection != null)
 				packingSelection.Notify += Notified;
 				
@@ -118,6 +119,11 @@ namespace Stetic
 		}
 		
 		protected virtual void AddWidgetCommands (ObjectWrapper wrapper)
+		{
+			AddCommands (wrapper);
+		}
+		
+		void AddCommands (ObjectWrapper wrapper)
 		{
 			foreach (ItemGroup igroup in wrapper.ClassDescriptor.ItemGroups) {
 				foreach (ItemDescriptor desc in igroup) {
@@ -130,7 +136,7 @@ namespace Stetic
 			if (widget != null) {
 				Stetic.Wrapper.Container.ContainerChild packingSelection = Stetic.Wrapper.Container.ChildWrapper (widget);
 				if (packingSelection != null)
-					AddWidgetCommands (packingSelection);
+					AddCommands (packingSelection);
 			}
 		}
 		

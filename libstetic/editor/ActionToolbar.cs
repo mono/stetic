@@ -119,14 +119,12 @@ namespace Stetic.Editor
 		public bool ShowInsertPlaceholder {
 			get { return showPlaceholder; }
 			set {
-				Console.WriteLine ("ShowInsertPlaceholder: " + value);
 				showPlaceholder = value;
 				if (value && addLabel == null) {
 					AddCreateItemLabel ();
 				} else if (!value && addLabel != null) {
 					Remove (addLabel);
 					addLabel = null;
-					Console.WriteLine ("actionTree.Children.Count: " + actionTree.Children.Count);
 					if (actionTree.Children.Count == 0)
 						AddSpacerItem ();
 				}

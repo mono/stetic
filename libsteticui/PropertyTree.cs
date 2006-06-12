@@ -151,18 +151,21 @@ namespace Stetic
 		
 		public void AddGroup (ItemGroup igroup, object instance)
 		{
-			InstanceData idata = new InstanceData (instance);
-			
-			TreeIter iter = store.AppendValues (igroup.Label, null, true, idata);
-			
+			ArrayList props = new ArrayList ();
 			foreach (ItemDescriptor item in igroup) {
 				if (item.IsInternal)
 					continue;
 				if (item is PropertyDescriptor)
-					AppendProperty (iter, (PropertyDescriptor)item, idata);
-				else if (item is CommandDescriptor)
-					AppendCommand ((CommandDescriptor)item);
+					props.Add (item);
 			}
+			
+			if (props.Count == 0)
+				return;
+			
+			InstanceData idata = new InstanceData (instance);
+			TreeIter iter = store.AppendValues (igroup.Label, null, true, idata);
+			foreach (PropertyDescriptor item in props)
+				AppendProperty (iter, (PropertyDescriptor)item, idata);
 		}
 		
 		protected void AppendProperty (PropertyDescriptor prop, object instance)
@@ -187,11 +190,6 @@ namespace Stetic
 			if (prop.HasVisibility)
 				invisibles[prop] = prop;
 			propertyRows [prop] = store.GetStringFromIter (iter);
-		}
-		
-		protected void AppendCommand (CommandDescriptor prop)
-		{
-			// Ignore commands for now. They are added to the widget action bar
 		}
 		
 		protected virtual void OnObjectChanged ()

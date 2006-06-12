@@ -257,6 +257,9 @@ namespace Stetic.Wrapper {
 
 		public void Delete ()
 		{
+			if (Project.Selection == Wrapped)
+				Project.Selection = null;
+
 			if (ParentWrapper != null)
 				ParentWrapper.Delete (this);
 			else

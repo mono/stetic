@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
@@ -23,6 +24,14 @@ namespace Stetic.Wrapper {
 					cb.Alpha = (ushort)value;
 				}
 			}
+		}
+		
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		{
+			if (prop.Name == "Alpha" && Alpha == -1)
+				return;
+			else
+				base.GeneratePropertySet (ctx, var, prop);
 		}
 	}
 }

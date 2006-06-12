@@ -1,3 +1,19 @@
+2006-05-12  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/PropertyTree.cs: Don't show empty item groups.
+	* libsteticui/WidgetActionBar.cs: Call the virtual AddWidgetCommands
+	  only once per widget.
+	* libstetic/editor/ActionToolbar.cs: Remove debug code.
+	* libstetic/wrapper/Widget.cs: When deleting a widget unselect it if
+	  it is the current selection. Fixes bugs #78620 and 78622.
+	* libstetic/wrapper/ColorButton.cs: Don't generate the Alpha property
+	  if the value is -1 (not set).
+	  
+	* libstetic/wrapper/objects.xml:
+	* libstetic/wrapper/pixmaps/expander.png: Added icon for the expander
+	  widget by ml.
+	  
+
 2006-05-09  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/CommandDescriptor.cs:
