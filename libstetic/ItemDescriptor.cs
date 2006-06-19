@@ -121,8 +121,8 @@ namespace Stetic {
 					return Value.Equals (depValue);
 				} else {
 					object wrapper = ObjectWrapper.Lookup (obj);
-					object res = obj.GetType().InvokeMember (CheckName, BindingFlags.Public | BindingFlags.NonPublic, null, wrapper, null);
-					return (bool) res;
+					object res = wrapper.GetType().InvokeMember (CheckName, BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic, null, wrapper, null);
+					return !(bool) res;
 				}
 			}
 		}

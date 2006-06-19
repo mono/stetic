@@ -9,9 +9,11 @@ namespace Stetic
 	public class ErrorWidget: Gtk.Frame
 	{
 		readonly string className;
+		readonly Exception exc;
 		
 		public ErrorWidget (Exception ex)
 		{
+			exc = ex;
 			Init ("Load Error: " + ex.Message);
 		}
 		
@@ -33,6 +35,10 @@ namespace Stetic
 		
 		public string ClassName {
 			get { return className; }
+		}
+		
+		public Exception Exception {
+			get { return exc; }
 		}
 	}
 	
@@ -58,7 +64,10 @@ namespace Stetic
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
 			ErrorWidget ew = (ErrorWidget) Wrapped;
-			throw new InvalidOperationException ("Can't generate code for unknown type: " + ew.ClassName);
+			if (ew.Exception != null)
+				throw new InvalidOperationException ("Can't generate code for an invalid widget. The widget failed to load: " + ew.Exception.Message);
+			else
+				throw new InvalidOperationException ("Can't generate code for unknown type: " + ew.ClassName);
 		}
 	}
 }

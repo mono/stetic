@@ -203,6 +203,10 @@ namespace Stetic.Wrapper
 			GtkAction.Visible = action.GtkAction.Visible;
 			GtkAction.VisibleHorizontal = action.GtkAction.VisibleHorizontal;
 			GtkAction.VisibleVertical = action.GtkAction.VisibleVertical;
+			
+			foreach (Signal s in action.Signals)
+				Signals.Add (new Signal (s.SignalDescriptor, s.Handler, s.After));
+			
 			NotifyChanged ();
 		}
 		

@@ -1,4 +1,22 @@
-2006-05-12  Lluis Sanchez Gual  <lluis@novell.com>
+2006-06-12  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/ItemDescriptor.cs: Properly invoke method based checks
+	  for item descriptors.
+	* libstetic/wrapper/Action.cs: Copy signals when cloning actions.
+	* libstetic/ErrorWidget.cs: Improve error message when generating code.
+	
+	* libstetic/GeneratorContext.cs:
+	* libstetic/PropertyDescriptor.cs: Add support for string arrays.
+	
+	* libstetic/wrapper/objects.xml:
+	* libstetic/wrapper/ComboBox.cs: Added property which when set generates
+	  a text based combobox.
+	  
+	* libstetic/wrapper/Notebook.cs:
+	* libstetic/RadioGroupManager.cs: Fix bug when accessing to widget
+	  variable names. Patch by Jasiu.
+
+2006-06-12  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/PropertyTree.cs: Don't show empty item groups.
 	* libsteticui/WidgetActionBar.cs: Call the virtual AddWidgetCommands
@@ -14,7 +32,7 @@
 	  widget by ml.
 	  
 
-2006-05-09  Lluis Sanchez Gual  <lluis@novell.com>
+2006-06-09  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/CommandDescriptor.cs:
 	* libsteticui/WidgetActionBar.cs: Add support for icon based
@@ -43,7 +61,7 @@
 	  library that implements the class descriptor.
 	* libstetic/AssemblyWidgetLibrary.cs: Implemented GetResource method.
 
-2006-05-08  Lluis Sanchez Gual  <lluis@novell.com>
+2006-06-08  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/wrapper/Box.cs: In GladeChildren return children
 	  based on the order of their positions. Fixes bug #78160.

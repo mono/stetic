@@ -642,9 +642,13 @@
 	    label="Combo Box" icon="combo.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Combo Box Properties">
+		<property name="IsTextCombo" label="Text ComboBox" 
+		      description="Checked if the combo box displays a list of strings" />
 		<property name="Items" translatable="true" label="Items" glade-name="items"
 			  description="The items to display in the Combo Box, one per line"
-			  editor="Stetic.Editor.Text" />
+			  editor="Stetic.Editor.Text">
+		    <disabled-if name="IsTextCombo" value="false" />
+		</property>
 		<property name="Active" min="-1"/>
 		<!-- 2.6 <property name="AddTearoffs" /> -->
 		<!-- 2.6 <property name="FocusOnClick" /> -->

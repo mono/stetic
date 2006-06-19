@@ -17,6 +17,7 @@ namespace Stetic.Wrapper {
 
 		string items = "";
 		string[] item = new string[0];
+		bool textCombo;
 
 		public string Items {
 			get {
@@ -65,9 +66,14 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
+		public bool IsTextCombo {
+			get { return textCombo; }
+			set { textCombo = value; }
+		}
+		
 		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
-			if (Items != null && Items.Length > 0) {
+			if (textCombo) {
 				return new CodeMethodInvokeExpression (
 					new CodeTypeReferenceExpression ("Gtk.ComboBox"),
 					"NewText"
@@ -78,7 +84,7 @@ namespace Stetic.Wrapper {
 		
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
-			if (Items != null && Items.Length > 0) {
+			if (textCombo && Items != null && Items.Length > 0) {
 				foreach (string str in item) {
 					ctx.Statements.Add (new CodeMethodInvokeExpression (
 						new CodeVariableReferenceExpression (varName),

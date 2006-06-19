@@ -172,6 +172,8 @@ namespace Stetic
 					widgetCol = cond.FalseStatements;
 				}
 				
+				// Generate action groups
+				
 				foreach (Wrapper.ActionGroup agroup in gp.ActionGroups) {
 					CodeConditionStatement cond = new CodeConditionStatement ();
 					cond.Condition = new CodeBinaryOperatorExpression (

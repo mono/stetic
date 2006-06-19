@@ -171,6 +171,8 @@ namespace Stetic {
 				return Enum.Parse (PropertyType, value);
 			else if (PropertyType == typeof(ImageInfo))
 				return ImageInfo.FromString (value);
+			else if (PropertyType == typeof(string[]))
+				return value.Split ('\n');
 			else
 				return Convert.ChangeType (value, PropertyType);
 		}
@@ -180,6 +182,8 @@ namespace Stetic {
 		{
 			if (typeConverter != null && typeConverter.CanConvertTo (typeof(string)))
 				return typeConverter.ConvertToString (value);
+			else if (PropertyType == typeof(string[]))
+				return string.Join ("\n", (string[])value);
 			else
 				return value.ToString ();
 		}

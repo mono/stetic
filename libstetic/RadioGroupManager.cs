@@ -184,7 +184,7 @@ namespace Stetic {
 			foreach (Gtk.Widget radio in group.Widgets) {
 				if (radio == widget)
 					continue;
-				var = ctx.WidgetMap.GetWidgetId (radio.Name);
+				var = ctx.WidgetMap.GetWidgetId (radio);
 				if (var != null)
 					break;
 			}

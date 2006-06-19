@@ -116,6 +116,13 @@ namespace Stetic
 				);
 			}
 			
+			if (value is Array) {
+				ArrayList list = new ArrayList ();
+				foreach (object val in (Array)value)
+					list.Add (GenerateValue (val, val != null ? val.GetType() : null));
+				return new CodeArrayCreateExpression (value.GetType().GetElementType(), (CodeExpression[]) list.ToArray(typeof(CodeExpression)));
+			}
+			
 			return new CodePrimitiveExpression (value);
 		}
 		

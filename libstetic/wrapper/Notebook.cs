@@ -88,7 +88,7 @@ namespace Stetic.Wrapper {
 					);
 					pageVarName = dvar.Name;
 				} else
-					pageVarName = ctx.WidgetMap.GetWidgetId (page.Name);
+					pageVarName = ctx.WidgetMap.GetWidgetId (page);
 				
 				// Generate code for the tab
 				string varName = ctx.GenerateCreationCode (wrapper);
