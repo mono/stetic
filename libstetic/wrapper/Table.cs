@@ -439,6 +439,28 @@ namespace Stetic.Wrapper {
 				}
 				base.EmitNotify (propertyName);
 			}
+			
+			// Properties to be used by the wrapper commands
+			
+			public bool CellXExpand {
+				get { return XExpand; }
+				set { AutoSize = false; XExpand = value; }
+			}
+			
+			public bool CellXFill{
+				get { return XFill; }
+				set { AutoSize = false; XFill = value; }
+			}
+			
+			public bool CellYExpand {
+				get { return YExpand; }
+				set { AutoSize = false; YExpand = value; }
+			}
+			
+			public bool CellYFill{
+				get { return YFill; }
+				set { AutoSize = false; YFill = value; }
+			}
 		}
 	}
 }

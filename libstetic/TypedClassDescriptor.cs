@@ -23,10 +23,13 @@ namespace Stetic
 
 		public TypedClassDescriptor (Assembly assembly, XmlElement elem)
 		{
+			bool inheritedWrapper = false;
+			
 			wrapped = Registry.GetType (elem.GetAttribute ("type"), true);
 			if (elem.HasAttribute ("wrapper"))
 			    wrapper = Registry.GetType (elem.GetAttribute ("wrapper"), true);
 			else {
+				inheritedWrapper = true;
 				for (Type type = wrapped.BaseType; type != null; type = type.BaseType) {
 					TypedClassDescriptor parent = Registry.LookupClassByName (type.FullName) as TypedClassDescriptor;
 					if (parent != null) {
@@ -55,10 +58,13 @@ namespace Stetic
 			
 			BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 						
-
-			ctorMethodInfoWithClass = wrapper.GetMethod ("CreateInstance", flags, null, new Type[] { typeof(ClassDescriptor)}, null);
-			if (ctorMethodInfoWithClass == null) {
-				ctorMethodInfo = wrapper.GetMethod ("CreateInstance", flags, null, Type.EmptyTypes, null);
+			// If the wrapper is inherited from a base class, ignore the CreateInstance method
+			// since it is going to create an instance of the base class.
+			if (!inheritedWrapper) {
+				ctorMethodInfoWithClass = wrapper.GetMethod ("CreateInstance", flags, null, new Type[] { typeof(ClassDescriptor)}, null);
+				if (ctorMethodInfoWithClass == null) {
+					ctorMethodInfo = wrapper.GetMethod ("CreateInstance", flags, null, Type.EmptyTypes, null);
+				}
 			}
 			
 			// Look for a constructor even if a CreateInstance method was
@@ -68,6 +74,7 @@ namespace Stetic
 				useGTypeCtor = true;
 				cinfo = wrapped.GetConstructor (new Type[] { typeof (IntPtr) });
 			}
+			
 			Load (elem);
 		}
 		
@@ -119,6 +126,10 @@ namespace Stetic
 				inst = ctorMethodInfo.Invoke (null, new object[0]);
 				if (inst != null) return inst;
 			}
+			
+			if (cinfo == null)
+				throw new InvalidOperationException ("The class '" + wrapped + "' does not have a default constructor.");
+			
 			if (!useGTypeCtor)
 				inst = cinfo.Invoke (null, new object[0]);
 			else {

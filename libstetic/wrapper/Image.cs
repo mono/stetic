@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public class Image : Widget {
+	public class Image : Misc {
 	
 		ImageInfo imageInfo;
 

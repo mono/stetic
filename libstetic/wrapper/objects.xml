@@ -4,7 +4,9 @@
     <object type="Gtk.Widget,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
 	<itemgroups>
 	    <itemgroup label="Common Widget Properties">
-		<property name="MemberName" description="Name of the member to which this widget is bound." />
+		<property name="MemberName"
+			editor="Stetic.Editor.Identifier"
+			description="Name of the member to which this widget is bound." />
 		<property name="WidthRequest" min="-1" />
 		<property name="HeightRequest" min="-1" />
 		<property name="Visible" glade-override="true" />
@@ -18,7 +20,10 @@
 		<property name="HasFocus" />
 		<property name="Events" />
 		<property name="ExtensionEvents" />
-		<property name="Name" internal="true" init-with-name="true" />
+		<property name="Name" internal="true"
+			min="1"
+			init-with-name="true" 
+			editor="Stetic.Editor.Identifier"/>
 	    </itemgroup>
 	</itemgroups>
     <signals>
@@ -202,13 +207,16 @@
 	</signals>
     </object>
 
-    <object type="Gtk.Misc,gtk-sharp">
+    <object type="Gtk.Misc,gtk-sharp" wrapper="Stetic.Wrapper.Misc">
 	<itemgroups>
 	    <itemgroup label="Miscellaneous Alignment Properties">
 		<property name="Xpad" />
 		<property name="Ypad" />
 		<property name="Xalign" />
 		<property name="Yalign" />
+		<command name="AlignLeft" label="Align Left" icon="gtk-justify-left" />
+		<command name="AlignCenter" label="Align Center" icon="gtk-justify-center" />
+		<command name="AlignRight" label="Align Right" icon="gtk-justify-right" />
 	    </itemgroup>
 	</itemgroups>
     </object>
@@ -1552,6 +1560,10 @@
 			  description="Whether or not the table cell should shrink vertically">
 		    <disabled-if name="AutoSize" value="true" />
 		</property>
+		<command name="CellXExpand" label="Expand Horizontally" icon="res:cell-expand-h.png" />
+		<command name="CellXFill" label="Fill Horizontally" icon="res:cell-fill-h.png" />
+		<command name="CellYExpand" label="Expand Vertically" icon="res:cell-expand-v.png" />
+		<command name="CellYFill" label="Fill Vertically" icon="res:cell-fill-v.png" />
 	    </itemgroup>
 	</itemgroups>
     </object>
@@ -2060,7 +2072,7 @@
     	init-properties="Name Label Tooltip StockId" >
 	<itemgroups>
 	    <itemgroup label="Action Properties">
-		<property name="Name" />
+		<property name="Name" editor="Stetic.Editor.Identifier" min="1"/>
 		<property name="Type" />
 		<property name="Accelerator" editor="Stetic.Editor.Accelerator" />
 		<property name="HideIfEmpty" />

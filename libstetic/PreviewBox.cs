@@ -70,6 +70,16 @@ namespace Stetic
 			}
 		}
 		
+		public object Selection {
+			get { 
+				IObjectSelection sel = resizableFixed.GetSelection ();
+				if (sel != null)
+					return sel.DataObject;
+				else
+					return null;
+			}
+		}
+		
 		internal PreviewBox (Gtk.Container container, int designWidth, int designHeight)
 		{
 			ShadowType = ShadowType.None;
@@ -367,7 +377,10 @@ namespace Stetic
 				if (currentObjectSelection != null) {
 					currentObjectSelection.FireDisposed ();
 					currentObjectSelection = null;
-					UpdateObjectViewers ();
+					
+					// This makes the property editor to flicker
+					// when changing widget selection
+					// UpdateObjectViewers ();
 				}
 			}
 		}

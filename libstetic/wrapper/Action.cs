@@ -231,14 +231,10 @@ namespace Stetic.Wrapper
 			if (px != null)
 				return px;
 			
-			int w, h;
-			Gtk.Icon.SizeLookup (size, out w, out h);
-			
-			try {
-				return Gtk.IconTheme.Default.LoadIcon (GtkAction.StockId, h, 0);
-			} catch {
-				return Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, h, 0);
-			}
+			Gtk.IconSet iset = Gtk.IconFactory.LookupDefault (GtkAction.StockId);
+			if (iset == null)
+				iset = Gtk.IconFactory.LookupDefault (Gtk.Stock.MissingImage);
+			return iset.RenderIcon (new Gtk.Style (), Gtk.TextDirection.Ltr, Gtk.StateType.Normal, size, null, "");
 		}
 		
 		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)

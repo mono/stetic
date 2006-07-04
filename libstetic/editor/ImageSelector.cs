@@ -16,7 +16,7 @@ namespace Stetic.Editor
 		}
 		
 		protected int ImageSize {
-			get { return imgSize - imgPad*2; }
+			get { return 16; }//imgSize - imgPad*2; }
 		}
 		
 		public override void GetSize (int availableWidth, out int width, out int height)

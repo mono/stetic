@@ -23,11 +23,19 @@ namespace Stetic.Editor {
 				Gtk.StockItem item = Gtk.Stock.Lookup (name);
 				label = item.Label != null && item.Label.Length > 0 ? item.Label : name;
 				label = label.Replace ("_", "");
-				try {
-					Image = Gtk.IconTheme.Default.LoadIcon (name, ImageSize, 0);
-				} catch {
-					Image = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, ImageSize, 0);;
+				
+				Gtk.IconSet iset = Gtk.IconFactory.LookupDefault (name);
+				if (iset == null)
+					iset = Gtk.IconFactory.LookupDefault (Gtk.Stock.MissingImage);
+				
+				Image = iset.RenderIcon (new Gtk.Style (), Gtk.TextDirection.Ltr, Gtk.StateType.Normal, Gtk.IconSize.Menu, null, "");
+				
+/*				try {
+					Image = Container.RenderIcon (name, Gtk.IconSize.Menu, "");
+				} catch (Exception ex) {
+					Image = Container.RenderIcon (Gtk.Stock.MissingImage, Gtk.IconSize.Menu, "");
 				}
+*/
 			} else {
 				Image = null;
 				label = "";

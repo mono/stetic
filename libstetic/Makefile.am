@@ -56,6 +56,7 @@ libstetic_dll_sources =			\
 	editor/Color.cs			\
 	editor/Enumeration.cs		\
 	editor/GroupPicker.cs		\
+	editor/Identifier.cs			\
 	editor/EditIconFactoryDialog.cs	\
 	editor/EditIconDialog.cs	\
 	editor/Flags.cs			\
@@ -123,6 +124,7 @@ libstetic_dll_sources =			\
 	wrapper/MessageDialog.cs	\
 	wrapper/MenuBar.cs		\
 	wrapper/MenuItem.cs		\
+	wrapper/Misc.cs		\
 	wrapper/Notebook.cs		\
 	wrapper/Object.cs		\
 	wrapper/OptionMenu.cs		\

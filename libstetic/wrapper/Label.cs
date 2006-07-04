@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper {
 
-	public class Label : Widget {
+	public class Label : Misc {
 
 		public Label () {}
 

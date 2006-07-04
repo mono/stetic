@@ -1,3 +1,31 @@
+2006-07-04  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/WidgetActionBar.cs: Assign the label of the command
+	  to the button.
+	* libstetic/PreviewBox.cs: Added property for getting the current
+	  selection.
+	* libstetic/wrapper/Action.cs: Use IconSet.RenderIcon to render
+	  action icons.
+	  
+	* libstetic/wrapper/Image.cs:
+	* libstetic/wrapper/Label.cs: Changed base wrapper to Misc.
+	
+	* libstetic/wrapper/objects.xml: Use the new identifier editor
+	  for the widget name. Added alignment commands for Label and
+	  for table child.
+	* libstetic/wrapper/Table.cs: Implemented Fill/Expand commands.
+	* libstetic/editor/ImageSelector.cs: Use a default size of 16
+	  for thumbnail icons.
+	* libstetic/editor/StockItem.cs: Render icons using the icon set,
+	  not the theme.
+	* libstetic/WidgetUtils.cs: In ParseWidgetName, limit numeric suffix
+	  to 4 digits.
+	* libstetic/Makefile.am: Added Identifier.cs and Misc.cs.
+	* libstetic/TypedClassDescriptor.cs: If a wrapper is inherited 
+	  from a base class, ignore the CreateInstance method since it 
+	  is going to create an instance of the base class.
+	  
+
 2006-06-12  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/ItemDescriptor.cs: Properly invoke method based checks
