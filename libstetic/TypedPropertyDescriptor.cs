@@ -52,7 +52,7 @@ namespace Stetic
 			}
 
 			if (pspec != null) {
-				// This information will be overriden by what's specified in the xml file
+				// This information will be overridden by what's specified in the xml file
 				description = pspec.Blurb;
 				minimum = pspec.Minimum;
 				maximum = pspec.Maximum;

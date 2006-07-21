@@ -88,7 +88,7 @@ namespace Stetic
 			if (!tree.Model.GetIterFirst (out iter))
 				return;
 			
-			// If the tree only has one group, show it always exapnded
+			// If the tree only has one group, show it always expanded
 			TreeIter iter2 = iter;
 			if (!tree.Model.IterNext (ref iter2)) {
 				tree.ExpandRow (tree.Model.GetPath (iter), true);

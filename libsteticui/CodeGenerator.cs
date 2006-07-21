@@ -59,7 +59,7 @@ namespace Stetic
 			
 			// Create the project initialization method
 			// This method will only be added at the end if there
-			// is actualy something to initialize
+			// is actually something to initialize
 			
 			CodeMemberMethod initMethod = new CodeMemberMethod ();
 			initMethod.Name = "Initialize";
@@ -67,7 +67,7 @@ namespace Stetic
 			initMethod.Attributes = MemberAttributes.Private | MemberAttributes.Static;
 			GeneratorContext initContext = new ProjectGeneratorContext (cns, initMethod.Statements);
 			
-			// Buid method overload that takes a type as parameter.
+			// Build method overload that takes a type as parameter.
 			
 			CodeMemberMethod met = new CodeMemberMethod ();
 			met.Name = "Build";

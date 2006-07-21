@@ -331,9 +331,9 @@ namespace Stetic
 		
 		internal static void ParseWidgetName (string name, out string baseName, out int idx)
 		{
-			// Extract a numeric sufix from the name
+			// Extract a numerical suffix from the name
 			// If suffix has more than 4 digits, only the last 4 digits are considered
-			// a numerix sufix.
+			// a numerical suffix.
 			
 			int n;
 			for (n = name.Length - 1; n >= name.Length-4 && n >= 0 && char.IsDigit (name [n]); n--)
