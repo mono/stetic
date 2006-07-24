@@ -50,9 +50,6 @@ namespace Stetic {
 							       valueElem.GetAttribute ("label"),
 							       valueElem.GetAttribute ("description"));
 			}
-
-			if (values.Count != evalues.Count)
-				throw new ArgumentException ("<enum> node for " + enumType.FullName + " is missing some values");
 		}
 		
 		public string Name {

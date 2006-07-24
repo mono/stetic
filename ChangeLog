@@ -1,3 +1,10 @@
+2006-07-24  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/EnumDescriptor.cs: Don't throw an exception if the
+	  CLR enum has more members than the enum declared in objects.xml.
+	  A new backward compatible version of a library may introduce new
+	  members which Stetic is unaware of.
+
 2006-07-24  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/wrapper/Table.cs: Don't try to automatically set
