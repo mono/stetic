@@ -1,3 +1,12 @@
+2006-07-24  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/wrapper/Table.cs: Don't try to automatically set
+	  the horizontal expansion property of widgets which expand 
+	  more than one column, since we may have a different expand
+	  value for each column, and changing it for every column may
+	  end up in an infinite loop when syncing the table. The
+	  same for rows and vertical expansion.
+
 2006-07-21  Alp Toker  <alp@atoker.com>
 
 	* libsteticui/CodeGenerator.cs:

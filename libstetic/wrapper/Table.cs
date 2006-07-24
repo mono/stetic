@@ -116,6 +116,10 @@ namespace Stetic.Wrapper {
 					if (!AutoSize[w])
 						continue;
 					tc = table[w] as Gtk.Table.TableChild;
+					// We can't play with the vertical expansion property of
+					// widgets which span more than one row
+					if (tc.BottomAttach != tc.TopAttach + 1)
+						continue;
 					Gtk.AttachOptions opts = allPlaceholders ? expandOpts : fillOpts;
 					if (tc.YOptions != opts)
 						tc.YOptions = opts;
@@ -144,6 +148,10 @@ namespace Stetic.Wrapper {
 					if (!AutoSize[w])
 						continue;
 					tc = table[w] as Gtk.Table.TableChild;
+					// We can't play with the horizontal expansion property of
+					// widgets which span more than one column
+					if (tc.RightAttach != tc.LeftAttach + 1)
+						continue;
 					Gtk.AttachOptions opts = allPlaceholders ? expandOpts : fillOpts;
 					if (tc.XOptions != opts)
 						tc.XOptions = opts;
