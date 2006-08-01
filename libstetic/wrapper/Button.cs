@@ -145,13 +145,21 @@ namespace Stetic.Wrapper {
 			get { return imageInfo; }
 			set { 
 				imageInfo = value;
-				ConstructContents ();
-				EmitNotify ("Image");
+				if (!Loading) {
+					ConstructContents ();
+					EmitNotify ("Image");
+				}
 			}
 		}
 
 		Gtk.Label labelWidget;
 
+		protected override void OnEndRead ()
+		{
+			base.OnEndRead ();
+			ConstructContents ();
+		}
+		
 		void ConstructContents ()
 		{
 			if (button.Child != null)

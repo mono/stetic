@@ -175,8 +175,7 @@ namespace Stetic.Wrapper
 			ClassDescriptor klass = Registry.LookupClassByName ("Gtk.Action");
 			ObjectWrapper.Bind (project, klass, this, ac, true);
 			
-			WidgetUtils.ReadProperties (klass, this, ac, elem);
-			WidgetUtils.ReadSignals (klass, this, elem);
+			WidgetUtils.ReadMembers (klass, this, ac, elem);
 		}
 		
 		public Action Clone ()

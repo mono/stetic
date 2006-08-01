@@ -1,3 +1,22 @@
+2006-08-01  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/ItemGroup.cs: Use a hashtable to store the items.
+	
+	* libstetic/wrapper/Button.cs:
+	* libstetic/wrapper/Object.cs:
+	* libstetic/wrapper/Table.cs:
+	* libstetic/ObjectWrapper.cs: Avoid firing events while the objects
+	  are loading.
+	  
+	* libstetic/wrapper/Container.cs: Don't validate names while the object
+	  is being loaded.
+	* libstetic/ItemGroupCollection.cs: Added helper method for getting
+	  an item.
+	  
+	* libstetic/WidgetUtils.cs: Avoid using SelectSingleNode since it's very
+	  slow. Use the ChildNodes property instead. Merged ReadProperties and
+	  ReadSignals in a single ReadMembers method, which is more efficient.
+
 2006-08-01  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libsteticui/Clipboard.cs: When copying a widget, store it as
@@ -21,7 +40,7 @@
 	* libstetic/editor/Accelerator.cs: Capture the key combination using
 	  a modal dialog, to avoid messing with the container accelerators.
 	  Fixes bug #78867.
-
+	  
 2006-07-24  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/EnumDescriptor.cs: Don't throw an exception if the

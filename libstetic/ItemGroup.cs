@@ -3,8 +3,12 @@ using System.Collections;
 using System.Xml;
 
 namespace Stetic {
-	public class ItemGroup : IEnumerable {
+	public class ItemGroup : IEnumerable
+	{
 		public static ItemGroup Empty;
+
+		string label, name;
+		Hashtable items = new Hashtable ();
 
 		static ItemGroup ()
 		{
@@ -25,21 +29,21 @@ namespace Stetic {
 				XmlElement item = (XmlElement)nodes[i];
 				string refname = item.GetAttribute ("ref");
 				if (refname != "") {
-					if (refname.IndexOf ('.') != -1)
-						items.Add (Registry.LookupItem (refname));
-					else
-						items.Add (klass[refname]);
+					if (refname.IndexOf ('.') != -1) {
+						ItemDescriptor desc = (ItemDescriptor) Registry.LookupItem (refname);
+						items.Add (desc.Name, desc);
+					} else {
+						ItemDescriptor desc = (ItemDescriptor) klass[refname];
+						items.Add (desc.Name, desc);
+					}
 					continue;
 				}
 
 				ItemDescriptor idesc = klass.CreateItemDescriptor ((XmlElement)item, this);
 				if (idesc != null)
-					items.Add (idesc);
+					items.Add (idesc.Name, idesc);
 			}
 		}
-
-		string label, name;
-		ArrayList items = new ArrayList ();
 
 		public string Label {
 			get {
@@ -55,16 +59,12 @@ namespace Stetic {
 
 		public IEnumerator GetEnumerator ()
 		{
-			return items.GetEnumerator ();
+			return items.Values.GetEnumerator ();
 		}
 
 		public ItemDescriptor this [string name] {
 			get {
-				foreach (ItemDescriptor item in items) {
-					if (item != null && item.Name == name)
-						return item;
-				}
-				return null;
+				return (ItemDescriptor) items [name];
 			}
 		}
 	}

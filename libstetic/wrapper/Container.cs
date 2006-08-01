@@ -39,14 +39,16 @@ namespace Stetic.Wrapper {
 			else
 				ContainerOrientation = Gtk.Orientation.Vertical;
 			
-			ValidateChildNames (Wrapped);
+			if (!Loading)
+				ValidateChildNames (Wrapped);
 		}
 		
 		void OnChildAdded (object o, Gtk.AddedArgs args)
 		{
 			// Make sure children's IDs don't conflict with other widgets
 			// in the parent container.
-			ValidateChildNames ((Gtk.Widget)o);
+			if (!Loading)
+				ValidateChildNames ((Gtk.Widget)o);
 			if (designer != null) {
 				ObjectWrapper w = ObjectWrapper.Lookup (o);
 				if (w != null)
@@ -108,7 +110,7 @@ namespace Stetic.Wrapper {
 
 		protected void Sync ()
 		{
-			if (freeze > 0)
+			if (freeze > 0 || Loading)
 				return;
 			freeze = 1;
 			DoSync ();

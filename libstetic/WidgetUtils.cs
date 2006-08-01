@@ -125,66 +125,68 @@ namespace Stetic
 			else
 				widget.Name = elem.GetAttribute ("id");
 			
-			ReadSignals (klass, wrapper, elem);
-			ReadProperties (klass, wrapper, widget, elem);
+			ReadMembers (klass, wrapper, widget, elem);
 			
 			if (!(widget is Gtk.Window))
 				widget.ShowAll ();
 		}
-
-		public static void ReadSignals (ClassDescriptor klass, ObjectWrapper ob, XmlElement elem)
+		
+		public static void ReadMembers (ClassDescriptor klass, ObjectWrapper wrapper, object wrapped, XmlElement elem)
 		{
-			foreach (ItemGroup group in klass.SignalGroups) {
-				foreach (SignalDescriptor signal in group) {
-					XmlElement signal_elem = elem.SelectSingleNode ("signal[@name='" + signal.Name + "']") as XmlElement;
-					if (signal_elem == null)
-						continue;
+			foreach (XmlNode node in elem.ChildNodes) {
+				XmlElement child = node as XmlElement;
+				if (child == null)
+					continue;
 					
-					string handler = signal_elem.GetAttribute ("handler");
-					bool after = signal_elem.GetAttribute ("after") == "yes";
-					ob.Signals.Add (new Signal (signal, handler, after));
-				}
+				if (child.LocalName == "signal")
+					ReadSignal (klass, wrapper, child);
+				else if (child.LocalName == "property")
+					ReadProperty (klass, wrapper, wrapped, child);
 			}
 		}
 		
-		public static void ReadProperties (ClassDescriptor klass, ObjectWrapper wrapper, object wrapped, XmlElement elem)
+		public static void ReadSignal (ClassDescriptor klass, ObjectWrapper ob, XmlElement elem)
 		{
-			foreach (ItemGroup group in klass.ItemGroups) {
-				foreach (ItemDescriptor item in group) {
-					PropertyDescriptor prop = item as PropertyDescriptor;
-					if (prop == null || !prop.CanWrite)
-						continue;
+			string name = elem.GetAttribute ("name");
+			SignalDescriptor signal = klass.SignalGroups.GetItem (name) as SignalDescriptor;
+			if (signal != null) {
+				string handler = elem.GetAttribute ("handler");
+				bool after = elem.GetAttribute ("after") == "yes";
+				ob.Signals.Add (new Signal (signal, handler, after));
+			}
+		}
 
-					XmlElement prop_node = (XmlElement) elem.SelectSingleNode ("property[@name='" + prop.Name + "']");
-					if (prop_node == null)
-						continue;
-					
-					string strval = prop_node.InnerText;
-					
-					// Skip translation context
-					if (prop_node.GetAttribute ("context") == "yes" && strval.IndexOf ('|') != -1)
-						strval = strval.Substring (strval.IndexOf ('|') + 1);
-						
-					object value = prop.StringToValue (strval);
-					prop.SetValue (wrapped, value);
-					
-					if (prop.Translatable) {
-						if (prop_node.GetAttribute ("translatable") != "yes") {
-							prop.SetTranslated (wrapped, false);
-						}
-						else {
-							prop.SetTranslated (wrapped, true);
-							if (prop_node.GetAttribute ("context") == "yes") {
-								strval = prop_node.InnerText;
-								int bar = strval.IndexOf ('|');
-								if (bar != -1)
-									prop.SetTranslationContext (wrapped, strval.Substring (0, bar));
-							}
+		public static void ReadProperty (ClassDescriptor klass, ObjectWrapper wrapper, object wrapped, XmlElement prop_node)
+		{
+			string name = prop_node.GetAttribute ("name");
+			PropertyDescriptor prop = klass [name] as PropertyDescriptor;
+			if (prop == null || !prop.CanWrite)
+				return;
 
-							if (prop_node.HasAttribute ("comments"))
-								prop.SetTranslationComment (wrapped, prop_node.GetAttribute ("comments"));
-						}
+			string strval = prop_node.InnerText;
+			
+			// Skip translation context
+			if (prop_node.GetAttribute ("context") == "yes" && strval.IndexOf ('|') != -1)
+				strval = strval.Substring (strval.IndexOf ('|') + 1);
+				
+			object value = prop.StringToValue (strval);
+			prop.SetValue (wrapped, value);
+			
+			if (prop.Translatable) {
+				if (prop_node.GetAttribute ("translatable") != "yes") {
+					prop.SetTranslated (wrapped, false);
+				}
+				else {
+					prop.SetTranslated (wrapped, true);
+					if (prop_node.GetAttribute ("context") == "yes") {
+						strval = prop_node.InnerText;
+						int bar = strval.IndexOf ('|');
+						if (bar != -1)
+							prop.SetTranslationContext (wrapped, strval.Substring (0, bar));
 					}
+
+					if (prop_node.HasAttribute ("comments"))
+						prop.SetTranslationComment (wrapped, prop_node.GetAttribute ("comments"));
 				}
 			}
 		}
@@ -197,7 +199,7 @@ namespace Stetic
 
 			Gtk.Container.ContainerChild cc = wrapper.Wrapped as Gtk.Container.ContainerChild;
 			ClassDescriptor klass = wrapper.ClassDescriptor;
-			ReadProperties (klass, wrapper, cc, packing);
+			ReadMembers (klass, wrapper, cc, packing);
 		}
 		
 		

@@ -7,7 +7,9 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-			((GLib.Object)Wrapped).AddNotification (NotifyHandler);
+			if (!Loading) {
+				((GLib.Object)Wrapped).AddNotification (NotifyHandler);
+			}
 
 			// FIXME; arrange for wrapper disposal?
 		}
@@ -18,6 +20,12 @@ namespace Stetic.Wrapper {
 			base.Dispose ();
 		}
 
+		protected override void OnEndRead ()
+		{
+			base.OnEndRead ();
+			((GLib.Object)Wrapped).AddNotification (NotifyHandler);
+		}
+		
 		public static Object Lookup (GLib.Object obj)
 		{
 			return Stetic.ObjectWrapper.Lookup (obj) as Stetic.Wrapper.Object;
@@ -25,8 +33,10 @@ namespace Stetic.Wrapper {
 
 		void NotifyHandler (object obj, GLib.NotifyArgs args)
 		{
+			if (Loading)
+				return;
+
 			// Translate gtk names into descriptor names.
-			
 			foreach (ItemGroup group in ClassDescriptor.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
 					TypedPropertyDescriptor prop = item as TypedPropertyDescriptor;

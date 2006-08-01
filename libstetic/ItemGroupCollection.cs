@@ -28,5 +28,15 @@ namespace Stetic
 				return null;
 			}
 		}
+		
+		public ItemDescriptor GetItem (string name)
+		{
+			for (int n=0; n<List.Count; n++) {
+				ItemDescriptor item = ((ItemGroup) List [n])[name];
+				if (item != null)
+					return item;
+			}
+			return null;
+		}
 	}
 }

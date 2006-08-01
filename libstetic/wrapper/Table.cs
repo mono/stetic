@@ -433,7 +433,7 @@ namespace Stetic.Wrapper {
 
 			protected override void EmitNotify (string propertyName)
 			{
-				if (freeze) return;
+				if (freeze || Loading) return;
 
 				if (propertyName == "x-options" || propertyName == "AutoSize") {
 					base.EmitNotify ("XExpand");

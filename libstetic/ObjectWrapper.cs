@@ -20,6 +20,7 @@ namespace Stetic {
 		protected object wrapped;
 		protected ClassDescriptor classDescriptor;
 		SignalCollection signals;
+		bool loading;
 
 		public SignalCollection Signals {
 			get {
@@ -27,6 +28,10 @@ namespace Stetic {
 					signals = new SignalCollection (this);
 				return signals;
 			}
+		}
+		
+		protected bool Loading {
+			get { return loading; }
 		}
 		
 		public virtual void Wrap (object obj, bool initialized)
@@ -86,6 +91,7 @@ namespace Stetic {
 			ObjectWrapper wrapper = klass.CreateWrapper ();
 			wrapper.proj = proj;
 			try {
+				wrapper.OnBeginRead ();
 				wrapper.Read (elem, format);
 			} catch (Exception ex) {
 				ErrorWidget we = new ErrorWidget (ex);
@@ -93,6 +99,8 @@ namespace Stetic {
 				wrap.Read (elem, format);
 				Console.WriteLine (ex);
 				return wrap;
+			} finally {
+				wrapper.OnEndRead ();
 			}
 			return wrapper;
 		}
@@ -205,37 +213,47 @@ namespace Stetic {
 		
 		// Fired when any information of the object changes.
 		public event ObjectWrapperEventHandler ObjectChanged;
+		
+		protected virtual void OnBeginRead ()
+		{
+			loading = true;
+		}
+
+		protected virtual void OnEndRead ()
+		{
+			loading = false;
+		}
 
 		internal protected virtual void OnObjectChanged (ObjectWrapperEventArgs args)
 		{
-			if (ObjectChanged != null)
+			if (!loading && ObjectChanged != null)
 				ObjectChanged (this, args);
 		}
 		
 		protected virtual void EmitNotify (string propertyName)
 		{
-			if (Notify != null)
+			if (!loading && Notify != null)
 				Notify (this, propertyName);
 		}
 
 		internal protected virtual void OnSignalAdded (SignalEventArgs args)
 		{
 			OnObjectChanged (args);
-			if (SignalAdded != null)
+			if (!loading && SignalAdded != null)
 				SignalAdded (this, args);
 		}
 		
 		internal protected virtual void OnSignalRemoved (SignalEventArgs args)
 		{
 			OnObjectChanged (args);
-			if (SignalRemoved != null)
+			if (!loading && SignalRemoved != null)
 				SignalRemoved (this, args);
 		}
 		
 		internal protected virtual void OnSignalChanged (SignalChangedEventArgs args)
 		{
 			OnObjectChanged (args);
-			if (SignalChanged != null)
+			if (!loading && SignalChanged != null)
 				SignalChanged (this, args);
 		}
 		
