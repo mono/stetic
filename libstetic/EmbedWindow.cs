@@ -20,7 +20,6 @@ namespace Stetic {
 				window.Realized += new EventHandler (OnRealized);
 				PreviewBox prev = new PreviewBox (container, designWidth, designHeight);
 				prev.Title = window.Title;
-				prev.Theme = Theme;
 				return prev;
 			} else
 				return new PreviewBox (container, designWidth, designHeight);
@@ -80,32 +79,5 @@ namespace Stetic {
 			// FIXME: gtk-sharp 2.6
 			// window.GdkWindow.EnableSynchronizedConfigure ();
 		}
-
-		static Metacity.Theme theme;
-		static Metacity.Theme Theme {
-			get {
-				if (theme == null) {
-					GConf.Client client = new GConf.Client ();
-//					client.AddNotify ("/apps/metacity/general", GConfNotify);
-					string themeName = (string)client.Get ("/apps/metacity/general/theme");
-					try {
-						theme = Metacity.Theme.Load (themeName);
-					} catch {
-						// Don't crash if metacity is not available
-						return null;
-					}
-				}
-				return theme;
-			}
-		}
-
-/*		static void GConfNotify (object obj, GConf.NotifyEventArgs args)
-		{
-			if (args.Key == "/apps/metacity/general/theme") {
-				theme = Metacity.Theme.Load ((string)args.Value);
-				foreach (Metacity.Preview prev in wrappers.Values)
-					prev.Theme = Theme;
-			}
-		}
-*/	}
+	}
 }

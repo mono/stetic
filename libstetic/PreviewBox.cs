@@ -42,6 +42,7 @@ namespace Stetic
 		Gtk.Widget preview;
 		Metacity.Preview metacityPreview;
 		ResizableFixed resizableFixed;
+		static Metacity.Theme theme;
 		
 		static IObjectViewer defaultPropertyViewer;
 		static IObjectViewer defaultSignalsViewer;
@@ -203,9 +204,37 @@ namespace Stetic
 			metacityPreview.FrameFlags = flags;
 			metacityPreview.ShowAll ();
 			metacityPreview.Add (window);
+			
+			metacityPreview.Theme = GetTheme ();
+			
 			return metacityPreview;
 		}
 
+		static Metacity.Theme GetTheme ()
+		{
+			if (theme == null) {
+				GConf.Client client = new GConf.Client ();
+//				client.AddNotify ("/apps/metacity/general", GConfNotify);
+				string themeName = (string)client.Get ("/apps/metacity/general/theme");
+				try {
+					theme = Metacity.Theme.Load (themeName);
+				} catch {
+					// Don't crash if metacity is not available
+					return null;
+				}
+			}
+			return theme;
+		}
+
+/*		static void GConfNotify (object obj, GConf.NotifyEventArgs args)
+		{
+			if (args.Key == "/apps/metacity/general/theme") {
+				theme = Metacity.Theme.Load ((string)args.Value);
+				foreach (Metacity.Preview prev in wrappers.Values)
+					prev.Theme = Theme;
+			}
+		}
+*/		
 		protected override void OnParentSet (Gtk.Widget previousParent)
 		{
 			base.OnParentSet (previousParent);

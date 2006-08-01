@@ -1,5 +1,6 @@
 using Gtk;
 using System;
+using System.Xml;
 
 namespace Stetic {
 
@@ -33,12 +34,17 @@ namespace Stetic {
 			}
 		}
 
-		static Gtk.Widget selection;
+		static XmlElement selection;
 
 		static void ClipboardGet (Gtk.Clipboard clipboard, Gtk.SelectionData seldata, uint info)
 		{
-			if (selection != null)
-				WidgetUtils.Copy (selection, seldata, info == TextType);
+			if (selection == null)
+				return;
+
+			if (info == TextType)
+				seldata.Text = selection.OuterXml;
+			else
+				seldata.Set (WidgetUtils.ApplicationXSteticAtom, 8, System.Text.Encoding.UTF8.GetBytes (selection.OuterXml));
 		}
 
 		static void ClipboardClear (Gtk.Clipboard clipboard)
@@ -49,7 +55,7 @@ namespace Stetic {
 		public static void Copy (Gtk.Widget widget)
 		{
 			MainClipboard.SetWithData (Targets, ClipboardGet, ClipboardClear);
-			selection = widget;
+			selection = widget != null ? WidgetUtils.ExportWidget (widget) : null;
 		}
 
 		public static void Cut (Gtk.Widget widget)

@@ -13,7 +13,7 @@ namespace Stetic.Editor {
 		Gtk.Button clearButton;
 		Gtk.Entry entry;
 
-		const Gdk.ModifierType AcceleratorModifierMask = ~(
+		public const Gdk.ModifierType AcceleratorModifierMask = ~(
 			Gdk.ModifierType.Button1Mask |
 			Gdk.ModifierType.Button2Mask |
 			Gdk.ModifierType.Button3Mask |
@@ -56,36 +56,34 @@ namespace Stetic.Editor {
 			args.RetVal = true;
 		}
 
+		GrabDialog grabWindow;
+
 		void Ungrab (uint time)
 		{
 			if (!editing)
 				return;
 			editing = false;
 
-			Gdk.Keyboard.Ungrab (time);
-			Gdk.Pointer.Ungrab (time);
 			if (Value != null)
 				entry.Text = (string) Value;
 			else
 				entry.Text = "";
+				
+			grabWindow.Destroy ();
 		}
 
 		void Grab (Gdk.Window window, uint time)
 		{
 			if (editing)
 				return;
-
-			if (Gdk.Keyboard.Grab (window, false, time) != Gdk.GrabStatus.Success)
-				return;
-			if (Gdk.Pointer.Grab (window, false, Gdk.EventMask.ButtonPressMask,
-					      null, null, time) != Gdk.GrabStatus.Success) {
-				Gdk.Keyboard.Ungrab (time);
-				return;
-			}
-			entry.GrabFocus ();
-
+				
+			grabWindow = new GrabDialog ();
 			editing = true;
 			entry.Text = "Press a key...";
+			grabWindow.Run ();
+			this.keyval = grabWindow.Keyval;
+			this.mask = grabWindow.Mask;
+			Ungrab (time);
 		}
 
 		[GLib.ConnectBefore]
@@ -147,6 +145,49 @@ namespace Stetic.Editor {
 		{
 			if (ValueChanged != null)
 				ValueChanged (this, EventArgs.Empty);
+		}
+	}
+	
+	class GrabDialog: Gtk.Dialog
+	{
+		public uint Keyval;
+		public Gdk.ModifierType Mask;
+		
+		public GrabDialog ()
+		{
+			Decorated = false;
+			this.SkipPagerHint = true;
+			this.SkipTaskbarHint = true;
+			this.WindowPosition = Gtk.WindowPosition.CenterOnParent;
+			Gtk.Frame f = new Gtk.Frame ();
+			f.Shadow = Gtk.ShadowType.Out;
+			this.VBox.PackStart (f, true, true, 0);
+			Gtk.Label lab = new Gtk.Label ("Press the key combination you want to assign to the accelerator...");
+			lab.Xpad = 12;
+			lab.Ypad = 12;
+			f.Add (lab);
+			ShowAll ();
+		}
+		
+		protected override bool OnKeyPressEvent (Gdk.EventKey evt)
+		{
+			uint keyval;
+			int effectiveGroup, level;
+			Gdk.ModifierType consumedMods, mask;
+			
+			if (!Gtk.Accelerator.Valid (evt.KeyValue, evt.State))
+				return base.OnKeyPressEvent (evt);
+			
+			// We know this will succeed, since we're already here...
+			Gdk.Keymap.Default.TranslateKeyboardState (evt.HardwareKeycode, evt.State, evt.Group, out keyval, out effectiveGroup, out level, out consumedMods);
+			mask = evt.State & Accelerator.AcceleratorModifierMask & ~consumedMods;
+
+			if (evt.Key != Gdk.Key.Escape || mask != 0) {
+				Keyval = keyval;
+				Mask = mask;
+				this.Respond (0);
+			}
+			return false;
 		}
 	}
 }

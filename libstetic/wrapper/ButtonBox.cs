@@ -1,11 +1,14 @@
 using System;
 using System.Xml;
 using System.Collections;
+using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
 	public class ButtonBox : Box {
 
+		Dialog actionDialog;
+		
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
@@ -13,6 +16,11 @@ namespace Stetic.Wrapper {
 				if (child is Placeholder)
 					ReplaceChild (child, NewButton ());
 			}
+		}
+		
+		public void SetActionDialog (Dialog dialog)
+		{
+			actionDialog = dialog;
 		}
 
 		Gtk.Button NewButton ()
@@ -98,6 +106,33 @@ namespace Stetic.Wrapper {
 			// Reset the button count
 			Size = 0;
 			base.ReadChildren (elem, format);
+		}
+		
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
+		{
+			if (actionDialog != null && wrapper is Button) {
+			
+				// If this is the action area of a dialog, buttons must be added using AddActionWidget,
+				// so they are properly registered.
+				
+				ObjectWrapper childwrapper = ChildWrapper (wrapper);
+				Button button = wrapper as Button;
+				
+				if (childwrapper != null) {
+					string dialogVarName = ctx.WidgetMap.GetWidgetId (actionDialog);
+					ctx.Statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
+					string varName = ctx.GenerateCreationCode (wrapper);
+					CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
+						new CodeVariableReferenceExpression (dialogVarName),
+						"AddActionWidget",
+						new CodeVariableReferenceExpression (varName),
+						new CodePrimitiveExpression (button.ResponseId)
+					);
+					ctx.Statements.Add (invoke);
+					GenerateSetPacking (ctx, parentVar, varName, childwrapper);
+				}
+			} else
+				base.GenerateChildBuildCode (ctx, parentVar, wrapper);
 		}
 
 		public class ButtonBoxChild : Box.BoxChild {

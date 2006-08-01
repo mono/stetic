@@ -193,13 +193,13 @@ namespace Stetic.Wrapper {
 			XmlElement elem = base.Write (doc, format);
 			XmlElement child_elem;
 			
-			if (ClassDescriptor.AllowChildren || format == FileFormat.Glade) {
+			if (ClassDescriptor.AllowChildren) {
 				foreach (Gtk.Widget child in GladeChildren) {
 					Widget wrapper = Widget.Lookup (child);
 					
 					if (wrapper != null) {
 						// Iternal children are written later
-						if (format == FileFormat.Native && wrapper.InternalChildProperty != null)
+						if (wrapper.InternalChildProperty != null)
 							continue;
 						child_elem = WriteChild (wrapper, doc, format);
 						elem.AppendChild (child_elem);
@@ -211,26 +211,26 @@ namespace Stetic.Wrapper {
 				}
 			}
 			
-			if (format == FileFormat.Native) {
-				foreach (PropertyDescriptor prop in this.ClassDescriptor.InternalChildren) {
-					Gtk.Widget child = prop.GetValue (Wrapped) as Gtk.Widget;
-					if (child == null)
-						continue;
+			foreach (PropertyDescriptor prop in this.ClassDescriptor.InternalChildren) {
+				Gtk.Widget child = prop.GetValue (Wrapped) as Gtk.Widget;
+				if (child == null)
+					continue;
 
-					child_elem = doc.CreateElement ("child");
-					Widget wrapper = Widget.Lookup (child);
-					if (wrapper == null) {
-						child_elem.AppendChild (doc.CreateElement ("placeholder"));
-						elem.AppendChild (child_elem);
-						continue;
-					}
-					
-					XmlElement widget_elem = wrapper.Write (doc, format);
-					child_elem.SetAttribute ("internal-child", prop.Name);
-					
-					child_elem.AppendChild (widget_elem);
+				child_elem = doc.CreateElement ("child");
+				Widget wrapper = Widget.Lookup (child);
+				if (wrapper == null) {
+					child_elem.AppendChild (doc.CreateElement ("placeholder"));
 					elem.AppendChild (child_elem);
+					continue;
 				}
+				
+				string cid = format == FileFormat.Glade ? prop.InternalChildId : prop.Name;
+				
+				XmlElement widget_elem = wrapper.Write (doc, format);
+				child_elem.SetAttribute ("internal-child", cid);
+				
+				child_elem.AppendChild (widget_elem);
+				elem.AppendChild (child_elem);
 			}
 
 			if (DesignWidth != 0 || DesignHeight != 0)
@@ -317,7 +317,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		void GenerateSetPacking (GeneratorContext ctx, string parentVar, string childVar, ObjectWrapper containerChildWrapper)
+		protected void GenerateSetPacking (GeneratorContext ctx, string parentVar, string childVar, ObjectWrapper containerChildWrapper)
 		{
 			Gtk.Container.ContainerChild cc = containerChildWrapper.Wrapped as Gtk.Container.ContainerChild;
 			ClassDescriptor klass = containerChildWrapper.ClassDescriptor;

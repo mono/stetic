@@ -1,3 +1,27 @@
+2006-08-01  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/Clipboard.cs: When copying a widget, store it as
+	  xml, so if the widget is deleted the clipboard will still
+	  have the data. Fixes bug #78938.
+	  
+	* libstetic/PreviewBox.cs:
+	* libstetic/EmbedWindow.cs: Avoid a crash when metacity is not
+	  installed. Fixes bug #78916.
+	  
+	* libstetic/wrapper/Container.cs: Properly read internal children
+	  when using Glade format.
+	* libstetic/wrapper/RadioButton.cs: Fix read code for radio buttons.
+	  Fixes bug #78909.
+	  
+	* libstetic/wrapper/Dialog.cs:
+	* libstetic/wrapper/ButtonBox.cs: Added special code generation case
+	  when the button box is the action area of a dialog. In this case
+	  widgets are added using dialog.AddActionWidget(). Fixes bug #78956.
+	  
+	* libstetic/editor/Accelerator.cs: Capture the key combination using
+	  a modal dialog, to avoid messing with the container accelerators.
+	  Fixes bug #78867.
+
 2006-07-24  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/EnumDescriptor.cs: Don't throw an exception if the

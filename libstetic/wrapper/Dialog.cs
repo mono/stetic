@@ -14,6 +14,7 @@ namespace Stetic.Wrapper {
 			dialog.HasSeparator = false;
 
 			ActionArea = (ButtonBox)Container.Lookup (dialog.ActionArea);
+			ActionArea.SetActionDialog (this);
 
 			if (!initialized && dialog.VBox.Children.Length == 1) {
 				Container vbox = Container.Lookup (dialog.VBox);
@@ -32,6 +33,7 @@ namespace Stetic.Wrapper {
 			ActionArea.ContentsChanged -= ButtonsChanged;
 			base.ReadChildren (elem, format);
 			ActionArea.ContentsChanged += ButtonsChanged;
+			ActionArea.SetActionDialog (this);
 		}
 
 		Gtk.Dialog dialog {

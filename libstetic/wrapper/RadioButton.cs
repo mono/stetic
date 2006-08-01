@@ -22,14 +22,17 @@ namespace Stetic.Wrapper {
 
 		public override void Read (XmlElement elem, FileFormat format)
 		{
-			string group = (string)GladeUtils.ExtractProperty (elem, "group", "");
 			bool active = (bool)GladeUtils.ExtractProperty (elem, "active", false);
+			string group = (string)GladeUtils.ExtractProperty (elem, "group", "");
 			base.Read (elem, format);
 
-			if (group != "")
-				Group = group;
-			else
-				Group = Wrapped.Name;
+			if (format == FileFormat.Glade) {
+				if (group != "")
+					Group = group;
+				else
+					Group = Wrapped.Name;
+			}
+				
 			if (active)
 				((Gtk.RadioButton)Wrapped).Active = true;
 		}
@@ -37,9 +40,11 @@ namespace Stetic.Wrapper {
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
 			XmlElement elem = base.Write (doc, format);
-			string group = GroupManager.GladeGroupName (Wrapped);
-			if (group != Wrapped.Name)
-				GladeUtils.SetProperty (elem, "group", group);
+			if (format == FileFormat.Glade) {
+				string group = GroupManager.GladeGroupName (Wrapped);
+				if (group != Wrapped.Name)
+					GladeUtils.SetProperty (elem, "group", group);
+			}
 			return elem;
 		}
 		
