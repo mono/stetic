@@ -1,3 +1,10 @@
+2006-08-11  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/editor/DateTimeEditor.cs:
+	* libstetic/editor/TimeSpanEditor.cs:
+	* libstetic/PropertyEditorCell.cs:
+	* libstetic/Makefile.am: Added editors for DateTime and TimeSpan.
+
 2006-08-11  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/WidgetTreeCombo.cs: Don't show unselectable
