@@ -1,3 +1,42 @@
+2006-08-11  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/WidgetTreeCombo.cs: Don't show unselectable
+	  widgets in the combo.
+	  
+	* libstetic/IProject.cs:
+	* libsteticui/Project.cs: Removed tooltips property. They are
+	  now handlerd in a different way.
+	  
+	* libstetic/ObjectWrapper.cs:
+	* libstetic/wrapper/Container.cs:
+	* libstetic/wrapper/Frame.cs:
+	* libstetic/wrapper/Button.cs: Fixed some issues when reading
+	  and writing buttons.
+
+	* libstetic/wrapper/Notebook.cs:
+	* libstetic/wrapper/MenuItem.cs:
+	* libstetic/wrapper/OptionMenu.cs:
+	* libstetic/wrapper/Expander.cs:
+	* libstetic/wrapper/CheckButton.cs:
+	* libstetic/wrapper/Object.cs: Track api changes.
+	
+	* libstetic/wrapper/objects.xml: Added initialization property
+	  for windows. Use Entry.IsEditable instead of Editable, which is
+	  obsolete.
+	  
+	* libstetic/editor/Flags.cs: Fix warnings.
+	* libstetic/wrapper/Widget.cs: Generate code for displaying
+	  tooltips.
+
+	* libstetic/GeneratorContext.cs:
+	* libstetic/PropertyDescriptor.cs: Support code generation of
+	  DateTime and TimeSpan.
+	  
+	* libstetic/DND.cs: Fixed several issues with insert bars in
+	  boxes.
+	  
+	* libstetic/Makefile.am: Updated.
+	  
 2006-08-01  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/ItemGroup.cs: Use a hashtable to store the items.

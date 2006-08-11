@@ -17,6 +17,8 @@ namespace Stetic.Wrapper {
 		Gdk.EventMask events;
 		ActionGroupCollection actionGroups;
 		string member;
+		string tooltip;
+		CodeExpression generatedTooltips;
 		
 		// Name of the generated UIManager
 		string uiManagerName;
@@ -357,6 +359,9 @@ namespace Stetic.Wrapper {
 				ctx.Statements.Add (ami);
 			}
 			
+			if (tooltip != null && tooltip.Length > 0)
+				GetTopLevel().GenerateTooltip (ctx, this);
+			
 			base.GenerateBuildCode (ctx, varName);
 		}
 		
@@ -420,6 +425,29 @@ namespace Stetic.Wrapper {
 				);
 			}
 			return null;
+		}
+		
+		void GenerateTooltip (GeneratorContext ctx, Widget widget)
+		{
+			if (generatedTooltips == null) {
+				string tid = ctx.NewId ();
+				CodeVariableDeclarationStatement vardec = new CodeVariableDeclarationStatement (
+					typeof(Gtk.Tooltips),
+					tid,
+					new CodeObjectCreateExpression (typeof(Gtk.Tooltips))
+				);
+				ctx.Statements.Add (vardec);
+				generatedTooltips = new CodeVariableReferenceExpression (tid);
+			}
+			ctx.Statements.Add (
+				new CodeMethodInvokeExpression (
+					generatedTooltips,
+					"SetTip",
+					new CodeVariableReferenceExpression (ctx.WidgetMap.GetWidgetId (widget)),
+					new CodePrimitiveExpression (widget.Tooltip),
+					new CodePrimitiveExpression (widget.Tooltip)
+				)
+			);
 		}
 
 		public static new Widget Lookup (GLib.Object obj)
@@ -506,10 +534,10 @@ namespace Stetic.Wrapper {
 
 		public string Tooltip {
 			get {
-				return proj.Tooltips[Wrapped];
+				return tooltip;
 			}
 			set {
-				proj.Tooltips[Wrapped] = value;
+				tooltip = value;
 			}
 		}
 

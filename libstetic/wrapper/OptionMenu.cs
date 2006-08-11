@@ -39,19 +39,18 @@ namespace Stetic.Wrapper {
 
 		// Some versions of glade call the menu an internal child, some don't
 
-		protected override Widget ReadInternalChild (XmlElement child_elem, FileFormat format)
+		protected override void ReadInternalChild (XmlElement child_elem, FileFormat format)
 		{
 			if (child_elem.GetAttribute ("internal-child") == "menu")
-				return ReadChild (child_elem, format);
+				ReadChild (child_elem, format);
 			else
-				return base.ReadInternalChild (child_elem, format);
+				base.ReadInternalChild (child_elem, format);
 		}
 
-		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
+		protected override void ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			Widget wrapper = Stetic.Wrapper.Widget.Lookup (optionmenu.Menu);
 			wrapper.Read (child_elem["widget"], format);
-			return wrapper;
 		}
 
 		public override IEnumerable GladeChildren {

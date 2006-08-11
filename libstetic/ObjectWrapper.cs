@@ -91,7 +91,7 @@ namespace Stetic {
 			ObjectWrapper wrapper = klass.CreateWrapper ();
 			wrapper.proj = proj;
 			try {
-				wrapper.OnBeginRead ();
+				wrapper.OnBeginRead (format);
 				wrapper.Read (elem, format);
 			} catch (Exception ex) {
 				ErrorWidget we = new ErrorWidget (ex);
@@ -100,7 +100,7 @@ namespace Stetic {
 				Console.WriteLine (ex);
 				return wrap;
 			} finally {
-				wrapper.OnEndRead ();
+				wrapper.OnEndRead (format);
 			}
 			return wrapper;
 		}
@@ -214,12 +214,12 @@ namespace Stetic {
 		// Fired when any information of the object changes.
 		public event ObjectWrapperEventHandler ObjectChanged;
 		
-		protected virtual void OnBeginRead ()
+		protected virtual void OnBeginRead (FileFormat format)
 		{
 			loading = true;
 		}
 
-		protected virtual void OnEndRead ()
+		protected virtual void OnEndRead (FileFormat format)
 		{
 			loading = false;
 		}

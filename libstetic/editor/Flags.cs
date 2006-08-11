@@ -87,7 +87,7 @@ namespace Stetic.Editor {
 			else 
 			{
 				flagsLabel = new Gtk.Entry ();
-				flagsLabel.Editable = false;
+				flagsLabel.IsEditable = false;
 				flagsLabel.ShowAll ();
 				PackStart (flagsLabel, true, true, 0);
 				

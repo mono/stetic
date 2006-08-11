@@ -80,7 +80,7 @@ namespace Stetic
 		void FillCombo (Menu menu, Gtk.Widget widget, int level)
 		{
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			if (wrapper == null) return;
+			if (wrapper == null || wrapper.Unselectable) return;
 			
 			MenuItem item = new WidgetMenuItem (widget);
 			item.Activated += new EventHandler (OnItemSelected);

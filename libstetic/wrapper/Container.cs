@@ -148,7 +148,7 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
-		protected virtual Widget ReadChild (XmlElement child_elem, FileFormat format)
+		protected virtual void ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
 
@@ -161,10 +161,9 @@ namespace Stetic.Wrapper {
 				GladeUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
 			else
 				WidgetUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
-			return (Widget)wrapper;
 		}
 
-		protected virtual Widget ReadInternalChild (XmlElement child_elem, FileFormat format)
+		protected virtual void ReadInternalChild (XmlElement child_elem, FileFormat format)
 		{
 			TypedClassDescriptor klass = base.ClassDescriptor as TypedClassDescriptor;
 			string childId = child_elem.GetAttribute ("internal-child");
@@ -183,7 +182,7 @@ namespace Stetic.Wrapper {
 						GladeUtils.SetPacking (ChildWrapper (wrapper), child_elem);
 					else
 						WidgetUtils.SetPacking (ChildWrapper (wrapper), child_elem);
-					return (Widget)wrapper;
+					return;
 				}
 			}
 			
@@ -204,7 +203,8 @@ namespace Stetic.Wrapper {
 						if (wrapper.InternalChildProperty != null)
 							continue;
 						child_elem = WriteChild (wrapper, doc, format);
-						elem.AppendChild (child_elem);
+						if (child_elem != null)
+							elem.AppendChild (child_elem);
 					} else if (child is Stetic.Placeholder) {
 						child_elem = doc.CreateElement ("child");
 						child_elem.AppendChild (doc.CreateElement ("placeholder"));

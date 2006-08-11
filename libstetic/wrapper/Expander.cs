@@ -23,14 +23,13 @@ namespace Stetic.Wrapper {
 				ObjectWrapper.Create (proj, expander.LabelWidget);
 		}
 
-		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
+		protected override void ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "label_item") {
 				ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
 				expander.LabelWidget = (Gtk.Widget)wrapper.Wrapped;
-				return (Widget)wrapper;
 			} else
-				return base.ReadChild (child_elem, format);
+				base.ReadChild (child_elem, format);
 		}
 
 		protected override XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)

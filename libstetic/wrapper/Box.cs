@@ -13,6 +13,7 @@ namespace Stetic.Wrapper {
 				box.PackStart (CreatePlaceholder ());
 			}
 			box.SizeAllocated += box_SizeAllocated;
+			ContainerOrientation = obj is Gtk.HBox ? Gtk.Orientation.Horizontal : Gtk.Orientation.Vertical;
 		}
 
 		protected Gtk.Box box {
@@ -82,7 +83,7 @@ namespace Stetic.Wrapper {
 
 			// The orientation of the faults is the opposite of the
 			// orientation of the box
-			Gtk.Orientation orientation = hbox ? Gtk.Orientation.Vertical : orientation = Gtk.Orientation.Horizontal;
+			Gtk.Orientation orientation = hbox ? Gtk.Orientation.Vertical : Gtk.Orientation.Horizontal;
 			Gtk.SideType before = hbox ? Gtk.SideType.Left : Gtk.SideType.Top;
 			Gtk.SideType after = hbox ? Gtk.SideType.Right : Gtk.SideType.Bottom;
 

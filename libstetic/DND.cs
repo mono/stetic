@@ -394,29 +394,32 @@ namespace Stetic {
 			}
 		}
 
-		static void FindFault (int x, int y, out Fault fault)
+		static Fault FindFault (int x, int y, Gtk.Widget w)
 		{
 			int wx, wy, width, height, depth;
 
-			fault = null;
-
-			foreach (Hashtable widgetFaults in faultGroups.Values) {
-				foreach (Fault f in widgetFaults.Values) {
-					f.Window.GetGeometry (out wx, out wy, out width, out height, out depth);
-					if (x >= wx && y >= wy && x <= wx + width && y <= wy + height) {
-						fault = f;
-						return;
-					}
+			Hashtable widgetFaults  = (Hashtable) faultGroups [w];
+			if (widgetFaults == null)
+				return null;
+				
+			foreach (Fault f in widgetFaults.Values) {
+				f.Window.GetGeometry (out wx, out wy, out width, out height, out depth);
+				if (x >= wx && y >= wy && x <= wx + width && y <= wy + height) {
+					return f;
 				}
 			}
+			return null;
 		}
 
 		static void FaultDragMotion (object obj, Gtk.DragMotionArgs args)
 		{
 			int wx, wy, width, height, depth;
-			Fault fault;
-
-			FindFault (args.X, args.Y, out fault);
+			
+			Gtk.Widget widget = (Gtk.Widget) obj;
+			int px = args.X + widget.Allocation.X;
+			int py = args.Y + widget.Allocation.Y;
+			
+			Fault fault = FindFault (px, py, widget);
 
 			// If there's a splitter visible, and we're not currently dragging
 			// in the fault that owns that splitter, hide it
@@ -452,12 +455,13 @@ namespace Stetic {
 			dragFault = null;
 		}
 
-		static void FaultDrop (Stetic.Wrapper.Widget wrapper, int x, int y)
+		static void FaultDrop (Stetic.Wrapper.Widget wrapper, int x, int y, Gtk.Widget targetWidget)
 		{
-			Fault fault;
-			FindFault (x, y, out fault);
-			fault.Owner.Drop (wrapper.Wrapped, fault.Id);
-			wrapper.Select ();
+			Fault fault = FindFault (x, y, targetWidget);
+			if (fault != null) {
+				fault.Owner.Drop (wrapper.Wrapped, fault.Id);
+				wrapper.Select ();
+			}
 		}
 
 		static void FaultDragDrop (object obj, Gtk.DragDropArgs args)
@@ -465,7 +469,11 @@ namespace Stetic {
 			Gtk.Widget w = DND.Drop (args.Context, (Gtk.Widget)obj, args.Time);
 			Stetic.Wrapper.Widget dropped = Stetic.Wrapper.Widget.Lookup (w);
 			if (dropped != null) {
-				FaultDrop (dropped, args.X, args.Y);
+				Gtk.Widget targetWidget = (Gtk.Widget) obj;
+				int px = args.X + targetWidget.Allocation.X;
+				int py = args.Y + targetWidget.Allocation.Y;
+			
+				FaultDrop (dropped, px, py, targetWidget);
 				args.RetVal = true;
 			}
 		}
@@ -479,8 +487,12 @@ namespace Stetic {
 				dropped = GladeUtils.Paste (faultOwner.Project, args.SelectionData);
 			Gtk.Drag.Finish (args.Context, dropped != null,
 					 dropped != null, args.Time);
-			if (dropped != null)
-				FaultDrop (dropped, args.X, args.Y);
+			if (dropped != null) {
+				Gtk.Widget targetWidget = (Gtk.Widget) obj;
+				int px = args.X + targetWidget.Allocation.X;
+				int py = args.Y + targetWidget.Allocation.Y;
+				FaultDrop (dropped, px, py, targetWidget);
+			}
 		}
 
 		static Gdk.Window NewWindow (Gtk.Widget parent, Gdk.WindowClass wclass)

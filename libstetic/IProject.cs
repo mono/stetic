@@ -11,8 +11,6 @@ namespace Stetic {
 		
 		IResourceProvider ResourceProvider { get; set; }
 
-		Stetic.Tooltips Tooltips { get; }
-		
 		bool Modified { get; set; }
 
 		void PopupContextMenu (Stetic.Wrapper.Widget wrapper);

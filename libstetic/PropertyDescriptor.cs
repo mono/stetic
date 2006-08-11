@@ -173,6 +173,10 @@ namespace Stetic {
 				return ImageInfo.FromString (value);
 			else if (PropertyType == typeof(string[]))
 				return value.Split ('\n');
+			else if (PropertyType == typeof(DateTime))
+				return new DateTime (long.Parse (value));
+			else if (PropertyType == typeof(TimeSpan))
+				return new TimeSpan (long.Parse (value));
 			else
 				return Convert.ChangeType (value, PropertyType);
 		}
@@ -184,6 +188,10 @@ namespace Stetic {
 				return typeConverter.ConvertToString (value);
 			else if (PropertyType == typeof(string[]))
 				return string.Join ("\n", (string[])value);
+			else if (PropertyType == typeof(DateTime))
+				return ((DateTime)value).Ticks.ToString ();
+			else if (PropertyType == typeof(TimeSpan))
+				return ((TimeSpan)value).Ticks.ToString ();
 			else
 				return value.ToString ();
 		}

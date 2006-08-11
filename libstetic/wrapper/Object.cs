@@ -20,9 +20,9 @@ namespace Stetic.Wrapper {
 			base.Dispose ();
 		}
 
-		protected override void OnEndRead ()
+		protected override void OnEndRead (FileFormat format)
 		{
-			base.OnEndRead ();
+			base.OnEndRead (format);
 			((GLib.Object)Wrapped).AddNotification (NotifyHandler);
 		}
 		

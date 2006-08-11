@@ -123,6 +123,20 @@ namespace Stetic
 				return new CodeArrayCreateExpression (value.GetType().GetElementType(), (CodeExpression[]) list.ToArray(typeof(CodeExpression)));
 			}
 			
+			if (value is DateTime) {
+				return new CodeObjectCreateExpression (
+					typeof(DateTime),
+					new CodePrimitiveExpression (((DateTime)value).Ticks)
+				);
+			}
+			
+			if (value is TimeSpan) {
+				return new CodeObjectCreateExpression (
+					typeof(TimeSpan),
+					new CodePrimitiveExpression (((TimeSpan)value).Ticks)
+				);
+			}
+			
 			return new CodePrimitiveExpression (value);
 		}
 		

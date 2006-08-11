@@ -36,7 +36,6 @@ libstetic_dll_sources =			\
 	Shadow.cs				\
 	SignalDescriptor.cs		\
 	TextBox.cs			\
-	Tooltips.cs			\
 	TranslatableAttribute.cs	\
 	TypedClassDescriptor.cs		\
 	TypedPropertyDescriptor.cs		\

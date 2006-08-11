@@ -162,7 +162,7 @@
     <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
 
     <object type="Gtk.Window,gtk-sharp" wrapper="Stetic.Wrapper.Window"
-	    label="Window" icon="window.png" palette-category="window">
+	    label="Window" icon="window.png" palette-category="window" init-properties="Title">
 	<itemgroups>
 	    <itemgroup label="Window Properties">
 		<property name="Title" init-with-name="true" translatable="true" />
@@ -751,7 +751,7 @@
 	<itemgroups>
 	    <itemgroup label="Entry Properties">
 		<property name="Text" translatable="true" />
-		<property name="Editable" />
+		<property name="IsEditable" />
 		<property name="WidthChars" min="-1"/>
 		<property name="MaxLength" />
 		<property name="HasFrame" />

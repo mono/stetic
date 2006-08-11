@@ -21,16 +21,15 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
+		protected override void ReadChild (XmlElement child_elem, FileFormat format)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "tab") {
 				ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
 				Gtk.Widget widget = (Gtk.Widget)wrapper.Wrapped;
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), widget);
 				tabs.Add (widget);
-				return (Widget)wrapper;
 			} else
-				return base.ReadChild (child_elem, format);
+				base.ReadChild (child_elem, format);
 		}
 
 		protected override XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)

@@ -482,15 +482,6 @@ namespace Stetic {
 			}
 		}
 
-		Stetic.Tooltips tooltips;
-		public Stetic.Tooltips Tooltips {
-			get {
-				if (tooltips == null)
-					tooltips = new Stetic.Tooltips ();
-				return tooltips;
-			}
-		}
-		 
 		public void PopupContextMenu (Stetic.Wrapper.Widget wrapper)
 		{
 			Gtk.Menu m = new ContextMenu (wrapper);

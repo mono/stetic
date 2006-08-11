@@ -29,17 +29,25 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override Widget ReadChild (XmlElement child_elem, FileFormat format)
+		protected override void ReadChild (XmlElement child_elem, FileFormat format)
 		{
-			Type = ButtonType.Custom;
-
-			if (button.Child != null)
-				button.Remove (button.Child);
-			Widget wrapper = base.ReadChild (child_elem, format);
-			FixupGladeChildren ();
-			return wrapper;
+			if (Type == ButtonType.Custom || format == FileFormat.Glade) {
+				if (button.Child != null)
+					button.Remove (button.Child);
+				base.ReadChild (child_elem, format);
+				FixupGladeChildren ();
+			} else if (Type == ButtonType.TextAndIcon)
+				ConstructContents ();
 		}
 
+		protected override XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)
+		{
+			if (format == FileFormat.Glade || Type == ButtonType.Custom)
+				return base.WriteChild (wrapper, doc, format);
+			else
+				return null;
+		}
+		
 		void FixupGladeChildren ()
 		{
 			Gtk.Alignment alignment = button.Child as Gtk.Alignment;
@@ -154,10 +162,11 @@ namespace Stetic.Wrapper {
 
 		Gtk.Label labelWidget;
 
-		protected override void OnEndRead ()
+		protected override void OnEndRead (FileFormat format)
 		{
-			base.OnEndRead ();
-			ConstructContents ();
+			base.OnEndRead (format);
+			if (format == FileFormat.Native && Type == ButtonType.TextAndIcon)
+				ConstructContents ();
 		}
 		
 		void ConstructContents ()
