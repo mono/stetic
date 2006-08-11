@@ -87,6 +87,8 @@ libstetic_dll_sources =			\
 	editor/ThemedIconList.cs			\
 	editor/Translatable.cs		\
 	editor/TreeViewCellContainer.cs	\
+	editor/TimeSpanEditor.cs	\
+	editor/DateTimeEditor.cs	\
 	editor/WidgetSelector.cs		\
 	Metacity/ButtonFunction.cs \
 	Metacity/ButtonLayout.cs \
