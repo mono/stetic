@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Mono.Unix;
 
 namespace Stetic.Editor {
 
@@ -79,7 +80,7 @@ namespace Stetic.Editor {
 				
 			grabWindow = new GrabDialog ();
 			editing = true;
-			entry.Text = "Press a key...";
+			entry.Text = Catalog.GetString ("Press a key...");
 			grabWindow.Run ();
 			this.keyval = grabWindow.Keyval;
 			this.mask = grabWindow.Mask;
@@ -162,7 +163,7 @@ namespace Stetic.Editor {
 			Gtk.Frame f = new Gtk.Frame ();
 			f.Shadow = Gtk.ShadowType.Out;
 			this.VBox.PackStart (f, true, true, 0);
-			Gtk.Label lab = new Gtk.Label ("Press the key combination you want to assign to the accelerator...");
+			Gtk.Label lab = new Gtk.Label (Catalog.GetString ("Press the key combination you want to assign to the accelerator..."));
 			lab.Xpad = 12;
 			lab.Ypad = 12;
 			f.Add (lab);

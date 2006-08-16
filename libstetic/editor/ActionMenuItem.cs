@@ -1,6 +1,7 @@
 
 using System;
 using Stetic.Wrapper;
+using Mono.Unix;
 
 namespace Stetic.Editor
 {
@@ -254,7 +255,7 @@ namespace Stetic.Editor
 					}
 					bbox.PackStart (new Gtk.Arrow (Gtk.ArrowType.Down, Gtk.ShadowType.In), false, false, 0);
 					Gtk.Button b = new Gtk.Button (bbox);
-					tooltips.SetTip (b, "Select action type", "");
+					tooltips.SetTip (b, Catalog.GetString ("Select action type"), "");
 					b.Relief = Gtk.ReliefStyle.None;
 					b.ButtonPressEvent += OnSelectIcon;
 					icon = b;
@@ -267,7 +268,7 @@ namespace Stetic.Editor
 				entry.Activated += OnLabelActivated;
 				entry.HasFrame = false;
 				this.label = entry;
-				tooltips.SetTip (entry, "Action label", "");
+				tooltips.SetTip (entry, Catalog.GetString ("Action label"), "");
 			} else {
 				Gtk.Label label = new Gtk.Label (text);
 				label.Xalign = 0;
@@ -280,10 +281,10 @@ namespace Stetic.Editor
 				string tip;
 				if (node.Type != Gtk.UIManagerItemType.Menu) {
 					img = addMenuImage;
-					tip = "Add submenu";
+					tip = Catalog.GetString ("Add submenu");
 				} else {
 					img = removeMenuImage;
-					tip = "Remove submenu";
+					tip = Catalog.GetString ("Remove submenu");
 				}
 					
 				Gtk.Button sb = new Gtk.Button (new Gtk.Image (img));
@@ -360,19 +361,19 @@ namespace Stetic.Editor
 		{
 			Gtk.Menu menu = new Gtk.Menu ();
 			
-			Gtk.CheckMenuItem item = new Gtk.CheckMenuItem ("Action");
+			Gtk.CheckMenuItem item = new Gtk.CheckMenuItem (Catalog.GetString ("Action"));
 			item.DrawAsRadio = true;
 			item.Active = (node.Action.Type == Action.ActionType.Action);
 			item.Activated += OnSetActionType;
 			menu.Insert (item, -1);
 			
-			item = new Gtk.CheckMenuItem ("Radio Action");
+			item = new Gtk.CheckMenuItem (Catalog.GetString ("Radio Action"));
 			item.DrawAsRadio = true;
 			item.Active = (node.Action.Type == Action.ActionType.Radio);
 			item.Activated += OnSetRadioType;
 			menu.Insert (item, -1);
 			
-			item = new Gtk.CheckMenuItem ("Toggle Action");
+			item = new Gtk.CheckMenuItem (Catalog.GetString ("Toggle Action"));
 			item.DrawAsRadio = true;
 			item.Active = (node.Action.Type == Action.ActionType.Toggle);
 			item.Activated += OnSetToggleType;
@@ -380,13 +381,13 @@ namespace Stetic.Editor
 			
 			menu.Insert (new Gtk.SeparatorMenuItem (), -1);
 			
-			Gtk.MenuItem itIcons = new Gtk.MenuItem ("Select Icon");
+			Gtk.MenuItem itIcons = new Gtk.MenuItem (Catalog.GetString ("Select Icon"));
 			menu.Insert (itIcons, -1);
 			IconSelectorMenu menuIcons = new IconSelectorMenu (GetProject ());
 			menuIcons.IconSelected += OnStockSelected;
 			itIcons.Submenu = menuIcons;
 			
-			Gtk.MenuItem it = new Gtk.MenuItem ("Clear Icon");
+			Gtk.MenuItem it = new Gtk.MenuItem (Catalog.GetString ("Clear Icon"));
 			it.Sensitive = (node.Action.GtkAction.StockId != null);
 			it.Activated += OnClearIcon;
 			menu.Insert (it, -1);

@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using Stetic.Wrapper;
+using Mono.Unix;
 
 namespace Stetic.Editor
 {
@@ -119,7 +120,7 @@ namespace Stetic.Editor
 			emptyLabel.VisibleWindow = false;
 			Gtk.Label label = new Gtk.Label ();
 			label.Xalign = 0;
-			label.Markup = "<i><span foreground='darkgrey'>Click to create action</span></i>";
+			label.Markup = "<i><span foreground='darkgrey'>" + Catalog.GetString ("Click to create action") + "</span></i>";
 			emptyLabel.Add (label);
 			emptyLabel.ButtonPressEvent += OnAddClicked;
 			table.Attach (emptyLabel, 1, 2, n, n + 1);
@@ -411,22 +412,22 @@ namespace Stetic.Editor
 		public void ShowContextMenu (ActionMenuItem menuItem)
 		{
 			Gtk.Menu m = new Gtk.Menu ();
-			Gtk.MenuItem item = new Gtk.MenuItem ("Insert Before");
+			Gtk.MenuItem item = new Gtk.MenuItem (Catalog.GetString ("Insert Before"));
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				InsertActionAt (menuItem, false, false);
 			};
-			item = new Gtk.MenuItem ("Insert After");
+			item = new Gtk.MenuItem (Catalog.GetString ("Insert After"));
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				InsertActionAt (menuItem, true, false);
 			};
-			item = new Gtk.MenuItem ("Insert Separator Before");
+			item = new Gtk.MenuItem (Catalog.GetString ("Insert Separator Before"));
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				InsertActionAt (menuItem, false, true);
 			};
-			item = new Gtk.MenuItem ("Insert Separator After");
+			item = new Gtk.MenuItem (Catalog.GetString ("Insert Separator After"));
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				InsertActionAt (menuItem, true, true);

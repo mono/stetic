@@ -3,6 +3,7 @@ using Gdk;
 using System;
 using System.Collections;
 using System.Reflection;
+using Mono.Unix;
 
 namespace Stetic {
 
@@ -21,11 +22,11 @@ namespace Stetic {
 			groups = new Hashtable ();
 			Registry.RegistryChanged += OnRegistryChanged;
 			
-			ShowGroup ("window", "Windows");
-			ShowGroup ("widget", "Widgets");
-			ShowGroup ("container", "Containers");
+			ShowGroup ("window", Catalog.GetString ("Windows"));
+			ShowGroup ("widget", Catalog.GetString ("Widgets"));
+			ShowGroup ("container", Catalog.GetString ("Containers"));
 //			ShowGroup ("toolbaritem", "Toolbar Items");
-			ShowGroup ("actions", "Actions");
+			ShowGroup ("actions", Catalog.GetString ("Actions"));
 		}
 		
 		public override void Dispose ()
@@ -134,7 +135,7 @@ namespace Stetic {
 			if (globalActionsBox != null)
 				globalActionsBox.Dispose ();
 				
-			PaletteGroup widgetGroup = AddOrGetGroup ("actions", "Actions");
+			PaletteGroup widgetGroup = AddOrGetGroup ("actions", Catalog.GetString ("Actions"));
 			localActionsBox = new ActionGroupBox ();
 			globalActionsBox = new ActionGroupBox ();
 			widgetGroup.Append (localActionsBox);
@@ -188,7 +189,7 @@ namespace Stetic {
 		{
 			vbox = new VBox (false, 0);
 			emptyLabel = new Gtk.Label ();
-			emptyLabel.Markup = "<small><i><span foreground='darkgrey'>  Empty</span></i></small>";
+			emptyLabel.Markup = "<small><i><span foreground='darkgrey'>  " + Catalog.GetString ("Empty") + "</span></i></small>";
 			vbox.PackStart (emptyLabel, false, false, 0);
 			
 			align = new Gtk.Alignment (0, 0, 0, 0);

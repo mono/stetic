@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Collections;
 using Stetic.Wrapper;
+using Mono.Unix;
 
 namespace Stetic
 {
@@ -44,9 +45,9 @@ namespace Stetic
 			crtogAfter.Activatable = true;
 			crtogAfter.Toggled += new Gtk.ToggledHandler (OnAfterToggled);
 			
-			tree.AppendColumn ("Signal", crtSignal, "text", ColSignal, "weight", ColSignalTextWeight);
-			tree.AppendColumn ("Handler", crtHandler, "markup", ColHandler, "visible", ColIsSignal);
-			tree.AppendColumn ("After", crtogAfter, "active", ColAfter, "visible", ColHasHandler);
+			tree.AppendColumn (Catalog.GetString ("Signal"), crtSignal, "text", ColSignal, "weight", ColSignalTextWeight);
+			tree.AppendColumn (Catalog.GetString ("Handler"), crtHandler, "markup", ColHandler, "visible", ColIsSignal);
+			tree.AppendColumn (Catalog.GetString ("After"), crtogAfter, "active", ColAfter, "visible", ColHasHandler);
 			tree.Columns[0].Resizable = true;
 			tree.Columns[1].Resizable = true;
 			tree.Columns[2].Resizable = true;
@@ -420,7 +421,7 @@ namespace Stetic
 		}
 		
 		string EmptyHandlerText {
-			get { return "Click here to add a new handler"; } 
+			get { return Catalog.GetString ("Click here to add a new handler"); } 
 		}
 	}
 	

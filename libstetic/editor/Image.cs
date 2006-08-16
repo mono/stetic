@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
+using Mono.Unix;
 
 namespace Stetic.Editor {
 
@@ -79,7 +80,7 @@ namespace Stetic.Editor {
 
 			if (allowStock) {
 				store = new Gtk.ListStore (typeof (string), typeof (string));
-				store.AppendValues (Gnome.Stock.Blank, "(None)");
+				store.AppendValues (Gnome.Stock.Blank, Catalog.GetString ("(None)"));
 				for (int i = 0; i < stockIds.Length; i++)
 					store.AppendValues (stockIds[i], stockLabels[i]);
 
@@ -165,7 +166,7 @@ namespace Stetic.Editor {
 		void button_Clicked (object obj, EventArgs args)
 		{
 			Gtk.FileChooserDialog dialog =
-				new Gtk.FileChooserDialog ("Image", null, Gtk.FileChooserAction.Open,
+				new Gtk.FileChooserDialog (Catalog.GetString ("Image"), null, Gtk.FileChooserAction.Open,
 							   Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
 							   Gtk.Stock.Open, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();

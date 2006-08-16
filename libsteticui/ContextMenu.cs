@@ -2,6 +2,7 @@ using Gtk;
 using System;
 using System.Collections;
 using System.Reflection;
+using Mono.Unix;
 
 namespace Stetic {
 
@@ -19,7 +20,7 @@ namespace Stetic {
 			item.Sensitive = false;
 			Add (item);
 
-			item = new MenuItem ("_Select");
+			item = new MenuItem (Catalog.GetString ("_Select"));
 			item.Sensitive = false;
 			Add (item);
 
@@ -40,7 +41,7 @@ namespace Stetic {
 				Add (item);
 			}
 
-			item = new MenuItem ("_Select");
+			item = new MenuItem (Catalog.GetString ("_Select"));
 			item.Activated += DoSelect;
 			Add (item);
 
@@ -154,7 +155,7 @@ namespace Stetic {
 			ImageMenuItem item;
 			Label label;
 			
-			label = new Label (widget is Placeholder ? "Placeholder" : widget.Name);
+			label = new Label (widget is Placeholder ? Catalog.GetString ("Placeholder") : widget.Name);
 			label.UseUnderline = false;
 			label.SetAlignment (0.0f, 0.5f);
 			item = new ImageMenuItem ();

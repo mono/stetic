@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using Stetic.Wrapper;
+using Mono.Unix;
 
 namespace Stetic
 {
@@ -44,7 +45,7 @@ namespace Stetic
 
 				Gtk.ToolItem comboItem = new Gtk.ToolItem ();
 				Gtk.HBox cbox = new Gtk.HBox ();
-				cbox.PackStart (new Gtk.Label ("Action Group: "), false, false, 3);
+				cbox.PackStart (new Gtk.Label (Catalog.GetString ("Action Group:") + " "), false, false, 3);
 				cbox.PackStart (combo, true, true, 3);
 				comboItem.Add (cbox);
 				comboItem.ShowAll ();
@@ -178,7 +179,7 @@ namespace Stetic
 		void OnAddGroup (object s, EventArgs args)
 		{
 			ActionGroup group = new ActionGroup ();
-			group.Name = "New Action Group";
+			group.Name = Catalog.GetString ("New Action Group");
 			actionGroups.Add (group);
 			combo.Active = actionGroups.Count - 1;
 			if (ActiveGroupCreated != null)

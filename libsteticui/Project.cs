@@ -3,6 +3,7 @@ using System;
 using System.Xml;
 using System.Collections;
 using System.CodeDom;
+using Mono.Unix;
 
 namespace Stetic {
 
@@ -133,7 +134,7 @@ namespace Stetic {
 				
 				XmlNode node = doc.SelectSingleNode ("/stetic-interface");
 				if (node == null)
-					throw new ApplicationException ("Not a Stetic file according to node name");
+					throw new ApplicationException (Catalog.GetString ("Not a Stetic file according to node name."));
 				
 				foreach (XmlElement groupElem in node.SelectNodes ("action-group")) {
 					Wrapper.ActionGroup actionGroup = new Wrapper.ActionGroup ();

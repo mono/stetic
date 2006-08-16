@@ -2,6 +2,7 @@ using Gtk;
 using System;
 using System.IO;
 using System.Xml.Serialization;
+using Mono.Unix;
 
 namespace Stetic {
 
@@ -60,30 +61,30 @@ namespace Stetic {
 		public UIManager (Project project)
 		{
 			ActionEntry[] entries = new ActionEntry[] {
-				new ActionEntry ("FileMenu", null, "_File", null, null, null),
-				new ActionEntry ("Open", Stock.Open, null, "<control>O", "Open a file", OpenFile),
-				new ActionEntry ("RecentFiles", null, "Recent files", null, null, null),
-				new ActionEntry ("Save", Stock.Save, null, "<control>S", "Save", SaveFile),
-				new ActionEntry ("SaveAs", Stock.SaveAs, null, "<control><shift>S", "Save As", SaveFileAs),
-				new ActionEntry ("ImportGlade", null, "_Import from Glade File...", null, "Import UI from a Glade file", ImportGlade),
-				new ActionEntry ("ExportGlade", null, "_Export to Glade File...", null, "Export UI to a Glade file", ExportGlade),
-				new ActionEntry ("Close", Stock.Close, null, "<control>W", "Close", Close),
-				new ActionEntry ("Quit", Stock.Quit, null, "<control>Q", "Quit", Quit),
+				new ActionEntry ("FileMenu", null, Catalog.GetString ("_File"), null, null, null),
+				new ActionEntry ("Open", Stock.Open, null, "<control>O", Catalog.GetString ("Open a file"), OpenFile),
+				new ActionEntry ("RecentFiles", null, Catalog.GetString ("Recent files"), null, null, null),
+				new ActionEntry ("Save", Stock.Save, null, "<control>S", Catalog.GetString ("Save"), SaveFile),
+				new ActionEntry ("SaveAs", Stock.SaveAs, null, "<control><shift>S", Catalog.GetString ("Save As"), SaveFileAs),
+				new ActionEntry ("ImportGlade", null, Catalog.GetString ("_Import from Glade File..."), null, Catalog.GetString ("Import UI from a Glade file"), ImportGlade),
+				new ActionEntry ("ExportGlade", null, Catalog.GetString ("_Export to Glade File..."), null, Catalog.GetString ("Export UI to a Glade file"), ExportGlade),
+				new ActionEntry ("Close", Stock.Close, null, "<control>W", Catalog.GetString ("Close"), Close),
+				new ActionEntry ("Quit", Stock.Quit, null, "<control>Q", Catalog.GetString ("Quit"), Quit),
 
 				new ActionEntry ("EditMenu", null, "_Edit", null, null, null),
-				new ActionEntry ("Undo", Stock.Undo, null, "<control>Z", "Undo previous action", Undo),
-				new ActionEntry ("Redo", Stock.Redo, null, "<control><shift>Z", "Redo previously-undone action", Redo),
-				new ActionEntry ("Cut", Stock.Cut, null, "<control>X", "Cut selection to clipboard", Cut),
-				new ActionEntry ("Copy", Stock.Copy, null, "<control>C", "Copy selection to clipboard", Copy),
-				new ActionEntry ("Paste", Stock.Paste, null, "<control>V", "Paste from clipboard", Paste),
-				new ActionEntry ("Delete", Stock.Delete, null, "Delete", "Delete selection", Delete),
+				new ActionEntry ("Undo", Stock.Undo, null, "<control>Z", Catalog.GetString ("Undo previous action"), Undo),
+				new ActionEntry ("Redo", Stock.Redo, null, "<control><shift>Z", Catalog.GetString ("Redo previously-undone action"), Redo),
+				new ActionEntry ("Cut", Stock.Cut, null, "<control>X", Catalog.GetString ("Cut selection to clipboard"), Cut),
+				new ActionEntry ("Copy", Stock.Copy, null, "<control>C", Catalog.GetString ("Copy selection to clipboard"), Copy),
+				new ActionEntry ("Paste", Stock.Paste, null, "<control>V", Catalog.GetString ("Paste from clipboard"), Paste),
+				new ActionEntry ("Delete", Stock.Delete, null, "Delete", Catalog.GetString ("Delete selection"), Delete),
 
-				new ActionEntry ("ProjectMenu", null, "Project", null, null, null),
-				new ActionEntry ("EditProjectIcons", null, "Project Icons...", null, null, EditIcons),
+				new ActionEntry ("ProjectMenu", null, Catalog.GetString ("Project"), null, null, null),
+				new ActionEntry ("EditProjectIcons", null, Catalog.GetString ("Project Icons..."), null, null, EditIcons),
 
-				new ActionEntry ("HelpMenu", null, "_Help", null, null, null),
-				new ActionEntry ("Contents", Stock.Help, "_Contents", "F1", "Help", Help),
-				new ActionEntry ("About", Gnome.Stock.About, null, null, "About Stetic", About),
+				new ActionEntry ("HelpMenu", null, Catalog.GetString ("_Help"), null, null, null),
+				new ActionEntry ("Contents", Stock.Help, Catalog.GetString ("_Contents"), "F1", Catalog.GetString ("Help"), Help),
+				new ActionEntry ("About", Gnome.Stock.About, null, null, Catalog.GetString ("About Stetic"), About),
 			};
 
 			ActionGroup actions = new ActionGroup ("group");
@@ -138,7 +139,7 @@ namespace Stetic {
 		void OpenFile (object obj, EventArgs e)
 		{
 			FileChooserDialog dialog =
-				new FileChooserDialog ("Open Stetic File", null, FileChooserAction.Open,
+				new FileChooserDialog (Catalog.GetString (Catalog.GetString ("Open Stetic File")), null, FileChooserAction.Open,
 						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
 						       Gtk.Stock.Open, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();
@@ -162,7 +163,7 @@ namespace Stetic {
 		void ImportGlade (object obj, EventArgs e)
 		{
 			FileChooserDialog dialog =
-				new FileChooserDialog ("Import from Glade File", null, FileChooserAction.Open,
+				new FileChooserDialog (Catalog.GetString ("Import from Glade File"), null, FileChooserAction.Open,
 						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
 						       Gtk.Stock.Open, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();
@@ -174,7 +175,7 @@ namespace Stetic {
 		void ExportGlade (object obj, EventArgs e)
 		{
 			FileChooserDialog dialog =
-				new FileChooserDialog ("Export to Glade File", null, FileChooserAction.Save,
+				new FileChooserDialog (Catalog.GetString ("Export to Glade File"), null, FileChooserAction.Save,
 						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
 						       Gtk.Stock.Save, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();
@@ -250,7 +251,7 @@ namespace Stetic {
 		
 		const string AppName = "Stetic";
 		const string AppVersion = "0.1.0";
-		const string AppComments = "A GNOME and Gtk GUI designer";
+		static readonly string AppComments = Catalog.GetString ("A GNOME and Gtk GUI designer");
 		static string[] AppAuthors = new string[] { "Dan Winship", "Lluís Sánchez" };
 		const string AppCopyright = "Copyright 2004, 2005, 2006 Novell, Inc.";
 

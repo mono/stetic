@@ -12,7 +12,7 @@ RESOURCE_FILES = $(wildcard $(srcdir)/*.png) $(srcdir)/stetic.glade
 RESOURCES = $(foreach file,$(RESOURCE_FILES),-resource:$(file)$(comma)$(notdir $(file)))
 
 stetic.exe: $(stetic_exe_sources) $(RESOURCE_FILES) ../libstetic/libstetic.dll
-	$(MCS) -debug -pkg:gnome-sharp-2.0 -pkg:glade-sharp-2.0 -r:../libstetic/libstetic.dll -r:../libsteticui/libsteticui.dll -out:stetic.exe $(stetic_exe_sources:%=$(srcdir)/%) $(RESOURCES)
+	$(MCS) -debug -r:Mono.Posix -pkg:gnome-sharp-2.0 -pkg:glade-sharp-2.0 -r:../libstetic/libstetic.dll -r:../libsteticui/libsteticui.dll -out:stetic.exe $(stetic_exe_sources:%=$(srcdir)/%) $(RESOURCES)
 
 stetic: stetic.in
 	sed -e "s:\@MONO\@:$(MONO):" -e "s:\@pkglibdir\@:$(pkglibdir):" $< > $@

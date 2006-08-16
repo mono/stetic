@@ -146,7 +146,7 @@ namespace Stetic.Editor
 				PlaceAddLabel (actionGroup.Actions.Count);
 			} else {
 				HideAddLabel ();
-				headerLabel.Text = "No selection";
+				headerLabel.Text = Catalog.GetString ("No selection");
 				headerLabel.Sensitive = false;
 			}
 			ShowAll ();
@@ -183,7 +183,7 @@ namespace Stetic.Editor
 			emptyLabel.VisibleWindow = false;
 			Gtk.Label label = new Gtk.Label ();
 			label.Xalign = 0;
-			label.Markup = "<i><span foreground='darkgrey'>Click to create action</span></i>";
+			label.Markup = "<i><span foreground='darkgrey'>" + Catalog.GetString ("Click to create action") + "</span></i>";
 			emptyLabel.Add (label);
 			emptyLabel.ButtonPressEvent += OnAddClicked;
 			table.Attach (emptyLabel, c, c+3, r, r+1);

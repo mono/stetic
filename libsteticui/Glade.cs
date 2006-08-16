@@ -3,6 +3,7 @@ using System.Xml;
 using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Mono.Unix;
 
 using Gtk;
 
@@ -21,7 +22,7 @@ namespace Stetic {
 
 			XmlNode node = doc.SelectSingleNode ("/glade-interface");
 			if (node == null)
-				throw new ApplicationException ("Not a glade file according to node name");
+				throw new ApplicationException (Catalog.GetString ("Not a glade file according to node name."));
 
 			foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
 				Wrapper.Container wrapper = Stetic.ObjectWrapper.Read (project, toplevel, FileFormat.Glade) as Wrapper.Container;

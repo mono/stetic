@@ -1,11 +1,12 @@
 
 using System;
+using Mono.Unix;
 
 namespace Stetic.Editor
 {
 	public class StockIconSelectorItem: IconSelectorItem
 	{
-		public StockIconSelectorItem (): base ("Stock Icons")
+		public StockIconSelectorItem (): base (Catalog.GetString ("Stock Icons"))
 		{
 		}
 		

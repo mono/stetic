@@ -38,7 +38,7 @@ libsteticui.dll: $(libsteticui_dll_sources) $(libsteticui_dll_resources)
 	@rm -f sources.rsp
 	@echo $(libsteticui_dll_sources:%=$(srcdir)/%) > sources.rsp
 	@for resource in $(libsteticui_dll_resources); do echo -resource:$$resource,`basename $$resource` >> sources.rsp; done
-	$(MCS) -debug -unsafe -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -r:../libstetic/libstetic.dll -target:library -out:$@ @sources.rsp
+	$(MCS) -debug -unsafe -r:Mono.Posix -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -r:../libstetic/libstetic.dll -target:library -out:$@ @sources.rsp
 
 CLEANFILES = libsteticui.dll libsteticui.dll.mdb sources.rsp
 

@@ -1,6 +1,7 @@
 using System;
 using System.Xml;
 using System.CodeDom;
+using Mono.Unix;
 
 namespace Stetic
 {
@@ -14,13 +15,13 @@ namespace Stetic
 		public ErrorWidget (Exception ex)
 		{
 			exc = ex;
-			Init ("Load Error: " + ex.Message);
+			Init (Catalog.GetString ("Load Error:") + " " + ex.Message);
 		}
 		
 		public ErrorWidget (string className)
 		{
 			this.className = className;
-			Init ("Unknown widget: " + className);
+			Init (Catalog.GetString ("Unknown widget:") + " " + className);
 		}
 		
 		void Init (string message)

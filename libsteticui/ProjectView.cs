@@ -1,5 +1,6 @@
 using Gtk;
 using System;
+using Mono.Unix;
 
 namespace Stetic {
 
@@ -15,7 +16,7 @@ namespace Stetic {
 			CellRenderer renderer;
 
 			col = new TreeViewColumn ();
-			col.Title = "Widget";
+			col.Title = Catalog.GetString ("Widget");
 
 			renderer = new CellRendererPixbuf ();
 			col.PackStart (renderer, false);

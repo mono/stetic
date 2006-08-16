@@ -6,6 +6,7 @@ using System.Reflection;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Xml.Serialization;
+using Mono.Unix;
 
 namespace Stetic {
 
@@ -50,8 +51,8 @@ namespace Stetic {
 			}
 			
 			if (args.Length == 1 && args [0] == "--help") {
-				Console.WriteLine ("Stetic - A GTK User Interface Builder"); 
-				Console.WriteLine ("Usage:");
+				Console.WriteLine (Catalog.GetString ("Stetic - A GTK User Interface Builder")); 
+				Console.WriteLine (Catalog.GetString ("Usage:"));
 				Console.WriteLine ("\tstetic [<file>]");
 				Console.WriteLine ("\tstetic [--language:<language>] [-lib:<library>...] --generate <sourceFile> <projectFile> ...");
 				return 0;
@@ -243,8 +244,8 @@ namespace Stetic {
 				// Designers tab
 				
 				Gtk.Notebook winActionsBook = new Gtk.Notebook ();
-				winActionsBook.AppendPage (box, new Gtk.Label ("Designer"));
-				winActionsBook.AppendPage (actionbox, new Gtk.Label ("Actions"));
+				winActionsBook.AppendPage (box, new Gtk.Label (Catalog.GetString ("Designer")));
+				winActionsBook.AppendPage (actionbox, new Gtk.Label (Catalog.GetString ("Actions")));
 				winActionsBook.TabPos = Gtk.PositionType.Bottom;
 				
 				// Tab label
@@ -311,7 +312,7 @@ namespace Stetic {
 					Project.Modified = false;
 					return true;
 				} catch (Exception ex) {
-					ReportError ("The project could not be saved.", ex);
+					ReportError (Catalog.GetString ("The project could not be saved."), ex);
 					return false;
 				}
 			}
@@ -320,7 +321,7 @@ namespace Stetic {
 		public static bool SaveProjectAs ()
 		{
 			FileChooserDialog dialog =
-				new FileChooserDialog ("Save Stetic File As", null, FileChooserAction.Save,
+				new FileChooserDialog (Catalog.GetString ("Save Stetic File As"), null, FileChooserAction.Save,
 						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
 						       Gtk.Stock.Save, Gtk.ResponseType.Ok);
 
@@ -337,7 +338,7 @@ namespace Stetic {
 					Project.Modified = false;
 					SteticMain.UIManager.AddRecentFile (name);
 				} catch (Exception ex) {
-					ReportError ("The project could not be saved.", ex);
+					ReportError (Catalog.GetString ("The project could not be saved."), ex);
 					return false;
 				}
 			}
@@ -349,9 +350,9 @@ namespace Stetic {
 		public static void CloseProject ()
 		{
 			if (Project.Modified) {
-				string msg = "Do you want to save the project before closing?";
+				string msg = Catalog.GetString ("Do you want to save the project before closing?");
 				Gtk.MessageDialog dlg = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, ButtonsType.None, msg);
-				dlg.AddButton ("Close without saving", Gtk.ResponseType.No);
+				dlg.AddButton (Catalog.GetString ("Close without saving"), Gtk.ResponseType.No);
 				dlg.AddButton (Gtk.Stock.Cancel, Gtk.ResponseType.Cancel);
 				dlg.AddButton (Gtk.Stock.Save, Gtk.ResponseType.Yes);
 				Gtk.ResponseType res = (Gtk.ResponseType) dlg.Run ();

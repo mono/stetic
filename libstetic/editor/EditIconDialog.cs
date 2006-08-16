@@ -25,9 +25,9 @@ namespace Stetic.Editor
 		
 		ImageInfo singleIcon;
 		
-		string[] sizes = { "All Sizes", "Menu", "SmallToolbar", "LargeToolbar", "Button", "Dnd", "Dialog" };
-		string[] states = { "All States", "Normal", "Active", "Prelight", "Selected", "Insensitive" };
-		string[] directions = { "All Directions", "Ltr", "Rtl" };
+		string[] sizes = { Catalog.GetString ("All Sizes"), "Menu", "SmallToolbar", "LargeToolbar", "Button", "Dnd", "Dialog" };
+		string[] states = { Catalog.GetString ("All States"), "Normal", "Active", "Prelight", "Selected", "Insensitive" };
+		string[] directions = { Catalog.GetString ("All Directions"), "Ltr", "Rtl" };
 		
 		public EditIconDialog (IProject project, ProjectIconSet iconSet)
 		{
@@ -67,7 +67,7 @@ namespace Stetic.Editor
 			Gtk.TreeViewColumn col = new Gtk.TreeViewColumn ();
 			
 			Gtk.CellRendererPixbuf pr = new Gtk.CellRendererPixbuf ();
-			col.Title = "Image";
+			col.Title = Catalog.GetString ("Image");
 			col.PackStart (pr, false);
 			col.AddAttribute (pr, "pixbuf", 0);
 			
@@ -78,7 +78,7 @@ namespace Stetic.Editor
 			
 			col = new Gtk.TreeViewColumn ();
 			col.Expand = true;
-			col.Title = "Size";
+			col.Title = Catalog.GetString ("Size");
 			CellRendererComboBox crtb = new CellRendererComboBox ();
 			crtb.Changed += new ComboSelectionChangedHandler (OnSizeComboChanged);
 			crtb.Values = sizes;
@@ -88,7 +88,7 @@ namespace Stetic.Editor
 			
 			col = new Gtk.TreeViewColumn ();
 			col.Expand = true;
-			col.Title = "State";
+			col.Title = Catalog.GetString ("State");
 			crtb = new CellRendererComboBox ();
 			crtb.Changed += new ComboSelectionChangedHandler (OnStateComboChanged);
 			crtb.Values = states;
@@ -98,7 +98,7 @@ namespace Stetic.Editor
 			
 			col = new Gtk.TreeViewColumn ();
 			col.Expand = true;
-			col.Title = "Direction";
+			col.Title = Catalog.GetString ("Direction");
 			crtb = new CellRendererComboBox ();
 			crtb.Changed += new ComboSelectionChangedHandler (OnDirComboChanged);
 			crtb.Values = directions;

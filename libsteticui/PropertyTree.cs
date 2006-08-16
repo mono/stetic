@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using Gtk;
 using Gdk;
+using Mono.Unix;
 
 namespace Stetic
 {
@@ -35,7 +36,7 @@ namespace Stetic
 			TreeViewColumn col;
 
 			col = new TreeViewColumn ();
-			col.Title = "Property";
+			col.Title = Catalog.GetString ("Property");
 			crt = new CellRendererPropertyGroup (tree);
 			col.PackStart (crt, true);
 			col.SetCellDataFunc (crt, new TreeCellDataFunc (GroupData));
@@ -46,7 +47,7 @@ namespace Stetic
 			tree.AppendColumn (col);
 			
 			editorColumn = new TreeViewColumn ();
-			editorColumn.Title = "Value";
+			editorColumn.Title = Catalog.GetString ("Value");
 			
 			CellRendererProperty crp = new CellRendererProperty (tree);
 			

@@ -3,6 +3,7 @@ using System;
 using System.Xml;
 using System.Collections;
 using Stetic.Wrapper;
+using Mono.Unix;
 
 namespace Stetic.Editor
 {
@@ -67,7 +68,7 @@ namespace Stetic.Editor
 			HideSpacerItem ();
 			Gtk.Label emptyLabel = new Gtk.Label ();
 			emptyLabel.Xalign = 0;
-			emptyLabel.Markup = "<i><span foreground='darkgrey'>Click to create menu</span></i>";
+			emptyLabel.Markup = "<i><span foreground='darkgrey'>" + Catalog.GetString ("Click to create menu") + "</span></i>";
 			Gtk.MenuItem mit = new Gtk.MenuItem ();
 			mit.Child = emptyLabel;
 			mit.ButtonPressEvent += OnNewItemPress;
@@ -419,12 +420,12 @@ namespace Stetic.Editor
 		public void ShowContextMenu (ActionMenuItem menuItem)
 		{
 			Gtk.Menu m = new Gtk.Menu ();
-			Gtk.MenuItem item = new Gtk.MenuItem ("Insert Before");
+			Gtk.MenuItem item = new Gtk.MenuItem (Catalog.GetString ("Insert Before"));
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				InsertActionAt (menuItem, false, false);
 			};
-			item = new Gtk.MenuItem ("Insert After");
+			item = new Gtk.MenuItem (Catalog.GetString ("Insert After"));
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
 				InsertActionAt (menuItem, true, false);

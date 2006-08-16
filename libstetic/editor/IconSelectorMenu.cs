@@ -2,6 +2,7 @@
 using System;
 using System.Reflection;
 using System.Collections;
+using Mono.Unix;
 
 namespace Stetic.Editor
 {
@@ -29,7 +30,7 @@ namespace Stetic.Editor
 			
 			Insert (new Gtk.SeparatorMenuItem (), -1);
 			
-			Gtk.MenuItem it = new Gtk.MenuItem ("More...");
+			Gtk.MenuItem it = new Gtk.MenuItem (Catalog.GetString ("More..."));
 			it.Activated += OnSetStockActionType;
 			Insert (it, -1);
 		}

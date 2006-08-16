@@ -4,6 +4,7 @@ using GLib;
 using System;
 using System.Collections;
 using System.Reflection;
+using Mono.Unix;
 
 namespace Stetic.Editor {
 
@@ -76,8 +77,8 @@ namespace Stetic.Editor {
 			combo.AppendText ("");
 #endif
 
-			combo.AppendText ("Rename Group...");
-			combo.AppendText ("New Group...");
+			combo.AppendText (Catalog.GetString ("Rename Group..."));
+			combo.AppendText (Catalog.GetString ("New Group..."));
 		}
 
 #if GTK_SHARP_2_6
@@ -126,7 +127,7 @@ namespace Stetic.Editor {
 			bool rename = combo.Active == values.Count;
 #endif
 			Gtk.Dialog dialog = new Gtk.Dialog (
-				rename ? "Rename Group" : "New Group",
+				rename ? Catalog.GetString ("Rename Group") : Catalog.GetString ("New Group"),
 				combo.Toplevel as Gtk.Window,
 				Gtk.DialogFlags.Modal | Gtk.DialogFlags.NoSeparator, 
 				Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
@@ -138,7 +139,7 @@ namespace Stetic.Editor {
 			dialog.VBox.BorderWidth = 0;
 
 			Gtk.HBox hbox = new Gtk.HBox (false, 12);
-			Gtk.Label label = new Gtk.Label (rename ? "_New name:" : "_Name:");
+			Gtk.Label label = new Gtk.Label (rename ? Catalog.GetString ("_New name:") : Catalog.GetString ("_Name:"));
 			Gtk.Entry entry = new Gtk.Entry ();
 			label.MnemonicWidget = entry;
 			hbox.PackStart (label, false, false, 0);

@@ -1,3 +1,9 @@
+2006-08-16  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/*:
+	* libstetic/*
+	* stetic/*: Added Catalog.GetString to all translatable strings.
+
 2006-08-16  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* stetic/Stetic.cs: If a file name is specified when starting
