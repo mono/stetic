@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class ContextMenu : Gtk.Menu {
+	class ContextMenu : Gtk.Menu {
 
 		Gtk.Widget widget;
 

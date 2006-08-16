@@ -1,3 +1,35 @@
+2006-08-16  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/Shadow.cs:
+	* libsteticui/EmbedWindow.cs:
+	* libsteticui/Metacity: Moved from libstetic.
+	
+	* libsteticui/WidgetFactory.cs: Don't allow dragging window
+	  items.
+	* libsteticui/Glade.cs: Removed unused BeginGladeImport method.
+	* libsteticui/CodeGenerator.cs: Use GenerateCreationCode instead
+	  of GenerateBuildCode to generate the code for the root window,
+	  since it includes initialization code for properties which are
+	  usually provided as constructor parameters.
+	* libsteticui/WidgetTreeCombo.cs: Fix warning.
+	* libsteticui/Project.cs: Added Close method. Removed some unused
+	  code.
+	* libsteticui/PropertyTree.cs: Made CellRendererPropertyGroup internal.
+	
+	* libsteticui/UserInterface.cs: Added method overload.
+	  CreateActionGroupDesigner now creates the toolbar.
+	
+	* libsteticui/ContextMenu.cs:
+	* libsteticui/Grid.cs: Made the class internal.
+	
+	* libsteticui/WidgetDesigner.cs: Moved from libstetic. Renamed from
+	  PreviewBox to WidgetDesigner.
+	  
+	* libsteticui/WidgetPropertyTree.cs:
+	* libsteticui/SignalsEditor.cs: Track api changes.
+	
+	* libsteticui/Makefile.am: Updated.
+
 2006-08-16  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/CustomWidget.cs:

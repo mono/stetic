@@ -15,7 +15,7 @@ namespace Stetic {
 		{
 		}
 		
-		public void Initialize (string name, Gdk.Pixbuf icon)
+		public virtual void Initialize (string name, Gdk.Pixbuf icon)
 		{
 			DND.SourceSet (this);
 			AboveChild = true;
@@ -85,15 +85,18 @@ namespace Stetic {
 			if (project == null)
 				Sensitive = false;
 		}
-
+		
 		protected override Gtk.Widget CreateItemWidget ()
 		{
 			return klass.NewInstance (project) as Widget;
 		}
 	}
 
-	public class WindowFactory : WidgetFactory {
-		public WindowFactory (Project project, ClassDescriptor klass) : base (project, klass) {}
+	public class WindowFactory : WidgetFactory
+	{
+		public WindowFactory (Project project, ClassDescriptor klass) : base (project, klass) 
+		{
+		}
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)
 		{
@@ -101,10 +104,11 @@ namespace Stetic {
 			project.AddWindow (win, true);
 			return true;
 		}
-		
-		protected override bool OnMotionNotifyEvent (Gdk.EventMotion evt)
+
+		public override void Initialize (string name, Gdk.Pixbuf icon)
 		{
-			return true;
+			base.Initialize (name, icon);
+			DND.SourceUnset (this);
 		}
 	}
 	

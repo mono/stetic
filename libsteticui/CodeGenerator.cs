@@ -164,7 +164,7 @@ namespace Stetic
 					varDec.InitExpression = new CodeCastExpression (wwidget.ClassDescriptor.WrappedTypeName, cobj);
 					cond.TrueStatements.Add (varDec);
 
-					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateBuildCode (cns, w, "cobj", cond.TrueStatements);
+					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (cns, w, "cobj", cond.TrueStatements);
 					
 					CodeVariableReferenceExpression targetObjectVar = new CodeVariableReferenceExpression ("cobj");
 					BindSignalHandlers (targetObjectVar, wwidget, map, cond.TrueStatements);
@@ -187,7 +187,7 @@ namespace Stetic
 					varDec.InitExpression = new CodeCastExpression ("Gtk.ActionGroup", cobj);
 					cond.TrueStatements.Add (varDec);
 					
-					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateBuildCode (cns, agroup, "cobj", cond.TrueStatements);
+					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (cns, agroup, "cobj", cond.TrueStatements);
 					
 					CodeVariableReferenceExpression targetObjectVar = new CodeVariableReferenceExpression ("cobj");
 					foreach (Wrapper.Action ac in agroup.Actions)
@@ -465,21 +465,21 @@ namespace Stetic
 			}
 		}
 		
-		public static WidgetMap GenerateBuildCode (CodeNamespace cns, Gtk.Widget w, string widgetVarName, CodeStatementCollection statements)
+		public static WidgetMap GenerateCreationCode (CodeNamespace cns, Gtk.Widget w, string widgetVarName, CodeStatementCollection statements)
 		{
 			statements.Add (new CodeCommentStatement ("Widget " + w.Name));
 			GeneratorContext ctx = new ProjectGeneratorContext (cns, statements);
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (w);
-			ctx.GenerateBuildCode (ww, widgetVarName);
+			ctx.GenerateCreationCode (ww, widgetVarName);
 			ctx.EndGeneration ();
 			return ctx.WidgetMap;
 		}
 		
-		public static WidgetMap GenerateBuildCode (CodeNamespace cns, Wrapper.ActionGroup grp, string groupVarName, CodeStatementCollection statements)
+		public static WidgetMap GenerateCreationCode (CodeNamespace cns, Wrapper.ActionGroup grp, string groupVarName, CodeStatementCollection statements)
 		{
 			statements.Add (new CodeCommentStatement ("Action group " + grp.Name));
 			GeneratorContext ctx = new ProjectGeneratorContext (cns, statements);
-			ctx.GenerateBuildCode (grp, groupVarName);
+			ctx.GenerateCreationCode (grp, groupVarName);
 			ctx.EndGeneration ();
 			return ctx.WidgetMap;
 		}

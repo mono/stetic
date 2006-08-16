@@ -10,7 +10,6 @@ namespace Stetic
 		Image image;
 		Stetic.Wrapper.Widget rootWidget;
 		Stetic.IProject project;
-		Gdk.Pixbuf emptyImage;
 		Stetic.Wrapper.Widget selection;
 		
 		public WidgetTreeCombo ()

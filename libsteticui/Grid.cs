@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Stetic {
 
-	public class Grid : Gtk.Container {
+	internal class Grid : Gtk.Container {
 
 		public Grid () : base ()
 		{

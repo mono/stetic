@@ -401,7 +401,7 @@ namespace Stetic
 		}
 	}
 
-	public class CellRendererPropertyGroup: CellRendererText
+	class CellRendererPropertyGroup: CellRendererText
 	{
 		Pango.Layout layout;
 		bool isGroup;

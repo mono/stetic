@@ -10,16 +10,14 @@ namespace Stetic
 		Stetic.ObjectWrapper newSelection;
 		Stetic.Wrapper.Container.ContainerChild packingSelection;
 		
-		public event EventHandler ObjectChanged;
-		
 		public WidgetPropertyTree (): this (null)
 		{
-			PreviewBox.DefaultPropertyViewer = this;
+			WidgetDesigner.DefaultPropertyViewer = this;
 		}
 		
 		public WidgetPropertyTree (Project project)
 		{
-			PreviewBox.DefaultPropertyViewer = this;
+			WidgetDesigner.DefaultPropertyViewer = this;
 			Stetic.Registry.RegistryChanging += new EventHandler (OnRegistryChanging);
 			Project = project;
 		}

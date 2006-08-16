@@ -27,7 +27,7 @@ namespace Stetic
 		
 		public SignalsEditor ()
 		{
-			PreviewBox.DefaultSignalsViewer = this;
+			WidgetDesigner.DefaultSignalsViewer = this;
 			
 			tree = new Gtk.TreeView ();
 			store = new Gtk.TreeStore (typeof(string), typeof(string), typeof(bool), typeof(bool), typeof(bool), typeof(SignalDescriptor), typeof(Signal), typeof(int));

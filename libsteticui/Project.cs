@@ -32,8 +32,6 @@ namespace Stetic {
 		public event Wrapper.WidgetEventHandler SelectionChanged;
 		public event EventHandler ModifiedChanged;
 		
-		public event IProjectDelegate GladeImportComplete;
-		
 		// Fired when the project has been reloaded, due for example to
 		// a change in the registry
 		public event EventHandler ProjectReloaded;
@@ -94,6 +92,19 @@ namespace Stetic {
 			this.fileName = fileName;
 		}
 		
+		public void Close ()
+		{
+			fileName = null;
+			
+			foreach (Gtk.Widget w in Toplevels)
+				w.Destroy ();
+
+			selection = null;
+			store.Clear ();
+			nodes.Clear ();
+			actionGroups.Clear ();
+		}
+		
 		public void Load (string fileName)
 		{
 			this.fileName = fileName;
@@ -118,12 +129,12 @@ namespace Stetic {
 				selection = null;
 				store.Clear ();
 				nodes.Clear ();
+				actionGroups.Clear ();
 				
 				XmlNode node = doc.SelectSingleNode ("/stetic-interface");
 				if (node == null)
 					throw new ApplicationException ("Not a Stetic file according to node name");
 				
-				actionGroups.Clear ();
 				foreach (XmlElement groupElem in node.SelectNodes ("action-group")) {
 					Wrapper.ActionGroup actionGroup = new Wrapper.ActionGroup ();
 					actionGroup.Read (this, groupElem);
@@ -501,16 +512,6 @@ namespace Stetic {
 					return w;
 			}
 			return null;
-		}
-		
-		public void BeginGladeImport ()
-		{
-		}
-
-		public void EndGladeImport ()
-		{
-			if (GladeImportComplete != null)
-				GladeImportComplete ();
 		}
 		
 		internal ProjectNode GetNode (object widget)
