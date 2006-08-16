@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace Stetic {
 
-	public class TranslationInfo {
+	class TranslationInfo {
 		public bool Translated;
 		public string Context, Comment;
 	}

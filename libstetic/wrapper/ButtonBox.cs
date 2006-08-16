@@ -121,7 +121,7 @@ namespace Stetic.Wrapper {
 				if (childwrapper != null) {
 					string dialogVarName = ctx.WidgetMap.GetWidgetId (actionDialog);
 					ctx.Statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
-					string varName = ctx.GenerateCreationCode (wrapper);
+					string varName = ctx.GenerateNewInstanceCode (wrapper);
 					CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
 						new CodeVariableReferenceExpression (dialogVarName),
 						"AddActionWidget",

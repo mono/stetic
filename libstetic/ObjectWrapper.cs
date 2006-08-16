@@ -34,6 +34,16 @@ namespace Stetic {
 			get { return loading; }
 		}
 		
+		public void AttachDesigner (IDesignArea designer)
+		{
+			OnDesignerAttach (designer);
+		}
+		
+		public void DetachDesigner (IDesignArea designer)
+		{
+			OnDesignerDetach (designer);
+		}
+		
 		public virtual void Wrap (object obj, bool initialized)
 		{
 			this.wrapped = obj;
@@ -105,6 +115,17 @@ namespace Stetic {
 			return wrapper;
 		}
 		
+		internal void GenerateInitCode (GeneratorContext ctx, string varName)
+		{
+			// Set the value for initialization properties. The value for those properties is
+			// usually set in the constructor, but top levels are created by the user, so
+			// those properties need to be explicitely set in the Gui.Build method.
+			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
+			foreach (PropertyDescriptor prop in ClassDescriptor.InitializationProperties) {
+				GeneratePropertySet (ctx, var, prop);
+			}
+		}
+		
 		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
 			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
@@ -114,6 +135,8 @@ namespace Stetic {
 				foreach (ItemDescriptor item in group) {
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null || !prop.IsRuntimeProperty)
+						continue;
+					if (ClassDescriptor.InitializationProperties != null && Array.IndexOf (ClassDescriptor.InitializationProperties, prop) != -1)
 						continue;
 					GeneratePropertySet (ctx, var, prop);
 				}
@@ -139,9 +162,6 @@ namespace Stetic {
 		
 		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
 		{
-			if (ClassDescriptor.InitializationProperties != null && Array.IndexOf (ClassDescriptor.InitializationProperties, prop) != -1)
-				return;
-			
 			object oval = prop.GetValue (Wrapped);
 			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))
 				return;

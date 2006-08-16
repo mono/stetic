@@ -1,10 +1,9 @@
 using System;
 
-namespace Stetic {
-	public delegate void IProjectDelegate ();
-
-	public interface IProject {
-	
+namespace Stetic 
+{
+	public interface IProject 
+	{
 		string FileName { get; }
 		
 		Gtk.Widget Selection { get; set; }
@@ -23,7 +22,6 @@ namespace Stetic {
 		Wrapper.ActionGroupCollection ActionGroups { get; }
 		ProjectIconFactory IconFactory { get; }
 		
-		event IProjectDelegate GladeImportComplete;
 		event Wrapper.WidgetEventHandler SelectionChanged;
 	}
 }

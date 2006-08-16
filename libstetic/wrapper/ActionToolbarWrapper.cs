@@ -11,7 +11,18 @@ namespace Stetic.Wrapper
 	{
 		ActionTree actionTree;
 		XmlElement toolbarInfo;
+		ToolbarStyle toolbarStyle;
+		static Gtk.ToolbarStyle defaultStyle;
+		static bool gotDefault;
 		
+		public enum ToolbarStyle {
+			Icons,
+			Text,
+			Both,
+			BothHoriz,
+			Default
+		}
+	
 		public ActionToolbarWrapper()
 		{
 		}
@@ -69,9 +80,25 @@ namespace Stetic.Wrapper
 			set { toolbar.IconSize = value; EmitNotify ("IconSize"); }
 		}
 		
-		public Gtk.ToolbarStyle ToolbarStyle {
-			get { return toolbar.ToolbarStyle; }
-			set { toolbar.ToolbarStyle = value; EmitNotify ("ToolbarStyle"); }
+		public ToolbarStyle ButtonStyle {
+			get { return toolbarStyle; }
+			set {
+				toolbarStyle = value;
+				if (value == ToolbarStyle.Default) {
+					if (!gotDefault) {
+						// Is there a better way of getting the default?
+						Gtk.Window d = new Gtk.Window ("");
+						Gtk.Toolbar t = new Gtk.Toolbar ();
+						d.Add (t);
+						defaultStyle = t.ToolbarStyle;
+						d.Destroy ();
+					}
+					toolbar.ToolbarStyle = defaultStyle;
+				} else {
+					toolbar.ToolbarStyle = (Gtk.ToolbarStyle) ((int)value);
+				}
+				EmitNotify ("ButtonStyle");
+			}
 		}
 		
 		internal protected override void OnSelected ()
@@ -89,10 +116,14 @@ namespace Stetic.Wrapper
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
 			XmlElement elem = base.Write (doc, format);
-			if (toolbarInfo != null)
-				elem.AppendChild (doc.ImportNode (toolbarInfo, true));
-			else
-				elem.AppendChild (actionTree.Write (doc, format));
+			if (format == FileFormat.Native) {
+				// The style is already stored in ButtonStyle
+				GladeUtils.ExtractProperty (elem, "ToolbarStyle", "");
+				if (toolbarInfo != null)
+					elem.AppendChild (doc.ImportNode (toolbarInfo, true));
+				else
+					elem.AppendChild (actionTree.Write (doc, format));
+			}
 			return elem;
 		}
 		
@@ -125,6 +156,14 @@ namespace Stetic.Wrapper
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
 			base.GenerateBuildCode (ctx, varName);
+		}
+		
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		{
+			if (toolbarStyle == ToolbarStyle.Default && prop.Name == "ToolbarStyle")
+				return;
+			else
+				base.GeneratePropertySet (ctx, var, prop);
 		}
 		
 		internal protected override void OnDesignerAttach (IDesignArea designer)

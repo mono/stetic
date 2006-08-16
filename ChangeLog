@@ -1,3 +1,38 @@
+2006-08-16  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/CustomWidget.cs:
+	* libstetic/wrapper/Custom.cs: Made the class internal.
+	
+	* libstetic/wrapper/Frame.cs:
+	* libstetic/wrapper/Notebook.cs:
+	* libstetic/wrapper/ButtonBox.cs:
+	* libstetic/wrapper/Expander.cs:
+	* libstetic/HandleWindow.cs:
+	* libstetic/editor/Translatable.cs: Track api changes.
+	
+	* libstetic/PreviewBox.cs:
+	* libstetic/EmbedWindow.cs:
+	* libstetic/Shadow.cs:
+	* libstetic/Metacity: Moved to libsteticui.
+	
+	* libstetic/IDesignArea.cs: Moved here a delegate previously declared
+	  in PreviewBox.
+	* libstetic/IProject.cs: Removed unused event.
+	* libstetic/ObjectWrapper.cs: Added public methods for attaching/detaching
+	  designers.
+	* libstetic/wrapper/Container.cs: Removed unused code.
+	* libstetic/editor/TextBox.cs: Moved to Editors directory.
+	* libstetic/PropertyDescriptor.cs: Made TranslationInfo internal.
+	* libstetic/GeneratorContext.cs: Added initialization code for
+	  top level widgets.
+	
+	* libstetic/wrapper/ActionToolbarWrapper.cs:
+	* libstetic/wrapper/objects.xml: Support specifying a "Default" style for
+	  the toolbar, which will cause the toolbar to take the style from the
+	  gnome preferences.
+	  
+	* libstetic/Makefile.am: Updated.
+
 2006-08-11  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/editor/DateTimeEditor.cs:

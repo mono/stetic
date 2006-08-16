@@ -15,7 +15,7 @@ namespace Stetic.Editor {
 		Gtk.CheckMenuItem markItem;
 		Gtk.MenuItem addContextItem, remContextItem, addCommentItem, remCommentItem;
 		Gtk.Entry contextEntry;
-		Stetic.TextBox commentText;
+		TextBox commentText;
 		bool initializing;
 
 		public virtual void Initialize (PropertyDescriptor prop)
@@ -74,7 +74,7 @@ namespace Stetic.Editor {
 			Gtk.Label commentLabel = new Gtk.Label ("Comment for Translators:");
 			commentLabel.Xalign = 0.0f;
 			commentBox.PackStart (commentLabel, false, false, 0);
-			commentText = new Stetic.TextBox (3);
+			commentText = new TextBox (3);
 			commentBox.PackStart (commentText, false, false, 0);
 			commentBox.ShowAll ();
 			commentText.Changed += CommentChanged;

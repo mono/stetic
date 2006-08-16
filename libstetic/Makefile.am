@@ -8,11 +8,9 @@ libstetic_dll_sources =			\
 	DND.cs				\
 	ErrorWidget.cs		\
 	EnumDescriptor.cs		\
-	EmbedWindow.cs		\
 	GeneratorContext.cs			\
 	GladeException.cs		\
 	GladeUtils.cs			\
-	HandleWindow.cs			\
 	IDesignArea.cs		\
 	ImageInfo.cs 			\
 	ItemDescriptor.cs		\
@@ -25,7 +23,6 @@ libstetic_dll_sources =			\
 	ObjectWrapperEventHandler.cs		\
 	ParamSpec.cs			\
 	Placeholder.cs			\
-	PreviewBox.cs		\
 	ProjectIconFactory.cs			\
 	PropertyDescriptor.cs		\
 	PropertyEditorAttribute.cs	\
@@ -33,9 +30,7 @@ libstetic_dll_sources =			\
 	RadioGroupManager.cs		\
 	Registry.cs			\
 	Set.cs				\
-	Shadow.cs				\
 	SignalDescriptor.cs		\
-	TextBox.cs			\
 	TranslatableAttribute.cs	\
 	TypedClassDescriptor.cs		\
 	TypedPropertyDescriptor.cs		\
@@ -81,6 +76,7 @@ libstetic_dll_sources =			\
 	editor/String.cs		\
 	editor/StringArray.cs		\
 	editor/Text.cs			\
+	editor/TextBox.cs			\
 	editor/TextEditor.cs			\
 	editor/TextEditorDialog.cs			\
 	editor/ThemedIcon.cs			\
@@ -90,13 +86,6 @@ libstetic_dll_sources =			\
 	editor/TimeSpanEditor.cs	\
 	editor/DateTimeEditor.cs	\
 	editor/WidgetSelector.cs		\
-	Metacity/ButtonFunction.cs \
-	Metacity/ButtonLayout.cs \
-	Metacity/FrameFlags.cs \
-	Metacity/FrameType.cs \
-	Metacity/ObjectManager.cs \
-	Metacity/Preview.cs \
-	Metacity/Theme.cs \
 	wrapper/Action.cs			\
 	wrapper/ActionGroup.cs			\
 	wrapper/ActionTree.cs			\
@@ -163,7 +152,7 @@ libstetic.dll: $(libstetic_dll_sources) $(libstetic_dll_resources)
 	@rm -f sources.rsp
 	@echo $(libstetic_dll_sources:%=$(srcdir)/%) > sources.rsp
 	@for resource in $(libstetic_dll_resources); do echo -resource:$$resource,`basename $$resource` >> sources.rsp; done
-	$(MCS) -debug -unsafe -r:Mono.Posix -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -pkg:glade-sharp-2.0 -target:library -out:$@ @sources.rsp
+	$(MCS) -debug -r:Mono.Posix -pkg:gnome-sharp-2.0 -pkg:glade-sharp-2.0 -target:library -out:$@ @sources.rsp
 
 CLEANFILES = libstetic.dll libstetic.dll.mdb sources.rsp
 

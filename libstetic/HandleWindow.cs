@@ -5,7 +5,7 @@ namespace Stetic {
 
 	// This ought to be a subclass of Gdk.Window, but GdkWindow isn't subclassable
 
-	public class HandleWindow : IDisposable {
+	class HandleWindow : IDisposable {
 
 		static Gdk.Color black, white;
 		Gtk.Widget topLevel;
@@ -37,7 +37,7 @@ namespace Stetic {
 			// the gdk window of that box, which has more room
 			// for drawing the handles.
 			while (parent != null) {
-				if (parent.Parent is PreviewBox || parent.Parent is Gtk.EventBox)
+				if (parent.Parent is WidgetDesigner || parent.Parent is Gtk.EventBox)
 					break;
 				parent = parent.Parent;
 			}

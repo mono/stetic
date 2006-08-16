@@ -58,7 +58,7 @@ namespace Stetic.Wrapper {
 		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
 		{
 			if (wrapper.Wrapped == frame.LabelWidget) {
-				string varName = ctx.GenerateCreationCode (wrapper);
+				string varName = ctx.GenerateNewInstanceCode (wrapper);
 				CodeAssignStatement assign = new CodeAssignStatement (
 					new CodePropertyReferenceExpression (
 						new CodeVariableReferenceExpression (parentVar),

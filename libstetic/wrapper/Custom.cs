@@ -2,7 +2,7 @@ using System;
 using Gtk;
 
 namespace Stetic {
-	public class Custom : Gtk.DrawingArea {
+	internal class Custom : Gtk.DrawingArea {
 		public Custom () {}
 
 		public Custom (IntPtr raw) : base (raw) {}

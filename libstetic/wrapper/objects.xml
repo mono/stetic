@@ -1667,8 +1667,9 @@
 	    <itemgroup label="Tool Bar Properties">
 		<property name="Orientation" />
 		<property name="ShowArrow" />
-		<property name="ToolbarStyle" />
 		<property name="Tooltips" />
+		<property name="ButtonStyle" label="Toolbar style"/>
+		<property name="ToolbarStyle" ignore-default="true" internal="true"/>
 		<property name="IconSize" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Widget" />
@@ -2410,7 +2411,9 @@
 	       description="When refreshing the SpinButton, the value is only displayed if it is within the SpinButton's bounds" />
     </enum>
 
-    <enum type="Gtk.ToolbarStyle,gtk-sharp">
+    <enum type="Stetic.Wrapper.ActionToolbarWrapper+ToolbarStyle">
+	<value name="Default" label="System Default"
+	       description="Use the system default style" />
 	<value name="Icons" label="Icons"
 	       description="Buttons display only icons in the toolbar" />
 	<value name="Text" label="Text"

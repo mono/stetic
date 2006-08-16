@@ -90,7 +90,7 @@ namespace Stetic.Wrapper {
 					pageVarName = ctx.WidgetMap.GetWidgetId (page);
 				
 				// Generate code for the tab
-				string varName = ctx.GenerateCreationCode (wrapper);
+				string varName = ctx.GenerateNewInstanceCode (wrapper);
 				
 				// Assign the tab to the page
 				CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (

@@ -1,6 +1,6 @@
 using System;
 
-namespace Stetic {
+namespace Stetic.Editor {
 
 	public class TextBox : Gtk.ScrolledWindow {
 

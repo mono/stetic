@@ -31,7 +31,6 @@ namespace Stetic.Wrapper {
 				AddPlaceholder ();
 
 			container.Removed += ChildRemoved;
-			container.SizeAllocated += SizeAllocated;
 			container.Added += OnChildAdded;
 
 			if (Wrapped.GetType ().ToString ()[0] == 'H')
@@ -291,7 +290,7 @@ namespace Stetic.Wrapper {
 			ObjectWrapper childwrapper = ChildWrapper (wrapper);
 			if (childwrapper != null) {
 				ctx.Statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
-				string varName = ctx.GenerateCreationCode (wrapper);
+				string varName = ctx.GenerateNewInstanceCode (wrapper);
 				CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
 					new CodeVariableReferenceExpression (parentVar),
 					"Add",
@@ -587,7 +586,6 @@ namespace Stetic.Wrapper {
 		}
 
 		Gtk.Widget selection;
-		HandleWindow handles;
 
 		public virtual void Select (Stetic.Wrapper.Widget wrapper)
 		{
@@ -665,18 +663,10 @@ namespace Stetic.Wrapper {
 				sel.Drag += HandleWindowDrag;
 				return;
 			}
-			
-			handles = new HandleWindow (selection, dragHandles);
-			handles.Drag += HandleWindowDrag;
 		}
 		
 		void HideSelectionBox (Gtk.Widget widget)
 		{
-			if (handles != null) {
-				handles.Dispose ();
-				handles = null;
-			}
-			
 			if (widget != null) {
 				IDesignArea designArea = GetDesignArea (widget);
 				if (designArea != null)
@@ -733,12 +723,6 @@ namespace Stetic.Wrapper {
 				Sync ();
 			} else
 				ReplaceChild (ph, DND.Cancel ());
-		}
-
-		void SizeAllocated (object obj, Gtk.SizeAllocatedArgs args)
-		{
-			if (handles != null)
-				handles.Shape ();
 		}
 
 		public virtual void Delete (Stetic.Wrapper.Widget wrapper)

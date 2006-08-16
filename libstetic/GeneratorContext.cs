@@ -36,7 +36,7 @@ namespace Stetic
 			return idPrefix + (++n);
 		}
 		
-		public string GenerateCreationCode (Wrapper.Widget widget)
+		public string GenerateNewInstanceCode (Wrapper.Widget widget)
 		{
 			string varName = NewId ();
 			
@@ -47,6 +47,12 @@ namespace Stetic
 			return varName;
 		}
 		
+		public virtual void GenerateCreationCode (ObjectWrapper wrapper, string varName)
+		{
+			wrapper.GenerateInitCode (this, varName);
+			GenerateBuildCode (wrapper, varName);
+		}
+		
 		public virtual void GenerateBuildCode (ObjectWrapper wrapper, string varName)
 		{
 			vars [wrapper] = varName;
@@ -55,7 +61,7 @@ namespace Stetic
 			generatedWrappers.Add (wrapper);
 		}
 		
-		public virtual void GenerateBuildCode (Wrapper.ActionGroup agroup, string varName)
+		public virtual void GenerateCreationCode (Wrapper.ActionGroup agroup, string varName)
 		{
 			vars [agroup] = varName;
 			widgets [varName] = agroup;

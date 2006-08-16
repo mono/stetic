@@ -19,6 +19,8 @@ namespace Stetic
 		event EventHandler SelectionChanged;
 	}
 	
+	public delegate void DragDelegate (Gdk.EventMotion evt);
+
 	public interface IObjectViewer
 	{
 		object TargetObject { get; set; }
