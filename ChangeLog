@@ -1,3 +1,16 @@
+2006-08-16  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* stetic/Stetic.cs: If a file name is specified when starting
+	  Stetic, load it. Warn the user when closing an unsaved project.
+	  Implemented Close command. Read and save the main window position.
+	* stetic/stetic.glade: Added an status bar.
+	* stetic/UIManager.cs: Implemented "Recent Files" submenu.
+	
+	* stetic/RecentFiles.cs:
+	* stetic/Configuration.cs: New files.
+	
+	* stetic/Makefile.am: Updated.
+
 2006-08-16  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/Shadow.cs:

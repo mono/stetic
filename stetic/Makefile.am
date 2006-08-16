@@ -3,6 +3,8 @@ bin_SCRIPTS = stetic
 
 stetic_exe_sources =			\
 	Stetic.cs			\
+	RecentFiles.cs		\
+	Configuration.cs		\
 	UIManager.cs
 
 comma = ,

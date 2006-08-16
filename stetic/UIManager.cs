@@ -1,15 +1,21 @@
 using Gtk;
 using System;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace Stetic {
 
 	public class UIManager : Gtk.UIManager {
+	
+		RecentFiles recentFiles;
+		Menu recentFilesMenu;
 
 		static string menuXml =
 		"<ui>" +
 		"    <menubar>" +
 		"	<menu action='FileMenu'>" +
 		"	    <menuitem action='Open' />" +
+		"	    <menuitem action='RecentFiles' />" +
 		"	    <separator />" +
 		"	    <menuitem action='Save' />" +
 		"	    <menuitem action='SaveAs' />" +
@@ -17,6 +23,7 @@ namespace Stetic {
 		"	    <menuitem action='ImportGlade' />" +
 		"	    <menuitem action='ExportGlade' />" +
 		"	    <separator />" +
+		"	    <menuitem action='Close' />" +
 		"	    <menuitem action='Quit' />" +
 		"	</menu>" +
 		"	<menu action='EditMenu'>" +
@@ -55,10 +62,12 @@ namespace Stetic {
 			ActionEntry[] entries = new ActionEntry[] {
 				new ActionEntry ("FileMenu", null, "_File", null, null, null),
 				new ActionEntry ("Open", Stock.Open, null, "<control>O", "Open a file", OpenFile),
+				new ActionEntry ("RecentFiles", null, "Recent files", null, null, null),
 				new ActionEntry ("Save", Stock.Save, null, "<control>S", "Save", SaveFile),
 				new ActionEntry ("SaveAs", Stock.SaveAs, null, "<control><shift>S", "Save As", SaveFileAs),
 				new ActionEntry ("ImportGlade", null, "_Import from Glade File...", null, "Import UI from a Glade file", ImportGlade),
 				new ActionEntry ("ExportGlade", null, "_Export to Glade File...", null, "Export UI to a Glade file", ExportGlade),
+				new ActionEntry ("Close", Stock.Close, null, "<control>W", "Close", Close),
 				new ActionEntry ("Quit", Stock.Quit, null, "<control>Q", "Quit", Quit),
 
 				new ActionEntry ("EditMenu", null, "_Edit", null, null, null),
@@ -93,6 +102,13 @@ namespace Stetic {
 			Gtk.Menu editMenu = (Gtk.Menu)editMenuItem.Submenu;
 			editMenu.Shown += EditShown;
 			editMenu.Hidden += EditHidden;
+			
+			Gtk.MenuItem recentMenuItem = (Gtk.MenuItem) GetWidget ("/menubar/FileMenu/RecentFiles");
+			recentFilesMenu = new Gtk.Menu ();
+			recentMenuItem.Submenu = recentFilesMenu;
+			recentMenuItem.ShowAll ();
+			
+			ReadRecentFiles ();
 
 			Project = project;
 		}
@@ -126,37 +142,21 @@ namespace Stetic {
 						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
 						       Gtk.Stock.Open, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();
-			if (response == (int)Gtk.ResponseType.Ok)
-				project.Load (dialog.Filename);
+			if (response == (int)Gtk.ResponseType.Ok) {
+				SteticMain.LoadProject (dialog.Filename);
+				AddRecentFile (dialog.Filename);
+			}
 			dialog.Hide ();
 		}
 		
 		void SaveFile (object obj, EventArgs e)
 		{
-			if (project.FileName == null)
-				SaveFileAs (obj, e);
-			else
-				project.Save (project.FileName);
+			SteticMain.SaveProject ();
 		}
 		
 		void SaveFileAs (object obj, EventArgs e)
 		{
-			FileChooserDialog dialog =
-				new FileChooserDialog ("Save Stetic File As", null, FileChooserAction.Save,
-						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
-						       Gtk.Stock.Save, Gtk.ResponseType.Ok);
-
-			if (project.FileName != null)
-				dialog.CurrentName = project.FileName;
-
-			int response = dialog.Run ();
-			if (response == (int)Gtk.ResponseType.Ok) {
-				string name = dialog.Filename;
-				if (System.IO.Path.GetExtension (name) == "")
-					name = name + ".stetic";
-				project.Save (name);
-			}
-			dialog.Hide ();
+			SteticMain.SaveProjectAs ();
 		}
 		
 		void ImportGlade (object obj, EventArgs e)
@@ -249,10 +249,10 @@ namespace Stetic {
 		}
 		
 		const string AppName = "Stetic";
-		const string AppVersion = "0.0.0";
+		const string AppVersion = "0.1.0";
 		const string AppComments = "A GNOME and Gtk GUI designer";
-		static string[] AppAuthors = new string[] { "Dan Winship" };
-		const string AppCopyright = "Copyright 2004, 2005 Novell, Inc.";
+		static string[] AppAuthors = new string[] { "Dan Winship", "Lluís Sánchez" };
+		const string AppCopyright = "Copyright 2004, 2005, 2006 Novell, Inc.";
 
 		void About (object obj, EventArgs e)
 		{
@@ -275,7 +275,12 @@ namespace Stetic {
 
 		void Quit (object obj, EventArgs e)
 		{
-			SteticMain.Program.Quit ();
+			SteticMain.Quit ();
+		}
+
+		void Close (object obj, EventArgs e)
+		{
+			SteticMain.CloseProject ();
 		}
 
 		public Gtk.MenuBar MenuBar {
@@ -339,6 +344,73 @@ namespace Stetic {
 		void Selected (object s, Wrapper.WidgetEventArgs args)
 		{
 			UpdateEdit (args.Widget != null ? args.Widget.Wrapped : null);
+		}
+		
+		void ReadRecentFiles ()
+		{
+			string file = GetConfigFile ();
+			recentFiles = null;
+			
+			if (File.Exists (file)) {
+				try {
+					using (StreamReader sr = new StreamReader (file)) {
+						XmlSerializer ser = new XmlSerializer (typeof (RecentFiles));
+						recentFiles = (RecentFiles) ser.Deserialize (sr);
+					}
+				} catch {
+					// Ignore exceptions while reading the recents file
+				}
+			}
+			
+			if (recentFiles == null)
+				recentFiles = new RecentFiles ();
+			
+			BuildRecentMenu ();
+		}
+		
+		public void AddRecentFile (string steticFile)
+		{
+			recentFiles.Files.Remove (steticFile);
+			recentFiles.Files.Insert (0, steticFile);
+			if (recentFiles.Files.Count > 10)
+				recentFiles.Files.RemoveAt (10);
+
+			string file = GetConfigFile ();
+			try {
+				if (!Directory.Exists (Path.GetDirectoryName (file)))
+					Directory.CreateDirectory (Path.GetDirectoryName (file));
+
+				using (StreamWriter sw = new StreamWriter (file)) {
+					XmlSerializer ser = new XmlSerializer (typeof (RecentFiles));
+					ser.Serialize (sw, recentFiles);
+				}
+			} catch {
+				// Ignore exceptions while writing the recents file
+			}
+			BuildRecentMenu ();
+		}
+		
+		void BuildRecentMenu ()
+		{
+			foreach (Gtk.Widget w in recentFilesMenu)
+				recentFilesMenu.Remove (w);
+
+			int n = 0;
+			foreach (string f in recentFiles.Files) {
+				MenuItem m = new MenuItem ("_" + n + " " + Path.GetFileName (f));
+				m.Activated += delegate {
+					SteticMain.LoadProject (f);
+					AddRecentFile (f);
+				};
+				recentFilesMenu.Append (m);
+				n++;
+			}
+			recentFilesMenu.ShowAll ();
+		}
+		
+		string GetConfigFile ()
+		{
+			return Path.Combine (SteticMain.ConfigDir, "recent-files.xml");
 		}
 	}
 }

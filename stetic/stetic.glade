@@ -21,6 +21,7 @@
   <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
+  <property name="urgency_hint">False</property>
   <signal name="delete_event" handler="Window_Delete" last_modification_time="Wed, 01 Jun 2005 15:25:39 GMT"/>
 
   <child>
@@ -123,7 +124,7 @@
 		  <property name="show_tabs">True</property>
 		  <property name="show_border">True</property>
 		  <property name="tab_pos">GTK_POS_TOP</property>
-		  <property name="scrollable">False</property>
+		  <property name="scrollable">True</property>
 		  <property name="enable_popup">False</property>
 		</widget>
 		<packing>
@@ -295,6 +296,18 @@
 	  <property name="padding">0</property>
 	  <property name="expand">True</property>
 	  <property name="fill">True</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkStatusbar" id="statusbar">
+	  <property name="visible">True</property>
+	  <property name="has_resize_grip">True</property>
+	</widget>
+	<packing>
+	  <property name="padding">0</property>
+	  <property name="expand">False</property>
+	  <property name="fill">False</property>
 	</packing>
       </child>
     </widget>

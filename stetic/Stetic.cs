@@ -1,15 +1,17 @@
 using Gtk;
 using System;
+using System.IO;
 using System.Collections;
 using System.Reflection;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Xml.Serialization;
 
 namespace Stetic {
 
 	public class SteticMain  {
 
-		public static Gnome.Program Program;
+		static Gnome.Program Program;
 
 		static Stetic.Palette Palette;
 		static Stetic.Project Project;
@@ -25,6 +27,7 @@ namespace Stetic {
 		static ArrayList libraries = new ArrayList ();
 		
 		static Hashtable openWindows = new Hashtable ();
+		static Configuration configuration;
 		
 
 		public static int Main (string[] args)
@@ -94,6 +97,7 @@ namespace Stetic {
 			Project.WidgetAdded += OnWidgetAdded;
 			Project.WidgetRemoved += OnWidgetRemoved;
 			Project.SelectionChanged += OnSelectionChanged;
+			Project.ModifiedChanged += OnProjectModified;
 
 			Palette = new Stetic.Palette (Project);
 			ProjectView = new Stetic.ProjectView (Project);
@@ -131,6 +135,12 @@ namespace Stetic {
 			Gtk.AboutDialog.SetUrlHook (ActivateUrl);
 #endif
 
+			if (args.Length > 0) {
+				LoadProject (args [0]);
+			}
+
+			ReadConfiguration ();
+			
 			Program.Run ();
 			return 0;
 		}
@@ -163,8 +173,8 @@ namespace Stetic {
 #endif
 
 		internal static void Window_Delete (object obj, DeleteEventArgs args) {
-			Program.Quit ();
 			args.RetVal = true;
+			Quit ();
 		}
 		
 		static void OnWidgetAdded (object s, Wrapper.WidgetEventArgs args)
@@ -194,6 +204,14 @@ namespace Stetic {
 			OpenWindow ((Gtk.Container) w.Wrapped);
 		}
 		
+		static void OnProjectModified (object s, EventArgs a)
+		{
+			string title = "Stetic - " + Path.GetFileName (Project.FileName);
+			if (Project.Modified)
+				title += "*";
+			MainWindow.Title = title;
+		}
+		
 		static bool IsWindowOpen (Gtk.Container widget)
 		{
 			Gtk.Widget w = openWindows [widget] as Gtk.Widget;
@@ -212,7 +230,7 @@ namespace Stetic {
 				
 				// Widget design tab
 				
-				Gtk.Widget design = EmbedWindow.Wrap (widget, wc.DesignWidth, wc.DesignHeight);
+				Gtk.Widget design = UserInterface.CreateWidgetDesigner (widget);
 				VBox box = new VBox ();
 				box.BorderWidth = 3;
 				box.PackStart (new WidgetActionBar (wc), false, false, 0);
@@ -220,17 +238,7 @@ namespace Stetic {
 				
 				// Actions design tab
 				
-				Editor.ActionGroupEditor agroupEditor = new Editor.ActionGroupEditor ();
-				agroupEditor.Project = Project;
-				Gtk.Widget groupDesign = EmbedWindow.Wrap (agroupEditor, -1, -1);
-				
-				VBox actionbox = new VBox ();
-				actionbox.BorderWidth = 3;
-				ActionGroupToolbar groupToolbar = new ActionGroupToolbar (wc.LocalActionGroups);
-				groupToolbar.Bind (agroupEditor);
-				
-				actionbox.PackStart (groupToolbar, false, false, 0);
-				actionbox.PackStart (groupDesign, true, true, 3);
+				Gtk.Widget actionbox = UserInterface.CreateActionGroupDesigner (Project, wc.LocalActionGroups);
 				
 				// Designers tab
 				
@@ -242,17 +250,18 @@ namespace Stetic {
 				// Tab label
 				
 				HBox tabLabel = new HBox ();
-				tabLabel.PackStart (new Label (widget.Name), true, true, 0);
-				Button b = new Button (new Gtk.Image ("gtk-close", IconSize.SmallToolbar));
+				tabLabel.PackStart (new Gtk.Image (wc.ClassDescriptor.Icon), true, true, 0);
+				tabLabel.PackStart (new Label (widget.Name), true, true, 3);
+				Button b = new Button (new Gtk.Image ("gtk-close", IconSize.Menu));
 				b.Relief = Gtk.ReliefStyle.None;
 				b.WidthRequest = b.HeightRequest = 24;
 				
 				b.Clicked += delegate (object s, EventArgs a) {
-					box.Hide ();
+					winActionsBook.Hide ();
 					WidgetNotebook.QueueResize ();
 				};
 				
-				tabLabel.PackStart (b, false, false, 3);
+				tabLabel.PackStart (b, false, false, 0);
 				tabLabel.ShowAll ();
 				
 				// Notebook page
@@ -272,6 +281,164 @@ namespace Stetic {
 					WidgetNotebook.Remove (page);
 					openWindows.Remove (widget);
 				}
+			}
+		}
+		
+		public static void LoadProject (string file)
+		{
+			try {
+				Project.Load (file);
+				
+				string title = "Stetic - " + Path.GetFileName (file);
+				MainWindow.Title = title;
+				
+			} catch (Exception ex) {
+				string msg = string.Format ("The file '{0}' could not be loaded.", file);
+				msg += " " + ex.Message;
+				Gtk.MessageDialog dlg = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, ButtonsType.Close, msg);
+				dlg.Run ();
+				dlg.Destroy ();
+			}
+		}
+		
+		public static bool SaveProject ()
+		{
+			if (Project.FileName == null)
+				return SaveProjectAs ();
+			else {
+				try {
+					Project.Save (Project.FileName);
+					Project.Modified = false;
+					return true;
+				} catch (Exception ex) {
+					ReportError ("The project could not be saved.", ex);
+					return false;
+				}
+			}
+		}
+		
+		public static bool SaveProjectAs ()
+		{
+			FileChooserDialog dialog =
+				new FileChooserDialog ("Save Stetic File As", null, FileChooserAction.Save,
+						       Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
+						       Gtk.Stock.Save, Gtk.ResponseType.Ok);
+
+			if (Project.FileName != null)
+				dialog.CurrentName = Project.FileName;
+
+			int response = dialog.Run ();
+			if (response == (int)Gtk.ResponseType.Ok) {
+				string name = dialog.Filename;
+				if (System.IO.Path.GetExtension (name) == "")
+					name = name + ".stetic";
+				try {
+					Project.Save (name);
+					Project.Modified = false;
+					SteticMain.UIManager.AddRecentFile (name);
+				} catch (Exception ex) {
+					ReportError ("The project could not be saved.", ex);
+					return false;
+				}
+			}
+			dialog.Hide ();
+			return true;
+		}
+		
+		
+		public static void CloseProject ()
+		{
+			if (Project.Modified) {
+				string msg = "Do you want to save the project before closing?";
+				Gtk.MessageDialog dlg = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, ButtonsType.None, msg);
+				dlg.AddButton ("Close without saving", Gtk.ResponseType.No);
+				dlg.AddButton (Gtk.Stock.Cancel, Gtk.ResponseType.Cancel);
+				dlg.AddButton (Gtk.Stock.Save, Gtk.ResponseType.Yes);
+				Gtk.ResponseType res = (Gtk.ResponseType) dlg.Run ();
+				dlg.Destroy ();
+				
+				if (res == Gtk.ResponseType.Cancel)
+					return;
+					
+				if (res == Gtk.ResponseType.Yes) {
+					if (!SaveProject ())
+						return;
+				}
+			}
+			
+			Project.Close ();
+			MainWindow.Title = "Stetic";
+		}
+		
+		public static void Quit ()
+		{
+			SaveConfiguration ();
+			Program.Quit ();
+		}
+		
+		static void ReportError (string message, Exception ex)
+		{
+			string msg = message + " " + ex.Message;
+			Gtk.MessageDialog dlg = new Gtk.MessageDialog (MainWindow, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, ButtonsType.Close, msg);
+			dlg.Run ();
+			dlg.Destroy ();
+		}
+		
+		static void ReadConfiguration ()
+		{
+			string file = Path.Combine (SteticMain.ConfigDir, "configuration.xml");
+			configuration = null;
+			
+			if (File.Exists (file)) {
+				try {
+					using (StreamReader sr = new StreamReader (file)) {
+						XmlSerializer ser = new XmlSerializer (typeof (Configuration));
+						configuration = (Configuration) ser.Deserialize (sr);
+					}
+				} catch {
+					// Ignore exceptions while reading the recents file
+				}
+			}
+			
+			if (configuration != null) {
+				MainWindow.Move (configuration.WindowX, configuration.WindowY);
+				MainWindow.Resize (configuration.WindowWidth, configuration.WindowHeight);
+				if (configuration.WindowState == Gdk.WindowState.Maximized)
+					MainWindow.Maximize ();
+				else if (configuration.WindowState == Gdk.WindowState.Iconified)
+					MainWindow.Iconify ();
+			}
+			else {
+				configuration = new Configuration ();
+			}
+			
+		}
+		
+		static void SaveConfiguration ()
+		{
+			MainWindow.GetPosition (out configuration.WindowX, out configuration.WindowY);
+			MainWindow.GetSize (out configuration.WindowWidth, out configuration.WindowHeight);
+			configuration.WindowState = MainWindow.GdkWindow.State; 
+			
+			string file = Path.Combine (SteticMain.ConfigDir, "configuration.xml");
+			try {
+				if (!Directory.Exists (SteticMain.ConfigDir))
+					Directory.CreateDirectory (SteticMain.ConfigDir);
+
+				using (StreamWriter sw = new StreamWriter (file)) {
+					XmlSerializer ser = new XmlSerializer (typeof (Configuration));
+					ser.Serialize (sw, configuration);
+				}
+			} catch (Exception ex) {
+				// Ignore exceptions while writing the recents file
+				Console.WriteLine (ex);
+			}
+		}
+		
+		public static string ConfigDir {
+			get { 
+				string file = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.Personal), ".config");
+				return Path.Combine (file, "stetic");
 			}
 		}
 	}
