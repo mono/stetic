@@ -399,9 +399,10 @@ namespace Stetic {
 			int n = 0;
 			foreach (string f in recentFiles.Files) {
 				MenuItem m = new MenuItem ("_" + n + " " + Path.GetFileName (f));
+				string fname = f;
 				m.Activated += delegate {
-					SteticMain.LoadProject (f);
-					AddRecentFile (f);
+					SteticMain.LoadProject (fname);
+					AddRecentFile (fname);
 				};
 				recentFilesMenu.Append (m);
 				n++;

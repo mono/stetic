@@ -3,6 +3,7 @@ bin_SCRIPTS = stetic
 
 stetic_exe_sources =			\
 	Stetic.cs			\
+	DesignerView.cs			\
 	RecentFiles.cs		\
 	Configuration.cs		\
 	UIManager.cs

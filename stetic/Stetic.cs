@@ -228,25 +228,7 @@ namespace Stetic {
 			}
 			else {
 				Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.Lookup (widget);
-				
-				// Widget design tab
-				
-				Gtk.Widget design = UserInterface.CreateWidgetDesigner (widget);
-				VBox box = new VBox ();
-				box.BorderWidth = 3;
-				box.PackStart (new WidgetActionBar (wc), false, false, 0);
-				box.PackStart (design, true, true, 3);
-				
-				// Actions design tab
-				
-				Gtk.Widget actionbox = UserInterface.CreateActionGroupDesigner (Project, wc.LocalActionGroups);
-				
-				// Designers tab
-				
-				Gtk.Notebook winActionsBook = new Gtk.Notebook ();
-				winActionsBook.AppendPage (box, new Gtk.Label (Catalog.GetString ("Designer")));
-				winActionsBook.AppendPage (actionbox, new Gtk.Label (Catalog.GetString ("Actions")));
-				winActionsBook.TabPos = Gtk.PositionType.Bottom;
+				DesignerView view = new DesignerView (Project, widget);
 				
 				// Tab label
 				
@@ -258,7 +240,7 @@ namespace Stetic {
 				b.WidthRequest = b.HeightRequest = 24;
 				
 				b.Clicked += delegate (object s, EventArgs a) {
-					winActionsBook.Hide ();
+					view.Hide ();
 					WidgetNotebook.QueueResize ();
 				};
 				
@@ -267,9 +249,9 @@ namespace Stetic {
 				
 				// Notebook page
 				
-				int p = WidgetNotebook.AppendPage (winActionsBook, tabLabel);
-				winActionsBook.ShowAll ();
-				openWindows [widget] = winActionsBook;
+				int p = WidgetNotebook.AppendPage (view, tabLabel);
+				view.ShowAll ();
+				openWindows [widget] = view;
 				WidgetNotebook.Page = p;
 			}
 		}
@@ -281,6 +263,7 @@ namespace Stetic {
 				if (page != null) {
 					WidgetNotebook.Remove (page);
 					openWindows.Remove (widget);
+					page.Dispose ();
 				}
 			}
 		}
@@ -288,6 +271,9 @@ namespace Stetic {
 		public static void LoadProject (string file)
 		{
 			try {
+				if (!CloseProject ())
+					return;
+				
 				Project.Load (file);
 				
 				string title = "Stetic - " + Path.GetFileName (file);
@@ -347,7 +333,7 @@ namespace Stetic {
 		}
 		
 		
-		public static void CloseProject ()
+		public static bool CloseProject ()
 		{
 			if (Project.Modified) {
 				string msg = Catalog.GetString ("Do you want to save the project before closing?");
@@ -359,16 +345,24 @@ namespace Stetic {
 				dlg.Destroy ();
 				
 				if (res == Gtk.ResponseType.Cancel)
-					return;
+					return false;
 					
 				if (res == Gtk.ResponseType.Yes) {
 					if (!SaveProject ())
-						return;
+						return false;
 				}
 			}
 			
+			foreach (Gtk.Widget page in openWindows.Values) {
+				WidgetNotebook.Remove (page);
+				page.Dispose ();
+			}
+				
+			openWindows.Clear ();
+
 			Project.Close ();
 			MainWindow.Title = "Stetic";
+			return true;
 		}
 		
 		public static void Quit ()

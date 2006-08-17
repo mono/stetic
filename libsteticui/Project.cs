@@ -542,12 +542,14 @@ namespace Stetic {
 		
 		protected virtual void OnWidgetRemoved (Stetic.Wrapper.WidgetEventArgs args)
 		{
+			Modified = true;
 			if (WidgetRemoved != null)
 				WidgetRemoved (this, args);
 		}
 		
 		protected virtual void OnWidgetAdded (Stetic.Wrapper.WidgetEventArgs args)
 		{
+			Modified = true;
 			if (WidgetAdded != null)
 				WidgetAdded (this, args);
 		}

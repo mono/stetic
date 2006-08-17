@@ -20,21 +20,21 @@ namespace Stetic
 			return EmbedWindow.Wrap (widget, designWidth, designHeight);
 		}
 		
-		public static Gtk.Widget CreateActionGroupDesigner (Project project, Wrapper.ActionGroupCollection actionGroups)
+		public static ActionGroupDesigner CreateActionGroupDesigner (Project project, Wrapper.ActionGroupCollection actionGroups)
+		{
+			ActionGroupToolbar groupToolbar = new ActionGroupToolbar (actionGroups);
+			return CreateActionGroupDesigner (project, groupToolbar);
+		}
+		
+		public static ActionGroupDesigner CreateActionGroupDesigner (Project project, ActionGroupToolbar groupToolbar)
 		{
 			Editor.ActionGroupEditor agroupEditor = new Editor.ActionGroupEditor ();
 			agroupEditor.Project = project;
-			Gtk.Widget groupDesign = EmbedWindow.Wrap (agroupEditor, -1, -1);
+			WidgetDesigner groupDesign = EmbedWindow.Wrap (agroupEditor, -1, -1);
 			
-			Gtk.VBox actionbox = new Gtk.VBox ();
-			actionbox.BorderWidth = 3;
-			ActionGroupToolbar groupToolbar = new ActionGroupToolbar (actionGroups);
 			groupToolbar.Bind (agroupEditor);
 			
-			actionbox.PackStart (groupToolbar, false, false, 0);
-			actionbox.PackStart (groupDesign, true, true, 3);
-
-			return actionbox;
+			return new ActionGroupDesigner (groupDesign, agroupEditor, groupToolbar);
 		}
 		
 		public static IObjectViewer DefaultPropertyViewer {

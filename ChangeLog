@@ -1,3 +1,22 @@
+2006-08-17  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/PropertyEditor.cs: Made the class internal.
+	* libsteticui/UserInterface.cs: Added new overload for
+	  CreateActionGroupDesigner.
+	* stetic/Stetic.cs: Close the project before opening a new one.
+	* stetic/UIManager.cs: Fixed bug when opening recent files.
+	* libsteticui/ActionGroupDesigner.cs: New file.
+	* libsteticui/Project.cs: Set the modified flag when a widget
+	  is added or removed from the project.
+	* stetic/Stetic.cs: Moved page creation code to DesignerView.cs.
+	* DesignerView.cs: New file.
+	
+	* libstetic/wrapper/Custom.cs:
+	* libstetic/CustomWidget.cs: Make public again, since it is
+	  being used by the MD addin.
+	  
+	* libsteticui/Makefile.am: Updated.
+
 2006-08-16  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/*:

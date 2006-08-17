@@ -5,7 +5,8 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class PropertyEditor : VBox {
+	class PropertyEditor : VBox
+	{
 		IPropertyEditor propEditor;
 		EditSession session;
 		

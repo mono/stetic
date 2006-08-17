@@ -6,7 +6,7 @@ namespace Stetic
 	// This widget is used at design-time to represent a Gtk.Bin container.
 	// Gtk.Bin is the base class for custom widgets.
 	
-	internal class CustomWidget: Gtk.EventBox
+	public class CustomWidget: Gtk.EventBox
 	{
 		public CustomWidget ()
 		{

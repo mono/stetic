@@ -9,6 +9,7 @@ libsteticui_dll_sources =			\
 	Metacity/Preview.cs \
 	Metacity/Theme.cs \
 	ActionGroupToolbar.cs \
+	ActionGroupDesigner.cs \
 	Clipboard.cs			\
 	CodeGenerator.cs			\
 	ContextMenu.cs			\
