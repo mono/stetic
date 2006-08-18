@@ -84,15 +84,15 @@ namespace Stetic
 						new CodeTypeReferenceExpression (cns.Name + ".Gui"),
 						"Build"
 					),
-					new CodeVariableReferenceExpression ("obj"),
+					new CodeArgumentReferenceExpression ("obj"),
 					new CodePropertyReferenceExpression (
-						new CodeVariableReferenceExpression ("type"),
+						new CodeArgumentReferenceExpression ("type"),
 						"FullName"
 					)
 			);
 			if (multiProject)
-				call.Parameters.Add (new CodeVariableReferenceExpression ("file"));
-				
+				call.Parameters.Add (new CodeArgumentReferenceExpression ("file"));
+
 			met.Statements.Add (call);
 			
 			// Generate the build method
@@ -108,9 +108,9 @@ namespace Stetic
 			met.ReturnType = new CodeTypeReference (typeof(void));
 			met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
 			
-			CodeVariableReferenceExpression cobj = new CodeVariableReferenceExpression ("obj");
-			CodeVariableReferenceExpression cfile = new CodeVariableReferenceExpression ("file");
-			CodeVariableReferenceExpression cid = new CodeVariableReferenceExpression ("id");
+			CodeArgumentReferenceExpression cobj = new CodeArgumentReferenceExpression ("obj");
+			CodeArgumentReferenceExpression cfile = new CodeArgumentReferenceExpression ("file");
+			CodeArgumentReferenceExpression cid = new CodeArgumentReferenceExpression ("id");
 			
 			CodeVariableDeclarationStatement varDecHash = new CodeVariableDeclarationStatement (typeof(System.Collections.Hashtable), "bindings");
 			met.Statements.Add (varDecHash);
@@ -378,12 +378,12 @@ namespace Stetic
 						"GetActionGroup"
 					),
 					new CodePropertyReferenceExpression (
-						new CodeVariableReferenceExpression ("type"),
+						new CodeArgumentReferenceExpression ("type"),
 						"FullName"
 					)
 			);
 			if (multiProject)
-				call.Parameters.Add (new CodeVariableReferenceExpression ("file"));
+				call.Parameters.Add (new CodeArgumentReferenceExpression ("file"));
 				
 			met.Statements.Add (new CodeMethodReturnStatement (call));
 
@@ -398,8 +398,8 @@ namespace Stetic
 			met.ReturnType = new CodeTypeReference (typeof(Gtk.ActionGroup));
 			met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
 			
-			CodeVariableReferenceExpression cfile = new CodeVariableReferenceExpression ("file");
-			CodeVariableReferenceExpression cid = new CodeVariableReferenceExpression ("name");
+			CodeArgumentReferenceExpression cfile = new CodeArgumentReferenceExpression ("file");
+			CodeArgumentReferenceExpression cid = new CodeArgumentReferenceExpression ("name");
 			
 			CodeStatementCollection projectCol = met.Statements;
 			int n=1;

@@ -258,6 +258,14 @@ namespace Stetic
 		
 		void OnResized (object s, Gtk.SizeAllocatedArgs a)
 		{
+			Stetic.Wrapper.Container cont = wrapper as Stetic.Wrapper.Container;
+			if (cont != null) {
+				if (cont.DesignHeight != DesignHeight)
+					cont.DesignHeight = DesignHeight;
+				if (cont.DesignWidth != DesignWidth)
+					cont.DesignWidth = DesignWidth;
+			}
+			
 			if (DesignSizeChanged != null)
 				DesignSizeChanged (this, a);
 		}
@@ -353,6 +361,11 @@ namespace Stetic
 				currentObjectSelection = null;
 			
 			PlaceSelectionBox (widget);
+			// Make sure the selection box is shown before doing anything else.
+			// The UI looks more responsive in this way.
+			while (Gtk.Application.EventsPending ())
+				Gtk.Application.RunIteration ();
+			
 			UpdateObjectViewers ();
 
 			if (SelectionChanged != null)

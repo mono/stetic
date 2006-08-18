@@ -1,3 +1,28 @@
+2006-08-18  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/ActionGroupToolbar.cs: Fix exception.
+	* libsteticui/CodeGenerator.cs: Use CodeArgumentReferenceExpression
+	  instead of CodeVariableReferenceExpression to reference parameters.
+	* libsteticui/WidgetDesigner.cs: Update the widget design size when
+	  it changes.
+	* libstetic/ObjectWrapper.cs: Added setter for Loading.
+	* libstetic/wrapper/Container.cs: Don't fire ChildRemoved event
+	  when loading.
+	* libstetic/wrapper/ActionGroup.cs: Added Remove method.
+	
+	* libstetic/wrapper/ActionTree.cs:
+	* libstetic/wrapper/ActionToolbarWrapper.cs:
+	* libstetic/wrapper/MenuBar.cs: Don't fire change events when
+	  creating the menu and toolbar.
+	  
+	* libstetic/wrapper/Widget.cs:
+	* libstetic/wrapper/Bin.cs: Implemented support for UIManagers
+	  in custom widgets.
+	  
+	* libstetic/editor/Accelerator.cs: Fire change event when the
+	  accelerator is set.
+	* stetic/UIManager.cs: Some UI improvements.
+
 2006-08-17  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/PropertyEditor.cs: Made the class internal.

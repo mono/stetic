@@ -97,6 +97,8 @@ namespace Stetic {
 			GetAction ("/menubar/EditMenu/Undo").Sensitive = false;
 			GetAction ("/menubar/EditMenu/Redo").Sensitive = false;
 			GetAction ("/menubar/HelpMenu/Contents").Sensitive = false;
+			GetAction ("/menubar/FileMenu/Open").IsImportant = true;
+			GetAction ("/menubar/FileMenu/Save").IsImportant = true;
 
 			// Set up Edit menu sensitivity hackery
 			Gtk.MenuItem editMenuItem = (Gtk.MenuItem) GetWidget ("/menubar/EditMenu");

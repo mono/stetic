@@ -33,15 +33,48 @@ namespace Stetic.Wrapper
 				if (!found)
 					GenerateHelperClass (ctx);
 				
-				ctx.Statements.Add (
-					new CodeMethodInvokeExpression (
-						new CodeTypeReferenceExpression ("BinContainer"),
-						"Attach",
-						new CodeVariableReferenceExpression (varName)
-					)
+				CodeMethodInvokeExpression attachExp = new CodeMethodInvokeExpression (
+					new CodeTypeReferenceExpression ("BinContainer"),
+					"Attach",
+					new CodeVariableReferenceExpression (varName)
 				);
-			}
-			base.GenerateBuildCode (ctx, varName);
+				
+				// If the Bin has its own action groups, we need to register
+				// the resulting UIManager in the BinContainer, but it needs to be done
+				// after generating it. Right now, we only keep a reference to
+				// the BinContainer.
+				
+				string binContainerVar = null;
+				
+				if (IsTopLevel && LocalActionGroups.Count > 0) {
+					binContainerVar = ctx.NewId ();
+					ctx.Statements.Add (
+						new CodeVariableDeclarationStatement (
+							"BinContainer", 
+							binContainerVar,
+							attachExp
+						)
+					);
+				} else {
+					ctx.Statements.Add (attachExp);
+				}
+				
+				base.GenerateBuildCode (ctx, varName);
+				
+				// Register the UIManager, if the Bin has one
+				
+				if (binContainerVar != null && UIManagerName != null) {
+					ctx.Statements.Add (
+						new CodeMethodInvokeExpression (
+							new CodeVariableReferenceExpression (binContainerVar),
+							"SetUiManager",
+							new CodeVariableReferenceExpression (UIManagerName)
+						)
+					);
+				}
+				
+			} else
+				base.GenerateBuildCode (ctx, varName);
 		}
 		
 		void GenerateHelperClass (GeneratorContext ctx)
@@ -55,9 +88,18 @@ namespace Stetic.Wrapper
 			field.Attributes = MemberAttributes.Private;
 			type.Members.Add (field);
 			
+			field = new CodeMemberField ("Gtk.UIManager", "uimanager");
+			field.Attributes = MemberAttributes.Private;
+			type.Members.Add (field);
+			
 			CodeExpression child = new CodeFieldReferenceExpression (
 				new CodeThisReferenceExpression (),
 				"child"
+			);
+			
+			CodeExpression uimanager = new CodeFieldReferenceExpression (
+				new CodeThisReferenceExpression (),
+				"uimanager"
 			);
 			
 			// Attach method
@@ -66,14 +108,14 @@ namespace Stetic.Wrapper
 			type.Members.Add (met);
 			met.Name = "Attach";
 			met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
-			met.ReturnType = new CodeTypeReference (typeof(void));
+			met.ReturnType = new CodeTypeReference ("BinContainer");
 			met.Parameters.Add (new CodeParameterDeclarationExpression ("Gtk.Bin", "bin"));
 			
 			CodeVariableDeclarationStatement bcDec = new CodeVariableDeclarationStatement ("BinContainer", "bc");
 			bcDec.InitExpression = new CodeObjectCreateExpression ("BinContainer");
 			met.Statements.Add (bcDec);
 			CodeVariableReferenceExpression bc = new CodeVariableReferenceExpression ("bc");
-			CodeVariableReferenceExpression bin = new CodeVariableReferenceExpression ("bin");
+			CodeArgumentReferenceExpression bin = new CodeArgumentReferenceExpression ("bin");
 			
 			met.Statements.Add (
 				new CodeAttachEventStatement (
@@ -104,6 +146,7 @@ namespace Stetic.Wrapper
 					)
 				)
 			);
+			met.Statements.Add (new CodeMethodReturnStatement (bc));
 			
 			// OnSizeRequested override
 			
@@ -123,7 +166,7 @@ namespace Stetic.Wrapper
 			cond.TrueStatements.Add (
 				new CodeAssignStatement (
 					new CodePropertyReferenceExpression (
-						new CodeVariableReferenceExpression ("args"),
+						new CodeArgumentReferenceExpression ("args"),
 						"Requisition"
 					),
 					new CodeMethodInvokeExpression (
@@ -156,7 +199,7 @@ namespace Stetic.Wrapper
 						"Allocation"
 					),
 					new CodePropertyReferenceExpression (
-						new CodeVariableReferenceExpression ("args"),
+						new CodeArgumentReferenceExpression ("args"),
 						"Allocation"
 					)
 				)
@@ -176,11 +219,108 @@ namespace Stetic.Wrapper
 				new CodeAssignStatement (
 					child,
 					new CodePropertyReferenceExpression (
-						new CodeVariableReferenceExpression ("args"),
+						new CodeArgumentReferenceExpression ("args"),
 						"Widget"
 					)
 				)
 			);
+			
+			// SetUiManager method
+			
+			met = new CodeMemberMethod ();
+			type.Members.Add (met);
+			met.Name = "SetUiManager";
+			met.Attributes = MemberAttributes.Public | MemberAttributes.Final;
+			met.ReturnType = new CodeTypeReference (typeof(void));
+			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(Gtk.UIManager), "uim"));
+			
+			met.Statements.Add (
+				new CodeAssignStatement (
+					uimanager,
+					new CodeArgumentReferenceExpression ("uim")
+				)
+			);
+			met.Statements.Add (
+				new CodeAttachEventStatement (
+					child, 
+					"Realized",
+					new CodeDelegateCreateExpression (
+						new CodeTypeReference ("System.EventHandler"), new CodeThisReferenceExpression(), "OnRealized"
+					)
+				)
+			);
+			
+			// OnRealized method
+			
+			met = new CodeMemberMethod ();
+			type.Members.Add (met);
+			met.Name = "OnRealized";
+			met.ReturnType = new CodeTypeReference (typeof(void));
+			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(object), "sender"));
+			met.Parameters.Add (new CodeParameterDeclarationExpression ("System.EventArgs", "args"));
+			
+			cond = new CodeConditionStatement ();
+			cond.Condition = new CodeBinaryOperatorExpression (
+						uimanager,
+						CodeBinaryOperatorType.IdentityInequality,
+						new CodePrimitiveExpression (null)
+			);
+			
+			cond.TrueStatements.Add (
+				new CodeVariableDeclarationStatement (
+					typeof(Gtk.Widget),
+					"w"
+				)
+			);
+			
+			CodeExpression wexp = new CodeVariableReferenceExpression ("w");
+			
+			CodeIterationStatement iter = new CodeIterationStatement ();
+			
+			cond.TrueStatements.Add (
+				new CodeAssignStatement (
+					wexp,
+					new CodePropertyReferenceExpression (
+						child,
+						"Toplevel"
+					)
+				)
+			);
+								
+			CodeConditionStatement cond2 = new CodeConditionStatement ();
+			cond2.Condition = new CodeBinaryOperatorExpression (
+				new CodeBinaryOperatorExpression (
+					wexp,
+					CodeBinaryOperatorType.IdentityInequality,
+					new CodePrimitiveExpression (null)
+				),
+				CodeBinaryOperatorType.BooleanAnd,
+				new CodeMethodInvokeExpression (
+					new CodeTypeOfExpression ("Gtk.Window"),
+					"IsInstanceOfType",
+					wexp
+				)
+			);
+			
+			cond2.TrueStatements.Add (
+				new CodeMethodInvokeExpression (
+					new CodeCastExpression ("Gtk.Window", wexp),
+					"AddAccelGroup",
+					new CodePropertyReferenceExpression (
+						uimanager,
+						"AccelGroup"
+					)
+				)
+			);
+			cond2.TrueStatements.Add (
+				new CodeAssignStatement (
+					uimanager,
+					new CodePrimitiveExpression (null)
+				)
+			);
+			cond.TrueStatements.Add (cond2);
+			
+			met.Statements.Add (cond);
 		}
 	}
 	
@@ -190,13 +330,15 @@ namespace Stetic.Wrapper
 	class BinContainer
 	{
 		Gtk.Widget child;
+		UIManager uimanager;
 		
-		public static void Attach (Gtk.Bin bin)
+		public static BinContainer Attach (Gtk.Bin bin)
 		{
 			BinContainer bc = new BinContainer ();
 			bin.SizeRequested += new Gtk.SizeRequestedHandler (bc.OnSizeRequested);
 			bin.SizeAllocated += new Gtk.SizeAllocatedHandler (bc.OnSizeAllocated);
 			bin.Added += new Gtk.AddedHandler (bc.OnAdded);
+			return bin;
 		}
 		
 		void OnSizeRequested (object s, Gtk.SizeRequestedArgs args)
@@ -214,6 +356,23 @@ namespace Stetic.Wrapper
 		void OnAdded (object s, Gtk.AddedArgs args)
 		{
 			child = args.Widget;
+		}
+		
+		public void SetUiManager (UIManager manager)
+		{
+			uimanager = manager;
+			child.Realized += new System.EventHandler (OnRealized);
+		}
+		
+		void OnRealized ()
+		{
+			if (uimanager != null) {
+				Gtk.Widget w = child.Toplevel;
+				if (w != null && w is Gtk.Window) {
+					((Gtk.Window)w).AddAccelGroup (uimanager.AccelGroup);
+					uimanager = null;
+				}
+			}
 		}
 	}
 */

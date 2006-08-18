@@ -30,8 +30,9 @@ namespace Stetic {
 			}
 		}
 		
-		protected bool Loading {
+		internal protected bool Loading {
 			get { return loading; }
+			set { loading = value; }
 		}
 		
 		public void AttachDesigner (IDesignArea designer)

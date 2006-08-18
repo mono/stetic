@@ -76,7 +76,8 @@ namespace Stetic
 		public override void Dispose ()
 		{
 			base.Dispose ();
-			ActionGroups = null;
+			if (!singleGroupMode)
+				ActionGroups = null;
 		}
 		
 		public Wrapper.ActionGroupCollection ActionGroups {

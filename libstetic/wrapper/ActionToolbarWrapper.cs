@@ -103,14 +103,18 @@ namespace Stetic.Wrapper
 		
 		internal protected override void OnSelected ()
 		{
+			Loading = true;
 			toolbar.ShowInsertPlaceholder = true;
+			Loading = false;
 		}
 		
 		internal protected override void OnUnselected ()
 		{
 			base.OnUnselected ();
+			Loading = true;
 			toolbar.ShowInsertPlaceholder = false;
 			toolbar.Unselect ();
+			Loading = false;
 		}
 		
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
@@ -170,7 +174,10 @@ namespace Stetic.Wrapper
 		{
 			base.OnDesignerAttach (designer);
 			BuildTree ();
+			
+			Loading = true;
 			toolbar.FillMenu (actionTree);
+			Loading = false;
 			
 			if (LocalActionGroups.Count == 0)
 				LocalActionGroups.Add (new ActionGroup ("Default"));

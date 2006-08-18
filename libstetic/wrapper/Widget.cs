@@ -348,15 +348,21 @@ namespace Stetic.Wrapper {
 				
 				// Adds the accel group to the window
 				Window w = GetTopLevel () as Window;
-				CodeMethodInvokeExpression ami = new CodeMethodInvokeExpression (
-					new CodeVariableReferenceExpression (ctx.WidgetMap.GetWidgetId (w)),
-					"AddAccelGroup",
-					new CodePropertyReferenceExpression (
-						uixp,
-						"AccelGroup"
-					)
-				);
-				ctx.Statements.Add (ami);
+				if (w != null) {
+					CodeMethodInvokeExpression ami = new CodeMethodInvokeExpression (
+						new CodeVariableReferenceExpression (ctx.WidgetMap.GetWidgetId (w)),
+						"AddAccelGroup",
+						new CodePropertyReferenceExpression (
+							uixp,
+							"AccelGroup"
+						)
+					);
+					ctx.Statements.Add (ami);
+				} else {
+					// There is no top level window, this must be a custom widget.
+					// The only option is to register the accel group when
+					// the widget is realized. This is done by the Bin wrapper.
+				}
 			}
 			
 			if (tooltip != null && tooltip.Length > 0)

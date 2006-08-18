@@ -213,6 +213,11 @@ namespace Stetic.Wrapper
 		{
 			return List.IndexOf (group);
 		}
+		
+		public void Remove (ActionGroup group)
+		{
+			List.Remove (group);
+		}
 
 		protected override void OnInsertComplete (int index, object val)
 		{

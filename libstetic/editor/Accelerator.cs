@@ -85,6 +85,7 @@ namespace Stetic.Editor {
 			this.keyval = grabWindow.Keyval;
 			this.mask = grabWindow.Mask;
 			Ungrab (time);
+			EmitAccelChanged ();
 		}
 
 		[GLib.ConnectBefore]

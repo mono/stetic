@@ -52,6 +52,7 @@ namespace Stetic.Wrapper
 		Action action;
 		ActionTreeNodeCollection children;
 		ActionTreeNode parentNode;
+		bool loading;
 		
 		public ActionTreeNode ()
 		{
@@ -128,10 +129,16 @@ namespace Stetic.Wrapper
 				if (action != null)
 					action.Deleted += OnActionDeleted;
 			}
-			foreach (XmlElement child in elem.SelectNodes ("node")) {
-				ActionTreeNode node = new ActionTreeNode ();
-				node.Read (baseWidget, child);
-				Children.Add (node);
+			
+			try {
+				loading = true;
+				foreach (XmlElement child in elem.SelectNodes ("node")) {
+					ActionTreeNode node = new ActionTreeNode ();
+					node.Read (baseWidget, child);
+					Children.Add (node);
+				}
+			} finally {
+				loading = false;
 			}
 		}
 		
@@ -218,17 +225,21 @@ namespace Stetic.Wrapper
 		internal void NotifyChildAdded (ActionTreeNode node)
 		{
 			node.parentNode = this;
-			NotifyChanged ();
-			if (ChildNodeAdded != null)
-				ChildNodeAdded (this, new ActionTreeNodeArgs (node));
+			if (!loading) {
+				NotifyChanged ();
+				if (ChildNodeAdded != null)
+					ChildNodeAdded (this, new ActionTreeNodeArgs (node));
+			}
 		}
 		
 		internal void NotifyChildRemoved (ActionTreeNode node)
 		{
 			node.parentNode = null;
-			NotifyChanged ();
-			if (ChildNodeRemoved != null)
-				ChildNodeRemoved (this, new ActionTreeNodeArgs (node));
+			if (!loading) {
+				NotifyChanged ();
+				if (ChildNodeRemoved != null)
+					ChildNodeRemoved (this, new ActionTreeNodeArgs (node));
+			}
 		}
 		
 		public event ActionTreeNodeHanlder ChildNodeAdded;

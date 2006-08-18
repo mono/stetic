@@ -529,9 +529,14 @@ namespace Stetic.Wrapper {
 
 		void ChildRemoved (object obj, Gtk.RemovedArgs args)
 		{
-			if (designer != null) {
-				ObjectWrapper w = ObjectWrapper.Lookup (args.Widget);
-				if (w != null)
+			if (Loading)
+				return;
+				
+			ObjectWrapper w = ObjectWrapper.Lookup (args.Widget);
+			if (w != null) {
+				if (w.Loading)
+					return;
+				if (designer != null)
 					w.OnDesignerDetach (designer);
 			}
 			ChildRemoved (args.Widget);
@@ -629,12 +634,16 @@ namespace Stetic.Wrapper {
 			if (win != null) {
 				if (widget != null && widget.CanFocus)
 					win.Focus = widget;
-				else {
+				else if (widget != null) {
 					// Remove the focus from the window. In this way we ensure
 					// that the current selected widget will lose the focus,
 					// even if the new selection is not focusable.
+					Gtk.Widget w = widget.Parent;
+					while (w != null && !w.CanFocus)
+						w = w.Parent;
+					win.Focus = w;
+				} else
 					win.Focus = null;
-				}
 			}
 				
 			if (selection != null) {
@@ -644,8 +653,9 @@ namespace Stetic.Wrapper {
 				// to be. (Eg, if you select a widget in a hidden window, the window
 				// should map. If you select a widget on a non-current notebook
 				// page, the notebook should switch pages, etc.)
-				if (selection.IsDrawable && Visible)
+				if (selection.IsDrawable && Visible) {
 					ShowSelectionBox (selection, dragHandles);
+				}
 				
 				Widget wr = Widget.Lookup (selection);
 				if (wr != null)
