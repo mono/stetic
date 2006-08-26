@@ -14,6 +14,13 @@ namespace Stetic.Wrapper {
 			}
 			box.SizeAllocated += box_SizeAllocated;
 			ContainerOrientation = obj is Gtk.HBox ? Gtk.Orientation.Horizontal : Gtk.Orientation.Vertical;
+			DND.ClearFaults (this);
+		}
+		
+		public override void Dispose ()
+		{
+			box.SizeAllocated -= box_SizeAllocated;
+			base.Dispose ();
 		}
 
 		protected Gtk.Box box {
@@ -87,38 +94,40 @@ namespace Stetic.Wrapper {
 			Gtk.SideType before = hbox ? Gtk.SideType.Left : Gtk.SideType.Top;
 			Gtk.SideType after = hbox ? Gtk.SideType.Right : Gtk.SideType.Bottom;
 
-			// If there are no PackStart widgets, we need a fault at the leading
-			// edge. Otherwise if there's a widget at the leading edge, we need a
-			// fault before it.
-			if (last_start == -1)
-				DND.AddFault (this, 0, before, null);
-			else if (sorted[0] != null)
-				DND.AddFault (this, 0, before, sorted[0]);
+			if (!Unselectable) {
+				// If there are no PackStart widgets, we need a fault at the leading
+				// edge. Otherwise if there's a widget at the leading edge, we need a
+				// fault before it.
+				if (last_start == -1)
+					DND.AddFault (this, 0, before, null);
+				else if (sorted[0] != null)
+					DND.AddFault (this, 0, before, sorted[0]);
 
-			// Add a fault between each pair of (non-placeholder) start widgets
-			for (int i = 1; i <= last_start; i++) {
-				if (sorted[i - 1] != null && sorted[i] != null)
-					DND.AddFault (this, i, orientation, sorted[i - 1], sorted[i]);
+				// Add a fault between each pair of (non-placeholder) start widgets
+				for (int i = 1; i <= last_start; i++) {
+					if (sorted[i - 1] != null && sorted[i] != null)
+						DND.AddFault (this, i, orientation, sorted[i - 1], sorted[i]);
+				}
+
+				// If there's a non-placeholder at the end of the PackStart
+				// range, add a fault after it
+				if (last_start > -1 && sorted[last_start] != null)
+					DND.AddFault (this, last_start + 1, after, sorted[last_start]);
+
+				// Now the PackEnd widgets
+				if (last_start == sorted.Length - 1)
+					DND.AddFault (this, -(last_start + 1), after, null);
+				else if (sorted[last_start + 1] != null)
+					DND.AddFault (this, -(last_start + 1), after, sorted[last_start + 1]);
+
+				for (int i = last_start + 2; i < sorted.Length; i++) {
+					if (sorted[i - 1] != null && sorted[i] != null)
+						DND.AddFault (this, -i, orientation, sorted[i - 1], sorted[i]);
+				}
+
+				if (sorted.Length > last_start + 1 && sorted[sorted.Length - 1] != null)
+					DND.AddFault (this, -sorted.Length, before, sorted[sorted.Length - 1]);
 			}
-
-			// If there's a non-placeholder at the end of the PackStart
-			// range, add a fault after it
-			if (last_start > -1 && sorted[last_start] != null)
-				DND.AddFault (this, last_start + 1, after, sorted[last_start]);
-
-			// Now the PackEnd widgets
-			if (last_start == sorted.Length - 1)
-				DND.AddFault (this, -(last_start + 1), after, null);
-			else if (sorted[last_start + 1] != null)
-				DND.AddFault (this, -(last_start + 1), after, sorted[last_start + 1]);
-
-			for (int i = last_start + 2; i < sorted.Length; i++) {
-				if (sorted[i - 1] != null && sorted[i] != null)
-					DND.AddFault (this, -i, orientation, sorted[i - 1], sorted[i]);
-			}
-
-			if (sorted.Length > last_start + 1 && sorted[sorted.Length - 1] != null)
-				DND.AddFault (this, -sorted.Length, before, sorted[sorted.Length - 1]);
 		}
 
 		internal void InsertBefore (Gtk.Widget context)

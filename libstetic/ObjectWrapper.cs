@@ -20,6 +20,7 @@ namespace Stetic {
 		protected object wrapped;
 		protected ClassDescriptor classDescriptor;
 		SignalCollection signals;
+		internal Hashtable translationInfo;
 		bool loading;
 
 		public SignalCollection Signals {

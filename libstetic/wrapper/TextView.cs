@@ -12,6 +12,12 @@ namespace Stetic.Wrapper {
 			((Gtk.TextView)Wrapped).Buffer.Changed += Buffer_Changed;
 		}
 
+		public override void Dispose ()
+		{
+			((Gtk.TextView)Wrapped).Buffer.Changed -= Buffer_Changed;
+			base.Dispose ();
+		}
+
 		public string Text {
 			get {
 				return ((Gtk.TextView)Wrapped).Buffer.Text;

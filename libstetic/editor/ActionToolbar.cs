@@ -41,6 +41,7 @@ namespace Stetic.Editor
 			actionTree.ChildNodeAdded += OnChildAdded;
 			actionTree.ChildNodeRemoved += OnChildRemoved;
 			
+			HideSpacerItem ();
 			toolItems.Clear ();
 			Widget wrapper = Widget.Lookup (this);
 			
@@ -91,7 +92,15 @@ namespace Stetic.Editor
 		{
 			if (spacerItem == null) {
 				Gtk.ToolItem tb = new Gtk.ToolItem ();
-				tb.Child = new Gtk.Label ("   ");
+				Gtk.Label emptyLabel = new Gtk.Label ();
+				emptyLabel.Xalign = 0;
+				emptyLabel.Xpad = 3;
+				emptyLabel.Ypad = 3;
+				if (this.Orientation == Gtk.Orientation.Vertical)
+					emptyLabel.Markup = "<i><span foreground='darkgrey'>" + Catalog.GetString ("Empty\ntoolbar") + "</span></i>";
+				else
+					emptyLabel.Markup = "<i><span foreground='darkgrey'>" + Catalog.GetString ("Empty toolbar") + "</span></i>";
+				tb.Child = emptyLabel;
 				Insert (tb, -1);
 				ShowAll ();
 				spacerItem = tb;

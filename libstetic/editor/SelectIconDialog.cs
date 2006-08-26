@@ -15,6 +15,7 @@ namespace Stetic.Editor
 		[Glade.Widget] Gtk.ScrolledWindow customIconScrolledwindow;
 		[Glade.Widget] Gtk.Image previewIcon;
 		[Glade.Widget] Gtk.Button okButton;
+		[Glade.Widget] Gtk.Widget labelWarningIcon;
 		[Glade.Widget ("SelectIconDialog")] Gtk.Dialog dialog;
 		
 		StockIconList iconList;
@@ -42,13 +43,15 @@ namespace Stetic.Editor
 			customIconList = new ProjectIconList (project, project.IconFactory);
 			customIconList.SelectionChanged += new EventHandler (OnCustomIconSelectionChanged);
 			customIconScrolledwindow.AddWithViewport (customIconList);
+			dialog.ShowAll ();
 
+			UpdateIconSelection ();
 			UpdateButtons ();
 		}
 		
 		public int Run ()
 		{
-			dialog.ShowAll ();
+			dialog.Show ();
 			dialog.TransientFor = parent;
 			return dialog.Run ();
 		}
@@ -108,6 +111,8 @@ namespace Stetic.Editor
 		
 		void UpdateIconSelection ()
 		{
+			labelWarningIcon.Visible = stockIconEntry.Text.Length > 0 && (!stockIconEntry.Text.StartsWith ("gtk-"));
+				
 			Gdk.Pixbuf icon = null;
 			if (stockIconEntry.Text.Length > 0) {
 				try {

@@ -162,6 +162,7 @@ namespace Stetic.Wrapper
 		public override XmlElement Write (XmlDocument doc, FileFormat format)
 		{
 			XmlElement elem = doc.CreateElement ("action");
+			elem.SetAttribute ("id", Name);
 			WidgetUtils.GetProps (this, elem);
 			WidgetUtils.GetSignals (this, elem);
 			return elem;
@@ -169,13 +170,13 @@ namespace Stetic.Wrapper
 		
 		public void Read (IProject project, XmlElement elem)
 		{
-			string name = elem.GetAttribute ("name");
 			Gtk.Action ac = new Gtk.Action (name, "");
 			
 			ClassDescriptor klass = Registry.LookupClassByName ("Gtk.Action");
 			ObjectWrapper.Bind (project, klass, this, ac, true);
 			
 			WidgetUtils.ReadMembers (klass, this, ac, elem);
+			name = nameRoot = oldDefaultName = elem.GetAttribute ("id");
 		}
 		
 		public Action Clone ()

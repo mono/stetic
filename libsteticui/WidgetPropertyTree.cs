@@ -66,7 +66,7 @@ namespace Stetic
 		
 		void Selected (object s, Wrapper.WidgetEventArgs args)
 		{
-			TargetObject = args != null && args.Widget != null? args.Widget.Wrapped : null;
+			TargetObject = args != null && args.Widget != null? args.Widget : null;
 		}
 		
 		bool SelectedHandler ()

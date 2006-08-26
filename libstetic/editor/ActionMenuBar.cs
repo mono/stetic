@@ -41,6 +41,7 @@ namespace Stetic.Editor
 			actionTree.ChildNodeAdded += OnChildAdded;
 			actionTree.ChildNodeRemoved += OnChildRemoved;
 			
+			HideSpacerItem ();
 			menuItems.Clear ();
 			Widget wrapper = Widget.Lookup (this);
 			
@@ -80,9 +81,13 @@ namespace Stetic.Editor
 		void AddSpacerItem ()
 		{
 			if (spacerItem == null) {
-				Gtk.MenuItem mi = new Gtk.MenuItem ("");
-				Insert (mi, -1);
-				spacerItem = mi;
+				Gtk.Label emptyLabel = new Gtk.Label ();
+				emptyLabel.Xalign = 0;
+				emptyLabel.Markup = "<i><span foreground='darkgrey'>" + Catalog.GetString ("Empty menu bar") + "</span></i>";
+				Gtk.MenuItem mit = new Gtk.MenuItem ();
+				mit.Child = emptyLabel;
+				Insert (mit, -1);
+				spacerItem = mit;
 				ShowAll ();
 			}
 		}

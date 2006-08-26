@@ -41,6 +41,14 @@ namespace Stetic.Wrapper {
 			if (!Loading)
 				ValidateChildNames (Wrapped);
 		}
+
+		public override void Dispose ()
+		{
+			container.Removed -= ChildRemoved;
+			container.Added -= OnChildAdded;
+			AutoSize.Clear ();
+			base.Dispose ();
+		}
 		
 		void OnChildAdded (object o, Gtk.AddedArgs args)
 		{
@@ -120,6 +128,7 @@ namespace Stetic.Wrapper {
 		{
 			base.Read (elem, format);
 			ReadChildren (elem, format);
+			DoSync ();
 		}
 		
 		protected virtual void ReadChildren (XmlElement elem, FileFormat format)

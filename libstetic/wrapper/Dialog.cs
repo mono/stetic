@@ -27,6 +27,13 @@ namespace Stetic.Wrapper {
 			ActionArea.ContentsChanged += ButtonsChanged;
 		}
 		
+		public override void Dispose ()
+		{
+			ActionArea.ContentsChanged -= ButtonsChanged;
+			ActionArea.SetActionDialog (null);
+			base.Dispose ();
+		}
+		
 		protected override void ReadChildren (XmlElement elem, FileFormat format)
 		{
 			// Ignore changes in the buttons while loading

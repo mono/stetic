@@ -90,7 +90,7 @@ namespace Stetic
 		void OnSelectionChanged (object s, Wrapper.WidgetEventArgs args)
 		{
 			Clear ();
-			selection = args.Widget;
+			selection = args.WidgetWrapper;
 			
 			if (selection == null) {
 				combo.SetSelection (null);

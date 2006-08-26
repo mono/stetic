@@ -85,7 +85,7 @@ namespace Stetic {
 
 		void Selected (object s, Wrapper.WidgetEventArgs args)
 		{
-			newSelection = args != null ? args.Widget : null;
+			newSelection = args != null ? args.WidgetWrapper : null;
 			GLib.Timeout.Add (50, new GLib.TimeoutHandler (SelectedHandler));
 		}
 		

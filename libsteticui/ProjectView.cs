@@ -93,7 +93,7 @@ namespace Stetic {
 			if (!syncing) {
 				syncing = true;
 				if (args.Widget != null) {
-					ProjectNode node = project.GetNode (args.Widget.Wrapped);
+					ProjectNode node = project.GetNode (args.Widget);
 					if (node != null)
 						NodeSelection.SelectNode (node);
 				}

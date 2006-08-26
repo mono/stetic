@@ -300,7 +300,8 @@ namespace Stetic.Editor
 			
 			menu.ShowAll ();
 
-			menu.Popup (null, null, new Gtk.MenuPositionFunc (OnDropMenuPosition), 3, Gtk.Global.CurrentEventTime);
+			uint but = args != null ? args.Event.Button : 1;
+			menu.Popup (null, null, new Gtk.MenuPositionFunc (OnDropMenuPosition), but, Gtk.Global.CurrentEventTime);
 			
 			// Make sure we get the focus after closing the menu, so we can keep browsing buttons
 			// using the keyboard.

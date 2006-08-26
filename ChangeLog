@@ -1,3 +1,51 @@
+2006-08-26  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libstetic/wrapper/WidgetEventHandler.cs: Added WidgetWrapper property.
+	
+	* libsteticui/PropertyGrid.cs:
+	* libsteticui/Palette.cs:
+	* libsteticui/ProjectView.cs:
+	* libsteticui/WidgetActionBar.cs:
+	* libsteticui/SignalsEditor.cs:
+	* stetic/Stetic.cs:
+	* stetic/UIManager.cs:
+	* libsteticui/WidgetPropertyTree.cs: Track changes in WidgetEventHandler.
+	
+	* libsteticui/Project.cs: Factorized cleanup methods into Close().
+	  Properly dispose actions.
+	* libstetic/wrapper/Action.cs: Properly read the action id.
+	* libstetic/wrapper/Container.cs: Disconnect container events when
+	  disposing. Sync the table after reading it.
+	* libstetic/wrapper/Widget.cs: Properly track unwrapped children
+	  and intercept clicks for them.
+	* libstetic/wrapper/Box.cs: Don't create drop faults if the widget is
+	  not selectable.
+	* libstetic/wrapper/ActionGroup.cs: Implemented IDisposable.
+	* libstetic/wrapper/ButtonBox.cs: Destroy buttons being removed (this will
+	  dispose the wrapper).
+	* libstetic/wrapper/objects.xml: Inherit IsTextCombo property.
+	* libstetic/editor/ActionMenuBar.cs: Show an "Empty" message when the widget
+	  is not selected.
+	* libstetic/editor/StockIconSelectorItem.cs: Removed gnome stock icons since
+	  they need some special initialization code. Still available in the stock
+	  icon selection box.
+	* libstetic/editor/ActionToolItem.cs: Propagate to menu popup the key used
+	  to show the menu.
+	* libstetic/PropertyDescriptor.cs: Store translation info in the object wrapper,
+	  instead of a global hashtable. This avoids keeping a reference to the object
+	  forever in the translation info hashtable.
+	
+	* libstetic/wrapper/TextView.cs:
+	* libstetic/wrapper/Window.cs:
+	* libstetic/wrapper/Scale.cs:
+	* libstetic/wrapper/Range.cs:
+	* libstetic/wrapper/Dialog.cs:
+	* libstetic/wrapper/Toolbar.cs: Unsubscribe events on dispose.
+	  
+	* libstetic/editor/SelectIconDialog.cs:
+	* libstetic/stetic.glade: Added warning to stock selection icon, shown when
+	  the selected icon needs special icon factories.
+
 2006-08-18  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/ActionGroupToolbar.cs: Fix exception.

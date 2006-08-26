@@ -6,15 +6,27 @@ namespace Stetic.Wrapper
 	
 	public class WidgetEventArgs: EventArgs
 	{
-		Stetic.Wrapper.Widget widget;
+		Stetic.Wrapper.Widget wrapper;
+		Gtk.Widget widget;
 		
-		public WidgetEventArgs (Stetic.Wrapper.Widget widget)
+		public WidgetEventArgs (Gtk.Widget widget)
 		{
 			this.widget = widget;
 		}
 		
-		public Stetic.Wrapper.Widget Widget {
+		public WidgetEventArgs (Stetic.Wrapper.Widget wrapper)
+		{
+			this.wrapper = wrapper;
+			if (wrapper != null)
+				this.widget = wrapper.Wrapped;
+		}
+		
+		public Gtk.Widget Widget {
 			get { return widget; }
+		}
+		
+		public Widget WidgetWrapper {
+			get { return wrapper; }
 		}
 	}	
 }

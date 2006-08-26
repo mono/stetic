@@ -21,6 +21,12 @@ namespace Stetic.Wrapper {
 
 			window.DeleteEvent += DeleteEvent;
 		}
+		
+		public override void Dispose ()
+		{
+			Wrapped.DeleteEvent -= DeleteEvent;
+			base.Dispose ();
+		}
 
 		[ConnectBefore]
 		void DeleteEvent (object obj, Gtk.DeleteEventArgs args)

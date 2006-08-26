@@ -346,7 +346,7 @@ namespace Stetic {
 
 		void Selected (object s, Wrapper.WidgetEventArgs args)
 		{
-			UpdateEdit (args.Widget != null ? args.Widget.Wrapped : null);
+			UpdateEdit (args.Widget != null ? args.Widget : null);
 		}
 		
 		void ReadRecentFiles ()

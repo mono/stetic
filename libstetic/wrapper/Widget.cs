@@ -59,6 +59,39 @@ namespace Stetic.Wrapper {
 				if (nn != Wrapped.Name)
 					Wrapped.Name = nn;
 			}
+			
+			Wrapped.Destroyed += OnDestroyed;
+			
+			if (Wrapped.Parent != null) {
+				// The object was added to the parent before creating the wrapper.
+				// Since it's now a wrapped object, the parent don't need to
+				// intercept clicks for it anymore
+				Gtk.Widget wp = Wrapped.Parent;
+				while (wp != null && Lookup (wp) == null)
+					wp = wp.Parent;
+				if (wp != null)
+					Lookup (wp).UninterceptClicks (Wrapped);
+			}
+		}
+		
+		void OnDestroyed (object on, EventArgs a)
+		{
+			Dispose ();
+		}
+		
+		public override void Dispose ()
+		{
+			Wrapped.Destroyed -= OnDestroyed;
+			Wrapped.PopupMenu -= PopupMenu;
+			Wrapped.FocusInEvent -= OnFocusIn;
+			UninterceptClicks (Wrapped);
+			Wrapped.HierarchyChanged -= HierarchyChanged;
+			
+			if (actionGroups != null) {
+				foreach (ActionGroup ag in actionGroups)
+					ag.Dispose ();
+			}
+			base.Dispose ();
 		}
 		
 		void OnFocusIn (object s, Gtk.FocusInEventArgs a)
@@ -79,9 +112,38 @@ namespace Stetic.Wrapper {
 
 			Gtk.Container container = widget as Gtk.Container;
 			if (container != null) {
+				container.Added += OnInterceptedChildAdded;
+				container.Removed += OnInterceptedChildRemoved;
 				foreach (Gtk.Widget child in container.AllChildren) {
 					if (Lookup (child) == null)
 						InterceptClicks (child);
+				}
+			}
+		}
+		
+		[GLib.ConnectBefore]
+		void OnInterceptedChildAdded (object o, Gtk.AddedArgs args)
+		{
+			if (Lookup (args.Widget) == null)
+				InterceptClicks (args.Widget);
+		}
+		
+		void OnInterceptedChildRemoved (object o, Gtk.RemovedArgs args)
+		{
+			UninterceptClicks (args.Widget);
+		}
+		
+		void UninterceptClicks (Gtk.Widget widget)
+		{
+			widget.WidgetEvent -= WidgetEvent;
+			
+			Gtk.Container container = widget as Gtk.Container;
+			if (container != null) {
+				container.Added -= OnInterceptedChildAdded;
+				container.Removed -= OnInterceptedChildRemoved;
+				foreach (Gtk.Widget child in container.AllChildren) {
+					if (Lookup (child) == null)
+						UninterceptClicks (child);
 				}
 			}
 		}

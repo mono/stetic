@@ -11,6 +11,12 @@ namespace Stetic.Wrapper {
 			toolbar.SizeAllocated += toolbar_SizeAllocated;
 		}
 
+		public override void Dispose ()
+		{
+			toolbar.SizeAllocated -= toolbar_SizeAllocated;
+			base.Dispose ();
+		}
+
 		public override IEnumerable RealChildren {
 			get {
 				// Don't return Gtk.ToolItems that are only being used

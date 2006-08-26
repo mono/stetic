@@ -108,7 +108,7 @@ namespace Stetic
 		
 		void OnWidgetSelected (object s, Wrapper.WidgetEventArgs args)
 		{
-			selection = args != null ? args.Widget : null;
+			selection = args != null ? args.WidgetWrapper : null;
 			RefreshTree ();
 		}
 		

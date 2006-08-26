@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper
 {
-	public class ActionGroup
+	public class ActionGroup: IDisposable
 	{
 		string name;
 		ActionCollection actions;
@@ -27,6 +27,12 @@ namespace Stetic.Wrapper
 		public ActionGroup (string name): this ()
 		{
 			this.name = name;
+		}
+		
+		public virtual void Dispose ()
+		{
+			foreach (Action a in actions)
+				a.Dispose ();
 		}
 		
 		public ActionCollection Actions {

@@ -181,25 +181,25 @@ namespace Stetic {
 		static void OnWidgetAdded (object s, Wrapper.WidgetEventArgs args)
 		{
 			if (args.Widget.IsTopLevel) {
-				OpenWindow (args.Widget.Wrapped as Gtk.Container);
+				OpenWindow (args.Widget as Gtk.Container);
 			}
 		}
 		
 		static void OnWidgetRemoved (object s, Wrapper.WidgetEventArgs args)
 		{
-			CloseWindow (args.Widget.Wrapped as Gtk.Container);
+			CloseWindow (args.Widget as Gtk.Container);
 		}
 		
 		static void OnSelectionChanged (object s, Wrapper.WidgetEventArgs args)
 		{
-			Stetic.Wrapper.Container wc = args.Widget as Stetic.Wrapper.Container;
-			if (wc != null && wc.IsTopLevel && IsWindowOpen ((Gtk.Container) args.Widget.Wrapped))
-				OpenWindow ((Gtk.Container) args.Widget.Wrapped);
+			Stetic.Wrapper.Container wc = args.WidgetWrapper as Stetic.Wrapper.Container;
+			if (wc != null && wc.IsTopLevel && IsWindowOpen ((Gtk.Container) args.Widget))
+				OpenWindow ((Gtk.Container) args.Widget);
 		}
 		
 		static void OnWidgetActivated (object s, Wrapper.WidgetEventArgs args)
 		{
-			Stetic.Wrapper.Widget w = args.Widget;
+			Stetic.Wrapper.Widget w = args.WidgetWrapper;
 			while (!w.IsTopLevel)
 				w = Stetic.Wrapper.Container.LookupParent (w.Wrapped);
 			OpenWindow ((Gtk.Container) w.Wrapped);
@@ -273,7 +273,7 @@ namespace Stetic {
 			try {
 				if (!CloseProject ())
 					return;
-				
+
 				Project.Load (file);
 				
 				string title = "Stetic - " + Path.GetFileName (file);

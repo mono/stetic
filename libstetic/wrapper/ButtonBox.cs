@@ -92,8 +92,11 @@ namespace Stetic.Wrapper {
 				Gtk.Widget[] children = buttonbox.Children;
 				int cursize = children.Length;
 
-				while (cursize > value)
-					buttonbox.Remove (children[--cursize]);
+				while (cursize > value) {
+					Gtk.Widget w = children[--cursize];
+					buttonbox.Remove (w);
+					w.Destroy ();
+				}
 				while (cursize < value) {
 					buttonbox.PackStart (NewButton (), false, false, 0);
 					cursize++;

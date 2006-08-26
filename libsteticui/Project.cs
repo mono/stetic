@@ -52,11 +52,9 @@ namespace Stetic {
 		
 		public void Dispose ()
 		{
-			ActionGroups = null;
 			Registry.RegistryChanging -= OnRegistryChanging;
 			Registry.RegistryChanged -= OnRegistryChanged;
-			foreach (Gtk.Widget w in Toplevels)
-				w.Destroy ();
+			Close ();
 		}
 		
 		public string FileName {
@@ -97,25 +95,29 @@ namespace Stetic {
 		{
 			fileName = null;
 			
+			if (actionGroups != null) {
+				foreach (Stetic.Wrapper.ActionGroup ag in actionGroups)
+					ag.Dispose ();
+				actionGroups.Clear ();
+			}
+
 			foreach (Gtk.Widget w in Toplevels)
 				w.Destroy ();
 
 			selection = null;
 			store.Clear ();
 			nodes.Clear ();
-			actionGroups.Clear ();
 		}
 		
 		public void Load (string fileName)
 		{
-			this.fileName = fileName;
-			
-			Id = System.IO.Path.GetFileName (fileName);
-			
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
 			doc.Load (fileName);
 			Read (doc);
+			
+			this.fileName = fileName;
+			Id = System.IO.Path.GetFileName (fileName);
 		}
 		
 		public void Read (XmlDocument doc)
@@ -123,14 +125,7 @@ namespace Stetic {
 			loading = true;
 			
 			try {
-				// Clean the existing tree
-				foreach (Gtk.Widget w in Toplevels)
-					w.Destroy ();
-
-				selection = null;
-				store.Clear ();
-				nodes.Clear ();
-				actionGroups.Clear ();
+				Close ();
 				
 				XmlNode node = doc.SelectSingleNode ("/stetic-interface");
 				if (node == null)
@@ -297,20 +292,26 @@ namespace Stetic {
 		void UnhashNodeRecursive (ProjectNode node)
 		{
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (node.Widget);
-			ww.ObjectChanged -= OnObjectChanged;
-			ww.NameChanged -= OnWidgetNameChanged;
-			ww.MemberNameChanged -= OnWidgetMemberNameChanged;
-			ww.SignalAdded -= OnSignalAdded;
-			ww.SignalRemoved -= OnSignalRemoved;
-			ww.SignalChanged -= OnSignalChanged;
-			((Gtk.Widget)ww.Wrapped).Destroyed -= WidgetDestroyed;
+			if (ww != null) {
+				ww.ObjectChanged -= OnObjectChanged;
+				ww.NameChanged -= OnWidgetNameChanged;
+				ww.MemberNameChanged -= OnWidgetMemberNameChanged;
+				ww.SignalAdded -= OnSignalAdded;
+				ww.SignalRemoved -= OnSignalRemoved;
+				ww.SignalChanged -= OnSignalChanged;
+				Stetic.Wrapper.Container container = ww as Stetic.Wrapper.Container;
+				if (container != null)
+					container.ContentsChanged -= ContentsChanged;
+			}
+			node.Widget.Destroyed -= WidgetDestroyed;
 			
 			if (!loading)
-				OnWidgetRemoved (new Stetic.Wrapper.WidgetEventArgs (ww));
+				OnWidgetRemoved (new Stetic.Wrapper.WidgetEventArgs (node.Widget));
 			
 			nodes.Remove (node.Widget);
 			for (int i = 0; i < node.ChildCount; i++)
 				UnhashNodeRecursive (node[i] as ProjectNode);
+			node.Widget = null;
 		}
 		
 		void RemoveNode (ProjectNode node)
@@ -569,6 +570,9 @@ namespace Stetic {
 		public Widget Widget {
 			get {
 				return widget;
+			}
+			set {
+				widget = value;
 			}
 		}
 

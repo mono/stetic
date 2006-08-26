@@ -9,6 +9,12 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 			((Gtk.Range)Wrapped).Adjustment.AddNotification (AdjustmentNotifyHandler);
 		}
+		
+		public override void Dispose ()
+		{
+			((Gtk.Range)Wrapped).Adjustment.RemoveNotification (AdjustmentNotifyHandler);
+			base.Dispose ();
+		}
 
 		void AdjustmentNotifyHandler (object obj, GLib.NotifyArgs args)
 		{

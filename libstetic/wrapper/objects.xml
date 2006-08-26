@@ -676,6 +676,7 @@
 	    label="Combo Box Entry" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Combo Box Entry Properties">
+		<property ref="Gtk.ComboBox.IsTextCombo" />
 		<property ref="Gtk.ComboBox.Items" />
 		<property name="Active" min="-1"/>
 		<!-- 2.6 <property name="AddTearoffs" /> -->

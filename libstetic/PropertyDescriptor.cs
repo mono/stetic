@@ -21,9 +21,8 @@ namespace Stetic {
 		protected object minimum, maximum;
 		protected object defaultValue;
 		protected TypeConverter typeConverter;
+		protected bool translatable;
 
-		protected Hashtable translationInfo;
-		
 		protected PropertyDescriptor ()
 		{
 		}
@@ -59,7 +58,7 @@ namespace Stetic {
 				initWithName = true;
 
 			if (elem.HasAttribute ("translatable"))
-				translationInfo = new Hashtable ();
+				translatable = true;
 				
 			if (elem.HasAttribute ("default"))
 				defaultValue = StringToValue (elem.GetAttribute ("default"));
@@ -208,13 +207,16 @@ namespace Stetic {
 
 		public virtual bool Translatable {
 			get {
-				return translationInfo != null;
+				return translatable;
 			}
 		}
 
 		public virtual bool IsTranslated (object obj)
 		{
-			TranslationInfo info = (TranslationInfo)translationInfo[obj];
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
+			if (wrapper == null || wrapper.translationInfo == null) return false;
+			
+			TranslationInfo info = (TranslationInfo)wrapper.translationInfo[obj];
 
 			// Since translatable properties are assumed to be translated
 			// by default, we return true if there is no TranslationInfo
@@ -224,10 +226,16 @@ namespace Stetic {
 
 		public virtual void SetTranslated (object obj, bool translated)
 		{
-			TranslationInfo info = (TranslationInfo)translationInfo[obj];
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
+			if (wrapper == null) return;
+			
+			if (wrapper.translationInfo == null)
+				wrapper.translationInfo = new Hashtable ();
+			
+			TranslationInfo info = (TranslationInfo)wrapper.translationInfo[obj];
 			if (info == null) {
 				info = new TranslationInfo ();
-				translationInfo[obj] = info;
+				wrapper.translationInfo[obj] = info;
 			}
 
 			if (translated)
@@ -241,28 +249,38 @@ namespace Stetic {
 
 		public virtual string TranslationContext (object obj)
 		{
-			TranslationInfo info = (TranslationInfo)translationInfo[obj];
-
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
+			if (wrapper == null || wrapper.translationInfo == null) return null;
+			
+			TranslationInfo info = (TranslationInfo)wrapper.translationInfo[obj];
 			return info != null ? info.Context : null;
 		}
 
 		public virtual void SetTranslationContext (object obj, string context)
 		{
 			SetTranslated (obj, true);
-			((TranslationInfo)translationInfo[obj]).Context = context;
+			
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
+			if (wrapper == null) return;
+			((TranslationInfo)wrapper.translationInfo[obj]).Context = context;
 		}
 
 		public virtual string TranslationComment (object obj)
 		{
-			TranslationInfo info = (TranslationInfo)translationInfo[obj];
-
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
+			if (wrapper == null || wrapper.translationInfo == null) return null;
+			
+			TranslationInfo info = (TranslationInfo)wrapper.translationInfo[obj];
 			return info != null ? info.Comment : null;
 		}
 
 		public virtual void SetTranslationComment (object obj, string comment)
 		{
 			SetTranslated (obj, true);
-			((TranslationInfo)translationInfo[obj]).Comment = comment;
+			
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
+			if (wrapper == null) return;
+			((TranslationInfo)wrapper.translationInfo[obj]).Comment = comment;
 		}		
 	}
 }

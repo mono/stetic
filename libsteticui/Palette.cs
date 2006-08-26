@@ -62,7 +62,7 @@ namespace Stetic {
 		
 		void OnSelectionChanged (object ob, Stetic.Wrapper.WidgetEventArgs args)
 		{
-			selection = args.Widget;
+			selection = args.WidgetWrapper;
 			localActionsBox.SetActionGroups (selection != null ? selection.LocalActionGroups : null);
 			ShowAll ();
 		}
