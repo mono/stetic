@@ -32,11 +32,5 @@ namespace Stetic
 			AppendPage (actionbox, new Gtk.Label (Catalog.GetString ("Actions")));
 			TabPos = Gtk.PositionType.Bottom;
 		}
-		
-		public override void Dispose ()
-		{
-			design.Dispose ();
-			actionbox.Dispose ();
-		}
 	}
 }

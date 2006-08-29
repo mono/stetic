@@ -47,6 +47,7 @@ namespace Stetic.Editor
 			
 			foreach (Gtk.Widget w in Children) {
 				Remove (w);
+				w.Destroy ();
 				w.Dispose ();
 			}
 

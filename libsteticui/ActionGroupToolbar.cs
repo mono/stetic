@@ -209,8 +209,10 @@ namespace Stetic
 		void UpdateActionCommands (Action action)
 		{
 			foreach (Gtk.Widget w in Children) {
-				if (!internalButtons.Contains (w))
+				if (!internalButtons.Contains (w)) {
 					Remove (w);
+					w.Destroy ();
+				}
 			}
 			AddActionCommands (action);
 				

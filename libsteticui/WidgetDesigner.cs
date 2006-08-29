@@ -135,6 +135,12 @@ namespace Stetic
 		{
 			if (wrapper != null)
 				wrapper.DetachDesigner (resizableFixed);
+			preview.SizeAllocated -= new Gtk.SizeAllocatedHandler (OnResized);
+			resizableFixed.Dispose ();
+			resizableFixed.Destroy ();
+			resizableFixed = null;
+			preview = null;
+			wrapper = null;
 			base.Dispose ();
 		}
 		
@@ -328,6 +334,13 @@ namespace Stetic
 			this.container = container;
 			fixd.Put (child, selectionBorder + padding, selectionBorder + padding);
 			child.SizeRequested += new SizeRequestedHandler (OnSizeReq);
+		}
+		
+		public override void Dispose ()
+		{
+			if (child != null)
+				child.SizeRequested -= new SizeRequestedHandler (OnSizeReq);
+			base.Dispose ();
 		}
 		
 		public bool IsSelected (Gtk.Widget widget)
@@ -576,7 +589,8 @@ namespace Stetic
 			base.ForAll (include_internals, callback);
 			foreach (TopLevelChild child in topLevels)
 				callback (child.Child);
-			selectionBox.ForAll (include_internals, callback);
+			if (include_internals)
+				selectionBox.ForAll (include_internals, callback);
 		}
 		
 		protected override bool OnMotionNotifyEvent (Gdk.EventMotion ev)

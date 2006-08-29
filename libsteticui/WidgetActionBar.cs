@@ -43,7 +43,11 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
+			RootWidget = null;
 			Clear ();
+			combo.Dispose ();
+			combo.Destroy ();
+			combo = null;
 			base.Dispose ();
 		}
 		
@@ -83,8 +87,11 @@ namespace Stetic
 			toggles.Clear ();
 				
 			foreach (Gtk.Widget child in Children)
-				if (child != comboItem)
+				if (child != comboItem) {
 					Remove (child);
+					child.Destroy ();
+					child.Dispose ();
+				}
 		}
 		
 		void OnSelectionChanged (object s, Wrapper.WidgetEventArgs args)

@@ -353,9 +353,11 @@ namespace Stetic {
 				}
 			}
 			
-			foreach (Gtk.Widget page in openWindows.Values) {
+			object[] obs = new object [openWindows.Count];
+			openWindows.Values.CopyTo (obs, 0);
+			foreach (Gtk.Widget page in obs) {
 				WidgetNotebook.Remove (page);
-				page.Dispose ();
+				page.Destroy ();
 			}
 				
 			openWindows.Clear ();
@@ -368,6 +370,7 @@ namespace Stetic {
 		public static void Quit ()
 		{
 			SaveConfiguration ();
+			Palette.Destroy ();
 			Program.Quit ();
 		}
 		

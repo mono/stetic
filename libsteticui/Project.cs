@@ -55,6 +55,9 @@ namespace Stetic {
 			Registry.RegistryChanging -= OnRegistryChanging;
 			Registry.RegistryChanged -= OnRegistryChanged;
 			Close ();
+			store.Dispose ();
+			iconFactory = null;
+			ActionGroups = null;
 		}
 		
 		public string FileName {

@@ -1,3 +1,18 @@
+2006-08-29  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/ActionGroupDesigner.cs:
+	* libsteticui/ActionGroupToolbar.cs:
+	* libsteticui/Palette.cs:
+	* libsteticui/WidgetDesigner.cs:
+	* libsteticui/Project.cs: 
+	* libsteticui/WidgetActionBar.cs:
+	* libstetic/ObjectWrapper.cs:
+	* libstetic/editor/ActionMenuBar.cs:
+	* libstetic/editor/ActionMenu.cs:
+	* libstetic/editor/ActionGroupEditor.cs:
+	* stetic/Stetic.cs: Explicitely destroy custom widgets to avoid memory
+	  leaks.
+
 2006-08-26  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libstetic/wrapper/WidgetEventHandler.cs: Added WidgetWrapper property.

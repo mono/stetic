@@ -56,6 +56,26 @@ namespace Stetic.Editor
 			ShowAll ();
 		}
 		
+		public override void Dispose ()
+		{
+			foreach (ActionMenuItem aitem in items) {
+				aitem.KeyPressEvent -= OnItemKeyPress;
+				aitem.Dispose ();
+				aitem.Node.Dispose ();
+			}
+			items.Clear ();
+			ActionGroup = null;
+			project = null;
+			headerLabel = null;
+			
+			if (darea != null) {
+				darea.SelectionChanged -= OnSelectionChanged;
+				darea = null;
+			}
+
+			base.Dispose ();
+		}
+		
 		public ActionGroup ActionGroup {
 			get { return actionGroup; }
 			set {

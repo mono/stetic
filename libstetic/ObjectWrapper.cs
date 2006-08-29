@@ -55,6 +55,8 @@ namespace Stetic {
 		public virtual void Dispose ()
 		{
 			wrappers.Remove (GetIndentityObject (wrapped));
+			proj = null;
+			signals = null;
 		}
 
 		public static ObjectWrapper Create (IProject proj, object wrapped)

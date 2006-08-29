@@ -32,6 +32,21 @@ namespace Stetic {
 		public override void Dispose ()
 		{
 			Registry.RegistryChanged -= OnRegistryChanged;
+			
+			foreach (PaletteGroup grp in groups.Values)
+				grp.Destroy ();
+
+			if (localActionsBox != null) {
+				localActionsBox.Destroy ();
+				localActionsBox = null;
+			}
+			if (globalActionsBox != null) {
+				globalActionsBox.Destroy ();
+				globalActionsBox = null;
+			}
+			
+			project = null;
+			selection = null;
 			base.Dispose ();
 		}
 		
@@ -93,8 +108,10 @@ namespace Stetic {
 		
 		public void LoadWidgets (Project project)
 		{
-			foreach (PaletteGroup g in groups.Values)
+			foreach (PaletteGroup g in groups.Values) {
 				Remove (g);
+				g.Destroy ();
+			}
 				
 			groups.Clear ();
 			
@@ -131,9 +148,9 @@ namespace Stetic {
 			}
 
 			if (localActionsBox != null)
-				localActionsBox.Dispose ();
+				localActionsBox.Destroy ();
 			if (globalActionsBox != null)
-				globalActionsBox.Dispose ();
+				globalActionsBox.Destroy ();
 				
 			PaletteGroup widgetGroup = AddOrGetGroup ("actions", Catalog.GetString ("Actions"));
 			localActionsBox = new ActionGroupBox ();
@@ -217,8 +234,10 @@ namespace Stetic {
 	
 		public void Clear ()
 		{
-			foreach (Gtk.Widget w in vbox.Children)
+			foreach (Gtk.Widget w in vbox.Children) {
 				vbox.Remove (w);
+				w.Destroy ();
+			}
 
 			isEmpty = true;
 			vbox.PackStart (emptyLabel, false, false, 0);
@@ -317,6 +336,8 @@ namespace Stetic {
 		public override void Dispose ()
 		{
 			base.Dispose ();
+			foreach (ActionPaletteGroup grp in Children)
+				grp.Destroy ();
 			SetActionGroups (null);
 		}
 		
@@ -324,7 +345,7 @@ namespace Stetic {
 		{
 			foreach (ActionPaletteGroup grp in Children) {
 				Remove (grp);
-				grp.Dispose ();
+				grp.Destroy ();
 			}
 			
 			if (groups != null) {
@@ -348,7 +369,7 @@ namespace Stetic {
 			foreach (ActionPaletteGroup grp in Children) {
 				if (grp.Group == args.ActionGroup) {
 					Remove (grp);
-					grp.Dispose ();
+					grp.Destroy ();
 				}
 			}
 		}
