@@ -35,9 +35,9 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
-			editor.Destroy ();
-			toolbar.Destroy ();
-			groupDesign.Destroy ();
+			editor.Dispose ();
+			toolbar.Dispose ();
+			groupDesign.Dispose ();
 			editor = null;
 			toolbar = null;
 			groupDesign = null;

@@ -111,14 +111,14 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override void Select (Stetic.Wrapper.Widget wrapper)
+		public override void Select (Gtk.Widget widget)
 		{
-			if (wrapper != null) {
-				int index = tabs.IndexOf (wrapper.Wrapped);
+			if (widget != null) {
+				int index = tabs.IndexOf (widget);
 				if (index != -1 && index != notebook.CurrentPage)
 					notebook.CurrentPage = index;
 			}
-			base.Select (wrapper);
+			base.Select (widget);
 		}
 
 		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)

@@ -124,6 +124,17 @@ namespace Stetic.Editor
 			}
 		}
 		
+		ActionMenuItem SelectedActionMenuItem {
+			get {
+				IDesignArea designArea = GetDesignArea ();
+				IObjectSelection sel = designArea.GetSelection ();
+				if (sel != null)
+					return sel.Widget as ActionMenuItem;
+				else
+					return null;
+			}
+		}
+		
 		public void StartEditing ()
 		{
 			IDesignArea designArea = GetDesignArea ();
@@ -323,6 +334,31 @@ namespace Stetic.Editor
 				SelectionChanged (this, args);
 		}
 		
+		public void Cut ()
+		{
+			ActionMenuItem menuItem = SelectedActionMenuItem;
+			if (menuItem != null)
+				Cut (SelectedActionMenuItem);
+		}
+		
+		public void Copy ()
+		{
+			ActionMenuItem menuItem = SelectedActionMenuItem;
+			if (menuItem != null)
+				Copy (SelectedActionMenuItem);
+		}
+		
+		public void Paste ()
+		{
+		}
+		
+		public void Delete ()
+		{
+			ActionMenuItem menuItem = SelectedActionMenuItem;
+			if (menuItem != null)
+				Delete (SelectedActionMenuItem);
+		}
+		
 		void Cut (ActionMenuItem menuItem)
 		{
 		}
@@ -341,6 +377,7 @@ namespace Stetic.Editor
 			Gtk.MessageDialog md = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Question, Gtk.ButtonsType.YesNo, msg);
 			if (md.Run () == (int) Gtk.ResponseType.Yes) {
 				menuItem.Node.Action.Delete ();
+				darea.SetSelection (null, null);
 			}
 			md.Destroy ();
 		}

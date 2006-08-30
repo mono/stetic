@@ -174,11 +174,15 @@ namespace Stetic
 		// Gets the value of the property on @obj
 		public override object GetValue (object obj)
 		{
-			if (isWrapperProperty)
-				obj = ObjectWrapper.Lookup (obj);
-			if (memberInfo != null)
-				obj = memberInfo.GetValue (obj, null);
-			return propertyInfo.GetValue (obj, null);
+			try {
+				if (isWrapperProperty)
+					obj = ObjectWrapper.Lookup (obj);
+				if (memberInfo != null)
+					obj = memberInfo.GetValue (obj, null);
+				return propertyInfo.GetValue (obj, null);
+			} catch (Exception ex) {
+				throw new InvalidOperationException ("Could not get value for property " + klass.Name + "." + Name + " from object '" + obj + "'"); 
+			}
 		}
 
 		// Whether or not the property is writable
@@ -191,11 +195,15 @@ namespace Stetic
 		// Sets the value of the property on @obj
 		public override void SetValue (object obj, object value)
 		{
-			if (isWrapperProperty)
-				obj = ObjectWrapper.Lookup (obj);
-			if (memberInfo != null)
-				obj = memberInfo.GetValue (obj, null);
-			propertyInfo.SetValue (obj, value, null);
+			try {
+				if (isWrapperProperty)
+					obj = ObjectWrapper.Lookup (obj);
+				if (memberInfo != null)
+					obj = memberInfo.GetValue (obj, null);
+				propertyInfo.SetValue (obj, value, null);
+			} catch (Exception ex) {
+				throw new InvalidOperationException ("Could not set value for property " + klass.Name + "." + Name + " to object '" + obj + "'"); 
+			}
 		}
 
 		// The property's type at run time

@@ -337,7 +337,7 @@ namespace Stetic {
 		{
 			if (Project.Modified) {
 				string msg = Catalog.GetString ("Do you want to save the project before closing?");
-				Gtk.MessageDialog dlg = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, ButtonsType.None, msg);
+				Gtk.MessageDialog dlg = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Question, ButtonsType.None, msg);
 				dlg.AddButton (Catalog.GetString ("Close without saving"), Gtk.ResponseType.No);
 				dlg.AddButton (Gtk.Stock.Cancel, Gtk.ResponseType.Cancel);
 				dlg.AddButton (Gtk.Stock.Save, Gtk.ResponseType.Yes);

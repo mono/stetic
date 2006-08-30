@@ -9,7 +9,7 @@ namespace Stetic.Wrapper {
 	
 		string oldName;
 		string oldMemberName;
-		bool settingFocus;
+		internal bool settingFocus;
 		bool hexpandable, vexpandable;
 
 		bool window_visible = true;
@@ -25,7 +25,7 @@ namespace Stetic.Wrapper {
 		// List of groups added to the UIManager
 		ArrayList includedActionGroups;
 		
-		public bool Unselectable;
+		public bool unselectable;
 		
 		public Widget ()
 		{
@@ -66,11 +66,9 @@ namespace Stetic.Wrapper {
 				// The object was added to the parent before creating the wrapper.
 				// Since it's now a wrapped object, the parent don't need to
 				// intercept clicks for it anymore
-				Gtk.Widget wp = Wrapped.Parent;
-				while (wp != null && Lookup (wp) == null)
-					wp = wp.Parent;
-				if (wp != null)
-					Lookup (wp).UninterceptClicks (Wrapped);
+				Widget w = GetInterceptorParent ();
+				if (w != null)
+					w.UninterceptClicks (Wrapped);
 			}
 		}
 		
@@ -105,8 +103,39 @@ namespace Stetic.Wrapper {
 				ParentWrapper.Select ();
 		}
 		
+		public bool Unselectable {
+			get { 
+				return unselectable; 
+			}
+			set {
+				if (value == unselectable)
+					return;
+				unselectable = value;
+				Widget w = GetInterceptorParent ();
+				if (w != null) {
+					// If a widget becomes unselectable, then the parent must intercept
+					// their clicks.
+					if (unselectable)
+						w.InterceptClicks (Wrapped);
+					else
+						w.UninterceptClicks (Wrapped);
+				}
+			}
+		}
+		
+		Widget GetInterceptorParent ()
+		{
+			Gtk.Widget wp = Wrapped.Parent;
+			while (wp != null && Lookup (wp) == null)
+				wp = wp.Parent;
+			return Lookup (wp);
+		}
+		
 		void InterceptClicks (Gtk.Widget widget)
 		{
+			if (widget is Stetic.Placeholder)
+				return;
+
 			widget.Events |= Gdk.EventMask.ButtonPressMask;
 			widget.WidgetEvent += WidgetEvent;
 
@@ -115,7 +144,8 @@ namespace Stetic.Wrapper {
 				container.Added += OnInterceptedChildAdded;
 				container.Removed += OnInterceptedChildRemoved;
 				foreach (Gtk.Widget child in container.AllChildren) {
-					if (Lookup (child) == null)
+					Widget w = Lookup (child);
+					if (w == null || w.Unselectable)
 						InterceptClicks (child);
 				}
 			}
@@ -124,7 +154,8 @@ namespace Stetic.Wrapper {
 		[GLib.ConnectBefore]
 		void OnInterceptedChildAdded (object o, Gtk.AddedArgs args)
 		{
-			if (Lookup (args.Widget) == null)
+			Widget w = Lookup (args.Widget);
+			if (w == null || w.Unselectable)
 				InterceptClicks (args.Widget);
 		}
 		
@@ -298,17 +329,13 @@ namespace Stetic.Wrapper {
 
 		public void Select ()
 		{
-			// Select() will bring the focus to this widget.
-			// This flags avoids calling Select() again
-			// when the focusIn event is received.
-			settingFocus = true;
-			
-			if (ParentWrapper != null)
-				ParentWrapper.Select (this);
-			else if (this is Stetic.Wrapper.Container)
-				((Container)this).Select (this);
-				
-			settingFocus = false;
+			proj.Selection = Wrapped;
+		}
+		
+		public void Unselect ()
+		{
+			if (proj.Selection == Wrapped)
+				proj.Selection = null;
 		}
 		
 		internal protected virtual void OnSelected ()
@@ -370,7 +397,7 @@ namespace Stetic.Wrapper {
 		
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
 		{
-			if (actionGroups != null) {
+			if (actionGroups != null && actionGroups.Count > 0) {
 				// Create an UI manager
 				uiManagerName = ctx.NewId ();
 				CodeVariableDeclarationStatement uidec = new CodeVariableDeclarationStatement (

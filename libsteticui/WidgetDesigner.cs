@@ -137,7 +137,6 @@ namespace Stetic
 				wrapper.DetachDesigner (resizableFixed);
 			preview.SizeAllocated -= new Gtk.SizeAllocatedHandler (OnResized);
 			resizableFixed.Dispose ();
-			resizableFixed.Destroy ();
 			resizableFixed = null;
 			preview = null;
 			wrapper = null;

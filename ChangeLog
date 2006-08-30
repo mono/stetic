@@ -1,3 +1,25 @@
+2006-08-30  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/ActionGroupDesigner.cs: Use Dispose instead of destroy
+	  since it was generating some warnings.
+	* libsteticui/WidgetDesigner.cs: Dispose is enough.
+	* libsteticui/Project.cs: Don't add unselectable widgets to the tree.
+	  Moved here some selection code from Widget.cs.
+	* libstetic/ItemGroup.cs: Make sure properties are returned in the
+	  same order they are declared in objects.xml.
+	* libstetic/ObjectWrapper.cs: Don't nullify proj and signals on dispose,
+	  it is causing some nullrefs.
+	* libstetic/wrapper/Container.cs: Changed a bit how selection works.
+	  Everything is now controled by the project.
+	* libstetic/wrapper/Widget.cs: Make sure clicks for unselectable widgets
+	  are intercepted.
+	* libstetic/wrapper/Notebook.cs: Track api changes.
+	* libstetic/wrapper/Table.cs: Destroy widgets removed from the table.
+	* libstetic/editor/ActionGroupEditor.cs: Implemented public Cut, Copy,
+	  Paste and Delete methods.
+	* stetic/Stetic.cs:
+	* libstetic/TypedPropertyDescriptor.cs: Improved some error messages.
+
 2006-08-29  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/ActionGroupDesigner.cs:

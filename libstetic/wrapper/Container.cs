@@ -497,7 +497,7 @@ namespace Stetic.Wrapper {
 			Placeholder ph = obj as Placeholder;
 
 			if (args.Event.Button == 1) {
-				Select (ph);
+				proj.Selection = ph;
 				args.RetVal = true;
 			} else if (args.Event.Button == 3) {
 				proj.PopupContextMenu (ph);
@@ -596,19 +596,20 @@ namespace Stetic.Wrapper {
 				pinfo.SetValue (cc, props[pinfo], null);
 
 			Sync ();
+			oldChild.Destroy ();
 			EmitContentsChanged ();
+			Project.Selection = newChild;
 		}
 
 		Gtk.Widget selection;
 
-		public virtual void Select (Stetic.Wrapper.Widget wrapper)
+		public virtual void Select (Gtk.Widget widget)
 		{
-			if (wrapper == null) {
+			if (widget == null) {
 				Select (null, false);
-				proj.Selection = null;
 			} else {
-				Select (wrapper.Wrapped, (wrapper.InternalChildProperty == null));
-				proj.Selection = wrapper.Wrapped;
+				Widget wrapper = Widget.Lookup (widget);
+				Select (widget, wrapper != null && wrapper.InternalChildProperty == null);
 			}
 		}
 
@@ -616,12 +617,6 @@ namespace Stetic.Wrapper {
 		{
 			if (selection == widget)
 				Select (null, false);
-		}
-
-		public virtual void Select (Placeholder ph)
-		{
-			Select (ph, false);
-			proj.Selection = ph;
 		}
 
 		void Select (Gtk.Widget widget, bool dragHandles)
@@ -648,11 +643,22 @@ namespace Stetic.Wrapper {
 					// that the current selected widget will lose the focus,
 					// even if the new selection is not focusable.
 					Gtk.Widget w = widget.Parent;
-					while (w != null && !w.CanFocus)
+					while (w != null && !w.CanFocus) {
 						w = w.Parent;
-					win.Focus = w;
-				} else
+					}
+					Widget wr = Widget.Lookup (widget);
+					
+					if (wr != null) {
+						// This flags avoids calling Select() again
+						// when the focusIn event is received.
+						wr.settingFocus = true;
+						win.Focus = w;
+						wr.settingFocus = false;
+					} else
+						win.Focus = w;
+				} else {
 					win.Focus = null;
+				}
 			}
 				
 			if (selection != null) {
@@ -712,7 +718,7 @@ namespace Stetic.Wrapper {
 		{
 			Gtk.Widget dragWidget = selection;
 
-			Select ((Stetic.Wrapper.Widget)null);
+			Select ((Gtk.Widget)null);
 
 			dragSource = CreateDragSource (dragWidget);
 			DND.Drag (dragSource, evt, dragWidget);

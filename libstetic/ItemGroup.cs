@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Specialized;
 using System.Xml;
 
 namespace Stetic {
@@ -8,7 +9,7 @@ namespace Stetic {
 		public static ItemGroup Empty;
 
 		string label, name;
-		Hashtable items = new Hashtable ();
+		HybridDictionary items = new HybridDictionary ();
 
 		static ItemGroup ()
 		{

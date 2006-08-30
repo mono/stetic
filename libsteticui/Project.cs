@@ -254,7 +254,7 @@ namespace Stetic {
 		void AddWidget (Widget widget, ProjectNode parent, int position)
 		{
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (widget);
-			if (ww == null)
+			if (ww == null || ww.Unselectable)
 				return;
 				
 			ww.ObjectChanged += OnObjectChanged;
@@ -492,6 +492,14 @@ namespace Stetic {
 				}
 
 				selection = value;
+
+				if (selection != null && selection.Handle != IntPtr.Zero) {
+					Stetic.Wrapper.Container parent = Stetic.Wrapper.Container.LookupParent (selection);
+					if (parent == null)
+						parent = Stetic.Wrapper.Container.Lookup (selection);
+					if (parent != null)
+						parent.Select (selection);
+				}
 
 				if (SelectionChanged != null)
 					SelectionChanged (this, new Wrapper.WidgetEventArgs (Wrapper.Widget.Lookup (selection)));

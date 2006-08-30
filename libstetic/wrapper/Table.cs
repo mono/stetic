@@ -60,8 +60,10 @@ namespace Stetic.Wrapper {
 
 				if (right == left + 1 && bottom == top + 1)
 					grid[top,left] = child;
-				else
+				else {
 					table.Remove (child);
+					child.Destroy ();
+				}
 			}
 
 			// Now fill in the real widgets, knocking out any placeholders
@@ -82,8 +84,10 @@ namespace Stetic.Wrapper {
 				for (row = top; row < bottom; row++) {
 					for (col = left; col < right; col++) {
 						w = grid[row,col];
-						if (w is Placeholder)
-							table.Remove (grid[row,col]);
+						if (w is Placeholder) {
+							table.Remove (w);
+							w.Destroy ();
+						}
 						grid[row,col] = child;
 					}
 				}
@@ -222,8 +226,10 @@ namespace Stetic.Wrapper {
 				tc = table[child] as Gtk.Table.TableChild;
 
 				if (tc.TopAttach == row) {
-					if (tc.BottomAttach == tc.TopAttach + 1)
+					if (tc.BottomAttach == tc.TopAttach + 1) {
 						table.Remove (child);
+						child.Destroy ();
+					}
 					else
 						tc.BottomAttach--;
 				} else {
@@ -262,8 +268,10 @@ namespace Stetic.Wrapper {
 				tc = table[child] as Gtk.Table.TableChild;
 
 				if (tc.LeftAttach == col) {
-					if (tc.RightAttach == tc.LeftAttach + 1)
+					if (tc.RightAttach == tc.LeftAttach + 1) {
 						table.Remove (child);
+						child.Destroy ();
+					}
 					else
 						tc.RightAttach--;
 				} else {
