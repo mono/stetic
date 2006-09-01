@@ -12,6 +12,7 @@ namespace Stetic.Wrapper
 		public WidgetEventArgs (Gtk.Widget widget)
 		{
 			this.widget = widget;
+			wrapper = Stetic.Wrapper.Widget.Lookup (widget);
 		}
 		
 		public WidgetEventArgs (Stetic.Wrapper.Widget wrapper)

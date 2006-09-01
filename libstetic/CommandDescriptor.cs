@@ -48,7 +48,7 @@ namespace Stetic {
 		{
 			object target;
 			PropertyInfo prop = FindBoolProperty (obj, out target);
-			return (bool) prop.GetValue (target, null);
+			return prop != null && (bool) prop.GetValue (target, null);
 		}
 		
 		PropertyInfo FindBoolProperty (object obj, out object target)

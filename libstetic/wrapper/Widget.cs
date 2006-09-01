@@ -79,6 +79,9 @@ namespace Stetic.Wrapper {
 		
 		public override void Dispose ()
 		{
+			if (Project.Selection == Wrapped)
+				Project.Selection = null;
+
 			Wrapped.Destroyed -= OnDestroyed;
 			Wrapped.PopupMenu -= PopupMenu;
 			Wrapped.FocusInEvent -= OnFocusIn;

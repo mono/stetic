@@ -1,3 +1,22 @@
+2006-09-01  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/Project.cs: Avoid the normal widget clearing callback
+	  when closing a project. It may avoid a crash seen by some users
+	  but which is hard to reproduce. Initialize the icon factory
+	  when closing the project.
+	* libstetic/CommandDescriptor.cs: Added null check.
+	* libstetic/wrapper/Widget.cs: Clear the selection if the selected
+	  widget is destroyed.
+	* libstetic/wrapper/WidgetEventHandler.cs: Set the wrapper property
+	  in the args constructor.
+	* libstetic/wrapper/Viewport.cs: Wrapper properties can't be initialized
+	  in the constructor.
+	* libstetic/wrapper/objects.xml: Set the default value for Visible to 
+	  'true' (in gtk, the default is false, but for stetic it is true).
+	* libstetic/editor/ActionMenuItem.cs: Added null check.
+	* libstetic/editor/SelectImageDialog.cs: Don't allow addin/removing
+	  resources if there is no resource manager.
+
 2006-08-30  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/ActionGroupDesigner.cs: Use Dispose instead of destroy

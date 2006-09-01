@@ -104,12 +104,19 @@ namespace Stetic {
 				actionGroups.Clear ();
 			}
 
-			foreach (Gtk.Widget w in Toplevels)
+			foreach (Gtk.Widget w in Toplevels) {
+				w.Destroyed -= WidgetDestroyed;
+				ProjectNode node = nodes[w] as ProjectNode;
+				if (node != null)
+					UnhashNodeRecursive (node);
 				w.Destroy ();
+			}
 
 			selection = null;
 			store.Clear ();
 			nodes.Clear ();
+
+			iconFactory = new ProjectIconFactory ();
 		}
 		
 		public void Load (string fileName)

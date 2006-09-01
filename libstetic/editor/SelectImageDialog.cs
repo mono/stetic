@@ -18,6 +18,8 @@ namespace Stetic.Editor
 		[Glade.Widget] Gtk.ComboBox iconSizeCombo;
 		[Glade.Widget] Gtk.Entry resourceNameEntry;
 		[Glade.Widget] Gtk.Button okButton;
+		[Glade.Widget] Gtk.Button buttonAdd;
+		[Glade.Widget] Gtk.Button buttonRemove;
 		[Glade.Widget ("SelectImageDialog")] Gtk.Dialog dialog;
 		
 		ThemedIconList iconList;
@@ -68,6 +70,10 @@ namespace Stetic.Editor
 			
 			resourceList.AppendColumn (col);
 			resourceProvider = project.ResourceProvider;
+			if (resourceProvider == null) {
+				buttonAdd.Sensitive = false;
+				buttonRemove.Sensitive = false;
+			}
 			FillResources ();
 			resourceList.Selection.Changed += OnResourceSelectionChanged;
 			

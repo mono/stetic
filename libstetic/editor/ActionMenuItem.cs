@@ -317,6 +317,8 @@ namespace Stetic.Editor
 		public void Detach ()
 		{
 			Gtk.Table table = (Gtk.Table)Parent;
+			if (table == null)
+				return;
 			if (icon != null)
 				table.Remove (icon);
 			if (label != null)

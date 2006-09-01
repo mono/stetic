@@ -9,7 +9,7 @@
 			description="Name of the member to which this widget is bound." />
 		<property name="WidthRequest" min="-1" />
 		<property name="HeightRequest" min="-1" />
-		<property name="Visible" glade-override="true" />
+		<property name="Visible" glade-override="true" default="true"/>
 		<property name="Sensitive" glade-override="true" />
 		<property name="Tooltip" label="Tooltip" glade-name="tooltip"
 			  description="Tooltip for this widget"
