@@ -7,7 +7,7 @@ namespace Stetic {
 
 	internal class EmbedWindow
 	{
-		public static WidgetDesigner Wrap (Gtk.Container container, int designWidth, int designHeight)
+		public static WidgetDesignerBackend Wrap (Gtk.Container container, int designWidth, int designHeight)
 		{
 			Window window = container as Gtk.Window;
 			
@@ -18,11 +18,11 @@ namespace Stetic {
 				window.WidgetFlags &= ~(WidgetFlags.Toplevel);
 				window.SizeAllocated += new SizeAllocatedHandler (OnSizeAllocated);
 				window.Realized += new EventHandler (OnRealized);
-				WidgetDesigner prev = new WidgetDesigner (container, designWidth, designHeight);
+				WidgetDesignerBackend prev = new WidgetDesignerBackend (container, designWidth, designHeight);
 				prev.Title = window.Title;
 				return prev;
 			} else
-				return new WidgetDesigner (container, designWidth, designHeight);
+				return new WidgetDesignerBackend (container, designWidth, designHeight);
 		}
 
 		static private void OnSizeAllocated (object obj, SizeAllocatedArgs args)

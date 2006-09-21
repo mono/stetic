@@ -4,7 +4,7 @@ using Gtk;
 
 namespace Stetic
 {
-	public class WidgetTreeCombo: Button
+	internal class WidgetTreeCombo: Button
 	{
 		Label label;
 		Image image;

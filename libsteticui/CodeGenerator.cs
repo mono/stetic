@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Stetic
 {
-	public static class CodeGenerator
+	internal static class CodeGenerator
 	{
 		static CodeExpression bindingFlags;
 		
@@ -26,12 +26,10 @@ namespace Stetic
 			);		
 		}
 	
-		public static void GenerateProjectCode (string file, string namespaceName, CodeDomProvider provider, params Project[] projects)
+		public static void GenerateProjectCode (string file, string namespaceName, CodeDomProvider provider, GenerationOptions options, params ProjectBackend[] projects)
 		{
 			CodeCompileUnit cunit = new CodeCompileUnit ();
-			CodeNamespace cns = new CodeNamespace (namespaceName);
-			cunit.Namespaces.Add (cns);
-			GenerateProjectCode (cns, projects);
+			cunit.Namespaces.Add (GenerateProjectCode (namespaceName, options, projects));
 			
 			ICodeGenerator gen = provider.CreateGenerator ();
 			StreamWriter fileStream = new StreamWriter (file);
@@ -42,13 +40,17 @@ namespace Stetic
 			}
 		}
 		
-		public static void GenerateProjectCode (CodeNamespace cns, params Project[] projects)
+		public static CodeNamespace GenerateProjectCode (string namespaceName, GenerationOptions options, params ProjectBackend[] projects)
 		{
-			GenerateProjectGuiCode (cns, projects);
-			GenerateProjectActionsCode (cns, projects);
+			if (options == null)
+				options = new GenerationOptions ();
+			CodeNamespace cns = new CodeNamespace (namespaceName);
+			GenerateProjectGuiCode (cns, options, projects);
+			GenerateProjectActionsCode (cns, options, projects);
+			return cns;
 		}
 		
-		static void GenerateProjectGuiCode (CodeNamespace cns, params Project[] projects)
+		static void GenerateProjectGuiCode (CodeNamespace cns, GenerationOptions options, params ProjectBackend[] projects)
 		{
 			bool multiProject = projects.Length > 1;
 			
@@ -65,7 +67,7 @@ namespace Stetic
 			initMethod.Name = "Initialize";
 			initMethod.ReturnType = new CodeTypeReference (typeof(void));
 			initMethod.Attributes = MemberAttributes.Private | MemberAttributes.Static;
-			GeneratorContext initContext = new ProjectGeneratorContext (cns, initMethod.Statements);
+			GeneratorContext initContext = new ProjectGeneratorContext (cns, initMethod.Statements, options);
 			
 			// Build method overload that takes a type as parameter.
 			
@@ -123,7 +125,7 @@ namespace Stetic
 			
 			// Generate code for each project
 			
-			foreach (Project gp in projects) {
+			foreach (ProjectBackend gp in projects) {
 			
 				CodeStatementCollection widgetCol;
 				
@@ -164,7 +166,7 @@ namespace Stetic
 					varDec.InitExpression = new CodeCastExpression (wwidget.ClassDescriptor.WrappedTypeName, cobj);
 					cond.TrueStatements.Add (varDec);
 
-					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (cns, w, "cobj", cond.TrueStatements);
+					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (cns, w, "cobj", cond.TrueStatements, options);
 					
 					CodeVariableReferenceExpression targetObjectVar = new CodeVariableReferenceExpression ("cobj");
 					BindSignalHandlers (targetObjectVar, wwidget, map, cond.TrueStatements);
@@ -187,7 +189,7 @@ namespace Stetic
 					varDec.InitExpression = new CodeCastExpression ("Gtk.ActionGroup", cobj);
 					cond.TrueStatements.Add (varDec);
 					
-					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (cns, agroup, "cobj", cond.TrueStatements);
+					Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (cns, agroup, "cobj", cond.TrueStatements, options);
 					
 					CodeVariableReferenceExpression targetObjectVar = new CodeVariableReferenceExpression ("cobj");
 					foreach (Wrapper.Action ac in agroup.Actions)
@@ -352,7 +354,7 @@ namespace Stetic
 			
 		}
 		
-		static void GenerateProjectActionsCode (CodeNamespace cns, params Project[] projects)
+		static void GenerateProjectActionsCode (CodeNamespace cns, GenerationOptions options, params ProjectBackend[] projects)
 		{
 			bool multiProject = projects.Length > 1;
 			
@@ -404,7 +406,7 @@ namespace Stetic
 			CodeStatementCollection projectCol = met.Statements;
 			int n=1;
 			
-			foreach (Project gp in projects) {
+			foreach (ProjectBackend gp in projects) {
 			
 				CodeStatementCollection widgetCol;
 				
@@ -465,20 +467,20 @@ namespace Stetic
 			}
 		}
 		
-		public static WidgetMap GenerateCreationCode (CodeNamespace cns, Gtk.Widget w, string widgetVarName, CodeStatementCollection statements)
+		public static WidgetMap GenerateCreationCode (CodeNamespace cns, Gtk.Widget w, string widgetVarName, CodeStatementCollection statements, GenerationOptions options)
 		{
 			statements.Add (new CodeCommentStatement ("Widget " + w.Name));
-			GeneratorContext ctx = new ProjectGeneratorContext (cns, statements);
+			GeneratorContext ctx = new ProjectGeneratorContext (cns, statements, options);
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (w);
 			ctx.GenerateCreationCode (ww, widgetVarName);
 			ctx.EndGeneration ();
 			return ctx.WidgetMap;
 		}
 		
-		public static WidgetMap GenerateCreationCode (CodeNamespace cns, Wrapper.ActionGroup grp, string groupVarName, CodeStatementCollection statements)
+		public static WidgetMap GenerateCreationCode (CodeNamespace cns, Wrapper.ActionGroup grp, string groupVarName, CodeStatementCollection statements, GenerationOptions options)
 		{
 			statements.Add (new CodeCommentStatement ("Action group " + grp.Name));
-			GeneratorContext ctx = new ProjectGeneratorContext (cns, statements);
+			GeneratorContext ctx = new ProjectGeneratorContext (cns, statements, options);
 			ctx.GenerateCreationCode (grp, groupVarName);
 			ctx.EndGeneration ();
 			return ctx.WidgetMap;
@@ -487,7 +489,7 @@ namespace Stetic
 	
 	class ProjectGeneratorContext: GeneratorContext
 	{
-		public ProjectGeneratorContext (CodeNamespace cns, CodeStatementCollection statements): base (cns, "w", statements)
+		public ProjectGeneratorContext (CodeNamespace cns, CodeStatementCollection statements, GenerationOptions options): base (cns, "w", statements, options)
 		{
 		}
 		

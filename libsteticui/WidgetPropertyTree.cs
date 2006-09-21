@@ -1,119 +1,23 @@
 
 using System;
+using Gtk;
 
 namespace Stetic
 {
-	public class WidgetPropertyTree: PropertyTree, IObjectViewer
+	public class WidgetPropertyTree: PluggableWidget
 	{
-		Project project;
-		Stetic.ObjectWrapper selection;
-		Stetic.ObjectWrapper newSelection;
-		Stetic.Wrapper.Container.ContainerChild packingSelection;
-		
-		public WidgetPropertyTree (): this (null)
+		internal WidgetPropertyTree (Application app): base (app)
 		{
-			WidgetDesigner.DefaultPropertyViewer = this;
 		}
 		
-		public WidgetPropertyTree (Project project)
+		protected override void OnCreatePlug (uint socketId)
 		{
-			WidgetDesigner.DefaultPropertyViewer = this;
-			Stetic.Registry.RegistryChanging += new EventHandler (OnRegistryChanging);
-			Project = project;
-		}
-
-		public Project Project {
-			get { return project; }
-			set {
-				if (project != null)
-					project.SelectionChanged -= Selected;
-					
-				project = value;
-				if (project != null)
-					project.SelectionChanged += Selected;
-				
-				newSelection = null;
-				Selected (null, null);
-			}
+			app.Backend.CreatePropertiesWidgetPlug (socketId);
 		}
 		
-		public override void Clear ()
+		protected override Gtk.Widget OnCreateWidget ()
 		{
-			base.Clear ();
-			Wrapper.Widget selWidget = selection as Wrapper.Widget;
-			if (selWidget != null)
-				selWidget.Notify -= Notified;
-			if (packingSelection != null)
-				packingSelection.Notify -= Notified;
-		}
-		
-		protected override void OnObjectChanged ()
-		{
-			if (selection != null)
-				selection.NotifyChanged ();
-		}
-		
-		public object TargetObject {
-			get { return selection.Wrapped; }
-			set {
-				newSelection = ObjectWrapper.Lookup (value);
-				if (newSelection != null)
-					GLib.Timeout.Add (50, new GLib.TimeoutHandler (SelectedHandler));
-				else
-					SelectedHandler ();
-			}
-		}
-		
-		void Selected (object s, Wrapper.WidgetEventArgs args)
-		{
-			TargetObject = args != null && args.Widget != null? args.Widget : null;
-		}
-		
-		bool SelectedHandler ()
-		{
-			SaveStatus ();
-			
-			Clear ();
-			
-			selection = newSelection;
-			if (selection == null || selection.Wrapped is ErrorWidget) {
-				return false;
-			}
-
-			Wrapper.Widget selWidget = selection as Wrapper.Widget;
-			if (selWidget != null) {
-				selWidget.Notify += Notified;
-			
-				PropertyDescriptor name = (PropertyDescriptor)Registry.LookupClassByName ("Gtk.Widget") ["Name"];
-				AppendProperty (name, selection.Wrapped);
-			}
-
-			AddProperties (selection.ClassDescriptor.ItemGroups, selection.Wrapped);
-			
-			if (selWidget != null) {
-				packingSelection = Stetic.Wrapper.Container.ChildWrapper (selWidget);
-				if (packingSelection != null) {
-					ClassDescriptor childklass = packingSelection.ClassDescriptor;
-					if (childklass.ItemGroups.Count > 0) {
-						AddProperties (childklass.ItemGroups, packingSelection.Wrapped);
-						packingSelection.Notify += Notified;
-					}
-				}
-			}
-			
-			RestoreStatus ();
-			return false;
-		}
-		
-		void Notified (object wrapper, string propertyName)
-		{
-			Update ();
-		}
-		
-		void OnRegistryChanging (object o, EventArgs args)
-		{
-			Clear ();
+			return app.Backend.GetPropertiesWidget ();
 		}
 	}
-	
 }

@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace Stetic {
 
-	public static class Clipboard {
+	internal static class Clipboard {
 
 		const int SteticType = 0;
 		const int TextType = 1;

@@ -2,13 +2,14 @@
 using System;
 using System.Collections;
 using Gtk;
+using Mono.Unix;
 
 namespace Stetic
 {
 	
-	public class WidgetActionBar: Gtk.Toolbar
+	internal class WidgetActionBar: Gtk.Toolbar
 	{
-		Project project;
+		ProjectBackend project;
 		Stetic.Wrapper.Widget rootWidget;
 		WidgetTreeCombo combo;
 		ToolItem comboItem;
@@ -19,9 +20,13 @@ namespace Stetic
 		ArrayList toggles;
 		Gtk.Tooltips tips = new Gtk.Tooltips ();
 		bool updating;
+		bool allowBinding;
+		WidgetDesignerFrontend frontend;
 		
-		public WidgetActionBar (Stetic.Wrapper.Widget rootWidget)
+		public WidgetActionBar (WidgetDesignerFrontend frontend, Stetic.Wrapper.Widget rootWidget)
 		{
+			this.frontend = frontend;
+			
 			editors = new Hashtable ();
 			wrappers = new Hashtable ();
 			sensitives = new Hashtable ();
@@ -51,6 +56,11 @@ namespace Stetic
 			base.Dispose ();
 		}
 		
+		public bool AllowWidgetBinding {
+			get { return allowBinding; }
+			set { allowBinding = value; }
+		}
+		
 		public Stetic.Wrapper.Widget RootWidget {
 			get { return rootWidget; }
 			set {
@@ -63,7 +73,8 @@ namespace Stetic
 				combo.RootWidget = rootWidget;
 				
 				if (rootWidget != null) {
-					project = (Stetic.Project) rootWidget.Project;
+					project = (Stetic.ProjectBackend) rootWidget.Project;
+					UpdateSelection (Wrapper.Widget.Lookup (project.Selection));
 					project.SelectionChanged += new Wrapper.WidgetEventHandler (OnSelectionChanged);
 				}
 			}
@@ -96,8 +107,13 @@ namespace Stetic
 		
 		void OnSelectionChanged (object s, Wrapper.WidgetEventArgs args)
 		{
+			UpdateSelection (args.WidgetWrapper);
+		}
+		
+		void UpdateSelection (Wrapper.Widget w)
+		{
 			Clear ();
-			selection = args.WidgetWrapper;
+			selection = w;
 			
 			if (selection == null) {
 				combo.SetSelection (null);
@@ -107,7 +123,6 @@ namespace Stetic
 			// Look for the root widget, and only update the bar if the selected
 			// widget is a child of the root widget
 			
-			Stetic.Wrapper.Widget w = selection;
 			while (w != null && !w.IsTopLevel) {
 				w = Stetic.Wrapper.Container.LookupParent ((Gtk.Widget) w.Wrapped);
 			}
@@ -127,6 +142,14 @@ namespace Stetic
 		
 		protected virtual void AddWidgetCommands (ObjectWrapper wrapper)
 		{
+			if (allowBinding && wrapper != RootWidget) {
+				// Show the Bind to Field button only for children of the root container.
+				ToolButton bindButton = new ToolButton (null, Catalog.GetString ("Bind to Field"));
+				bindButton.IsImportant = true;
+				bindButton.Clicked += delegate { frontend.NotifyBindField (); };
+				bindButton.Show ();
+				Insert (bindButton, -1);
+			}
 			AddCommands (wrapper);
 		}
 		

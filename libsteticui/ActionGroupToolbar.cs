@@ -6,7 +6,7 @@ using Mono.Unix;
 
 namespace Stetic
 {
-	public class ActionGroupToolbar: Gtk.Toolbar
+	internal class ActionGroupToolbar: Gtk.Toolbar
 	{
 		Wrapper.ActionGroupCollection actionGroups;
 		Gtk.ComboBox combo;
@@ -14,25 +14,36 @@ namespace Stetic
 		ActionGroup currentGroup;
 		ArrayList internalButtons = new ArrayList ();
 		bool singleGroupMode;
+		bool allowBinding;
+		ActionGroupDesignerFrontend frontend;
 		
-		public ActionGroupToolbar (bool singleGroupMode)
+		public event ActionGroupEventHandler ActiveGroupChanged;
+		public event ActionGroupEventHandler ActiveGroupCreated;
+		
+		public ActionGroupToolbar (ActionGroupDesignerFrontend frontend, bool singleGroupMode)
 		{
-			Initialize (null, singleGroupMode);
+			Initialize (frontend, null, singleGroupMode);
 		}
 		
-		public ActionGroupToolbar (Wrapper.ActionGroup actionGroup)
+		public ActionGroupToolbar (ActionGroupDesignerFrontend frontend, Wrapper.ActionGroup actionGroup)
 		{
 			currentGroup = actionGroup;
-			Initialize (null, true);
+			Initialize (frontend, null, true);
 		}
 		
-		public ActionGroupToolbar (Wrapper.ActionGroupCollection actionGroups)
+		public ActionGroupToolbar (ActionGroupDesignerFrontend frontend, Wrapper.ActionGroupCollection actionGroups)
 		{
-			Initialize (actionGroups, false);
+			Initialize (frontend, actionGroups, false);
 		}
 		
-		void Initialize (Wrapper.ActionGroupCollection actionGroups, bool singleGroupMode)
+		public bool AllowActionBinding {
+			get { return allowBinding; }
+			set { allowBinding = value; }
+		}
+		
+		void Initialize (ActionGroupDesignerFrontend frontend, Wrapper.ActionGroupCollection actionGroups, bool singleGroupMode)
 		{
+			this.frontend = frontend;
 			this.singleGroupMode = singleGroupMode;
 			IconSize = Gtk.IconSize.SmallToolbar;
 			Orientation = Gtk.Orientation.Horizontal;
@@ -224,9 +235,16 @@ namespace Stetic
 		
 		protected virtual void AddActionCommands (Action action)
 		{
+			if (allowBinding) {
+				Gtk.ToolButton bindButton = new Gtk.ToolButton (null, Catalog.GetString ("Bind to Field"));
+				bindButton.IsImportant = true;
+				bindButton.Show ();
+				Insert (bindButton, -1);
+				if (action == null)
+					bindButton.Sensitive = false;
+					
+				bindButton.Clicked += delegate { frontend.NotifyBindField (); };
+			}
 		}
-		
-		public event ActionGroupEventHandler ActiveGroupChanged;
-		public event ActionGroupEventHandler ActiveGroupCreated;
 	}
 }

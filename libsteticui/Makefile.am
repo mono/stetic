@@ -8,27 +8,50 @@ libsteticui_dll_sources =			\
 	Metacity/ObjectManager.cs \
 	Metacity/Preview.cs \
 	Metacity/Theme.cs \
-	ActionGroupToolbar.cs \
+	ActionComponent.cs \
+	ActionGroupComponent.cs \
 	ActionGroupDesigner.cs \
+	ActionGroupDesignerBackend.cs \
+	ActionGroupEditSession.cs \
+	ActionGroupToolbar.cs \
+	Application.cs			\
+	ApplicationBackend.cs			\
+	ApplicationBackendController.cs \
 	Clipboard.cs			\
-	CodeGenerator.cs			\
 	ContextMenu.cs			\
+	Component.cs			\
+	ComponentEventHandler.cs			\
+	ComponentSignalEventHandler.cs			\
+	ComponentType.cs			\
+	CodeGenerator.cs			\
 	EmbedWindow.cs		\
 	Glade.cs			\
 	Grid.cs				\
+	GuiDispatchServerSink.cs \
+	GuiDispatchServerSinkProvider.cs \
+	NoGuiDispatchAttribute.cs \
 	Palette.cs			\
-	WidgetDesigner.cs		\
+	PaletteBackend.cs			\
+	PluggableWidget.cs			\
 	Project.cs			\
+	ProjectBackend.cs			\
 	ProjectView.cs			\
+	ProjectViewBackend.cs			\
 	PropertyEditor.cs		\
 	Shadow.cs				\
 	SignalsEditor.cs		\
+	SignalsEditorBackend.cs		\
 	PropertyGrid.cs			\
 	PropertyTree.cs			\
 	UserInterface.cs		\
 	WidgetActionBar.cs		\
+	WidgetComponent.cs			\
+	WidgetDesigner.cs		\
+	WidgetDesignerBackend.cs		\
+	WidgetEditSession.cs		\
 	WidgetFactory.cs		\
 	WidgetPropertyTree.cs	\
+	WidgetPropertyTreeBackend.cs	\
 	WidgetTreeCombo.cs
 
 libsteticui_dll_resources =		\
@@ -39,7 +62,7 @@ libsteticui.dll: $(libsteticui_dll_sources) $(libsteticui_dll_resources)
 	@rm -f sources.rsp
 	@echo $(libsteticui_dll_sources:%=$(srcdir)/%) > sources.rsp
 	@for resource in $(libsteticui_dll_resources); do echo -resource:$$resource,`basename $$resource` >> sources.rsp; done
-	$(MCS) -debug -unsafe -r:Mono.Posix -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -r:../libstetic/libstetic.dll -target:library -out:$@ @sources.rsp
+	$(MCS) -debug -unsafe -main:Stetic.ApplicationBackend -r:Mono.Posix -r:System.Runtime.Remoting -pkg:gnome-sharp-2.0 -pkg:gconf-sharp-2.0 -r:../libstetic/libstetic.dll -out:$@ @sources.rsp
 
 CLEANFILES = libsteticui.dll libsteticui.dll.mdb sources.rsp
 

@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Stetic {
 
-	public class PropertyGrid : Gtk.VBox {
+	internal class PropertyGrid : Gtk.VBox {
 
 		Hashtable cachedGroups = new Hashtable ();
 
@@ -17,7 +17,7 @@ namespace Stetic {
 		PropertyGridHeader header;
 		Gtk.Widget noSelection;
 		
-		Project project;
+		ProjectBackend project;
 
 		public PropertyGrid ()
 		{
@@ -33,9 +33,9 @@ namespace Stetic {
 			Stetic.Registry.RegistryChanging += new EventHandler (OnRegistryChanging);
 		}
 		
-		public PropertyGrid (Project project): this ()
+		public PropertyGrid (ProjectBackend project): this ()
 		{
-			this.Project = project;
+			this.ProjectBackend = project;
 		}
 		
 		public override void Dispose ()
@@ -52,7 +52,7 @@ namespace Stetic {
 					Remove (w);
 		}
 
-		public Project Project {
+		public ProjectBackend ProjectBackend {
 			get { return project; }
 			set {
 				if (project != null)

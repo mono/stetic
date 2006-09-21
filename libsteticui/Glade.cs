@@ -9,9 +9,9 @@ using Gtk;
 
 namespace Stetic {
 
-	public static class GladeFiles {
+	internal static class GladeFiles {
 
-		public static void Import (Project project, string filename)
+		public static void Import (ProjectBackend project, string filename)
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
@@ -31,7 +31,7 @@ namespace Stetic {
 			}
 		}
 
-		public static void Export (Project project, string filename)
+		public static void Export (ProjectBackend project, string filename)
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;

@@ -9,7 +9,7 @@ namespace Stetic {
 	// This is the base class for palette items. Implements the basic
 	// functionality for showing the icon and label of the item.
 	
-	public class PaletteItemFactory : EventBox 
+	internal class PaletteItemFactory : EventBox 
 	{
 		public PaletteItemFactory ()
 		{
@@ -72,12 +72,12 @@ namespace Stetic {
 
 
 	// Palette item factory which creates a widget.
-	public class WidgetFactory : PaletteItemFactory {
+	internal class WidgetFactory : PaletteItemFactory {
 
-		protected Project project;
+		protected ProjectBackend project;
 		protected ClassDescriptor klass;
 
-		public WidgetFactory (Project project, ClassDescriptor klass)
+		public WidgetFactory (ProjectBackend project, ClassDescriptor klass)
 		{
 			this.project = project;
 			this.klass = klass;
@@ -92,9 +92,9 @@ namespace Stetic {
 		}
 	}
 
-	public class WindowFactory : WidgetFactory
+	internal class WindowFactory : WidgetFactory
 	{
-		public WindowFactory (Project project, ClassDescriptor klass) : base (project, klass) 
+		public WindowFactory (ProjectBackend project, ClassDescriptor klass) : base (project, klass) 
 		{
 		}
 
@@ -113,7 +113,7 @@ namespace Stetic {
 	}
 	
 	// Palette item factory which allows dragging an already existing object.
-	public class InstanceWidgetFactory : PaletteItemFactory 
+	internal class InstanceWidgetFactory : PaletteItemFactory 
 	{
 		Gtk.Widget instance;
 		
