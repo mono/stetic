@@ -12,6 +12,7 @@ namespace Stetic
 		void RemoveResource (string resourceName);
 	}
 	
+	[Serializable]
 	public class ResourceInfo
 	{
 		string name;

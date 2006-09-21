@@ -18,9 +18,7 @@ namespace Stetic.Editor {
 			PackStart (entry, true, true, 0);
 			entry.Changed += entry_Changed;
 
-			button = new Gtk.Button ();
-			Gtk.Image icon = new Gtk.Image (Gtk.IconTheme.Default.LoadIcon ("stock_symbol-selection", 16, 0));
-			button.Add (icon);
+			button = new Gtk.Button ("...");
 			PackStart (button, false, false, 0);
 			button.Clicked += button_Clicked;
 		}

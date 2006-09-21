@@ -4,6 +4,7 @@ using System.Xml;
 
 namespace Stetic
 {
+	[Serializable]
 	public abstract class SignalDescriptor: ItemDescriptor
 	{
 		protected string name, label, description;

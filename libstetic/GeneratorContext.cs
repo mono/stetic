@@ -14,12 +14,14 @@ namespace Stetic
 		ArrayList generatedWrappers = new ArrayList ();
 		WidgetMap map;
 		CodeStatementCollection statements;
+		GenerationOptions options;
 		
-		public GeneratorContext (CodeNamespace cns, string idPrefix, CodeStatementCollection statements)
+		public GeneratorContext (CodeNamespace cns, string idPrefix, CodeStatementCollection statements, GenerationOptions options)
 		{
 			this.cns = cns;
 			this.idPrefix = idPrefix;
 			this.statements = statements;
+			this.options = options;
 			map = new WidgetMap (vars, widgets);
 		}
 		
@@ -29,6 +31,10 @@ namespace Stetic
 		
 		public CodeStatementCollection Statements {
 			get { return statements; }
+		}
+		
+		public GenerationOptions Options {
+			get { return options; }
 		}
 		
 		public string NewId ()
@@ -69,6 +75,11 @@ namespace Stetic
 		}
 		
 		public CodeExpression GenerateValue (object value, Type type)
+		{
+			return GenerateValue (value, type, false);
+		}
+		
+		public CodeExpression GenerateValue (object value, Type type, bool translatable)
 		{
 			if (value == null)
 				return new CodePrimitiveExpression (value);
@@ -125,7 +136,7 @@ namespace Stetic
 			if (value is Array) {
 				ArrayList list = new ArrayList ();
 				foreach (object val in (Array)value)
-					list.Add (GenerateValue (val, val != null ? val.GetType() : null));
+					list.Add (GenerateValue (val, val != null ? val.GetType() : null, translatable));
 				return new CodeArrayCreateExpression (value.GetType().GetElementType(), (CodeExpression[]) list.ToArray(typeof(CodeExpression)));
 			}
 			
@@ -140,6 +151,14 @@ namespace Stetic
 				return new CodeObjectCreateExpression (
 					typeof(TimeSpan),
 					new CodePrimitiveExpression (((TimeSpan)value).Ticks)
+				);
+			}
+			
+			if (value is string && translatable && options.UseGettext) {
+				return new CodeMethodInvokeExpression (
+					new CodeTypeReferenceExpression (typeof(Mono.Unix.Catalog)),
+					"GetString",
+					new CodePrimitiveExpression (value)
 				);
 			}
 			
@@ -196,6 +215,17 @@ namespace Stetic
 		public ObjectWrapper GetWidgetFromId (string widgetId)
 		{
 			return (ObjectWrapper) widgets [widgetId];
+		}
+	}
+	
+	[Serializable]
+	public class GenerationOptions
+	{
+		bool useGettext;
+		
+		public bool UseGettext {
+			get { return useGettext; }
+			set { useGettext = value; }
 		}
 	}
 }

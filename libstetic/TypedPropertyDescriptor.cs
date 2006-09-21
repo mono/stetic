@@ -181,7 +181,7 @@ namespace Stetic
 					obj = memberInfo.GetValue (obj, null);
 				return propertyInfo.GetValue (obj, null);
 			} catch (Exception ex) {
-				throw new InvalidOperationException ("Could not get value for property " + klass.Name + "." + Name + " from object '" + obj + "'"); 
+				throw new InvalidOperationException ("Could not get value for property " + klass.Name + "." + Name + " from object '" + obj + "'", ex); 
 			}
 		}
 
@@ -202,7 +202,7 @@ namespace Stetic
 					obj = memberInfo.GetValue (obj, null);
 				propertyInfo.SetValue (obj, value, null);
 			} catch (Exception ex) {
-				throw new InvalidOperationException ("Could not set value for property " + klass.Name + "." + Name + " to object '" + obj + "'"); 
+				throw new InvalidOperationException ("Could not set value for property " + klass.Name + "." + Name + " to object '" + obj + "'", ex); 
 			}
 		}
 

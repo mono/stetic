@@ -275,8 +275,6 @@ namespace Stetic.Wrapper
 			
 			CodeExpression wexp = new CodeVariableReferenceExpression ("w");
 			
-			CodeIterationStatement iter = new CodeIterationStatement ();
-			
 			cond.TrueStatements.Add (
 				new CodeAssignStatement (
 					wexp,

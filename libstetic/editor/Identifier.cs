@@ -8,8 +8,6 @@ namespace Stetic.Editor
 {
 	public class Identifier: Gtk.Entry, IPropertyEditor
 	{
-		PropertyDescriptor prop;
-		object obj;
 		string id;
 		int min = -1;
 		int max = -1;

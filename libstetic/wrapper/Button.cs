@@ -313,7 +313,7 @@ namespace Stetic.Wrapper {
 			
 			if (Type != ButtonType.TextAndIcon) {
 				CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (new CodeVariableReferenceExpression (varName), "Label");
-				CodeExpression val = ctx.GenerateValue (button.Label, typeof(string));
+				CodeExpression val = ctx.GenerateValue (button.Label, typeof(string), true);
 				ctx.Statements.Add (new CodeAssignStatement (cprop, val));
 			}
 		}

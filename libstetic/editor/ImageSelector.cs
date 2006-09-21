@@ -113,9 +113,7 @@ namespace Stetic.Editor
 			clearButton.Clicked += OnClearImage;
 			PackStart (clearButton, false, false, 0);
 
-			button = new Gtk.Button ();
-			Gtk.Image icon = new Gtk.Image (Gtk.IconTheme.Default.LoadIcon ("stock_symbol-selection", 16, 0));
-			button.Add (icon);
+			button = new Gtk.Button ("...");
 			PackStart (button, false, false, 0);
 			button.Clicked += button_Clicked;
 			ShowAll ();

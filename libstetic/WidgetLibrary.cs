@@ -15,6 +15,21 @@ namespace Stetic
 		
 		public event EventHandler Changed;
 		
+		public abstract string Name { get; }
+		
+		public virtual bool NeedsReload {
+			get { return false; }
+		}
+		
+		public virtual bool CanReload {
+			get { return false; }
+		}
+		
+		public virtual void Reload ()
+		{
+			Load ();
+		}
+
 		public virtual void Load ()
 		{
 		}

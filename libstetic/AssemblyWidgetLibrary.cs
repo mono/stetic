@@ -7,15 +7,48 @@ namespace Stetic
 	public class AssemblyWidgetLibrary: WidgetLibrary
 	{
 		Assembly assembly;
+		DateTime timestamp;
+		string name;
 		
-		public AssemblyWidgetLibrary (Assembly assembly)
+		public AssemblyWidgetLibrary (string name, Assembly assembly)
 		{
+			this.name = name;
 			this.assembly = assembly;
+			timestamp = System.IO.File.GetLastWriteTime (assembly.Location);
 		}
 		
 		public AssemblyWidgetLibrary (string assemblyPath)
 		{
-			assembly = Assembly.LoadFrom (assemblyPath);
+			this.name = assemblyPath;
+			if (assemblyPath.EndsWith (".dll") || assemblyPath.EndsWith (".exe"))
+				assembly = Assembly.LoadFrom (assemblyPath);
+			else
+				assembly = Assembly.Load (assemblyPath);
+			timestamp = System.IO.File.GetLastWriteTime (assembly.Location);
+		}
+		
+		public override string Name {
+			get { return name; }
+		}
+		
+		public override bool NeedsReload {
+			get {
+				if (!System.IO.File.Exists (assembly.Location))
+					return false;
+				return System.IO.File.GetLastWriteTime (assembly.Location) != timestamp;
+			}
+		}
+		
+		public override bool CanReload {
+			get { return false; }
+		}
+		
+		public Assembly Assembly {
+			get { return assembly; }
+		}
+		
+		public DateTime TimeStamp {
+			get { return timestamp; }
 		}
 		
 		public override void Load ()
@@ -41,12 +74,16 @@ namespace Stetic
 			if (t != null) return t;
 			
 			// Look in referenced assemblies
+/*
+			Disabled. The problem is that Assembly.Load tries to load the exact version
+			of the assembly, and loaded references may not have the same exact version.
 			
 			foreach (AssemblyName an in assembly.GetReferencedAssemblies ()) {
 				Assembly a = Assembly.Load (an);
 				t = a.GetType (typeName);
 				if (t != null) return t;
 			}
+*/
 			return null;
 		}
 		

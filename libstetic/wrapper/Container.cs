@@ -376,7 +376,7 @@ namespace Stetic.Wrapper {
 				return;
 				
 			CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (var, prop.Name);
-			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType);
+			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType, prop.Translatable);
 			ctx.Statements.Add (new CodeAssignStatement (cprop, val));
 		}
 		
@@ -646,7 +646,7 @@ namespace Stetic.Wrapper {
 					while (w != null && !w.CanFocus) {
 						w = w.Parent;
 					}
-					Widget wr = Widget.Lookup (widget);
+					Widget wr = Widget.Lookup (w);
 					
 					if (wr != null) {
 						// This flags avoids calling Select() again

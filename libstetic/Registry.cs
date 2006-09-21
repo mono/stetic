@@ -18,7 +18,7 @@ namespace Stetic {
 
 		static Registry ()
 		{
-			coreLib = new AssemblyWidgetLibrary (Assembly.GetExecutingAssembly ());
+			coreLib = new AssemblyWidgetLibrary (typeof(Registry).Assembly.FullName, Assembly.GetExecutingAssembly ());
 			RegisterWidgetLibrary (coreLib);
 		}
 		
@@ -30,12 +30,17 @@ namespace Stetic {
 		{
 			NotifyChanging ();
 			
-			libraries.Add (library);
-			library.Load ();
-			classes.AddRange (library.AllClasses);
-			UpdateGladeTransform ();
-			
-			NotifyChanged ();
+			try {
+				libraries.Add (library);
+				library.Load ();
+				classes.AddRange (library.AllClasses);
+				UpdateGladeTransform ();
+			} catch (Exception ex) {
+				Console.WriteLine (ex);
+				throw;
+			} finally {
+				NotifyChanged ();
+			}
 		}
 
 		public static void UnregisterWidgetLibrary (WidgetLibrary library)
@@ -51,21 +56,45 @@ namespace Stetic {
 			NotifyChanged ();
 		}
 		
-		public static void ReloadWidgetLibrary (WidgetLibrary library)
+		
+		// Returns true if all libraries that need reloading
+		// could be reloaded
+		
+		public static bool ReloadWidgetLibraries ()
 		{
-			NotifyChanging ();
+			bool res = true;
+			bool changing = false;
 
 			foreach (WidgetLibrary lib in libraries)
-				if (lib != coreLib)
-					lib.Load ();
+				if (lib != coreLib && lib.NeedsReload) {
+					if (!changing) {
+						changing = true;
+						NotifyChanging ();
+					}
+					if (!lib.CanReload)
+						res = false;
+					else
+						lib.Reload ();
+				}
 
-			InternalUpdate ();
-			NotifyChanged ();
+			if (changing) {
+				InternalUpdate ();
+				NotifyChanged ();
+			}
+			return res;
 		}
 		
 		public static bool IsRegistered (WidgetLibrary library)
 		{
 			return libraries.Contains (library);
+		}
+		
+		public static bool IsRegistered (string name)
+		{
+			foreach (WidgetLibrary lib in libraries)
+				if (lib.Name == name)
+					return true;
+			return false;
 		}
 		
 		public static WidgetLibrary[] RegisteredWidgetLibraries {

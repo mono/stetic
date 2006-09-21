@@ -2079,11 +2079,11 @@
 		<property name="Accelerator" editor="Stetic.Editor.Accelerator" />
 		<property name="HideIfEmpty" />
 		<property name="IsImportant" />
-		<property name="Label" />
+		<property name="Label" translatable="true"/>
 		<property name="Sensitive" />
-		<property name="ShortLabel" default=""/>
+		<property name="ShortLabel" default="" translatable="true"/>
 		<property name="StockId" editor="Stetic.Editor.StockItem"/>
-		<property name="Tooltip" />
+		<property name="Tooltip" translatable="true"/>
 		<property name="Visible" />
 		<property name="VisibleHorizontal" />
 		<property name="VisibleVertical" />

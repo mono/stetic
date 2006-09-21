@@ -1,11 +1,16 @@
 
+using System;
+
 namespace Stetic
 {
+	[Serializable]
 	public class Signal
 	{
 		SignalDescriptor descriptor;
 		string handlerName;
 		bool after;
+		
+		[NonSerialized]
 		internal ObjectWrapper Owner;
 		
 		public Signal (SignalDescriptor descriptor): this (descriptor, null, false)

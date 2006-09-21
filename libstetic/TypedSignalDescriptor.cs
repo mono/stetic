@@ -4,10 +4,9 @@ using System.Xml;
 
 namespace Stetic
 {
+	[Serializable]
 	public class TypedSignalDescriptor: SignalDescriptor
 	{
-		EventInfo eventInfo;
-		MethodInfo handler;
 		string gladeName;
 		
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
@@ -16,8 +15,8 @@ namespace Stetic
 		{
 			Load (elem);
 
-			eventInfo = FindEvent (klass.WrapperType, klass.WrappedType, name);
-			handler = eventInfo.EventHandlerType.GetMethod ("Invoke");
+			EventInfo eventInfo = FindEvent (klass.WrapperType, klass.WrappedType, name);
+			MethodInfo handler = eventInfo.EventHandlerType.GetMethod ("Invoke");
 			
 			if (elem.HasAttribute ("glade-name"))
 				gladeName = elem.GetAttribute ("glade-name");

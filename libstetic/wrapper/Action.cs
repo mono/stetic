@@ -7,7 +7,7 @@ using System.Collections;
 
 namespace Stetic.Wrapper
 {
-	public class Action: Stetic.Wrapper.Object
+	public sealed class Action: Stetic.Wrapper.Object
 	{
 		ActionType type;
 		bool drawAsRadio;
@@ -230,7 +230,7 @@ namespace Stetic.Wrapper
 			Gdk.Pixbuf px = Project.IconFactory.RenderIcon (Project, GtkAction.StockId, size);
 			if (px != null)
 				return px;
-			
+
 			Gtk.IconSet iset = Gtk.IconFactory.LookupDefault (GtkAction.StockId);
 			if (iset == null)
 				iset = Gtk.IconFactory.LookupDefault (Gtk.Stock.MissingImage);
@@ -247,13 +247,13 @@ namespace Stetic.Wrapper
 			prop = (PropertyDescriptor) ClassDescriptor ["Label"];
 			string lab = (string) prop.GetValue (Wrapped);
 			if (lab == "") lab = null;
-			exp.Parameters.Add (ctx.GenerateValue (lab, prop.RuntimePropertyType));
+			exp.Parameters.Add (ctx.GenerateValue (lab, prop.RuntimePropertyType, prop.Translatable));
 			
 			prop = (PropertyDescriptor) ClassDescriptor ["Tooltip"];
-			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));
+			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType, prop.Translatable));
 			
 			prop = (PropertyDescriptor) ClassDescriptor ["StockId"];
-			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType));
+			exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType, prop.Translatable));
 			
 			if (type == ActionType.Action)
 				exp.CreateType = new CodeTypeReference ("Gtk.Action");
@@ -294,8 +294,10 @@ namespace Stetic.Wrapper
 		}
 	}
 	
+	[Serializable]
 	public class ActionCollection: CollectionBase
 	{
+		[NonSerialized]
 		ActionGroup group;
 		
 		public ActionCollection ()
@@ -307,9 +309,9 @@ namespace Stetic.Wrapper
 			this.group = group;
 		}
 		
-		public void Add (Action group)
+		public void Add (Action action)
 		{
-			List.Add (group);
+			List.Add (action);
 		}
 		
 		public Action this [int n] {
@@ -333,18 +335,22 @@ namespace Stetic.Wrapper
 
 		protected override void OnInsertComplete (int index, object val)
 		{
-			group.NotifyActionAdded ((Action) val);
+			if (group != null)
+				group.NotifyActionAdded ((Action) val);
 		}
 		
 		protected override void OnRemoveComplete (int index, object val)
 		{
-			group.NotifyActionRemoved ((Action)val);
+			if (group != null)
+				group.NotifyActionRemoved ((Action)val);
 		}
 		
 		protected override void OnSetComplete (int index, object oldv, object newv)
 		{
-			group.NotifyActionRemoved ((Action) oldv);
-			group.NotifyActionAdded ((Action) newv);
+			if (group != null) {
+				group.NotifyActionRemoved ((Action) oldv);
+				group.NotifyActionAdded ((Action) newv);
+			}
 		}
 	}
 }

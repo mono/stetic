@@ -3,9 +3,14 @@ using System.Collections;
 
 namespace Stetic
 {
+	[Serializable]
 	public class SignalCollection: CollectionBase
 	{
+		[NonSerialized]
 		ObjectWrapper owner;
+		
+		[NonSerialized]
+		Signal[] clearedData;
 		
 		public SignalCollection ()
 		{
@@ -35,7 +40,6 @@ namespace Stetic
 			List.CopyTo (signals, index);
 		}
 		
-		Signal[] clearedData;
 		protected override void OnClear ()
 		{
 			if (owner != null) {

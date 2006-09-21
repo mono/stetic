@@ -3,12 +3,20 @@ using System.Collections;
 using System.Xml;
 using System.Reflection;
 
-namespace Stetic {
-
-	public abstract class ItemDescriptor {
-
-		ArrayList deps, visdeps;
+namespace Stetic
+{
+	public abstract class ItemDescriptor
+	{
+		[NonSerialized]
+		ArrayList deps;
+		
+		[NonSerialized]
+		ArrayList visdeps;
+		
+		[NonSerialized]
 		bool isInternal;
+		
+		[NonSerialized]
 		ClassDescriptor klass;
 
 		protected ItemDescriptor () {}

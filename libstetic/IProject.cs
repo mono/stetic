@@ -15,8 +15,6 @@ namespace Stetic
 		void PopupContextMenu (Stetic.Wrapper.Widget wrapper);
 		void PopupContextMenu (Placeholder ph);
 
-		Gtk.Widget LookupWidgetById (string id);
-
 		void AddWindow (Gtk.Window window);
 		
 		Wrapper.ActionGroupCollection ActionGroups { get; }

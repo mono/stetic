@@ -5,7 +5,7 @@ namespace Stetic
 	
 	public class SignalEventArgs: ObjectWrapperEventArgs
 	{
-		public Signal signal;
+		Signal signal;
 		
 		public SignalEventArgs (ObjectWrapper wrapper, Signal signal): base (wrapper)
 		{

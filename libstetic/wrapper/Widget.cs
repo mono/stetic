@@ -25,7 +25,9 @@ namespace Stetic.Wrapper {
 		// List of groups added to the UIManager
 		ArrayList includedActionGroups;
 		
-		public bool unselectable;
+		bool unselectable;
+		
+		public event EventHandler Destroyed;
 		
 		public Widget ()
 		{
@@ -74,12 +76,14 @@ namespace Stetic.Wrapper {
 		
 		void OnDestroyed (object on, EventArgs a)
 		{
+			if (Destroyed != null)
+				Destroyed (this, a);
 			Dispose ();
 		}
 		
 		public override void Dispose ()
 		{
-			if (Project.Selection == Wrapped)
+			if (Project != null && Project.Selection == Wrapped)
 				Project.Selection = null;
 
 			Wrapped.Destroyed -= OnDestroyed;
@@ -661,8 +665,6 @@ namespace Stetic.Wrapper {
 		
 		protected override void EmitNotify (string propertyName)
 		{
-			base.EmitNotify (propertyName);
-			
 			// Don't notify parent change for top level widgets.
 			if (propertyName == "parent" || propertyName == "has-focus" || 
 				propertyName == "has-toplevel-focus" || propertyName == "is-active" ||
@@ -675,10 +677,15 @@ namespace Stetic.Wrapper {
 					if (ParentWrapper != null) {
 						string nn = ParentWrapper.GetValidWidgetName (Wrapped);
 						if (nn != Wrapped.Name) {
+							// The name was not valid, so it has to be changed again.
+							// Don't fire the changed event now, will be fired after the following change
 							Wrapped.Name = nn;
 							return;
 						}
 					}
+					
+					// This fires the changed event
+					base.EmitNotify (propertyName);
 						
 					string on = oldName;
 					oldName = Wrapped.Name;
@@ -691,6 +698,7 @@ namespace Stetic.Wrapper {
 			}
 			else if (propertyName == "MemberName") {
 				if (MemberName != oldMemberName) {
+					base.EmitNotify (propertyName);
 					string on = oldMemberName;
 					oldMemberName = MemberName;
 					OnMemberNameChanged (new WidgetNameChangedArgs (this, on, MemberName));
@@ -698,20 +706,18 @@ namespace Stetic.Wrapper {
 			}
 			else {
 //				Console.WriteLine ("PROP: " + propertyName);
-				NotifyChanged ();
+				base.EmitNotify (propertyName);
 			}
 		}
 		
 		protected virtual void OnNameChanged (WidgetNameChangedArgs args)
 		{
-			NotifyChanged ();
 			if (NameChanged != null)
 				NameChanged (this, args);
 		}
 		
 		protected virtual void OnMemberNameChanged (WidgetNameChangedArgs args)
 		{
-			NotifyChanged ();
 			if (MemberNameChanged != null)
 				MemberNameChanged (this, args);
 		}

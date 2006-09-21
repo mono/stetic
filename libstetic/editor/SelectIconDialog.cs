@@ -93,7 +93,6 @@ namespace Stetic.Editor
 		
 		protected void OnCurrentPageChanged (object s, Gtk.SwitchPageArgs args)
 		{
-			Console.WriteLine ("OnCurrentPageChanged");
 			UpdateButtons ();
 		}
 		

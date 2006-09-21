@@ -6,10 +6,11 @@ using System.Collections;
 
 namespace Stetic.Wrapper
 {
-	public class ActionGroup: IDisposable
+	public sealed class ActionGroup: MarshalByRefObject, IDisposable
 	{
 		string name;
 		ActionCollection actions;
+		IObjectFrontend frontend;
 		
 		public event ActionEventHandler ActionAdded;
 		public event ActionEventHandler ActionRemoved;
@@ -29,10 +30,19 @@ namespace Stetic.Wrapper
 			this.name = name;
 		}
 		
-		public virtual void Dispose ()
+		public void Dispose ()
 		{
 			foreach (Action a in actions)
 				a.Dispose ();
+		}
+		
+		public IObjectFrontend Frontend {
+			get { return frontend; }
+			set {
+				if (frontend != null)
+					frontend.Dispose ();
+				frontend = value;
+			}
 		}
 		
 		public ActionCollection Actions {
@@ -169,6 +179,8 @@ namespace Stetic.Wrapper
 		
 		void NotifyChanged ()
 		{
+			if (frontend != null)
+				frontend.NotifyChanged ();
 			if (Changed != null)
 				Changed (this, EventArgs.Empty);
 		}
@@ -213,6 +225,15 @@ namespace Stetic.Wrapper
 		
 		public ActionGroup this [int n] {
 			get { return (ActionGroup) List [n]; }
+		}
+		
+		public ActionGroup this [string name] {
+			get {
+				foreach (ActionGroup grp in List)
+					if (grp.Name == name)
+						return grp;
+				return null;
+			}
 		}
 		
 		public int IndexOf (ActionGroup group)
@@ -272,6 +293,13 @@ namespace Stetic.Wrapper
 		{
 			if (ActionGroupChanged != null)
 				ActionGroupChanged (this, new ActionGroupEventArgs ((ActionGroup)s));
+		}
+		
+		public ActionGroup[] ToArray ()
+		{
+			ActionGroup[] groups = new ActionGroup [Count];
+			List.CopyTo (groups, 0);
+			return groups;
 		}
 		
 		public event ActionGroupEventHandler ActionGroupAdded;

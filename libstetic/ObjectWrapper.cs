@@ -12,8 +12,8 @@ namespace Stetic {
 		Glade
 	}
 
-	public abstract class ObjectWrapper : IDisposable {
-
+	public abstract class ObjectWrapper : MarshalByRefObject, IDisposable
+	{
 		static Hashtable wrappers = new Hashtable ();
 
 		protected IProject proj;
@@ -22,6 +22,7 @@ namespace Stetic {
 		SignalCollection signals;
 		internal Hashtable translationInfo;
 		bool loading;
+		IObjectFrontend frontend;
 
 		public SignalCollection Signals {
 			get {
@@ -34,6 +35,15 @@ namespace Stetic {
 		internal protected bool Loading {
 			get { return loading; }
 			set { loading = value; }
+		}
+		
+		public IObjectFrontend Frontend {
+			get { return frontend; }
+			set {
+				if (frontend != null)
+					frontend.Dispose ();
+				frontend = value;
+			}
 		}
 		
 		public void AttachDesigner (IDesignArea designer)
@@ -54,7 +64,11 @@ namespace Stetic {
 
 		public virtual void Dispose ()
 		{
+			if (frontend != null)
+				frontend.Dispose ();
+			frontend = null;
 			wrappers.Remove (GetIndentityObject (wrapped));
+			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 		}
 
 		public static ObjectWrapper Create (IProject proj, object wrapped)
@@ -155,7 +169,7 @@ namespace Stetic {
 				CodeExpression[] paramters = new CodeExpression [ClassDescriptor.InitializationProperties.Length];
 				for (int n=0; n < paramters.Length; n++) {
 					PropertyDescriptor prop = ClassDescriptor.InitializationProperties [n];
-					paramters [n] = ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType);
+					paramters [n] = ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType, prop.Translatable);
 				}
 				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, paramters);
 			} else
@@ -168,7 +182,7 @@ namespace Stetic {
 			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))
 				return;
 
-			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType);
+			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType, prop.Translatable);
 			CodeExpression cprop;
 			
 			TypedPropertyDescriptor tprop = prop as TypedPropertyDescriptor;
@@ -248,12 +262,15 @@ namespace Stetic {
 
 		internal protected virtual void OnObjectChanged (ObjectWrapperEventArgs args)
 		{
+			if (frontend != null)
+				frontend.NotifyChanged ();
 			if (!loading && ObjectChanged != null)
 				ObjectChanged (this, args);
 		}
 		
 		protected virtual void EmitNotify (string propertyName)
 		{
+			NotifyChanged ();
 			if (!loading && Notify != null)
 				Notify (this, propertyName);
 		}
@@ -286,6 +303,12 @@ namespace Stetic {
 		internal protected virtual void OnDesignerDetach (IDesignArea designer)
 		{
 		}
+
+		public override object InitializeLifetimeService ()
+		{
+			// Will be disconnected when calling Dispose
+			return null;
+		}
 	}
 	
 	// Wraps a ContainerChild, and properly implements GetHashCode() and Equals()
@@ -303,5 +326,10 @@ namespace Stetic {
 			ContainerChildHashItem ot = (ContainerChildHashItem) ob;
 			return ot.ContainerChild.Child == ContainerChild.Child && ot.ContainerChild.Parent == ContainerChild.Parent;
 		}
+	}
+	
+	public interface IObjectFrontend: IDisposable
+	{
+		void NotifyChanged ();
 	}
 }
