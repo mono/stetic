@@ -10,27 +10,28 @@ namespace Stetic
 		Gtk.Widget design;
 		Gtk.Widget actionbox;
 		
-		public DesignerView (Stetic.Project project, Gtk.Container widget)
+		public DesignerView (Stetic.Project project, Component widget)
 		{
-			Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.Lookup (widget);
-			
 			// Widget design tab
 			
-			design = UserInterface.CreateWidgetDesigner (widget);
-			VBox box = new VBox ();
-			box.BorderWidth = 3;
-			box.PackStart (new WidgetActionBar (wc), false, false, 0);
-			box.PackStart (design, true, true, 3);
+			design = project.CreateWidgetDesigner (widget, true);
 			
 			// Actions design tab
 			
-			actionbox = UserInterface.CreateActionGroupDesigner (project, wc.LocalActionGroups);
+			actionbox = project.CreateActionGroupDesigner (widget, true);
 			
 			// Designers tab
 			
-			AppendPage (box, new Gtk.Label (Catalog.GetString ("Designer")));
+			AppendPage (design, new Gtk.Label (Catalog.GetString ("Designer")));
 			AppendPage (actionbox, new Gtk.Label (Catalog.GetString ("Actions")));
 			TabPos = Gtk.PositionType.Bottom;
+		}
+		
+		public override void Dispose ()
+		{
+			base.Dispose ();
+			design.Dispose ();
+			actionbox.Dispose ();
 		}
 	}
 }

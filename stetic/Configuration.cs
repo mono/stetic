@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Specialized;
 
 namespace Stetic
 {
@@ -11,5 +12,7 @@ namespace Stetic
 		public int WindowWidth;
 		public int WindowHeight;
 		public Gdk.WindowState WindowState;
+		
+		public StringCollection WidgetLibraries = new StringCollection ();
 	}
 }

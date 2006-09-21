@@ -1,3 +1,110 @@
+2006-09-21  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* stetic/UIManager.cs:
+	* stetic/Stetic.cs: Use the new API.
+	
+	* stetic/stetic.glade:
+	* stetic/Configuration.cs:
+	* stetic/LibraryManagerDialog.cs: Implemented dialog for selecting
+	  widget libraries.
+	  
+	* stetic/Makefile.am: Updated.
+
+2006-09-21  Lluis Sanchez Gual  <lluis@novell.com>
+
+	* libsteticui/ActionGroupDesigner.cs:
+	* libsteticui/ApplicationBackend.cs:
+	* libsteticui/WidgetDesignerBackend.cs:
+	* libsteticui/ProjectBackend.cs:
+	* libsteticui/SignalsEditorBackend.cs:
+	* libsteticui/WidgetPropertyTreeBackend.cs:
+	* libsteticui/WidgetEditSession.cs:
+	* libsteticui/Palette.cs:
+	* libsteticui/ComponentSignalEventHandler.cs:
+	* libsteticui/ProjectView.cs:
+	* libsteticui/ComponentEventHandler.cs:
+	* libsteticui/Component.cs:
+	* libsteticui/Application.cs:
+	* libsteticui/EmbedWindow.cs:
+	* libsteticui/PaletteBackend.cs:
+	* libsteticui/SignalsEditor.cs:
+	* libsteticui/ActionGroupComponent.cs:
+	* libsteticui/ApplicationBackendController.cs:
+	* libsteticui/ActionGroupDesignerBackend.cs:
+	* libsteticui/ActionComponent.cs:
+	* libsteticui/WidgetDesigner.cs:
+	* libsteticui/ActionGroupEditSession.cs:
+	* libsteticui/ComponentType.cs:
+	* libsteticui/Project.cs:
+	* libsteticui/WidgetComponent.cs:
+	* libsteticui/PluggableWidget.cs:
+	* libsteticui/WidgetPropertyTree.cs: 
+	* libsteticui/ProjectViewBackend.cs:
+	* libstetic/IResourceProvider.cs:
+	  Redesigned the API so it allows running the designer in a separate
+	  process. This running mode is optional and not enabled by default
+	  until all stability problems have been fixed.
+	
+	* libsteticui/NoGuiDispatchAttribute.cs:
+	* libsteticui/GuiDispatchServerSinkProvider.cs:
+	* libsteticui/GuiDispatchServerSink.cs: A channel sink which ensures that
+	  all incoming calls al dispatched in the GUI thread.
+	
+	* libsteticui/ActionGroupToolbar.cs:
+	* libsteticui/WidgetActionBar.cs: Added the Bind to Field button
+	  (moved from MD).
+	
+	* libsteticui/CodeGenerator.cs: Added optional Gettext support.
+	
+	* libsteticui/WidgetTreeCombo.cs:
+	* libsteticui/Clipboard.cs:
+	* libsteticui/Glade.cs:
+	* libsteticui/PropertyGrid.cs:
+	* libsteticui/UserInterface.cs:
+	* libsteticui/WidgetFactory.cs: Make classes internal.
+	
+	* libsteticui/Makefile.am: Updated.
+	
+2006-09-21  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/IProject.cs: Removed unused method.
+	* libstetic/ItemDescriptor.cs: Made some fields not serializable.
+	* libstetic/ObjectWrapper.cs: Allow binding a wrapper to a remote
+	  frontend running in another process.
+	  
+	* libstetic/Registry.cs:
+	* libstetic/WidgetLibrary.cs: Implemented better support for library
+	  reloading.
+
+	* libstetic/wrapper/Container.cs:
+	* libstetic/wrapper/Widget.cs:
+	* libstetic/wrapper/Action.cs: Track api changes, added some null checks.
+	
+	* libstetic/wrapper/Signal.cs:
+	* libstetic/SignalDescriptor.cs:
+	* libstetic/TypedSignalDescriptor.cs:
+	* libstetic/wrapper/SignalCollection.cs: Made it serializable.
+	
+	* libstetic/wrapper/ActionGroup.cs: Made it sealed. Added some helper
+	  methods.
+	* libstetic/wrapper/objects.xml: Action properties are translatable.
+	* libstetic/editor/ThemedIcon.cs, ImageSelector.cs: Don't use 
+	  stock_symbol-selection stock
+	  icon since it is not available in all themes.
+	* libstetic/editor/Identifier.cs: Fix warning.
+	* libstetic/TypedPropertyDescriptor.cs: Improved error reporting.
+	* libstetic/GeneratorContext.cs: Added support for Gettext.
+
+2006-09-01  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/wrapper/Container.cs: When changing the selected item,
+	  disable the focus event for the correct widget. Fixes bug #79247.
+	
+	* libstetic/editor/ThemedIcon.cs:
+	* libstetic/editor/ImageSelector.cs: Use "..." as label for the selector
+	  button since the icon stock_symbol-selection is not present in some
+	  themes.
+
 2006-09-01  Lluis Sanchez Gual  <lluis@novell.com>
 
 	* libsteticui/Project.cs: Avoid the normal widget clearing callback

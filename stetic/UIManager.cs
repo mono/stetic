@@ -35,6 +35,8 @@ namespace Stetic {
 		"	    <menuitem action='Copy' />" +
 		"	    <menuitem action='Paste' />" +
 		"	    <menuitem action='Delete' />" +
+		"	    <separator />" +
+		"	    <menuitem action='LibraryManager' />" +
 		"	</menu>" +
 		"	<menu action='ProjectMenu'>" +
 		"	    <menuitem action='EditProjectIcons' />" +
@@ -78,6 +80,7 @@ namespace Stetic {
 				new ActionEntry ("Copy", Stock.Copy, null, "<control>C", Catalog.GetString ("Copy selection to clipboard"), Copy),
 				new ActionEntry ("Paste", Stock.Paste, null, "<control>V", Catalog.GetString ("Paste from clipboard"), Paste),
 				new ActionEntry ("Delete", Stock.Delete, null, "Delete", Catalog.GetString ("Delete selection"), Delete),
+				new ActionEntry ("LibraryManager", null, Catalog.GetString ("Widget libraries..."), null, null, ShowLibraryManager),
 
 				new ActionEntry ("ProjectMenu", null, Catalog.GetString ("Project"), null, null, null),
 				new ActionEntry ("EditProjectIcons", null, Catalog.GetString ("Project Icons..."), null, null, EditIcons),
@@ -129,9 +132,8 @@ namespace Stetic {
 
 				if (project != null) {
 					project.SelectionChanged += Selected;
-					UpdateEdit (project.Selection);
-				} else
-					UpdateEdit (null);
+				}
+				UpdateEdit ();
 
 				GetAction ("/menubar/FileMenu/ImportGlade").Sensitive = (project != null);
 				GetAction ("/menubar/FileMenu/ExportGlade").Sensitive = (project != null);
@@ -170,7 +172,7 @@ namespace Stetic {
 						       Gtk.Stock.Open, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();
 			if (response == (int)Gtk.ResponseType.Ok)
-				GladeFiles.Import (project, dialog.Filename);
+				project.ImportGlade (dialog.Filename);
 			dialog.Hide ();
 		}
 
@@ -182,7 +184,7 @@ namespace Stetic {
 						       Gtk.Stock.Save, Gtk.ResponseType.Ok);
 			int response = dialog.Run ();
 			if (response == (int)Gtk.ResponseType.Ok)
-				GladeFiles.Export (project, dialog.Filename);
+				project.ExportGlade (dialog.Filename);
 			dialog.Hide ();
 		}
 
@@ -201,8 +203,8 @@ namespace Stetic {
 			Gtk.Editable focus = Focus;
 			if (focus != null)
 				focus.CutClipboard ();
-			else if (project.Selection != null)
-				Clipboard.Cut (project.Selection);
+			else
+				project.PasteToSelection ();
 		}
 
 		void Copy (object obj, EventArgs e)
@@ -210,8 +212,8 @@ namespace Stetic {
 			Gtk.Editable focus = Focus;
 			if (focus != null)
 				focus.CopyClipboard ();
-			else if (project.Selection != null)
-				Clipboard.Copy (project.Selection);
+			else
+				project.CopySelection ();
 		}
 
 		void Paste (object obj, EventArgs e)
@@ -219,15 +221,8 @@ namespace Stetic {
 			Gtk.Editable focus = Focus;
 			if (focus != null)
 				focus.PasteClipboard ();
-			else if (project.Selection != null)
-				Clipboard.Paste (project.Selection as Placeholder);
-		}
-
-		public void Delete (Gtk.Widget widget)
-		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			if (wrapper != null)
-				wrapper.Delete ();
+			else
+				project.CutSelection ();
 		}
 
 		void Delete (object obj, EventArgs e)
@@ -236,7 +231,7 @@ namespace Stetic {
 			if (focus != null)
 				focus.DeleteSelection ();
 			else if (project.Selection != null)
-				Delete (project.Selection);
+				project.DeleteSelection ();
 		}
 
 		void Help (object obj, EventArgs e)
@@ -246,9 +241,12 @@ namespace Stetic {
 
 		void EditIcons (object obj, EventArgs e)
 		{
-			using (Stetic.Editor.EditIconFactoryDialog dlg = new Stetic.Editor.EditIconFactoryDialog (null, project, project.IconFactory)) {
-				dlg.Run ();
-			}
+			project.EditIcons ();
+		}
+		
+		void ShowLibraryManager (object obj, EventArgs e)
+		{
+			SteticMain.ShowLibraryManager ();
 		}
 		
 		const string AppName = "Stetic";
@@ -317,7 +315,7 @@ namespace Stetic {
 				editable = focus.IsEditable;
 				UpdateEdit (hasSelection && editable, hasSelection, editable);
 			} else
-				UpdateEdit (project.Selection);
+				UpdateEdit ();
 		}
 
 		void EditHidden (object obj, EventArgs args)
@@ -333,20 +331,14 @@ namespace Stetic {
 			GetAction ("/menubar/EditMenu/Delete").Sensitive = cut;
 		}
 
-		void UpdateEdit (Gtk.Widget selection)
+		void UpdateEdit ()
 		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (selection);
-			if (wrapper != null)
-				UpdateEdit (wrapper.InternalChildProperty == null, true, false);
-			else if (selection is Placeholder)
-				UpdateEdit (false, false, true);
-			else
-				UpdateEdit (false, false, false);
+			UpdateEdit (Project.CanCutSelection, Project.CanCopySelection, Project.CanPasteToSelection);
 		}
 
-		void Selected (object s, Wrapper.WidgetEventArgs args)
+		void Selected (object s, ComponentEventArgs args)
 		{
-			UpdateEdit (args.Widget != null ? args.Widget : null);
+			UpdateEdit ();
 		}
 		
 		void ReadRecentFiles ()

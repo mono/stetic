@@ -13,6 +13,7 @@ namespace Stetic {
 	public class SteticMain  {
 
 		static Gnome.Program Program;
+		public static Stetic.Application SteticApp;
 
 		static Stetic.Palette Palette;
 		static Stetic.Project Project;
@@ -28,12 +29,13 @@ namespace Stetic {
 		static ArrayList libraries = new ArrayList ();
 		
 		static Hashtable openWindows = new Hashtable ();
-		static Configuration configuration;
+		public static Configuration Configuration;
 		
 
 		public static int Main (string[] args)
 		{
 			int n = 0;
+			IsolationMode mode = IsolationMode.None; // IsolationMode.ProcessUnix;
 			
 			while (n < args.Length) {
 				string arg = args[n];
@@ -46,6 +48,10 @@ namespace Stetic {
 				else if (arg.StartsWith ("--library:"))
 					libraries.Add (arg.Substring (10));
 				else if (arg == "--generate" || arg == "-g")
+					break;
+				else if (arg == "--noisolation")
+					mode = IsolationMode.None;
+				else
 					break;
 				n++;
 			}
@@ -60,29 +66,34 @@ namespace Stetic {
 			
 			Program = new Gnome.Program ("Stetic", "0.0", Gnome.Modules.UI, args);
 			
-			if (args.Length - n > 2) {
-				if (args [n] == "--generate" || args [n] == "-g")
-					return GenerateCode (args [n+1], args, n+2);
+			int ret;
+			
+			if (args.Length - n > 2 && ((args [n] == "--generate" || args [n] == "-g"))) {
+				SteticApp = new Stetic.Application (IsolationMode.None);
+				ret = GenerateCode (args [n+1], args, n+2);
+			}
+			else {
+				SteticApp = new Stetic.Application (mode);
+				ret = RunApp (args, n);
 			}
 			
-			return RunApp (args);
+			SteticApp.Dispose ();
+			return ret;
 		}
 		
 		static int GenerateCode (string file, string[] args, int n)
 		{
 			foreach (string lib in libraries)
-				Registry.RegisterWidgetLibrary (new AssemblyWidgetLibrary (lib));
+				SteticApp.AddWidgetLibrary (lib);
+			
+			SteticApp.UpdateWidgetLibraries (false);
 	
 			Project[] projects = new Project [args.Length - n];
-			for (int i=n; i<args.Length; i++) {
-				projects [i - n] = new Project ();
-				if (System.IO.Path.GetExtension (args [i]) == ".glade")
-					GladeFiles.Import (projects [i - n], args [i]);
-				else
-					projects [i - n].Load (args [i]);
-			}
+			for (int i=n; i<args.Length; i++)
+				projects [i - n] = SteticApp.LoadProject (args [i]);
+
 			CodeDomProvider provider = GetProvider (language);
-			CodeGenerator.GenerateProjectCode (file, "Stetic", provider, projects);
+			SteticApp.GenerateProjectCode (file, "Stetic", provider, null, projects);
 			return 0;
 		}
 		
@@ -91,23 +102,25 @@ namespace Stetic {
 			return new Microsoft.CSharp.CSharpCodeProvider ();
 		}
 		
-		static int RunApp (string[] args)
+		static int RunApp (string[] args, int n)
 		{
-			Project = new Project ();
-			Project.ActionGroups.Add (new Stetic.Wrapper.ActionGroup ("Global"));
-			Project.WidgetAdded += OnWidgetAdded;
-			Project.WidgetRemoved += OnWidgetRemoved;
+			Project = SteticApp.CreateProject ();
+			SteticApp.ActiveProject = Project;
+			
+			Project.ComponentAdded += OnWidgetAdded;
+			Project.ComponentRemoved += OnWidgetRemoved;
 			Project.SelectionChanged += OnSelectionChanged;
 			Project.ModifiedChanged += OnProjectModified;
 
-			Palette = new Stetic.Palette (Project);
-			ProjectView = new Stetic.ProjectView (Project);
-			Signals = new Stetic.SignalsEditor (Project);
+			Palette = SteticApp.PaletteWidget;
+			ProjectView = SteticApp.ProjectWidget;
+			Signals = SteticApp.SignalsWidget;
+			propertyTree = SteticApp.PropertiesWidget;
+			
 			UIManager = new Stetic.UIManager (Project);
-			propertyTree = new Stetic.WidgetPropertyTree (Project);
 
 			Glade.XML.CustomHandler = CustomWidgetHandler;
-			Glade.XML glade = new Glade.XML ("stetic.glade", null);
+			Glade.XML glade = new Glade.XML ("stetic.glade", "MainWindow");
 			glade.Autoconnect (typeof (SteticMain));
 
 			if (ProjectView.Parent is Gtk.Viewport &&
@@ -116,7 +129,7 @@ namespace Stetic {
 				Gtk.ScrolledWindow scrolled = (Gtk.ScrolledWindow)viewport.Parent;
 				viewport.Remove (ProjectView);
 				scrolled.Remove (viewport);
-				scrolled.Add (ProjectView);
+				scrolled.AddWithViewport (ProjectView);
 			}
 
 			foreach (Gtk.Widget w in glade.GetWidgetPrefix ("")) {
@@ -128,7 +141,7 @@ namespace Stetic {
 			}
 			MainWindow = (Gtk.Window)Palette.Toplevel;
 			WidgetNotebook = (Gtk.Notebook) glade ["notebook"];
-			ProjectView.WidgetActivated += OnWidgetActivated;
+			ProjectView.ComponentActivated += OnWidgetActivated;
 
 #if GTK_SHARP_2_6
 			// This is needed for both our own About dialog and for ones
@@ -136,11 +149,16 @@ namespace Stetic {
 			Gtk.AboutDialog.SetUrlHook (ActivateUrl);
 #endif
 
-			if (args.Length > 0) {
-				LoadProject (args [0]);
+			if (n < args.Length) {
+				LoadProject (args [n]);
 			}
 
 			ReadConfiguration ();
+			
+			foreach (string s in Configuration.WidgetLibraries) {
+				SteticApp.AddWidgetLibrary (s);
+			}
+			SteticApp.UpdateWidgetLibraries (false);
 			
 			Program.Run ();
 			return 0;
@@ -178,31 +196,25 @@ namespace Stetic {
 			Quit ();
 		}
 		
-		static void OnWidgetAdded (object s, Wrapper.WidgetEventArgs args)
+		static void OnWidgetAdded (object s, ComponentEventArgs args)
 		{
-			if (args.Widget.IsTopLevel) {
-				OpenWindow (args.Widget as Gtk.Container);
-			}
+			OpenWindow (args.Component);
 		}
 		
-		static void OnWidgetRemoved (object s, Wrapper.WidgetEventArgs args)
+		static void OnWidgetRemoved (object s, ComponentEventArgs args)
 		{
-			CloseWindow (args.Widget as Gtk.Container);
+			CloseWindow (args.Component);
 		}
 		
-		static void OnSelectionChanged (object s, Wrapper.WidgetEventArgs args)
+		static void OnSelectionChanged (object s, ComponentEventArgs args)
 		{
-			Stetic.Wrapper.Container wc = args.WidgetWrapper as Stetic.Wrapper.Container;
-			if (wc != null && wc.IsTopLevel && IsWindowOpen ((Gtk.Container) args.Widget))
-				OpenWindow ((Gtk.Container) args.Widget);
+			if (args.Component != null && IsWindowOpen (args.Component))
+				OpenWindow (args.Component);
 		}
 		
-		static void OnWidgetActivated (object s, Wrapper.WidgetEventArgs args)
+		static void OnWidgetActivated (object s, ComponentEventArgs args)
 		{
-			Stetic.Wrapper.Widget w = args.WidgetWrapper;
-			while (!w.IsTopLevel)
-				w = Stetic.Wrapper.Container.LookupParent (w.Wrapped);
-			OpenWindow ((Gtk.Container) w.Wrapped);
+			OpenWindow (args.Component);
 		}
 		
 		static void OnProjectModified (object s, EventArgs a)
@@ -213,13 +225,13 @@ namespace Stetic {
 			MainWindow.Title = title;
 		}
 		
-		static bool IsWindowOpen (Gtk.Container widget)
+		static bool IsWindowOpen (Component component)
 		{
-			Gtk.Widget w = openWindows [widget] as Gtk.Widget;
+			Gtk.Widget w = openWindows [component] as Gtk.Widget;
 			return w != null && w.Visible;
 		}
 		
-		static void OpenWindow (Gtk.Container widget)
+		static void OpenWindow (Component widget)
 		{
 			Gtk.Widget page = (Gtk.Widget) openWindows [widget];
 			if (page != null) {
@@ -227,13 +239,12 @@ namespace Stetic {
 				WidgetNotebook.Page = WidgetNotebook.PageNum (page);
 			}
 			else {
-				Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.Lookup (widget);
 				DesignerView view = new DesignerView (Project, widget);
 				
 				// Tab label
 				
 				HBox tabLabel = new HBox ();
-				tabLabel.PackStart (new Gtk.Image (wc.ClassDescriptor.Icon), true, true, 0);
+				tabLabel.PackStart (new Gtk.Image (widget.Type.Icon), true, true, 0);
 				tabLabel.PackStart (new Label (widget.Name), true, true, 3);
 				Button b = new Button (new Gtk.Image ("gtk-close", IconSize.Menu));
 				b.Relief = Gtk.ReliefStyle.None;
@@ -256,7 +267,7 @@ namespace Stetic {
 			}
 		}
 		
-		static void CloseWindow (Gtk.Container widget)
+		static void CloseWindow (Component widget)
 		{
 			if (widget != null) {
 				Gtk.Widget page = (Gtk.Widget) openWindows [widget];
@@ -369,9 +380,18 @@ namespace Stetic {
 		
 		public static void Quit ()
 		{
+			if (!CloseProject ())
+				return;
 			SaveConfiguration ();
 			Palette.Destroy ();
 			Program.Quit ();
+		}
+		
+		public static void ShowLibraryManager ()
+		{
+			using (LibraryManagerDialog dlg = new LibraryManagerDialog ()) {
+				dlg.Run ();
+			}
 		}
 		
 		static void ReportError (string message, Exception ex)
@@ -385,38 +405,41 @@ namespace Stetic {
 		static void ReadConfiguration ()
 		{
 			string file = Path.Combine (SteticMain.ConfigDir, "configuration.xml");
-			configuration = null;
+			Configuration = null;
 			
 			if (File.Exists (file)) {
 				try {
 					using (StreamReader sr = new StreamReader (file)) {
 						XmlSerializer ser = new XmlSerializer (typeof (Configuration));
-						configuration = (Configuration) ser.Deserialize (sr);
+						Configuration = (Configuration) ser.Deserialize (sr);
 					}
 				} catch {
 					// Ignore exceptions while reading the recents file
 				}
 			}
 			
-			if (configuration != null) {
-				MainWindow.Move (configuration.WindowX, configuration.WindowY);
-				MainWindow.Resize (configuration.WindowWidth, configuration.WindowHeight);
-				if (configuration.WindowState == Gdk.WindowState.Maximized)
+			if (Configuration != null) {
+				MainWindow.Move (Configuration.WindowX, Configuration.WindowY);
+				MainWindow.Resize (Configuration.WindowWidth, Configuration.WindowHeight);
+				if (Configuration.WindowState == Gdk.WindowState.Maximized)
 					MainWindow.Maximize ();
-				else if (configuration.WindowState == Gdk.WindowState.Iconified)
+				else if (Configuration.WindowState == Gdk.WindowState.Iconified)
 					MainWindow.Iconify ();
 			}
 			else {
-				configuration = new Configuration ();
+				Configuration = new Configuration ();
 			}
 			
 		}
 		
-		static void SaveConfiguration ()
+		public static void SaveConfiguration ()
 		{
-			MainWindow.GetPosition (out configuration.WindowX, out configuration.WindowY);
-			MainWindow.GetSize (out configuration.WindowWidth, out configuration.WindowHeight);
-			configuration.WindowState = MainWindow.GdkWindow.State; 
+			SteticMain.Configuration.WidgetLibraries.Clear ();
+			SteticMain.Configuration.WidgetLibraries.AddRange (SteticApp.GetWidgetLibraries ());
+					
+			MainWindow.GetPosition (out Configuration.WindowX, out Configuration.WindowY);
+			MainWindow.GetSize (out Configuration.WindowWidth, out Configuration.WindowHeight);
+			Configuration.WindowState = MainWindow.GdkWindow.State; 
 			
 			string file = Path.Combine (SteticMain.ConfigDir, "configuration.xml");
 			try {
@@ -425,7 +448,7 @@ namespace Stetic {
 
 				using (StreamWriter sw = new StreamWriter (file)) {
 					XmlSerializer ser = new XmlSerializer (typeof (Configuration));
-					ser.Serialize (sw, configuration);
+					ser.Serialize (sw, Configuration);
 				}
 			} catch (Exception ex) {
 				// Ignore exceptions while writing the recents file
