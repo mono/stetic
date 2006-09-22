@@ -144,6 +144,15 @@ namespace Stetic {
 			Gdk.Threads.Leave ();
 		}
 		
+		public void DestroyWrapperWidgetPlug ()
+		{
+			if (designer != null) {
+				Gtk.Plug plug = (Gtk.Plug) WrapperWidget.Parent;
+				plug.Remove (WrapperWidget);
+				plug.Destroy ();
+			}
+		}
+		
 		public void Save ()
 		{
 			if (!autoCommitChanges) {
@@ -170,6 +179,7 @@ namespace Stetic {
 			if (toolbar != null)
 				toolbar.Destroy ();
 			
+			gproject.ProjectReloaded -= new EventHandler (OnProjectReloaded);
 //			gproject.WidgetMemberNameChanged -= new Stetic.Wrapper.WidgetNameChangedHandler (OnWidgetNameChanged);
 			
 			if (!autoCommitChanges) {
@@ -188,6 +198,7 @@ namespace Stetic {
 				plug.Destroy ();
 			gproject = null;
 			rootWidget = null;
+			frontend = null;
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 		}
 
@@ -208,7 +219,8 @@ namespace Stetic {
 		
 		void OnModifiedChanged (object s, EventArgs a)
 		{
-			frontend.NotifyModifiedChanged ();
+			if (frontend != null)
+				frontend.NotifyModifiedChanged ();
 		}
 		
 		void OnProjectReloaded (object s, EventArgs a)
@@ -260,12 +272,12 @@ namespace Stetic {
 				frontend.NotifySelectionChanged (Component.GetSafeReference (ObjectWrapper.Lookup (widget.Selection)));
 		}
 		
-		public string SaveState ()
+		public object SaveState ()
 		{
 			return null;
 		}
 		
-		public void RestoreState (string stateData)
+		public void RestoreState (object sessionData)
 		{
 		}
 	}

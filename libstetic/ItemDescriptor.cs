@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace Stetic
 {
+	[Serializable]
 	public abstract class ItemDescriptor
 	{
 		[NonSerialized]

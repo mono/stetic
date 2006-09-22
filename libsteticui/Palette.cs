@@ -18,6 +18,11 @@ namespace Stetic
 			Update ();
 		}
 		
+		protected override void OnDestroyPlug (uint socketId)
+		{
+			app.Backend.DestroyPaletteWidgetPlug ();
+		}
+		
 		protected override Gtk.Widget OnCreateWidget ()
 		{
 			Update ();

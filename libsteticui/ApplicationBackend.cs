@@ -245,6 +245,15 @@ namespace Stetic
 			plug.Show ();
 		}
 		
+		public void DestroyPaletteWidgetPlug ()
+		{
+			if (paletteWidget != null) {
+				Gtk.Plug plug = (Gtk.Plug)paletteWidget.Parent;
+				plug.Remove (paletteWidget);
+				plug.Destroy ();
+			}
+		}
+		
 		public WidgetPropertyTreeBackend GetPropertiesWidget ()
 		{
 			if (propertiesWidget == null) {
@@ -262,6 +271,15 @@ namespace Stetic
 //			Gtk.Window plug = new Gtk.Window ("");
 			plug.Add (GetPropertiesWidget ());
 			plug.Show ();
+		}
+		
+		public void DestroyPropertiesWidgetPlug ()
+		{
+			if (propertiesWidget != null) {
+				Gtk.Plug plug = (Gtk.Plug) propertiesWidget.Parent;
+				plug.Remove (propertiesWidget);
+				plug.Destroy ();
+			}
 		}
 		
 		public SignalsEditorEditSession GetSignalsWidget (SignalsEditorFrontend frontend)
@@ -285,6 +303,15 @@ namespace Stetic
 			return session;
 		}
 		
+		public void DestroySignalsWidgetPlug ()
+		{
+			if (signalsWidget != null) {
+				Gtk.Plug plug = (Gtk.Plug) signalsWidget.Editor.Parent;
+				plug.Remove (signalsWidget.Editor);
+				plug.Destroy ();
+			}
+		}
+		
 		public ProjectViewBackend GetProjectWidget (ProjectViewFrontend frontend)
 		{
 			if (projectWidget == null) {
@@ -301,6 +328,15 @@ namespace Stetic
 //			Gtk.Window plug = new Gtk.Window ("");
 			plug.Add (GetProjectWidget (frontend));
 			plug.Show ();
+		}
+		
+		public void DestroyProjectWidgetPlug ()
+		{
+			if (projectWidget != null) {
+				Gtk.Plug plug = (Gtk.Plug)projectWidget.Parent;
+				plug.Remove (projectWidget);
+				plug.Destroy ();
+			}
 		}
 		
 		public bool GetClassDescriptorInfo (string name, out string desc, out string className, out byte[] icon)

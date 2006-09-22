@@ -42,7 +42,7 @@ namespace Stetic
 			string sref = Convert.ToBase64String (ms.ToArray ());
 		
 			Process process = new Process ();
-			process.StartInfo = new ProcessStartInfo ("sh", "-c \"mono " + asm + "\"");
+			process.StartInfo = new ProcessStartInfo ("sh", "-c \"mono --debug " + asm + "\"");
 			process.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
 			process.StartInfo.UseShellExecute = false;
 			process.StartInfo.RedirectStandardInput = true;
@@ -63,7 +63,7 @@ namespace Stetic
 			runningEvent.Reset ();
 			backend.Dispose ();
 			if (waitUntilDone)
-				runningEvent.WaitOne (5000, false);
+				runningEvent.WaitOne (9000, false);
 		}
 		
 		void OnExited (object o, EventArgs args)

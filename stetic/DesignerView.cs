@@ -9,9 +9,12 @@ namespace Stetic
 	{
 		Gtk.Widget design;
 		Gtk.Widget actionbox;
+		Component widget;
 		
 		public DesignerView (Stetic.Project project, Component widget)
 		{
+			this.widget = widget;
+
 			// Widget design tab
 			
 			design = project.CreateWidgetDesigner (widget, true);
@@ -25,6 +28,10 @@ namespace Stetic
 			AppendPage (design, new Gtk.Label (Catalog.GetString ("Designer")));
 			AppendPage (actionbox, new Gtk.Label (Catalog.GetString ("Actions")));
 			TabPos = Gtk.PositionType.Bottom;
+		}
+		
+		public Component Component {
+			get { return widget; }
 		}
 		
 		public override void Dispose ()

@@ -41,8 +41,8 @@ namespace Stetic
 		ProjectView projectWidget;
 		SignalsEditor signalsWidget;
 		
-		internal event EventHandler BackendChanging;
-		internal event EventHandler BackendChanged;
+		internal event BackendChangingHandler BackendChanging;
+		internal event BackendChangedHandler BackendChanged;
 		
 		public Application (IsolationMode mode)
 		{
@@ -124,6 +124,7 @@ namespace Stetic
 		void OnBackendStopped (object ob, EventArgs args)
 		{
 			// The backend process crashed, try to restart it
+			backend = null;
 			backendController = new ApplicationBackendController (channelId);
 			backendController.StartBackend ();
 			OnBackendChanged (true);
@@ -131,6 +132,8 @@ namespace Stetic
 		
 		void OnBackendChanged (bool notify)
 		{
+			ApplicationBackend oldBackend = backend;
+			
 			backend = backendController.Backend;
 			backendController.Stopped += OnBackendStopped;
 			UpdateWidgetLibraries (false, false);
@@ -147,7 +150,7 @@ namespace Stetic
 			}
 
 			if (notify && BackendChanged != null)
-				BackendChanged (this, EventArgs.Empty);
+				BackendChanged (oldBackend);
 
 			backend.ActiveProject = activeProject != null ? activeProject.ProjectBackend : null;
 		}
@@ -156,7 +159,7 @@ namespace Stetic
 		{
 			backend.GlobalWidgetLibraries = widgetLibraries;
 			if (BackendChanging != null)
-				BackendChanging (this, EventArgs.Empty);
+				BackendChanging ();
 		}
 		
 		internal string RegisterRemotingChannel (IsolationMode mode)
@@ -342,26 +345,36 @@ namespace Stetic
 		
 		internal Component GetComponent (object cbackend, string name, string type)
 		{
-			Component c = (Component) components [cbackend];
-			if (c != null)
+			try {
+				Component c = (Component) components [cbackend];
+				if (c != null)
+					return c;
+
+				if (cbackend is Wrapper.Action) {
+					c = new ActionComponent (this, cbackend, name);
+					((ObjectWrapper)cbackend).Frontend = c;
+				} else if (cbackend is Wrapper.ActionGroup) {
+					c = new ActionGroupComponent (this, cbackend, name);
+					((Wrapper.ActionGroup)cbackend).Frontend = c;
+				} else if (cbackend is ObjectWrapper) {
+					c = new WidgetComponent (this, cbackend, name, type != null ? GetComponentType (type) : null);
+					((ObjectWrapper)cbackend).Frontend = c;
+				} else if (cbackend == null)
+					throw new System.ArgumentNullException ("cbackend");
+				else
+					throw new System.InvalidOperationException ("Invalid component type: " + cbackend.GetType ());
+
+				components [cbackend] = c;
 				return c;
-
-			if (cbackend is Wrapper.Action) {
-				c = new ActionComponent (this, cbackend, name);
-				((ObjectWrapper)cbackend).Frontend = c;
-			} else if (cbackend is Wrapper.ActionGroup) {
-				c = new ActionGroupComponent (this, cbackend, name);
-				((Wrapper.ActionGroup)cbackend).Frontend = c;
-			} else if (cbackend is ObjectWrapper) {
-				c = new WidgetComponent (this, cbackend, name, type != null ? GetComponentType (type) : null);
-				((ObjectWrapper)cbackend).Frontend = c;
-			} else if (cbackend == null)
-				throw new System.ArgumentNullException ("cbackend");
-			else
-				throw new System.InvalidOperationException ("Invalid component type: " + cbackend.GetType ());
-
-			components [cbackend] = c;
-			return c;
+			}
+			catch (System.Runtime.Remoting.RemotingException ex)
+			{
+				// There may be a remoting exception if the remote wrapper
+				// has already been disconnected when trying to create the
+				// component frontend. This may happen since calls are
+				// dispatched in the GUI thread, so they may be delayed.
+				return null;
+			}
 		}
 		
 		internal void DisposeComponent (Component c)
@@ -369,4 +382,7 @@ namespace Stetic
 			components.Remove (c.Backend);
 		}
 	}
+
+	internal delegate void BackendChangingHandler ();
+	internal delegate void BackendChangedHandler (ApplicationBackend oldBackend);
 }

@@ -7,10 +7,9 @@ namespace Stetic
 	{
 		ActionGroupEditSession editSession;
 		ActionGroupDesignerFrontend frontend;
-		string sessionData;
 		Project project;
 		string componentName;
-		ActionGroupComponent actionGroup;
+		string actionGroupName;
 		bool autoCommitChanges;
 		
 		public event EventHandler BindField;
@@ -21,7 +20,7 @@ namespace Stetic
 		internal ActionGroupDesigner (Project project, string componentName, ActionGroupComponent actionGroup, bool autoCommitChanges): base (project.App)
 		{
 			this.componentName = componentName;
-			this.actionGroup = actionGroup;
+			this.actionGroupName = actionGroup.Name;
 			this.autoCommitChanges = autoCommitChanges;
 			this.project = project;
 			
@@ -83,8 +82,11 @@ namespace Stetic
 		
 		public void Save ()
 		{
-			if (editSession != null)
+			if (editSession != null) {
 				editSession.Save ();
+				if (!autoCommitChanges && componentName != null)
+					componentName = editSession.ActiveGroup;
+			}
 		}
 		
 		public void CopySelection ()
@@ -116,6 +118,11 @@ namespace Stetic
 			editSession.CreateBackendWidgetPlug (socketId);
 		}
 		
+		protected override void OnDestroyPlug (uint socketId)
+		{
+			editSession.DestroyBackendWidgetPlug ();
+		}
+		
 		protected override Gtk.Widget OnCreateWidget ()
 		{
 			return editSession.Backend;
@@ -124,8 +131,8 @@ namespace Stetic
 		void CreateSession ()
 		{
 			try {
-				if (actionGroup != null)
-					editSession = project.ProjectBackend.CreateGlobalActionGroupDesignerSession (frontend, actionGroup.Name, autoCommitChanges);
+				if (actionGroupName != null)
+					editSession = project.ProjectBackend.CreateGlobalActionGroupDesignerSession (frontend, actionGroupName, autoCommitChanges);
 				else
 					editSession = project.ProjectBackend.CreateLocalActionGroupDesignerSession (frontend, componentName, autoCommitChanges);
 				ResetCustomWidget ();
@@ -144,24 +151,23 @@ namespace Stetic
 			base.Dispose ();
 		}
 		
-		protected override void OnBackendChanging ()
+		internal override void OnBackendChanged (ApplicationBackend oldBackend)
 		{
-			if (!autoCommitChanges)
-				sessionData = editSession.SaveState ();
-			if (editSession != null)
-				editSession.Dispose ();
-			editSession = null;
-			base.OnBackendChanging ();
-		}
+			object[] sessionData = null;
+			
+			if (oldBackend != null) {
+				if (!autoCommitChanges)
+					sessionData = editSession.SaveState ();
+				if (editSession != null)
+					editSession.Dispose ();
+			}
 		
-		protected override void OnBackendChanged ()
-		{
 			CreateSession ();
 
 			if (sessionData != null && editSession != null)
 				editSession.RestoreState (sessionData);
 			
-			base.OnBackendChanged ();
+			base.OnBackendChanged (oldBackend);
 		}
 		
 		internal void NotifyBindField ()

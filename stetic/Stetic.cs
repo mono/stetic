@@ -35,7 +35,7 @@ namespace Stetic {
 		public static int Main (string[] args)
 		{
 			int n = 0;
-			IsolationMode mode = IsolationMode.None; // IsolationMode.ProcessUnix;
+			IsolationMode mode = IsolationMode.ProcessUnix;
 			
 			while (n < args.Length) {
 				string arg = args[n];
@@ -111,6 +111,7 @@ namespace Stetic {
 			Project.ComponentRemoved += OnWidgetRemoved;
 			Project.SelectionChanged += OnSelectionChanged;
 			Project.ModifiedChanged += OnProjectModified;
+			Project.ProjectReloaded += OnProjectReloaded;
 
 			Palette = SteticApp.PaletteWidget;
 			ProjectView = SteticApp.ProjectWidget;
@@ -223,6 +224,31 @@ namespace Stetic {
 			if (Project.Modified)
 				title += "*";
 			MainWindow.Title = title;
+		}
+		
+		static void OnProjectReloaded (object sender, EventArgs a)
+		{
+			if (WidgetNotebook.Page == -1)
+				return;
+			
+			// Get the opened components
+			
+			int active = WidgetNotebook.Page;
+			ArrayList pages = new ArrayList ();
+			while (WidgetNotebook.NPages > 0) {
+				DesignerView view = (DesignerView) WidgetNotebook.GetNthPage (0);
+				pages.Add (view.Component.Name);
+				WidgetNotebook.Remove (view);
+			}
+			openWindows.Clear ();
+			
+			// Reopen the components
+			foreach (string s in pages) {
+				Component w = Project.GetComponent (s);
+				if (w != null)
+					OpenWindow (w);
+			}
+			WidgetNotebook.Page = active;
 		}
 		
 		static bool IsWindowOpen (Component component)

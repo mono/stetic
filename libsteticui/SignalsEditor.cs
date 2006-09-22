@@ -29,6 +29,11 @@ namespace Stetic
 			session = app.Backend.CreateSignalsWidgetPlug (frontend, socketId);
 		}
 		
+		protected override void OnDestroyPlug (uint socketId)
+		{
+			app.Backend.DestroySignalsWidgetPlug ();
+		}
+		
 		protected override Gtk.Widget OnCreateWidget ()
 		{
 			session = app.Backend.GetSignalsWidget (frontend);

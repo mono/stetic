@@ -1,5 +1,6 @@
 
 using System;
+using System.Xml;
 using System.Collections;
 
 namespace Stetic
@@ -37,7 +38,7 @@ namespace Stetic
 			}
 			else {
 				if (!autoCommitChanges)
-					throw new InvalidOperationException ();
+					throw new System.NotSupportedException ();
 				Stetic.Wrapper.Container container = project.GetTopLevelWrapper (containerName, true);
 				groupToolbar = new ActionGroupToolbar (frontend, container.LocalActionGroups);
 			}
@@ -201,6 +202,13 @@ namespace Stetic
 			Gdk.Threads.Leave ();
 		}
 		
+		public void DestroyBackendWidgetPlug ()
+		{
+			Gtk.Plug plug = (Gtk.Plug) Backend.Parent;
+			plug.Remove (Backend);
+			plug.Destroy ();
+		}
+		
 		public bool AllowActionBinding {
 			get { return designer.Toolbar.AllowActionBinding; }
 			set { designer.Toolbar.AllowActionBinding = value; }
@@ -219,13 +227,42 @@ namespace Stetic
 			return null;
 		}
 		
-		public string SaveState ()
+		public object[] SaveState ()
 		{
-			return null;
+			if (autoCommitChanges)
+				return null;
+
+			XmlDocument doc = new XmlDocument ();
+			doc.AppendChild (groupCopy.Write (doc, FileFormat.Native));
+			
+			Hashtable nameMap = new Hashtable ();
+			foreach (DictionaryEntry e in actionCopyMap)
+				nameMap [((Wrapper.Action)e.Key).Name] = ((Wrapper.Action)e.Value).Name;
+			
+			return new object[] { groupCopy.Name, nameMap, doc.OuterXml };
 		}
 		
-		public void RestoreState (string state)
+		public void RestoreState (object[] data)
 		{
+			if (data == null)
+				return;
+			
+			groupCopy = new Stetic.Wrapper.ActionGroup ();
+			groupCopy.Name = (string) data [0];
+			
+			XmlDocument doc = new XmlDocument ();
+			doc.LoadXml ((string) data [2]);
+			
+			// Create the map which links edited action with source actions
+			actionCopyMap.Clear ();
+			foreach (DictionaryEntry e in (Hashtable) data [1]) {
+				Wrapper.Action dupaction = groupCopy.GetAction ((string)e.Key);
+				Wrapper.Action action = group.GetAction ((string)e.Value);
+				actionCopyMap [dupaction] = action;
+			}
+			
+			groupCopy.SignalAdded += new Stetic.SignalEventHandler (OnSignalAdded);
+			groupCopy.SignalChanged += new Stetic.SignalChangedEventHandler (OnSignalChanged);
 		}
 		
 		void OnSignalAdded (object s, Stetic.SignalEventArgs a)

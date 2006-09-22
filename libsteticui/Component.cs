@@ -116,7 +116,9 @@ namespace Stetic
 		{
 			// Make sure we don't leak the wrapper type to the frontend process
 			
-			if (ob is Wrapper.Container) {
+			if (ob is Wrapper.Window) {
+				System.Runtime.Remoting.RemotingServices.Marshal (ob, null, typeof(Wrapper.Window));
+			} else if (ob is Wrapper.Container) {
 				System.Runtime.Remoting.RemotingServices.Marshal (ob, null, typeof(Wrapper.Container));
 			} else if (ob is Wrapper.Widget) {
 				System.Runtime.Remoting.RemotingServices.Marshal (ob, null, typeof(Wrapper.Widget));

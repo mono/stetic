@@ -18,8 +18,8 @@ namespace Stetic
 		string tmpProjectFile;
 		WidgetLibrarySet widgetLibraries = new WidgetLibrarySet ();
 		
-		internal event EventHandler BackendChanging;
-		internal event EventHandler BackendChanged;
+		internal event BackendChangingHandler BackendChanging;
+		internal event BackendChangedHandler BackendChanged;
 
 		public event ComponentEventHandler ComponentAdded;
 		public event ComponentEventHandler ComponentRemoved;
@@ -60,12 +60,16 @@ namespace Stetic
 		
 		public void Dispose ()
 		{
+			app.BackendChanging -= OnBackendChanging;
+			app.BackendChanged -= OnBackendChanged;
+			
 			if (tmpProjectFile != null && File.Exists (tmpProjectFile)) {
 				File.Delete (tmpProjectFile);
 				tmpProjectFile = null;
 			}
 			backend.Dispose ();
 			app.DisposeProject (this);
+			widgetLibraries.Dispose ();
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 		}
 
@@ -271,7 +275,7 @@ namespace Stetic
 				Gtk.Application.Invoke (
 					delegate {
 						Component c = App.GetComponent (obj, name, typeName);
-						if (ComponentAdded != null)
+						if (c != null && ComponentAdded != null)
 							ComponentAdded (this, new ComponentEventArgs (this, c));
 					}
 				);
@@ -284,7 +288,7 @@ namespace Stetic
 				Gtk.Application.Invoke (
 					delegate {
 						Component c = App.GetComponent (obj, name, typeName);
-						if (ComponentRemoved != null)
+						if (c != null && ComponentRemoved != null)
 							ComponentRemoved (this, new ComponentEventArgs (this, c));
 					}
 				);
@@ -324,8 +328,10 @@ namespace Stetic
 				delegate {
 					if (ComponentNameChanged != null) {
 						WidgetComponent c = (WidgetComponent) App.GetComponent (obj, null, null);
-						c.UpdateName (newName);
-						ComponentNameChanged (this, new ComponentNameEventArgs (this, c, oldName));
+						if (c != null) {
+							c.UpdateName (newName);
+							ComponentNameChanged (this, new ComponentNameEventArgs (this, c, oldName));
+						}
 					}
 				}
 			);
@@ -352,7 +358,8 @@ namespace Stetic
 			Gtk.Application.Invoke (delegate {
 				if (SignalAdded != null) {
 					Component c = App.GetComponent (obj, name, null);
-					SignalAdded (this, new ComponentSignalEventArgs (this, c, null, signal));
+					if (c != null)
+						SignalAdded (this, new ComponentSignalEventArgs (this, c, null, signal));
 				}
 			});
 		}
@@ -362,7 +369,8 @@ namespace Stetic
 			Gtk.Application.Invoke (delegate {
 				if (SignalRemoved != null) {
 					Component c = App.GetComponent (obj, name, null);
-					SignalRemoved (this, new ComponentSignalEventArgs (this, c, null, signal));
+					if (c != null)
+						SignalRemoved (this, new ComponentSignalEventArgs (this, c, null, signal));
 				}
 			});
 		}
@@ -372,7 +380,8 @@ namespace Stetic
 			Gtk.Application.Invoke (delegate {
 				if (SignalChanged != null) {
 					Component c = App.GetComponent (obj, name, null);
-					SignalChanged (this, new ComponentSignalEventArgs (this, c, oldSignal, signal));
+					if (c != null)
+						SignalChanged (this, new ComponentSignalEventArgs (this, c, oldSignal, signal));
 				}
 			});
 		}
@@ -385,21 +394,23 @@ namespace Stetic
 			});
 		}
 		
-		void OnBackendChanging (object ob, EventArgs args)
+		void OnBackendChanging ()
 		{
 			selection = null;
 			if (SelectionChanged != null)
 				SelectionChanged (this, new ComponentEventArgs (this, selection));
 				
-			tmpProjectFile = Path.GetTempFileName ();
-			backend.Save (tmpProjectFile);
-			
 			if (BackendChanging != null)
-				BackendChanging (this, args);
+				BackendChanging ();
 		}
 		
-		void OnBackendChanged (object ob, EventArgs args)
+		void OnBackendChanged (ApplicationBackend oldBackend)
 		{
+			if (oldBackend != null) {
+				tmpProjectFile = Path.GetTempFileName ();
+				backend.Save (tmpProjectFile);
+			}
+			
 			backend = app.Backend.CreateProject ();
 			backend.SetFrontend (this);
 			backend.WidgetLibraries = widgetLibraries;
@@ -417,7 +428,10 @@ namespace Stetic
 				backend.ResourceProvider = resourceProvider;
 
 			if (BackendChanged != null)
-				BackendChanged (this, args);
+				BackendChanged (oldBackend);
+				
+			if (ProjectReloaded != null)
+				ProjectReloaded (this, EventArgs.Empty);
 		}
 	}
 	
@@ -440,6 +454,17 @@ namespace Stetic
 		public string[] GetWidgetLibraries ()
 		{
 			return (string[]) widgetLibraries.ToArray (typeof(string));
+		}
+
+		public override object InitializeLifetimeService ()
+		{
+			// Will be disconnected when calling Dispose
+			return null;
+		}
+		
+		public void Dispose ()
+		{
+			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 		}
 	}
 }

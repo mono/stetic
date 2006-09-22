@@ -350,6 +350,7 @@ namespace Stetic {
 			doc.LoadXml (template);
 			Stetic.Wrapper.ActionGroup group = new Stetic.Wrapper.ActionGroup ();
 			group.Read (this, doc.DocumentElement);
+			ActionGroups.Add (group);
 			return group;
 		}
 		
@@ -570,7 +571,7 @@ namespace Stetic {
 		void OnSignalRemoved (object sender, SignalEventArgs args)
 		{
 			if (frontend != null)
-				frontend.NotifySignalRemoved (Component.GetSafeReference (args.Wrapper), ((Gtk.Widget)args.Wrapper.Wrapped).Name, args.Signal);
+				frontend.NotifySignalRemoved (Component.GetSafeReference (args.Wrapper), null, args.Signal);
 			OnSignalRemoved (args);
 		}
 

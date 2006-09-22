@@ -62,26 +62,35 @@ namespace Stetic {
 		
 		public static bool ReloadWidgetLibraries ()
 		{
-			bool res = true;
-			bool changing = false;
+			bool needsReload = false;
 
-			foreach (WidgetLibrary lib in libraries)
+			// If there is a lib which can't be reloaded, 
+			// there is no need to start the reloading process
+			
+			foreach (WidgetLibrary lib in libraries) {
 				if (lib != coreLib && lib.NeedsReload) {
-					if (!changing) {
-						changing = true;
-						NotifyChanging ();
-					}
 					if (!lib.CanReload)
-						res = false;
-					else
-						lib.Reload ();
+						return false;
+					needsReload = true;
 				}
+			}
+			
+			if (!needsReload)
+				return true;
 
-			if (changing) {
+			try {
+				NotifyChanging ();
+				
+				foreach (WidgetLibrary lib in libraries)
+					if (lib != coreLib && lib.NeedsReload)
+						lib.Reload ();
+
 				InternalUpdate ();
+			} finally {
 				NotifyChanged ();
 			}
-			return res;
+			
+			return true;
 		}
 		
 		public static bool IsRegistered (WidgetLibrary library)

@@ -50,6 +50,15 @@ namespace Stetic
 			}
 		}
 		
+		protected override void OnUnrealized ()
+		{
+			if (app.UseExternalBackend && initialized) {
+				OnDestroyPlug (socket.Id);
+				initialized = false;
+			}
+			base.OnUnrealized ();
+		}
+		
 		protected void UpdateWidget ()
 		{
 			if (initialized) {
@@ -62,6 +71,7 @@ namespace Stetic
 		}
 		
 		protected abstract void OnCreatePlug (uint socketId);
+		protected abstract void OnDestroyPlug (uint socketId);
 		
 		protected abstract Gtk.Widget OnCreateWidget ();
 		
@@ -74,17 +84,7 @@ namespace Stetic
 			}
 		}
 		
-		void OnBackendChanging (object ob, EventArgs args)
-		{
-			OnBackendChanging ();
-		}
-		
-		void OnBackendChanged (object ob, EventArgs args)
-		{
-			OnBackendChanged ();
-		}
-		
-		protected virtual void OnBackendChanged ()
+		internal virtual void OnBackendChanged (ApplicationBackend oldBackend)
 		{
 			if (initialized && app.UseExternalBackend && !customWidget) {
 				Remove (Child);
@@ -93,7 +93,7 @@ namespace Stetic
 			}
 		}
 		
-		protected virtual void OnBackendChanging ()
+		internal virtual void OnBackendChanging ()
 		{
 		}
 		

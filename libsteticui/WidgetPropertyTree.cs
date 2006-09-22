@@ -15,6 +15,11 @@ namespace Stetic
 			app.Backend.CreatePropertiesWidgetPlug (socketId);
 		}
 		
+		protected override void OnDestroyPlug (uint socketId)
+		{
+			app.Backend.DestroyPropertiesWidgetPlug ();
+		}
+		
 		protected override Gtk.Widget OnCreateWidget ()
 		{
 			return app.Backend.GetPropertiesWidget ();

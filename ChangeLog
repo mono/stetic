@@ -1,3 +1,35 @@
+2006-09-22  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libsteticui/WidgetEditSession.cs:
+	* libsteticui/Palette.cs:
+	* libsteticui/ProjectView.cs:
+	* libsteticui/SignalsEditor.cs:
+	* libsteticui/ApplicationBackend.cs: Reconnect the plug when the socket
+	  is unrealized.
+	  
+	* libsteticui/WidgetDesignerBackend.cs: Added null check.
+	
+	* libsteticui/WidgetDesigner.cs:
+	* libsteticui/ActionGroupEditSession.cs:
+	* libsteticui/PluggableWidget.cs:
+	* libsteticui/WidgetPropertyTree.cs:
+	* libsteticui/ActionGroupDesigner.cs:
+	* libstetic/Registry.cs:
+	* stetic/Stetic.cs:
+	* libsteticui/Application.cs: Fixed process restart workflow, to make
+	  the process switch faster.
+	
+	* libsteticui/GuiDispatchServerSink.cs:
+	* libsteticui/Component.cs:
+	* libsteticui/ApplicationBackendController.cs:
+	* libsteticui/Project.cs:
+	* libsteticui/ProjectBackend.cs: Misc bug fixes.
+	
+	* libstetic/ItemDescriptor.cs: Made it serializable.
+	* libstetic/wrapper/Action.cs (CopyFrom): Clear the signals list before
+	  adding the new signals.
+	* stetic/DesignerView.cs: Added getter for the root component.
+
 2006-09-21  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* stetic/UIManager.cs:

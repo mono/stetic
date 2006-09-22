@@ -45,6 +45,7 @@ namespace Stetic
 							out IMessage responseMsg, out ITransportHeaders responseHeaders, out Stream responseStream)
 		{
 			IMethodCallMessage msg = (IMethodCallMessage) requestMsg;
+//			Console.WriteLine ("MESSAGE: " + msg.MethodName);
 			
 			sinkStack.Push (this, null);
 
@@ -93,8 +94,8 @@ namespace Stetic
 			public void Dispatch (object o, EventArgs a)
 			{
 				IMessage responseMsg;
-				ITransportHeaders responseHeaders;
-				Stream responseStream;
+				ITransportHeaders responseHeaders = null;
+				Stream responseStream = null;
 				
 				try {
 					nextSink.ProcessMessage (sinkStack,
@@ -104,13 +105,12 @@ namespace Stetic
 									 out responseMsg,
 									 out responseHeaders,
 									 out responseStream);
-
-					sinkStack.AsyncProcessResponse (responseMsg, responseHeaders, responseStream);
 				}
 				catch (Exception ex) {
 					responseMsg = new ReturnMessage (ex, (IMethodCallMessage)requestMsg);
-					sinkStack.AsyncProcessResponse (responseMsg, null, null);
 				}
+				
+				sinkStack.AsyncProcessResponse (responseMsg, responseHeaders, responseStream);
 			}
 		}
 	}

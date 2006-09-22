@@ -134,6 +134,8 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
+			if (preview == null)
+				return;
 			if (wrapper != null)
 				wrapper.DetachDesigner (resizableFixed);
 			preview.SizeAllocated -= new Gtk.SizeAllocatedHandler (OnResized);

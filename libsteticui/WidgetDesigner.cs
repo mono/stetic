@@ -10,7 +10,6 @@ namespace Stetic
 		Component selection;
 		Component rootWidget;
 		
-		string sessionData;
 		Project project;
 		Project editedProject;
 		int reloadCount;
@@ -21,6 +20,7 @@ namespace Stetic
 		public event EventHandler BindField;
 		public event EventHandler ModifiedChanged;
 		public event EventHandler SelectionChanged;
+		public event EventHandler RootComponentChanged;
 		public event ComponentSignalEventHandler SignalAdded;
 		public event ComponentSignalEventHandler SignalRemoved;
 		public event ComponentSignalEventHandler SignalChanged;
@@ -99,6 +99,11 @@ namespace Stetic
 			session.CreateWrapperWidgetPlug (socketId);
 		}
 		
+		protected override void OnDestroyPlug (uint socketId)
+		{
+			session.DestroyWrapperWidgetPlug ();
+		}
+		
 		protected override Gtk.Widget OnCreateWidget ()
 		{
 			return session.WrapperWidget;
@@ -146,10 +151,11 @@ namespace Stetic
 			if (!autoCommitChanges)
 				editedProject.Dispose ();
 
-			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
 			if (session != null)
 				session.Dispose ();
 			base.Dispose ();
+
+			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
 		}
 		
 		public void Save ()
@@ -168,32 +174,46 @@ namespace Stetic
 		{
 			rootWidget = app.GetComponent (session.RootWidget, null, null);
 			UpdateWidget ();
+			if (RootComponentChanged != null)
+				RootComponentChanged (this, EventArgs.Empty);
 		}
 		
-		protected override void OnBackendChanging ()
+		internal override void OnBackendChanging ()
 		{
 			reloadCount = 0;
-			if (!autoCommitChanges)
-				sessionData = session.SaveState ();
-			if (session != null)
-				session.Dispose ();
-			session = null;
 			base.OnBackendChanging ();
 		}
 		
-		protected override void OnBackendChanged ()
+		internal override void OnBackendChanged (ApplicationBackend oldBackend)
 		{
 			// Can't do anything until the projects are reloaded
 			// This is checked in OnProjectBackendChanged.
 		}
 		
-		void OnProjectBackendChanged (object s, EventArgs a)
+		void OnProjectBackendChanged (ApplicationBackend oldBackend)
 		{
 			if (++reloadCount == 2) {
+				object sessionData = null;
+				
+				if (oldBackend != null && !autoCommitChanges) {
+					sessionData = session.SaveState ();
+					session.DestroyWrapperWidgetPlug ();
+				}
+
+				// Don't dispose the session here, since it will dispose
+				// the underlying project, and we can't do it because
+				// it may need to process the OnBackendChanging event
+				// as well.
+			
 				CreateSession ();
+				
 				if (sessionData != null && session != null)
 					session.RestoreState (sessionData);
-				base.OnBackendChanged ();
+
+				base.OnBackendChanged (oldBackend);
+				
+				if (RootComponentChanged != null)
+					RootComponentChanged (this, EventArgs.Empty);
 			}
 		}
 		

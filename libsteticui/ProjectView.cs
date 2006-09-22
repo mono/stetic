@@ -22,6 +22,11 @@ namespace Stetic
 			app.Backend.CreateProjectWidgetPlug (frontend, socketId);
 		}
 		
+		protected override void OnDestroyPlug (uint socketId)
+		{
+			app.Backend.DestroyProjectWidgetPlug ();
+		}
+		
 		protected override Gtk.Widget OnCreateWidget ()
 		{
 			return app.Backend.GetProjectWidget (frontend);
