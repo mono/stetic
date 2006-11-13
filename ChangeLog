@@ -1,3 +1,9 @@
+2006-11-13  Lluis Sanchez Gual  <lluis@novell.com> 
+
+	* libstetic/editor/Flags.cs:
+	* libstetic/editor/ActionToolItem.cs:
+	  Fix build. Patch by Michael Schurter.
+
 2006-09-22  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libsteticui/WidgetEditSession.cs:

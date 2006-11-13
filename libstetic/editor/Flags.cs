@@ -11,7 +11,7 @@ namespace Stetic.Editor {
 			if (Value == null)
 				return "";
 
-			uint value = (uint)(int)(Enum)Value;
+			uint value = (uint)(int)Value;
 			EnumDescriptor enm = Registry.LookupEnum (Property.PropertyType.FullName);
 			string txt = "";
 			foreach (Enum val in enm.Values) {
@@ -19,7 +19,7 @@ namespace Stetic.Editor {
 				if (eval.Label == "")
 					continue;
 				
-				if ((value & (uint)(int)(Enum) eval.Value) != 0) {
+				if ((value & (uint)(int)eval.Value) != 0) {
 					if (txt.Length > 0) txt += ", ";
 					txt += eval.Label;
 				}
@@ -113,7 +113,7 @@ namespace Stetic.Editor {
 				return Enum.ToObject (enm.EnumType, UIntValue);
 			}
 			set {
-				uint newVal = (uint)(int)(Enum)value;
+				uint newVal = (uint)(int)value;
 				if (flagsLabel != null) {
 					string txt = "";
 					foreach (Enum val in enm.Values) {
@@ -121,7 +121,7 @@ namespace Stetic.Editor {
 						if (eval.Label == "")
 							continue;
 						
-						if ((newVal & (uint)(int)(Enum) eval.Value) != 0) {
+						if ((newVal & (uint)(int) eval.Value) != 0) {
 							if (txt.Length > 0) txt += ", ";
 							txt += eval.Label;
 						}

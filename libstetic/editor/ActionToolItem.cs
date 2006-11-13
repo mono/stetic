@@ -305,7 +305,7 @@ namespace Stetic.Editor
 			
 			// Make sure we get the focus after closing the menu, so we can keep browsing buttons
 			// using the keyboard.
-			menu.Hidden += delegate (object s, EventArgs a) {
+			menu.Hidden += delegate (object sender, EventArgs a) {
 				GrabFocus ();
 			};
 			
