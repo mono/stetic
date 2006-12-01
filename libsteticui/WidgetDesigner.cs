@@ -139,6 +139,15 @@ namespace Stetic
 				session.EditingBackend.DeleteSelection ();
 		}
 		
+		public UndoQueue UndoQueue {
+			get {
+				if (session != null)
+					return session.UndoQueue;
+				else
+					return UndoQueue.Empty;
+			}
+		}
+		
 		public override void Dispose ()
 		{
 			editedProject.SignalAdded -= OnSignalAdded;

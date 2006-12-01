@@ -11,6 +11,7 @@ namespace Stetic {
 	internal class ProjectBackend : MarshalByRefObject, IProject, IDisposable 
 	{
 		Hashtable nodes;
+		ArrayList topLevels;
 		NodeStore store;
 		bool modified;
 		internal bool Syncing;
@@ -30,6 +31,7 @@ namespace Stetic {
 		public event Wrapper.WidgetNameChangedHandler WidgetMemberNameChanged;
 		public event Wrapper.WidgetEventHandler WidgetAdded;
 		public event Wrapper.WidgetEventHandler WidgetRemoved;
+		public event ObjectWrapperEventHandler ObjectChanged;
 		
 		public event SignalEventHandler SignalAdded;
 		public event SignalEventHandler SignalRemoved;
@@ -46,6 +48,7 @@ namespace Stetic {
 		{
 			nodes = new Hashtable ();
 			store = new NodeStore (typeof (ProjectNode));
+			topLevels = new ArrayList ();
 			
 			ActionGroups = new Stetic.Wrapper.ActionGroupCollection ();
 
@@ -57,6 +60,10 @@ namespace Stetic {
 		
 		public void Dispose ()
 		{
+			// First of all, disconnect from the frontend,
+			// to avoid sending notifications while disposing
+			frontend = null;
+			
 			Registry.RegistryChanging -= OnRegistryChanging;
 			Registry.RegistryChanged -= OnRegistryChanged;
 			Close ();
@@ -145,6 +152,7 @@ namespace Stetic {
 			selection = null;
 			store.Clear ();
 			nodes.Clear ();
+			topLevels.Clear ();
 
 			iconFactory = new ProjectIconFactory ();
 		}
@@ -181,8 +189,9 @@ namespace Stetic {
 				if (iconsElem != null)
 					iconFactory.Read (this, iconsElem);
 				
+				ObjectReader reader = new ObjectReader (this, FileFormat.Native);
 				foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
-					Wrapper.Container wrapper = Stetic.ObjectWrapper.Read (this, toplevel, FileFormat.Native) as Wrapper.Container;
+					Wrapper.Container wrapper = Stetic.ObjectWrapper.ReadObject (reader, toplevel) as Wrapper.Container;
 					if (wrapper != null)
 						AddWidget ((Gtk.Widget)wrapper.Wrapped);
 				}
@@ -210,8 +219,9 @@ namespace Stetic {
 			XmlElement toplevel = doc.CreateElement ("stetic-interface");
 			doc.AppendChild (toplevel);
 
+			ObjectWriter writer = new ObjectWriter (doc, FileFormat.Native);
 			foreach (Wrapper.ActionGroup agroup in actionGroups) {
-				XmlElement elem = agroup.Write (doc, FileFormat.Native);
+				XmlElement elem = agroup.Write (writer);
 				toplevel.AppendChild (elem);
 			}
 			
@@ -223,7 +233,7 @@ namespace Stetic {
 				if (wrapper == null)
 					continue;
 
-				XmlElement elem = wrapper.Write (doc, FileFormat.Native);
+				XmlElement elem = wrapper.Write (writer);
 				if (elem != null)
 					toplevel.AppendChild (elem);
 			}
@@ -442,6 +452,7 @@ namespace Stetic {
 			node.Id = ++componentIdCounter;
 			nodes[widget] = node;
 			if (parent == null) {
+				topLevels.Add (widget);
 				if (position == -1)
 					store.AddNode (node);
 				else
@@ -486,6 +497,9 @@ namespace Stetic {
 			}
 			ww.Destroyed -= WidgetDestroyed;
 			
+			if (node.Parent == null)
+				topLevels.Remove (node.Widget);
+
 			if (!loading) {
 				if (frontend != null)
 					frontend.NotifyWidgetRemoved (node.Wrapper, node.Widget.Name, null, node.Parent == null);
@@ -521,8 +535,11 @@ namespace Stetic {
 		
 		void OnObjectChanged (object sender, ObjectWrapperEventArgs args)
 		{
-			if (!Syncing)
+			if (!Syncing) {
 				Modified = true;
+				if (ObjectChanged != null)
+					ObjectChanged (this, args);
+			}
 		}
 
 		void OnWidgetNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
@@ -635,13 +652,7 @@ namespace Stetic {
 
 		public Gtk.Widget[] Toplevels {
 			get {
-				ArrayList list = new ArrayList ();
-				foreach (Widget w in nodes.Keys) {
-					Wrapper.Widget wrapper = Wrapper.Widget.Lookup (w);
-					if (wrapper != null && wrapper.IsTopLevel)
-						list.Add (w);
-				}
-				return (Gtk.Widget[]) list.ToArray (typeof(Gtk.Widget));
+				return (Gtk.Widget[]) topLevels.ToArray (typeof(Gtk.Widget));
 			}
 		}
 
@@ -661,6 +672,7 @@ namespace Stetic {
 		public void Clear ()
 		{
 			nodes.Clear ();
+			topLevels.Clear ();
 			store = new NodeStore (typeof (ProjectNode));
 		}
 

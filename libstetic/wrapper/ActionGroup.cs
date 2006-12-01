@@ -88,12 +88,12 @@ namespace Stetic.Wrapper
 				return name;
 		}
 		
-		public XmlElement Write (XmlDocument doc, FileFormat format)
+		public XmlElement Write (ObjectWriter writer)
 		{
-			XmlElement group = doc.CreateElement ("action-group");
+			XmlElement group = writer.XmlDocument.CreateElement ("action-group");
 			group.SetAttribute ("name", name);
 			foreach (Action ac in actions)
-				group.AppendChild (ac.Write (doc, format));
+				group.AppendChild (ac.Write (writer));
 			return group;
 		}
 		

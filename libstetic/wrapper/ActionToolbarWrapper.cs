@@ -117,23 +117,23 @@ namespace Stetic.Wrapper
 			Loading = false;
 		}
 		
-		public override XmlElement Write (XmlDocument doc, FileFormat format)
+		public override XmlElement Write (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (doc, format);
-			if (format == FileFormat.Native) {
+			XmlElement elem = base.Write (writer);
+			if (writer.Format == FileFormat.Native) {
 				// The style is already stored in ButtonStyle
 				GladeUtils.ExtractProperty (elem, "ToolbarStyle", "");
 				if (toolbarInfo != null)
-					elem.AppendChild (doc.ImportNode (toolbarInfo, true));
+					elem.AppendChild (writer.XmlDocument.ImportNode (toolbarInfo, true));
 				else
-					elem.AppendChild (actionTree.Write (doc, format));
+					elem.AppendChild (actionTree.Write (writer.XmlDocument, writer.Format));
 			}
 			return elem;
 		}
 		
-		public override void Read (XmlElement elem, FileFormat format)
+		public override void Read (ObjectReader reader, XmlElement elem)
 		{
-			base.Read (elem, format);
+			base.Read (reader, elem);
 			toolbarInfo = elem ["node"];
 		}
 		

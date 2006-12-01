@@ -13,6 +13,7 @@ namespace Stetic
 		TypedPropertyDescriptor gladeProperty;
 		bool isWrapperProperty;
 		TypedClassDescriptor klass;
+		bool defaultSet;
 
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
@@ -171,6 +172,27 @@ namespace Stetic
 				return false;
 		}
 
+		public override void ResetValue (object instance) 
+		{
+			// This is a hack because there is no managed way of getting
+			// the default value of a GObject property. The call to LoadDefaultValues
+			// will guess the default values from a dummy instance
+			if (!defaultSet) {
+				ObjectWrapper ww = ObjectWrapper.Lookup (instance);
+				TypedClassDescriptor td = ww.ClassDescriptor as TypedClassDescriptor;
+				if (td != null)
+					td.LoadDefaultValues ();
+				defaultSet = true;
+			}
+			base.ResetValue (instance);
+		}
+		
+		internal void SetDefault (object val)
+		{
+			defaultValue = val;
+			defaultSet = true;
+		}
+		
 		// Gets the value of the property on @obj
 		public override object GetValue (object obj)
 		{
@@ -195,14 +217,19 @@ namespace Stetic
 		// Sets the value of the property on @obj
 		public override void SetValue (object obj, object value)
 		{
+			ObjectWrapper ww = ObjectWrapper.Lookup (obj);
+			IDisposable t = ww != null ? ww.UndoManager.AtomicChange : null;
 			try {
 				if (isWrapperProperty)
-					obj = ObjectWrapper.Lookup (obj);
+					obj = ww;
 				if (memberInfo != null)
 					obj = memberInfo.GetValue (obj, null);
 				propertyInfo.SetValue (obj, value, null);
 			} catch (Exception ex) {
 				throw new InvalidOperationException ("Could not set value for property " + klass.Name + "." + Name + " to object '" + obj + "'", ex); 
+			} finally {
+				if (t != null)
+					t.Dispose ();
 			}
 		}
 

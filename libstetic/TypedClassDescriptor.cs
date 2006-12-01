@@ -16,6 +16,7 @@ namespace Stetic
 		ConstructorInfo cinfo;
 		bool useGTypeCtor;
 		Gdk.Pixbuf icon;
+		bool defaultValuesLoaded;
 		
 		const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 		
@@ -155,6 +156,38 @@ namespace Stetic
 			if (missingIcon == null)
 				missingIcon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
 			return missingIcon;
+		}
+		
+		internal void LoadDefaultValues ()
+		{
+			// This is a hack because there is no managed way of getting
+			// the default value of a GObject property.
+			// This method creates an dummy instance of this class and
+			// gets the values for their properties. Those values are
+			// considered the default
+			
+			if (defaultValuesLoaded)
+				return;
+			defaultValuesLoaded = true;
+			
+			object ob = NewInstance (null);
+			
+			foreach (ItemGroup group in ItemGroups) {
+				foreach (ItemDescriptor item in group) {
+					TypedPropertyDescriptor prop = item as TypedPropertyDescriptor;
+					if (prop == null)
+						continue;
+						
+					if (!prop.HasDefault) {
+						prop.SetDefault (null);
+					} else {
+						object val = prop.GetValue (ob);
+						prop.SetDefault (val);
+					}
+				}
+			}
+			ObjectWrapper ww = ObjectWrapper.Lookup (ob);
+			ww.Dispose ();
 		}
 	}
 }

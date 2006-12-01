@@ -48,18 +48,18 @@ namespace Stetic
 		XmlElement elementData;
 		FileFormat format;
 		
-		public override void Read (XmlElement elem, FileFormat format)
+		public override void Read (ObjectReader reader, XmlElement elem)
 		{
 			elementData = elem;
-			this.format = format;
+			this.format = reader.Format;
 		}
 
-		public override XmlElement Write (XmlDocument doc, FileFormat format)
+		public override XmlElement Write (ObjectWriter writer)
 		{
-			if (format != this.format)
+			if (writer.Format != this.format)
 				throw new InvalidOperationException ("Can't export incomplete widget information");
 				
-			return (XmlElement) doc.ImportNode (elementData, true);
+			return (XmlElement) writer.XmlDocument.ImportNode (elementData, true);
 		}
 		
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)

@@ -69,9 +69,10 @@ namespace Stetic {
 
 			XmlElement elem;
 			Stetic.Wrapper.Container parent = wrapper.ParentWrapper;
+			ObjectWriter writer = new ObjectWriter (doc, FileFormat.Glade);
 
 			if (parent == null) {
-				elem = wrapper.Write (doc, FileFormat.Glade);
+				elem = wrapper.Write (writer);
 				if (elem == null)
 					return null;
 				if (!(widget is Gtk.Window)) {
@@ -89,7 +90,7 @@ namespace Stetic {
 				// transforms will work correctly.
 				ClassDescriptor klass = parent.ClassDescriptor;
 				elem.SetAttribute ("class", klass.CName);
-				elem.AppendChild (parent.WriteContainerChild (wrapper, doc, FileFormat.Glade));
+				elem.AppendChild (parent.WriteContainerChild (writer, wrapper));
 			}
 			toplevel.AppendChild (elem);
 
@@ -111,12 +112,14 @@ namespace Stetic {
 				return null;
 			}
 
+			ObjectReader reader = new ObjectReader (project, FileFormat.Glade);
+			
 			XmlElement elem = (XmlElement)doc.SelectSingleNode ("glade-interface/widget");
 			if (elem.GetAttribute ("class") != "GtkWindow" ||
 			    elem.GetAttribute ("id") != "glade-dummy-container") {
 				// Creating a new toplevel
 				Stetic.Wrapper.Widget toplevel = (Stetic.Wrapper.Widget)
-					Stetic.ObjectWrapper.Read (project, elem, FileFormat.Glade);
+					Stetic.ObjectWrapper.ReadObject (reader, elem);
 				if (toplevel != null) {
 					project.AddWindow ((Gtk.Window)toplevel.Wrapped);
 				}
@@ -124,7 +127,7 @@ namespace Stetic {
 			}
 
 			return (Stetic.Wrapper.Widget)
-				Stetic.ObjectWrapper.Read (project, (XmlElement)elem.SelectSingleNode ("child/widget"), FileFormat.Glade);
+				Stetic.ObjectWrapper.ReadObject (reader, (XmlElement)elem.SelectSingleNode ("child/widget"));
 		}
 		
 		public static void Copy (Gtk.Widget widget, Gtk.SelectionData seldata, bool copyAsText)
@@ -560,6 +563,13 @@ namespace Stetic {
 
 			SetOverrideProperties (wrapper, overrideProps);
 			MarkTranslatables (cc, overrideProps);
+		}
+		
+		internal static XmlElement CreatePacking (XmlDocument doc, Stetic.Wrapper.Container.ContainerChild childwrapper)
+		{
+			XmlElement packing_elem = doc.CreateElement ("packing");
+			GetProps (childwrapper, packing_elem);
+			return packing_elem;
 		}
 		
 		static string PropToString (ObjectWrapper wrapper, TypedPropertyDescriptor prop)

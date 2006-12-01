@@ -20,7 +20,8 @@ namespace Stetic
 		internal ActionGroupDesigner (Project project, string componentName, ActionGroupComponent actionGroup, bool autoCommitChanges): base (project.App)
 		{
 			this.componentName = componentName;
-			this.actionGroupName = actionGroup.Name;
+			if (actionGroup != null)
+				this.actionGroupName = actionGroup.Name;
 			this.autoCommitChanges = autoCommitChanges;
 			this.project = project;
 			

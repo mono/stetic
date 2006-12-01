@@ -132,6 +132,12 @@ namespace Stetic {
 				return value.Equals (defaultValue);
 			return false;
 		}
+		
+		public virtual void ResetValue (object instance) 
+		{
+			if (HasDefault)
+				SetValue (instance, defaultValue);
+		}
 
 		// The property's type at run time
 		public virtual Type RuntimePropertyType {

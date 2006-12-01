@@ -57,19 +57,19 @@ namespace Stetic.Wrapper
 			Loading = false;
 		}
 		
-		public override XmlElement Write (XmlDocument doc, FileFormat format)
+		public override XmlElement Write (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (doc, format);
+			XmlElement elem = base.Write (writer);
 			if (menuInfo != null)
-				elem.AppendChild (doc.ImportNode (menuInfo, true));
+				elem.AppendChild (writer.XmlDocument.ImportNode (menuInfo, true));
 			else
-				elem.AppendChild (actionTree.Write (doc, format));
+				elem.AppendChild (actionTree.Write (writer.XmlDocument, writer.Format));
 			return elem;
 		}
 		
-		public override void Read (XmlElement elem, FileFormat format)
+		public override void Read (ObjectReader reader, XmlElement elem)
 		{
-			base.Read (elem, format);
+			base.Read (reader, elem);
 			menuInfo = elem ["node"];
 		}
 		

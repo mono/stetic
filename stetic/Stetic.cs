@@ -35,7 +35,7 @@ namespace Stetic {
 		public static int Main (string[] args)
 		{
 			int n = 0;
-			IsolationMode mode = IsolationMode.ProcessUnix;
+			IsolationMode mode = IsolationMode.None;
 			
 			while (n < args.Length) {
 				string arg = args[n];
@@ -303,6 +303,12 @@ namespace Stetic {
 					page.Dispose ();
 				}
 			}
+		}
+		
+		public static UndoQueue GetUndoQueue ()
+		{
+			DesignerView view = (DesignerView) WidgetNotebook.CurrentPageWidget;
+			return view.UndoQueue;
 		}
 		
 		public static void LoadProject (string file)

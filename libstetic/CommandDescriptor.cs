@@ -106,13 +106,18 @@ namespace Stetic {
 
 		public void Run (object obj)
 		{
-			InvokeMethod (ObjectWrapper.Lookup (obj), name, null, false);
+			ObjectWrapper ww = ObjectWrapper.Lookup (obj);
+			using (ww.UndoManager.AtomicChange) {
+				InvokeMethod (ww, name, null, false);
+			}
 		}
 
 		public void Run (object obj, Gtk.Widget context)
 		{
-			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
-			InvokeMethod (wrapper, name, context, true);
+			ObjectWrapper ww = ObjectWrapper.Lookup (obj);
+			using (ww.UndoManager.AtomicChange) {
+				InvokeMethod (ww, name, context, true);
+			}
 		}
 		
 		object InvokeMethod (object target, string name, object context, bool withContext)

@@ -187,6 +187,18 @@ namespace Stetic {
 			return ob;
 		}
 		
+		// Sets the default values for an instance
+		public virtual void ResetInstance (object obj)
+		{
+			foreach (ItemGroup group in groups) {
+				foreach (ItemDescriptor item in group) {
+					PropertyDescriptor prop = item as PropertyDescriptor;
+					if (prop != null)
+						prop.ResetValue (obj);
+				}
+			}
+		}
+		
 		public abstract object CreateInstance (IProject proj);
 		
 		public abstract ObjectWrapper CreateWrapper ();

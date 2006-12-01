@@ -104,11 +104,11 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		protected override void ReadChildren (XmlElement elem, FileFormat format)
+		protected override void ReadChildren (ObjectReader reader, XmlElement elem)
 		{
 			// Reset the button count
 			Size = 0;
-			base.ReadChildren (elem, format);
+			base.ReadChildren (reader, elem);
 		}
 		
 		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)

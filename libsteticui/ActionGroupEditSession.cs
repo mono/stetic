@@ -233,7 +233,7 @@ namespace Stetic
 				return null;
 
 			XmlDocument doc = new XmlDocument ();
-			doc.AppendChild (groupCopy.Write (doc, FileFormat.Native));
+			doc.AppendChild (groupCopy.Write (new ObjectWriter (doc, FileFormat.Native)));
 			
 			Hashtable nameMap = new Hashtable ();
 			foreach (DictionaryEntry e in actionCopyMap)

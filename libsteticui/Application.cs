@@ -350,6 +350,11 @@ namespace Stetic
 				if (c != null)
 					return c;
 
+				// If the remote object is already disposed, don't try to create a
+				// local component.
+				if (cbackend is ObjectWrapper && ((ObjectWrapper)cbackend).IsDisposed)
+					return null;
+				
 				if (cbackend is Wrapper.Action) {
 					c = new ActionComponent (this, cbackend, name);
 					((ObjectWrapper)cbackend).Frontend = c;

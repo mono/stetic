@@ -9,6 +9,7 @@ namespace Stetic
 	public static class WidgetUtils
 	{
 		static Gdk.Atom steticAtom;
+		static int undoIdCount;
 		
 		public static Gdk.Atom ApplicationXSteticAtom {
 			get {
@@ -25,14 +26,15 @@ namespace Stetic
 			if (wrapper == null)
 				throw new InvalidOperationException ();
 				
-			XmlElement elem = wrapper.Write (doc, FileFormat.Native);
+			XmlElement elem = wrapper.Write (new ObjectWriter (doc, FileFormat.Native));
 			doc.AppendChild (elem);
 			return doc.DocumentElement;
 		}
 		
 		public static Gtk.Widget ImportWidget (IProject project, XmlElement element)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (project, element, FileFormat.Native);
+			ObjectReader reader = new ObjectReader (project, FileFormat.Native);
+			ObjectWrapper wrapper = Stetic.ObjectWrapper.ReadObject (reader, element);
 			return wrapper.Wrapped as Gtk.Widget;
 		}
 		
@@ -202,6 +204,12 @@ namespace Stetic
 			ReadMembers (klass, wrapper, cc, packing);
 		}
 		
+		internal static XmlElement CreatePacking (XmlDocument doc, Stetic.Wrapper.Container.ContainerChild childwrapper)
+		{
+			XmlElement packing_elem = doc.CreateElement ("packing");
+			WidgetUtils.GetProps (childwrapper, packing_elem);
+			return packing_elem;
+		}
 		
 		public static void Copy (Gtk.Widget widget, Gtk.SelectionData seldata, bool copyAsText)
 		{
@@ -348,6 +356,11 @@ namespace Stetic
 				baseName = name;
 				idx = 0;
 			}
+		}
+		
+		internal static string GetUndoId ()
+		{
+			return (undoIdCount++).ToString ();
 		}
 	}
 }

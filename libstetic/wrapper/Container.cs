@@ -5,9 +5,10 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml;
 
-namespace Stetic.Wrapper {
-	public class Container : Widget {
-	
+namespace Stetic.Wrapper
+{
+	public class Container : Widget
+	{
 		int designWidth;
 		int designHeight;
 		IDesignArea designer;
@@ -56,9 +57,11 @@ namespace Stetic.Wrapper {
 			// in the parent container.
 			if (!Loading)
 				ValidateChildNames ((Gtk.Widget)o);
-			if (designer != null) {
-				ObjectWrapper w = ObjectWrapper.Lookup (o);
-				if (w != null)
+
+			ObjectWrapper w = ObjectWrapper.Lookup (args.Widget);
+			if (w != null) {
+				((Widget)w).RequiresUndoStatusUpdate = true;
+				if (designer != null)
 					w.OnDesignerAttach (designer);
 			}
 		}
@@ -123,24 +126,213 @@ namespace Stetic.Wrapper {
 			DoSync ();
 			freeze = 0;
 		}
-
-		public override void Read (XmlElement elem, FileFormat format)
+		
+		public override object GetUndoDiff ()
 		{
-			base.Read (elem, format);
-			ReadChildren (elem, format);
+			XmlElement oldElem = UndoManager.GetObjectStatus (this);
+			
+//			Console.WriteLine ("UNDO status: ");
+//			Console.WriteLine (oldElem.OuterXml);
+			
+			// Write the new status of the object. This is going to replace the old status in undoManager.
+			// In the process, register new objects found.
+			UndoWriter writer = new UndoWriter (oldElem.OwnerDocument, FileFormat.Native, UndoManager);
+			XmlElement newElem = Write (writer);
+			
+//			Console.WriteLine ("CURRENT status: ");
+//			Console.WriteLine (newElem.OuterXml);
+			
+			object dif = GetUndoDiff (newElem, oldElem, true);
+			UndoManager.UpdateObjectStatus (this, newElem);
+			
+//			UndoManager.Dump ();
+			
+			return dif;
+		}
+		
+		object GetUndoDiff (XmlElement oldStatus, XmlElement newStatus, bool fillOldChildData)
+		{
+			WidgetDiff baseDiff = WidgetDiff.Create (oldStatus, newStatus);
+			
+			ArrayList changes = new ArrayList ();
+			Hashtable foundChildren = new Hashtable ();
+			
+			// Register changed and deleted child elements
+			foreach (XmlElement oldChild in oldStatus.SelectNodes ("child")) {
+				string cid = oldChild.GetAttribute ("childId");
+				if (cid.Length > 0) {
+					XmlElement newChild = (XmlElement) newStatus.SelectSingleNode ("child[@childId='" + cid + "']");
+					if (newChild != null) {
+						// ChildCreate will work even if the packing element is null
+						ChildWidgetDiff cdiff = ChildWidgetDiff.ChildCreate (oldChild ["packing"], newChild ["packing"]);
+						if (cdiff != null) {
+							cdiff.Id = cid;
+							cdiff.Operation = DiffOperation.Update;
+							changes.Add (cdiff);
+						}
+						if (fillOldChildData) {
+							// This is done here to avoid processing the child list twice.
+							// It updates the original status of the widget by adding information
+							// about the children.
+							XmlElement widgetElem = newChild ["widget"];
+							XmlElement recChild = oldChild ["widget"];
+							if (widgetElem != null && recChild.GetAttribute ("unchanged_marker") == "yes") {
+								// (placeholders don't have a widget child)
+								widgetElem.ParentNode.RemoveChild (widgetElem);
+								if (recChild != null) {
+									recChild.ParentNode.ReplaceChild (widgetElem, recChild);
+								}
+								else
+									recChild.AppendChild (widgetElem);
+							}
+						}
+						foundChildren [cid] = cid;
+					} else {
+						ChildWidgetDiff cdiff = new ChildWidgetDiff ();
+						cdiff.Id = cid;
+						cdiff.Operation = DiffOperation.Remove;
+						changes.Add (cdiff);
+					}
+				} else
+					throw new InvalidOperationException ("Found a child without ID");
+			}
+			
+			// Register new elements
+			
+			string lastWidgetId = null;
+			foreach (XmlElement newChildElem in newStatus.SelectNodes ("child")) {
+				string cid = newChildElem.GetAttribute ("childId");
+				if (cid.Length > 0) {
+					if (!foundChildren.ContainsKey (cid)) {
+						ChildWidgetDiff cdiff = new ChildWidgetDiff ();
+						cdiff.Id = cid;
+						cdiff.Operation = DiffOperation.Add;
+						cdiff.AddContent = newChildElem;
+						cdiff.InsertAfter = lastWidgetId;
+						changes.Add (cdiff);
+					}
+				} else
+					throw new InvalidOperationException ("Found a child without ID");
+
+				lastWidgetId = cid;
+			}
+			
+			// Return null if there are no changes
+			if (baseDiff == null && changes.Count == 0)
+				return null;
+				
+			ContainerDiff cd = new ContainerDiff ();
+			cd.BaseDiff = baseDiff;
+			if (changes.Count > 0)
+				cd.PackingDiffs = (WidgetDiff[]) changes.ToArray (typeof(WidgetDiff));
+			return cd;
+		}
+		
+		public override object ApplyUndoRedoDiff (object diff)
+		{
+			ContainerDiff cd = (ContainerDiff) diff;
+			XmlElement status = UndoManager.GetObjectStatus (this);
+			XmlElement oldStatus = (XmlElement) status.CloneNode (true);
+			UndoReader reader = new UndoReader (Project, FileFormat.Native, UndoManager);
+			
+			if (cd.BaseDiff != null) {
+				cd.BaseDiff.ApplyChanges (status);
+				if (cd.PackingDiffs == null) {
+					ReadProperties (reader, status);
+					return GetUndoDiff (status, oldStatus, false);
+				}
+			}
+			
+//			Console.WriteLine ("BEFORE PATCH: " + status.OuterXml);
+			
+			foreach (ChildWidgetDiff cdiff in cd.PackingDiffs) {
+				if (cdiff.Operation == DiffOperation.Update) {
+					XmlElement statusChild = (XmlElement) status.SelectSingleNode ("child[@childId='" + cdiff.Id + "']/packing");
+					if (statusChild != null)
+						cdiff.ApplyChanges (statusChild);
+				} else if (cdiff.Operation == DiffOperation.Remove) {
+					// Remove the child
+					XmlElement statusChild = (XmlElement) status.SelectSingleNode ("child[@childId='" + cdiff.Id + "']");
+					if (statusChild != null)
+						status.RemoveChild (statusChild);
+				} else {
+					// Add the child at the correct position
+					XmlElement newNode = cdiff.AddContent;
+					if (newNode.OwnerDocument != status.OwnerDocument)
+						newNode = (XmlElement) status.OwnerDocument.ImportNode (cdiff.AddContent, true);
+
+					if (cdiff.InsertAfter != null) {
+						XmlElement statusChild = (XmlElement) status.SelectSingleNode ("child[@childId='" + cdiff.InsertAfter + "']");
+						if (statusChild != null)
+							status.InsertAfter (newNode, statusChild);
+						else
+							status.AppendChild (newNode);
+					} else {
+						if (status.FirstChild != null)
+							status.InsertBefore (newNode, status.FirstChild);
+						else
+							status.AppendChild (newNode);
+					}
+				}
+			}
+			
+			Read (reader, status);
+			object revDiff = GetUndoDiff (status, oldStatus, false);
+			
+//			Console.WriteLine ("\nAFTER PATCH:");
+//			UndoManager.Dump ();
+			
+			EmitContentsChanged ();
+			
+			return revDiff;
+		}
+		
+		public override void Read (ObjectReader reader, XmlElement elem)
+		{
+			// Remove all existing children
+			if (ClassDescriptor.AllowChildren && Wrapped != null) {
+				foreach (Gtk.Widget child in GladeChildren) {
+					Widget wrapper = Widget.Lookup (child);
+					
+					if (wrapper != null) {
+						if (wrapper.InternalChildProperty != null)
+							continue;
+						container.Remove (child);
+						child.Destroy ();
+					} else if (child is Stetic.Placeholder) {
+						container.Remove (child);
+						child.Destroy ();
+					}
+				}
+			}
+			
+			ReadProperties (reader, elem);
+			ReadChildren (reader, elem);
 			DoSync ();
 		}
 		
-		protected virtual void ReadChildren (XmlElement elem, FileFormat format)
+		protected virtual void ReadProperties (ObjectReader reader, XmlElement elem)
+		{
+			base.Read (reader, elem);
+		}
+		
+		protected virtual void ReadChildren (ObjectReader reader, XmlElement elem)
 		{
 			foreach (XmlElement child_elem in elem.SelectNodes ("./child")) {
 				try {
 					if (child_elem.HasAttribute ("internal-child"))
-						ReadInternalChild (child_elem, format);
+						ReadInternalChild (reader, child_elem);
 					else if (child_elem["widget"] == null)
-						AddPlaceholder ();
-					else
-						ReadChild (child_elem, format);
+						ReadPlaceholder (reader, child_elem);
+					else {
+						ObjectWrapper cw = ReadChild (reader, child_elem);
+						// Set a temporary id used for the undo/redo operations
+						string cid = child_elem.GetAttribute ("childId");
+						if (cid.Length > 0)
+							ChildWrapper ((Widget)cw).Id = cid;
+						else
+							child_elem.SetAttribute ("childId", ChildWrapper ((Widget)cw).Id);
+					}
 				} catch (GladeException ge) {
 					Console.Error.WriteLine (ge.Message);
 				}
@@ -156,50 +348,63 @@ namespace Stetic.Wrapper {
 			Sync ();
 		}
 
-		protected virtual void ReadChild (XmlElement child_elem, FileFormat format)
+		protected virtual ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
+			ObjectWrapper wrapper = reader.ReadObject (child_elem["widget"]);
 
 			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
 			AutoSize[child] = false;
 			container.Add (child);
 
-			if (format == FileFormat.Glade)
+			if (reader.Format == FileFormat.Glade)
 				GladeUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
 			else
 				WidgetUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
+			return wrapper;
+		}
+		
+		void ReadPlaceholder (ObjectReader reader, XmlElement child_elem)
+		{
+			Placeholder ph = AddPlaceholder ();
+			if (ph != null) {
+				string cid = child_elem.GetAttribute ("childId");
+				if (cid.Length > 0)
+					ph.Id = cid;
+				else
+					child_elem.SetAttribute ("childId", ph.Id);
+			}
 		}
 
-		protected virtual void ReadInternalChild (XmlElement child_elem, FileFormat format)
+		protected virtual ObjectWrapper ReadInternalChild (ObjectReader reader, XmlElement child_elem)
 		{
 			TypedClassDescriptor klass = base.ClassDescriptor as TypedClassDescriptor;
 			string childId = child_elem.GetAttribute ("internal-child");
 			
 			foreach (PropertyDescriptor prop in klass.InternalChildren) {
-				if (format == FileFormat.Glade && ((TypedPropertyDescriptor)prop).GladeName != childId)
+				if (reader.Format == FileFormat.Glade && ((TypedPropertyDescriptor)prop).GladeName != childId)
 					continue;
-				else if (format == FileFormat.Native && prop.Name != childId)
+				else if (reader.Format == FileFormat.Native && prop.Name != childId)
 					continue;
 				
 				Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
 				Widget wrapper = Widget.Lookup (child);
 				if (wrapper != null) {
-					wrapper.Read (child_elem["widget"], format);
-					if (format == FileFormat.Glade)
+					reader.ReadObject (wrapper, child_elem["widget"]);
+					if (reader.Format == FileFormat.Glade)
 						GladeUtils.SetPacking (ChildWrapper (wrapper), child_elem);
 					else
 						WidgetUtils.SetPacking (ChildWrapper (wrapper), child_elem);
-					return;
+					return wrapper;
 				}
 			}
 			
 			throw new GladeException ("Unrecognized internal child name", Wrapped.GetType ().FullName, false, "internal-child", childId);
 		}
 
-		public override XmlElement Write (XmlDocument doc, FileFormat format)
+		public override XmlElement Write (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (doc, format);
+			XmlElement elem = WriteProperties (writer);
 			XmlElement child_elem;
 			
 			if (ClassDescriptor.AllowChildren) {
@@ -210,12 +415,13 @@ namespace Stetic.Wrapper {
 						// Iternal children are written later
 						if (wrapper.InternalChildProperty != null)
 							continue;
-						child_elem = WriteChild (wrapper, doc, format);
+						child_elem = WriteChild (writer, wrapper);
 						if (child_elem != null)
 							elem.AppendChild (child_elem);
 					} else if (child is Stetic.Placeholder) {
-						child_elem = doc.CreateElement ("child");
-						child_elem.AppendChild (doc.CreateElement ("placeholder"));
+						child_elem = writer.XmlDocument.CreateElement ("child");
+						child_elem.SetAttribute ("childId", ((Stetic.Placeholder)child).Id.ToString ());
+						child_elem.AppendChild (writer.XmlDocument.CreateElement ("placeholder"));
 						elem.AppendChild (child_elem);
 					}
 				}
@@ -226,18 +432,21 @@ namespace Stetic.Wrapper {
 				if (child == null)
 					continue;
 
-				child_elem = doc.CreateElement ("child");
+				child_elem = writer.XmlDocument.CreateElement ("child");
 				Widget wrapper = Widget.Lookup (child);
 				if (wrapper == null) {
-					child_elem.AppendChild (doc.CreateElement ("placeholder"));
+					child_elem.AppendChild (writer.XmlDocument.CreateElement ("placeholder"));
 					elem.AppendChild (child_elem);
 					continue;
 				}
 				
-				string cid = format == FileFormat.Glade ? prop.InternalChildId : prop.Name;
+				string cid = writer.Format == FileFormat.Glade ? prop.InternalChildId : prop.Name;
 				
-				XmlElement widget_elem = wrapper.Write (doc, format);
+				XmlElement widget_elem = writer.WriteObject (wrapper);
 				child_elem.SetAttribute ("internal-child", cid);
+				// Sets the child Id to be used in undo/redo operations
+				if (writer.CreateUndoInfo)
+					child_elem.SetAttribute ("childId", cid);
 				
 				child_elem.AppendChild (widget_elem);
 				elem.AppendChild (child_elem);
@@ -245,34 +454,47 @@ namespace Stetic.Wrapper {
 
 			if (DesignWidth != 0 || DesignHeight != 0)
 				elem.SetAttribute ("design-size", DesignWidth + " " + DesignHeight);
+				
 			return elem;
 		}
 
-		protected virtual XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)
+		protected virtual XmlElement WriteProperties (ObjectWriter writer)
 		{
-			XmlElement child_elem = doc.CreateElement ("child");
-			XmlElement widget_elem = wrapper.Write (doc, format);
+			return base.Write (writer);
+		}
+		
+		protected virtual XmlElement WriteChild (ObjectWriter writer, Widget wrapper)
+		{
+			XmlElement child_elem = writer.XmlDocument.CreateElement ("child");
+			XmlElement widget_elem = writer.WriteObject (wrapper);
 			child_elem.AppendChild (widget_elem);
 
-			ObjectWrapper childwrapper = ChildWrapper (wrapper);
+			Container.ContainerChild childwrapper = ChildWrapper (wrapper);
 			if (childwrapper != null) {
-				XmlElement packing_elem = doc.CreateElement ("packing");
+				XmlElement packing_elem;
 				
-				if (format == FileFormat.Glade)
-					GladeUtils.GetProps (childwrapper, packing_elem);
+				if (writer.Format == FileFormat.Glade)
+					packing_elem = GladeUtils.CreatePacking (writer.XmlDocument, childwrapper);
 				else
-					WidgetUtils.GetProps (childwrapper, packing_elem);
-					
+					packing_elem = WidgetUtils.CreatePacking (writer.XmlDocument, childwrapper);
+				
+				// Sets the child Id to be used in undo/redo operations
+				if (writer.CreateUndoInfo)
+					child_elem.SetAttribute ("childId", childwrapper.Id.ToString ());
+
 				if (packing_elem.HasChildNodes)
 					child_elem.AppendChild (packing_elem);
+			} else {
+				// There is no container child, so make up an id.
+				child_elem.SetAttribute ("childId", "0");
 			}
 
 			return child_elem;
 		}
 		
-		public XmlElement WriteContainerChild (Widget wrapper, XmlDocument doc, FileFormat format)
+		public XmlElement WriteContainerChild (ObjectWriter writer, Widget wrapper)
 		{
-			return WriteChild (wrapper, doc, format);
+			return WriteChild (writer, wrapper);
 		}
 		
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
@@ -474,6 +696,7 @@ namespace Stetic.Wrapper {
 				ContentsChanged (this);
 			if (ParentWrapper != null)
 				ParentWrapper.ChildContentsChanged (this);
+			NotifyChanged ();
 		}
 
 		protected Set AutoSize = new Set ();
@@ -507,9 +730,11 @@ namespace Stetic.Wrapper {
 
 		void PlaceholderDrop (Placeholder ph, Stetic.Wrapper.Widget wrapper)
 		{
-			ReplaceChild (ph, wrapper.Wrapped);
-			ph.Destroy ();
-			wrapper.Select ();
+			using (UndoManager.AtomicChange) {
+				ReplaceChild (ph, wrapper.Wrapped);
+				ph.Destroy ();
+				wrapper.Select ();
+			}
 		}
 
 		void PlaceholderDragDrop (object obj, Gtk.DragDropArgs args)
@@ -576,29 +801,33 @@ namespace Stetic.Wrapper {
 
 		public virtual void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
-			Gtk.Container.ContainerChild cc;
-			Hashtable props = new Hashtable ();
+			using (UndoManager.AtomicChange)
+			{
+				Gtk.Container.ContainerChild cc;
+				Hashtable props = new Hashtable ();
 
-			cc = container[oldChild];
-			foreach (PropertyInfo pinfo in cc.GetType ().GetProperties ()) {
-				if (!pinfo.IsDefined (typeof (Gtk.ChildPropertyAttribute), true))
-					continue;
-				props[pinfo] = pinfo.GetValue (cc, null);
+				cc = container[oldChild];
+				foreach (PropertyInfo pinfo in cc.GetType ().GetProperties ()) {
+					if (!pinfo.IsDefined (typeof (Gtk.ChildPropertyAttribute), true))
+						continue;
+					props[pinfo] = pinfo.GetValue (cc, null);
+				}
+
+				container.Remove (oldChild);
+				AutoSize[oldChild] = false;
+				AutoSize[newChild] = true;
+				container.Add (newChild);
+
+				cc = container[newChild];
+				foreach (PropertyInfo pinfo in props.Keys)
+					pinfo.SetValue (cc, props[pinfo], null);
+
+				Sync ();
+				oldChild.Destroy ();
+				EmitContentsChanged ();
+				if (Project != null)
+					Project.Selection = newChild;
 			}
-
-			container.Remove (oldChild);
-			AutoSize[oldChild] = false;
-			AutoSize[newChild] = true;
-			container.Add (newChild);
-
-			cc = container[newChild];
-			foreach (PropertyInfo pinfo in props.Keys)
-				pinfo.SetValue (cc, props[pinfo], null);
-
-			Sync ();
-			oldChild.Destroy ();
-			EmitContentsChanged ();
-			Project.Selection = newChild;
 		}
 
 		Gtk.Widget selection;
@@ -726,37 +955,43 @@ namespace Stetic.Wrapper {
 
 		protected virtual Gtk.Widget CreateDragSource (Gtk.Widget dragWidget)
 		{
-			Placeholder ph = CreatePlaceholder ();
-			Gdk.Rectangle alloc = dragWidget.Allocation;
-			ph.SetSizeRequest (alloc.Width, alloc.Height);
-			ph.DragEnd += DragEnd;
-			ReplaceChild (dragWidget, ph);
-			return ph;
+			using (UndoManager.AtomicChange) {
+				Placeholder ph = CreatePlaceholder ();
+				Gdk.Rectangle alloc = dragWidget.Allocation;
+				ph.SetSizeRequest (alloc.Width, alloc.Height);
+				ph.DragEnd += DragEnd;
+				ReplaceChild (dragWidget, ph);
+				return ph;
+			}
 		}
 
 		void DragEnd (object obj, Gtk.DragEndArgs args)
 		{
-			Placeholder ph = obj as Placeholder;
-			ph.DragEnd -= DragEnd;
+			using (UndoManager.AtomicChange) {
+				Placeholder ph = obj as Placeholder;
+				ph.DragEnd -= DragEnd;
 
-			dragSource = null;
-			if (DND.DragWidget == null) {
-				if (AllowPlaceholders)
-					ph.SetSizeRequest (-1, -1);
-				else
-					container.Remove (ph);
-				Sync ();
-			} else
-				ReplaceChild (ph, DND.Cancel ());
+				dragSource = null;
+				if (DND.DragWidget == null) {
+					if (AllowPlaceholders)
+						ph.SetSizeRequest (-1, -1);
+					else
+						container.Remove (ph);
+					Sync ();
+				} else
+					ReplaceChild (ph, DND.Cancel ());
+			}
 		}
 
 		public virtual void Delete (Stetic.Wrapper.Widget wrapper)
 		{
-			if (AllowPlaceholders)
-				ReplaceChild (wrapper.Wrapped, CreatePlaceholder ());
-			else
-				container.Remove (wrapper.Wrapped);
-			wrapper.Wrapped.Destroy ();
+			using (UndoManager.AtomicChange) {
+				if (AllowPlaceholders)
+					ReplaceChild (wrapper.Wrapped, CreatePlaceholder ());
+				else
+					container.Remove (wrapper.Wrapped);
+				wrapper.Wrapped.Destroy ();
+			}
 		}
 
 		public virtual void Delete (Stetic.Placeholder ph)
@@ -765,11 +1000,13 @@ namespace Stetic.Wrapper {
 				// Don't allow deleting the only placeholder of a top level container
 				if (IsTopLevel && container.Children.Length == 1)
 					return;
-				container.Remove (ph);
-				ph.Destroy ();
-				// If there aren't more placeholders in this container, just delete the container
-				if (container.Children.Length == 0)
-					Delete ();
+				using (UndoManager.AtomicChange) {
+					container.Remove (ph);
+					ph.Destroy ();
+					// If there aren't more placeholders in this container, just delete the container
+					if (container.Children.Length == 0)
+						Delete ();
+				}
 			}
 		}
 
@@ -917,6 +1154,12 @@ namespace Stetic.Wrapper {
 			return compName;
 		}
 		
+		public Widget FindChild (string name)
+		{
+			Gtk.Widget w = FindWidget (name, null);
+			return Widget.Lookup (w);
+		}
+		
 		Gtk.Widget FindWidget (string name, Gtk.Widget skipwidget)
 		{
 			if (Wrapped != skipwidget && Wrapped.Name == name)
@@ -939,7 +1182,22 @@ namespace Stetic.Wrapper {
 			return null;
 		}
 		
-		public class ContainerChild : Stetic.ObjectWrapper {
+		public class ContainerChild : Stetic.ObjectWrapper
+		{
+			// This id is used by the undo methods to identify a child of a container.
+			// The id is not stored, since it's used only while the widget is being
+			// edited in the designer
+			string id;
+			
+			public ContainerChild ()
+			{
+				id = WidgetUtils.GetUndoId ();
+			}
+			
+			internal string Id {
+				get { return id; }
+				set { id = value; }
+			}
 
 			internal static void Register ()
 			{
@@ -1006,4 +1264,51 @@ namespace Stetic.Wrapper {
 			}
 		}
 	}
+	
+	class ContainerDiff
+	{
+		public WidgetDiff BaseDiff;
+		public WidgetDiff[] PackingDiffs;
+		
+		public override string ToString ()
+		{
+			string s = BaseDiff != null ? BaseDiff.ToString () : "";
+			if (PackingDiffs != null) {
+				foreach (WidgetDiff d in PackingDiffs) {
+					s += d.ToString () + "\n";
+				}
+			}
+			return s;
+		}
+	}
+	
+	class ChildWidgetDiff: WidgetDiff
+	{
+		public string Id;
+		public DiffOperation Operation;
+		public XmlElement AddContent;
+		public string InsertAfter;
+		
+		public static ChildWidgetDiff ChildCreate (XmlElement oldElem, XmlElement newElem)
+		{
+			WidgetPropDiff[] changes = GetChanges (oldElem, newElem);
+			if (changes == null)
+				return null;
+			ChildWidgetDiff dif = new ChildWidgetDiff ();
+			dif.Changes = changes;
+			return dif;
+		}
+		
+		public override string ToString ()
+		{
+			string s = "ChildWidgetDiff:\n";
+			s += "  " + Operation + " " + Id + "\n";
+			if (Operation == DiffOperation.Update)
+				s += base.ToString () + "\n";
+			if (Operation == DiffOperation.Add)
+				s += "  InsertAfter: " + InsertAfter + "\n  Content: " + AddContent.OuterXml + "\n";
+			return s;
+		}
+	}
+
 }

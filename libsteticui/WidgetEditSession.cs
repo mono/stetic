@@ -51,6 +51,9 @@ namespace Stetic {
 		WidgetDesignerFrontend frontend;
 		bool allowBinding;
 		
+		ContainerUndoRedoManager undoManager;
+		UndoQueue undoQueue;
+		
 		public event EventHandler ModifiedChanged;
 		public event EventHandler RootWidgetChanged;
 		
@@ -58,6 +61,9 @@ namespace Stetic {
 		{
 			this.frontend = frontend;
 			this.autoCommitChanges = autoCommitChanges;
+			undoManager = new ContainerUndoRedoManager ();
+			undoQueue = new UndoQueue ();
+			undoManager.UndoQueue = undoQueue;
 			
 			sourceWidget = win.Wrapped.Name;
 			sourceProject = (ProjectBackend) win.Project;
@@ -89,6 +95,7 @@ namespace Stetic {
 			}
 			
 			rootWidget.Select ();
+			undoManager.RootObject = rootWidget;
 			
 			gproject.ModifiedChanged += new EventHandler (OnModifiedChanged);
 			gproject.ProjectReloaded += new EventHandler (OnProjectReloaded);
@@ -217,6 +224,15 @@ namespace Stetic {
 			get { return gproject.Modified; }
 		}
 		
+		public UndoQueue UndoQueue {
+			get { 
+				if (undoQueue != null)
+					return undoQueue;
+				else
+					return UndoQueue.Empty;
+			}
+		}
+		
 		void OnModifiedChanged (object s, EventArgs a)
 		{
 			if (frontend != null)
@@ -228,6 +244,7 @@ namespace Stetic {
 			Gtk.Widget[] tops = gproject.Toplevels;
 			if (tops.Length > 0) {
 				rootWidget = Stetic.Wrapper.Container.Lookup (tops[0]);
+				undoManager.RootObject = rootWidget;
 				if (rootWidget != null) {
 					WidgetDesignerBackend oldWidget = widget;
 					if (widget != null) {

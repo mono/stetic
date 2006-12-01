@@ -21,20 +21,21 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override void ReadChild (XmlElement child_elem, FileFormat format)
+		protected override ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "tab") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
+				ObjectWrapper wrapper = reader.ReadObject (child_elem["widget"]);
 				Gtk.Widget widget = (Gtk.Widget)wrapper.Wrapped;
 				notebook.SetTabLabel (notebook.GetNthPage (notebook.NPages - 1), widget);
 				tabs.Add (widget);
+				return wrapper;
 			} else
-				base.ReadChild (child_elem, format);
+				return base.ReadChild (reader, child_elem);
 		}
 
-		protected override XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)
+		protected override XmlElement WriteChild (ObjectWriter writer, Widget wrapper)
 		{
-			XmlElement child_elem = base.WriteChild (wrapper, doc, format);
+			XmlElement child_elem = base.WriteChild (writer, wrapper);
 			if (tabs.Contains (wrapper.Wrapped))
 				GladeUtils.SetChildProperty (child_elem, "type", "tab");
 			return child_elem;
@@ -134,6 +135,7 @@ namespace Stetic.Wrapper {
 				base.ReplaceChild (oldChild, newChild);
 				notebook.CurrentPage = current;
 				notebook.SetTabLabel (newChild, tab);
+				Widget.Lookup (tab).RequiresUndoStatusUpdate = true;
 			}
 		}
 
@@ -143,7 +145,9 @@ namespace Stetic.Wrapper {
 			label.LabelProp = "page" + (notebook.NPages + 1).ToString ();
 			tabs.Insert (position, label);
 
-			return notebook.InsertPage (CreatePlaceholder (), label, position);
+			int i = notebook.InsertPage (CreatePlaceholder (), label, position);
+			EmitContentsChanged ();
+			return i;
 		}
 
 		internal void PreviousPage ()

@@ -7,7 +7,7 @@ namespace Stetic
 {
 	public class DesignerView: Gtk.Notebook
 	{
-		Gtk.Widget design;
+		WidgetDesigner design;
 		Gtk.Widget actionbox;
 		Component widget;
 		
@@ -32,6 +32,10 @@ namespace Stetic
 		
 		public Component Component {
 			get { return widget; }
+		}
+		
+		public UndoQueue UndoQueue {
+			get { return design.UndoQueue; }
 		}
 		
 		public override void Dispose ()

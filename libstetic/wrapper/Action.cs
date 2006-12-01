@@ -159,9 +159,9 @@ namespace Stetic.Wrapper
 			base.EmitNotify (propertyName);
 		}
 		
-		public override XmlElement Write (XmlDocument doc, FileFormat format)
+		public override XmlElement Write (ObjectWriter writer)
 		{
-			XmlElement elem = doc.CreateElement ("action");
+			XmlElement elem = writer.XmlDocument.CreateElement ("action");
 			elem.SetAttribute ("id", Name);
 			WidgetUtils.GetProps (this, elem);
 			WidgetUtils.GetSignals (this, elem);

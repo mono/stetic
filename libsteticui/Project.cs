@@ -71,6 +71,7 @@ namespace Stetic
 			app.DisposeProject (this);
 			widgetLibraries.Dispose ();
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
+			app.UpdateWidgetLibraries (false, false);
 		}
 
 		public override object InitializeLifetimeService ()

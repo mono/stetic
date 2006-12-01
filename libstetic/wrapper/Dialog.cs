@@ -34,11 +34,11 @@ namespace Stetic.Wrapper {
 			base.Dispose ();
 		}
 		
-		protected override void ReadChildren (XmlElement elem, FileFormat format)
+		protected override void ReadChildren (ObjectReader reader, XmlElement elem)
 		{
 			// Ignore changes in the buttons while loading
 			ActionArea.ContentsChanged -= ButtonsChanged;
-			base.ReadChildren (elem, format);
+			base.ReadChildren (reader, elem);
 			ActionArea.ContentsChanged += ButtonsChanged;
 			ActionArea.SetActionDialog (this);
 		}

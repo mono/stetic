@@ -24,8 +24,9 @@ namespace Stetic {
 			if (node == null)
 				throw new ApplicationException (Catalog.GetString ("Not a glade file according to node name."));
 
+			ObjectReader reader = new ObjectReader (project, FileFormat.Glade);
 			foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
-				Wrapper.Container wrapper = Stetic.ObjectWrapper.Read (project, toplevel, FileFormat.Glade) as Wrapper.Container;
+				Wrapper.Container wrapper = Stetic.ObjectWrapper.ReadObject (reader, toplevel) as Wrapper.Container;
 				if (wrapper != null)
 					project.AddWidget ((Gtk.Widget)wrapper.Wrapped);
 			}
@@ -39,12 +40,13 @@ namespace Stetic {
 			XmlElement toplevel = doc.CreateElement ("glade-interface");
 			doc.AppendChild (toplevel);
 
+			ObjectWriter owriter = new ObjectWriter (doc, FileFormat.Glade);
 			foreach (Widget w in project.Toplevels) {
 				Stetic.Wrapper.Container wrapper = Stetic.Wrapper.Container.Lookup (w);
 				if (wrapper == null)
 					continue;
 
-				XmlElement elem = wrapper.Write (doc, FileFormat.Glade);
+				XmlElement elem = wrapper.Write (owriter);
 				if (elem != null)
 					toplevel.AppendChild (elem);
 			}

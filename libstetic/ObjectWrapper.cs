@@ -23,13 +23,31 @@ namespace Stetic {
 		internal Hashtable translationInfo;
 		bool loading;
 		IObjectFrontend frontend;
-
+		bool disposed;
+		UndoManager undoManager;
+		static UndoManager defaultUndoManager = new UndoManager (true);
+		
+		public ObjectWrapper ()
+		{
+			undoManager = defaultUndoManager;
+		}
+		
 		public SignalCollection Signals {
 			get {
 				if (signals == null)
 					signals = new SignalCollection (this);
 				return signals;
 			}
+		}
+		
+		public UndoManager UndoManager {
+			get { return GetUndoManagerInternal (); }
+			internal set { undoManager = value; }
+		}
+		
+		internal virtual UndoManager GetUndoManagerInternal ()
+		{
+			return undoManager;
 		}
 		
 		internal protected bool Loading {
@@ -40,6 +58,8 @@ namespace Stetic {
 		public IObjectFrontend Frontend {
 			get { return frontend; }
 			set {
+				if (disposed)
+					throw new InvalidOperationException ("Can't bind component to disposed wrapper");
 				if (frontend != null)
 					frontend.Dispose ();
 				frontend = value;
@@ -64,11 +84,18 @@ namespace Stetic {
 
 		public virtual void Dispose ()
 		{
+			if (Disposed != null)
+				Disposed (this, EventArgs.Empty);
+			disposed = true;
 			if (frontend != null)
 				frontend.Dispose ();
 			frontend = null;
 			wrappers.Remove (GetIndentityObject (wrapped));
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
+		}
+		
+		public bool IsDisposed {
+			get { return disposed; }
 		}
 
 		public static ObjectWrapper Create (IProject proj, object wrapped)
@@ -78,6 +105,7 @@ namespace Stetic {
 			wrapper.proj = proj;
 			wrapper.classDescriptor = klass;
 			wrapper.Wrap (wrapped, true);
+			wrapper.OnWrapped ();
 			return wrapper;
 		}
 
@@ -86,47 +114,49 @@ namespace Stetic {
 			wrapper.proj = proj;
 			wrapper.classDescriptor = klass;
 			wrapper.Wrap (wrapped, initialized);
+			wrapper.OnWrapped ();
 		}
 		
-		public virtual void Read (XmlElement elem, FileFormat format)
+		public virtual void Read (ObjectReader reader, XmlElement element)
 		{
-			throw new System.NotSupportedException ();
+			throw new System.NotImplementedException ();
 		}
 		
-		public virtual XmlElement Write (XmlDocument doc, FileFormat format)
+		public virtual XmlElement Write (ObjectWriter writer)
 		{
-			throw new System.NotSupportedException ();
+			throw new System.NotImplementedException ();
 		}
 
-		public static ObjectWrapper Read (IProject proj, XmlElement elem, FileFormat format)
+		public static ObjectWrapper ReadObject (ObjectReader reader, XmlElement elem)
 		{
 			string className = elem.GetAttribute ("class");
 			ClassDescriptor klass;
-			if (format == FileFormat.Native)
+			if (reader.Format == FileFormat.Native)
 				klass = Registry.LookupClassByName (className);
 			else
 				klass = Registry.LookupClassByCName (className);
 			
 			if (klass == null) {
 				ErrorWidget we = new ErrorWidget (className);
-				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (proj, we);
-				wrap.Read (elem, format);
+				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (reader.Project, we);
+				wrap.Read (reader, elem);
 				return wrap;
 			}
 
 			ObjectWrapper wrapper = klass.CreateWrapper ();
-			wrapper.proj = proj;
+			wrapper.classDescriptor = klass;
+			wrapper.proj = reader.Project;
 			try {
-				wrapper.OnBeginRead (format);
-				wrapper.Read (elem, format);
+				wrapper.OnBeginRead (reader.Format);
+				wrapper.Read (reader, elem);
 			} catch (Exception ex) {
-				ErrorWidget we = new ErrorWidget (ex);
-				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (proj, we);
-				wrap.Read (elem, format);
 				Console.WriteLine (ex);
+				ErrorWidget we = new ErrorWidget (ex);
+				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (reader.Project, we);
+				wrap.Read (reader, elem);
 				return wrap;
 			} finally {
-				wrapper.OnEndRead (format);
+				wrapper.OnEndRead (reader.Format);
 			}
 			return wrapper;
 		}
@@ -221,6 +251,12 @@ namespace Stetic {
 		
 		public void NotifyChanged ()
 		{
+			if (UndoManager.CanNotifyChanged (this))
+				OnObjectChanged (new ObjectWrapperEventArgs (this));
+		}
+		
+		internal void FireObjectChangedEvent ()
+		{
 			OnObjectChanged (new ObjectWrapperEventArgs (this));
 		}
 		
@@ -246,6 +282,7 @@ namespace Stetic {
 		public event SignalEventHandler SignalAdded;
 		public event SignalEventHandler SignalRemoved;
 		public event SignalChangedEventHandler SignalChanged;
+		public event EventHandler Disposed;
 		
 		// Fired when any information of the object changes.
 		public event ObjectWrapperEventHandler ObjectChanged;
@@ -301,6 +338,10 @@ namespace Stetic {
 		}
 		
 		internal protected virtual void OnDesignerDetach (IDesignArea designer)
+		{
+		}
+		
+		internal protected virtual void OnWrapped ()
 		{
 		}
 

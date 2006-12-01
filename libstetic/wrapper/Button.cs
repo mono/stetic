@@ -29,21 +29,23 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override void ReadChild (XmlElement child_elem, FileFormat format)
+		protected override ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
 		{
-			if (Type == ButtonType.Custom || format == FileFormat.Glade) {
+			ObjectWrapper ret = null;
+			if (Type == ButtonType.Custom || reader.Format == FileFormat.Glade) {
 				if (button.Child != null)
 					button.Remove (button.Child);
-				base.ReadChild (child_elem, format);
+				ret = base.ReadChild (reader, child_elem);
 				FixupGladeChildren ();
 			} else if (Type == ButtonType.TextAndIcon)
 				ConstructContents ();
+			return ret;
 		}
 
-		protected override XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)
+		protected override XmlElement WriteChild (ObjectWriter writer, Widget wrapper)
 		{
-			if (format == FileFormat.Glade || Type == ButtonType.Custom)
-				return base.WriteChild (wrapper, doc, format);
+			if (writer.Format == FileFormat.Glade || Type == ButtonType.Custom)
+				return base.WriteChild (writer, wrapper);
 			else
 				return null;
 		}
@@ -76,9 +78,9 @@ namespace Stetic.Wrapper {
 			Type = ButtonType.TextAndIcon;
 		}
 
-		public override XmlElement Write (XmlDocument doc, FileFormat format)
+		public override XmlElement Write (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (doc, format);
+			XmlElement elem = base.Write (writer);
 			if (Type == ButtonType.StockItem)
 				GladeUtils.SetProperty (elem, "label", stockId);
 			return elem;

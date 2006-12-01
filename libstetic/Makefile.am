@@ -19,8 +19,10 @@ libstetic_dll_sources =			\
 	IProject.cs			\
 	IPropertyEditor.cs			\
 	IResourceProvider.cs 	\
+	ObjectReader.cs		\
 	ObjectWrapper.cs		\
 	ObjectWrapperEventHandler.cs		\
+	ObjectWriter.cs		\
 	ParamSpec.cs			\
 	Placeholder.cs			\
 	ProjectIconFactory.cs			\
@@ -35,6 +37,7 @@ libstetic_dll_sources =			\
 	TypedClassDescriptor.cs		\
 	TypedPropertyDescriptor.cs		\
 	TypedSignalDescriptor.cs		\
+	UndoManager.cs		\
 	WidgetLibrary.cs	\
 	WidgetUtils.cs		\
 	editor/Accelerator.cs		\

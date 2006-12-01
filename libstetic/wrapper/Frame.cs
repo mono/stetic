@@ -38,18 +38,19 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		protected override void ReadChild (XmlElement child_elem, FileFormat format)
+		protected override ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
 		{
 			if ((string)GladeUtils.GetChildProperty (child_elem, "type", "") == "label_item") {
-				ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
+				ObjectWrapper wrapper = reader.ReadObject (child_elem["widget"]);
 				frame.LabelWidget = (Gtk.Widget)wrapper.Wrapped;
+				return wrapper;
 			} else
-				base.ReadChild (child_elem, format);
+				return base.ReadChild (reader, child_elem);
 		}
 
-		protected override XmlElement WriteChild (Widget wrapper, XmlDocument doc, FileFormat format)
+		protected override XmlElement WriteChild (ObjectWriter writer, Widget wrapper)
 		{
-			XmlElement child_elem = base.WriteChild (wrapper, doc, format);
+			XmlElement child_elem = base.WriteChild (writer, wrapper);
 			if (wrapper.Wrapped == frame.LabelWidget)
 				GladeUtils.SetChildProperty (child_elem, "type", "label_item");
 			return child_elem;

@@ -9,7 +9,7 @@ namespace Stetic {
 		public static ItemGroup Empty;
 
 		string label, name;
-		HybridDictionary items = new HybridDictionary ();
+		ListDictionary items = new ListDictionary ();
 
 		static ItemGroup ()
 		{

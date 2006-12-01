@@ -1,3 +1,43 @@
+2006-12-01  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ActionGroupDesigner.cs: Added null check.
+	* libsteticui/ProjectBackend.cs: Always return the top level widgets in
+	  the same order they were stored in the project file.
+	* libsteticui/WidgetEditSession.cs, libsteticui/Clipboard.cs,
+	  libsteticui/WidgetDesigner.cs, libsteticui/UndoQueue.cs,
+	  libstetic/UndoManager.cs, libstetic/ObjectWrapper.cs,
+	  libstetic/Placeholder.cs, stetic/Stetic.cs, stetic/DesignerView.cs,
+	  stetic/UIManager.cs: Added support for undo/redo.
+	* libsteticui/Application.cs: Minor fix.
+	* libsteticui/Glade.cs, libsteticui/ActionGroupEditSession.cs,
+	  libstetic/wrapper/Button.cs, libstetic/wrapper/Action.cs,
+	  libstetic/wrapper/Container.cs, libstetic/wrapper/Widget.cs,
+	  libstetic/wrapper/RadioToolButton.cs,
+	  libstetic/wrapper/RadioButton.cs, libstetic/wrapper/Frame.cs,
+	  libstetic/wrapper/ActionGroup.cs, libstetic/wrapper/OptionMenu.cs,
+	  libstetic/wrapper/Notebook.cs, libstetic/wrapper/Image.cs,
+	  libstetic/wrapper/MenuItem.cs, libstetic/wrapper/ButtonBox.cs,
+	  libstetic/wrapper/ImageMenuItem.cs, libstetic/wrapper/Table.cs,
+	  libstetic/wrapper/MenuBar.cs, libstetic/wrapper/Dialog.cs,
+	  libstetic/wrapper/ActionToolbarWrapper.cs,
+	  libstetic/wrapper/RadioMenuItem.cs, libstetic/wrapper/Expander.cs,
+	  libstetic/wrapper/CheckButton.cs, libstetic/wrapper/ToolButton.cs,
+	  libstetic/GladeUtils.cs, libstetic/ErrorWidget.cs,
+	  libstetic/WidgetUtils.cs: Track api changes.
+	* libsteticui/Makefile.am, libstetic/Makefile.am: Updated.
+	* libsteticui/Project.cs: Update the app library list after removing a
+	  project.
+	* libstetic/ItemGroup.cs: Use an ordered dictionary to store
+	  properties, so we always get them in the correct order.
+	* libstetic/CommandDescriptor.cs: Make sure the changes done by
+	  commands are atomic.
+	* libstetic/ObjectReader.cs, libstetic/ObjectWriter.cs: New clases for
+	  reading/writing objects
+	* libstetic/PropertyDescriptor.cs,
+	  libstetic/TypedPropertyDescriptor.cs, libstetic/ClassDescriptor.cs,
+	  libstetic/TypedClassDescriptor.cs: Added new method for
+	  initializing and instance to its default values.
+
 2006-11-13  Lluis Sanchez Gual  <lluis@novell.com> 
 
 	* libstetic/editor/Flags.cs:

@@ -3,12 +3,21 @@ using System;
 
 namespace Stetic {
 
-	public class Placeholder : Gtk.DrawingArea {
-
+	public class Placeholder : Gtk.DrawingArea
+	{
+		// This id is used by the undo methods to identify a child of a container.
+		string id;
+		
 		public Placeholder ()
 		{
+			id = WidgetUtils.GetUndoId ();
 			DND.DestSet (this, true);
 			Events |= Gdk.EventMask.ButtonPressMask;
+		}
+		
+		internal string Id {
+			get { return id; }
+			set { id = value; }
 		}
 
 		const int minSize = 10;

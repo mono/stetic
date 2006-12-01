@@ -20,6 +20,8 @@ namespace Stetic.Wrapper {
 		string tooltip;
 		CodeExpression generatedTooltips;
 		
+		bool requiresUndoStatusUpdate;
+		
 		// Name of the generated UIManager
 		string uiManagerName;
 		// List of groups added to the UIManager
@@ -27,12 +29,9 @@ namespace Stetic.Wrapper {
 		
 		bool unselectable;
 		
+		
 		public event EventHandler Destroyed;
 		
-		public Widget ()
-		{
-		}
-	
 		// Fired when the name of the widget changes.
 		public event WidgetNameChangedHandler NameChanged;
 		// Fired when the member name of the widget changes.
@@ -108,6 +107,14 @@ namespace Stetic.Wrapper {
 				Select ();
 			else if (ParentWrapper != null)
 				ParentWrapper.Select ();
+		}
+		
+		internal override UndoManager GetUndoManagerInternal ()
+		{
+			if (ParentWrapper != null)
+				return ParentWrapper.UndoManager;
+			else
+				return base.GetUndoManagerInternal ();
 		}
 		
 		public bool Unselectable {
@@ -363,10 +370,41 @@ namespace Stetic.Wrapper {
 			else
 				Wrapped.Destroy ();
 		}
-
-		public override void Read (XmlElement elem, FileFormat format)
+		
+		internal bool RequiresUndoStatusUpdate {
+			get { return requiresUndoStatusUpdate; }
+			set { requiresUndoStatusUpdate = value; }
+		}
+		
+		public virtual object GetUndoDiff ()
 		{
-			if (format == FileFormat.Native) {
+			XmlElement oldElem = UndoManager.GetObjectStatus (this);
+			XmlElement newElem = Write (new ObjectWriter (oldElem.OwnerDocument, FileFormat.Native));
+			WidgetDiff diff = WidgetDiff.Create (newElem, oldElem);
+			UndoManager.UpdateObjectStatus (this, newElem);
+			return diff;
+		}
+		
+		public virtual object ApplyUndoRedoDiff (object diff)
+		{
+			XmlElement status = UndoManager.GetObjectStatus (this);
+			XmlElement oldElem = (XmlElement) status.CloneNode (true);
+			
+			WidgetDiff wdif = (WidgetDiff) diff;
+			wdif.ApplyChanges (status);
+			Read (new ObjectReader (Project, FileFormat.Native), status);
+			
+			return WidgetDiff.Create (status, oldElem);
+		}
+
+		public override void Read (ObjectReader reader, XmlElement elem)
+		{
+			if (Wrapped != null) {
+				// There is already an instance. Load the default values.
+				this.ClassDescriptor.ResetInstance (Wrapped);
+			}
+			
+			if (reader.Format == FileFormat.Native) {
 				foreach (XmlElement groupElem in elem.SelectNodes ("action-group")) {
 					ActionGroup actionGroup = new ActionGroup ();
 					actionGroup.Read (Project, groupElem);
@@ -381,22 +419,22 @@ namespace Stetic.Wrapper {
 				}
 				WidgetUtils.Read (this, elem);
 			}
-			else if (format == FileFormat.Glade)
+			else if (reader.Format == FileFormat.Glade)
 				GladeUtils.ImportWidget (this, elem);
 		}
 
-		public override XmlElement Write (XmlDocument doc, FileFormat format)
+		public override XmlElement Write (ObjectWriter writer)
 		{
-			if (format == FileFormat.Native) {
-				XmlElement elem = WidgetUtils.Write (this, doc);
+			if (writer.Format == FileFormat.Native) {
+				XmlElement elem = WidgetUtils.Write (this, writer.XmlDocument);
 				if (actionGroups != null) {
 					foreach (ActionGroup actionGroup in actionGroups)
-						elem.InsertBefore (actionGroup.Write (doc, format), elem.FirstChild);
+						elem.InsertBefore (actionGroup.Write (writer), elem.FirstChild);
 				}
 				return elem;
 			}
 			else {
-				XmlElement elem = GladeUtils.ExportWidget (this, doc);
+				XmlElement elem = GladeUtils.ExportWidget (this, writer.XmlDocument);
 				GladeUtils.ExtractProperty (elem, "name", "");
 				return elem;
 			}
@@ -820,5 +858,111 @@ namespace Stetic.Wrapper {
 			map.Remove (obj);
 			map.Remove (win);
 		}
+	}
+	
+	class WidgetDiff
+	{
+		public WidgetPropDiff[] Changes;
+
+		public static WidgetDiff Create (XmlElement oldElem, XmlElement newElem)
+		{
+			WidgetPropDiff[] changes = GetChanges (oldElem, newElem);
+			if (changes == null)
+				return null;
+			WidgetDiff dif = new WidgetDiff ();
+			dif.Changes = changes;
+			return dif;
+		}
+		
+		protected static WidgetPropDiff[] GetChanges (XmlElement oldElem, XmlElement newElem)
+		{
+			ArrayList changes = new ArrayList ();
+			Hashtable found = new Hashtable ();
+			
+			// Look for modified and deleted elements
+			if (oldElem != null) {
+				foreach (XmlElement oldProp in oldElem.SelectNodes ("property")) {
+					string name = oldProp.GetAttribute ("name");
+					XmlElement newProp = newElem != null ? (XmlElement) newElem.SelectSingleNode ("property[@name='" + name + "']"): null;
+					if (newProp == null)
+						changes.Add (new WidgetPropDiff (DiffOperation.Remove, name, null));
+					else {
+						found [oldProp.GetAttribute ("name")] = found;
+						if (newProp.InnerText != oldProp.InnerText)
+							changes.Add (new WidgetPropDiff (DiffOperation.Update, name, newProp.InnerText));
+					}
+				}
+			}
+			
+			// Look for new elements
+			if (newElem != null) {
+				foreach (XmlElement newProp in newElem.SelectNodes ("property")) {
+					string name = newProp.GetAttribute ("name");
+					if (!found.ContainsKey (name))
+						changes.Add (new WidgetPropDiff (DiffOperation.Add, name, newProp.InnerText));
+				}
+			}
+			
+			if (changes.Count == 0)
+				return null;
+			return (WidgetPropDiff[]) changes.ToArray (typeof(WidgetPropDiff));
+		}
+		
+		public virtual void ApplyChanges (XmlElement elem)
+		{
+			foreach (WidgetPropDiff pdif in Changes) {
+				if (pdif.Operation == DiffOperation.Add) {
+					XmlElement newProp = elem.OwnerDocument.CreateElement ("property");
+					newProp.SetAttribute ("name", pdif.Name);
+					newProp.InnerText = pdif.Text;
+					elem.AppendChild (newProp);
+				}
+				else if (pdif.Operation == DiffOperation.Update) {
+					XmlElement newProp = (XmlElement) elem.SelectSingleNode ("property[@name='" + pdif.Name + "']");
+					if (newProp != null) {
+						newProp.InnerText = pdif.Text;
+					}
+				}
+				else {
+					XmlElement newProp = (XmlElement) elem.SelectSingleNode ("property[@name='" + pdif.Name + "']");
+					if (newProp != null)
+						elem.RemoveChild (newProp);
+				}
+			}
+		}
+		
+		public override string ToString ()
+		{
+			string s = "WidgetDiff:\n";
+			if (Changes != null) {
+				foreach (WidgetPropDiff d in Changes) {
+					s += "  " + d.Operation + ": " + d.Name;
+					if (d.Operation != DiffOperation.Remove)
+						s += " = " + d.Text;
+					s += "\n";
+				}
+			} else
+				s += "  No Changes";
+			return s;
+		}
+	}
+	
+	class WidgetPropDiff
+	{
+		public WidgetPropDiff (DiffOperation Operation, string Name, string Text) {
+			this.Operation = Operation;
+			this.Name = Name;
+			this.Text = Text;
+		}
+		public DiffOperation Operation;
+		public string Name;
+		public string Text;
+	}
+	
+	enum DiffOperation
+	{
+		Add,
+		Remove,
+		Update
 	}
 }

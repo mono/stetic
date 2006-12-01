@@ -97,9 +97,8 @@ namespace Stetic {
 			AddUiFromString (menuXml);
 
 			// Not yet implemented
-			GetAction ("/menubar/EditMenu/Undo").Sensitive = false;
-			GetAction ("/menubar/EditMenu/Redo").Sensitive = false;
 			GetAction ("/menubar/HelpMenu/Contents").Sensitive = false;
+			
 			GetAction ("/menubar/FileMenu/Open").IsImportant = true;
 			GetAction ("/menubar/FileMenu/Save").IsImportant = true;
 
@@ -190,12 +189,12 @@ namespace Stetic {
 
 		void Undo (object obj, EventArgs e)
 		{
-			Console.WriteLine ("Undo");
+			SteticMain.GetUndoQueue().Undo ();
 		}
 
 		void Redo (object obj, EventArgs e)
 		{
-			Console.WriteLine ("Redo");
+			SteticMain.GetUndoQueue().Redo ();
 		}
 
 		void Cut (object obj, EventArgs e)

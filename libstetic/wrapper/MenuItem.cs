@@ -16,10 +16,11 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 		}
 
-		protected override void ReadChild (XmlElement child_elem, FileFormat format)
+		protected override ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
 		{
-			ObjectWrapper wrapper = Stetic.ObjectWrapper.Read (proj, child_elem["widget"], format);
+			ObjectWrapper wrapper = reader.ReadObject (child_elem["widget"]);
 			menuitem.Submenu = (Gtk.Menu)wrapper.Wrapped;
+			return wrapper;
 		}
 
 		Gtk.MenuItem menuitem {
