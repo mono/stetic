@@ -11,7 +11,7 @@ namespace Stetic.Wrapper {
 			return new Gtk.ImageMenuItem ("");
 		}
 
-		public override void Read (ObjectReader reader, XmlElement elem)
+		protected override void ReadProperties (ObjectReader reader, XmlElement elem)
 		{
 			Gtk.StockItem stockItem = Gtk.StockItem.Zero;
 			bool use_stock = (bool)GladeUtils.ExtractProperty (elem, "use_stock", false);
@@ -21,7 +21,7 @@ namespace Stetic.Wrapper {
 				if (stockItem.Label != null)
 					GladeUtils.ExtractProperty (elem, "label", "");
 			}
-			base.Read (reader, elem);
+			base.ReadProperties (reader, elem);
 
 			if (stockItem.StockId != null)
 				Image = "stock:" + stockItem.StockId;

@@ -50,7 +50,7 @@ namespace Stetic
 				return atomicChangeTracker.ProcessChange (wrapper);
 		}
 		
-		public IDisposable AtomicChange {
+		public IAtomicChange AtomicChange {
 			get {
 				atomicChangeTracker.Count++;
 				return atomicChangeTracker;
@@ -237,11 +237,17 @@ namespace Stetic
 		}
 	}
 	
-	class AtomicChangeTracker: IDisposable
+	public interface IAtomicChange: IDisposable
+	{
+		void Delay ();
+	}
+	
+	class AtomicChangeTracker: IAtomicChange
 	{
 		public int Count;
 		public ArrayList ChangeEventPending = new ArrayList ();
 		public UndoManager undoManager;
+		bool delayed;
 		
 		public bool InAtomicChange {
 			get { return Count > 0; }
@@ -249,11 +255,19 @@ namespace Stetic
 		
 		public bool ProcessChange (ObjectWrapper wrapper)
 		{
-			if (!ChangeEventPending.Contains (wrapper))
+			if (!ChangeEventPending.Contains (wrapper)) {
 				ChangeEventPending.Add (wrapper);
+				delayed = false;
+			}
 			return false;
 		}
-					
+		
+		public void Delay ()
+		{
+			delayed = true;
+			Console.WriteLine ("Delay");
+		}
+
 		public void Dispose ()
 		{
 			if (Count == 0)
@@ -272,8 +286,12 @@ namespace Stetic
 				ObjectWrapper[] obs = (ObjectWrapper[]) ChangeEventPending.ToArray (typeof(ObjectWrapper));
 				ChangeEventPending.Clear ();
 				Count = 0;
+				
+				Console.WriteLine ("Delayed: " + delayed);
 
-				undoManager.NotifyUndoCheckpoint (obs);
+				if (!delayed)
+					undoManager.NotifyUndoCheckpoint (obs);
+				delayed = false;
 			}
 			else
 				Count--;

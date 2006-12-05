@@ -37,7 +37,6 @@ libstetic_dll_sources =			\
 	TypedClassDescriptor.cs		\
 	TypedPropertyDescriptor.cs		\
 	TypedSignalDescriptor.cs		\
-	UndoManager.cs		\
 	WidgetLibrary.cs	\
 	WidgetUtils.cs		\
 	editor/Accelerator.cs		\
@@ -89,6 +88,11 @@ libstetic_dll_sources =			\
 	editor/TimeSpanEditor.cs	\
 	editor/DateTimeEditor.cs	\
 	editor/WidgetSelector.cs		\
+	undo/ActionDiffAdaptor.cs	\
+	undo/DiffGenerator.cs	\
+	undo/IDiffAdaptor.cs	\
+	undo/UndoManager.cs	\
+	undo/XmlDiffAdaptor.cs	\
 	wrapper/Action.cs			\
 	wrapper/ActionGroup.cs			\
 	wrapper/ActionTree.cs			\

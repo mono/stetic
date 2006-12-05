@@ -11,6 +11,7 @@ namespace Stetic.Wrapper
 	{
 		ActionTree actionTree;
 		XmlElement menuInfo;
+		bool treeChanged;
 		
 		public MenuBar()
 		{
@@ -57,9 +58,9 @@ namespace Stetic.Wrapper
 			Loading = false;
 		}
 		
-		public override XmlElement Write (ObjectWriter writer)
+		protected override XmlElement WriteProperties (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (writer);
+			XmlElement elem = base.WriteProperties (writer);
 			if (menuInfo != null)
 				elem.AppendChild (writer.XmlDocument.ImportNode (menuInfo, true));
 			else
@@ -67,10 +68,58 @@ namespace Stetic.Wrapper
 			return elem;
 		}
 		
-		public override void Read (ObjectReader reader, XmlElement elem)
+		protected override void ReadProperties (ObjectReader reader, XmlElement elem)
 		{
-			base.Read (reader, elem);
+			base.ReadProperties (reader, elem);
 			menuInfo = elem ["node"];
+			treeChanged = false;
+		}
+		
+		public override object GetUndoDiff ()
+		{
+			XmlElement oldElem = treeChanged ? UndoManager.GetObjectStatus (this) ["node"] : null;
+			treeChanged = false;
+			object baseDiff = base.GetUndoDiff ();
+			if (baseDiff == null && oldElem == null)
+				return null;
+			else
+				return new object[] { baseDiff, oldElem };
+		}
+		
+		public override object ApplyUndoRedoDiff (object diff)
+		{
+			object[] data = (object[]) diff;
+			object retBaseDiff;
+			
+			object stat = menu.SaveStatus ();
+			
+			if (data [0] != null)
+				retBaseDiff = base.ApplyUndoRedoDiff (data [0]);
+			else
+				retBaseDiff = null;
+				
+			XmlElement xdiff = (XmlElement) data [1];
+			Console.WriteLine ("DD:" + xdiff.OuterXml);
+			XmlElement status = UndoManager.GetObjectStatus (this);
+			XmlElement oldNode = status ["node"];
+			if (oldNode != null)
+				status.RemoveChild (oldNode);
+			status.AppendChild (xdiff);
+			
+			if (actionTree != null) {
+				Loading = true;
+				menu.OpenSubmenu = null;
+				DisposeTree ();
+				CreateTree ();
+				actionTree.Read (this, xdiff);
+				menu.FillMenu (actionTree);
+				Loading = false;
+			} else
+				menuInfo = xdiff;
+			
+			menu.RestoreStatus (stat);
+			
+			return new object [] { retBaseDiff, oldNode };
 		}
 		
 		protected override void OnNameChanged (WidgetNameChangedArgs args)
@@ -136,6 +185,7 @@ namespace Stetic.Wrapper
 		
 		void OnTreeChanged (object s, EventArgs a)
 		{
+			treeChanged = true;
 			NotifyChanged ();
 		}
 	}

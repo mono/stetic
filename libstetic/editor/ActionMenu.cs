@@ -464,6 +464,38 @@ namespace Stetic.Editor
 			m.Popup ();
 		}
 		
+		internal void SaveStatus (ArrayList status)
+		{
+			for (int n=0; n<menuItems.Count; n++) {
+				ActionMenuItem item = (ActionMenuItem) menuItems [n];
+				if (item.IsSelected) {
+					status.Add (n);
+					return;
+				}
+				if (item.IsSubmenuVisible) {
+					status.Add (n);
+					OpenSubmenu.SaveStatus (status);
+					return;
+				}
+			}
+		}
+		
+		internal void RestoreStatus (ArrayList status, int index)
+		{
+			int pos = (int) status [index];
+			if (pos >= menuItems.Count)
+				return;
+				
+			ActionMenuItem item = (ActionMenuItem)menuItems [pos];
+			if (index == status.Count - 1)	// The last position in the status is the selected item
+				item.Select ();
+			else {
+				item.ShowSubmenu ();
+				if (OpenSubmenu != null)
+					OpenSubmenu.RestoreStatus (status, index + 1);
+			}
+		}
+		
 		ActionMenuItem LocateWidget (int x, int y)
 		{
 			foreach (ActionMenuItem mi in menuItems) {

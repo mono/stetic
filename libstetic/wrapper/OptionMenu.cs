@@ -21,10 +21,10 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 		}
 
-		public override void Read (ObjectReader reader, XmlElement elem)
+		protected override void ReadProperties (ObjectReader reader, XmlElement elem)
 		{
 			int history = (int)GladeUtils.ExtractProperty (elem, "history", -1);
-			base.Read (reader, elem);
+			base.ReadProperties (reader, elem);
 
 			// Fiddle with things to make the optionmenu resize itself correctly
 			Gtk.Widget menu = optionmenu.Menu;

@@ -65,6 +65,41 @@ namespace Stetic.Editor
 			}
 		}
 		
+		public object SaveStatus ()
+		{
+			ArrayList status = new ArrayList ();
+			
+			for (int n=0; n<menuItems.Count; n++) {
+				ActionMenuItem item = (ActionMenuItem) menuItems [n];
+				if (item.IsSubmenuVisible) {
+					status.Add (n);
+					OpenSubmenu.SaveStatus (status);
+					break;
+				}
+			}
+			return status;
+		}
+		
+		public void RestoreStatus (object data)
+		{
+			ArrayList status = (ArrayList) data;
+			if (status.Count == 0)
+				return;
+
+			int pos = (int) status [0];
+			if (pos >= menuItems.Count)
+				return;
+				
+			ActionMenuItem item = (ActionMenuItem) menuItems [pos];
+			if (status.Count == 1)	// The last position in the status is the selected item
+				item.Select ();
+			else {
+				item.ShowSubmenu ();
+				if (OpenSubmenu != null)
+					OpenSubmenu.RestoreStatus (status, 1);
+			}
+		}
+		
 		void AddCreateItemLabel ()
 		{
 			HideSpacerItem ();

@@ -1,3 +1,33 @@
+2006-12-05  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/UndoQueue.cs: Added debug method.
+	* libstetic/UndoManager.cs: Moved to undo dir.
+	* libstetic/undo, libstetic/undo/IDiffAdaptor.cs,
+	  libstetic/undo/DiffGenerator.cs, libstetic/undo/UndoManager.cs,
+	  libstetic/undo/ActionDiffAdaptor.cs,
+	  libstetic/undo/XmlDiffAdaptor.cs: Moved here UndoManager and added
+	  some classes to generate undo diffs between objects and xml
+	  representations.
+	* libstetic/wrapper/Button.cs, libstetic/wrapper/RadioToolButton.cs,
+	  libstetic/wrapper/RadioButton.cs, libstetic/wrapper/OptionMenu.cs,
+	  libstetic/wrapper/Image.cs, libstetic/wrapper/ImageMenuItem.cs,
+	  libstetic/wrapper/RadioMenuItem.cs,
+	  libstetic/wrapper/ToolButton.cs: Track api changes.
+	* libstetic/wrapper/Action.cs, libstetic/wrapper/ActionGroup.cs,
+	  libstetic/wrapper/MenuBar.cs,
+	  libstetic/wrapper/ActionToolbarWrapper.cs: Added support for
+	  Undo/Redo.
+	* libstetic/wrapper/Container.cs, libstetic/wrapper/Widget.cs: Moved
+	  all diffing code to the DiffGenerator class.
+	* libstetic/Placeholder.cs: Changed the name of the undo id property.
+	* libstetic/editor/ActionMenuItem.cs: Made atomic some action property
+	  changes.
+	* libstetic/editor/ActionMenuBar.cs, libstetic/editor/ActionMenu.cs:
+	  Added methods for saving/restoring the selection of a menu and
+	  toolbar.
+	* libstetic/TypedPropertyDescriptor.cs: Added null check.
+	* libstetic/Makefile.am: Updated.
+
 2006-12-01  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ActionGroupDesigner.cs: Added null check.

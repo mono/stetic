@@ -4,6 +4,7 @@ using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml;
+using Stetic.Undo;
 
 namespace Stetic.Wrapper
 {
@@ -12,7 +13,20 @@ namespace Stetic.Wrapper
 		int designWidth;
 		int designHeight;
 		IDesignArea designer;
+		static DiffGenerator containerDiffGenerator;
 
+		static Container ()
+		{
+			XmlDiffAdaptor adaptor = new XmlDiffAdaptor ();
+			adaptor.ChildElementName = "child";
+			adaptor.ChildAdaptor = new XmlDiffAdaptor ();
+			adaptor.ChildAdaptor.PropsElementName = "packing";
+			
+			containerDiffGenerator = new DiffGenerator ();
+			containerDiffGenerator.CurrentStatusAdaptor = adaptor;
+			containerDiffGenerator.NewStatusAdaptor = adaptor;
+		}
+		
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
@@ -130,161 +144,109 @@ namespace Stetic.Wrapper
 		public override object GetUndoDiff ()
 		{
 			XmlElement oldElem = UndoManager.GetObjectStatus (this);
-			
+
 //			Console.WriteLine ("UNDO status: ");
 //			Console.WriteLine (oldElem.OuterXml);
 			
 			// Write the new status of the object. This is going to replace the old status in undoManager.
 			// In the process, register new objects found.
+			
 			UndoWriter writer = new UndoWriter (oldElem.OwnerDocument, FileFormat.Native, UndoManager);
 			XmlElement newElem = Write (writer);
 			
 //			Console.WriteLine ("CURRENT status: ");
 //			Console.WriteLine (newElem.OuterXml);
 			
-			object dif = GetUndoDiff (newElem, oldElem, true);
+			// Get the changes since the last undo checkpoint
+			
+			ObjectDiff actionsDiff = null;
+			ObjectDiff objectDiff = containerDiffGenerator.GetDiff (newElem, oldElem);
+			
+			// If there are child changes there is no need to look for changes in the
+			// actions, since the whole widget will be read again
+			
+			if (objectDiff == null || objectDiff.ChildChanges == null)
+				actionsDiff = LocalActionGroups.GetDiff (Project, oldElem);
+			
+			// The undo writer skips children which are already registered in the undo manager
+			// to avoid writing information we already have. Now it's the moment to fill the gaps
+			
+			foreach (XmlElement newChild in newElem.SelectNodes ("child[widget/@unchanged_marker='yes']")) {
+				string cid = newChild.GetAttribute ("undoId");
+				XmlElement oldChild = (XmlElement) oldElem.SelectSingleNode ("child[@undoId='" + cid + "']");
+				if (oldChild == null)
+					throw new InvalidOperationException ("Child not found when filling widget info gaps.");
+					
+				XmlElement oldWidgetChild = oldChild ["widget"];
+				XmlElement newWidgetChild = newChild ["widget"];
+				
+				oldChild.RemoveChild (oldWidgetChild);
+				if (newWidgetChild != null)
+					newChild.ReplaceChild (oldWidgetChild, newWidgetChild);
+			}
+
+			// Update the status tree
+			
 			UndoManager.UpdateObjectStatus (this, newElem);
 			
 //			UndoManager.Dump ();
 			
-			return dif;
-		}
-		
-		object GetUndoDiff (XmlElement oldStatus, XmlElement newStatus, bool fillOldChildData)
-		{
-			WidgetDiff baseDiff = WidgetDiff.Create (oldStatus, newStatus);
-			
-			ArrayList changes = new ArrayList ();
-			Hashtable foundChildren = new Hashtable ();
-			
-			// Register changed and deleted child elements
-			foreach (XmlElement oldChild in oldStatus.SelectNodes ("child")) {
-				string cid = oldChild.GetAttribute ("childId");
-				if (cid.Length > 0) {
-					XmlElement newChild = (XmlElement) newStatus.SelectSingleNode ("child[@childId='" + cid + "']");
-					if (newChild != null) {
-						// ChildCreate will work even if the packing element is null
-						ChildWidgetDiff cdiff = ChildWidgetDiff.ChildCreate (oldChild ["packing"], newChild ["packing"]);
-						if (cdiff != null) {
-							cdiff.Id = cid;
-							cdiff.Operation = DiffOperation.Update;
-							changes.Add (cdiff);
-						}
-						if (fillOldChildData) {
-							// This is done here to avoid processing the child list twice.
-							// It updates the original status of the widget by adding information
-							// about the children.
-							XmlElement widgetElem = newChild ["widget"];
-							XmlElement recChild = oldChild ["widget"];
-							if (widgetElem != null && recChild.GetAttribute ("unchanged_marker") == "yes") {
-								// (placeholders don't have a widget child)
-								widgetElem.ParentNode.RemoveChild (widgetElem);
-								if (recChild != null) {
-									recChild.ParentNode.ReplaceChild (widgetElem, recChild);
-								}
-								else
-									recChild.AppendChild (widgetElem);
-							}
-						}
-						foundChildren [cid] = cid;
-					} else {
-						ChildWidgetDiff cdiff = new ChildWidgetDiff ();
-						cdiff.Id = cid;
-						cdiff.Operation = DiffOperation.Remove;
-						changes.Add (cdiff);
-					}
-				} else
-					throw new InvalidOperationException ("Found a child without ID");
-			}
-			
-			// Register new elements
-			
-			string lastWidgetId = null;
-			foreach (XmlElement newChildElem in newStatus.SelectNodes ("child")) {
-				string cid = newChildElem.GetAttribute ("childId");
-				if (cid.Length > 0) {
-					if (!foundChildren.ContainsKey (cid)) {
-						ChildWidgetDiff cdiff = new ChildWidgetDiff ();
-						cdiff.Id = cid;
-						cdiff.Operation = DiffOperation.Add;
-						cdiff.AddContent = newChildElem;
-						cdiff.InsertAfter = lastWidgetId;
-						changes.Add (cdiff);
-					}
-				} else
-					throw new InvalidOperationException ("Found a child without ID");
-
-				lastWidgetId = cid;
-			}
-			
-			// Return null if there are no changes
-			if (baseDiff == null && changes.Count == 0)
+			if (objectDiff != null || actionsDiff != null)
+				return new ObjectDiff[] { objectDiff, actionsDiff };
+			else
 				return null;
-				
-			ContainerDiff cd = new ContainerDiff ();
-			cd.BaseDiff = baseDiff;
-			if (changes.Count > 0)
-				cd.PackingDiffs = (WidgetDiff[]) changes.ToArray (typeof(WidgetDiff));
-			return cd;
 		}
 		
-		public override object ApplyUndoRedoDiff (object diff)
+		public override object ApplyUndoRedoDiff (object data)
 		{
-			ContainerDiff cd = (ContainerDiff) diff;
+			ObjectDiff diff = ((ObjectDiff[]) data)[0];
+			ObjectDiff actionsDiff = ((ObjectDiff[]) data)[1];
+			
+			ObjectDiff reverseDiff = null;
+			ObjectDiff reverseActionsDiff = null;
+			
 			XmlElement status = UndoManager.GetObjectStatus (this);
 			XmlElement oldStatus = (XmlElement) status.CloneNode (true);
 			UndoReader reader = new UndoReader (Project, FileFormat.Native, UndoManager);
 			
-			if (cd.BaseDiff != null) {
-				cd.BaseDiff.ApplyChanges (status);
-				if (cd.PackingDiffs == null) {
-					ReadProperties (reader, status);
-					return GetUndoDiff (status, oldStatus, false);
-				}
-			}
-			
-//			Console.WriteLine ("BEFORE PATCH: " + status.OuterXml);
-			
-			foreach (ChildWidgetDiff cdiff in cd.PackingDiffs) {
-				if (cdiff.Operation == DiffOperation.Update) {
-					XmlElement statusChild = (XmlElement) status.SelectSingleNode ("child[@childId='" + cdiff.Id + "']/packing");
-					if (statusChild != null)
-						cdiff.ApplyChanges (statusChild);
-				} else if (cdiff.Operation == DiffOperation.Remove) {
-					// Remove the child
-					XmlElement statusChild = (XmlElement) status.SelectSingleNode ("child[@childId='" + cdiff.Id + "']");
-					if (statusChild != null)
-						status.RemoveChild (statusChild);
-				} else {
-					// Add the child at the correct position
-					XmlElement newNode = cdiff.AddContent;
-					if (newNode.OwnerDocument != status.OwnerDocument)
-						newNode = (XmlElement) status.OwnerDocument.ImportNode (cdiff.AddContent, true);
+			// Only apply the actions diff if the widget has not been completely reloaded
+			if (actionsDiff != null && !(diff != null && diff.ChildChanges != null)) {
+				// Apply the patch
+				LocalActionGroups.ApplyDiff (Project, actionsDiff);
+				
+				// Get the redo patch
+				reverseActionsDiff = LocalActionGroups.GetDiff (Project, oldStatus);
+				
+				// Update the status of the action group list in the undo status tree.
+				// It has to remove all action groups and then write them again 
+				foreach (XmlElement group in status.SelectNodes ("action-group"))
+					status.RemoveChild (group);
 
-					if (cdiff.InsertAfter != null) {
-						XmlElement statusChild = (XmlElement) status.SelectSingleNode ("child[@childId='" + cdiff.InsertAfter + "']");
-						if (statusChild != null)
-							status.InsertAfter (newNode, statusChild);
-						else
-							status.AppendChild (newNode);
-					} else {
-						if (status.FirstChild != null)
-							status.InsertBefore (newNode, status.FirstChild);
-						else
-							status.AppendChild (newNode);
-					}
+				UndoWriter writer = new UndoWriter (status.OwnerDocument, FileFormat.Native, UndoManager);
+				foreach (ActionGroup actionGroup in LocalActionGroups)
+					status.InsertBefore (actionGroup.Write (writer), status.FirstChild);
+			}
+			
+			if (diff != null) {
+				containerDiffGenerator.ApplyDiff (status, diff);
+				reverseDiff = containerDiffGenerator.GetDiff (status, oldStatus);
+			
+				// Avoid reading the whole widget tree if only the properties have changed.
+				if (diff.ChildChanges == null) {
+					ReadProperties (reader, status);
+				} else {
+//					Console.WriteLine ("BEFORE PATCH: " + status.OuterXml);
+					Read (reader, status);
+//					Console.WriteLine ("\nAFTER PATCH:");
+//					UndoManager.Dump ();
+					EmitContentsChanged ();
 				}
 			}
 			
-			Read (reader, status);
-			object revDiff = GetUndoDiff (status, oldStatus, false);
-			
-//			Console.WriteLine ("\nAFTER PATCH:");
-//			UndoManager.Dump ();
-			
-			EmitContentsChanged ();
-			
-			return revDiff;
+			if (reverseDiff != null || reverseActionsDiff != null)
+				return new ObjectDiff[] { reverseDiff, reverseActionsDiff };
+			else
+				return null;
 		}
 		
 		public override void Read (ObjectReader reader, XmlElement elem)
@@ -306,14 +268,10 @@ namespace Stetic.Wrapper
 				}
 			}
 			
+			ReadActionGroups (reader, elem);
 			ReadProperties (reader, elem);
 			ReadChildren (reader, elem);
 			DoSync ();
-		}
-		
-		protected virtual void ReadProperties (ObjectReader reader, XmlElement elem)
-		{
-			base.Read (reader, elem);
 		}
 		
 		protected virtual void ReadChildren (ObjectReader reader, XmlElement elem)
@@ -327,11 +285,11 @@ namespace Stetic.Wrapper
 					else {
 						ObjectWrapper cw = ReadChild (reader, child_elem);
 						// Set a temporary id used for the undo/redo operations
-						string cid = child_elem.GetAttribute ("childId");
+						string cid = child_elem.GetAttribute ("undoId");
 						if (cid.Length > 0)
-							ChildWrapper ((Widget)cw).Id = cid;
+							ChildWrapper ((Widget)cw).UndoId = cid;
 						else
-							child_elem.SetAttribute ("childId", ChildWrapper ((Widget)cw).Id);
+							child_elem.SetAttribute ("undoId", ChildWrapper ((Widget)cw).UndoId);
 					}
 				} catch (GladeException ge) {
 					Console.Error.WriteLine (ge.Message);
@@ -368,11 +326,11 @@ namespace Stetic.Wrapper
 		{
 			Placeholder ph = AddPlaceholder ();
 			if (ph != null) {
-				string cid = child_elem.GetAttribute ("childId");
+				string cid = child_elem.GetAttribute ("undoId");
 				if (cid.Length > 0)
-					ph.Id = cid;
+					ph.UndoId = cid;
 				else
-					child_elem.SetAttribute ("childId", ph.Id);
+					child_elem.SetAttribute ("undoId", ph.UndoId);
 			}
 		}
 
@@ -405,6 +363,7 @@ namespace Stetic.Wrapper
 		public override XmlElement Write (ObjectWriter writer)
 		{
 			XmlElement elem = WriteProperties (writer);
+			WriteActionGroups (writer, elem);
 			XmlElement child_elem;
 			
 			if (ClassDescriptor.AllowChildren) {
@@ -420,7 +379,7 @@ namespace Stetic.Wrapper
 							elem.AppendChild (child_elem);
 					} else if (child is Stetic.Placeholder) {
 						child_elem = writer.XmlDocument.CreateElement ("child");
-						child_elem.SetAttribute ("childId", ((Stetic.Placeholder)child).Id.ToString ());
+						child_elem.SetAttribute ("undoId", ((Stetic.Placeholder)child).UndoId);
 						child_elem.AppendChild (writer.XmlDocument.CreateElement ("placeholder"));
 						elem.AppendChild (child_elem);
 					}
@@ -446,7 +405,7 @@ namespace Stetic.Wrapper
 				child_elem.SetAttribute ("internal-child", cid);
 				// Sets the child Id to be used in undo/redo operations
 				if (writer.CreateUndoInfo)
-					child_elem.SetAttribute ("childId", cid);
+					child_elem.SetAttribute ("undoId", cid);
 				
 				child_elem.AppendChild (widget_elem);
 				elem.AppendChild (child_elem);
@@ -458,11 +417,6 @@ namespace Stetic.Wrapper
 			return elem;
 		}
 
-		protected virtual XmlElement WriteProperties (ObjectWriter writer)
-		{
-			return base.Write (writer);
-		}
-		
 		protected virtual XmlElement WriteChild (ObjectWriter writer, Widget wrapper)
 		{
 			XmlElement child_elem = writer.XmlDocument.CreateElement ("child");
@@ -480,13 +434,13 @@ namespace Stetic.Wrapper
 				
 				// Sets the child Id to be used in undo/redo operations
 				if (writer.CreateUndoInfo)
-					child_elem.SetAttribute ("childId", childwrapper.Id.ToString ());
+					child_elem.SetAttribute ("undoId", childwrapper.UndoId);
 
 				if (packing_elem.HasChildNodes)
 					child_elem.AppendChild (packing_elem);
 			} else {
 				// There is no container child, so make up an id.
-				child_elem.SetAttribute ("childId", "0");
+				child_elem.SetAttribute ("undoId", "0");
 			}
 
 			return child_elem;
@@ -1187,16 +1141,16 @@ namespace Stetic.Wrapper
 			// This id is used by the undo methods to identify a child of a container.
 			// The id is not stored, since it's used only while the widget is being
 			// edited in the designer
-			string id;
+			string undoId;
 			
 			public ContainerChild ()
 			{
-				id = WidgetUtils.GetUndoId ();
+				undoId = WidgetUtils.GetUndoId ();
 			}
 			
-			internal string Id {
-				get { return id; }
-				set { id = value; }
+			internal string UndoId {
+				get { return undoId; }
+				set { undoId = value; }
 			}
 
 			internal static void Register ()
@@ -1264,51 +1218,4 @@ namespace Stetic.Wrapper
 			}
 		}
 	}
-	
-	class ContainerDiff
-	{
-		public WidgetDiff BaseDiff;
-		public WidgetDiff[] PackingDiffs;
-		
-		public override string ToString ()
-		{
-			string s = BaseDiff != null ? BaseDiff.ToString () : "";
-			if (PackingDiffs != null) {
-				foreach (WidgetDiff d in PackingDiffs) {
-					s += d.ToString () + "\n";
-				}
-			}
-			return s;
-		}
-	}
-	
-	class ChildWidgetDiff: WidgetDiff
-	{
-		public string Id;
-		public DiffOperation Operation;
-		public XmlElement AddContent;
-		public string InsertAfter;
-		
-		public static ChildWidgetDiff ChildCreate (XmlElement oldElem, XmlElement newElem)
-		{
-			WidgetPropDiff[] changes = GetChanges (oldElem, newElem);
-			if (changes == null)
-				return null;
-			ChildWidgetDiff dif = new ChildWidgetDiff ();
-			dif.Changes = changes;
-			return dif;
-		}
-		
-		public override string ToString ()
-		{
-			string s = "ChildWidgetDiff:\n";
-			s += "  " + Operation + " " + Id + "\n";
-			if (Operation == DiffOperation.Update)
-				s += base.ToString () + "\n";
-			if (Operation == DiffOperation.Add)
-				s += "  InsertAfter: " + InsertAfter + "\n  Content: " + AddContent.OuterXml + "\n";
-			return s;
-		}
-	}
-
 }

@@ -166,7 +166,7 @@ namespace Stetic
 		{
 			if (defaultValue != null)
 				return base.IsDefaultValue (value);
-			if (ParamSpec != null)
+			if (ParamSpec != null && value != null)
 				return ParamSpec.IsDefaultValue (value);
 			else
 				return false;

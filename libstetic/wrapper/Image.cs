@@ -13,13 +13,13 @@ namespace Stetic.Wrapper {
 			return new Gtk.Image (Gtk.Stock.Execute, Gtk.IconSize.Dialog);
 		}
 		
-		public override void Read (ObjectReader reader, XmlElement elem)
+		protected override void ReadProperties (ObjectReader reader, XmlElement elem)
 		{
 			if (reader.Format == FileFormat.Glade) {
 				string file = (string)GladeUtils.ExtractProperty (elem, "pixbuf", "");
 				string stock = (string)GladeUtils.ExtractProperty (elem, "stock", "");
 				string iconSize = (string)GladeUtils.ExtractProperty (elem, "icon_size", "");
-				base.Read (reader, elem);
+				base.ReadProperties (reader, elem);
 				
 				if (stock != null && stock.Length > 0) {
 					Pixbuf = ImageInfo.FromTheme (stock, (Gtk.IconSize) int.Parse (iconSize));
@@ -27,12 +27,12 @@ namespace Stetic.Wrapper {
 					Pixbuf = ImageInfo.FromFile (file);
 				}
 			} else
-				base.Read (reader, elem);
+				base.ReadProperties (reader, elem);
 		}
 		
-		public override XmlElement Write (ObjectWriter writer)
+		protected override XmlElement WriteProperties (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (writer);
+			XmlElement elem = base.WriteProperties (writer);
 			if (imageInfo != null) {
 				if (writer.Format == FileFormat.Glade) {
 					// The generated pixbuf property doesn't have a valid value, it needs to be replaced.

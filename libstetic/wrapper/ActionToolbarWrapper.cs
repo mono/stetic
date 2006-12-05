@@ -117,9 +117,9 @@ namespace Stetic.Wrapper
 			Loading = false;
 		}
 		
-		public override XmlElement Write (ObjectWriter writer)
+		protected override XmlElement WriteProperties (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (writer);
+			XmlElement elem = base.WriteProperties (writer);
 			if (writer.Format == FileFormat.Native) {
 				// The style is already stored in ButtonStyle
 				GladeUtils.ExtractProperty (elem, "ToolbarStyle", "");
@@ -131,9 +131,9 @@ namespace Stetic.Wrapper
 			return elem;
 		}
 		
-		public override void Read (ObjectReader reader, XmlElement elem)
+		protected override void ReadProperties (ObjectReader reader, XmlElement elem)
 		{
-			base.Read (reader, elem);
+			base.ReadProperties (reader, elem);
 			toolbarInfo = elem ["node"];
 		}
 		

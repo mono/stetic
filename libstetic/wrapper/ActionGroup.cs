@@ -3,6 +3,7 @@ using System;
 using System.CodeDom;
 using System.Xml;
 using System.Collections;
+using Stetic.Undo;
 
 namespace Stetic.Wrapper
 {
@@ -11,6 +12,10 @@ namespace Stetic.Wrapper
 		string name;
 		ActionCollection actions;
 		IObjectFrontend frontend;
+		ObjectWrapper owner;
+		
+		// This id is used by the undo methods to identify an object.
+		string undoId = WidgetUtils.GetUndoId ();
 		
 		public event ActionEventHandler ActionAdded;
 		public event ActionEventHandler ActionRemoved;
@@ -34,6 +39,11 @@ namespace Stetic.Wrapper
 		{
 			foreach (Action a in actions)
 				a.Dispose ();
+		}
+		
+		internal string UndoId {
+			get { return undoId; }
+			set { undoId = value; }
 		}
 		
 		public IObjectFrontend Frontend {
@@ -92,6 +102,8 @@ namespace Stetic.Wrapper
 		{
 			XmlElement group = writer.XmlDocument.CreateElement ("action-group");
 			group.SetAttribute ("name", name);
+			if (writer.CreateUndoInfo)
+				group.SetAttribute ("undoId", undoId);
 			foreach (Action ac in actions)
 				group.AppendChild (ac.Write (writer));
 			return group;
@@ -100,6 +112,7 @@ namespace Stetic.Wrapper
 		public void Read (IProject project, XmlElement elem)
 		{
 			name = elem.GetAttribute ("name");
+			undoId = elem.GetAttribute ("undoId");
 			foreach (XmlElement child in elem.SelectNodes ("action")) {
 				Action ac = new Action ();
 				ac.Read (project, child);
@@ -145,6 +158,19 @@ namespace Stetic.Wrapper
 					)
 				);
 			}
+		}
+		
+		internal void SetOwner (ObjectWrapper owner)
+		{
+			this.owner = owner;
+		}
+		
+		internal UndoManager GetUndoManager ()
+		{
+			if (owner != null)
+				return owner.UndoManager;
+			else
+				return null;
 		}
 		
 		internal void NotifyActionAdded (Action ac)
@@ -217,10 +243,21 @@ namespace Stetic.Wrapper
 	public class ActionGroupCollection: CollectionBase
 	{
 		ActionGroup[] toClear;
+		ObjectWrapper owner;
+		
+		internal void SetOwner (ObjectWrapper owner)
+		{
+			this.owner = owner;
+		}
 		
 		public void Add (ActionGroup group)
 		{
 			List.Add (group);
+		}
+		
+		public void Insert (int n, ActionGroup group)
+		{
+			List.Insert (n, group);
 		}
 		
 		public ActionGroup this [int n] {
@@ -234,6 +271,29 @@ namespace Stetic.Wrapper
 						return grp;
 				return null;
 			}
+		}
+		
+		DiffGenerator GetDiffGenerator (IProject prj)
+		{
+			DiffGenerator gen = new DiffGenerator ();
+			gen.CurrentStatusAdaptor = new ActionDiffAdaptor (prj);
+			XmlDiffAdaptor xad = new XmlDiffAdaptor ();
+			xad.ChildElementName = "action-group";
+			xad.ProcessProperties = false;
+			xad.ChildAdaptor = new XmlDiffAdaptor ();
+			xad.ChildAdaptor.ChildElementName = "action";
+			gen.NewStatusAdaptor = xad;
+			return gen;
+		}
+		
+		internal ObjectDiff GetDiff (IProject prj, XmlElement elem)
+		{
+			return GetDiffGenerator (prj).GetDiff (this, elem);
+		}
+		
+		internal void ApplyDiff (IProject prj, ObjectDiff diff)
+		{
+			GetDiffGenerator (prj).ApplyDiff (this, diff);
 		}
 		
 		public int IndexOf (ActionGroup group)
@@ -277,6 +337,7 @@ namespace Stetic.Wrapper
 		
 		void NotifyGroupAdded (ActionGroup grp)
 		{
+			grp.SetOwner (owner);
 			grp.Changed += OnGroupChanged;
 			if (ActionGroupAdded != null)
 				ActionGroupAdded (this, new ActionGroupEventArgs (grp));
@@ -284,6 +345,7 @@ namespace Stetic.Wrapper
 		
 		void NotifyGroupRemoved (ActionGroup grp)
 		{
+			grp.SetOwner (null);
 			grp.Changed -= OnGroupChanged;
 			if (ActionGroupRemoved != null)
 				ActionGroupRemoved (this, new ActionGroupEventArgs (grp));

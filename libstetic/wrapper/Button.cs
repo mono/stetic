@@ -78,9 +78,9 @@ namespace Stetic.Wrapper {
 			Type = ButtonType.TextAndIcon;
 		}
 
-		public override XmlElement Write (ObjectWriter writer)
+		protected override XmlElement WriteProperties (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (writer);
+			XmlElement elem = base.WriteProperties (writer);
 			if (Type == ButtonType.StockItem)
 				GladeUtils.SetProperty (elem, "label", stockId);
 			return elem;

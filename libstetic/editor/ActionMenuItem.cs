@@ -140,6 +140,13 @@ namespace Stetic.Editor
 			GrabFocus ();
 		}
 		
+		public bool IsSelected {
+			get {
+				IDesignArea area = GetDesignArea ();
+				return area.IsSelected (this);
+			}
+		}
+		
 		public void Copy ()
 		{
 		}
@@ -334,23 +341,27 @@ namespace Stetic.Editor
 			
 			Gtk.Entry entry = ob as Gtk.Entry;
 			if (entry.Text.Length > 0 || node.Action.GtkAction.StockId != null) {
-				node.Action.GtkAction.Label = entry.Text;
-				node.Action.NotifyChanged ();
+				using (node.Action.UndoManager.AtomicChange) {
+					node.Action.GtkAction.Label = entry.Text;
+					node.Action.NotifyChanged ();
+				}
 			}
 			localUpdate = false;
 		}
 		
 		void OnCreateDeleteSubmenu (object ob, EventArgs args)
 		{
-			if (node.Type == Gtk.UIManagerItemType.Menu) {
-				node.Type = Gtk.UIManagerItemType.Menuitem;
-				node.Children.Clear ();
-			} else {
-				node.Type = Gtk.UIManagerItemType.Menu;
+			using (node.Action.UndoManager.AtomicChange) {
+				if (node.Type == Gtk.UIManagerItemType.Menu) {
+					node.Type = Gtk.UIManagerItemType.Menuitem;
+					node.Children.Clear ();
+				} else {
+					node.Type = Gtk.UIManagerItemType.Menu;
+				}
+				
+				EndEditing ();
+				node.Action.NotifyChanged ();
 			}
-			
-			EndEditing ();
-			node.Action.NotifyChanged ();
 		}
 		
 		void OnLabelActivated (object ob, EventArgs args)
@@ -409,32 +420,42 @@ namespace Stetic.Editor
 		
 		void OnStockSelected (object s, IconEventArgs args)
 		{
-			node.Action.GtkAction.StockId = args.IconId;
-			node.Action.NotifyChanged ();
+			using (node.Action.UndoManager.AtomicChange) {
+				node.Action.GtkAction.StockId = args.IconId;
+				node.Action.NotifyChanged ();
+			}
 		}
 		
 		void OnSetToggleType (object ob, EventArgs args)
 		{
-			node.Action.Type = Action.ActionType.Toggle;
-			node.Action.NotifyChanged ();
+			using (node.Action.UndoManager.AtomicChange) {
+				node.Action.Type = Action.ActionType.Toggle;
+				node.Action.NotifyChanged ();
+			}
 		}
 		
 		void OnSetRadioType (object ob, EventArgs args)
 		{
-			node.Action.Type = Action.ActionType.Radio;
-			node.Action.NotifyChanged ();
+			using (node.Action.UndoManager.AtomicChange) {
+				node.Action.Type = Action.ActionType.Radio;
+				node.Action.NotifyChanged ();
+			}
 		}
 		
 		void OnSetActionType (object ob, EventArgs args)
 		{
-			node.Action.Type = Action.ActionType.Action;
-			node.Action.NotifyChanged ();
+			using (node.Action.UndoManager.AtomicChange) {
+				node.Action.Type = Action.ActionType.Action;
+				node.Action.NotifyChanged ();
+			}
 		}
 		
 		void OnClearIcon (object on, EventArgs args)
 		{
-			node.Action.GtkAction.StockId = null;
-			node.Action.NotifyChanged ();
+			using (node.Action.UndoManager.AtomicChange) {
+				node.Action.GtkAction.StockId = null;
+				node.Action.NotifyChanged ();
+			}
 		}
 		
 		public void Refresh ()
@@ -564,6 +585,13 @@ namespace Stetic.Editor
 		void OnSelectionDisposed (object ob, EventArgs a)
 		{
 			EndEditing ();
+		}
+		
+		public bool IsSubmenuVisible {
+			get {
+				ActionMenu menu = parentMenu.OpenSubmenu;
+				return (menu != null && menu.ParentNode == node);
+			}
 		}
 		
 		public void ShowSubmenu ()

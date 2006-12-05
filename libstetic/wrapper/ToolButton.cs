@@ -34,13 +34,13 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override void Read (ObjectReader reader, XmlElement elem)
+		protected override void ReadProperties (ObjectReader reader, XmlElement elem)
 		{
 			if (reader.Format == FileFormat.Glade) {
 				string icon = (string)GladeUtils.ExtractProperty (elem, "icon", "");
 				stockId = (string)GladeUtils.ExtractProperty (elem, "stock_id", "");
 				label = (string)GladeUtils.ExtractProperty (elem, "label", "");
-				base.Read (reader, elem);
+				base.ReadProperties (reader, elem);
 				
 				if (stockId != null && stockId.Length > 0) {
 					Type = ButtonType.StockItem;
@@ -49,12 +49,12 @@ namespace Stetic.Wrapper {
 					Type = ButtonType.TextAndIcon;
 				}
 			} else
-				base.Read (reader, elem);
+				base.ReadProperties (reader, elem);
 		}
 		
-		public override XmlElement Write (ObjectWriter writer)
+		protected override XmlElement WriteProperties (ObjectWriter writer)
 		{
-			XmlElement elem = base.Write (writer);
+			XmlElement elem = base.WriteProperties (writer);
 			if (type != ButtonType.StockItem && imageInfo != null) {
 				if (writer.Format == FileFormat.Glade) {
 					switch (imageInfo.Source) {

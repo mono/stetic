@@ -177,7 +177,7 @@ namespace Stetic
 					continue;
 				
 //				Console.WriteLine ("ADDCHANGE " + widget);
-//				Console.WriteLine (diff.ToString ());
+//				PrintPatch (diff);
 				
 				ObjectWrapperUndoRedoChange change = new ObjectWrapperUndoRedoChange (this, widget.Wrapped.Name, diff);
 				if (lastChange == null)
@@ -218,7 +218,7 @@ namespace Stetic
 		ObjectWrapperUndoRedoChange ApplyDiff (string name, object diff)
 		{
 //			Console.WriteLine ("** APPLYING DIFF:");
-//			Console.WriteLine (diff.ToString ());
+//			PrintPatch (diff);
 			
 			Wrapper.Widget ww = rootObject.FindChild (name);
 			
@@ -226,7 +226,7 @@ namespace Stetic
 		
 			if (reverseDiff != null) {
 //				Console.WriteLine ("** REVERSE DIFF:");
-//				Console.WriteLine (reverseDiff.ToString ());
+//				PrintPatch (reverseDiff);
 				
 				ObjectWrapperUndoRedoChange change = new ObjectWrapperUndoRedoChange (this, name, reverseDiff);
 				return change;
@@ -244,6 +244,15 @@ namespace Stetic
 			rootObject = null;
 			if (queue != null)
 				queue.Purge ();
+		}
+		
+		internal void PrintPatch (object diff)
+		{
+			if (diff is Array) {
+				foreach (object ob in (Array)diff)
+					if (ob != null) PrintPatch (ob);
+			} else
+				Console.WriteLine (diff.ToString ());
 		}
 	}
 }

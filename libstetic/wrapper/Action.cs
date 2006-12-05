@@ -20,6 +20,9 @@ namespace Stetic.Wrapper
 		string oldDefaultName;
 		string nameRoot;
 
+		// This id is used by the undo methods to identify an object.
+		string undoId = WidgetUtils.GetUndoId ();
+		
 		public enum ActionType {
 			Action,
 			Toggle,
@@ -50,6 +53,11 @@ namespace Stetic.Wrapper
 					name = group.GetValidName (this, name);
 				EmitNotify ("Name");
 			}
+		}
+		
+		internal string UndoId {
+			get { return undoId; }
+			set { undoId = value; }
 		}
 		
 		internal void UpdateNameIndex ()
@@ -163,6 +171,8 @@ namespace Stetic.Wrapper
 		{
 			XmlElement elem = writer.XmlDocument.CreateElement ("action");
 			elem.SetAttribute ("id", Name);
+			if (writer.CreateUndoInfo)
+				elem.SetAttribute ("undoId", undoId);
 			WidgetUtils.GetProps (this, elem);
 			WidgetUtils.GetSignals (this, elem);
 			return elem;
@@ -177,6 +187,7 @@ namespace Stetic.Wrapper
 			
 			WidgetUtils.ReadMembers (klass, this, ac, elem);
 			name = nameRoot = oldDefaultName = elem.GetAttribute ("id");
+			undoId = elem.GetAttribute ("undoId");
 		}
 		
 		public Action Clone ()
@@ -293,6 +304,14 @@ namespace Stetic.Wrapper
 			}
 			return sb.ToString ();
 		}
+		
+		internal override UndoManager GetUndoManagerInternal ()
+		{
+			if (group != null)
+				return group.GetUndoManager ();
+			else
+				return base.GetUndoManagerInternal ();
+		}
 	}
 	
 	[Serializable]
@@ -313,6 +332,11 @@ namespace Stetic.Wrapper
 		public void Add (Action action)
 		{
 			List.Add (action);
+		}
+		
+		public void Insert (int i, Action action)
+		{
+			List.Insert (i, action);
 		}
 		
 		public Action this [int n] {
