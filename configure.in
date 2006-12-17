@@ -14,7 +14,7 @@ MONO_REQUIRED_VERSION=1.1.2
 PKG_CHECK_MODULES(MONO, mono >= $MONO_REQUIRED_VERSION)
 
 AC_PATH_PROG(MONO, mono, no)
-AC_PATH_PROG(MCS, mcs, no)
+AC_PATH_PROG(MCS, gmcs, no)
 
 CS="C#"
 if test "$MCS" = "no" ; then

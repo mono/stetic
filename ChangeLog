@@ -21,6 +21,29 @@
 	* libstetic/wrapper/ActionToolbarWrapper.cs: Implemented support for
 	  Undo.
 
+2006-12-17  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs, libsteticui/WidgetEditSession.cs,
+	  libsteticui/WidgetDesigner.cs, libsteticui/Project.cs: Added new
+	  Changed event.
+	* libsteticui/PaletteBackend.cs, libsteticui/UndoQueue.cs,
+	  libstetic/undo/DiffGenerator.cs,
+	  libstetic/undo/ActionDiffAdaptor.cs, libstetic/wrapper/Action.cs,
+	  libstetic/wrapper/Container.cs, libstetic/wrapper/Widget.cs,
+	  libstetic/wrapper/ActionGroup.cs, libstetic/wrapper/MenuBar.cs,
+	  libstetic/wrapper/ActionTree.cs,
+	  libstetic/editor/ActionMenuItem.cs,
+	  libstetic/editor/ActionMenuBar.cs, libstetic/editor/ActionMenu.cs,
+	  libstetic/editor/ActionToolItem.cs,
+	  libstetic/editor/ActionToolbar.cs: Improved support for Undo.
+	* libstetic/undo/UndoManager.cs: Removed debug code.
+	* libstetic/undo/XmlDiffAdaptor.cs: Fix support for name and id
+	  properties when diffing.
+	* libstetic/wrapper/objects.xml: HasFocus property doesn't need to be
+	  available at design time.
+	* libstetic/wrapper/ActionToolbarWrapper.cs: Implemented support for
+	  Undo.
+
 2006-12-05  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/UndoQueue.cs: Added debug method.

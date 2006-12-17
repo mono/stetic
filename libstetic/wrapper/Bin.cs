@@ -23,7 +23,7 @@ namespace Stetic.Wrapper
 				// the app.
 				
 				bool found = false;
-				foreach (CodeTypeDeclaration dec in ctx.CodeNamespace.Types) {
+				foreach (CodeTypeDeclaration dec in ctx.GlobalCodeNamespace.Types) {
 					if (dec.Name == "BinContainer") {
 						found = true;
 						break;
@@ -34,7 +34,7 @@ namespace Stetic.Wrapper
 					GenerateHelperClass (ctx);
 				
 				CodeMethodInvokeExpression attachExp = new CodeMethodInvokeExpression (
-					new CodeTypeReferenceExpression ("BinContainer"),
+					new CodeTypeReferenceExpression (ctx.GlobalCodeNamespace.Name + ".BinContainer"),
 					"Attach",
 					new CodeVariableReferenceExpression (varName)
 				);
@@ -50,7 +50,7 @@ namespace Stetic.Wrapper
 					binContainerVar = ctx.NewId ();
 					ctx.Statements.Add (
 						new CodeVariableDeclarationStatement (
-							"BinContainer", 
+							ctx.GlobalCodeNamespace.Name + ".BinContainer", 
 							binContainerVar,
 							attachExp
 						)
@@ -82,7 +82,7 @@ namespace Stetic.Wrapper
 			CodeTypeDeclaration type = new CodeTypeDeclaration ("BinContainer");
 			type.Attributes = MemberAttributes.Private;
 			type.TypeAttributes = TypeAttributes.NestedAssembly;
-			ctx.CodeNamespace.Types.Add (type);
+			ctx.GlobalCodeNamespace.Types.Add (type);
 			
 			CodeMemberField field = new CodeMemberField ("Gtk.Widget", "child");
 			field.Attributes = MemberAttributes.Private;

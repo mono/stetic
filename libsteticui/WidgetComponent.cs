@@ -93,4 +93,25 @@ namespace Stetic
 			}
 		}
 	}
+	
+	[Serializable]
+	public class ObjectBindInfo
+	{
+		string typeName;
+		string name;
+		
+		public ObjectBindInfo (string typeName, string name)
+		{
+			this.typeName = typeName;
+			this.name = name;
+		}
+		
+		public string TypeName {
+			get { return typeName; }
+		}
+		
+		public string Name {
+			get { return name; }
+		}
+	}
 }

@@ -25,7 +25,7 @@ namespace Stetic
 			map = new WidgetMap (vars, widgets);
 		}
 		
-		public CodeNamespace CodeNamespace {
+		public CodeNamespace GlobalCodeNamespace {
 			get { return cns; }
 		}
 		
@@ -126,7 +126,7 @@ namespace Stetic
 			if (value is Wrapper.ActionGroup) {
 				return new CodeMethodInvokeExpression (
 					new CodeMethodReferenceExpression (
-						new CodeTypeReferenceExpression (CodeNamespace.Name + ".ActionGroups"),
+						new CodeTypeReferenceExpression (GlobalCodeNamespace.Name + ".ActionGroups"),
 						"GetActionGroup"
 					),
 					new CodePrimitiveExpression (((Wrapper.ActionGroup)value).Name)
@@ -222,10 +222,40 @@ namespace Stetic
 	public class GenerationOptions
 	{
 		bool useGettext;
+		bool partialClasses;
+		bool generateEmptyBuildMethod;
+		bool generateSingleFile = true;
+		string path;
+		string globalNamespace = "Stetic";
 		
 		public bool UseGettext {
 			get { return useGettext; }
 			set { useGettext = value; }
+		}
+		
+		public bool UsePartialClasses {
+			get { return partialClasses; }
+			set { partialClasses = value; }
+		}
+		
+		public string Path {
+			get { return path; }
+			set { path = value; }
+		}
+		
+		public bool GenerateEmptyBuildMethod {
+			get { return generateEmptyBuildMethod; }
+			set { generateEmptyBuildMethod = value; }
+		}
+		
+		public bool GenerateSingleFile {
+			get { return generateSingleFile; }
+			set { generateSingleFile = value; }
+		}
+		
+		public string GlobalNamespace {
+			get { return globalNamespace; }
+			set { globalNamespace = value; }
 		}
 	}
 }

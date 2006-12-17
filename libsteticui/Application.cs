@@ -243,28 +243,39 @@ namespace Stetic
 			projects.Remove (p);
 		}
 		
-		public void GenerateProjectCode (string file, string namespaceName, CodeDomProvider provider, GenerationOptions options, params Project[] projects)
+		public string[] GenerateProjectCode (string file, string namespaceName, CodeDomProvider provider, GenerationOptions options, params Project[] projects)
 		{
-			CodeCompileUnit cunit = GenerateProjectCode (namespaceName, options, projects);
+			ArrayList files = new ArrayList ();
+			SteticCompilationUnit[] units = GenerateProjectCode (options, projects);
 			
 			ICodeGenerator gen = provider.CreateGenerator ();
-			StreamWriter fileStream = new StreamWriter (file);
-			try {
-				gen.GenerateCodeFromCompileUnit (cunit, fileStream, new CodeGeneratorOptions ());
-			} finally {
-				fileStream.Close ();
+			string basePath = Path.GetDirectoryName (file);
+			string ext = Path.GetExtension (file);
+			
+			foreach (SteticCompilationUnit unit in units) {
+				string fname;
+				if (unit.Name.Length == 0)
+					fname = file;
+				else
+					fname = Path.Combine (basePath, unit.Name) + ext;
+				files.Add (fname);
+				StreamWriter fileStream = new StreamWriter (fname);
+				try {
+					gen.GenerateCodeFromCompileUnit (unit, fileStream, new CodeGeneratorOptions ());
+				} finally {
+					fileStream.Close ();
+				}
 			}
+			return (string[]) files.ToArray (typeof(string));
 		}
 		
-		public CodeCompileUnit GenerateProjectCode (string namespaceName, GenerationOptions options, params Project[] projects)
+		public SteticCompilationUnit[] GenerateProjectCode (GenerationOptions options, params Project[] projects)
 		{
 			ProjectBackend[] pbs = new ProjectBackend [projects.Length];
 			for (int n=0; n<projects.Length; n++)
 				pbs [n] = projects [n].ProjectBackend;
 				
-			CodeCompileUnit cunit = new CodeCompileUnit ();
-			cunit.Namespaces.Add (backend.GenerateProjectCode (namespaceName, options, pbs));
-			return cunit;
+			return backend.GenerateProjectCode (options, pbs);
 		}
 		
 		internal bool UseExternalBackend {
@@ -372,7 +383,7 @@ namespace Stetic
 				components [cbackend] = c;
 				return c;
 			}
-			catch (System.Runtime.Remoting.RemotingException ex)
+			catch (System.Runtime.Remoting.RemotingException)
 			{
 				// There may be a remoting exception if the remote wrapper
 				// has already been disconnected when trying to create the

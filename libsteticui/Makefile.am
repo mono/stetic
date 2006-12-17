@@ -24,6 +24,8 @@ libsteticui_dll_sources =			\
 	ComponentSignalEventHandler.cs			\
 	ComponentType.cs			\
 	CodeGenerator.cs			\
+	CodeGeneratorInternalClass.cs			\
+	CodeGeneratorPartialClass.cs			\
 	EmbedWindow.cs		\
 	Glade.cs			\
 	Grid.cs				\

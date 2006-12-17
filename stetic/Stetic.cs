@@ -36,6 +36,10 @@ namespace Stetic {
 		{
 			int n = 0;
 			IsolationMode mode = IsolationMode.None;
+			bool usePartial = false;
+			bool useGettext = false;
+			bool genEmpty = false;
+			bool useMultifile = false;
 			
 			while (n < args.Length) {
 				string arg = args[n];
@@ -51,6 +55,14 @@ namespace Stetic {
 					break;
 				else if (arg == "--noisolation")
 					mode = IsolationMode.None;
+				else if (arg == "--gen-partial")
+					usePartial = true;
+				else if (arg == "--gen-gettext")
+					useGettext = true;
+				else if (arg == "--gen-multifile")
+					useMultifile = true;
+				else if (arg == "--gen-empty")
+					genEmpty = true;
 				else
 					break;
 				n++;
@@ -70,7 +82,12 @@ namespace Stetic {
 			
 			if (args.Length - n > 2 && ((args [n] == "--generate" || args [n] == "-g"))) {
 				SteticApp = new Stetic.Application (IsolationMode.None);
-				ret = GenerateCode (args [n+1], args, n+2);
+				GenerationOptions ops = new GenerationOptions ();
+				ops.UsePartialClasses = usePartial;
+				ops.GenerateEmptyBuildMethod = genEmpty;
+				ops.UseGettext = useGettext;
+				ops.GenerateSingleFile = !useMultifile;
+				ret = GenerateCode (args [n+1], args, n+2, ops);
 			}
 			else {
 				SteticApp = new Stetic.Application (mode);
@@ -81,7 +98,7 @@ namespace Stetic {
 			return ret;
 		}
 		
-		static int GenerateCode (string file, string[] args, int n)
+		static int GenerateCode (string file, string[] args, int n, GenerationOptions ops)
 		{
 			foreach (string lib in libraries)
 				SteticApp.AddWidgetLibrary (lib);
@@ -93,7 +110,9 @@ namespace Stetic {
 				projects [i - n] = SteticApp.LoadProject (args [i]);
 
 			CodeDomProvider provider = GetProvider (language);
-			SteticApp.GenerateProjectCode (file, "Stetic", provider, null, projects);
+			string[] files = SteticApp.GenerateProjectCode (file, "Stetic", provider, ops, projects);
+			foreach (string f in files)
+				Console.WriteLine ("Generated file: " + f);
 			return 0;
 		}
 		

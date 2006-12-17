@@ -113,9 +113,9 @@ namespace Stetic
 			return p;
 		}
 		
-		public CodeNamespace GenerateProjectCode (string namespaceName, GenerationOptions options, ProjectBackend[] projects)
+		public SteticCompilationUnit[] GenerateProjectCode (GenerationOptions options, ProjectBackend[] projects)
 		{
-			return CodeGenerator.GenerateProjectCode (namespaceName, options, projects);
+			return CodeGenerator.GenerateProjectCode (options, projects);
 		}
 		
 		public ArrayList GlobalWidgetLibraries {
@@ -451,6 +451,11 @@ namespace Stetic
 		internal Wrapper.ActionGroup[] GetActionGroups (Wrapper.Widget widget)
 		{
 			return widget.LocalActionGroups.ToArray ();
+		}
+		
+		internal ObjectBindInfo[] GetBoundComponents (ObjectWrapper wrapper)
+		{
+			return CodeGenerator.GetFieldsToBind (wrapper).ToArray ();
 		}
 	}
 }

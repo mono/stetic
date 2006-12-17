@@ -132,5 +132,14 @@ namespace Stetic
 		{
 			return base.ToString() + " " + backend;
 		}
+		
+		public ObjectBindInfo[] GetObjectBindInfo ()
+		{
+			ObjectWrapper ww = backend as ObjectWrapper;
+			if (ww != null)
+				return app.Backend.GetBoundComponents (ww);
+			else
+				return new ObjectBindInfo [0];
+		}
 	}
 }
