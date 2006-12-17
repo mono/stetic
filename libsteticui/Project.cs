@@ -28,6 +28,7 @@ namespace Stetic
 		
 		public event EventHandler ActionGroupsChanged;
 		public event EventHandler ModifiedChanged;
+		public event EventHandler Changed;
 		
 		public event ComponentSignalEventHandler SignalAdded;
 		public event ComponentSignalEventHandler SignalRemoved;
@@ -319,6 +320,16 @@ namespace Stetic
 				delegate {
 					if (ModifiedChanged != null)
 						ModifiedChanged (this, EventArgs.Empty);
+				}
+			);
+		}
+		
+		internal void NotifyChanged ()
+		{
+			Gtk.Application.Invoke (
+				delegate {
+					if (Changed != null)
+						Changed (this, EventArgs.Empty);
 				}
 			);
 		}

@@ -265,7 +265,6 @@ namespace Stetic
 		public void Delay ()
 		{
 			delayed = true;
-			Console.WriteLine ("Delay");
 		}
 
 		public void Dispose ()
@@ -287,8 +286,6 @@ namespace Stetic
 				ChangeEventPending.Clear ();
 				Count = 0;
 				
-				Console.WriteLine ("Delayed: " + delayed);
-
 				if (!delayed)
 					undoManager.NotifyUndoCheckpoint (obs);
 				delayed = false;

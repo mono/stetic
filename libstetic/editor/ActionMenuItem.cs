@@ -107,6 +107,18 @@ namespace Stetic.Editor
 		public void EndEditing ()
 		{
 			if (editing) {
+				Gtk.Entry entry = label as Gtk.Entry;
+				if (entry != null) {
+					localUpdate = true;
+					if (entry.Text.Length > 0 || node.Action.GtkAction.StockId != null) {
+						using (node.Action.UndoManager.AtomicChange) {
+							node.Action.GtkAction.Label = entry.Text;
+							node.Action.NotifyChanged ();
+						}
+					}
+					localUpdate = false;
+				}
+				
 				editing = false;
 				Refresh ();
 				while (Gtk.Application.EventsPending ())
@@ -271,7 +283,6 @@ namespace Stetic.Editor
 				
 				Gtk.Entry entry = new Gtk.Entry ();
 				entry.Text = text;
-				entry.Changed += OnLabelChanged;
 				entry.Activated += OnLabelActivated;
 				entry.HasFrame = false;
 				this.label = entry;
@@ -333,20 +344,6 @@ namespace Stetic.Editor
 			if (accel != null)
 				table.Remove (accel);
 			table.Remove (this);
-		}
-		
-		void OnLabelChanged (object ob, EventArgs args)
-		{
-			localUpdate = true;
-			
-			Gtk.Entry entry = ob as Gtk.Entry;
-			if (entry.Text.Length > 0 || node.Action.GtkAction.StockId != null) {
-				using (node.Action.UndoManager.AtomicChange) {
-					node.Action.GtkAction.Label = entry.Text;
-					node.Action.NotifyChanged ();
-				}
-			}
-			localUpdate = false;
 		}
 		
 		void OnCreateDeleteSubmenu (object ob, EventArgs args)

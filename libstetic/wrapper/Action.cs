@@ -81,7 +81,7 @@ namespace Stetic.Wrapper
 				string s = GtkAction.StockId.Replace ("gtk-", "");
 				return GetIdentifier (s.Replace ("gnome-stock-", ""));
 			}
-			return null;
+			return "";
 		}
 		
 		public ActionType Type {
@@ -187,7 +187,10 @@ namespace Stetic.Wrapper
 			
 			WidgetUtils.ReadMembers (klass, this, ac, elem);
 			name = nameRoot = oldDefaultName = elem.GetAttribute ("id");
-			undoId = elem.GetAttribute ("undoId");
+			
+			string uid = elem.GetAttribute ("undoId");
+			if (uid.Length > 0)
+				undoId = uid;
 		}
 		
 		public Action Clone ()

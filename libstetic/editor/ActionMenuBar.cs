@@ -91,9 +91,17 @@ namespace Stetic.Editor
 				return;
 				
 			ActionMenuItem item = (ActionMenuItem) menuItems [pos];
-			if (status.Count == 1)	// The last position in the status is the selected item
+			if (status.Count == 1)	{
+				// The last position in the status is the selected item
 				item.Select ();
-			else {
+				if (item.Node.Action != null && item.Node.Action.Name.Length == 0) {
+					// Then only case when there can have an action when an empty name
+					// is when the user clicked on the "add action" link. In this case,
+					// start editing the item again
+					item.EditingDone += OnEditingDone;
+					item.StartEditing ();
+				}
+			} else {
 				item.ShowSubmenu ();
 				if (OpenSubmenu != null)
 					OpenSubmenu.RestoreStatus (status, 1);
@@ -236,14 +244,20 @@ namespace Stetic.Editor
 		void InsertAction (int pos)
 		{
 			Widget wrapper = Widget.Lookup (this);
-			Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
-			ActionTreeNode node = new ActionTreeNode (Gtk.UIManagerItemType.Menu, "", ac);
-			actionTree.Children.Insert (pos, node);
+			using (wrapper.UndoManager.AtomicChange) {
+				Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
+				ActionTreeNode node = new ActionTreeNode (Gtk.UIManagerItemType.Menu, "", ac);
+				actionTree.Children.Insert (pos, node);
 
-			ActionMenuItem aitem = FindMenuItem (node);
-			aitem.EditingDone += OnEditingDone;
-			aitem.Select ();
-			aitem.StartEditing ();
+				ActionMenuItem aitem = FindMenuItem (node);
+				aitem.EditingDone += OnEditingDone;
+				aitem.Select ();
+				aitem.StartEditing ();
+				
+				if (wrapper.LocalActionGroups.Count == 0)
+					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
+				wrapper.LocalActionGroups[0].Actions.Add (ac);
+			}
 		}
 		
 		void OnEditingDone (object ob, EventArgs args)
@@ -255,11 +269,10 @@ namespace Stetic.Editor
 			if (item.Node.Action.GtkAction.Label.Length == 0 && item.Node.Action.GtkAction.StockId == null) {
 				IDesignArea area = wrapper.GetDesignArea ();
 				area.ResetSelection (item);
-				actionTree.Children.Remove (item.Node);
-			} else {
-				if (wrapper.LocalActionGroups.Count == 0)
-					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
-				wrapper.LocalActionGroups[0].Actions.Add (item.Node.Action);
+				using (wrapper.UndoManager.AtomicChange) {
+					actionTree.Children.Remove (item.Node);
+					wrapper.LocalActionGroups [0].Actions.Remove (item.Node.Action);
+				}
 			}
 		}
 		
@@ -372,29 +385,32 @@ namespace Stetic.Editor
 				newNode.Type = Gtk.UIManagerItemType.Menuitem;
 			}
 
-			if (dropIndex < actionTree.Children.Count) {
-				// Do nothing if trying to drop the node over the same node
-				ActionTreeNode dropNode = actionTree.Children [dropIndex];
-				if (dropNode == dropped.Node)
-					return false;
+			Widget wrapper = Widget.Lookup (this);
+			using (wrapper.UndoManager.AtomicChange) {
+				if (dropIndex < actionTree.Children.Count) {
+					// Do nothing if trying to drop the node over the same node
+					ActionTreeNode dropNode = actionTree.Children [dropIndex];
+					if (dropNode == dropped.Node)
+						return false;
+						
+					if (newNode.ParentNode != null)
+						newNode.ParentNode.Children.Remove (newNode);
 					
-				if (newNode.ParentNode != null)
-					newNode.ParentNode.Children.Remove (newNode);
+					// The drop position may have changed after removing the dropped node,
+					// so get it again.
+					dropIndex = actionTree.Children.IndexOf (dropNode);
+					actionTree.Children.Insert (dropIndex, newNode);
+				} else {
+					if (newNode.ParentNode != null)
+						newNode.ParentNode.Children.Remove (newNode);
+					actionTree.Children.Add (newNode);
+					dropIndex = actionTree.Children.Count - 1;
+				}
 				
-				// The drop position may have changed after removing the dropped node,
-				// so get it again.
-				dropIndex = actionTree.Children.IndexOf (dropNode);
-				actionTree.Children.Insert (dropIndex, newNode);
-			} else {
-				if (newNode.ParentNode != null)
-					newNode.ParentNode.Children.Remove (newNode);
-				actionTree.Children.Add (newNode);
-				dropIndex = actionTree.Children.Count - 1;
+				// Select the dropped node
+				ActionMenuItem mi = (ActionMenuItem) menuItems [dropIndex];
+				mi.Select ();
 			}
-			
-			// Select the dropped node
-			ActionMenuItem mi = (ActionMenuItem) menuItems [dropIndex];
-			mi.Select ();
 			
 			return base.OnDragDrop (context, x,	y, time);
 		}		

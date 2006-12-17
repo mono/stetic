@@ -53,6 +53,7 @@ namespace Stetic.Wrapper
 		ActionTreeNodeCollection children;
 		ActionTreeNode parentNode;
 		bool loading;
+		string lastActionName;
 		
 		public ActionTreeNode ()
 		{
@@ -68,20 +69,37 @@ namespace Stetic.Wrapper
 			this.type = type;
 			this.name = name;
 			this.action = action;
-			if (this.action != null)
+			if (this.action != null) {
+				lastActionName = this.action.Name;
 				this.action.Deleted += OnActionDeleted;
+				this.action.ObjectChanged += OnActionChanged;
+			}
 		}
 		
 		public virtual void Dispose ()
 		{
-			if (action != null)
+			if (action != null) {
 				action.Deleted -= OnActionDeleted;
+				action.ObjectChanged -= OnActionChanged;
+			}
 		}
 		
 		void OnActionDeleted (object s, EventArgs args)
 		{
 			if (parentNode != null)
 				parentNode.Children.Remove (this);
+		}
+		
+		void OnActionChanged (object s, ObjectWrapperEventArgs args)
+		{
+			// If the name of the action changes, consider it a change in
+			// the node, since the generated xml will be different
+
+			Action ac = (Action) args.Wrapper;
+			if (ac.Name != lastActionName) {
+				lastActionName = ac.Name;
+				NotifyChanged ();
+			}
 		}
 
 		internal virtual void NotifyChanged ()
@@ -100,8 +118,11 @@ namespace Stetic.Wrapper
 				elem.SetAttribute ("action", action.Name);
 			
 			if (children != null) {
-				foreach (ActionTreeNode child in children)
+				foreach (ActionTreeNode child in children) {
+					if (child.Action != null && child.Action.Name.Length == 0)
+						continue;
 					elem.AppendChild (child.Write (doc, format));
+				}
 			}
 			return elem;
 		}
@@ -112,8 +133,10 @@ namespace Stetic.Wrapper
 			if (elem.HasAttribute ("type"))
 				type = (Gtk.UIManagerItemType) Enum.Parse (typeof(Gtk.UIManagerItemType), elem.GetAttribute ("type"));
 			
-			string aname = elem.GetAttribute ("action");
-			if (aname.Length > 0) {
+			// The name of an action may be empty in some situations (e.g. when adding a new action but before entering the name)
+			XmlAttribute actionAt = elem.Attributes ["action"];
+			if (actionAt != null) {
+				string aname = actionAt.Value;
 				foreach (ActionGroup grp in baseWidget.LocalActionGroups) {
 					action = grp.GetAction (aname);
 					if (action != null)
@@ -126,8 +149,11 @@ namespace Stetic.Wrapper
 							break;
 					}
 				}
-				if (action != null)
+				if (action != null) {
+					lastActionName = action.Name;
 					action.Deleted += OnActionDeleted;
+					action.ObjectChanged += OnActionChanged;
+				}
 			}
 			
 			try {

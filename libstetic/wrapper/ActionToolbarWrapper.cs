@@ -12,6 +12,7 @@ namespace Stetic.Wrapper
 		ActionTree actionTree;
 		XmlElement toolbarInfo;
 		ToolbarStyle toolbarStyle;
+		bool treeChanged;
 		static Gtk.ToolbarStyle defaultStyle;
 		static bool gotDefault;
 		
@@ -189,6 +190,77 @@ namespace Stetic.Wrapper
 			toolbar.FillMenu (actionTree);
 		}
 		
+		public override object GetUndoDiff ()
+		{
+			XmlElement oldElem = treeChanged ? UndoManager.GetObjectStatus (this) ["node"] : null;
+			if (oldElem != null)
+				oldElem = (XmlElement) oldElem.CloneNode (true);
+				
+			treeChanged = false;
+			object baseDiff = base.GetUndoDiff ();
+			
+			if (oldElem != null) {
+				XmlElement newElem = UndoManager.GetObjectStatus (this) ["node"];
+				if (newElem != null && oldElem.OuterXml == newElem.OuterXml)
+					oldElem = null;
+			}
+			
+			if (baseDiff == null && oldElem == null)
+				return null;
+			else {
+				object stat = toolbar.SaveStatus ();
+				return new object[] { baseDiff, oldElem, stat };
+			}
+		}
+		
+		public override object ApplyUndoRedoDiff (object diff)
+		{
+			object[] data = (object[]) diff;
+			object retBaseDiff;
+			XmlElement oldNode = null;
+			
+			if (actionTree != null) {
+				XmlElement status = UndoManager.GetObjectStatus (this);
+				oldNode = status ["node"];
+				if (oldNode != null)
+					oldNode = (XmlElement) oldNode.CloneNode (true);
+			}
+			object oldStat = toolbar.SaveStatus ();
+			
+			if (data [0] != null)
+				retBaseDiff = base.ApplyUndoRedoDiff (data [0]);
+			else
+				retBaseDiff = null;
+				
+			XmlElement xdiff = (XmlElement) data [1];
+
+			if (xdiff != null) {
+				XmlElement status = UndoManager.GetObjectStatus (this);
+				XmlElement prevNode = status ["node"];
+				if (prevNode != null)
+					status.RemoveChild (prevNode);
+				status.AppendChild (xdiff);
+				
+				if (actionTree != null) {
+					Loading = true;
+					DisposeTree ();
+					CreateTree ();
+					actionTree.Read (this, xdiff);
+					toolbar.FillMenu (actionTree);
+					Loading = false;
+				}
+			}
+			
+			// Restore the status after all menu structure has been properly built
+			GLib.Timeout.Add (50, delegate {
+				toolbar.RestoreStatus (data[2]);
+				return false;
+			});
+			
+			return new object [] { retBaseDiff, oldNode, oldStat };
+		}
+		
+		
 		void BuildTree ()
 		{
 			if (toolbarInfo != null) {
@@ -218,6 +290,7 @@ namespace Stetic.Wrapper
 		
 		void OnTreeChanged (object s, EventArgs a)
 		{
+			treeChanged = true;
 			NotifyChanged ();
 		}
 	}

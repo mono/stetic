@@ -107,6 +107,7 @@ namespace Stetic.Editor
 			menuItems.Clear ();
 
 			uint n = 0;
+			ActionMenuItem editItem = null;
 			
 			if (nodes.Count > 0) {
 				foreach (ActionTreeNode node in nodes) {
@@ -114,6 +115,9 @@ namespace Stetic.Editor
 					item.KeyPressEvent += OnItemKeyPress;
 					item.Attach (table, n++, 0);
 					menuItems.Add (item);
+					// If adding an action with an empty name, select and start editing it
+//					if (node.Action != null && node.Action.Name.Length == 0)
+//						editItem = item;
 				}
 			}
 			
@@ -127,6 +131,17 @@ namespace Stetic.Editor
 			table.Attach (emptyLabel, 1, 2, n, n + 1);
 			
 			ShowAll ();
+			
+			if (editItem != null) {
+				// If there is an item with an empty action, it means that it was an item that was
+				// being edited. Restart the editing now.
+				GLib.Timeout.Add (200, delegate {
+					editItem.Select ();
+					editItem.EditingDone += OnEditingDone;
+					editItem.StartEditing ();
+					return false;
+				});
+			}
 		}
 		
 		void Refresh ()
@@ -135,8 +150,9 @@ namespace Stetic.Editor
 			ActionTreeNode selNode = null;
 			
 			foreach (Gtk.Widget w in table.Children) {
-				if (area.IsSelected (w) && w is ActionMenuItem) {
-					selNode = ((ActionMenuItem)w).Node;
+				ActionMenuItem ami = w as ActionMenuItem;
+				if (area.IsSelected (w) && ami != null) {
+					selNode = ami.Node;
 					area.ResetSelection (w);
 				}
 				table.Remove (w);
@@ -166,14 +182,20 @@ namespace Stetic.Editor
 		
 		void InsertAction (int pos)
 		{
-			Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
-			ActionTreeNode newNode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac);
-			nodes.Insert (pos, newNode);
-			ActionMenuItem item = FindMenuItem (newNode);
-			item.EditingDone += OnEditingDone;
-			item.Select ();
-			item.StartEditing ();
-			emptyLabel.Hide ();
+			using (wrapper.UndoManager.AtomicChange) {
+				Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
+				ActionTreeNode newNode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, ac);
+				nodes.Insert (pos, newNode);
+				ActionMenuItem item = FindMenuItem (newNode);
+				item.EditingDone += OnEditingDone;
+				item.Select ();
+				item.StartEditing ();
+				emptyLabel.Hide ();
+				
+				if (wrapper.LocalActionGroups.Count == 0)
+					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
+				wrapper.LocalActionGroups [0].Actions.Add (ac);
+			}
 		}
 		
 		void OnEditingDone (object ob, EventArgs args)
@@ -183,11 +205,10 @@ namespace Stetic.Editor
 			if (item.Node.Action.GtkAction.Label.Length == 0 && item.Node.Action.GtkAction.StockId == null) {
 				IDesignArea area = wrapper.GetDesignArea ();
 				area.ResetSelection (item);
-				nodes.Remove (item.Node);
-			} else {
-				if (wrapper.LocalActionGroups.Count == 0)
-					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
-				wrapper.LocalActionGroups [0].Actions.Add (item.Node.Action);
+				using (wrapper.UndoManager.AtomicChange) {
+					nodes.Remove (item.Node);
+					wrapper.LocalActionGroups [0].Actions.Remove (item.Node.Action);
+				}
 			}
 		}
 		
@@ -308,31 +329,33 @@ namespace Stetic.Editor
 			
 			// Toolitems are copied, not moved
 			
-			if (dropped.Node.ParentNode != null && dropped.Node.Type != Gtk.UIManagerItemType.Toolitem) {
-				if (dropIndex < nodes.Count) {
-					// Do nothing if trying to drop the node over the same node
-					ActionTreeNode dropNode = nodes [dropIndex];
-					if (dropNode == dropped.Node)
-						return false;
-					dropped.Node.ParentNode.Children.Remove (dropped.Node);
-					
-					// The drop position may have changed after removing the dropped node,
-					// so get it again.
-					dropIndex = nodes.IndexOf (dropNode);
-					nodes.Insert (dropIndex, dropped.Node);
+			using (wrapper.UndoManager.AtomicChange) {
+				if (dropped.Node.ParentNode != null && dropped.Node.Type != Gtk.UIManagerItemType.Toolitem) {
+					if (dropIndex < nodes.Count) {
+						// Do nothing if trying to drop the node over the same node
+						ActionTreeNode dropNode = nodes [dropIndex];
+						if (dropNode == dropped.Node)
+							return false;
+							
+						dropped.Node.ParentNode.Children.Remove (dropped.Node);
+						
+						// The drop position may have changed after removing the dropped node,
+						// so get it again.
+						dropIndex = nodes.IndexOf (dropNode);
+						nodes.Insert (dropIndex, dropped.Node);
+					} else {
+						dropped.Node.ParentNode.Children.Remove (dropped.Node);
+						nodes.Add (dropped.Node);
+						dropIndex = nodes.Count - 1;
+					}
 				} else {
-					dropped.Node.ParentNode.Children.Remove (dropped.Node);
-					nodes.Add (dropped.Node);
-					dropIndex = nodes.Count - 1;
+					newNode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, dropped.Node.Action);
+					nodes.Insert (dropIndex, newNode);
 				}
-			} else {
-				newNode = new ActionTreeNode (Gtk.UIManagerItemType.Menuitem, null, dropped.Node.Action);
-				nodes.Insert (dropIndex, newNode);
+				// Select the dropped node
+				ActionMenuItem mi = (ActionMenuItem) menuItems [dropIndex];
+				mi.Select ();
 			}
-			
-			// Select the dropped node
-			ActionMenuItem mi = (ActionMenuItem) menuItems [dropIndex];
-			mi.Select ();
 			
 			return base.OnDragDrop (context, x,	y, time);
 		}
@@ -487,8 +510,17 @@ namespace Stetic.Editor
 				return;
 				
 			ActionMenuItem item = (ActionMenuItem)menuItems [pos];
-			if (index == status.Count - 1)	// The last position in the status is the selected item
+			if (index == status.Count - 1)	{
+				// The last position in the status is the selected item
 				item.Select ();
+				if (item.Node.Action != null && item.Node.Action.Name.Length == 0) {
+					// Then only case when there can have an action when an empty name
+					// is when the user clicked on the "add action" link. In this case,
+					// start editing the item again
+					item.EditingDone += OnEditingDone;
+					item.StartEditing ();
+				}
+			}
 			else {
 				item.ShowSubmenu ();
 				if (OpenSubmenu != null)

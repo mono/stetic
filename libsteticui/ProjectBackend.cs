@@ -39,6 +39,7 @@ namespace Stetic {
 		
 		public event Wrapper.WidgetEventHandler SelectionChanged;
 		public event EventHandler ModifiedChanged;
+		public event EventHandler Changed;
 		
 		// Fired when the project has been reloaded, due for example to
 		// a change in the registry
@@ -536,7 +537,7 @@ namespace Stetic {
 		void OnObjectChanged (object sender, ObjectWrapperEventArgs args)
 		{
 			if (!Syncing) {
-				Modified = true;
+				NotifyChanged ();
 				if (ObjectChanged != null)
 					ObjectChanged (this, args);
 			}
@@ -545,7 +546,7 @@ namespace Stetic {
 		void OnWidgetNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
 		{
 			if (!Syncing) {
-				Modified = true;
+				NotifyChanged ();
 				OnWidgetNameChanged (args);
 			}
 		}
@@ -561,7 +562,7 @@ namespace Stetic {
 		void OnWidgetMemberNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
 		{
 			if (!Syncing) {
-				Modified = true;
+				NotifyChanged ();
 				OnWidgetMemberNameChanged (args);
 			}
 		}
@@ -647,7 +648,7 @@ namespace Stetic {
 			while (i < children.Count)
 				AddWidget (children[i++] as Widget, node);
 
-			Modified = true;
+			NotifyChanged ();
 		}
 
 		public Gtk.Widget[] Toplevels {
@@ -769,6 +770,15 @@ namespace Stetic {
 				frontend.NotifyActionGroupRemoved (args.ActionGroup.Name);
 		}
 		
+		void NotifyChanged ()
+		{
+			Modified = true;
+			if (frontend != null)
+				frontend.NotifyChanged ();
+			if (Changed != null)
+				Changed (this, EventArgs.Empty);
+		}
+		
 		protected virtual void OnModifiedChanged (EventArgs args)
 		{
 			if (ModifiedChanged != null)
@@ -777,14 +787,14 @@ namespace Stetic {
 		
 		protected virtual void OnWidgetRemoved (Stetic.Wrapper.WidgetEventArgs args)
 		{
-			Modified = true;
+			NotifyChanged ();
 			if (WidgetRemoved != null)
 				WidgetRemoved (this, args);
 		}
 		
 		protected virtual void OnWidgetAdded (Stetic.Wrapper.WidgetEventArgs args)
 		{
-			Modified = true;
+			NotifyChanged ();
 			if (WidgetAdded != null)
 				WidgetAdded (this, args);
 		}

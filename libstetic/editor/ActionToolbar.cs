@@ -212,15 +212,21 @@ namespace Stetic.Editor
 		void InsertAction (int pos)
 		{
 			Widget wrapper = Widget.Lookup (this);
-			Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
-			ActionTreeNode node = new ActionTreeNode (Gtk.UIManagerItemType.Toolitem, "", ac);
-			actionTree.Children.Insert (pos, node);
+			using (wrapper.UndoManager.AtomicChange) {
+				Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
+				ActionTreeNode node = new ActionTreeNode (Gtk.UIManagerItemType.Toolitem, "", ac);
+				actionTree.Children.Insert (pos, node);
 
-			ActionToolItem aitem = FindMenuItem (node);
-			aitem.EditingDone += OnEditingDone;
-			aitem.Select ();
-			aitem.StartEditing (false);
-			//ShowInsertPlaceholder = false;
+				ActionToolItem aitem = FindMenuItem (node);
+				aitem.EditingDone += OnEditingDone;
+				aitem.Select ();
+				aitem.StartEditing (false);
+				//ShowInsertPlaceholder = false;
+
+				if (wrapper.LocalActionGroups.Count == 0)
+					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
+				wrapper.LocalActionGroups[0].Actions.Add (ac);
+			}
 		}
 		
 		void OnEditingDone (object ob, EventArgs args)
@@ -235,11 +241,10 @@ namespace Stetic.Editor
 			
 			if (item.Node.Action.GtkAction.Label.Length == 0 && item.Node.Action.GtkAction.StockId == null) {
 				area.ResetSelection (item);
-				actionTree.Children.Remove (item.Node);
-			} else {
-				if (wrapper.LocalActionGroups.Count == 0)
-					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
-				wrapper.LocalActionGroups[0].Actions.Add (item.Node.Action);
+				using (wrapper.UndoManager.AtomicChange) {
+					actionTree.Children.Remove (item.Node);
+					wrapper.LocalActionGroups [0].Actions.Remove (item.Node.Action);
+				}
 			}
 		}
 		
@@ -326,26 +331,28 @@ namespace Stetic.Editor
 				newNode.Type = Gtk.UIManagerItemType.Toolitem;
 			}
 
-			if (dropIndex < actionTree.Children.Count) {
-				// Do nothing if trying to drop the node over the same node
-				ActionTreeNode dropNode = actionTree.Children [dropIndex];
-				if (dropNode == newNode)
-					return false;
+			Widget wrapper = Widget.Lookup (this);
+			using (wrapper.UndoManager.AtomicChange) {
+				if (dropIndex < actionTree.Children.Count) {
+					// Do nothing if trying to drop the node over the same node
+					ActionTreeNode dropNode = actionTree.Children [dropIndex];
+					if (dropNode == newNode)
+						return false;
+						
+					if (newNode.ParentNode != null)
+						newNode.ParentNode.Children.Remove (newNode);
 					
-				if (newNode.ParentNode != null)
-					newNode.ParentNode.Children.Remove (newNode);
-				
-				// The drop position may have changed after removing the dropped node,
-				// so get it again.
-				dropIndex = actionTree.Children.IndexOf (dropNode);
-				actionTree.Children.Insert (dropIndex, newNode);
-			} else {
-				if (newNode.ParentNode != null)
-					newNode.ParentNode.Children.Remove (newNode);
-				actionTree.Children.Add (newNode);
-				dropIndex = actionTree.Children.Count - 1;
+					// The drop position may have changed after removing the dropped node,
+					// so get it again.
+					dropIndex = actionTree.Children.IndexOf (dropNode);
+					actionTree.Children.Insert (dropIndex, newNode);
+				} else {
+					if (newNode.ParentNode != null)
+						newNode.ParentNode.Children.Remove (newNode);
+					actionTree.Children.Add (newNode);
+					dropIndex = actionTree.Children.Count - 1;
+				}
 			}
-			
 			// Select the dropped node
 			ActionToolItem mi = (ActionToolItem) toolItems [dropIndex];
 			mi.Select ();
@@ -453,6 +460,23 @@ namespace Stetic.Editor
 			};
 			m.ShowAll ();
 			m.Popup ();
+		}
+		
+		public object SaveStatus ()
+		{
+			for (int n=0; n<toolItems.Count; n++)
+				if (((ActionToolItem)toolItems[n]).IsSelected)
+					return n;
+			return null;
+		}
+		
+		public void RestoreStatus (object stat)
+		{
+			if (stat == null)
+				return;
+			int n = (int) stat;
+			if (n < toolItems.Count)
+				((ActionToolItem)toolItems[n]).Select ();
 		}
 		
 		ActionToolItem LocateWidget (int x, int y)

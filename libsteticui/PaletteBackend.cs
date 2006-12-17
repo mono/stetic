@@ -326,8 +326,10 @@ namespace Stetic {
 				return false;
 
 			if (dropped.Node.Action.ActionGroup != group) {
-				dropped.Node.Action.ActionGroup.Actions.Remove (dropped.Node.Action);
-				group.Actions.Add (dropped.Node.Action);
+				using (dropped.Node.Action.UndoManager.AtomicChange) {
+					dropped.Node.Action.ActionGroup.Actions.Remove (dropped.Node.Action);
+					group.Actions.Add (dropped.Node.Action);
+				}
 			}
 
 			return base.OnDragDrop (context, x,	y, time);

@@ -78,20 +78,39 @@ namespace Stetic.Wrapper
 		public override object GetUndoDiff ()
 		{
 			XmlElement oldElem = treeChanged ? UndoManager.GetObjectStatus (this) ["node"] : null;
+			if (oldElem != null)
+				oldElem = (XmlElement) oldElem.CloneNode (true);
+
 			treeChanged = false;
 			object baseDiff = base.GetUndoDiff ();
+			
+			if (oldElem != null) {
+				XmlElement newElem = UndoManager.GetObjectStatus (this) ["node"];
+				if (newElem != null && oldElem.OuterXml == newElem.OuterXml)
+					oldElem = null;
+			}
+			
 			if (baseDiff == null && oldElem == null)
 				return null;
-			else
-				return new object[] { baseDiff, oldElem };
+			else {
+				object stat = menu.SaveStatus ();
+				return new object[] { baseDiff, oldElem, stat };
+			}
 		}
 		
 		public override object ApplyUndoRedoDiff (object diff)
 		{
 			object[] data = (object[]) diff;
 			object retBaseDiff;
+			XmlElement oldNode = null;
 			
-			object stat = menu.SaveStatus ();
+			if (actionTree != null) {
+				XmlElement status = UndoManager.GetObjectStatus (this);
+				oldNode = status ["node"];
+				if (oldNode != null)
+					oldNode = (XmlElement) oldNode.CloneNode (true);
+			}
+			object oldStat = menu.SaveStatus ();
 			
 			if (data [0] != null)
 				retBaseDiff = base.ApplyUndoRedoDiff (data [0]);
@@ -99,27 +118,33 @@ namespace Stetic.Wrapper
 				retBaseDiff = null;
 				
 			XmlElement xdiff = (XmlElement) data [1];
-			Console.WriteLine ("DD:" + xdiff.OuterXml);
-			XmlElement status = UndoManager.GetObjectStatus (this);
-			XmlElement oldNode = status ["node"];
-			if (oldNode != null)
-				status.RemoveChild (oldNode);
-			status.AppendChild (xdiff);
+
+			if (xdiff != null) {
+				XmlElement status = UndoManager.GetObjectStatus (this);
+				XmlElement prevNode = status ["node"];
+				if (prevNode != null)
+					status.RemoveChild (prevNode);
+				status.AppendChild (xdiff);
+				
+				if (actionTree != null) {
+					Loading = true;
+					menu.OpenSubmenu = null;
+					DisposeTree ();
+					CreateTree ();
+					actionTree.Read (this, xdiff);
+					menu.FillMenu (actionTree);
+					Loading = false;
+				} else
+					menuInfo = xdiff;
+			}
 			
-			if (actionTree != null) {
-				Loading = true;
-				menu.OpenSubmenu = null;
-				DisposeTree ();
-				CreateTree ();
-				actionTree.Read (this, xdiff);
-				menu.FillMenu (actionTree);
-				Loading = false;
-			} else
-				menuInfo = xdiff;
+			// Restore the status after all menu structure has been properly built
+			GLib.Timeout.Add (50, delegate {
+				menu.RestoreStatus (data[2]);
+				return false;
+			});
 			
-			menu.RestoreStatus (stat);
-			
-			return new object [] { retBaseDiff, oldNode };
+			return new object [] { retBaseDiff, oldNode, oldStat };
 		}
 		
 		protected override void OnNameChanged (WidgetNameChangedArgs args)

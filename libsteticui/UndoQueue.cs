@@ -1,10 +1,11 @@
 
 using System;
+using System.Xml;
 using System.Collections;
 
 namespace Stetic
 {
-	public class UndoQueue
+	public class UndoQueue: MarshalByRefObject
 	{
 		ArrayList changeList = new ArrayList ();
 		int undoListCount = 0;
@@ -176,10 +177,13 @@ namespace Stetic
 				if (diff == null)	// No differences
 					continue;
 				
-//				Console.WriteLine ("ADDCHANGE " + widget);
+//				Console.WriteLine ("ADDCHANGE " + widget + " uid:" + widget.UndoId);
 //				PrintPatch (diff);
 				
-				ObjectWrapperUndoRedoChange change = new ObjectWrapperUndoRedoChange (this, widget.Wrapped.Name, diff);
+				if (widget.UndoId == null || widget.UndoId.Length == 0)
+					throw new InvalidOperationException ("Object of type '" + widget.GetType () + "' does not have an undo id.");
+
+				ObjectWrapperUndoRedoChange change = new ObjectWrapperUndoRedoChange (this, widget.UndoId, diff);
 				if (lastChange == null)
 					lastChange = firstChange = change;
 				else {
@@ -215,12 +219,12 @@ namespace Stetic
 			}
 		}
 		
-		ObjectWrapperUndoRedoChange ApplyDiff (string name, object diff)
+		ObjectWrapperUndoRedoChange ApplyDiff (string id, object diff)
 		{
-//			Console.WriteLine ("** APPLYING DIFF:");
+//			Console.WriteLine ("** APPLYING DIFF: uid:" + id);
 //			PrintPatch (diff);
 			
-			Wrapper.Widget ww = rootObject.FindChild (name);
+			Wrapper.Widget ww = rootObject.FindChildByUndoId (id);
 			
 			object reverseDiff = ww.ApplyUndoRedoDiff (diff);
 		
@@ -228,7 +232,7 @@ namespace Stetic
 //				Console.WriteLine ("** REVERSE DIFF:");
 //				PrintPatch (reverseDiff);
 				
-				ObjectWrapperUndoRedoChange change = new ObjectWrapperUndoRedoChange (this, name, reverseDiff);
+				ObjectWrapperUndoRedoChange change = new ObjectWrapperUndoRedoChange (this, id, reverseDiff);
 				return change;
 			} else
 				return null;
@@ -251,7 +255,9 @@ namespace Stetic
 			if (diff is Array) {
 				foreach (object ob in (Array)diff)
 					if (ob != null) PrintPatch (ob);
-			} else
+			} else if (diff is XmlElement)
+				Console.WriteLine (((XmlElement)diff).OuterXml);
+			else
 				Console.WriteLine (diff.ToString ());
 		}
 	}

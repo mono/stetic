@@ -19,6 +19,7 @@ namespace Stetic
 		
 		public event EventHandler BindField;
 		public event EventHandler ModifiedChanged;
+		public event EventHandler Changed;
 		public event EventHandler SelectionChanged;
 		public event EventHandler RootComponentChanged;
 		public event ComponentSignalEventHandler SignalAdded;
@@ -256,6 +257,12 @@ namespace Stetic
 				ModifiedChanged (this, EventArgs.Empty);
 		}
 		
+		internal void NotifyChanged ()
+		{
+			if (Changed != null)
+				Changed (this, EventArgs.Empty);
+		}
+		
 		internal void NotifySelectionChanged (object ob)
 		{
 			if (ob != null)
@@ -288,6 +295,13 @@ namespace Stetic
 		{
 			Gtk.Application.Invoke (
 				delegate { designer.NotifyModifiedChanged (); }
+			);
+		}
+		
+		public void NotifyChanged ()
+		{
+			Gtk.Application.Invoke (
+				delegate { designer.NotifyChanged (); }
 			);
 		}
 		

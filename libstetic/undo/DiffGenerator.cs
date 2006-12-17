@@ -61,8 +61,9 @@ namespace Stetic.Undo
 						cdiff.Operation = DiffOperation.Remove;
 						changes.Add (cdiff);
 					}
-				} else
+				} else {
 					throw new InvalidOperationException ("Found an element without ID");
+				}
 			}
 			
 			// Register new elements
@@ -189,6 +190,7 @@ namespace Stetic.Undo
 					object newProp = newObject != null ? newAdaptor.GetSignal (newObject, name, handler) : null;
 					if (newProp == null)
 						changes.Add (new PropertyDiff (DiffOperation.Remove, name, handler));
+					found [name + " " + handler] = found;
 				}
 			}
 			

@@ -165,7 +165,7 @@ namespace Stetic.Wrapper
 			// If there are child changes there is no need to look for changes in the
 			// actions, since the whole widget will be read again
 			
-			if (objectDiff == null || objectDiff.ChildChanges == null)
+			if (IsTopLevel && (objectDiff == null || objectDiff.ChildChanges == null))
 				actionsDiff = LocalActionGroups.GetDiff (Project, oldElem);
 			
 			// The undo writer skips children which are already registered in the undo manager
@@ -595,6 +595,8 @@ namespace Stetic.Wrapper
 
 		public static Container LookupParent (Gtk.Widget widget)
 		{
+			if (widget == null)
+				return null;
 			Gtk.Widget parent = widget.Parent;
 			Container wrapper = null;
 			while ((wrapper == null || wrapper.Unselectable) && parent != null) {
@@ -1129,6 +1131,31 @@ namespace Stetic.Wrapper
 					return w;
 				if (w is Gtk.Container) {
 					Gtk.Widget res = FindWidget ((Gtk.Container)w, name, skipwidget);
+					if (res != null)
+						return res;
+				}
+			}
+			return null;
+		}
+		
+		public Widget FindChildByUndoId (string id)
+		{
+			if (UndoId == id)
+				return this;
+			else
+				return Widget.Lookup (FindChildByUndoId ((Gtk.Container)Wrapped, id));
+		}
+		
+		Gtk.Widget FindChildByUndoId (Gtk.Container parent, string id)
+		{
+			foreach (Gtk.Widget w in parent.AllChildren) {
+				Widget ww = Widget.Lookup (w);
+				if (ww == null)
+					continue;
+				if (ww.UndoId == id)
+					return w;
+				if (w is Gtk.Container) {
+					Gtk.Widget res = FindChildByUndoId ((Gtk.Container)w, id);
 					if (res != null)
 						return res;
 				}

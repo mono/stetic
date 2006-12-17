@@ -107,37 +107,58 @@ namespace Stetic.Undo
 		public IEnumerable GetProperties (object obj)
 		{
 			XmlElement elem = GetPropsElem (obj);
-			if (elem != null && processProperties)
-				return elem.SelectNodes ("property");
-			else
-				return Type.EmptyTypes;
+			if (elem != null && processProperties) {
+				XmlAttribute at = elem.Attributes ["name"];
+				if (at != null)
+					yield return at;
+				at = elem.Attributes ["id"];
+				if (at != null)
+					yield return at;
+				foreach (XmlElement e in elem.SelectNodes ("property"))
+					yield return e;
+			} else
+				yield break;
 		}
 		
 		public object GetPropertyByName (object obj, string name)
 		{
-			return GetPropsElem (obj).SelectSingleNode ("property[@name='" + name + "']");
+			XmlElement elem = GetPropsElem (obj);
+			XmlElement prop = (XmlElement) elem.SelectSingleNode ("property[@name='" + name + "']");
+			if (prop != null)
+				return prop;
+			return elem.Attributes [name];
 		}
 		
 		public string GetPropertyName (object property)
 		{
-			return ((XmlElement)property).GetAttribute ("name");
+			if (property is XmlElement)
+				return ((XmlElement)property).GetAttribute ("name");
+			else
+				return ((XmlAttribute)property).LocalName;
 		}
 		
 		public string GetPropertyValue (object obj, object property)
 		{
-			return ((XmlElement)property).InnerText;
+			if (property is XmlElement)
+				return ((XmlElement)property).InnerText;
+			else
+				return ((XmlAttribute)property).Value;
 		}
 		
 		public void SetPropertyValue (object obj, string name, string value)
 		{
 			XmlElement elem = GetPropsElem (obj);
-			XmlElement prop = (XmlElement) elem.SelectSingleNode ("property[@name='" + name + "']");
-			if (prop == null) {
-				prop = elem.OwnerDocument.CreateElement ("property");
-				prop.SetAttribute ("name", name);
-				elem.AppendChild (prop);
+			if (name == "id" || name == "name") {
+				elem.SetAttribute (name, value);
+			} else {
+				XmlElement prop = (XmlElement) elem.SelectSingleNode ("property[@name='" + name + "']");
+				if (prop == null) {
+					prop = elem.OwnerDocument.CreateElement ("property");
+					prop.SetAttribute ("name", name);
+					elem.AppendChild (prop);
+				}
+				prop.InnerText = value;
 			}
-			prop.InnerText = value;
 		}
 		
 		public void ResetPropertyValue (object obj, string name)
@@ -146,6 +167,11 @@ namespace Stetic.Undo
 			XmlElement prop = (XmlElement) elem.SelectSingleNode ("property[@name='" + name + "']");
 			if (prop != null)
 				elem.RemoveChild (prop);
+			else {
+				XmlAttribute at = elem.Attributes [name];
+				if (at != null)
+					elem.Attributes.Remove (at);
+			}
 		}
 		
 		public IEnumerable GetSignals (object obj)
@@ -159,7 +185,7 @@ namespace Stetic.Undo
 		
 		public object GetSignal (object obj, string name, string handler)
 		{
-			return GetPropsElem (obj).SelectSingleNode ("signal[@name='" + name + "' && @handler='" + handler + "']");
+			return GetPropsElem (obj).SelectSingleNode ("signal[@name='" + name + "' and @handler='" + handler + "']");
 		}
 		
 		public void GetSignalInfo (object signal, out string name, out string handler)

@@ -98,6 +98,7 @@ namespace Stetic {
 			undoManager.RootObject = rootWidget;
 			
 			gproject.ModifiedChanged += new EventHandler (OnModifiedChanged);
+			gproject.Changed += new EventHandler (OnChanged);
 			gproject.ProjectReloaded += new EventHandler (OnProjectReloaded);
 //			gproject.WidgetMemberNameChanged += new Stetic.Wrapper.WidgetNameChangedHandler (OnWidgetNameChanged);
 		}
@@ -237,6 +238,12 @@ namespace Stetic {
 		{
 			if (frontend != null)
 				frontend.NotifyModifiedChanged ();
+		}
+		
+		void OnChanged (object s, EventArgs a)
+		{
+			if (frontend != null)
+				frontend.NotifyChanged ();
 		}
 		
 		void OnProjectReloaded (object s, EventArgs a)

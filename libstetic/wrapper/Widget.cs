@@ -10,6 +10,9 @@ namespace Stetic.Wrapper {
 	{
 		static DiffGenerator propDiffGenerator;
 		
+		// This id is used by the undo methods to identify an object (even if it's name changes)
+		string undoId = WidgetUtils.GetUndoId ();
+		
 		string oldName;
 		string oldMemberName;
 		internal bool settingFocus;
@@ -105,6 +108,11 @@ namespace Stetic.Wrapper {
 					ag.Dispose ();
 			}
 			base.Dispose ();
+		}
+		
+		public string UndoId {
+			get { return undoId; }
+			internal set { undoId = value; }
 		}
 		
 		void OnFocusIn (object s, Gtk.FocusInEventArgs a)
@@ -442,6 +450,7 @@ namespace Stetic.Wrapper {
 					actionGroup.Read (Project, groupElem);
 					if (actionGroups == null) {
 						actionGroups = new ActionGroupCollection ();
+						actionGroups.SetOwner (this);
 						actionGroups.ActionGroupAdded += OnGroupAdded;
 						actionGroups.ActionGroupRemoved += OnGroupRemoved;
 						actionGroups.ActionGroupChanged += OnGroupChanged;
@@ -463,6 +472,10 @@ namespace Stetic.Wrapper {
 				WidgetUtils.Read (this, elem);
 			else
 				GladeUtils.ImportWidget (this, elem);
+			
+			string uid = elem.GetAttribute ("undoId");
+			if (uid.Length > 0)
+				undoId = uid;
 		}
 		
 		public override XmlElement Write (ObjectWriter writer)
@@ -475,7 +488,10 @@ namespace Stetic.Wrapper {
 		protected virtual XmlElement WriteProperties (ObjectWriter writer)
 		{
 			if (writer.Format == FileFormat.Native) {
-				return WidgetUtils.Write (this, writer.XmlDocument);
+				XmlElement elem = WidgetUtils.Write (this, writer.XmlDocument);
+				if (writer.CreateUndoInfo)
+					elem.SetAttribute ("undoId", undoId);
+				return elem;
 			}
 			else {
 				XmlElement elem = GladeUtils.ExportWidget (this, writer.XmlDocument);

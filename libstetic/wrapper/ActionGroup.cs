@@ -104,15 +104,19 @@ namespace Stetic.Wrapper
 			group.SetAttribute ("name", name);
 			if (writer.CreateUndoInfo)
 				group.SetAttribute ("undoId", undoId);
-			foreach (Action ac in actions)
-				group.AppendChild (ac.Write (writer));
+			foreach (Action ac in actions) {
+				if (ac.Name.Length > 0)
+					group.AppendChild (ac.Write (writer));
+			}
 			return group;
 		}
 		
 		public void Read (IProject project, XmlElement elem)
 		{
 			name = elem.GetAttribute ("name");
-			undoId = elem.GetAttribute ("undoId");
+			string uid = elem.GetAttribute ("undoId");
+			if (uid.Length > 0)
+				undoId = uid;
 			foreach (XmlElement child in elem.SelectNodes ("action")) {
 				Action ac = new Action ();
 				ac.Read (project, child);
