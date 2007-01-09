@@ -132,9 +132,8 @@ namespace Stetic.Wrapper
 			);
 		}
 		
-		internal void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
-			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
 			foreach (Action action in Actions) {
 				// Create the action
 				string acVar = ctx.NewId ();
@@ -151,13 +150,14 @@ namespace Stetic.Wrapper
 					acVar,
 					action.GenerateObjectCreation (ctx)
 				);
+				CodeExpression acVarExp = new CodeVariableReferenceExpression (acVar);
 				ctx.Statements.Add (uidec);
-				ctx.GenerateBuildCode (action, acVar);
+				ctx.GenerateBuildCode (action, acVarExp);
 				ctx.Statements.Add (
 					new CodeMethodInvokeExpression (
 						var,
 						"Add",
-						new CodeVariableReferenceExpression (acVar),
+						acVarExp,
 						new CodePrimitiveExpression (action.Accelerator)
 					)
 				);

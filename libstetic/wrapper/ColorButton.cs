@@ -26,7 +26,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
 		{
 			if (prop.Name == "Alpha" && Alpha == -1)
 				return;

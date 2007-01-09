@@ -510,7 +510,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
 			if (actionGroups != null && actionGroups.Count > 0) {
 				// Create an UI manager
@@ -536,7 +536,7 @@ namespace Stetic.Wrapper {
 						actionGroup.GenerateObjectCreation (ctx)
 					);
 					ctx.Statements.Add (uidec);
-					actionGroup.GenerateBuildCode (ctx, grpVar);
+					actionGroup.GenerateBuildCode (ctx, new CodeVariableReferenceExpression (grpVar));
 					
 					// Insert the action group in the UIManager
 					CodeMethodInvokeExpression mi = new CodeMethodInvokeExpression (
@@ -554,7 +554,7 @@ namespace Stetic.Wrapper {
 				Window w = GetTopLevel () as Window;
 				if (w != null) {
 					CodeMethodInvokeExpression ami = new CodeMethodInvokeExpression (
-						new CodeVariableReferenceExpression (ctx.WidgetMap.GetWidgetId (w)),
+						ctx.WidgetMap.GetWidgetExp (w),
 						"AddAccelGroup",
 						new CodePropertyReferenceExpression (
 							uixp,
@@ -572,30 +572,28 @@ namespace Stetic.Wrapper {
 			if (tooltip != null && tooltip.Length > 0)
 				GetTopLevel().GenerateTooltip (ctx, this);
 			
-			base.GenerateBuildCode (ctx, varName);
+			base.GenerateBuildCode (ctx, var);
 		}
 		
-		internal protected override void GeneratePostBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GeneratePostBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
-			base.GeneratePostBuildCode (ctx, varName);
+			base.GeneratePostBuildCode (ctx, var);
 			
 			// The visible property is generated here to ensure that widgets are made visible
 			// after they have been fully built
 			
 			PropertyDescriptor prop = ClassDescriptor ["Visible"] as PropertyDescriptor;
-			if (prop != null && prop.PropertyType == typeof(bool) && (bool) prop.GetValue (Wrapped)) {
-				if ((bool) prop.GetValue (Wrapped)) {
-					ctx.Statements.Add (
-						new CodeMethodInvokeExpression (
-							new CodeVariableReferenceExpression (varName), 
-							"Show"
-						)
-					);
-				}
+			if (prop != null && prop.PropertyType == typeof(bool) && !(bool) prop.GetValue (Wrapped)) {
+				ctx.Statements.Add (
+					new CodeMethodInvokeExpression (
+						var, 
+						"Hide"
+					)
+				);
 			}
 		}
 		
-		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
 		{
 			if (prop.Name != "Visible")
 				base.GeneratePropertySet (ctx, var, prop);
@@ -653,7 +651,7 @@ namespace Stetic.Wrapper {
 				new CodeMethodInvokeExpression (
 					generatedTooltips,
 					"SetTip",
-					new CodeVariableReferenceExpression (ctx.WidgetMap.GetWidgetId (widget)),
+					ctx.WidgetMap.GetWidgetExp (widget),
 					new CodePrimitiveExpression (widget.Tooltip),
 					new CodePrimitiveExpression (widget.Tooltip)
 				)

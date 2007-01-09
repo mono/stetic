@@ -62,7 +62,7 @@ namespace Stetic
 			return (XmlElement) writer.XmlDocument.ImportNode (elementData, true);
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression varExp)
 		{
 			ErrorWidget ew = (ErrorWidget) Wrapped;
 			if (ew.Exception != null)

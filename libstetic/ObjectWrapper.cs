@@ -161,21 +161,18 @@ namespace Stetic {
 			return wrapper;
 		}
 		
-		internal void GenerateInitCode (GeneratorContext ctx, string varName)
+		internal void GenerateInitCode (GeneratorContext ctx, CodeExpression var)
 		{
 			// Set the value for initialization properties. The value for those properties is
 			// usually set in the constructor, but top levels are created by the user, so
 			// those properties need to be explicitely set in the Gui.Build method.
-			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
 			foreach (PropertyDescriptor prop in ClassDescriptor.InitializationProperties) {
 				GeneratePropertySet (ctx, var, prop);
 			}
 		}
 		
-		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected virtual void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
-			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (varName);
-			
 			// Write the widget properties
 			foreach (ItemGroup group in ClassDescriptor.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
@@ -189,7 +186,7 @@ namespace Stetic {
 			}
 		}
 		
-		internal protected virtual void GeneratePostBuildCode (GeneratorContext ctx, string varName)
+		internal protected virtual void GeneratePostBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
 		}
 		
@@ -206,7 +203,7 @@ namespace Stetic {
 				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName);
 		}
 		
-		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
 		{
 			object oval = prop.GetValue (Wrapped);
 			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))

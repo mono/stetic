@@ -82,19 +82,19 @@ namespace Stetic.Wrapper {
 				return base.GenerateObjectCreation (ctx);
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
 			if (textCombo && Items != null && Items.Length > 0) {
 				foreach (string str in item) {
 					ctx.Statements.Add (new CodeMethodInvokeExpression (
-						new CodeVariableReferenceExpression (varName),
+						var,
 						"AppendText",
 						new CodePrimitiveExpression (str)
 					));
 				}
 			}
 			
-			base.GenerateBuildCode (ctx, varName);
+			base.GenerateBuildCode (ctx, var);
 		}
 	}
 }

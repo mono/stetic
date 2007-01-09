@@ -5,6 +5,7 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Serialization;
 
 namespace Stetic
 {
@@ -37,7 +38,7 @@ namespace Stetic
 			CodeMemberMethod met = new CodeMemberMethod ();
 			met.Name = "Build";
 			globalType.Members.Add (met);
-			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(object), "obj"));
+			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(object), "cobj"));
 			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(Type), "type"));
 			if (multiProject)
 				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "file"));
@@ -49,7 +50,7 @@ namespace Stetic
 						new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
 						"Build"
 					),
-					new CodeArgumentReferenceExpression ("obj"),
+					new CodeArgumentReferenceExpression ("cobj"),
 					new CodePropertyReferenceExpression (
 						new CodeArgumentReferenceExpression ("type"),
 						"FullName"
@@ -66,7 +67,7 @@ namespace Stetic
 			met.Name = "Build";
 			globalType.Members.Add (met);
 			
-			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(object), "obj"));
+			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(object), "cobj"));
 			met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "id"));
 			if (multiProject)
 				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "file"));
@@ -76,7 +77,7 @@ namespace Stetic
 			if (options.GenerateEmptyBuildMethod)
 				return;
 			
-			CodeArgumentReferenceExpression cobj = new CodeArgumentReferenceExpression ("obj");
+			CodeArgumentReferenceExpression cobj = new CodeArgumentReferenceExpression ("cobj");
 			CodeArgumentReferenceExpression cfile = new CodeArgumentReferenceExpression ("file");
 			CodeArgumentReferenceExpression cid = new CodeArgumentReferenceExpression ("id");
 			
@@ -105,6 +106,8 @@ namespace Stetic
 				
 				// Generate top levels
 				
+				CodeIdentifiers ids = new CodeIdentifiers ();
+				
 				foreach (Gtk.Widget w in gp.Toplevels) {
 					CodeConditionStatement cond = new CodeConditionStatement ();
 					cond.Condition = new CodeBinaryOperatorExpression (
@@ -114,7 +117,7 @@ namespace Stetic
 					);
 					widgetCol.Add (cond);
 					
-					GenerateComponentCode (w, globalUnit, globalNs, cobj, cond.TrueStatements, globalType, options, units);
+					GenerateComponentCode (w, globalUnit, globalNs, cobj, cond.TrueStatements, globalType, options, units, ids);
 					
 					widgetCol = cond.FalseStatements;
 				}
@@ -130,14 +133,14 @@ namespace Stetic
 					);
 					widgetCol.Add (cond);
 					
-					GenerateComponentCode (agroup, globalUnit, globalNs, cobj, cond.TrueStatements, globalType, options, units);
+					GenerateComponentCode (agroup, globalUnit, globalNs, cobj, cond.TrueStatements, globalType, options, units, ids);
 					
 					widgetCol = cond.FalseStatements;
 				}
 			}
 		}
 		
-		static CodeMemberMethod GetBuildMethod (string name, string typeName, SteticCompilationUnit globalUnit, GenerationOptions options, List<SteticCompilationUnit> units)
+		static CodeMemberMethod GetBuildMethod (string name, string internalClassName, string typeName, SteticCompilationUnit globalUnit, GenerationOptions options, List<SteticCompilationUnit> units)
 		{
 			SteticCompilationUnit unit;
 			
@@ -148,7 +151,7 @@ namespace Stetic
 				units.Add (unit);
 			}
 			
-			CodeTypeDeclaration type = new CodeTypeDeclaration (name);
+			CodeTypeDeclaration type = new CodeTypeDeclaration (internalClassName);
 			type.Attributes = MemberAttributes.Private;
 			type.TypeAttributes = TypeAttributes.NestedAssembly;
 			
@@ -162,25 +165,27 @@ namespace Stetic
 			met.Name = "Build";
 			type.Members.Add (met);
 			
-			met.Parameters.Add (new CodeParameterDeclarationExpression (new CodeTypeReference (typeName), "obj"));
+			met.Parameters.Add (new CodeParameterDeclarationExpression (new CodeTypeReference (typeName), "cobj"));
 			met.ReturnType = new CodeTypeReference (typeof(void));
 			met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
 			
 			return met;
 		}
 		
-		static void GenerateComponentCode (object component, SteticCompilationUnit globalUnit, CodeNamespace globalNs, CodeExpression cobj, CodeStatementCollection statements, CodeTypeDeclaration globalType, GenerationOptions options, List<SteticCompilationUnit> units)
+		static void GenerateComponentCode (object component, SteticCompilationUnit globalUnit, CodeNamespace globalNs, CodeExpression cobj, CodeStatementCollection statements, CodeTypeDeclaration globalType, GenerationOptions options, List<SteticCompilationUnit> units, CodeIdentifiers ids)
 		{
 			Gtk.Widget widget = component as Gtk.Widget;
 			Wrapper.Widget wwidget = Stetic.Wrapper.Widget.Lookup (widget);
 			Wrapper.ActionGroup agroup = component as Wrapper.ActionGroup;
 			
 			string name = widget != null ? widget.Name : agroup.Name;
+			string internalClassName = ids.MakeUnique (CodeIdentifier.MakeValid (name));
+			
 			string typeName = widget != null ? wwidget.ClassDescriptor.WrappedTypeName : "Gtk.ActionGroup";
 			// Create the build method for the top level
 			
 			CodeMemberMethod met;
-			met = GetBuildMethod (name , typeName, globalUnit, options, units);
+			met = GetBuildMethod (name, internalClassName, typeName, globalUnit, options, units);
 			
 			// Generate the build code
 			
@@ -195,10 +200,10 @@ namespace Stetic
 			Stetic.WidgetMap map;
 			
 			if (widget != null) {
-				map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, globalType, widget, "cobj", met.Statements, options);
+				map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, globalType, widget, targetObjectVar, met.Statements, options);
 				CodeGenerator.BindSignalHandlers (targetObjectVar, wwidget, map, met.Statements, options);
 			} else {
-				map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, globalType, agroup, "cobj", met.Statements, options);
+				map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, globalType, agroup, targetObjectVar, met.Statements, options);
 				foreach (Wrapper.Action ac in agroup.Actions)
 					CodeGenerator.BindSignalHandlers (targetObjectVar, ac, map, met.Statements, options);
 			}
@@ -209,7 +214,7 @@ namespace Stetic
 			
 			statements.Add (
 				new CodeMethodInvokeExpression (
-					new CodeTypeReferenceExpression (options.GlobalNamespace + ".SteticGenerated." + name),
+					new CodeTypeReferenceExpression (options.GlobalNamespace + ".SteticGenerated." + internalClassName),
 					"Build",
 					new CodeCastExpression (typeName, cobj)
 				)

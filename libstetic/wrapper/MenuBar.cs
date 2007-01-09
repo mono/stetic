@@ -164,11 +164,6 @@ namespace Stetic.Wrapper
 				return base.GenerateObjectCreation (ctx);
 		}
 
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
-		{
-			base.GenerateBuildCode (ctx, varName);
-		}
-		
 		internal protected override void OnDesignerAttach (IDesignArea designer)
 		{
 			base.OnDesignerAttach (designer);

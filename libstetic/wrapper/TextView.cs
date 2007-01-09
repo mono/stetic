@@ -38,14 +38,14 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
 			if (Text.Length > 0) {
 				ctx.Statements.Add (
 					new CodeAssignStatement (
 						new CodePropertyReferenceExpression (
 							new CodePropertyReferenceExpression (
-								new CodeVariableReferenceExpression (varName),
+								var,
 								"Buffer"
 							),
 							"Text"
@@ -54,7 +54,7 @@ namespace Stetic.Wrapper {
 					)
 				);
 			}
-			base.GenerateBuildCode (ctx, varName);
+			base.GenerateBuildCode (ctx, var);
 		}
 	}
 }

@@ -10,7 +10,6 @@ namespace Stetic
 		int n;
 		string idPrefix;
 		Hashtable vars = new Hashtable ();
-		Hashtable widgets = new Hashtable ();
 		ArrayList generatedWrappers = new ArrayList ();
 		WidgetMap map;
 		CodeStatementCollection statements;
@@ -22,7 +21,7 @@ namespace Stetic
 			this.idPrefix = idPrefix;
 			this.statements = statements;
 			this.options = options;
-			map = new WidgetMap (vars, widgets);
+			map = new WidgetMap (vars);
 		}
 		
 		public CodeNamespace GlobalCodeNamespace {
@@ -42,36 +41,39 @@ namespace Stetic
 			return idPrefix + (++n);
 		}
 		
-		public string GenerateNewInstanceCode (Wrapper.Widget widget)
+		public CodeExpression GenerateNewInstanceCode (Wrapper.Widget widget)
+		{
+			CodeExpression var = GenerateInstanceExpression (widget, widget.GenerateObjectCreation (this));
+			GenerateBuildCode (widget, var);
+			return var;
+		}
+		
+		protected virtual CodeExpression GenerateInstanceExpression (ObjectWrapper wrapper, CodeExpression newObject)
 		{
 			string varName = NewId ();
-			
-			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (widget.ClassDescriptor.WrappedTypeName, varName);
-			varDec.InitExpression = widget.GenerateObjectCreation (this);
+			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (wrapper.ClassDescriptor.WrappedTypeName, varName);
+			varDec.InitExpression = newObject;
 			statements.Add (varDec);
-			GenerateBuildCode (widget, varName);
-			return varName;
+			return new CodeVariableReferenceExpression (varName);
 		}
 		
-		public virtual void GenerateCreationCode (ObjectWrapper wrapper, string varName)
+		public virtual void GenerateCreationCode (ObjectWrapper wrapper, CodeExpression varExp)
 		{
-			wrapper.GenerateInitCode (this, varName);
-			GenerateBuildCode (wrapper, varName);
+			wrapper.GenerateInitCode (this, varExp);
+			GenerateBuildCode (wrapper, varExp);
 		}
 		
-		public virtual void GenerateBuildCode (ObjectWrapper wrapper, string varName)
+		public virtual void GenerateBuildCode (ObjectWrapper wrapper, CodeExpression var)
 		{
-			vars [wrapper] = varName;
-			widgets [varName] = wrapper.Wrapped;
-			wrapper.GenerateBuildCode (this, varName);
+			vars [wrapper] = var;
+			wrapper.GenerateBuildCode (this, var);
 			generatedWrappers.Add (wrapper);
 		}
 		
-		public virtual void GenerateCreationCode (Wrapper.ActionGroup agroup, string varName)
+		public virtual void GenerateCreationCode (Wrapper.ActionGroup agroup, CodeExpression var)
 		{
-			vars [agroup] = varName;
-			widgets [varName] = agroup;
-			agroup.GenerateBuildCode (this, varName);
+			vars [agroup] = var;
+			agroup.GenerateBuildCode (this, var);
 		}
 		
 		public CodeExpression GenerateValue (object value, Type type)
@@ -172,17 +174,16 @@ namespace Stetic
 		public void EndGeneration ()
 		{
 			foreach (ObjectWrapper w in generatedWrappers) {
-				string v = (string) vars [w];
-				w.GeneratePostBuildCode (this, v);
+				CodeExpression var = (CodeExpression) vars [w];
+				w.GeneratePostBuildCode (this, var);
 			}
 		}
 		
 		public void Reset ()
 		{
 			vars.Clear ();
-			widgets.Clear ();
 			generatedWrappers.Clear ();
-			map = new WidgetMap (vars, widgets);
+			map = new WidgetMap (vars);
 			n = 0;
 		}
 	}
@@ -190,31 +191,24 @@ namespace Stetic
 	public class WidgetMap
 	{
 		Hashtable vars;
-		Hashtable widgets;
 		
-		internal WidgetMap (Hashtable vars, Hashtable widgets)
+		internal WidgetMap (Hashtable vars)
 		{
 			this.vars = vars;
-			this.widgets = widgets;
 		}
 		
-		public string GetWidgetId (ObjectWrapper wrapper)
+		public CodeExpression GetWidgetExp (ObjectWrapper wrapper)
 		{
-			return (string) vars [wrapper];
+			return (CodeExpression) vars [wrapper];
 		}
 		
-		public string GetWidgetId (object wrapped)
+		public CodeExpression GetWidgetExp (object wrapped)
 		{
 			ObjectWrapper w = ObjectWrapper.Lookup (wrapped);
 			if (w != null)
-				return GetWidgetId (w);
+				return GetWidgetExp (w);
 			else
 				return null;
-		}
-		
-		public ObjectWrapper GetWidgetFromId (string widgetId)
-		{
-			return (ObjectWrapper) widgets [widgetId];
 		}
 	}
 	

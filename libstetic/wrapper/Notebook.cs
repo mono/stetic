@@ -41,18 +41,16 @@ namespace Stetic.Wrapper {
 			return child_elem;
 		}
 
-		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, CodeExpression parentExp, Widget wrapper)
 		{
 			Gtk.Widget child = (Gtk.Widget) wrapper.Wrapped;
 			
 			if (notebook.PageNum (child) == -1) {
 				// It's a tab
 				
-				CodeVariableReferenceExpression parentExp = new CodeVariableReferenceExpression (parentVar);
-				
 				ctx.Statements.Add (new CodeCommentStatement ("Notebook tab"));
 				Gtk.Widget page = null;
-				string pageVarName;
+				CodeExpression pageVar;
 				
 				// Look for the page widget contained in this tab
 				for (int n=0; n < notebook.NPages; n++) {
@@ -86,23 +84,23 @@ namespace Stetic.Wrapper {
 							new CodeVariableReferenceExpression (dvar.Name)
 						)
 					);
-					pageVarName = dvar.Name;
+					pageVar = new CodeVariableReferenceExpression (dvar.Name);
 				} else
-					pageVarName = ctx.WidgetMap.GetWidgetId (page);
+					pageVar = ctx.WidgetMap.GetWidgetExp (page);
 				
 				// Generate code for the tab
-				string varName = ctx.GenerateNewInstanceCode (wrapper);
+				CodeExpression var = ctx.GenerateNewInstanceCode (wrapper);
 				
 				// Assign the tab to the page
 				CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
 					parentExp,
 					"SetTabLabel",
-					new CodeVariableReferenceExpression (pageVarName),
-					new CodeVariableReferenceExpression (varName)
+					pageVar,
+					var
 				);
 				ctx.Statements.Add (invoke);
 			} else
-				base.GenerateChildBuildCode (ctx, parentVar, wrapper);
+				base.GenerateChildBuildCode (ctx, parentExp, wrapper);
 		}
 
 

@@ -111,7 +111,7 @@ namespace Stetic.Wrapper {
 			base.ReadChildren (reader, elem);
 		}
 		
-		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, CodeExpression parentVar, Widget wrapper)
 		{
 			if (actionDialog != null && wrapper is Button) {
 			
@@ -122,17 +122,17 @@ namespace Stetic.Wrapper {
 				Button button = wrapper as Button;
 				
 				if (childwrapper != null) {
-					string dialogVarName = ctx.WidgetMap.GetWidgetId (actionDialog);
+					CodeExpression dialogVar = ctx.WidgetMap.GetWidgetExp (actionDialog);
 					ctx.Statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
-					string varName = ctx.GenerateNewInstanceCode (wrapper);
+					CodeExpression var = ctx.GenerateNewInstanceCode (wrapper);
 					CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
-						new CodeVariableReferenceExpression (dialogVarName),
+						dialogVar,
 						"AddActionWidget",
-						new CodeVariableReferenceExpression (varName),
+						var,
 						new CodePrimitiveExpression (button.ResponseId)
 					);
 					ctx.Statements.Add (invoke);
-					GenerateSetPacking (ctx, parentVar, varName, childwrapper);
+					GenerateSetPacking (ctx, parentVar, var, childwrapper);
 				}
 			} else
 				base.GenerateChildBuildCode (ctx, parentVar, wrapper);

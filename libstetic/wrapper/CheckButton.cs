@@ -52,16 +52,16 @@ namespace Stetic.Wrapper {
 			EmitNotify ("HasContents");
 		}
 
-		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, CodeExpression parentVar, Widget wrapper)
 		{
 			if (!HasLabel) {
 				// CheckButton generates a label by default. Remove it if it is not required.
 				ctx.Statements.Add (
 					new CodeMethodInvokeExpression (
-						new CodeVariableReferenceExpression (parentVar),
+						parentVar,
 						"Remove",
 						new CodePropertyReferenceExpression (
-							new CodeVariableReferenceExpression (parentVar),
+							parentVar,
 							"Child"
 						)
 					)

@@ -134,7 +134,7 @@ namespace Stetic
 				
 				CodeAttachEventStatement cevent = new CodeAttachEventStatement (
 					new CodeEventReferenceExpression (
-						new CodeVariableReferenceExpression (map.GetWidgetId (wrapper)),
+						map.GetWidgetExp (wrapper),
 						descriptor.Name),
 					createDelegate);
 				
@@ -288,7 +288,7 @@ namespace Stetic
 			if (wrapper is Wrapper.Widget) {
 				Wrapper.Widget ww = wrapper as Wrapper.Widget;
 
-				if (!ww.IsTopLevel && ww.InternalChildProperty == null)
+				if (!ww.IsTopLevel && ww.InternalChildProperty == null && !ww.Unselectable)
 					memberName = ((Wrapper.Widget) wrapper).Wrapped.Name;
 			}
 			else if (wrapper is Wrapper.Action)
@@ -318,21 +318,21 @@ namespace Stetic
 			}
 		}
 		
-		public static WidgetMap GenerateCreationCode (CodeNamespace cns, CodeTypeDeclaration type, Gtk.Widget w, string widgetVarName, CodeStatementCollection statements, GenerationOptions options)
+		public static WidgetMap GenerateCreationCode (CodeNamespace cns, CodeTypeDeclaration type, Gtk.Widget w, CodeExpression widgetVarExp, CodeStatementCollection statements, GenerationOptions options)
 		{
 			statements.Add (new CodeCommentStatement ("Widget " + w.Name));
 			GeneratorContext ctx = new ProjectGeneratorContext (cns, type, statements, options);
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (w);
-			ctx.GenerateCreationCode (ww, widgetVarName);
+			ctx.GenerateCreationCode (ww, widgetVarExp);
 			ctx.EndGeneration ();
 			return ctx.WidgetMap;
 		}
 		
-		public static WidgetMap GenerateCreationCode (CodeNamespace cns, CodeTypeDeclaration type, Wrapper.ActionGroup grp, string groupVarName, CodeStatementCollection statements, GenerationOptions options)
+		public static WidgetMap GenerateCreationCode (CodeNamespace cns, CodeTypeDeclaration type, Wrapper.ActionGroup grp, CodeExpression groupVarExp, CodeStatementCollection statements, GenerationOptions options)
 		{
 			statements.Add (new CodeCommentStatement ("Action group " + grp.Name));
 			GeneratorContext ctx = new ProjectGeneratorContext (cns, type, statements, options);
-			ctx.GenerateCreationCode (grp, groupVarName);
+			ctx.GenerateCreationCode (grp, groupVarExp);
 			ctx.EndGeneration ();
 			return ctx.WidgetMap;
 		}
@@ -347,49 +347,55 @@ namespace Stetic
 			this.type = type;
 		}
 		
-		public override void GenerateBuildCode (ObjectWrapper wrapper, string varName)
+		protected override CodeExpression GenerateInstanceExpression (ObjectWrapper wrapper, CodeExpression newObject)
 		{
-			base.GenerateBuildCode (wrapper, varName);
-			
 			string memberName = null;
 			if (wrapper is Wrapper.Widget)
 				memberName = ((Wrapper.Widget) wrapper).Wrapped.Name;
 			else if (wrapper is Wrapper.Action)
 				memberName = ((Wrapper.Action) wrapper).Name;
 			
-			if (memberName != null) {
-				if (Options.UsePartialClasses) {
-					// Don't generate fields for top level widgets and for widgets accessible
-					// through other widget's properties
-					Wrapper.Widget ww = wrapper as Wrapper.Widget;
-					if (ww == null || (!ww.IsTopLevel && ww.InternalChildProperty == null)) {
-						type.Members.Add (
-							new CodeMemberField (
-								wrapper.ClassDescriptor.WrappedTypeName,
-								memberName
-							)
-						);
-						Statements.Add (
-							new CodeAssignStatement (
-								new CodeFieldReferenceExpression (
-									new CodeThisReferenceExpression (),
-									memberName
-								),
-								new CodeVariableReferenceExpression (varName)
-							)
-						);
-					}
-				} else {
-					Statements.Add (
-						new CodeAssignStatement (
-							new CodeIndexerExpression (
-								new CodeVariableReferenceExpression ("bindings"),
-								new CodePrimitiveExpression (memberName)
-							),
-							new CodeVariableReferenceExpression (varName)
+			if (memberName == null)
+				return base.GenerateInstanceExpression (wrapper, newObject);
+			
+			if (Options.UsePartialClasses) {
+				// Don't generate fields for top level widgets and for widgets accessible
+				// through other widget's properties
+				Wrapper.Widget ww = wrapper as Wrapper.Widget;
+				if (ww == null || (!ww.IsTopLevel && ww.InternalChildProperty == null && !ww.Unselectable)) {
+					type.Members.Add (
+						new CodeMemberField (
+							wrapper.ClassDescriptor.WrappedTypeName,
+							memberName
 						)
 					);
+					CodeExpression var = new CodeFieldReferenceExpression (
+					                          new CodeThisReferenceExpression (),
+					                          memberName
+					);
+
+					Statements.Add (
+						new CodeAssignStatement (
+							var,
+							newObject
+						)
+					);
+					return var;
 				}
+				else
+					return base.GenerateInstanceExpression (wrapper, newObject);
+			} else {
+				CodeExpression var = base.GenerateInstanceExpression (wrapper, newObject);
+				Statements.Add (
+					new CodeAssignStatement (
+						new CodeIndexerExpression (
+							new CodeVariableReferenceExpression ("bindings"),
+							new CodePrimitiveExpression (memberName)
+						),
+						var
+					)
+				);
+				return var;
 			}
 		}
 	}

@@ -60,16 +60,16 @@ namespace Stetic.Wrapper {
 			return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, new CodePrimitiveExpression (null));
 		}
 
-		protected override void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, CodeExpression parentVar, Widget wrapper)
 		{
 			if (wrapper.Wrapped == expander.LabelWidget) {
-				string varName = ctx.GenerateNewInstanceCode (wrapper);
+				CodeExpression var = ctx.GenerateNewInstanceCode (wrapper);
 				CodeAssignStatement assign = new CodeAssignStatement (
 					new CodePropertyReferenceExpression (
-						new CodeVariableReferenceExpression (parentVar),
+						parentVar,
 						"LabelWidget"
 					),
-					new CodeVariableReferenceExpression (varName)
+					var
 				);
 				ctx.Statements.Add (assign);
 			} else

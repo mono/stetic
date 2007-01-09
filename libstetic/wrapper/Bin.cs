@@ -14,7 +14,7 @@ namespace Stetic.Wrapper
 				return null;
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
 			if (ClassDescriptor.WrappedTypeName == "Gtk.Bin") {
 			
@@ -36,7 +36,7 @@ namespace Stetic.Wrapper
 				CodeMethodInvokeExpression attachExp = new CodeMethodInvokeExpression (
 					new CodeTypeReferenceExpression (ctx.GlobalCodeNamespace.Name + ".BinContainer"),
 					"Attach",
-					new CodeVariableReferenceExpression (varName)
+					var
 				);
 				
 				// If the Bin has its own action groups, we need to register
@@ -59,7 +59,7 @@ namespace Stetic.Wrapper
 					ctx.Statements.Add (attachExp);
 				}
 				
-				base.GenerateBuildCode (ctx, varName);
+				base.GenerateBuildCode (ctx, var);
 				
 				// Register the UIManager, if the Bin has one
 				
@@ -74,7 +74,7 @@ namespace Stetic.Wrapper
 				}
 				
 			} else
-				base.GenerateBuildCode (ctx, varName);
+				base.GenerateBuildCode (ctx, var);
 		}
 		
 		void GenerateHelperClass (GeneratorContext ctx)

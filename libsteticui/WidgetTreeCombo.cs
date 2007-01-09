@@ -79,26 +79,29 @@ namespace Stetic
 		void FillCombo (Menu menu, Gtk.Widget widget, int level)
 		{
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			if (wrapper == null || wrapper.Unselectable) return;
+			if (wrapper == null) return;
 			
-			MenuItem item = new WidgetMenuItem (widget);
-			item.Activated += new EventHandler (OnItemSelected);
-			
-			HBox box = new HBox ();
-			Gtk.Image img = new Gtk.Image (wrapper.ClassDescriptor.Icon);
-			img.Xalign = 1;
-			img.WidthRequest = level*30;
-			box.PackStart (img, false, false, 0);
-			
-			Label lab = new Label ();
-			if (widget == project.Selection)
-				lab.Markup = "<b>" + widget.Name + "</b>";
-			else
-				lab.Text = widget.Name;
+			if (!wrapper.Unselectable) {
+				MenuItem item = new WidgetMenuItem (widget);
+				item.Activated += new EventHandler (OnItemSelected);
 				
-			box.PackStart (lab, false, false, 3);
-			item.Child = box;
-			menu.Append (item);
+				HBox box = new HBox ();
+				Gtk.Image img = new Gtk.Image (wrapper.ClassDescriptor.Icon);
+				img.Xalign = 1;
+				img.WidthRequest = level*30;
+				box.PackStart (img, false, false, 0);
+				
+				Label lab = new Label ();
+				if (widget == project.Selection)
+					lab.Markup = "<b>" + widget.Name + "</b>";
+				else
+					lab.Text = widget.Name;
+					
+				box.PackStart (lab, false, false, 3);
+				item.Child = box;
+				menu.Append (item);
+			} else
+				level--;
 			
 			Gtk.Container cc = widget as Gtk.Container;
 			if (cc != null && wrapper.ClassDescriptor.AllowChildren) {

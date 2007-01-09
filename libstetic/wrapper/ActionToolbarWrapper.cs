@@ -158,12 +158,7 @@ namespace Stetic.Wrapper
 				return base.GenerateObjectCreation (ctx);
 		}
 
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
-		{
-			base.GenerateBuildCode (ctx, varName);
-		}
-		
-		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
 		{
 			if (toolbarStyle == ToolbarStyle.Default && prop.Name == "ToolbarStyle")
 				return;

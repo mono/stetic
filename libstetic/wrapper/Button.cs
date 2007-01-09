@@ -309,18 +309,18 @@ namespace Stetic.Wrapper {
 				return 0;
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
-			base.GenerateBuildCode (ctx, varName);
+			base.GenerateBuildCode (ctx, var);
 			
 			if (Type != ButtonType.TextAndIcon) {
-				CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (new CodeVariableReferenceExpression (varName), "Label");
+				CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (var, "Label");
 				CodeExpression val = ctx.GenerateValue (button.Label, typeof(string), true);
 				ctx.Statements.Add (new CodeAssignStatement (cprop, val));
 			}
 		}
 		
-		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
 		{
 			if (prop.Name != "Label")
 				base.GeneratePropertySet (ctx, var, prop);

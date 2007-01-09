@@ -18,29 +18,29 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
-		protected override void GeneratePropertySet (GeneratorContext ctx, CodeVariableReferenceExpression var, PropertyDescriptor prop)
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
 		{
 			if (prop.Name != "MnemonicWidget")
 				base.GeneratePropertySet (ctx, var, prop);
 		}
 		
-		internal protected override void GeneratePostBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GeneratePostBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
 			if (mnem != null) {
-				string memVar = ctx.WidgetMap.GetWidgetId (mnem);
+				CodeExpression memVar = ctx.WidgetMap.GetWidgetExp (mnem);
 				if (memVar != null) {
 					ctx.Statements.Add (
 						new CodeAssignStatement (
 							new CodePropertyReferenceExpression (
-								new CodeVariableReferenceExpression (varName), 
+								var, 
 								"MnemonicWidget"
 							),
-							new CodeVariableReferenceExpression (memVar)
+							memVar
 						)
 					);
 				}
 			}
-			base.GeneratePostBuildCode (ctx, varName);
+			base.GeneratePostBuildCode (ctx, var);
 		}
 	}
 }

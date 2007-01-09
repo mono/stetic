@@ -451,9 +451,9 @@ namespace Stetic.Wrapper
 			return WriteChild (writer, wrapper);
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
-			base.GenerateBuildCode (ctx, varName);
+			base.GenerateBuildCode (ctx, var);
 			
 			if (ClassDescriptor.AllowChildren) {
 				foreach (Gtk.Widget child in GladeChildren) {
@@ -461,33 +461,45 @@ namespace Stetic.Wrapper
 					
 					if (wrapper != null && wrapper.InternalChildProperty == null)
 						// Iternal children are written later
-						GenerateChildBuildCode (ctx, varName, wrapper);
+						GenerateChildBuildCode (ctx, var, wrapper);
 				}
 			}
 			
 			foreach (TypedPropertyDescriptor prop in this.ClassDescriptor.InternalChildren) {
-				GenerateSetInternalChild (ctx, varName, prop);
+				GenerateSetInternalChild (ctx, var, prop);
+			}
+			
+			if (IsTopLevel && Wrapped is Gtk.Bin) {
+				ctx.Statements.Add (
+					new CodeMethodInvokeExpression (
+						new CodePropertyReferenceExpression (
+							var,
+							"Child"
+						),
+						"ShowAll"
+					)
+				);
 			}
 		}
 		
-		protected virtual void GenerateChildBuildCode (GeneratorContext ctx, string parentVar, Widget wrapper)
+		protected virtual void GenerateChildBuildCode (GeneratorContext ctx, CodeExpression parentVar, Widget wrapper)
 		{
 			ObjectWrapper childwrapper = ChildWrapper (wrapper);
 			if (childwrapper != null) {
 				ctx.Statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
-				string varName = ctx.GenerateNewInstanceCode (wrapper);
+				CodeExpression var = ctx.GenerateNewInstanceCode (wrapper);
 				CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
-					new CodeVariableReferenceExpression (parentVar),
+					parentVar,
 					"Add",
-					new CodeVariableReferenceExpression (varName)
+					var
 				);
 				ctx.Statements.Add (invoke);
 
-				GenerateSetPacking (ctx, parentVar, varName, childwrapper);
+				GenerateSetPacking (ctx, parentVar, var, childwrapper);
 			}
 		}
 		
-		void GenerateSetInternalChild (GeneratorContext ctx, string parentVar, TypedPropertyDescriptor prop)
+		void GenerateSetInternalChild (GeneratorContext ctx, CodeExpression parentVar, TypedPropertyDescriptor prop)
 		{
 			Gtk.Widget child = prop.GetValue (container) as Gtk.Widget;
 			Widget cwrapper = Widget.Lookup (child);
@@ -496,14 +508,14 @@ namespace Stetic.Wrapper
 				string childVar = ctx.NewId ();
 				CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (child.GetType(), childVar);
 				ctx.Statements.Add (varDec);
-				varDec.InitExpression = new CodePropertyReferenceExpression (new CodeVariableReferenceExpression (parentVar), prop.Name);
+				varDec.InitExpression = new CodePropertyReferenceExpression (parentVar, prop.Name);
 			
-				ctx.GenerateBuildCode (cwrapper, childVar);
+				ctx.GenerateBuildCode (cwrapper, new CodeVariableReferenceExpression (childVar));
 				return;
 			}
 		}
 		
-		protected void GenerateSetPacking (GeneratorContext ctx, string parentVar, string childVar, ObjectWrapper containerChildWrapper)
+		protected void GenerateSetPacking (GeneratorContext ctx, CodeExpression parentVar, CodeExpression childVar, ObjectWrapper containerChildWrapper)
 		{
 			Gtk.Container.ContainerChild cc = containerChildWrapper.Wrapped as Gtk.Container.ContainerChild;
 			ClassDescriptor klass = containerChildWrapper.ClassDescriptor;
@@ -514,7 +526,7 @@ namespace Stetic.Wrapper
 			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (cc.GetType(), contChildVar);
 			varDec.InitExpression = new CodeCastExpression ( 
 				cc.GetType (),
-				new CodeIndexerExpression (new CodeVariableReferenceExpression (parentVar), new CodeVariableReferenceExpression (childVar))
+				new CodeIndexerExpression (parentVar, childVar)
 			);
 			
 			CodeVariableReferenceExpression var = new CodeVariableReferenceExpression (contChildVar);
@@ -555,6 +567,21 @@ namespace Stetic.Wrapper
 			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType, prop.Translatable);
 			ctx.Statements.Add (new CodeAssignStatement (cprop, val));
 		}
+		
+		internal protected override void GeneratePostBuildCode (GeneratorContext ctx, CodeExpression var)
+		{
+			base.GeneratePostBuildCode (ctx, var);
+			
+			if (IsTopLevel && Wrapped is Gtk.Bin) {
+				ctx.Statements.Add (
+					new CodeMethodInvokeExpression (
+						var,
+						"Show"
+					)
+				);
+			}
+		}
+		
 		
 		internal protected override void OnDesignerAttach (IDesignArea designer)
 		{

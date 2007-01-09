@@ -72,15 +72,8 @@ namespace Stetic
 			}
 
 			Stetic.Wrapper.Widget wwidget = Stetic.Wrapper.Widget.Lookup (w);
-			
-			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (wwidget.ClassDescriptor.WrappedTypeName, "cobj");
-			varDec.InitExpression = new CodeThisReferenceExpression ();
-			met.Statements.Add (varDec);
-
-			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, w, "cobj", met.Statements, options);
-			
-			CodeVariableReferenceExpression targetObjectVar = new CodeVariableReferenceExpression ("cobj");
-			CodeGenerator.BindSignalHandlers (targetObjectVar, wwidget, map, met.Statements, options);
+			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, w, new CodeThisReferenceExpression (), met.Statements, options);
+			CodeGenerator.BindSignalHandlers (new CodeThisReferenceExpression (), wwidget, map, met.Statements, options);
 		}
 		
 		static void GenerateWrapperFields (CodeTypeDeclaration type, ObjectWrapper wrapper)
@@ -108,15 +101,10 @@ namespace Stetic
 			met.ReturnType = new CodeTypeReference (typeof(void));
 			met.Attributes = MemberAttributes.Public;
 			
-			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement ("Gtk.ActionGroup", "cobj");
-			varDec.InitExpression = new CodeThisReferenceExpression ();
-			met.Statements.Add (varDec);
+			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, agroup, new CodeThisReferenceExpression (), met.Statements, options);
 			
-			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, agroup, "cobj", met.Statements, options);
-			
-			CodeVariableReferenceExpression targetObjectVar = new CodeVariableReferenceExpression ("cobj");
 			foreach (Wrapper.Action ac in agroup.Actions)
-				CodeGenerator.BindSignalHandlers (targetObjectVar, ac, map, met.Statements, options);
+				CodeGenerator.BindSignalHandlers (new CodeThisReferenceExpression (), ac, map, met.Statements, options);
 		}
 	}
 }

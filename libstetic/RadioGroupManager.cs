@@ -179,12 +179,12 @@ namespace Stetic {
 			// radios from the same group.
 			
 			RadioGroup group = widgets[widget] as RadioGroup;
-			string var = null;
+			CodeExpression var = null;
 			
 			foreach (Gtk.Widget radio in group.Widgets) {
 				if (radio == widget)
 					continue;
-				var = ctx.WidgetMap.GetWidgetId (radio);
+				var = ctx.WidgetMap.GetWidgetExp (radio);
 				if (var != null)
 					break;
 			}
@@ -199,7 +199,7 @@ namespace Stetic {
 				);
 			} else {
 				return new CodePropertyReferenceExpression (
-					new CodeVariableReferenceExpression (var),
+					var,
 					"Group"
 				);
 			}

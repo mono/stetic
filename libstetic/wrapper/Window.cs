@@ -92,15 +92,15 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, string varName)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
-			base.GenerateBuildCode (ctx, varName);
+			base.GenerateBuildCode (ctx, var);
 			
 			if (((Gtk.Window)Wrapped).DefaultWidth == -1) {
 				ctx.Statements.Add (
 					new CodeAssignStatement (
 						new CodePropertyReferenceExpression (
-							new CodeVariableReferenceExpression (varName),
+							var,
 							"DefaultWidth"
 						),
 						new CodePrimitiveExpression (DesignWidth)
@@ -112,7 +112,7 @@ namespace Stetic.Wrapper {
 				ctx.Statements.Add (
 					new CodeAssignStatement	 (
 						new CodePropertyReferenceExpression (
-							new CodeVariableReferenceExpression (varName),
+							var,
 							"DefaultHeight"
 						),
 						new CodePrimitiveExpression (DesignHeight)
