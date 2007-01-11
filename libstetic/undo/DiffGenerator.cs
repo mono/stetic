@@ -62,7 +62,7 @@ namespace Stetic.Undo
 						changes.Add (cdiff);
 					}
 				} else {
-					throw new InvalidOperationException ("Found an element without ID");
+					throw new InvalidOperationException ("Found an element of type '" + oldChild.GetType () + "' without ID");
 				}
 			}
 			
@@ -81,7 +81,7 @@ namespace Stetic.Undo
 						changes.Add (cdiff);
 					}
 				} else
-					throw new InvalidOperationException ("Found an element without ID");
+					throw new InvalidOperationException ("Found an element of type '" + newChildElem.GetType () + "' without ID");
 
 				lastWidgetId = cid;
 			}

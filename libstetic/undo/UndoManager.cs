@@ -36,14 +36,14 @@ namespace Stetic
 			elements.Clear ();
 			
 			doc = new XmlDocument ();
-			UndoWriter writer = new UndoWriter (doc, FileFormat.Native, this);
+			UndoWriter writer = new UndoWriter (doc, this);
 			writer.WriteObject (wrapper);
 		}
 		
 		internal bool CanNotifyChanged (ObjectWrapper wrapper)
 		{
 			if (!InAtomicChange) {
-				if (UndoCheckpoint != null)
+				if (IsRegistered (wrapper) && UndoCheckpoint != null)
 					UndoCheckpoint (this, new UndoCheckpointEventArgs (new ObjectWrapper[] { wrapper }));
 				return true;
 			} else
@@ -115,7 +115,6 @@ namespace Stetic
 		
 		internal bool IsRegistered (ObjectWrapper w)
 		{
-			VerifyManager ();
 			return elements.ContainsKey (w);
 		}
 		
@@ -177,7 +176,7 @@ namespace Stetic
 		UndoManager undoManager;
 		bool allowMarkers = true;
 		
-		public UndoWriter (XmlDocument doc, FileFormat format, UndoManager undoManager): base (doc, format)
+		public UndoWriter (XmlDocument doc, UndoManager undoManager): base (doc, FileFormat.Native)
 		{
 			this.undoManager = undoManager;
 			CreateUndoInfo = true;
@@ -202,12 +201,14 @@ namespace Stetic
 			allowMarkers = oldAllow;
 			
 			if (ww != null) {
-				// Register the object, so it is correctly bound to this xml element
 				ww.RequiresUndoStatusUpdate = false;
-				if (undoManager.IsRegistered (ww))
-					undoManager.UnregisterObject (ww);
-				undoManager.RegisterObject (ww, elem);
 			}
+
+			// Register the object, so it is correctly bound to this xml element
+			if (undoManager.IsRegistered (wrapper))
+				undoManager.UnregisterObject (wrapper);
+			undoManager.RegisterObject (wrapper, elem);
+			
 			return elem;
 		}
 	}
@@ -280,6 +281,18 @@ namespace Stetic
 				
 				for (int n=0; n < ChangeEventPending.Count; n++) {
 					((ObjectWrapper)ChangeEventPending[n]).FireObjectChangedEvent ();
+				}
+				
+				// Remove from the list the widgets that have been disposed. It means that
+				// they have been deleted. That change will be recorded by their parents.
+				// Remove as well wrappers that are not registered, since there won't be
+				// status information for them.
+				for (int n=0; n<ChangeEventPending.Count; n++) {
+					ObjectWrapper w = (ObjectWrapper)ChangeEventPending[n]; 
+					if (w.IsDisposed || !undoManager.IsRegistered (w)) {
+						ChangeEventPending.RemoveAt (n);
+						n--;
+					}
 				}
 				
 				ObjectWrapper[] obs = (ObjectWrapper[]) ChangeEventPending.ToArray (typeof(ObjectWrapper));

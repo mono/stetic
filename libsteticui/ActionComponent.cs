@@ -41,5 +41,9 @@ namespace Stetic
 				return icon;
 			}
 		}
+		
+		public ActionGroupComponent ActionGroup {
+			get { return (ActionGroupComponent) app.GetComponent (((Wrapper.Action)backend).ActionGroup, null, null); }
+		}
 	}
 }

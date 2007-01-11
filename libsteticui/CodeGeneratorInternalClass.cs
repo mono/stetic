@@ -181,7 +181,7 @@ namespace Stetic
 			string name = widget != null ? widget.Name : agroup.Name;
 			string internalClassName = ids.MakeUnique (CodeIdentifier.MakeValid (name));
 			
-			string typeName = widget != null ? wwidget.ClassDescriptor.WrappedTypeName : "Gtk.ActionGroup";
+			string typeName = widget != null ? wwidget.WrappedTypeName : "Gtk.ActionGroup";
 			// Create the build method for the top level
 			
 			CodeMemberMethod met;

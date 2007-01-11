@@ -280,7 +280,7 @@ namespace Stetic {
 			group.ActionAdded += OnActionGroupChanged;
 			group.ActionRemoved += OnActionGroupChanged;
 			group.ActionChanged += OnActionGroupChanged;
-			group.Changed += OnActionGroupChanged;
+			group.ObjectChanged += OnActionGroupChanged;
 			Fill ();
 		}
 		
@@ -294,7 +294,7 @@ namespace Stetic {
 			group.ActionAdded -= OnActionGroupChanged;
 			group.ActionRemoved -= OnActionGroupChanged;
 			group.ActionChanged -= OnActionGroupChanged;
-			group.Changed -= OnActionGroupChanged;
+			group.ObjectChanged -= OnActionGroupChanged;
 		}
 		
 		public void Fill ()

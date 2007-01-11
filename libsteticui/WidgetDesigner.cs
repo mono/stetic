@@ -57,7 +57,7 @@ namespace Stetic
 		// Creates an action group designer for the widget being edited by this widget designer
 		public ActionGroupDesigner CreateActionGroupDesigner ()
 		{
-			return new ActionGroupDesigner (editedProject, componentName, null, true);
+			return new ActionGroupDesigner (editedProject, componentName, null, this, true);
 		}
 		
 		public bool Modified {

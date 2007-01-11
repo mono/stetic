@@ -4,6 +4,7 @@ using System.Text;
 using System.Xml;
 using System.CodeDom;
 using System.Collections;
+using Stetic.Undo;
 
 namespace Stetic.Wrapper
 {
@@ -20,9 +21,6 @@ namespace Stetic.Wrapper
 		string oldDefaultName;
 		string nameRoot;
 
-		// This id is used by the undo methods to identify an object.
-		string undoId = WidgetUtils.GetUndoId ();
-		
 		public enum ActionType {
 			Action,
 			Toggle,
@@ -55,9 +53,15 @@ namespace Stetic.Wrapper
 			}
 		}
 		
-		internal string UndoId {
-			get { return undoId; }
-			set { undoId = value; }
+		public override string WrappedTypeName {
+			get { 
+				if (type == ActionType.Action)
+					return "Gtk.Action";
+				else if (type == ActionType.Toggle)
+					return "Gtk.ToggleAction";
+				else
+					return "Gtk.RadioAction";
+			}
 		}
 		
 		internal void UpdateNameIndex ()
@@ -171,26 +175,26 @@ namespace Stetic.Wrapper
 		{
 			XmlElement elem = writer.XmlDocument.CreateElement ("action");
 			elem.SetAttribute ("id", Name);
-			if (writer.CreateUndoInfo)
-				elem.SetAttribute ("undoId", undoId);
 			WidgetUtils.GetProps (this, elem);
 			WidgetUtils.GetSignals (this, elem);
+			if (writer.CreateUndoInfo)
+				elem.SetAttribute ("undoId", UndoId);
 			return elem;
 		}
 		
-		public void Read (IProject project, XmlElement elem)
+		public override void Read (ObjectReader reader, XmlElement elem)
 		{
 			Gtk.Action ac = new Gtk.Action (name, "");
 			
 			ClassDescriptor klass = Registry.LookupClassByName ("Gtk.Action");
-			ObjectWrapper.Bind (project, klass, this, ac, true);
+			ObjectWrapper.Bind (reader.Project, klass, this, ac, true);
 			
 			WidgetUtils.ReadMembers (klass, this, ac, elem);
 			name = nameRoot = oldDefaultName = elem.GetAttribute ("id");
 			
 			string uid = elem.GetAttribute ("undoId");
 			if (uid.Length > 0)
-				undoId = uid;
+				UndoId = uid;
 		}
 		
 		public Action Clone ()
@@ -311,9 +315,44 @@ namespace Stetic.Wrapper
 		internal override UndoManager GetUndoManagerInternal ()
 		{
 			if (group != null)
-				return group.GetUndoManager ();
+				return group.GetUndoManagerInternal ();
 			else
 				return base.GetUndoManagerInternal ();
+		}
+		
+		DiffGenerator GetDiffGenerator ()
+		{
+			DiffGenerator gen = new DiffGenerator ();
+			gen.CurrentStatusAdaptor = new ActionDiffAdaptor (Project);
+			gen.NewStatusAdaptor = new XmlDiffAdaptor ();
+			return gen;
+		}
+		
+		public override object GetUndoDiff ()
+		{
+			XmlElement oldElem = UndoManager.GetObjectStatus (this);
+			UndoWriter writer = new UndoWriter (oldElem.OwnerDocument, UndoManager);
+			XmlElement newElem = Write (writer);
+			ObjectDiff actionsDiff = GetDiffGenerator().GetDiff (this, oldElem);
+			UndoManager.UpdateObjectStatus (this, newElem);
+			return actionsDiff;
+		}
+		
+		public override object ApplyUndoRedoDiff (object diff)
+		{
+			ObjectDiff actionsDiff = (ObjectDiff) diff;
+			
+			XmlElement status = UndoManager.GetObjectStatus (this);
+			
+			DiffGenerator differ = GetDiffGenerator();
+			differ.ApplyDiff (this, actionsDiff);
+			actionsDiff = differ.GetDiff (this, status);
+			
+			UndoWriter writer = new UndoWriter (status.OwnerDocument, UndoManager);
+			XmlElement newElem = Write (writer);
+			UndoManager.UpdateObjectStatus (this, newElem);
+			
+			return actionsDiff;
 		}
 	}
 	

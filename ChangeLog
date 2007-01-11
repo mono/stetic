@@ -1,3 +1,43 @@
+2007-01-11  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ActionGroupDesigner.cs, libsteticui/WidgetDesigner.cs,
+	  libsteticui/ActionGroupEditSession.cs: Added undo support for the
+	  global action group designer.
+	* libsteticui/ApplicationBackend.cs: Catch errors when loading a
+	  library to avoid aborting the whole update operation.
+	* libsteticui/ProjectBackend.cs,
+	  libsteticui/CodeGeneratorInternalClass.cs,
+	  libsteticui/PaletteBackend.cs, libsteticui/PropertyGrid.cs,
+	  libstetic/undo/ActionDiffAdaptor.cs, stetic/Stetic.cs,
+	  stetic/DesignerView.cs: Track api changes.
+	* libsteticui/CodeGenerator.cs: Include actions in the bind field list.
+	* libsteticui/ComponentEventHandler.cs, libsteticui/Project.cs: The
+	  component removed event now provides the name of the removed
+	  component, no the component reference. Needed since the component
+	  is already removed, and providing an instance in this case is
+	  problematic.
+	* libsteticui/ActionComponent.cs: Added property for gettion the group
+	  of an action.
+	* libsteticui/Makefile.am: Added new file.
+	* libsteticui/UndoQueue.cs: Generalized the undo manager, so it can be
+	  used for the action group editor.
+	* libstetic/undo/DiffGenerator.cs: Improved error message.
+	* libstetic/undo/UndoManager.cs: Make sure the UndoWriter works for
+	  wrappers other than widgets. Don't include disposed or unregistered
+	  wrappers into the undo event.
+	* libstetic/ObjectWrapper.cs: Factorized some undo properties and
+	  methods into ObjectWrapper.
+	* libstetic/wrapper/Action.cs: More undo support.
+	* libstetic/wrapper/Container.cs, libstetic/wrapper/Widget.cs: Removed
+	  some methods and properties now implemented in ObjectWrapper.
+	* libstetic/wrapper/ActionGroup.cs: ActionGroup is now an ObjectWrapper
+	  subclass. Added better support for Undo.
+	* libstetic/editor/ActionGroupEditor.cs: Use new new ObjectChanged
+	  event.
+	* libstetic/GeneratorContext.cs: Made GenerateInstanceExpression
+	  public.
+	* stetic/LibraryManagerDialog.cs: Fixed warning.
+
 2007-01-09  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/CodeGenerator.cs: Don't generate variables for

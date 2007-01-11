@@ -97,14 +97,15 @@ namespace Stetic
 		}
 	}
 	
+	
 	class ObjectWrapperUndoRedoChange: UndoRedoChange
 	{
-		ContainerUndoRedoManager manager;
+		UndoRedoManager manager;
 		public string TargetObject;
 		public object Diff;
 		public ObjectWrapperUndoRedoChange Next;
 		
-		public ObjectWrapperUndoRedoChange (ContainerUndoRedoManager manager, string targetObject, object diff)
+		public ObjectWrapperUndoRedoChange (UndoRedoManager manager, string targetObject, object diff)
 		{
 			this.manager = manager;
 			this.TargetObject = targetObject;
@@ -122,19 +123,19 @@ namespace Stetic
 		}
 	}
 	
-	class ContainerUndoRedoManager: IDisposable
+	class UndoRedoManager: IDisposable
 	{
 		UndoQueue queue;
-		Wrapper.Container rootObject;
+		ObjectWrapper rootObject;
 		bool updating;
 		UndoManager undoManager = new UndoManager ();
 		
-		public ContainerUndoRedoManager ()
+		public UndoRedoManager ()
 		{
 			undoManager.UndoCheckpoint += OnUndoCheckpoint;
 		}
 		
-		public Wrapper.Container RootObject {
+		public ObjectWrapper RootObject {
 			get { return rootObject; }
 			set {
 				rootObject = value;
@@ -164,26 +165,23 @@ namespace Stetic
 			ObjectWrapperUndoRedoChange firstChange = null;
 			ObjectWrapperUndoRedoChange lastChange = null;
 			
-//			Console.WriteLine ("** UNDO CHECKPOINT: {0} objects", obs.Length);
+			Console.WriteLine ("** UNDO CHECKPOINT: {0} objects", obs.Length);
 			
 			foreach (ObjectWrapper ob in obs) {
-				Wrapper.Widget widget = ob as Wrapper.Widget;
-				if (widget == null)
-					continue;
-
+			
 				// Get the diff for going from the new status to the old status
-				object diff = widget.GetUndoDiff ();
+				object diff = GetDiff (ob);
 				
 				if (diff == null)	// No differences
 					continue;
 				
-//				Console.WriteLine ("ADDCHANGE " + widget + " uid:" + widget.UndoId);
-//				PrintPatch (diff);
+				Console.WriteLine ("ADDCHANGE " + ob + " uid:" + ob.UndoId);
+				PrintPatch (diff);
 				
-				if (widget.UndoId == null || widget.UndoId.Length == 0)
-					throw new InvalidOperationException ("Object of type '" + widget.GetType () + "' does not have an undo id.");
+				if (ob.UndoId == null || ob.UndoId.Length == 0)
+					throw new InvalidOperationException ("Object of type '" + ob.GetType () + "' does not have an undo id.");
 
-				ObjectWrapperUndoRedoChange change = new ObjectWrapperUndoRedoChange (this, widget.UndoId, diff);
+				ObjectWrapperUndoRedoChange change = new ObjectWrapperUndoRedoChange (this, ob.UndoId, diff);
 				if (lastChange == null)
 					lastChange = firstChange = change;
 				else {
@@ -193,6 +191,11 @@ namespace Stetic
 			}
 			if (firstChange != null)
 				queue.AddChange (firstChange);
+		}
+		
+		protected virtual object GetDiff (ObjectWrapper w)
+		{
+			return w.GetUndoDiff ();
 		}
 		
 		public UndoRedoChange ApplyChange (ObjectWrapperUndoRedoChange first)
@@ -221,10 +224,14 @@ namespace Stetic
 		
 		ObjectWrapperUndoRedoChange ApplyDiff (string id, object diff)
 		{
-//			Console.WriteLine ("** APPLYING DIFF: uid:" + id);
-//			PrintPatch (diff);
+			Console.WriteLine ("** APPLYING DIFF: uid:" + id);
+			PrintPatch (diff);
 			
-			Wrapper.Widget ww = rootObject.FindChildByUndoId (id);
+			ObjectWrapper ww = rootObject.FindObjectByUndoId (id);
+			if (ww == null) {
+				Console.WriteLine ("Object with undo id '{0}' not found", id);
+				return null;
+			}
 			
 			object reverseDiff = ww.ApplyUndoRedoDiff (diff);
 		

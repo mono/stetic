@@ -161,7 +161,15 @@ namespace Stetic
 					}
 				}
 				if (alib != null) {
-					Registry.RegisterWidgetLibrary (alib);
+					try {
+						Registry.RegisterWidgetLibrary (alib);
+					} catch (Exception ex) {
+						// Catch errors when loading a library to avoid aborting
+						// the whole update method. After all, that's not a fatal
+						// error (some widgets just won't be shown).
+						// FIXME: return the error somewhere
+						Console.WriteLine (ex);
+					}
 					updated = true;
 				}
 			}
@@ -456,6 +464,11 @@ namespace Stetic
 		internal ObjectBindInfo[] GetBoundComponents (ObjectWrapper wrapper)
 		{
 			return CodeGenerator.GetFieldsToBind (wrapper).ToArray ();
+		}
+		
+		internal ObjectWrapper GetPropertyTreeTarget ()
+		{
+			return targetViewerObject as ObjectWrapper;
 		}
 	}
 }

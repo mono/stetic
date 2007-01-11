@@ -22,7 +22,7 @@ namespace Stetic
 		internal event BackendChangedHandler BackendChanged;
 
 		public event ComponentEventHandler ComponentAdded;
-		public event ComponentEventHandler ComponentRemoved;
+		public event ComponentRemovedEventHandler ComponentRemoved;
 		public event ComponentEventHandler SelectionChanged;
 		public event ComponentNameEventHandler ComponentNameChanged;
 		
@@ -144,12 +144,7 @@ namespace Stetic
 		
 		public ActionGroupDesigner CreateActionGroupDesigner (ActionGroupComponent actionGroup, bool autoCommitChanges)
 		{
-			return new ActionGroupDesigner (this, null, actionGroup, autoCommitChanges);
-		}
-
-		public ActionGroupDesigner CreateActionGroupDesigner (Component component, bool autoCommitChanges)
-		{
-			return new ActionGroupDesigner (this, component.Name, null, autoCommitChanges);
+			return new ActionGroupDesigner (this, null, actionGroup, null, autoCommitChanges);
 		}
 
 		public WidgetComponent AddNewComponent (ComponentType type, string name)
@@ -289,9 +284,8 @@ namespace Stetic
 			if (topLevel) {
 				Gtk.Application.Invoke (
 					delegate {
-						Component c = App.GetComponent (obj, name, typeName);
-						if (c != null && ComponentRemoved != null)
-							ComponentRemoved (this, new ComponentEventArgs (this, c));
+						if (ComponentRemoved != null)
+							ComponentRemoved (this, new ComponentRemovedEventArgs (this, name));
 					}
 				);
 			}

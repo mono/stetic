@@ -180,9 +180,11 @@ namespace Stetic {
 				if (node == null)
 					throw new ApplicationException (Catalog.GetString ("Not a Stetic file according to node name."));
 				
+				ObjectReader reader = new ObjectReader (this, FileFormat.Native);
+				
 				foreach (XmlElement groupElem in node.SelectNodes ("action-group")) {
 					Wrapper.ActionGroup actionGroup = new Wrapper.ActionGroup ();
-					actionGroup.Read (this, groupElem);
+					actionGroup.Read (reader, groupElem);
 					actionGroups.Add (actionGroup);
 				}
 				
@@ -190,7 +192,6 @@ namespace Stetic {
 				if (iconsElem != null)
 					iconFactory.Read (this, iconsElem);
 				
-				ObjectReader reader = new ObjectReader (this, FileFormat.Native);
 				foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
 					Wrapper.Container wrapper = Stetic.ObjectWrapper.ReadObject (reader, toplevel) as Wrapper.Container;
 					if (wrapper != null)
@@ -359,8 +360,9 @@ namespace Stetic {
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.LoadXml (template);
+			ObjectReader or = new ObjectReader (this, FileFormat.Native);
 			Stetic.Wrapper.ActionGroup group = new Stetic.Wrapper.ActionGroup ();
-			group.Read (this, doc.DocumentElement);
+			group.Read (or, doc.DocumentElement);
 			ActionGroups.Add (group);
 			return group;
 		}

@@ -269,7 +269,7 @@ namespace Stetic {
 			Gtk.Widget w = (Gtk.Widget) ob;
 			ObjectWrapper wrapper = ObjectWrapper.Lookup (w);
 			image.Pixbuf = wrapper.ClassDescriptor.Icon;
-			label.Text = wrapper.ClassDescriptor.WrappedTypeName;
+			label.Text = wrapper.WrappedTypeName;
 		}
 	}
 }

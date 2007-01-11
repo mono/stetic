@@ -7,7 +7,6 @@ namespace Stetic
 {
 	public class LibraryManagerDialog: IDisposable
 	{
-		[Glade.Widget] Gtk.Button buttonRemove;
 		[Glade.Widget] Gtk.TreeView libraryList;
 		[Glade.Widget ("LibraryManagerDialog")] Gtk.Dialog dialog;
 		Gtk.ListStore store;

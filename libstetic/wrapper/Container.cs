@@ -151,7 +151,7 @@ namespace Stetic.Wrapper
 			// Write the new status of the object. This is going to replace the old status in undoManager.
 			// In the process, register new objects found.
 			
-			UndoWriter writer = new UndoWriter (oldElem.OwnerDocument, FileFormat.Native, UndoManager);
+			UndoWriter writer = new UndoWriter (oldElem.OwnerDocument, UndoManager);
 			XmlElement newElem = Write (writer);
 			
 //			Console.WriteLine ("CURRENT status: ");
@@ -222,7 +222,7 @@ namespace Stetic.Wrapper
 				foreach (XmlElement group in status.SelectNodes ("action-group"))
 					status.RemoveChild (group);
 
-				UndoWriter writer = new UndoWriter (status.OwnerDocument, FileFormat.Native, UndoManager);
+				UndoWriter writer = new UndoWriter (status.OwnerDocument, UndoManager);
 				foreach (ActionGroup actionGroup in LocalActionGroups)
 					status.InsertBefore (actionGroup.Write (writer), status.FirstChild);
 			}
@@ -1165,48 +1165,27 @@ namespace Stetic.Wrapper
 			return null;
 		}
 		
-		public Widget FindChildByUndoId (string id)
+		public override ObjectWrapper FindObjectByUndoId (string id)
 		{
-			if (UndoId == id)
-				return this;
-			else
-				return Widget.Lookup (FindChildByUndoId ((Gtk.Container)Wrapped, id));
-		}
-		
-		Gtk.Widget FindChildByUndoId (Gtk.Container parent, string id)
-		{
-			foreach (Gtk.Widget w in parent.AllChildren) {
+			ObjectWrapper c = base.FindObjectByUndoId (id);
+			if (c != null)
+				return c;
+
+			foreach (Gtk.Widget w in container.AllChildren) {
 				Widget ww = Widget.Lookup (w);
 				if (ww == null)
 					continue;
-				if (ww.UndoId == id)
-					return w;
-				if (w is Gtk.Container) {
-					Gtk.Widget res = FindChildByUndoId ((Gtk.Container)w, id);
-					if (res != null)
-						return res;
-				}
+				ObjectWrapper ow = ww.FindObjectByUndoId (id);
+				if (ow != null)
+					return ow;
 			}
 			return null;
 		}
 		
+		
+		
 		public class ContainerChild : Stetic.ObjectWrapper
 		{
-			// This id is used by the undo methods to identify a child of a container.
-			// The id is not stored, since it's used only while the widget is being
-			// edited in the designer
-			string undoId;
-			
-			public ContainerChild ()
-			{
-				undoId = WidgetUtils.GetUndoId ();
-			}
-			
-			internal string UndoId {
-				get { return undoId; }
-				set { undoId = value; }
-			}
-
 			internal static void Register ()
 			{
 				// FIXME?

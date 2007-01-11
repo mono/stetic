@@ -18,6 +18,7 @@ libsteticui_dll_sources =			\
 	ApplicationBackend.cs			\
 	ApplicationBackendController.cs \
 	Clipboard.cs			\
+	ContainerUndoRedoManager.cs \
 	ContextMenu.cs			\
 	Component.cs			\
 	ComponentEventHandler.cs			\

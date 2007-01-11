@@ -11,23 +11,31 @@ namespace Stetic
 		string componentName;
 		string actionGroupName;
 		bool autoCommitChanges;
+		WidgetDesigner relatedWidgetDesigner;
 		
 		public event EventHandler BindField;
 		public event EventHandler ModifiedChanged;
+		public event EventHandler RootComponentChanged;
 		public event ComponentSignalEventHandler SignalAdded;
 		public event ComponentSignalEventHandler SignalChanged;
 		
-		internal ActionGroupDesigner (Project project, string componentName, ActionGroupComponent actionGroup, bool autoCommitChanges): base (project.App)
+		internal ActionGroupDesigner (Project project, string componentName, ActionGroupComponent actionGroup, WidgetDesigner relatedWidgetDesigner, bool autoCommitChanges): base (project.App)
 		{
 			this.componentName = componentName;
+			this.relatedWidgetDesigner = relatedWidgetDesigner;
+			
 			if (actionGroup != null)
 				this.actionGroupName = actionGroup.Name;
 			this.autoCommitChanges = autoCommitChanges;
 			this.project = project;
-			
+
 			frontend = new ActionGroupDesignerFrontend (this);
 
 			CreateSession ();
+		}
+		
+		public Component RootComponent {
+			get { return app.GetComponent (editSession.EditedActionGroup, null, null); }
 		}
 		
 		public bool AllowActionBinding {
@@ -37,6 +45,17 @@ namespace Stetic
 			set {
 				if (editSession != null)
 					editSession.AllowActionBinding = value; 
+			}
+		}
+		
+		public UndoQueue UndoQueue {
+			get {
+				if (relatedWidgetDesigner != null)
+					return relatedWidgetDesigner.UndoQueue;
+				else if (editSession != null)
+					return editSession.UndoQueue;
+				else
+					return UndoQueue.Empty;
 			}
 		}
 		
@@ -169,6 +188,9 @@ namespace Stetic
 				editSession.RestoreState (sessionData);
 			
 			base.OnBackendChanged (oldBackend);
+			
+			if (RootComponentChanged != null)
+				RootComponentChanged (this, EventArgs.Empty);
 		}
 		
 		internal void NotifyBindField ()

@@ -221,9 +221,14 @@ namespace Stetic {
 			OpenWindow (args.Component);
 		}
 		
-		static void OnWidgetRemoved (object s, ComponentEventArgs args)
+		static void OnWidgetRemoved (object s, ComponentRemovedEventArgs args)
 		{
-			CloseWindow (args.Component);
+			foreach (Component c in openWindows.Keys) {
+				if (c.Name == args.ComponentName) {
+					CloseWindow (c);
+					return;
+				}
+			}
 		}
 		
 		static void OnSelectionChanged (object s, ComponentEventArgs args)

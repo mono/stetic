@@ -7,23 +7,15 @@ using Stetic.Undo;
 
 namespace Stetic.Wrapper
 {
-	public sealed class ActionGroup: MarshalByRefObject, IDisposable
+	public sealed class ActionGroup: ObjectWrapper
 	{
 		string name;
 		ActionCollection actions;
-		IObjectFrontend frontend;
 		ObjectWrapper owner;
-		
-		// This id is used by the undo methods to identify an object.
-		string undoId = WidgetUtils.GetUndoId ();
 		
 		public event ActionEventHandler ActionAdded;
 		public event ActionEventHandler ActionRemoved;
 		public event ActionEventHandler ActionChanged;
-		public event EventHandler Changed;
-		public event SignalEventHandler SignalAdded;
-		public event SignalEventHandler SignalRemoved;
-		public event SignalChangedEventHandler SignalChanged;
 		
 		public ActionGroup ()
 		{
@@ -35,24 +27,11 @@ namespace Stetic.Wrapper
 			this.name = name;
 		}
 		
-		public void Dispose ()
+		public override void Dispose ()
 		{
 			foreach (Action a in actions)
 				a.Dispose ();
-		}
-		
-		internal string UndoId {
-			get { return undoId; }
-			set { undoId = value; }
-		}
-		
-		public IObjectFrontend Frontend {
-			get { return frontend; }
-			set {
-				if (frontend != null)
-					frontend.Dispose ();
-				frontend = value;
-			}
+			base.Dispose ();
 		}
 		
 		public ActionCollection Actions {
@@ -98,33 +77,33 @@ namespace Stetic.Wrapper
 				return name;
 		}
 		
-		public XmlElement Write (ObjectWriter writer)
+		public override XmlElement Write (ObjectWriter writer)
 		{
 			XmlElement group = writer.XmlDocument.CreateElement ("action-group");
 			group.SetAttribute ("name", name);
 			if (writer.CreateUndoInfo)
-				group.SetAttribute ("undoId", undoId);
+				group.SetAttribute ("undoId", UndoId);
 			foreach (Action ac in actions) {
 				if (ac.Name.Length > 0)
-					group.AppendChild (ac.Write (writer));
+					group.AppendChild (writer.WriteObject (ac));
 			}
 			return group;
 		}
 		
-		public void Read (IProject project, XmlElement elem)
+		public override void Read (ObjectReader reader, XmlElement elem)
 		{
 			name = elem.GetAttribute ("name");
 			string uid = elem.GetAttribute ("undoId");
 			if (uid.Length > 0)
-				undoId = uid;
+				UndoId = uid;
 			foreach (XmlElement child in elem.SelectNodes ("action")) {
 				Action ac = new Action ();
-				ac.Read (project, child);
+				ac.Read (reader, child);
 				actions.Add (ac);
 			}
 		}
 		
-		internal CodeExpression GenerateObjectCreation (GeneratorContext ctx)
+		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
 			return new CodeObjectCreateExpression (
 				typeof(Gtk.ActionGroup),
@@ -132,26 +111,11 @@ namespace Stetic.Wrapper
 			);
 		}
 		
-		internal void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
 			foreach (Action action in Actions) {
 				// Create the action
-				string acVar = ctx.NewId ();
-				Type atype;
-				if (action.Type == Action.ActionType.Action)
-					atype = typeof (Gtk.Action);
-				else if (action.Type == Action.ActionType.Radio)
-					atype = typeof(Gtk.RadioAction);
-				else
-					atype = typeof(Gtk.ToggleAction);
-					
-				CodeVariableDeclarationStatement uidec = new CodeVariableDeclarationStatement (
-					atype,
-					acVar,
-					action.GenerateObjectCreation (ctx)
-				);
-				CodeExpression acVarExp = new CodeVariableReferenceExpression (acVar);
-				ctx.Statements.Add (uidec);
+				CodeExpression acVarExp = ctx.GenerateInstanceExpression (action, action.GenerateObjectCreation (ctx));
 				ctx.GenerateBuildCode (action, acVarExp);
 				ctx.Statements.Add (
 					new CodeMethodInvokeExpression (
@@ -169,12 +133,63 @@ namespace Stetic.Wrapper
 			this.owner = owner;
 		}
 		
-		internal UndoManager GetUndoManager ()
+		internal override UndoManager GetUndoManagerInternal ()
 		{
 			if (owner != null)
 				return owner.UndoManager;
 			else
-				return null;
+				return base.GetUndoManagerInternal ();
+		}
+		
+		public override ObjectWrapper FindObjectByUndoId (string id)
+		{
+			ObjectWrapper ow = base.FindObjectByUndoId (id);
+			if (ow != null) return ow;
+			
+			foreach (Action ac in Actions) {
+				ow = ac.FindObjectByUndoId (id);
+				if (ow != null)
+					return ow;
+			}
+			return null;
+		}
+		
+		DiffGenerator GetDiffGenerator ()
+		{
+			DiffGenerator gen = new DiffGenerator ();
+			gen.CurrentStatusAdaptor = new ActionDiffAdaptor (Project);
+			XmlDiffAdaptor xad = new XmlDiffAdaptor ();
+			xad.ChildElementName = "action";
+			gen.NewStatusAdaptor = xad;
+			return gen;
+		}
+		
+		public override object GetUndoDiff ()
+		{
+			XmlElement oldElem = UndoManager.GetObjectStatus (this);
+			UndoWriter writer = new UndoWriter (oldElem.OwnerDocument, UndoManager);
+			
+			XmlElement newElem = Write (writer);
+			ObjectDiff actionsDiff = GetDiffGenerator().GetDiff (this, oldElem);
+			UndoManager.UpdateObjectStatus (this, newElem);
+			return actionsDiff;
+		}
+		
+		public override object ApplyUndoRedoDiff (object diff)
+		{
+			ObjectDiff actionsDiff = (ObjectDiff) diff;
+			
+			XmlElement status = UndoManager.GetObjectStatus (this);
+			
+			DiffGenerator differ = GetDiffGenerator();
+			differ.ApplyDiff (this, actionsDiff);
+			actionsDiff = differ.GetDiff (this, status);
+			
+			UndoWriter writer = new UndoWriter (status.OwnerDocument, UndoManager);
+			XmlElement newElem = Write (writer);
+			UndoManager.UpdateObjectStatus (this, newElem);
+			
+			return actionsDiff;
 		}
 		
 		internal void NotifyActionAdded (Action ac)
@@ -207,14 +222,6 @@ namespace Stetic.Wrapper
 				ActionRemoved (this, new ActionEventArgs (ac));
 		}
 		
-		void NotifyChanged ()
-		{
-			if (frontend != null)
-				frontend.NotifyChanged ();
-			if (Changed != null)
-				Changed (this, EventArgs.Empty);
-		}
-		
 		void OnActionChanged (object s, ObjectWrapperEventArgs args)
 		{
 			NotifyChanged ();
@@ -224,23 +231,17 @@ namespace Stetic.Wrapper
 		
 		void OnSignalAdded (object s, SignalEventArgs args)
 		{
-			NotifyChanged ();
-			if (SignalAdded != null)
-				SignalAdded (this, args);
+			OnSignalAdded (args);
 		}
 		
 		void OnSignalRemoved (object s, SignalEventArgs args)
 		{
-			NotifyChanged ();
-			if (SignalRemoved != null)
-				SignalRemoved (this, args);
+			OnSignalRemoved (args);
 		}
 		
 		void OnSignalChanged (object s, SignalChangedEventArgs args)
 		{
-			NotifyChanged ();
-			if (SignalChanged != null)
-				SignalChanged (this, args);
+			OnSignalChanged (args);
 		}
 	}
 	
@@ -275,6 +276,16 @@ namespace Stetic.Wrapper
 						return grp;
 				return null;
 			}
+		}
+		
+		internal ObjectWrapper FindObjectByUndoId (string id)
+		{
+			foreach (ActionGroup ag in List) {
+				ObjectWrapper ow = ag.FindObjectByUndoId (id);
+				if (ow != null)
+					return ow;
+			}
+			return null;
 		}
 		
 		DiffGenerator GetDiffGenerator (IProject prj)
@@ -342,7 +353,7 @@ namespace Stetic.Wrapper
 		void NotifyGroupAdded (ActionGroup grp)
 		{
 			grp.SetOwner (owner);
-			grp.Changed += OnGroupChanged;
+			grp.ObjectChanged += OnGroupChanged;
 			if (ActionGroupAdded != null)
 				ActionGroupAdded (this, new ActionGroupEventArgs (grp));
 		}
@@ -350,12 +361,12 @@ namespace Stetic.Wrapper
 		void NotifyGroupRemoved (ActionGroup grp)
 		{
 			grp.SetOwner (null);
-			grp.Changed -= OnGroupChanged;
+			grp.ObjectChanged -= OnGroupChanged;
 			if (ActionGroupRemoved != null)
 				ActionGroupRemoved (this, new ActionGroupEventArgs (grp));
 		}
 		
-		void OnGroupChanged (object s, EventArgs a)
+		void OnGroupChanged (object s, ObjectWrapperEventArgs a)
 		{
 			if (ActionGroupChanged != null)
 				ActionGroupChanged (this, new ActionGroupEventArgs ((ActionGroup)s));

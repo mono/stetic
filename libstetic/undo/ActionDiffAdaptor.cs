@@ -141,13 +141,14 @@ namespace Stetic.Undo
 		
 		public object DeserializeChild (XmlElement data)
 		{
+			ObjectReader or = new ObjectReader (project, FileFormat.Native);
 			if (data.LocalName == "action") {
 				Action ac = new Action ();
-				ac.Read (project, data);
+				ac.Read (or, data);
 				return ac;
 			} else if (data.LocalName == "action-group") {
 				ActionGroup ac = new ActionGroup ();
-				ac.Read (project, data);
+				ac.Read (or, data);
 				return ac;
 			}
 			throw new NotImplementedException ();

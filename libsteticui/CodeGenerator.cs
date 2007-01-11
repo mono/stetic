@@ -295,16 +295,21 @@ namespace Stetic
 				memberName = ((Wrapper.Action) wrapper).Name;
 			
 			if (memberName != null) {
-				ObjectBindInfo binfo = new ObjectBindInfo (wrapper.ClassDescriptor.WrappedTypeName, memberName);
+				ObjectBindInfo binfo = new ObjectBindInfo (wrapper.WrappedTypeName, memberName);
 				tobind.Add (binfo);
+			}
+			
+			Wrapper.ActionGroup agroup = wrapper as Wrapper.ActionGroup;
+			if (agroup != null) {
+				foreach (Wrapper.Action ac in agroup.Actions)
+					GetFieldsToBind (tobind, ac);
 			}
 			
 			Wrapper.Widget widget = wrapper as Wrapper.Widget;
 			if (widget != null && widget.IsTopLevel) {
 				// Generate fields for local actions
 				foreach (Wrapper.ActionGroup grp in widget.LocalActionGroups) {
-					foreach (Wrapper.Action ac in grp.Actions)
-						GetFieldsToBind (tobind, ac);
+					GetFieldsToBind (tobind, grp);
 				}
 			}
 			
@@ -347,8 +352,9 @@ namespace Stetic
 			this.type = type;
 		}
 		
-		protected override CodeExpression GenerateInstanceExpression (ObjectWrapper wrapper, CodeExpression newObject)
+		public override CodeExpression GenerateInstanceExpression (ObjectWrapper wrapper, CodeExpression newObject)
 		{
+			string typeName = wrapper.WrappedTypeName;
 			string memberName = null;
 			if (wrapper is Wrapper.Widget)
 				memberName = ((Wrapper.Widget) wrapper).Wrapped.Name;
@@ -365,7 +371,7 @@ namespace Stetic
 				if (ww == null || (!ww.IsTopLevel && ww.InternalChildProperty == null && !ww.Unselectable)) {
 					type.Members.Add (
 						new CodeMemberField (
-							wrapper.ClassDescriptor.WrappedTypeName,
+							typeName,
 							memberName
 						)
 					);

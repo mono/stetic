@@ -10,9 +10,6 @@ namespace Stetic.Wrapper {
 	{
 		static DiffGenerator propDiffGenerator;
 		
-		// This id is used by the undo methods to identify an object (even if it's name changes)
-		string undoId = WidgetUtils.GetUndoId ();
-		
 		string oldName;
 		string oldMemberName;
 		internal bool settingFocus;
@@ -108,11 +105,6 @@ namespace Stetic.Wrapper {
 					ag.Dispose ();
 			}
 			base.Dispose ();
-		}
-		
-		public string UndoId {
-			get { return undoId; }
-			internal set { undoId = value; }
 		}
 		
 		void OnFocusIn (object s, Gtk.FocusInEventArgs a)
@@ -396,7 +388,19 @@ namespace Stetic.Wrapper {
 			set { requiresUndoStatusUpdate = value; }
 		}
 		
-		public virtual object GetUndoDiff ()
+		public override ObjectWrapper FindObjectByUndoId (string id)
+		{
+			ObjectWrapper c = base.FindObjectByUndoId (id);
+			if (c != null)
+				return c;
+
+			if (actionGroups != null)
+				return actionGroups.FindObjectByUndoId (id);
+			else
+				return null;
+		}
+		
+		public override object GetUndoDiff ()
 		{
 			XmlElement oldElem = UndoManager.GetObjectStatus (this);
 			XmlElement newElem = WriteProperties (new ObjectWriter (oldElem.OwnerDocument, FileFormat.Native));
@@ -412,7 +416,7 @@ namespace Stetic.Wrapper {
 				return new ObjectDiff[] { propsDiff, actionsDiff };
 		}
 		
-		public virtual object ApplyUndoRedoDiff (object diff)
+		public override object ApplyUndoRedoDiff (object diff)
 		{
 			ObjectDiff[] data = (ObjectDiff[]) diff;
 			
@@ -447,7 +451,7 @@ namespace Stetic.Wrapper {
 			if (reader.Format == FileFormat.Native) {
 				foreach (XmlElement groupElem in elem.SelectNodes ("action-group")) {
 					ActionGroup actionGroup = new ActionGroup ();
-					actionGroup.Read (Project, groupElem);
+					actionGroup.Read (reader, groupElem);
 					if (actionGroups == null) {
 						actionGroups = new ActionGroupCollection ();
 						actionGroups.SetOwner (this);
@@ -475,7 +479,7 @@ namespace Stetic.Wrapper {
 			
 			string uid = elem.GetAttribute ("undoId");
 			if (uid.Length > 0)
-				undoId = uid;
+				UndoId = uid;
 		}
 		
 		public override XmlElement Write (ObjectWriter writer)
@@ -490,7 +494,7 @@ namespace Stetic.Wrapper {
 			if (writer.Format == FileFormat.Native) {
 				XmlElement elem = WidgetUtils.Write (this, writer.XmlDocument);
 				if (writer.CreateUndoInfo)
-					elem.SetAttribute ("undoId", undoId);
+					elem.SetAttribute ("undoId", UndoId);
 				return elem;
 			}
 			else {

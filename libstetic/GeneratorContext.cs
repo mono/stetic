@@ -48,10 +48,10 @@ namespace Stetic
 			return var;
 		}
 		
-		protected virtual CodeExpression GenerateInstanceExpression (ObjectWrapper wrapper, CodeExpression newObject)
+		public virtual CodeExpression GenerateInstanceExpression (ObjectWrapper wrapper, CodeExpression newObject)
 		{
 			string varName = NewId ();
-			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (wrapper.ClassDescriptor.WrappedTypeName, varName);
+			CodeVariableDeclarationStatement varDec = new CodeVariableDeclarationStatement (wrapper.WrappedTypeName, varName);
 			varDec.InitExpression = newObject;
 			statements.Add (varDec);
 			return new CodeVariableReferenceExpression (varName);

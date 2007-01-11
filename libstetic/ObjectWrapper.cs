@@ -24,6 +24,12 @@ namespace Stetic {
 		bool loading;
 		IObjectFrontend frontend;
 		bool disposed;
+		
+		// This id is used by the undo methods to identify an object.
+		// This id is not stored, since it's used only while the widget is being
+		// edited in the designer
+		string undoId = WidgetUtils.GetUndoId ();
+		
 		UndoManager undoManager;
 		static UndoManager defaultUndoManager = new UndoManager (true);
 		
@@ -43,6 +49,35 @@ namespace Stetic {
 		public UndoManager UndoManager {
 			get { return GetUndoManagerInternal (); }
 			internal set { undoManager = value; }
+		}
+		
+		// Called the get a diff of changes since the last call to GetUndoDiff().
+		// The returned object can be used to restore the object status by calling
+		// ApplyUndoRedoDiff. The implementation can use the UndoManager object to
+		// store status information.
+		public virtual object GetUndoDiff ()
+		{
+			return null;
+		}
+		
+		// Called to apply a set of changes to the object. It returns
+		// a set of changes which can be used to reverse the operation.
+		public virtual object ApplyUndoRedoDiff (object diff)
+		{
+			return null;
+		}
+		
+		public string UndoId {
+			get { return undoId; }
+			internal set { undoId = value; }
+		}
+		
+		public virtual ObjectWrapper FindObjectByUndoId (string id)
+		{
+			if (undoId == id)
+				return this;
+			else
+				return null;
 		}
 		
 		internal virtual UndoManager GetUndoManagerInternal ()
@@ -90,7 +125,8 @@ namespace Stetic {
 			if (frontend != null)
 				frontend.Dispose ();
 			frontend = null;
-			wrappers.Remove (GetIndentityObject (wrapped));
+			if (wrapped != null)
+				wrappers.Remove (GetIndentityObject (wrapped));
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 		}
 		
@@ -198,9 +234,9 @@ namespace Stetic {
 					PropertyDescriptor prop = ClassDescriptor.InitializationProperties [n];
 					paramters [n] = ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType, prop.Translatable);
 				}
-				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName, paramters);
+				return new CodeObjectCreateExpression (WrappedTypeName, paramters);
 			} else
-				return new CodeObjectCreateExpression (ClassDescriptor.WrappedTypeName);
+				return new CodeObjectCreateExpression (WrappedTypeName);
 		}
 		
 		protected virtual void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
@@ -244,6 +280,10 @@ namespace Stetic {
 
 		public ClassDescriptor ClassDescriptor {
 			get { return classDescriptor; }
+		}
+		
+		public virtual string WrappedTypeName {
+			get { return classDescriptor.WrappedTypeName; }
 		}
 		
 		public void NotifyChanged ()

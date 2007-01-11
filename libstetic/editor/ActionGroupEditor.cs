@@ -80,14 +80,14 @@ namespace Stetic.Editor
 			get { return actionGroup; }
 			set {
 				if (actionGroup != null) {
-					actionGroup.Changed -= OnGroupChanged;
+					actionGroup.ObjectChanged -= OnGroupChanged;
 					actionGroup.ActionAdded -= OnActionAdded;
 					actionGroup.ActionRemoved -= OnActionRemoved;
 				}
 				actionGroup = value;
 				if (actionGroup != null) {
 					headerLabel.Text = actionGroup.Name;
-					actionGroup.Changed += OnGroupChanged;
+					actionGroup.ObjectChanged += OnGroupChanged;
 					actionGroup.ActionAdded += OnActionAdded;
 					actionGroup.ActionRemoved += OnActionRemoved;
 					foreach (Action a in actionGroup.Actions)
@@ -227,7 +227,7 @@ namespace Stetic.Editor
 			emptyLabel = null;
 		}
 		
-		void OnGroupChanged (object s, EventArgs args)
+		void OnGroupChanged (object s, ObjectWrapperEventArgs args)
 		{
 			headerLabel.Text = actionGroup.Name;
 			NotifyModified ();

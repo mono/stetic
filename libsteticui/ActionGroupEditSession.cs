@@ -21,6 +21,9 @@ namespace Stetic
 		Stetic.Wrapper.ActionGroup group;
 		Hashtable actionCopyMap = new Hashtable ();
 		
+		UndoRedoManager undoManager;
+		UndoQueue undoQueue;
+		
 		public ActionGroupEditSession (ActionGroupDesignerFrontend frontend, ProjectBackend project, string containerName, string groupToEdit, bool autoCommitChanges)
 		{
 			this.groupToEdit = groupToEdit;
@@ -35,6 +38,11 @@ namespace Stetic
 					throw new InvalidOperationException ("Unknown action group: " + groupToEdit);
 				Load (group);
 				groupToolbar = new ActionGroupToolbar (frontend, groupCopy);
+				
+				undoManager = new UndoRedoManager ();
+				undoQueue = new UndoQueue ();
+				undoManager.UndoQueue = undoQueue;
+				undoManager.RootObject = groupCopy;
 			}
 			else {
 				if (!autoCommitChanges)
@@ -46,6 +54,10 @@ namespace Stetic
 			designer.Editor.GroupModified += OnModified;
 			
 			project.ProjectReloaded += new EventHandler (OnProjectReloaded);
+		}
+		
+		public Wrapper.ActionGroup EditedActionGroup {
+			get { return groupCopy; }
 		}
 		
 		void Load (Stetic.Wrapper.ActionGroup group)
@@ -100,6 +112,15 @@ namespace Stetic
 				actionCopyMap.Remove (actionCopy);
 			}
 			Modified = false;
+		}
+		
+		public UndoQueue UndoQueue {
+			get { 
+				if (undoQueue != null)
+					return undoQueue;
+				else
+					return UndoQueue.Empty;
+			}
 		}
 		
 		public void CopySelection ()

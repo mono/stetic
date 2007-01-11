@@ -21,7 +21,7 @@ namespace Stetic
 			
 			// Actions design tab
 			
-			actionbox = project.CreateActionGroupDesigner (widget, true);
+			actionbox = design.CreateActionGroupDesigner ();
 			
 			// Designers tab
 			
