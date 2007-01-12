@@ -1,3 +1,14 @@
+2007-01-12  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/WidgetEditSession.cs: When saving the designer session,
+	  instead of deleting the old widget and adding the new one, update
+	  the existing widget.
+	* libsteticui/Application.cs: Added some thread locking.
+	* libsteticui/Project.cs: When a widget name changed event is received,
+	  update the corresponding component from the current thread, there
+	  is no need to do it in the gui thread.
+	* libstetic/wrapper/Container.cs: Added null check for container child.
+
 2007-01-11  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ActionGroupDesigner.cs, libsteticui/WidgetDesigner.cs,

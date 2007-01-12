@@ -330,15 +330,14 @@ namespace Stetic
 		
 		internal void NotifyWidgetNameChanged (object obj, string oldName, string newName)
 		{
+			WidgetComponent c = (WidgetComponent) App.GetComponent (obj, null, null);
+			if (c != null)
+				c.UpdateName (newName);
+				
 			Gtk.Application.Invoke (
 				delegate {
-					if (ComponentNameChanged != null) {
-						WidgetComponent c = (WidgetComponent) App.GetComponent (obj, null, null);
-						if (c != null) {
-							c.UpdateName (newName);
-							ComponentNameChanged (this, new ComponentNameEventArgs (this, c, oldName));
-						}
-					}
+					if (ComponentNameChanged != null && c != null)
+						ComponentNameChanged (this, new ComponentNameEventArgs (this, c, oldName));
 				}
 			);
 		}

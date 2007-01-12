@@ -167,13 +167,10 @@ namespace Stetic {
 				XmlElement data = Stetic.WidgetUtils.ExportWidget (rootWidget.Wrapped);
 				
 				Wrapper.Widget sw = sourceProject.GetTopLevelWrapper (sourceWidget, false);
-				if (sw != null)
-					sw.Delete ();
+				sw.Read (new ObjectReader (gproject, FileFormat.Native), data);
 				
-				Gtk.Widget w = Stetic.WidgetUtils.ImportWidget (sourceProject, data);
-				sourceWidget = w.Name;
-				sourceProject.AddWidget (w);
-				
+				sourceWidget = ((Gtk.Widget)sw.Wrapped).Name;
+				sw.NotifyChanged ();
 				gproject.Modified = false;
 			}
 		}

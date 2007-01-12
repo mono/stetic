@@ -139,11 +139,14 @@ namespace Stetic
 			UpdateWidgetLibraries (false, false);
 			types.Clear ();
 			
-			// All components should have been cleared by the backend,
-			// just make sure it did
-			Component[] comps = new Component [components.Count];
-			components.Values.CopyTo (comps, 0);
-			components.Clear ();
+			Component[] comps;
+			lock (components) {
+				// All components should have been cleared by the backend,
+				// just make sure it did
+				comps = new Component [components.Count];
+				components.Values.CopyTo (comps, 0);
+				components.Clear ();
+			}
 			
 			foreach (Component c in comps) {
 				c.Dispose ();
@@ -357,31 +360,33 @@ namespace Stetic
 		internal Component GetComponent (object cbackend, string name, string type)
 		{
 			try {
-				Component c = (Component) components [cbackend];
-				if (c != null)
+				lock (components) {
+					Component c = (Component) components [cbackend];
+					if (c != null)
+						return c;
+
+					// If the remote object is already disposed, don't try to create a
+					// local component.
+					if (cbackend is ObjectWrapper && ((ObjectWrapper)cbackend).IsDisposed)
+						return null;
+					
+					if (cbackend is Wrapper.Action) {
+						c = new ActionComponent (this, cbackend, name);
+						((ObjectWrapper)cbackend).Frontend = c;
+					} else if (cbackend is Wrapper.ActionGroup) {
+						c = new ActionGroupComponent (this, cbackend, name);
+						((Wrapper.ActionGroup)cbackend).Frontend = c;
+					} else if (cbackend is ObjectWrapper) {
+						c = new WidgetComponent (this, cbackend, name, type != null ? GetComponentType (type) : null);
+						((ObjectWrapper)cbackend).Frontend = c;
+					} else if (cbackend == null)
+						throw new System.ArgumentNullException ("cbackend");
+					else
+						throw new System.InvalidOperationException ("Invalid component type: " + cbackend.GetType ());
+
+					components [cbackend] = c;
 					return c;
-
-				// If the remote object is already disposed, don't try to create a
-				// local component.
-				if (cbackend is ObjectWrapper && ((ObjectWrapper)cbackend).IsDisposed)
-					return null;
-				
-				if (cbackend is Wrapper.Action) {
-					c = new ActionComponent (this, cbackend, name);
-					((ObjectWrapper)cbackend).Frontend = c;
-				} else if (cbackend is Wrapper.ActionGroup) {
-					c = new ActionGroupComponent (this, cbackend, name);
-					((Wrapper.ActionGroup)cbackend).Frontend = c;
-				} else if (cbackend is ObjectWrapper) {
-					c = new WidgetComponent (this, cbackend, name, type != null ? GetComponentType (type) : null);
-					((ObjectWrapper)cbackend).Frontend = c;
-				} else if (cbackend == null)
-					throw new System.ArgumentNullException ("cbackend");
-				else
-					throw new System.InvalidOperationException ("Invalid component type: " + cbackend.GetType ());
-
-				components [cbackend] = c;
-				return c;
+				}
 			}
 			catch (System.Runtime.Remoting.RemotingException)
 			{
@@ -395,7 +400,9 @@ namespace Stetic
 		
 		internal void DisposeComponent (Component c)
 		{
-			components.Remove (c.Backend);
+			lock (components) {
+				components.Remove (c.Backend);
+			}
 		}
 	}
 

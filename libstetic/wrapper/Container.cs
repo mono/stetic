@@ -469,16 +469,23 @@ namespace Stetic.Wrapper
 				GenerateSetInternalChild (ctx, var, prop);
 			}
 			
+			
 			if (IsTopLevel && Wrapped is Gtk.Bin) {
-				ctx.Statements.Add (
+				CodeExpression childExp = new CodePropertyReferenceExpression (var, "Child");
+				CodeConditionStatement cond = new CodeConditionStatement ();
+				cond.Condition = 
+					new CodeBinaryOperatorExpression (
+						childExp,
+						CodeBinaryOperatorType.IdentityInequality,
+						new CodePrimitiveExpression (null)
+					);
+				cond.TrueStatements.Add (
 					new CodeMethodInvokeExpression (
-						new CodePropertyReferenceExpression (
-							var,
-							"Child"
-						),
+						childExp,
 						"ShowAll"
 					)
 				);
+				ctx.Statements.Add (cond);
 			}
 		}
 		
