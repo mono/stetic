@@ -1,5 +1,9 @@
 2007-01-12  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/ContainerUndoRedoManager.cs: Added missing file.
+
+2007-01-12  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/WidgetEditSession.cs: When saving the designer session,
 	  instead of deleting the old widget and adding the new one, update
 	  the existing widget.
