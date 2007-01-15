@@ -246,22 +246,23 @@ namespace Stetic
 			projects.Remove (p);
 		}
 		
-		public string[] GenerateProjectCode (string file, string namespaceName, CodeDomProvider provider, GenerationOptions options, params Project[] projects)
+		public CodeGenerationResult GenerateProjectCode (string file, string namespaceName, CodeDomProvider provider, GenerationOptions options, params Project[] projects)
 		{
 			ArrayList files = new ArrayList ();
-			SteticCompilationUnit[] units = GenerateProjectCode (options, projects);
+			CodeGenerationResult res = GenerateProjectCode (options, projects);
 			
 			ICodeGenerator gen = provider.CreateGenerator ();
 			string basePath = Path.GetDirectoryName (file);
 			string ext = Path.GetExtension (file);
 			
-			foreach (SteticCompilationUnit unit in units) {
+			foreach (SteticCompilationUnit unit in res.Units) {
 				string fname;
 				if (unit.Name.Length == 0)
 					fname = file;
 				else
 					fname = Path.Combine (basePath, unit.Name) + ext;
 				files.Add (fname);
+				unit.Name = fname;
 				StreamWriter fileStream = new StreamWriter (fname);
 				try {
 					gen.GenerateCodeFromCompileUnit (unit, fileStream, new CodeGeneratorOptions ());
@@ -269,10 +270,10 @@ namespace Stetic
 					fileStream.Close ();
 				}
 			}
-			return (string[]) files.ToArray (typeof(string));
+			return res;
 		}
 		
-		public SteticCompilationUnit[] GenerateProjectCode (GenerationOptions options, params Project[] projects)
+		public CodeGenerationResult GenerateProjectCode (GenerationOptions options, params Project[] projects)
 		{
 			ProjectBackend[] pbs = new ProjectBackend [projects.Length];
 			for (int n=0; n<projects.Length; n++)

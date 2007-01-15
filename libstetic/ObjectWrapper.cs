@@ -173,7 +173,7 @@ namespace Stetic {
 				klass = Registry.LookupClassByCName (className);
 			
 			if (klass == null) {
-				ErrorWidget we = new ErrorWidget (className);
+				ErrorWidget we = new ErrorWidget (className, elem.GetAttribute ("id"));
 				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (reader.Project, we);
 				wrap.Read (reader, elem);
 				return wrap;
@@ -187,7 +187,7 @@ namespace Stetic {
 				wrapper.Read (reader, elem);
 			} catch (Exception ex) {
 				Console.WriteLine (ex);
-				ErrorWidget we = new ErrorWidget (ex);
+				ErrorWidget we = new ErrorWidget (ex, elem.GetAttribute ("id"));
 				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (reader.Project, we);
 				wrap.Read (reader, elem);
 				return wrap;

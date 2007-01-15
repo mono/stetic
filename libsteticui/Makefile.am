@@ -27,6 +27,7 @@ libsteticui_dll_sources =			\
 	CodeGenerator.cs			\
 	CodeGeneratorInternalClass.cs			\
 	CodeGeneratorPartialClass.cs			\
+	CodeGenerationResult.cs \
 	EmbedWindow.cs		\
 	Glade.cs			\
 	Grid.cs				\

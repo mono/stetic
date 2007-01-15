@@ -15,6 +15,9 @@ namespace Stetic {
 		
 		public static event EventHandler RegistryChanging;
 		public static event EventHandler RegistryChanged;
+		
+		static int changing;
+		static bool changed;
 
 		static Registry ()
 		{
@@ -24,6 +27,22 @@ namespace Stetic {
 		
 		public static WidgetLibrary CoreWidgetLibrary {
 			get { return coreLib; }
+		}
+		
+		public static void BeginChangeSet ()
+		{
+			if (changing == 0)
+				changed = false;
+			changing++;
+		}
+		
+		public static void EndChangeSet ()
+		{
+			if (--changing == 0) {
+				if (changed)
+					NotifyChanged ();
+				changed = false;
+			}
 		}
 		
 		public static void RegisterWidgetLibrary (WidgetLibrary library)
@@ -112,13 +131,19 @@ namespace Stetic {
 		
 		static void NotifyChanging ()
 		{
+			if (changing > 0) {
+				if (changed)
+					return;
+				else
+					changed = true;
+			}
 			if (RegistryChanging != null)
 				RegistryChanging (null, EventArgs.Empty);
 		}
 		
 		static void NotifyChanged ()
 		{
-			if (RegistryChanged != null)
+			if (changing == 0 && RegistryChanged != null)
 				RegistryChanged (null, EventArgs.Empty);
 		}
 		

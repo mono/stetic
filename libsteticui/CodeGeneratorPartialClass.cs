@@ -4,24 +4,25 @@ using System.Reflection;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 
 namespace Stetic
 {
 	internal static class CodeGeneratorPartialClass
 	{
-		public static void GenerateProjectGuiCode (SteticCompilationUnit globalUnit, CodeNamespace globalNs, CodeTypeDeclaration globalType, GenerationOptions options, List<SteticCompilationUnit> units, params ProjectBackend[] projects)
+		public static void GenerateProjectGuiCode (SteticCompilationUnit globalUnit, CodeNamespace globalNs, CodeTypeDeclaration globalType, GenerationOptions options, List<SteticCompilationUnit> units, ProjectBackend[] projects, ArrayList warnings)
 		{
 			// Generate code for each project
 			foreach (ProjectBackend gp in projects) {
 			
 				// Generate top levels
 				foreach (Gtk.Widget w in gp.Toplevels)
-					GenerateWidgetCode (globalUnit, globalNs, options, units, w);
+					GenerateWidgetCode (globalUnit, globalNs, options, units, w, warnings);
 					
 				// Generate global action groups
 				foreach (Wrapper.ActionGroup agroup in gp.ActionGroups)
-					GenerateGlobalActionGroupCode (globalUnit, globalNs, options, units, agroup);
+					GenerateGlobalActionGroupCode (globalUnit, globalNs, options, units, agroup, warnings);
 			}
 		}
 		
@@ -55,7 +56,7 @@ namespace Stetic
 		}
 		
 		
-		static void GenerateWidgetCode (SteticCompilationUnit globalUnit, CodeNamespace globalNs, GenerationOptions options, List<SteticCompilationUnit> units, Gtk.Widget w)
+		static void GenerateWidgetCode (SteticCompilationUnit globalUnit, CodeNamespace globalNs, GenerationOptions options, List<SteticCompilationUnit> units, Gtk.Widget w, ArrayList warnings)
 		{
 			// Generate the build method
 			
@@ -72,7 +73,7 @@ namespace Stetic
 			}
 
 			Stetic.Wrapper.Widget wwidget = Stetic.Wrapper.Widget.Lookup (w);
-			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, w, new CodeThisReferenceExpression (), met.Statements, options);
+			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, w, new CodeThisReferenceExpression (), met.Statements, options, warnings);
 			CodeGenerator.BindSignalHandlers (new CodeThisReferenceExpression (), wwidget, map, met.Statements, options);
 		}
 		
@@ -89,7 +90,7 @@ namespace Stetic
 		}
 
 		
-		static void GenerateGlobalActionGroupCode (SteticCompilationUnit globalUnit, CodeNamespace globalNs, GenerationOptions options, List<SteticCompilationUnit> units, Wrapper.ActionGroup agroup)
+		static void GenerateGlobalActionGroupCode (SteticCompilationUnit globalUnit, CodeNamespace globalNs, GenerationOptions options, List<SteticCompilationUnit> units, Wrapper.ActionGroup agroup, ArrayList warnings)
 		{
 			CodeTypeDeclaration type = CreatePartialClass (globalUnit, units, options, agroup.Name);
 			
@@ -101,7 +102,7 @@ namespace Stetic
 			met.ReturnType = new CodeTypeReference (typeof(void));
 			met.Attributes = MemberAttributes.Public;
 			
-			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, agroup, new CodeThisReferenceExpression (), met.Statements, options);
+			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, agroup, new CodeThisReferenceExpression (), met.Statements, options, warnings);
 			
 			foreach (Wrapper.Action ac in agroup.Actions)
 				CodeGenerator.BindSignalHandlers (new CodeThisReferenceExpression (), ac, map, met.Statements, options);

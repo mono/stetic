@@ -4,19 +4,20 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
+using System.Collections;
 
 namespace Stetic
 {
 	internal static class CodeGenerator
 	{
-		public static void GenerateProjectCode (string file, CodeDomProvider provider, GenerationOptions options, params ProjectBackend[] projects)
+		public static void GenerateProjectCode (string file, CodeDomProvider provider, GenerationOptions options, ProjectBackend[] projects)
 		{
-			SteticCompilationUnit[] units = GenerateProjectCode (options, projects);
+			CodeGenerationResult res = GenerateProjectCode (options, projects);
 			
 			ICodeGenerator gen = provider.CreateGenerator ();
 			string basePath = Path.GetDirectoryName (file);
 			
-			foreach (SteticCompilationUnit unit in units) {
+			foreach (SteticCompilationUnit unit in res.Units) {
 				string fname;
 				if (unit.Name.Length == 0)
 					fname = file;
@@ -31,8 +32,10 @@ namespace Stetic
 			}
 		}
 		
-		public static SteticCompilationUnit[] GenerateProjectCode (GenerationOptions options, params ProjectBackend[] projects)
+		public static CodeGenerationResult GenerateProjectCode (GenerationOptions options, ProjectBackend[] projects)
 		{
+			ArrayList warningList = new ArrayList ();
+			
 			List<SteticCompilationUnit> units = new List<SteticCompilationUnit> ();
 			SteticCompilationUnit globalUnit = new SteticCompilationUnit ("");
 			units.Add (globalUnit);
@@ -65,13 +68,14 @@ namespace Stetic
 				if (gp.IconFactory.Icons.Count > 0)
 					gp.IconFactory.GenerateBuildCode (initContext);
 			}
+			warningList.AddRange (initContext.Warnings);
 					
 			// Generate the code
 			
 			if (options.UsePartialClasses)
-				CodeGeneratorPartialClass.GenerateProjectGuiCode (globalUnit, globalNs, globalType, options, units, projects);
+				CodeGeneratorPartialClass.GenerateProjectGuiCode (globalUnit, globalNs, globalType, options, units, projects, warningList);
 			else
-				CodeGeneratorInternalClass.GenerateProjectGuiCode (globalUnit, globalNs, globalType, options, units, projects);
+				CodeGeneratorInternalClass.GenerateProjectGuiCode (globalUnit, globalNs, globalType, options, units, projects, warningList);
 
 			GenerateProjectActionsCode (globalNs, options, projects);
 			
@@ -103,7 +107,7 @@ namespace Stetic
 				);
 				initMethod.Statements.Insert (0, initCondition);
 			}
-			return units.ToArray ();
+			return new CodeGenerationResult (units.ToArray (), (string[]) warningList.ToArray (typeof(string)));
 		}
 		
 		internal static void BindSignalHandlers (CodeExpression targetObjectVar, ObjectWrapper wrapper, Stetic.WidgetMap map, CodeStatementCollection statements, GenerationOptions options)
@@ -323,22 +327,24 @@ namespace Stetic
 			}
 		}
 		
-		public static WidgetMap GenerateCreationCode (CodeNamespace cns, CodeTypeDeclaration type, Gtk.Widget w, CodeExpression widgetVarExp, CodeStatementCollection statements, GenerationOptions options)
+		public static WidgetMap GenerateCreationCode (CodeNamespace cns, CodeTypeDeclaration type, Gtk.Widget w, CodeExpression widgetVarExp, CodeStatementCollection statements, GenerationOptions options, ArrayList warnings)
 		{
 			statements.Add (new CodeCommentStatement ("Widget " + w.Name));
 			GeneratorContext ctx = new ProjectGeneratorContext (cns, type, statements, options);
 			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (w);
 			ctx.GenerateCreationCode (ww, widgetVarExp);
 			ctx.EndGeneration ();
+			warnings.AddRange (ctx.Warnings);
 			return ctx.WidgetMap;
 		}
 		
-		public static WidgetMap GenerateCreationCode (CodeNamespace cns, CodeTypeDeclaration type, Wrapper.ActionGroup grp, CodeExpression groupVarExp, CodeStatementCollection statements, GenerationOptions options)
+		public static WidgetMap GenerateCreationCode (CodeNamespace cns, CodeTypeDeclaration type, Wrapper.ActionGroup grp, CodeExpression groupVarExp, CodeStatementCollection statements, GenerationOptions options, ArrayList warnings)
 		{
 			statements.Add (new CodeCommentStatement ("Action group " + grp.Name));
 			GeneratorContext ctx = new ProjectGeneratorContext (cns, type, statements, options);
 			ctx.GenerateCreationCode (grp, groupVarExp);
 			ctx.EndGeneration ();
+			warnings.AddRange (ctx.Warnings);
 			return ctx.WidgetMap;
 		}
 	}
@@ -418,6 +424,7 @@ namespace Stetic
 		
 		public string Name {
 			get { return name; }
+			internal set { name = value; }
 		}
 	}
 }

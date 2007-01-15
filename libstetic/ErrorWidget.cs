@@ -12,19 +12,19 @@ namespace Stetic
 		readonly string className;
 		readonly Exception exc;
 		
-		public ErrorWidget (Exception ex)
+		public ErrorWidget (Exception ex, string id)
 		{
 			exc = ex;
-			Init (Catalog.GetString ("Load Error:") + " " + ex.Message);
+			Init (Catalog.GetString ("Load Error:") + " " + ex.Message, id);
 		}
 		
-		public ErrorWidget (string className)
+		public ErrorWidget (string className, string id)
 		{
 			this.className = className;
-			Init (Catalog.GetString ("Unknown widget:") + " " + className);
+			Init (Catalog.GetString ("Unknown widget:") + " " + className, id);
 		}
 		
-		void Init (string message)
+		void Init (string message, string id)
 		{
 			Gtk.Label lab = new Gtk.Label ();
 			lab.Markup = "<b><span foreground='red'>" + message + "</span></b>";
@@ -32,6 +32,8 @@ namespace Stetic
 			Add (lab);
 			this.ShadowType = Gtk.ShadowType.In;
 			ShowAll ();
+			if (id != null && id.Length > 0)
+				Name = id;
 		}
 		
 		public string ClassName {
@@ -62,13 +64,28 @@ namespace Stetic
 			return (XmlElement) writer.XmlDocument.ImportNode (elementData, true);
 		}
 		
-		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression varExp)
+		public override string WrappedTypeName {
+			get {
+				ErrorWidget ew = (ErrorWidget) Wrapped;
+				return ew.ClassName;
+			}
+		}
+		
+		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
 			ErrorWidget ew = (ErrorWidget) Wrapped;
+			string msg;
 			if (ew.Exception != null)
-				throw new InvalidOperationException ("Can't generate code for an invalid widget. The widget failed to load: " + ew.Exception.Message);
+				msg = "Could not generate code for an invalid widget. The widget failed to load: " + ew.Exception.Message + ". The generated code may be invalid.";
 			else
-				throw new InvalidOperationException ("Can't generate code for unknown type: " + ew.ClassName);
+				msg = "Could not generate code for widgets of type: " + ew.ClassName + ". The widget could not be found in any referenced library. The generated code may be invalid.";
+			
+			if (ctx.Options.FailForUnknownWidgets) {
+				throw new InvalidOperationException (msg);
+			} else {
+				ctx.ReportWarning (msg);
+				return new CodePrimitiveExpression (null);
+			}
 		}
 	}
 }

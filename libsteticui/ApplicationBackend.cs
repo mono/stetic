@@ -113,7 +113,7 @@ namespace Stetic
 			return p;
 		}
 		
-		public SteticCompilationUnit[] GenerateProjectCode (GenerationOptions options, ProjectBackend[] projects)
+		public CodeGenerationResult GenerateProjectCode (GenerationOptions options, ProjectBackend[] projects)
 		{
 			return CodeGenerator.GenerateProjectCode (options, projects);
 		}
@@ -125,60 +125,63 @@ namespace Stetic
 		
 		public bool UpdateLibraries (ArrayList libraries, bool allowBackendRestart, bool forceUnload)
 		{
-			libraries.Add (Registry.CoreWidgetLibrary.Name);
-			
-			if (!Registry.ReloadWidgetLibraries () && allowBackendRestart)
-				return false;
-			
-			bool updated = false;
-			
-			// Check which libraries need to be unloaded
-			
-			foreach (WidgetLibrary alib in Registry.RegisteredWidgetLibraries) {
-				if (!libraries.Contains (alib.Name)) {
-					if (forceUnload && allowBackendRestart)
-						return false;
-					Registry.UnregisterWidgetLibrary (alib);
-					updated = true;
-				}
-			}
-			
-			// Load new libraries
-			
-			foreach (string s in libraries) {
-				if (Registry.IsRegistered (s))
-					continue;
-					
-				// Try loading the library using the resolved delegate
-				WidgetLibrary alib = null;
-				if (widgetLibraryResolver != null)
-					alib = widgetLibraryResolver (s);
-				if (alib == null) {
-					try {
-						alib = new AssemblyWidgetLibrary (s);
-					} catch {
-						// FIXME: handle the error, but keep loading.
+			try {
+				Registry.BeginChangeSet ();
+				
+				libraries.Add (Registry.CoreWidgetLibrary.Name);
+				
+				if (!Registry.ReloadWidgetLibraries () && allowBackendRestart)
+					return false;
+				
+				bool updated = false;
+				
+				// Check which libraries need to be unloaded
+				
+				foreach (WidgetLibrary alib in Registry.RegisteredWidgetLibraries) {
+					if (!libraries.Contains (alib.Name)) {
+						if (forceUnload && allowBackendRestart)
+							return false;
+						Registry.UnregisterWidgetLibrary (alib);
+						updated = true;
 					}
 				}
-				if (alib != null) {
-					try {
-						Registry.RegisterWidgetLibrary (alib);
-					} catch (Exception ex) {
-						// Catch errors when loading a library to avoid aborting
-						// the whole update method. After all, that's not a fatal
-						// error (some widgets just won't be shown).
-						// FIXME: return the error somewhere
-						Console.WriteLine (ex);
+				
+				// Load new libraries
+				
+				foreach (string s in libraries) {
+					if (Registry.IsRegistered (s))
+						continue;
+						
+					// Try loading the library using the resolved delegate
+					WidgetLibrary alib = null;
+					if (widgetLibraryResolver != null)
+						alib = widgetLibraryResolver (s);
+					if (alib == null) {
+						try {
+							alib = new AssemblyWidgetLibrary (s);
+						} catch {
+							// FIXME: handle the error, but keep loading.
+						}
 					}
-					updated = true;
+					if (alib != null) {
+						try {
+							Registry.RegisterWidgetLibrary (alib);
+						} catch (Exception ex) {
+							// Catch errors when loading a library to avoid aborting
+							// the whole update method. After all, that's not a fatal
+							// error (some widgets just won't be shown).
+							// FIXME: return the error somewhere
+							Console.WriteLine (ex);
+						}
+						updated = true;
+					}
 				}
+				
+				return true;
 			}
-			
-			// Update the palette
-			if (updated && paletteWidget != null)
-				paletteWidget.WidgetLibraries = GetActiveLibraries ();
-			
-			return true;
+			finally {
+				Registry.EndChangeSet ();
+			}
 		}
 
 

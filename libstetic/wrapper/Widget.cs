@@ -449,17 +449,17 @@ namespace Stetic.Wrapper {
 		protected void ReadActionGroups (ObjectReader reader, XmlElement elem)
 		{
 			if (reader.Format == FileFormat.Native) {
+				if (actionGroups == null) {
+					actionGroups = new ActionGroupCollection ();
+					actionGroups.SetOwner (this);
+					actionGroups.ActionGroupAdded += OnGroupAdded;
+					actionGroups.ActionGroupRemoved += OnGroupRemoved;
+					actionGroups.ActionGroupChanged += OnGroupChanged;
+				} else
+					actionGroups.Clear ();
 				foreach (XmlElement groupElem in elem.SelectNodes ("action-group")) {
 					ActionGroup actionGroup = new ActionGroup ();
 					actionGroup.Read (reader, groupElem);
-					if (actionGroups == null) {
-						actionGroups = new ActionGroupCollection ();
-						actionGroups.SetOwner (this);
-						actionGroups.ActionGroupAdded += OnGroupAdded;
-						actionGroups.ActionGroupRemoved += OnGroupRemoved;
-						actionGroups.ActionGroupChanged += OnGroupChanged;
-					} else
-						actionGroups.Clear ();
 					actionGroups.Add (actionGroup); 
 				}
 			}
@@ -470,6 +470,7 @@ namespace Stetic.Wrapper {
 			if (Wrapped != null) {
 				// There is already an instance. Load the default values.
 				this.ClassDescriptor.ResetInstance (Wrapped);
+				Signals.Clear ();
 			}
 			
 			if (reader.Format == FileFormat.Native)

@@ -1,3 +1,22 @@
+2007-01-15  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ApplicationBackend.cs, libstetic/Registry.cs: Allow
+	  grouping several changes in the registry in a single transaction.
+	* libsteticui/CodeGenerator.cs, libsteticui/Application.cs,
+	  libsteticui/CodeGeneratorInternalClass.cs,
+	  libsteticui/CodeGeneratorPartialClass.cs,
+	  libsteticui/CodeGenerationResult.cs, libstetic/ObjectWrapper.cs,
+	  libstetic/GeneratorContext.cs, libstetic/ErrorWidget.cs,
+	  stetic/Stetic.cs: Added an option to allow generating code even
+	  when not all referenced widgets are available. Added support for
+	  warnings in the code generation methods, so the caller can get
+	  information about what went wrong during the generation process.
+	* libsteticui/Makefile.am: Added CodeGenerationResult.
+	* libstetic/wrapper/Widget.cs: Clear the signal list when reloading a
+	  widget. Fixed action group read code.
+	* libstetic/wrapper/Table.cs: Always return the children of the table
+	  in the same order, to avoid unneeded changes in the diff files.
+
 2007-01-12  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ContainerUndoRedoManager.cs: Added missing file.

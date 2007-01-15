@@ -14,6 +14,7 @@ namespace Stetic
 		WidgetMap map;
 		CodeStatementCollection statements;
 		GenerationOptions options;
+		ArrayList warnings = new ArrayList ();
 		
 		public GeneratorContext (CodeNamespace cns, string idPrefix, CodeStatementCollection statements, GenerationOptions options)
 		{
@@ -36,6 +37,15 @@ namespace Stetic
 			get { return options; }
 		}
 		
+		public string[] Warnings {
+			get { return (string[]) warnings.ToArray (typeof(string)); }
+		}
+		
+		public void ReportWarning (string s)
+		{
+			warnings.Add (s);
+		}
+		
 		public string NewId ()
 		{
 			return idPrefix + (++n);
@@ -43,7 +53,8 @@ namespace Stetic
 		
 		public CodeExpression GenerateNewInstanceCode (Wrapper.Widget widget)
 		{
-			CodeExpression var = GenerateInstanceExpression (widget, widget.GenerateObjectCreation (this));
+			CodeExpression exp = widget.GenerateObjectCreation (this);
+			CodeExpression var = GenerateInstanceExpression (widget, exp);
 			GenerateBuildCode (widget, var);
 			return var;
 		}
@@ -219,6 +230,7 @@ namespace Stetic
 		bool partialClasses;
 		bool generateEmptyBuildMethod;
 		bool generateSingleFile = true;
+		bool failForUnknownWidgets = false;
 		string path;
 		string globalNamespace = "Stetic";
 		
@@ -250,6 +262,11 @@ namespace Stetic
 		public string GlobalNamespace {
 			get { return globalNamespace; }
 			set { globalNamespace = value; }
+		}
+		
+		public bool FailForUnknownWidgets {
+			get { return failForUnknownWidgets; }
+			set { failForUnknownWidgets = value; }
 		}
 	}
 }

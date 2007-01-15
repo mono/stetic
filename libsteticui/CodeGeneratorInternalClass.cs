@@ -6,6 +6,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using System.Collections;
 
 namespace Stetic
 {
@@ -29,7 +30,7 @@ namespace Stetic
 			);		
 		}
 		
-		public static void GenerateProjectGuiCode (SteticCompilationUnit globalUnit, CodeNamespace globalNs, CodeTypeDeclaration globalType, GenerationOptions options, List<SteticCompilationUnit> units, params ProjectBackend[] projects)
+		public static void GenerateProjectGuiCode (SteticCompilationUnit globalUnit, CodeNamespace globalNs, CodeTypeDeclaration globalType, GenerationOptions options, List<SteticCompilationUnit> units, ProjectBackend[] projects, ArrayList warnings)
 		{
 			bool multiProject = projects.Length > 1;
 			
@@ -117,7 +118,7 @@ namespace Stetic
 					);
 					widgetCol.Add (cond);
 					
-					GenerateComponentCode (w, globalUnit, globalNs, cobj, cond.TrueStatements, globalType, options, units, ids);
+					GenerateComponentCode (w, globalUnit, globalNs, cobj, cond.TrueStatements, globalType, options, units, ids, warnings);
 					
 					widgetCol = cond.FalseStatements;
 				}
@@ -133,7 +134,7 @@ namespace Stetic
 					);
 					widgetCol.Add (cond);
 					
-					GenerateComponentCode (agroup, globalUnit, globalNs, cobj, cond.TrueStatements, globalType, options, units, ids);
+					GenerateComponentCode (agroup, globalUnit, globalNs, cobj, cond.TrueStatements, globalType, options, units, ids, warnings);
 					
 					widgetCol = cond.FalseStatements;
 				}
@@ -172,7 +173,7 @@ namespace Stetic
 			return met;
 		}
 		
-		static void GenerateComponentCode (object component, SteticCompilationUnit globalUnit, CodeNamespace globalNs, CodeExpression cobj, CodeStatementCollection statements, CodeTypeDeclaration globalType, GenerationOptions options, List<SteticCompilationUnit> units, CodeIdentifiers ids)
+		static void GenerateComponentCode (object component, SteticCompilationUnit globalUnit, CodeNamespace globalNs, CodeExpression cobj, CodeStatementCollection statements, CodeTypeDeclaration globalType, GenerationOptions options, List<SteticCompilationUnit> units, CodeIdentifiers ids, ArrayList warnings)
 		{
 			Gtk.Widget widget = component as Gtk.Widget;
 			Wrapper.Widget wwidget = Stetic.Wrapper.Widget.Lookup (widget);
@@ -200,10 +201,10 @@ namespace Stetic
 			Stetic.WidgetMap map;
 			
 			if (widget != null) {
-				map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, globalType, widget, targetObjectVar, met.Statements, options);
+				map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, globalType, widget, targetObjectVar, met.Statements, options, warnings);
 				CodeGenerator.BindSignalHandlers (targetObjectVar, wwidget, map, met.Statements, options);
 			} else {
-				map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, globalType, agroup, targetObjectVar, met.Statements, options);
+				map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, globalType, agroup, targetObjectVar, met.Statements, options, warnings);
 				foreach (Wrapper.Action ac in agroup.Actions)
 					CodeGenerator.BindSignalHandlers (targetObjectVar, ac, map, met.Statements, options);
 			}

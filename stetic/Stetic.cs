@@ -110,9 +110,11 @@ namespace Stetic {
 				projects [i - n] = SteticApp.LoadProject (args [i]);
 
 			CodeDomProvider provider = GetProvider (language);
-			string[] files = SteticApp.GenerateProjectCode (file, "Stetic", provider, ops, projects);
-			foreach (string f in files)
-				Console.WriteLine ("Generated file: " + f);
+			CodeGenerationResult res = SteticApp.GenerateProjectCode (file, "Stetic", provider, ops, projects);
+			foreach (SteticCompilationUnit f in res.Units)
+				Console.WriteLine ("Generated file: " + f.Name);
+			foreach (string s in res.Warnings)
+				Console.WriteLine ("WARNING: " + s);
 			return 0;
 		}
 		

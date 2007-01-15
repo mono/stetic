@@ -299,6 +299,24 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		public override IEnumerable GladeChildren {
+			get {
+				ArrayList list = new ArrayList ();
+				foreach (object ob in base.GladeChildren)
+					list.Add (ob);
+				list.Sort (new NameComparer ());
+				return list;
+			}
+		}
+		
+		class NameComparer: IComparer
+		{
+			public int Compare (object x, object y)
+			{
+				return string.Compare (((Gtk.Widget)x).Name, ((Gtk.Widget)y).Name);
+			}
+		}
+		
 		internal void InsertRowBefore (Gtk.Widget context)
 		{
 			Gtk.Table.TableChild tc = table[context] as Gtk.Table.TableChild;
