@@ -1,5 +1,9 @@
 2007-01-15  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/UndoQueue.cs: Removed debug messages.
+
+2007-01-15  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ApplicationBackend.cs, libstetic/Registry.cs: Allow
 	  grouping several changes in the registry in a single transaction.
 	* libsteticui/CodeGenerator.cs, libsteticui/Application.cs,

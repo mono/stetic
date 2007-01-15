@@ -165,7 +165,7 @@ namespace Stetic
 			ObjectWrapperUndoRedoChange firstChange = null;
 			ObjectWrapperUndoRedoChange lastChange = null;
 			
-			Console.WriteLine ("** UNDO CHECKPOINT: {0} objects", obs.Length);
+//			Console.WriteLine ("** UNDO CHECKPOINT: {0} objects", obs.Length);
 			
 			foreach (ObjectWrapper ob in obs) {
 			
@@ -175,8 +175,8 @@ namespace Stetic
 				if (diff == null)	// No differences
 					continue;
 				
-				Console.WriteLine ("ADDCHANGE " + ob + " uid:" + ob.UndoId);
-				PrintPatch (diff);
+//				Console.WriteLine ("ADDCHANGE " + ob + " uid:" + ob.UndoId);
+//				PrintPatch (diff);
 				
 				if (ob.UndoId == null || ob.UndoId.Length == 0)
 					throw new InvalidOperationException ("Object of type '" + ob.GetType () + "' does not have an undo id.");
@@ -224,8 +224,8 @@ namespace Stetic
 		
 		ObjectWrapperUndoRedoChange ApplyDiff (string id, object diff)
 		{
-			Console.WriteLine ("** APPLYING DIFF: uid:" + id);
-			PrintPatch (diff);
+//			Console.WriteLine ("** APPLYING DIFF: uid:" + id);
+//			PrintPatch (diff);
 			
 			ObjectWrapper ww = rootObject.FindObjectByUndoId (id);
 			if (ww == null) {
