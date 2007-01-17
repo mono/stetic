@@ -1,5 +1,11 @@
 2007-01-17  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/EnumDescriptor.cs: Avoid importing enum values which have
+	  not been declared in the xml file. Shoud fix bugs 80007 and 80471.
+	* libstetic/wrapper/objects.xml: Removed missing property.
+
+2007-01-17  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ApplicationBackend.cs: Fixed some warnings.
 	* libsteticui/WidgetDesignerBackend.cs,
 	  libsteticui/WidgetEditSession.cs, libstetic/IDesignArea.cs,

@@ -168,7 +168,6 @@
 		<property name="Title" init-with-name="true" translatable="true" />
 		<property name="Icon" />
 		<property name="Type" glade-override="true" internal="true" />
-		<property name="TypeVisible" internal="true"/>
 		<property name="TypeHint" glade-override="true" />
 		<property name="WindowPosition" />
 		<property name="Modal" glade-override="true" />

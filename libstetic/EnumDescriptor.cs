@@ -33,11 +33,11 @@ namespace Stetic {
 			values = new Hashtable ();
 
 			Array enumvalues = Enum.GetValues (enumType);
-			values_array = new Enum[enumvalues.Length];
+			ArrayList list = new ArrayList ();
 			Hashtable evalues = new Hashtable ();
 			for (int i = 0; i < enumvalues.Length; i++) {
 				Enum value = (Enum)Enum.ToObject (enumType, (int)enumvalues.GetValue (i));
-				values_array[i] = value;
+				list.Add (value);
 				evalues[Enum.GetName (enumType, value)] = value;
 			}
 
@@ -49,7 +49,14 @@ namespace Stetic {
 				values[value] = new EnumValue (value,
 							       valueElem.GetAttribute ("label"),
 							       valueElem.GetAttribute ("description"));
+				evalues.Remove (name);
 			}
+			
+			// Remove from the array the values not declared in the xml file
+			foreach (object val in evalues.Values)
+				list.Remove (val);
+
+			values_array = (Enum[]) list.ToArray (typeof(Enum));
 		}
 		
 		public string Name {
