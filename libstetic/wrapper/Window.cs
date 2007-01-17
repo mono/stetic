@@ -120,5 +120,11 @@ namespace Stetic.Wrapper {
 				);
 			}
 		}
+		
+		protected override void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
+		{
+			if (prop.Name != "Type")
+				base.GeneratePropertySet (ctx, var, prop);
+		}
 	}
 }

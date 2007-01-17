@@ -145,7 +145,7 @@ namespace Stetic.Wrapper {
 				case ButtonType.Custom:
 					button.UseStock = false;
 					if (button.Child != null)
-						ReplaceChild (button.Child, CreatePlaceholder ());
+						ReplaceChild (button.Child, CreatePlaceholder (), true);
 					break;
 				}
 			}

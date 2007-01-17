@@ -79,7 +79,7 @@ namespace Stetic {
 				return;
 
 			using (wrapper.UndoManager.AtomicChange) {
-				parent.ReplaceChild (target, wrapper.Wrapped);
+				parent.ReplaceChild (target, wrapper.Wrapped, true);
 			}
 			target = null;
 		}

@@ -18,7 +18,7 @@ namespace Stetic.Wrapper {
 				align.LeftPadding = 12;
 				Container align_wrapper = (Container)ObjectWrapper.Create (proj, align);
 				align_wrapper.AddPlaceholder ();
-				ReplaceChild (frame.Child, (Gtk.Widget)align_wrapper.Wrapped);
+				ReplaceChild (frame.Child, (Gtk.Widget)align_wrapper.Wrapped, true);
 			}
 
 			if (frame.LabelWidget != null)

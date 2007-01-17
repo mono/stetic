@@ -133,7 +133,7 @@ namespace Stetic {
 					designer.BorderWidth = 3;
 					designer.PackStart (toolbar, false, false, 0);
 					designer.PackStart (widget, true, true, 3);
-					widget.DesignArea.SetSelection (gproject.Selection, gproject.Selection);
+					widget.DesignArea.SetSelection (gproject.Selection, gproject.Selection, false);
 					widget.SelectionChanged += OnSelectionChanged;
 				
 				}

@@ -609,7 +609,7 @@ namespace Stetic {
 		protected virtual void OnSignalChanged (SignalChangedEventArgs args)
 		{
 			if (frontend != null)
-				frontend.NotifySignalChanged (Component.GetSafeReference (args.Wrapper), ((Gtk.Widget)args.Wrapper.Wrapped).Name, args.OldSignal, args.Signal);
+				frontend.NotifySignalChanged (Component.GetSafeReference (args.Wrapper), null, args.OldSignal, args.Signal);
 			if (SignalChanged != null)
 				SignalChanged (this, args);
 		}

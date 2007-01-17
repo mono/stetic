@@ -14,7 +14,7 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 			foreach (Gtk.Widget child in buttonbox.Children) {
 				if (child is Placeholder)
-					ReplaceChild (child, NewButton ());
+					ReplaceChild (child, NewButton (), true);
 			}
 		}
 		

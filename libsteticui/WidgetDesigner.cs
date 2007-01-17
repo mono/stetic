@@ -90,7 +90,11 @@ namespace Stetic
 				rootWidget = app.GetComponent (session.RootWidget, null, null);
 			} catch (Exception ex) {
 				Console.WriteLine (ex);
-				AddCustomWidget (new Gtk.Label (ex.Message));
+				Gtk.Label lab = new Gtk.Label ();
+				lab.Text = Mono.Unix.Catalog.GetString ("The desginer could not be loaded.") + "\n\n" + ex.Message;
+				lab.Wrap = true;
+				lab.WidthRequest = 400;
+				AddCustomWidget (lab);
 				session = null;
 			}
 		}

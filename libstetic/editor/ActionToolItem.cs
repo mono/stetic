@@ -480,7 +480,7 @@ namespace Stetic.Editor
 			EndEditing ();
 		}
 		
-		void HandleItemDrag (Gdk.EventMotion evt)
+		void HandleItemDrag (Gdk.EventMotion evt, int dx, int dy)
 		{
 			ActionPaletteItem item = new ActionPaletteItem (node);
 			DND.Drag (parentMenu, evt, item);

@@ -366,13 +366,20 @@ namespace Stetic
 		
 		public IObjectSelection SetSelection (Gtk.Widget widget, object obj)
 		{
+			return SetSelection (widget, obj, true);
+		}
+		
+		public IObjectSelection SetSelection (Gtk.Widget widget, object obj, bool allowDrag)
+		{
 			if (currentObjectSelection != null) {
 				currentObjectSelection.Dispose ();
 				currentObjectSelection = null;
 			}
 
-			if (widget != null)
+			if (widget != null) {
 				currentObjectSelection = new ObjectSelection (this, widget, obj);
+				currentObjectSelection.AllowDrag = allowDrag;
+			}
 			else
 				currentObjectSelection = null;
 			
@@ -736,11 +743,13 @@ namespace Stetic
 	
 	class SelectionHandleBox
 	{
-		const int selectionHandleSize = 6;
+		const int selectionHandleSize = 4;
+		const int topSelectionHandleSize = 8;
 		public const int selectionLineWidth = 2;
 		
 		ArrayList selection = new ArrayList ();
 		Gdk.Rectangle allocation;
+		SelectionHandlePart dragHandlePart;
 		public ObjectSelection ObjectSelection;
 		
 		public SelectionHandleBox (Gtk.Widget parent)
@@ -762,6 +771,9 @@ namespace Stetic
 			selection.Add (new SelectionHandlePart (BoxFill.Box, BoxPos.Start, BoxPos.Center, -selectionHandleSize, -selectionHandleSize/2, BoxPos.Start, BoxPos.Center, 0, selectionHandleSize/2));
 			selection.Add (new SelectionHandlePart (BoxFill.Box, BoxPos.End, BoxPos.Center, 0, -selectionHandleSize/2, BoxPos.End, BoxPos.Center, selectionHandleSize, selectionHandleSize/2));
 			
+			dragHandlePart = new SelectionHandlePart (BoxFill.Box, BoxPos.Center, BoxPos.Start, -topSelectionHandleSize/2, -topSelectionHandleSize, BoxPos.Center, BoxPos.Start, topSelectionHandleSize/2, 0);
+			selection.Add (dragHandlePart);
+			
 			foreach (SelectionHandlePart s in selection) {
 				s.Parent = parent;
 				s.ParentBox = this;
@@ -772,6 +784,7 @@ namespace Stetic
 		{
 			foreach (Gtk.Widget s in selection)
 				s.Show ();
+			dragHandlePart.Visible = (ObjectSelection != null && ObjectSelection.AllowDrag);
 		}
 		
 		public void Hide ()
@@ -782,12 +795,16 @@ namespace Stetic
 		
 		public void Reposition (Gdk.Rectangle rect)
 		{
-			allocation = new Gdk.Rectangle ();
+			bool firstRect = true;
 			
 			foreach (SelectionHandlePart s in selection) {
 				s.Reposition (rect);
 				Gdk.Rectangle r = s.Allocation;
-				allocation = allocation.Union (r);
+				if (firstRect) {
+					allocation = r;
+					firstRect = false;
+				} else
+					allocation = allocation.Union (r);
 			}
 		}
 		
@@ -817,6 +834,8 @@ namespace Stetic
 		BoxFill fill;
 		public SelectionHandleBox ParentBox;
 		int clickX, clickY;
+		int localClickX, localClickY;
+		int ox, oy;
 		
 		public SelectionHandlePart (BoxFill fill, BoxPos hpos, BoxPos vpos, int x, int y, BoxPos hposEnd, BoxPos vposEnd, int xEnd, int yEnd)
 		{
@@ -846,6 +865,8 @@ namespace Stetic
 			pyEnd += yEnd;
 			
 			Allocation = new Gdk.Rectangle (px, py, pxEnd - px, pyEnd - py);
+			ox = rect.X;
+			oy = rect.Y;
 		}
 		
 		void CalcPos (Gdk.Rectangle rect, BoxPos hp, BoxPos vp, out int px, out int py)
@@ -899,6 +920,8 @@ namespace Stetic
 			if (evb.Type == Gdk.EventType.ButtonPress && evb.Button == 1) {
 				clickX = (int)evb.XRoot;
 				clickY = (int)evb.YRoot;
+				localClickX = (int) evb.X;
+				localClickY = (int) evb.Y;
 			}
 			return true;
 		}
@@ -911,8 +934,11 @@ namespace Stetic
 			if (!Gtk.Drag.CheckThreshold (this, clickX, clickY, (int)evm.XRoot, (int)evm.YRoot))
 				return false;
 
-			if (ParentBox.ObjectSelection != null)
-				ParentBox.ObjectSelection.FireDrag (evm);
+			if (ParentBox.ObjectSelection != null && ParentBox.ObjectSelection.AllowDrag) {
+				int dx = Allocation.X - ox + localClickX;
+				int dy = Allocation.Y - oy + localClickY;
+				ParentBox.ObjectSelection.FireDrag (evm, dx, dy);
+			}
 
 			return true;
 		}
@@ -923,6 +949,7 @@ namespace Stetic
 		ResizableFixed box;
 		Gtk.Widget widget;
 		object dataObject;
+		bool allowDrag = true;
 		
 		public ObjectSelection (ResizableFixed box, Gtk.Widget widget, object dataObject)
 		{
@@ -950,10 +977,15 @@ namespace Stetic
 				Disposed (this, EventArgs.Empty);
 		}
 		
-		internal void FireDrag (Gdk.EventMotion evt)
+		internal void FireDrag (Gdk.EventMotion evt, int dx, int dy)
 		{
 			if (Drag != null)
-				Drag (evt);
+				Drag (evt, dx, dy);
+		}
+		
+		public bool AllowDrag {
+			get { return allowDrag; }
+			set { allowDrag = value; }
 		}
 		
 		public event DragDelegate Drag;

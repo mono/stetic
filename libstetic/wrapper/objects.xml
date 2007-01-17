@@ -162,12 +162,13 @@
     <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
 
     <object type="Gtk.Window,gtk-sharp" wrapper="Stetic.Wrapper.Window"
-	    label="Window" icon="window.png" palette-category="window" init-properties="Title">
+	    label="Window" icon="window.png" palette-category="window" init-properties="Type">
 	<itemgroups>
 	    <itemgroup label="Window Properties">
 		<property name="Title" init-with-name="true" translatable="true" />
 		<property name="Icon" />
-		<property name="Type" glade-override="true" />
+		<property name="Type" glade-override="true" internal="true" />
+		<property name="TypeVisible" internal="true"/>
 		<property name="TypeHint" glade-override="true" />
 		<property name="WindowPosition" />
 		<property name="Modal" glade-override="true" />
@@ -823,6 +824,30 @@
 	</signals>
     </object>
 
+    <object type="Gtk.Fixed,gtk-sharp" wrapper="Stetic.Wrapper.Fixed"
+	    label="Fixed" icon="fixed.png" palette-category="container">
+	<itemgroups>
+	    <itemgroup label="Fixed Properties">
+		<property name="HasWindow" />
+	    </itemgroup>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container.Commands" />
+	</itemgroups>
+	<signals>
+	    <itemgroup ref="Gtk.Widget" />
+	    <itemgroup ref="Gtk.Container" />
+	</signals>
+    </object>
+
+    <object type="Gtk.Fixed+FixedChild,gtk-sharp" wrapper="Stetic.Wrapper.Fixed+FixedChild">
+	<itemgroups>
+	    <itemgroup label="Fixed Child Layout">
+		<property name="X" />
+		<property name="Y" />
+	    </itemgroup>
+	</itemgroups>
+    </object>
+    
     <object type="Gtk.FontButton,gtk-sharp" wrapper="Stetic.Wrapper.FontButton"
 	    label="Font Button" icon="fontbutton.png" palette-category="widget">
 	<itemgroups>

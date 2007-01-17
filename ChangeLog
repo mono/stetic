@@ -1,3 +1,38 @@
+2007-01-17  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ApplicationBackend.cs: Fixed some warnings.
+	* libsteticui/WidgetDesignerBackend.cs,
+	  libsteticui/WidgetEditSession.cs, libstetic/IDesignArea.cs,
+	  libstetic/editor/ActionMenuItem.cs,
+	  libstetic/editor/ActionToolItem.cs: Provide information about the
+	  drag hot point when firing the drag event. Allow enabling/disabling
+	  drag support.
+	* libsteticui/ProjectBackend.cs: Fix cast exception when changing
+	  signals in actions.
+	* libsteticui/Clipboard.cs, libstetic/wrapper/Button.cs,
+	  libstetic/wrapper/Frame.cs, libstetic/wrapper/ButtonBox.cs: User
+	  the new ReplaceChild overload.
+	* libsteticui/WidgetDesigner.cs: Improve error message when the
+	  designet can't be loaded.
+	* libsteticui/Makefile.am, configure.in, stetic/Makefile.am: Build
+	  libstetic with mcs instead of gmcs, since that assembly may need to
+	  be linked with widget libraries based on .net 1.1.
+	* libstetic/wrapper/pixmaps/fixed.png: New bitmap for Gtk.Fixed.
+	* libstetic/wrapper/Container.cs: Added protected methods for notifying
+	  the add/remove child event, since some containers don't fire them.
+	  Added ReplaceChild overload which will explicitely destroy the
+	  replaced widget. Don't allow dragging top level widgets.
+	* libstetic/wrapper/Fixed.cs, libstetic/Makefile.am: Implemented
+	  support for Gtk.Fixed.
+	* libstetic/wrapper/Window.cs: Don't generate code for the Type
+	  property, since it's read-only.
+	* libstetic/wrapper/objects.xml: Implemented support for Gtk.Fixed.
+	  Hide the Type property, since code for that property can't be
+	  generated (it must be provided by the user in the window
+	  constructor.
+	* libstetic/DND.cs: Added properties for getting the hot drag point
+	  when dragging a widget.
+
 2007-01-15  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/UndoQueue.cs: Removed debug messages.

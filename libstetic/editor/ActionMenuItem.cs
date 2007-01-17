@@ -613,7 +613,7 @@ namespace Stetic.Editor
 			parentMenu.OpenSubmenu = null;
 		}
 		
-		void HandleItemDrag (Gdk.EventMotion evt)
+		void HandleItemDrag (Gdk.EventMotion evt, int dx, int dy)
 		{
 			ActionPaletteItem item = new ActionPaletteItem (node);
 			DND.Drag (parentMenu.Widget, evt, item);

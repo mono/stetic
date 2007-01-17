@@ -110,6 +110,7 @@ libstetic_dll_sources =			\
 	wrapper/Dialog.cs		\
 	wrapper/Entry.cs		\
 	wrapper/Expander.cs		\
+	wrapper/Fixed.cs		\
 	wrapper/FontButton.cs		\
 	wrapper/FontSelectionDialog.cs	\
 	wrapper/Frame.cs		\

@@ -6,6 +6,7 @@ namespace Stetic
 	public interface IDesignArea
 	{
 		IObjectSelection SetSelection (Gtk.Widget widget, object selectedInstance);
+		IObjectSelection SetSelection (Gtk.Widget widget, object selectedInstance, bool allowDrag);
 		void ResetSelection (Gtk.Widget widget);
 		bool IsSelected (Gtk.Widget widget);
 		IObjectSelection GetSelection ();
@@ -19,7 +20,7 @@ namespace Stetic
 		event EventHandler SelectionChanged;
 	}
 	
-	public delegate void DragDelegate (Gdk.EventMotion evt);
+	public delegate void DragDelegate (Gdk.EventMotion evt, int dx, int dy);
 
 	public interface IObjectViewer
 	{
@@ -30,6 +31,7 @@ namespace Stetic
 	{
 		Gtk.Widget Widget { get; }
 		object DataObject { get; }
+		bool AllowDrag {get; set; }
 		
 		event DragDelegate Drag;
 		event EventHandler Disposed;

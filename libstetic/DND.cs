@@ -47,9 +47,11 @@ namespace Stetic {
 		}
 
 		static Gtk.Widget dragWidget;
+		static int dragHotX;
+		static int dragHotY;
 
 		// Drag function for non-automatic sources, called from MotionNotifyEvent
-		public static void Drag (Gtk.Widget source, Gdk.EventMotion evt, Gtk.Widget dragWidget)
+		public static void Drag (Gtk.Widget source, Gdk.Event evt, Gtk.Widget dragWidget)
 		{
 			Gdk.DragContext ctx;
 
@@ -81,6 +83,8 @@ namespace Stetic {
 			else if (req.Height < 20)
 				dragWin.SetSizeRequest (-1, 20);
 
+			req = dragWin.SizeRequest ();
+			
 			int px, py, rx, ry;
 			Gdk.ModifierType pmask;
 			ctx.SourceWindow.GetPointer (out px, out py, out pmask);
@@ -88,7 +92,11 @@ namespace Stetic {
 
 			dragWin.Move (rx + px, ry + py);
 			dragWin.Show ();
-			Gtk.Drag.SetIconWidget (ctx, dragWin, 0, 0);
+			
+			dragHotX = req.Width / 2;
+			dragHotY = -3;
+			
+			Gtk.Drag.SetIconWidget (ctx, dragWin, dragHotX, dragHotY);
 
 			if (source != null) {
 				source.DragDataGet += DragDataGet;
@@ -99,6 +107,18 @@ namespace Stetic {
 		public static Gtk.Widget DragWidget {
 			get {
 				return dragWidget;
+			}
+		}
+
+		public static int DragHotX {
+			get {
+				return dragHotX;
+			}
+		}
+
+		public static int DragHotY {
+			get {
+				return dragHotY;
 			}
 		}
 

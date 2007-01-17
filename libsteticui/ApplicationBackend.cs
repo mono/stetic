@@ -133,8 +133,6 @@ namespace Stetic
 				if (!Registry.ReloadWidgetLibraries () && allowBackendRestart)
 					return false;
 				
-				bool updated = false;
-				
 				// Check which libraries need to be unloaded
 				
 				foreach (WidgetLibrary alib in Registry.RegisteredWidgetLibraries) {
@@ -142,7 +140,6 @@ namespace Stetic
 						if (forceUnload && allowBackendRestart)
 							return false;
 						Registry.UnregisterWidgetLibrary (alib);
-						updated = true;
 					}
 				}
 				
@@ -173,7 +170,6 @@ namespace Stetic
 							// FIXME: return the error somewhere
 							Console.WriteLine (ex);
 						}
-						updated = true;
 					}
 				}
 				

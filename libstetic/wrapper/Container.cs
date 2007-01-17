@@ -67,12 +67,17 @@ namespace Stetic.Wrapper
 		
 		void OnChildAdded (object o, Gtk.AddedArgs args)
 		{
+			NotifyChildAdded (args.Widget);
+		}
+		
+		protected void NotifyChildAdded (Gtk.Widget child)
+		{
 			// Make sure children's IDs don't conflict with other widgets
 			// in the parent container.
 			if (!Loading)
-				ValidateChildNames ((Gtk.Widget)o);
+				ValidateChildNames (Wrapped);
 
-			ObjectWrapper w = ObjectWrapper.Lookup (args.Widget);
+			ObjectWrapper w = ObjectWrapper.Lookup (child);
 			if (w != null) {
 				((Widget)w).RequiresUndoStatusUpdate = true;
 				if (designer != null)
@@ -379,7 +384,8 @@ namespace Stetic.Wrapper
 							elem.AppendChild (child_elem);
 					} else if (child is Stetic.Placeholder) {
 						child_elem = writer.XmlDocument.CreateElement ("child");
-						child_elem.SetAttribute ("undoId", ((Stetic.Placeholder)child).UndoId);
+						if (writer.CreateUndoInfo)
+							child_elem.SetAttribute ("undoId", ((Stetic.Placeholder)child).UndoId);
 						child_elem.AppendChild (writer.XmlDocument.CreateElement ("placeholder"));
 						elem.AppendChild (child_elem);
 					}
@@ -440,7 +446,8 @@ namespace Stetic.Wrapper
 					child_elem.AppendChild (packing_elem);
 			} else {
 				// There is no container child, so make up an id.
-				child_elem.SetAttribute ("undoId", "0");
+				if (writer.CreateUndoInfo)
+					child_elem.SetAttribute ("undoId", "0");
 			}
 
 			return child_elem;
@@ -721,8 +728,7 @@ namespace Stetic.Wrapper
 		void PlaceholderDrop (Placeholder ph, Stetic.Wrapper.Widget wrapper)
 		{
 			using (UndoManager.AtomicChange) {
-				ReplaceChild (ph, wrapper.Wrapped);
-				ph.Destroy ();
+				ReplaceChild (ph, wrapper.Wrapped, true);
 				wrapper.Select ();
 			}
 		}
@@ -753,17 +759,22 @@ namespace Stetic.Wrapper
 
 		void ChildRemoved (object obj, Gtk.RemovedArgs args)
 		{
+			NotifyChildRemoved (args.Widget);
+		}
+		
+		protected void NotifyChildRemoved (Gtk.Widget child)
+		{
 			if (Loading)
 				return;
 				
-			ObjectWrapper w = ObjectWrapper.Lookup (args.Widget);
+			ObjectWrapper w = ObjectWrapper.Lookup (child);
 			if (w != null) {
 				if (w.Loading)
 					return;
 				if (designer != null)
 					w.OnDesignerDetach (designer);
 			}
-			ChildRemoved (args.Widget);
+			ChildRemoved (child);
 		}
 
 		protected virtual void ChildRemoved (Gtk.Widget w)
@@ -789,6 +800,13 @@ namespace Stetic.Wrapper
 			}
 		}
 
+		public void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild, bool destroyOld)
+		{
+			ReplaceChild (oldChild, newChild);
+			if (destroyOld)
+				oldChild.Destroy ();
+		}
+		
 		public virtual void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			using (UndoManager.AtomicChange)
@@ -813,7 +831,6 @@ namespace Stetic.Wrapper
 					pinfo.SetValue (cc, props[pinfo], null);
 
 				Sync ();
-				oldChild.Destroy ();
 				EmitContentsChanged ();
 				if (Project != null)
 					Project.Selection = newChild;
@@ -828,7 +845,8 @@ namespace Stetic.Wrapper
 				Select (null, false);
 			} else {
 				Widget wrapper = Widget.Lookup (widget);
-				Select (widget, wrapper != null && wrapper.InternalChildProperty == null);
+				bool allowDrag = wrapper != null && wrapper.InternalChildProperty == null && !wrapper.IsTopLevel;
+				Select (widget, allowDrag);
 			}
 		}
 
@@ -903,7 +921,7 @@ namespace Stetic.Wrapper
 
 			IDesignArea designArea = GetDesignArea (widget);
 			if (designArea != null) {
-				IObjectSelection sel = designArea.SetSelection (widget, widget);
+				IObjectSelection sel = designArea.SetSelection (widget, widget, dragHandles);
 				sel.Drag += HandleWindowDrag;
 				return;
 			}
@@ -933,26 +951,27 @@ namespace Stetic.Wrapper
 
 		Gtk.Widget dragSource;
 
-		void HandleWindowDrag (Gdk.EventMotion evt)
+		void HandleWindowDrag (Gdk.EventMotion evt, int dx, int dy)
 		{
 			Gtk.Widget dragWidget = selection;
 
-			Select ((Gtk.Widget)null);
+			Project.Selection = null;
 
-			dragSource = CreateDragSource (dragWidget);
+			using (UndoManager.AtomicChange) {
+				dragSource = CreateDragSource (dragWidget);
+			}
+			
 			DND.Drag (dragSource, evt, dragWidget);
 		}
 
 		protected virtual Gtk.Widget CreateDragSource (Gtk.Widget dragWidget)
 		{
-			using (UndoManager.AtomicChange) {
-				Placeholder ph = CreatePlaceholder ();
-				Gdk.Rectangle alloc = dragWidget.Allocation;
-				ph.SetSizeRequest (alloc.Width, alloc.Height);
-				ph.DragEnd += DragEnd;
-				ReplaceChild (dragWidget, ph);
-				return ph;
-			}
+			Placeholder ph = CreatePlaceholder ();
+			Gdk.Rectangle alloc = dragWidget.Allocation;
+			ph.SetSizeRequest (alloc.Width, alloc.Height);
+			ph.DragEnd += DragEnd;
+			ReplaceChild (dragWidget, ph, false);
+			return ph;
 		}
 
 		void DragEnd (object obj, Gtk.DragEndArgs args)
@@ -969,7 +988,7 @@ namespace Stetic.Wrapper
 						container.Remove (ph);
 					Sync ();
 				} else
-					ReplaceChild (ph, DND.Cancel ());
+					ReplaceChild (ph, DND.Cancel (), true);
 			}
 		}
 
@@ -977,7 +996,7 @@ namespace Stetic.Wrapper
 		{
 			using (UndoManager.AtomicChange) {
 				if (AllowPlaceholders)
-					ReplaceChild (wrapper.Wrapped, CreatePlaceholder ());
+					ReplaceChild (wrapper.Wrapped, CreatePlaceholder (), true);
 				else
 					container.Remove (wrapper.Wrapped);
 				wrapper.Wrapped.Destroy ();
