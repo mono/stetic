@@ -16,6 +16,7 @@ namespace Stetic
 		
 		string componentName;
 		bool autoCommitChanges;
+		bool disposed;
 		
 		public event EventHandler BindField;
 		public event EventHandler ModifiedChanged;
@@ -150,6 +151,10 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
+			if (disposed)
+				return;
+				
+			disposed = true;
 			frontend.disposed = true;
 			editedProject.SignalAdded -= OnSignalAdded;
 			editedProject.SignalRemoved -= OnSignalRemoved;
