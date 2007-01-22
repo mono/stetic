@@ -50,6 +50,7 @@ namespace Stetic {
 		WidgetActionBar toolbar;
 		WidgetDesignerFrontend frontend;
 		bool allowBinding;
+		bool disposed;
 		
 		ContainerUndoRedoManager undoManager;
 		UndoQueue undoQueue;
@@ -123,6 +124,8 @@ namespace Stetic {
 		public Gtk.Widget WrapperWidget {
 			get {
 				if (designer == null) {
+					if (rootWidget == null)
+						return widget;
 					Gtk.Container wc = rootWidget.Wrapped as Gtk.Container;
 					if (widget == null)
 						widget = Stetic.UserInterface.CreateWidgetDesigner (wc, rootWidget.DesignWidth, rootWidget.DesignHeight);
@@ -205,6 +208,11 @@ namespace Stetic {
 			rootWidget = null;
 			frontend = null;
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
+			disposed = true;
+		}
+		
+		public bool Disposed {
+			get { return disposed; }
 		}
 
 		public override object InitializeLifetimeService ()
@@ -272,6 +280,7 @@ namespace Stetic {
 			box.Add (lab);
 			
 			widget = Stetic.UserInterface.CreateWidgetDesigner (box, 100, 100);
+			rootWidget = null;
 			
 			OnRootWidgetChanged ();
 		}
@@ -279,10 +288,21 @@ namespace Stetic {
 		void OnRootWidgetChanged ()
 		{
 			if (designer != null) {
+				if (designer.Parent is Gtk.Plug)
+					((Gtk.Plug)designer.Parent).Remove (designer);
 				designer.Dispose ();
 				designer = null;
 			}
 			
+			if (plug != null) {
+				Gdk.Threads.Enter ();
+				plug.Add (WrapperWidget);
+				plug.ShowAll ();
+				Gdk.Threads.Leave ();
+			}
+			
+			if (frontend != null)
+				frontend.NotifyRootWidgetChanged ();
 			if (RootWidgetChanged != null)
 				RootWidgetChanged (this, EventArgs.Empty);
 		}

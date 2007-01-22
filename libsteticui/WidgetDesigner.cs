@@ -36,7 +36,7 @@ namespace Stetic
 			
 			if (autoCommitChanges)
 				editedProject = project;
-			else 
+			else
 				editedProject = new Project (project.App);
 			
 			editedProject.SignalAdded += OnSignalAdded;
@@ -79,13 +79,8 @@ namespace Stetic
 		
 		void CreateSession ()
 		{
-			if (!app.UseExternalBackend && session != null)
-				session.RootWidgetChanged -= OnRootWidgetChanged;
-					
 			try {
 				session = project.ProjectBackend.CreateWidgetDesignerSession (frontend, componentName, editedProject.ProjectBackend, autoCommitChanges);
-				if (!app.UseExternalBackend)
-					session.RootWidgetChanged += OnRootWidgetChanged;
 				ResetCustomWidget ();
 				rootWidget = app.GetComponent (session.RootWidget, null, null);
 			} catch (Exception ex) {
@@ -155,6 +150,7 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
+			frontend.disposed = true;
 			editedProject.SignalAdded -= OnSignalAdded;
 			editedProject.SignalRemoved -= OnSignalRemoved;
 			editedProject.SignalChanged -= OnSignalChanged;
@@ -184,9 +180,14 @@ namespace Stetic
 				ComponentNameChanged (this, args);
 		}
 		
-		void OnRootWidgetChanged (object o, EventArgs a)
+		internal void NotifyRootWidgetChanged ()
 		{
-			rootWidget = app.GetComponent (session.RootWidget, null, null);
+			object rw = session.RootWidget;
+			if (rw != null)
+				rootWidget = app.GetComponent (session.RootWidget, null, null);
+			else
+				rootWidget = null;
+
 			UpdateWidget ();
 			if (RootComponentChanged != null)
 				RootComponentChanged (this, EventArgs.Empty);
@@ -225,9 +226,7 @@ namespace Stetic
 					session.RestoreState (sessionData);
 
 				base.OnBackendChanged (oldBackend);
-				
-				if (RootComponentChanged != null)
-					RootComponentChanged (this, EventArgs.Empty);
+				NotifyRootWidgetChanged ();
 			}
 		}
 		
@@ -282,6 +281,7 @@ namespace Stetic
 	internal class WidgetDesignerFrontend: MarshalByRefObject
 	{
 		WidgetDesigner designer;
+		internal bool disposed;
 		
 		public WidgetDesignerFrontend (WidgetDesigner designer)
 		{
@@ -291,31 +291,38 @@ namespace Stetic
 		public void NotifyBindField ()
 		{
 			Gtk.Application.Invoke (
-				delegate { designer.NotifyBindField (); }
+				delegate { if (!disposed) designer.NotifyBindField (); }
 			);
 		}
 		
 		public void NotifyModifiedChanged ()
 		{
 			Gtk.Application.Invoke (
-				delegate { designer.NotifyModifiedChanged (); }
+				delegate { if (!disposed) designer.NotifyModifiedChanged (); }
 			);
 		}
 		
 		public void NotifyChanged ()
 		{
 			Gtk.Application.Invoke (
-				delegate { designer.NotifyChanged (); }
+				delegate { if (!disposed) designer.NotifyChanged (); }
 			);
 		}
 		
 		internal void NotifySelectionChanged (object ob)
 		{
 			Gtk.Application.Invoke (
-				delegate { designer.NotifySelectionChanged (ob); }
+				delegate { if (!disposed) designer.NotifySelectionChanged (ob); }
 			);
 		}
 
+		public void NotifyRootWidgetChanged ()
+		{
+			Gtk.Application.Invoke (
+				delegate { if (!disposed) designer.NotifyRootWidgetChanged (); }
+			);
+		}
+		
 		public override object InitializeLifetimeService ()
 		{
 			// Will be disconnected when calling Dispose

@@ -16,7 +16,6 @@ namespace Stetic
 		IResourceProvider resourceProvider;
 		Component selection;
 		string tmpProjectFile;
-		WidgetLibrarySet widgetLibraries = new WidgetLibrarySet ();
 		
 		internal event BackendChangingHandler BackendChanging;
 		internal event BackendChangedHandler BackendChanged;
@@ -45,7 +44,6 @@ namespace Stetic
 			this.app = app;
 			this.backend = backend;
 			backend.SetFrontend (this);
-			backend.WidgetLibraries = widgetLibraries;
 
 			app.BackendChanging += OnBackendChanging;
 			app.BackendChanged += OnBackendChanged;
@@ -70,7 +68,6 @@ namespace Stetic
 			}
 			backend.Dispose ();
 			app.DisposeProject (this);
-			widgetLibraries.Dispose ();
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 			app.UpdateWidgetLibraries (false, false);
 		}
@@ -99,6 +96,10 @@ namespace Stetic
 				iconFactory = value;
 				backend.IconFactory = value;
 			}
+		}
+		
+		public bool CanGenerateCode {
+			get { return backend.CanGenerateCode; }
 		}
 		
 		public Component Selection {
@@ -159,6 +160,15 @@ namespace Stetic
 			return (WidgetComponent) App.GetComponent (ob, null, null);
 		}
 		
+		public ComponentType[] GetComponentTypes ()
+		{
+			ArrayList typeNames = app.Backend.GetComponentTypes ();
+			ComponentType[] types = new ComponentType [typeNames.Count];
+			for (int n=0; n<typeNames.Count; n++)
+				types [n] = app.GetComponentType ((string) typeNames [n]);
+			return types;
+		}
+		
 		public void RemoveComponent (WidgetComponent component)
 		{
 			backend.RemoveWidget (component.Name);
@@ -211,19 +221,25 @@ namespace Stetic
 		
 		public void AddWidgetLibrary (string assemblyPath)
 		{
-			widgetLibraries.AddWidgetLibrary (assemblyPath);
+			backend.AddWidgetLibrary (assemblyPath);
 			app.UpdateWidgetLibraries (false, false);
 		}
 		
 		public void RemoveWidgetLibrary (string assemblyPath)
 		{
-			widgetLibraries.RemoveWidgetLibrary (assemblyPath);
+			backend.RemoveWidgetLibrary (assemblyPath);
 			app.UpdateWidgetLibraries (false, false);
 		}
 		
-		public string[] GetWidgetLibraries ()
-		{
-			return widgetLibraries.GetWidgetLibraries ();
+		public string[] WidgetLibraries {
+			get {
+				return (string[]) backend.WidgetLibraries.ToArray (typeof(string));
+			} set {
+				ArrayList libs = new ArrayList ();
+				libs.AddRange (value);
+				backend.WidgetLibraries = libs;
+				app.UpdateWidgetLibraries (false, false);
+			}
 		}
 		
 		public bool CanCopySelection {
@@ -399,6 +415,11 @@ namespace Stetic
 			});
 		}
 		
+		internal void NotifyUpdateLibraries ()
+		{
+			app.UpdateWidgetLibraries (false, false);
+		}
+		
 		void OnBackendChanging ()
 		{
 			selection = null;
@@ -418,11 +439,9 @@ namespace Stetic
 			
 			backend = app.Backend.CreateProject ();
 			backend.SetFrontend (this);
-			backend.WidgetLibraries = widgetLibraries;
 
 			if (tmpProjectFile != null && File.Exists (tmpProjectFile)) {
-				backend.Load (tmpProjectFile);
-				backend.FileName = fileName;
+				backend.Load (tmpProjectFile, fileName);
 				File.Delete (tmpProjectFile);
 				tmpProjectFile = null;
 			} else if (fileName != null) {
@@ -437,39 +456,6 @@ namespace Stetic
 				
 			if (ProjectReloaded != null)
 				ProjectReloaded (this, EventArgs.Empty);
-		}
-	}
-	
-	class WidgetLibrarySet: MarshalByRefObject
-	{
-		ArrayList widgetLibraries = new ArrayList ();
-		
-		public void AddWidgetLibrary (string assemblyPath)
-		{
-			if (!widgetLibraries.Contains (assemblyPath)) {
-				widgetLibraries.Add (assemblyPath);
-			}
-		}
-		
-		public void RemoveWidgetLibrary (string assemblyPath)
-		{
-			widgetLibraries.Remove (assemblyPath);
-		}
-		
-		public string[] GetWidgetLibraries ()
-		{
-			return (string[]) widgetLibraries.ToArray (typeof(string));
-		}
-
-		public override object InitializeLifetimeService ()
-		{
-			// Will be disconnected when calling Dispose
-			return null;
-		}
-		
-		public void Dispose ()
-		{
-			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 		}
 	}
 }

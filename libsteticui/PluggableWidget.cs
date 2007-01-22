@@ -38,7 +38,7 @@ namespace Stetic
 		protected override void OnRealized ()
 		{
 			base.OnRealized ();
-			if (!initialized) {
+			if (!initialized && !app.Disposed) {
 				initialized = true;
 				if (app.UseExternalBackend)
 					ConnectPlug ();
@@ -52,7 +52,7 @@ namespace Stetic
 		
 		protected override void OnUnrealized ()
 		{
-			if (app.UseExternalBackend && initialized) {
+			if (!app.Disposed && app.UseExternalBackend && initialized) {
 				OnDestroyPlug (socket.Id);
 				initialized = false;
 			}
@@ -61,7 +61,10 @@ namespace Stetic
 		
 		protected void UpdateWidget ()
 		{
-			if (initialized) {
+			if (!initialized || app.Disposed)
+				return;
+
+			if (!app.UseExternalBackend) {
 				if (Child != null)
 					Remove (Child);
 				Gtk.Widget w = OnCreateWidget ();
@@ -86,7 +89,10 @@ namespace Stetic
 		
 		internal virtual void OnBackendChanged (ApplicationBackend oldBackend)
 		{
-			if (initialized && app.UseExternalBackend && !customWidget) {
+			if (!initialized || app.Disposed)
+				return;
+
+			if (app.UseExternalBackend) {
 				Remove (Child);
 				socket.Dispose ();
 				ConnectPlug ();

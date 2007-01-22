@@ -3,7 +3,7 @@ using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
-	public class ColorButton : Widget {
+	public class ColorButton : Container {
 
 		public int Alpha {
 			get {

@@ -113,8 +113,7 @@ namespace Stetic
 		internal static void BindSignalHandlers (CodeExpression targetObjectVar, ObjectWrapper wrapper, Stetic.WidgetMap map, CodeStatementCollection statements, GenerationOptions options)
 		{
 			foreach (Signal signal in wrapper.Signals) {
-				TypedSignalDescriptor descriptor = signal.SignalDescriptor as TypedSignalDescriptor;
-				if (descriptor == null) continue;
+				SignalDescriptor descriptor = signal.SignalDescriptor;
 				
 				CodeExpression createDelegate;
 				
@@ -276,6 +275,8 @@ namespace Stetic
 				}
 				widgetCol.Add (new CodeMethodReturnStatement (new CodePrimitiveExpression (null)));
 			}
+			if (met.Statements.Count == 0)
+				met.Statements.Add (new CodeMethodReturnStatement (new CodePrimitiveExpression (null)));
 		}
 		
 		internal static List<ObjectBindInfo> GetFieldsToBind (ObjectWrapper wrapper)

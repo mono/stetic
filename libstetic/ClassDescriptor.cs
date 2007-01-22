@@ -18,6 +18,7 @@ namespace Stetic {
 		protected int importantGroups;
 		protected ItemGroup contextMenu;
 		protected ItemGroup internalChildren;
+		protected string baseType;
 		
 		WidgetLibrary library;
 		PropertyDescriptor[] initializationProperties;
@@ -47,6 +48,21 @@ namespace Stetic {
 				hexpandable = true;
 			if (elem.HasAttribute ("vexpandable"))
 				vexpandable = true;
+			
+			contextMenu = ItemGroup.Empty;
+			
+			baseType = elem.GetAttribute ("base-type");
+			if (baseType.Length > 0) {
+				ClassDescriptor basec = Registry.LookupClassByName (baseType);
+				if (basec == null)
+					throw new InvalidOperationException ("Base type '" + baseType + "' not found.");
+				foreach (ItemGroup group in basec.ItemGroups)
+					groups.Add (group);
+				foreach (ItemGroup group in basec.SignalGroups)
+					signals.Add (group);
+				contextMenu = basec.ContextMenu;
+			} else
+				baseType = null;
 
 			XmlElement groupsElem = elem["itemgroups"];
 			if (groupsElem != null) {
@@ -88,8 +104,7 @@ namespace Stetic {
 					contextMenu = Registry.LookupContextMenu (refname);
 				} else
 					contextMenu = new ItemGroup (contextElem, this);
-			} else
-				contextMenu = ItemGroup.Empty;
+			}
 
 			XmlElement ichildElem = elem["internal-children"];
 			if (ichildElem != null)
@@ -171,8 +186,13 @@ namespace Stetic {
 			object ob = CreateInstance (proj);
 			
 			string name = WrappedTypeName.ToLower () + (++counter).ToString ();
-			int i = name.IndexOf ('.');
-			if (i != -1) name = name.Substring (i+1);
+			int i = name.LastIndexOf ('.');
+			if (i != -1) {
+				if (i < name.Length)
+					name = name.Substring (i+1);
+				else
+					name = name.Replace (".", "");
+			}
 			
 			foreach (ItemGroup group in groups) {
 				foreach (ItemDescriptor item in group) {

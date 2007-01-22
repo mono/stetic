@@ -20,12 +20,18 @@ namespace Stetic
 		ArrayList globalWidgetLibraries = new ArrayList ();
 		WidgetLibraryResolveHandler widgetLibraryResolver;
 		object targetViewerObject;
+		bool allowInProcLibraries = true;
 		
 		ProjectBackend activeProject;
 		static ApplicationBackendController controller;
 		
+		static ApplicationBackend ()
+		{
+		}
+		
 		public ApplicationBackend ()
 		{
+			Registry.Initialize (new AssemblyWidgetLibrary (typeof(Registry).Assembly.FullName, typeof(Registry).Assembly));
 			WidgetDesignerBackend.DefaultObjectViewer = this;
 		}
 		
@@ -71,10 +77,6 @@ namespace Stetic
 			
 			controller.Connect (backend);
 			
-/*			Gtk.Window w = new Gtk.Window ("fd");
-			w.Add (new Gtk.Button("hi"));
-			w.ShowAll ();
-*/
 			Gdk.Threads.Enter ();
 			Gtk.Application.Run ();
 			Gdk.Threads.Leave ();
@@ -103,7 +105,7 @@ namespace Stetic
 		
 		public ProjectBackend LoadProject (string path)
 		{
-			ProjectBackend p = new ProjectBackend ();
+			ProjectBackend p = new ProjectBackend (this);
 			
 			if (System.IO.Path.GetExtension (path) == ".glade") {
 				GladeFiles.Import (p, path);
@@ -121,6 +123,11 @@ namespace Stetic
 		public ArrayList GlobalWidgetLibraries {
 			get { return globalWidgetLibraries; }
 			set { globalWidgetLibraries = value; }
+		}
+		
+		public bool AllowInProcLibraries {
+			get { return allowInProcLibraries; }
+			set { allowInProcLibraries = value; }
 		}
 		
 		public bool UpdateLibraries (ArrayList libraries, bool allowBackendRestart, bool forceUnload)
@@ -145,33 +152,7 @@ namespace Stetic
 				
 				// Load new libraries
 				
-				foreach (string s in libraries) {
-					if (Registry.IsRegistered (s))
-						continue;
-						
-					// Try loading the library using the resolved delegate
-					WidgetLibrary alib = null;
-					if (widgetLibraryResolver != null)
-						alib = widgetLibraryResolver (s);
-					if (alib == null) {
-						try {
-							alib = new AssemblyWidgetLibrary (s);
-						} catch {
-							// FIXME: handle the error, but keep loading.
-						}
-					}
-					if (alib != null) {
-						try {
-							Registry.RegisterWidgetLibrary (alib);
-						} catch (Exception ex) {
-							// Catch errors when loading a library to avoid aborting
-							// the whole update method. After all, that's not a fatal
-							// error (some widgets just won't be shown).
-							// FIXME: return the error somewhere
-							Console.WriteLine (ex);
-						}
-					}
-				}
+				LoadLibraries (null, libraries);
 				
 				return true;
 			}
@@ -179,7 +160,81 @@ namespace Stetic
 				Registry.EndChangeSet ();
 			}
 		}
+		
+		internal void LoadLibraries (ImportContext ctx, IEnumerable libraries)
+		{
+			Hashtable visited = new Hashtable ();
+			
+			foreach (string s in libraries)
+				AddLibrary (ctx, visited, s);
+		}
+		
+		void AddLibrary (ImportContext ctx, Hashtable visited, string s)
+		{
+			if (Registry.IsRegistered (s))
+				return;
+				
+			WidgetLibrary alib = CreateLibrary (ctx, s);
+			if (alib == null)
+				return;
+				
+			RegisterLibrary (ctx, visited, alib);
+		}
+		
+		void RegisterLibrary (ImportContext ctx, Hashtable visited, WidgetLibrary lib)
+		{
+			if (visited.Contains (lib.Name))
+				return;
+				
+			visited [lib.Name] = lib;
 
+			if (Registry.IsRegistered (lib.Name))
+				return;
+			
+			foreach (WidgetLibrary dlib in GetDependentLibraries (ctx, lib))
+				RegisterLibrary (ctx, visited, dlib);
+			
+			try {
+				Registry.RegisterWidgetLibrary (lib);
+			} catch (Exception ex) {
+				// Catch errors when loading a library to avoid aborting
+				// the whole update method. After all, that's not a fatal
+				// error (some widgets just won't be shown).
+				// FIXME: return the error somewhere
+				Console.WriteLine (ex);
+			}
+		}
+		
+		WidgetLibrary CreateLibrary (ImportContext ctx, string name)
+		{
+			// Try loading the library using the resolved delegate
+			WidgetLibrary alib = null;
+			if (widgetLibraryResolver != null)
+				alib = widgetLibraryResolver (name);
+			if (alib == null) {
+				try {
+					if (allowInProcLibraries)
+						return new AssemblyWidgetLibrary (ctx, name);
+					else
+						return new CecilWidgetLibrary (ctx, name);
+				} catch (Exception ex) {
+					// FIXME: handle the error, but keep loading.
+					Console.WriteLine (ex);
+				}
+			}
+			return null;
+		}
+		
+		IEnumerable GetDependentLibraries (ImportContext ctx, WidgetLibrary lib)
+		{
+			foreach (string s in lib.GetLibraryDependencies ()) {
+				if (!Application.InternalIsWidgetLibrary (ctx, s))
+					continue;
+				WidgetLibrary dlib = CreateLibrary (ctx, s);
+				if (dlib != null)
+					yield return dlib;
+			}
+		}
 
 		public ProjectBackend ActiveProject {
 			get { return activeProject; }
@@ -202,24 +257,20 @@ namespace Stetic
 		{
 			ArrayList projectLibs = new ArrayList ();
 			if (activeProject != null)
-				projectLibs.AddRange (activeProject.WidgetLibraries.GetWidgetLibraries ());
+				projectLibs.AddRange (activeProject.WidgetLibraries);
 				
 			ArrayList list = new ArrayList ();
-			foreach (WidgetLibrary lib in Registry.RegisteredWidgetLibraries) {
-				WidgetLibrary alib = lib as WidgetLibrary;
-				if (alib == null) continue;
-				
+			foreach (WidgetLibrary alib in Registry.RegisteredWidgetLibraries) {
 				string aname = alib.Name;
 				if (projectLibs.Contains (aname) || globalWidgetLibraries.Contains (aname))
-					list.Add (lib);
+					list.Add (alib);
 			}
 			return (WidgetLibrary[]) list.ToArray (typeof(WidgetLibrary));
-				
 		}
 		
 		public ProjectBackend CreateProject ()
 		{
-			return new ProjectBackend ();
+			return new ProjectBackend (this);
 		}
 		
 		object IObjectViewer.TargetObject {
@@ -236,7 +287,7 @@ namespace Stetic
 		public PaletteBackend GetPaletteWidget ()
 		{
 			if (paletteWidget == null) {
-				paletteWidget = new PaletteBackend ();
+				paletteWidget = new PaletteBackend (this);
 				paletteWidget.ProjectBackend = activeProject;
 				paletteWidget.WidgetLibraries = GetActiveLibraries ();
 			}
@@ -344,6 +395,14 @@ namespace Stetic
 				plug.Remove (projectWidget);
 				plug.Destroy ();
 			}
+		}
+		
+		public ArrayList GetComponentTypes ()
+		{
+			ArrayList list = new ArrayList ();
+			foreach (ClassDescriptor cd in Registry.AllClasses)
+				list.Add (cd.Name);
+			return list;
 		}
 		
 		public bool GetClassDescriptorInfo (string name, out string desc, out string className, out byte[] icon)

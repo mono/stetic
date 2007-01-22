@@ -10,6 +10,7 @@ namespace Stetic {
 
 		string label, name;
 		ListDictionary items = new ListDictionary ();
+		ClassDescriptor declaringType;
 
 		static ItemGroup ()
 		{
@@ -22,6 +23,7 @@ namespace Stetic {
 
 		public ItemGroup (XmlElement elem, ClassDescriptor klass)
 		{
+			declaringType = klass;
 			label = elem.GetAttribute ("label");
 			name = elem.GetAttribute ("name");
 
@@ -67,6 +69,10 @@ namespace Stetic {
 			get {
 				return (ItemDescriptor) items [name];
 			}
+		}
+		
+		public ClassDescriptor DeclaringType {
+			get { return declaringType; }
 		}
 	}
 }

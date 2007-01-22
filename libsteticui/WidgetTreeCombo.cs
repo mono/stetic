@@ -114,7 +114,10 @@ namespace Stetic
 		{
 			WidgetMenuItem item = (WidgetMenuItem) sender;
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (item.Widget);
-			wrapper.Select ();
+			GLib.Timeout.Add (10, delegate {
+				wrapper.Select ();
+				return false;
+			});
 		}
 	}
 	

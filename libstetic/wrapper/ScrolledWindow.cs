@@ -42,9 +42,15 @@ namespace Stetic.Wrapper {
 
 		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
-			if (scrolled.Child is Gtk.Viewport)
-				((Gtk.Viewport)scrolled.Child).Remove (oldChild);
-			scrolled.Remove (scrolled.Child);
+			if (scrolled.Child is Gtk.Viewport) {
+				Gtk.Viewport vp = (Gtk.Viewport)scrolled.Child;
+				vp.Remove (oldChild);
+				scrolled.Remove (vp);
+				vp.Destroy ();
+			}
+			else
+				scrolled.Remove (scrolled.Child);
+			
 			if (newChild.SetScrollAdjustments (null, null))
 				scrolled.Add (newChild);
 			else

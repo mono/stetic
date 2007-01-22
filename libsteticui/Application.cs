@@ -5,12 +5,14 @@ using System.Collections;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.IO;
+using System.Xml;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Diagnostics;
 using Mono.Remoting.Channels.Unix;
+using Mono.Cecil;
 
 namespace Stetic
 {
@@ -40,9 +42,14 @@ namespace Stetic
 		Palette paletteWidget;
 		ProjectView projectWidget;
 		SignalsEditor signalsWidget;
+		bool allowInProcLibraries = true;
+		bool disposed;
+		
+		static Hashtable libraryCheckCache; 
 		
 		internal event BackendChangingHandler BackendChanging;
 		internal event BackendChangedHandler BackendChanged;
+		internal event EventHandler Disposing;
 		
 		public Application (IsolationMode mode)
 		{
@@ -59,11 +66,11 @@ namespace Stetic
 		}
 		
 		public WidgetLibraryResolveHandler WidgetLibraryResolver {
-			get { return backend.WidgetLibraryResolver; }
+			get { return Backend.WidgetLibraryResolver; }
 			set { 
 				if (UseExternalBackend)
 					throw new InvalidOperationException ("Can use a custom library resolver when running in isolated mode.");
-				backend.WidgetLibraryResolver = value;
+				Backend.WidgetLibraryResolver = value;
 			}
 		}
 		
@@ -83,12 +90,12 @@ namespace Stetic
 			assemblies.AddRange (widgetLibraries);
 			
 			foreach (Project p in projects) {
-				foreach (string s in p.GetWidgetLibraries ())
+				foreach (string s in p.WidgetLibraries)
 					if (!assemblies.Contains (s))
 						assemblies.Add (s);
 			}
 			
-			if (!backend.UpdateLibraries (assemblies, allowBackendRestart, forceUnload))
+			if (!Backend.UpdateLibraries (assemblies, allowBackendRestart, forceUnload))
 			{
 				// The backend process needs to be restarted.
 				// This is done in background.
@@ -187,12 +194,22 @@ namespace Stetic
 		
 		public virtual void Dispose ()
 		{
+			if (disposed)
+				return;
+				
+			disposed = true;
+			if (Disposing != null)
+				Disposing (this, EventArgs.Empty);
 			if (externalBackend) {
 				backendController.StopBackend (true);
 			} else {
 				backend.Dispose ();
 			}
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
+		}
+		
+		internal bool Disposed {
+			get { return disposed; }
 		}
 
 		public override object InitializeLifetimeService ()
@@ -202,7 +219,11 @@ namespace Stetic
 		}
 		
 		internal ApplicationBackend Backend {
-			get { return backend; }
+			get {
+				if (disposed)
+					throw new InvalidOperationException ("Application has been disposed");
+				return backend;
+			}
 		}
 		
 		public Project LoadProject (string path)
@@ -224,7 +245,7 @@ namespace Stetic
 		{
 			if (!widgetLibraries.Contains (assemblyPath)) {
 				widgetLibraries.Add (assemblyPath);
-				backend.GlobalWidgetLibraries = widgetLibraries; 
+				Backend.GlobalWidgetLibraries = widgetLibraries; 
 				UpdateWidgetLibraries (false, false);
 			}
 		}
@@ -232,13 +253,43 @@ namespace Stetic
 		public void RemoveWidgetLibrary (string assemblyPath)
 		{
 			widgetLibraries.Remove (assemblyPath);
-			backend.GlobalWidgetLibraries = widgetLibraries; 
+			Backend.GlobalWidgetLibraries = widgetLibraries; 
 			UpdateWidgetLibraries (false, false);
 		}
 		
 		public string[] GetWidgetLibraries ()
 		{
 			return (string[]) widgetLibraries.ToArray (typeof(string));
+		}
+		
+		public bool IsWidgetLibrary (string assemblyRef)
+		{
+			return Application.InternalIsWidgetLibrary (null, assemblyRef);
+		}
+		
+		internal static bool InternalIsWidgetLibrary (ImportContext ic, string assemblyRef)
+		{
+			string path;
+
+			if (assemblyRef.EndsWith (".dll") || assemblyRef.EndsWith (".exe")) {
+				if (!File.Exists (assemblyRef))
+					return false;
+				path = assemblyRef;
+			}
+			else {
+				path = CecilWidgetLibrary.FindAssembly (ic, assemblyRef, null);
+				if (path == null)
+					return false;
+			}
+			
+			LibraryData data = GetLibraryCacheData (path);
+			if (data == null) {
+				// There is no info about this library, it has to be checked
+				bool isLib = CecilWidgetLibrary.IsWidgetLibrary (path);
+				SetLibraryCacheData (path, isLib);
+				return isLib;
+			} else
+				return data.IsLibrary;
 		}
 		
 		internal void DisposeProject (Project p)
@@ -279,7 +330,7 @@ namespace Stetic
 			for (int n=0; n<projects.Length; n++)
 				pbs [n] = projects [n].ProjectBackend;
 				
-			return backend.GenerateProjectCode (options, pbs);
+			return Backend.GenerateProjectCode (options, pbs);
 		}
 		
 		internal bool UseExternalBackend {
@@ -290,7 +341,7 @@ namespace Stetic
 			get { return activeProject; }
 			set { 
 				activeProject = value;
-				backend.ActiveProject = value != null ? value.ProjectBackend : null;
+				Backend.ActiveProject = value != null ? value.ProjectBackend : null;
 			}
 		}
 		
@@ -326,6 +377,15 @@ namespace Stetic
 			}
 		}
 		
+		public bool AllowInProcLibraries {
+			get { return allowInProcLibraries; }
+			set {
+				allowInProcLibraries = value;
+				if (backend != null)
+					backend.AllowInProcLibraries = value;
+			}
+		}
+		
 		internal ComponentType GetComponentType (string typeName)
 		{
 			ComponentType t = (ComponentType) types [typeName];
@@ -337,21 +397,31 @@ namespace Stetic
 				return t;
 			}
 			
-			byte[] icon;
 			string desc = null, className = null;
 			Gdk.Pixbuf px = null;
 			
-			if (backend.GetClassDescriptorInfo (typeName, out desc, out className, out icon)) {
-				if (icon != null)
-					px = new Gdk.Pixbuf (icon);
+			if (externalBackend) {
+				byte[] icon;
+				
+				if (Backend.GetClassDescriptorInfo (typeName, out desc, out className, out icon)) {
+					if (icon != null)
+						px = new Gdk.Pixbuf (icon);
+				}
+				
+				if (px == null) {
+					px = ComponentType.Unknown.Icon;
+				}
+				
+				if (desc == null)
+					desc = typeName;
+			} else {
+				ClassDescriptor cls = Registry.LookupClassByName (typeName);
+				if (cls != null) {
+					desc = cls.Label;
+					className = cls.WrappedTypeName;
+					px = cls.Icon;
+				}
 			}
-			
-			if (px == null) {
-				px = ComponentType.Unknown.Icon;
-			}
-			
-			if (desc == null)
-				desc = typeName;
 			
 			t = new ComponentType (this, typeName, desc, className, px);
 			types [typeName] = t;
@@ -405,8 +475,112 @@ namespace Stetic
 				components.Remove (c.Backend);
 			}
 		}
+		
+		static LibraryData GetLibraryCacheData (string path)
+		{
+			if (libraryCheckCache == null)
+				LoadLibraryCheckCache ();
+			LibraryData data = (LibraryData) libraryCheckCache [path];
+			if (data == null)
+				return null;
+
+			DateTime lastWrite = File.GetLastWriteTime (path);
+			if (data.LastCheck == lastWrite)
+				return data;
+			else
+				// Data not valid anymore
+				return null;
+		}
+		
+		static void SetLibraryCacheData (string path, bool isLibrary)
+		{
+			if (libraryCheckCache == null)
+				LoadLibraryCheckCache ();
+
+			LibraryData data = (LibraryData) libraryCheckCache [path];
+			if (data == null) {
+				data = new LibraryData ();
+				libraryCheckCache [path] = data;
+			}
+			data.IsLibrary = isLibrary;
+			data.LastCheck = File.GetLastWriteTime (path);
+			SaveLibraryCheckCache ();
+		}
+		
+		static void LoadLibraryCheckCache ()
+		{
+			bool needsSave = false;;
+			libraryCheckCache = new Hashtable ();
+			string cacheFile = Path.Combine (ConfigDir, "assembly-check-cache");
+			if (!File.Exists (cacheFile))
+				return;
+			
+			try {
+				XmlDocument doc = new XmlDocument ();
+				doc.Load (cacheFile);
+				foreach (XmlElement elem in doc.SelectNodes ("assembly-check-cache/assembly")) {
+					string file = elem.GetAttribute ("path");
+					if (File.Exists (file)) {
+						LibraryData data = new LibraryData ();
+						if (elem.GetAttribute ("isLibrary") == "yes")
+							data.IsLibrary = true;
+						data.LastCheck = XmlConvert.ToDateTime (elem.GetAttribute ("timestamp"), XmlDateTimeSerializationMode.Local);
+					} else
+						needsSave = true;
+				}
+			} catch {
+				// If there is an error, just ignore the cached data
+				needsSave = true;
+			}
+			
+			if (needsSave)
+				SaveLibraryCheckCache ();
+		}
+		
+		static void SaveLibraryCheckCache ()
+		{
+			if (libraryCheckCache == null)
+				return;
+			
+			try {
+				if (!Directory.Exists (ConfigDir))
+					Directory.CreateDirectory (ConfigDir);
+					
+				XmlDocument doc = new XmlDocument ();
+				XmlElement delem = doc.CreateElement ("assembly-check-cache");
+				doc.AppendChild (delem);
+					
+				foreach (DictionaryEntry e in libraryCheckCache) {
+					LibraryData data = (LibraryData) e.Value;
+					XmlElement elem = doc.CreateElement ("assembly");
+					elem.SetAttribute ("path", (string) e.Key);
+					if (data.IsLibrary)
+						elem.SetAttribute ("isLibrary", "yes");
+					elem.SetAttribute ("timestamp", XmlConvert.ToString (data.LastCheck, XmlDateTimeSerializationMode.Local));
+					delem.AppendChild (elem);
+				}
+				
+				doc.Save (Path.Combine (ConfigDir, "assembly-check-cache"));
+			}
+			catch {
+				// If something goes wrong, just ignore the cached info
+			}
+		}
+		
+		static string ConfigDir {
+			get { 
+				string file = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.Personal), ".config");
+				return Path.Combine (file, "stetic");
+			}
+		}
 	}
 
 	internal delegate void BackendChangingHandler ();
 	internal delegate void BackendChangedHandler (ApplicationBackend oldBackend);
+	
+	class LibraryData
+	{
+		public DateTime LastCheck;
+		public bool IsLibrary;
+	}
 }

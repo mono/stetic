@@ -91,6 +91,7 @@ namespace Stetic {
 			}
 			else {
 				SteticApp = new Stetic.Application (mode);
+				SteticApp.AllowInProcLibraries = false;
 				ret = RunApp (args, n);
 			}
 			
@@ -265,6 +266,7 @@ namespace Stetic {
 				DesignerView view = (DesignerView) WidgetNotebook.GetNthPage (0);
 				pages.Add (view.Component.Name);
 				WidgetNotebook.Remove (view);
+				view.Dispose ();
 			}
 			openWindows.Clear ();
 			

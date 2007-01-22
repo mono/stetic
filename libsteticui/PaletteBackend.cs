@@ -17,9 +17,11 @@ namespace Stetic {
 		ActionGroupBox localActionsBox;
 		ActionGroupBox globalActionsBox;
 		Gtk.VBox box;
+		ApplicationBackend app;
 		
-		public PaletteBackend ()
+		public PaletteBackend (ApplicationBackend app)
 		{
+			this.app = app;
 			box = new Gtk.VBox (false, 0);
 			AddWithViewport (box);
 			groups = new Hashtable ();
@@ -53,7 +55,7 @@ namespace Stetic {
 			base.Dispose ();
 		}
 		
-		public PaletteBackend (ProjectBackend project): this ()
+		public PaletteBackend (ApplicationBackend app, ProjectBackend project): this (app)
 		{
 			this.ProjectBackend = project;
 		}
@@ -116,7 +118,7 @@ namespace Stetic {
 		
 		void OnRegistryChanged (object o, EventArgs args)
 		{
-			LoadWidgets (project);
+			WidgetLibraries = app.GetActiveLibraries ();
 		}
 		
 		public void LoadWidgets (ProjectBackend project)
@@ -137,9 +139,10 @@ namespace Stetic {
 					classes.Add (klass);
 			} else {
 				classes.AddRange (Registry.CoreWidgetLibrary.AllClasses);
-				foreach (WidgetLibrary lib in libraries)
+				foreach (WidgetLibrary lib in libraries) {
 					if (lib != Registry.CoreWidgetLibrary)
 						classes.AddRange (lib.AllClasses);
+				}
 			}
 			
 			classes.Sort (this);

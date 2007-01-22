@@ -2,7 +2,7 @@ using System;
 
 namespace Stetic.Wrapper {
 
-	public class FontSelectionDialog : Window {
+	public class FontSelectionDialog : Dialog {
 
 		public Gtk.FontSelection FontSelection {
 			get {

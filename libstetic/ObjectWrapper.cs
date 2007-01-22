@@ -21,6 +21,7 @@ namespace Stetic {
 		protected ClassDescriptor classDescriptor;
 		SignalCollection signals;
 		internal Hashtable translationInfo;
+		Hashtable extendedData;
 		bool loading;
 		IObjectFrontend frontend;
 		bool disposed;
@@ -91,13 +92,23 @@ namespace Stetic {
 		}
 		
 		public IObjectFrontend Frontend {
+			[NoGuiDispatch]
 			get { return frontend; }
+			[NoGuiDispatch]
 			set {
 				if (disposed)
 					throw new InvalidOperationException ("Can't bind component to disposed wrapper");
 				if (frontend != null)
 					frontend.Dispose ();
 				frontend = value;
+			}
+		}
+		
+		public IDictionary ExtendedData {
+			get {
+				if (extendedData == null)
+					extendedData = new Hashtable ();
+				return extendedData;
 			}
 		}
 		
@@ -131,6 +142,7 @@ namespace Stetic {
 		}
 		
 		public bool IsDisposed {
+			[NoGuiDispatch]
 			get { return disposed; }
 		}
 

@@ -1,3 +1,59 @@
+2007-01-22  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ActionGroupDesigner.cs, libsteticui/ProjectView.cs,
+	  libsteticui/SignalsEditor.cs, libsteticui/PluggableWidget.cs: Some
+	  protection to avoid dispatching some events after the object has
+	  been disposed.
+	* libsteticui/ApplicationBackend.cs: Changed the way libraries are
+	  loaded. If a library has dependencies, the dependencies are loaded
+	  first.
+	* libsteticui/CecilSignalDescriptor.cs,
+	  libsteticui/CecilPropertyDescriptor.cs,
+	  libsteticui/AssemblyResolver.cs,
+	  libsteticui/CecilClassDescriptor.cs,
+	  libsteticui/CecilWidgetLibrary.cs: New classes which allow loading
+	  a widget library using cecil.
+	* libsteticui/ProjectBackend.cs, libsteticui/Project.cs: Project
+	  libraries are now stored in the project file. In this way it is
+	  possible to generate code for projects which depend on other
+	  libraries using the command line tool.
+	* libsteticui/GuiDispatchServerSink.cs: Removed debug message.
+	* libsteticui/CodeGenerator.cs: Avoid dependency on
+	  TypeSignalDescriptor.
+	* libsteticui/WidgetTreeCombo.cs, stetic/Stetic.cs: Misc fixes.
+	* libsteticui/WidgetEditSession.cs, libsteticui/WidgetDesigner.cs: Some
+	  protection to avoid dispatching some events after the object has
+	  been disposed. Some fixes for the out-of-process mode.
+	* libsteticui/Application.cs: Implemented method which determines if an
+	  assembly is a widget library or not. Other misc fixes.
+	* libsteticui/PaletteBackend.cs: Update the widget list when the
+	  registry changes.
+	* libsteticui/Makefile.am: Updated. Added Cecil dependency.
+	* libsteticui/AssemblyWidgetLibrary.cs, libstetic/WidgetLibrary.cs:
+	  Added GetLibraryDependencies method, which returns widget libraries
+	  needed by the widgets of this library.
+	* libstetic/ItemGroup.cs, libstetic/Registry.cs: When looking for an
+	  item group of a class, avoid returning a group which has not been
+	  declared in the class, but inherited by a base class.
+	* libstetic/NoGuiDispatchAttribute.cs: Moved from libsteticui to
+	  libstetic.
+	* libstetic/ObjectWrapper.cs: Added an extended data property where
+	  class descriptors can store random information.
+	* libstetic/wrapper/Container.cs: Removed dependency on
+	  TypeClassDescriptor.
+	* libstetic/wrapper/FontSelectionDialog.cs,
+	  libstetic/wrapper/ComboBox.cs, libstetic/wrapper/ColorButton.cs:
+	  Set the correct base class.
+	* libstetic/wrapper/ScrolledWindow.cs: Destory viewport after replacing
+	  it.
+	* libstetic/wrapper/objects.xml, libstetic/ClassDescriptor.cs,
+	  libstetic/TypedClassDescriptor.cs: Implemented support for
+	  'base-type' attribute, which means that a widget class inherits all
+	  properties and events of the referenced type.
+	* libstetic/wrapper/TreeView.cs: New wrapper for TreeView.
+	* libstetic/Makefile.am: Updated.
+	* libstetic/AssemblyWidgetLibrary.cs: Moved to libsteticui.
+
 2007-01-17  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/EnumDescriptor.cs: Avoid importing enum values which have

@@ -1,7 +1,6 @@
 pkglib_DATA = libstetic.dll libstetic.dll.config libstetic.dll.mdb
 
 libstetic_dll_sources =			\
-	AssemblyWidgetLibrary.cs 	\
 	ClassDescriptor.cs		\
 	CommandDescriptor.cs		\
 	CustomWidget.cs		\
@@ -19,6 +18,7 @@ libstetic_dll_sources =			\
 	IProject.cs			\
 	IPropertyEditor.cs			\
 	IResourceProvider.cs 	\
+	NoGuiDispatchAttribute.cs \
 	ObjectReader.cs		\
 	ObjectWrapper.cs		\
 	ObjectWrapperEventHandler.cs		\
@@ -143,6 +143,7 @@ libstetic_dll_sources =			\
 	wrapper/ToggleToolButton.cs	\
 	wrapper/Toolbar.cs		\
 	wrapper/ToolButton.cs		\
+	wrapper/TreeView.cs		\
 	wrapper/Viewport.cs		\
 	wrapper/VScale.cs		\
 	wrapper/VScrollbar.cs		\

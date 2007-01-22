@@ -45,7 +45,7 @@ namespace Stetic
 							out IMessage responseMsg, out ITransportHeaders responseHeaders, out Stream responseStream)
 		{
 			IMethodCallMessage msg = (IMethodCallMessage) requestMsg;
-//			Console.WriteLine ("MESSAGE: " + msg.MethodName);
+//			Console.WriteLine ("MESSAGE: " + msg.TypeName + " - " + msg.MethodName);
 			
 			sinkStack.Push (this, null);
 

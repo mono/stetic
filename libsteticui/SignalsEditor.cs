@@ -44,6 +44,7 @@ namespace Stetic
 		{
 			base.Dispose ();
 			session.Dispose ();
+			frontend.disposed = true;
 			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
 		}
 		
@@ -57,6 +58,7 @@ namespace Stetic
 	internal class SignalsEditorFrontend: MarshalByRefObject
 	{
 		SignalsEditor editor;
+		internal bool disposed;
 		
 		public SignalsEditorFrontend (SignalsEditor editor)
 		{
@@ -67,7 +69,7 @@ namespace Stetic
 		{
 			Gtk.Application.Invoke (
 				delegate {
-					editor.NotifySignalActivated ();
+					if (!disposed) editor.NotifySignalActivated ();
 				}
 			);
 		}

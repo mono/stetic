@@ -35,6 +35,7 @@ namespace Stetic
 		public override void Dispose ()
 		{
 			base.Dispose ();
+			frontend.disposed = true;
 			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
 		}
 	}
@@ -43,6 +44,7 @@ namespace Stetic
 	internal class ProjectViewFrontend: MarshalByRefObject
 	{
 		Application app;
+		internal bool disposed;
 		
 		public event ComponentEventHandler ComponentActivated;
 		
@@ -55,6 +57,7 @@ namespace Stetic
 		{
 			Gtk.Application.Invoke (
 				delegate {
+					if (disposed) return;
 					Component c = app.GetComponent (ob, widgetName, widgetType);
 					if (c != null && ComponentActivated != null)
 						ComponentActivated (null, new ComponentEventArgs (app.ActiveProject, c));

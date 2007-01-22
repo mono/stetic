@@ -4,7 +4,7 @@ using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
-	public class ComboBox : Widget {
+	public class ComboBox : Container {
 
 		public static new Gtk.ComboBox CreateInstance ()
 		{

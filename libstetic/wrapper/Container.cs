@@ -341,7 +341,7 @@ namespace Stetic.Wrapper
 
 		protected virtual ObjectWrapper ReadInternalChild (ObjectReader reader, XmlElement child_elem)
 		{
-			TypedClassDescriptor klass = base.ClassDescriptor as TypedClassDescriptor;
+			ClassDescriptor klass = base.ClassDescriptor;
 			string childId = child_elem.GetAttribute ("internal-child");
 			
 			foreach (PropertyDescriptor prop in klass.InternalChildren) {

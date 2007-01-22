@@ -11,7 +11,7 @@ namespace Stetic {
 		static ArrayList classes = new ArrayList ();
 		
 		static XslTransform gladeImport, gladeExport;
-		static AssemblyWidgetLibrary coreLib;
+		static WidgetLibrary coreLib;
 		
 		public static event EventHandler RegistryChanging;
 		public static event EventHandler RegistryChanged;
@@ -19,9 +19,9 @@ namespace Stetic {
 		static int changing;
 		static bool changed;
 
-		static Registry ()
+		public static void Initialize (WidgetLibrary coreLibrary)
 		{
-			coreLib = new AssemblyWidgetLibrary (typeof(Registry).Assembly.FullName, Assembly.GetExecutingAssembly ());
+			coreLib = coreLibrary;
 			RegisterWidgetLibrary (coreLib);
 		}
 		
@@ -115,6 +115,14 @@ namespace Stetic {
 		public static bool IsRegistered (WidgetLibrary library)
 		{
 			return libraries.Contains (library);
+		}
+		
+		public static WidgetLibrary GetWidgetLibrary (string name)
+		{
+			foreach (WidgetLibrary lib in libraries)
+				if (lib.Name == name)
+					return lib;
+			return null;
 		}
 		
 		public static bool IsRegistered (string name)
@@ -264,11 +272,11 @@ namespace Stetic {
 			string groupname;
 			ClassDescriptor klass = FindGroupClass (name, out groupname);
 			
-			ItemGroup group = klass.ItemGroups [groupname];
-			if (group != null)
-				return group;
-			else
-				throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedTypeName);
+			foreach (ItemGroup grp in klass.ItemGroups)
+				if (grp.Name == groupname && grp.DeclaringType == klass)
+					return grp;
+
+			throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedTypeName);
 		}
 
 		public static ItemGroup LookupSignalGroup (string name)
@@ -276,11 +284,10 @@ namespace Stetic {
 			string groupname;
 			ClassDescriptor klass = FindGroupClass (name, out groupname);
 			
-			ItemGroup group = klass.SignalGroups [groupname];
-			if (group != null)
-				return group;
-			else
-				throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedTypeName);
+			foreach (ItemGroup grp in klass.SignalGroups)
+				if (grp.Name == groupname && grp.DeclaringType == klass)
+					return grp;
+			throw new ArgumentException ("No itemgroup '" + groupname + "' in class " + klass.WrappedTypeName);
 		}
 
 		public static ItemDescriptor LookupItem (string name)

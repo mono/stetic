@@ -31,11 +31,20 @@ namespace Stetic
 			    wrapper = Registry.GetType (elem.GetAttribute ("wrapper"), true);
 			else {
 				inheritedWrapper = true;
-				for (Type type = wrapped.BaseType; type != null; type = type.BaseType) {
-					TypedClassDescriptor parent = Registry.LookupClassByName (type.FullName) as TypedClassDescriptor;
-					if (parent != null) {
+				string baseClass = elem.GetAttribute ("base-type");
+				if (baseClass.Length > 0) {
+					// If a base type is specified, use the wrapper of that base type
+					TypedClassDescriptor parent = Registry.LookupClassByName (baseClass) as TypedClassDescriptor;
+					if (parent != null)
 						wrapper = parent.WrapperType;
-						break;
+				}
+				else {
+					for (Type type = wrapped.BaseType; type != null; type = type.BaseType) {
+						TypedClassDescriptor parent = Registry.LookupClassByName (type.FullName) as TypedClassDescriptor;
+						if (parent != null) {
+							wrapper = parent.WrapperType;
+							break;
+						}
 					}
 				}
 				if (wrapper == null)

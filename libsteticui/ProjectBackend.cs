@@ -1,5 +1,6 @@
 using Gtk;
 using System;
+using System.IO;
 using System.Xml;
 using System.Collections;
 using System.Collections.Specialized;
@@ -14,7 +15,6 @@ namespace Stetic {
 		ArrayList topLevels;
 		NodeStore store;
 		bool modified;
-		internal bool Syncing;
 		Gtk.Widget selection;
 		string id;
 		string fileName;
@@ -25,7 +25,9 @@ namespace Stetic {
 		Stetic.ProjectIconFactory iconFactory;
 		Project frontend;
 		int componentIdCounter;
-		WidgetLibrarySet widgetLibraries;
+		ArrayList widgetLibraries;
+		ApplicationBackend app;
+		ImportContext importContext;
 		
 		public event Wrapper.WidgetNameChangedHandler WidgetNameChanged;
 		public event Wrapper.WidgetNameChangedHandler WidgetMemberNameChanged;
@@ -45,8 +47,9 @@ namespace Stetic {
 		// a change in the registry
 		public event EventHandler ProjectReloaded;
 
-		public ProjectBackend ()
+		public ProjectBackend (ApplicationBackend app)
 		{
+			this.app = app;
 			nodes = new Hashtable ();
 			store = new NodeStore (typeof (ProjectNode));
 			topLevels = new ArrayList ();
@@ -57,6 +60,7 @@ namespace Stetic {
 			Registry.RegistryChanged += OnRegistryChanged;
 			
 			iconFactory = new ProjectIconFactory ();
+			widgetLibraries = new ArrayList ();
 		}
 		
 		public void Dispose ()
@@ -91,9 +95,32 @@ namespace Stetic {
 			}
 		}
 		
-		public WidgetLibrarySet WidgetLibraries {
+		internal ArrayList WidgetLibraries {
 			get { return widgetLibraries; }
 			set { widgetLibraries = value; }
+		}
+		
+		public bool CanGenerateCode {
+			get {
+				// It can generate code if all libraries on which depend can generate code
+				foreach (string s in widgetLibraries) {
+					WidgetLibrary lib = Registry.GetWidgetLibrary (s);
+					if (lib != null && !lib.CanGenerateCode)
+						return false;
+				}
+				return true;
+			}
+		}
+		
+		public void AddWidgetLibrary (string lib)
+		{
+			if (!widgetLibraries.Contains (lib))
+				widgetLibraries.Add (lib);
+		}
+		
+		public void RemoveWidgetLibrary (string lib)
+		{
+			widgetLibraries.Remove (lib);
 		}
 		
 		public IResourceProvider ResourceProvider { 
@@ -154,31 +181,68 @@ namespace Stetic {
 			store.Clear ();
 			nodes.Clear ();
 			topLevels.Clear ();
+			widgetLibraries.Clear ();
 
 			iconFactory = new ProjectIconFactory ();
 		}
 		
 		public void Load (string fileName)
 		{
+			Load (fileName, fileName);
+		}
+		
+		public void Load (string xmlFile, string fileName)
+		{
+			this.fileName = fileName;
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
-			doc.Load (fileName);
+			doc.Load (xmlFile);
 			Read (doc);
 			
-			this.fileName = fileName;
 			Id = System.IO.Path.GetFileName (fileName);
 		}
 		
-		public void Read (XmlDocument doc)
+		void Read (XmlDocument doc)
 		{
 			loading = true;
+			string basePath = fileName != null ? Path.GetDirectoryName (fileName) : null;
 			
 			try {
+				string fn = fileName;
 				Close ();
+				fileName = fn;
 				
 				XmlNode node = doc.SelectSingleNode ("/stetic-interface");
 				if (node == null)
 					throw new ApplicationException (Catalog.GetString ("Not a Stetic file according to node name."));
+				
+				// Load the assembly directories
+				importContext = new ImportContext ();
+				foreach (XmlElement libElem in node.SelectNodes ("import/assembly-directory")) {
+					string dir = libElem.GetAttribute ("path");
+					if (dir.Length > 0) {
+						if (basePath != null && !Path.IsPathRooted (dir)) {
+							dir = Path.Combine (basePath, dir);
+							if (Directory.Exists (dir))
+								dir = Path.GetFullPath (dir);
+						}
+						importContext.Directories.Add (dir);
+					}
+				}
+				
+				// Import the referenced libraries
+				foreach (XmlElement libElem in node.SelectNodes ("import/widget-library")) {
+					string libname = libElem.GetAttribute ("name");
+					if (libname.EndsWith (".dll") || libname.EndsWith (".exe")) {
+						if (basePath != null && !Path.IsPathRooted (libname)) {
+							libname = Path.Combine (basePath, libname);
+							if (File.Exists (libname))
+								libname = Path.GetFullPath (libname);
+						}
+					}
+					widgetLibraries.Add (libname);
+				}
+				app.LoadLibraries (importContext, widgetLibraries);
 				
 				ObjectReader reader = new ObjectReader (this, FileFormat.Native);
 				
@@ -213,13 +277,42 @@ namespace Stetic {
 			writer.Close ();
 		}
 		
-		public XmlDocument Write ()
+		XmlDocument Write ()
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
 
 			XmlElement toplevel = doc.CreateElement ("stetic-interface");
 			doc.AppendChild (toplevel);
+			
+			if (widgetLibraries.Count > 0 || (importContext != null && importContext.Directories.Count > 0)) {
+				XmlElement importElem = doc.CreateElement ("import");
+				toplevel.AppendChild (importElem);
+				string basePath = Path.GetDirectoryName (fileName);
+				
+				if (importContext != null && importContext.Directories.Count > 0) {
+					foreach (string dir in importContext.Directories) {
+						XmlElement dirElem = doc.CreateElement ("assembly-directory");
+						if (basePath != null)
+							dirElem.SetAttribute ("path", AbsoluteToRelativePath (basePath, dir));
+						else
+							dirElem.SetAttribute ("path", dir);
+						toplevel.AppendChild (dirElem);
+					}
+				}
+				
+				foreach (string wlib in widgetLibraries) {
+					string libName = wlib;
+					XmlElement libElem = doc.CreateElement ("widget-library");
+					if (wlib.EndsWith (".dll") || wlib.EndsWith (".exe")) {
+						if (basePath != null)
+							libName = AbsoluteToRelativePath (basePath, wlib);
+					}
+
+					libElem.SetAttribute ("name", libName);
+					importElem.AppendChild (libElem);
+				}
+			}
 
 			ObjectWriter writer = new ObjectWriter (doc, FileFormat.Native);
 			foreach (Wrapper.ActionGroup agroup in actionGroups) {
@@ -380,6 +473,8 @@ namespace Stetic {
 		
 		void OnRegistryChanging (object o, EventArgs args)
 		{
+			if (loading) return;
+				
 			// Store a copy of the current tree. The tree will
 			// be recreated once the registry change is completed.
 			
@@ -389,9 +484,13 @@ namespace Stetic {
 		
 		void OnRegistryChanged (object o, EventArgs args)
 		{
+			if (loading) return;
+			
 			if (tempDoc != null) {
 				Read (tempDoc);
 				tempDoc = null;
+				if (frontend != null)
+					frontend.NotifyProjectReloaded ();
 				if (ProjectReloaded != null)
 					ProjectReloaded (this, EventArgs.Empty);
 			}
@@ -538,19 +637,15 @@ namespace Stetic {
 		
 		void OnObjectChanged (object sender, ObjectWrapperEventArgs args)
 		{
-			if (!Syncing) {
-				NotifyChanged ();
-				if (ObjectChanged != null)
-					ObjectChanged (this, args);
-			}
+			NotifyChanged ();
+			if (ObjectChanged != null)
+				ObjectChanged (this, args);
 		}
 
 		void OnWidgetNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
 		{
-			if (!Syncing) {
-				NotifyChanged ();
-				OnWidgetNameChanged (args);
-			}
+			NotifyChanged ();
+			OnWidgetNameChanged (args);
 		}
 
 		protected virtual void OnWidgetNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args)
@@ -563,10 +658,8 @@ namespace Stetic {
 		
 		void OnWidgetMemberNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
 		{
-			if (!Syncing) {
-				NotifyChanged ();
-				OnWidgetMemberNameChanged (args);
-			}
+			NotifyChanged ();
+			OnWidgetMemberNameChanged (args);
 		}
 
 		protected virtual void OnWidgetMemberNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args)
@@ -753,6 +846,41 @@ namespace Stetic {
 			else
 				return -1;
 		}
+
+		internal static string AbsoluteToRelativePath (string baseDirectoryPath, string absPath)
+		{
+			if (!Path.IsPathRooted (absPath))
+				return absPath;
+			
+			absPath = Path.GetFullPath (absPath);
+			baseDirectoryPath = Path.GetFullPath (baseDirectoryPath);
+			char[] separators = { Path.DirectorySeparatorChar, Path.VolumeSeparatorChar, Path.AltDirectorySeparatorChar };
+			
+			string[] bPath = baseDirectoryPath.Split (separators);
+			string[] aPath = absPath.Split (separators);
+			int indx = 0;
+			for(; indx < Math.Min(bPath.Length, aPath.Length); ++indx) {
+				if(!bPath[indx].Equals(aPath[indx]))
+					break;
+			}
+			
+			if (indx == 0) {
+				return absPath;
+			}
+			
+			string erg = "";
+			
+			if(indx == bPath.Length) {
+				erg += "." + Path.DirectorySeparatorChar;
+			} else {
+				for (int i = indx; i < bPath.Length; ++i) {
+					erg += ".." + Path.DirectorySeparatorChar;
+				}
+			}
+			erg += String.Join(Path.DirectorySeparatorChar.ToString(), aPath, indx, aPath.Length-indx);
+			
+			return erg;
+		}
 		
 		void OnGroupAdded (object s, Stetic.Wrapper.ActionGroupEventArgs args)
 		{
@@ -864,10 +992,15 @@ namespace Stetic {
 				return p;
 			}
 		}
-
+		
 		public override string ToString ()
 		{
 			return "[ProjectNode " + GetHashCode().ToString() + " " + widget.GetType().FullName + " '" + Name + "']";
 		}
+	}
+	
+	class ImportContext
+	{
+		public StringCollection Directories = new StringCollection ();
 	}
 }

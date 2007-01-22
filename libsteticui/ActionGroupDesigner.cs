@@ -165,6 +165,7 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
+			frontend.disposed = true;
 			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
 			if (editSession != null)
 				editSession.Dispose ();
@@ -223,6 +224,7 @@ namespace Stetic
 	internal class ActionGroupDesignerFrontend: MarshalByRefObject
 	{
 		ActionGroupDesigner designer;
+		internal bool disposed;
 		
 		public ActionGroupDesignerFrontend (ActionGroupDesigner designer)
 		{
@@ -232,28 +234,28 @@ namespace Stetic
 		public void NotifyBindField ()
 		{
 			Gtk.Application.Invoke (
-				delegate { designer.NotifyBindField (); }
+				delegate { if (!disposed) designer.NotifyBindField (); }
 			);
 		}
 		
 		public void NotifyModified ()
 		{
 			Gtk.Application.Invoke (
-				delegate { designer.NotifyModified (); }
+				delegate { if (!disposed) designer.NotifyModified (); }
 			);
 		}
 
 		public void NotifySignalAdded (Wrapper.Action action, string name, Signal signal)
 		{
 			Gtk.Application.Invoke (
-				delegate { designer.NotifySignalAdded (action, name, signal); }
+				delegate { if (!disposed) designer.NotifySignalAdded (action, name, signal); }
 			);
 		}
 		
 		public void NotifySignalChanged (Wrapper.Action action, string name, Signal oldSignal, Signal signal)
 		{
 			Gtk.Application.Invoke (
-				delegate { designer.NotifySignalChanged (action, name, oldSignal, signal); }
+				delegate { if (!disposed) designer.NotifySignalChanged (action, name, oldSignal, signal); }
 			);
 		}
 		

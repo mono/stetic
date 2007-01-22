@@ -141,7 +141,7 @@
 	</glade-transform>
     </object>
 
-    <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container">
+    <object type="Gtk.Container,gtk-sharp" wrapper="Stetic.Wrapper.Container" base-type="Gtk.Widget">
 	<itemgroups>
     	<itemgroup name="Commands">
 			<command name="IncreaseBorderWidth" label="Increase Border Width" icon="res:inc-border.png" />
@@ -155,13 +155,12 @@
 			<signal name="Removed" />
 			<signal name="ResizeChecked" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</signals>
     </object>
     
     <object type="Gtk.Container+ContainerChild,gtk-sharp" wrapper="Stetic.Wrapper.Container+ContainerChild" />
 
-    <object type="Gtk.Window,gtk-sharp" wrapper="Stetic.Wrapper.Window"
+    <object type="Gtk.Window,gtk-sharp" base-type="Gtk.Container" wrapper="Stetic.Wrapper.Window"
 	    label="Window" icon="window.png" palette-category="window" init-properties="Type">
 	<itemgroups>
 	    <itemgroup label="Window Properties">
@@ -190,8 +189,6 @@
 		<property name="SkipPagerHint" />
 		<property name="SkipTaskbarHint" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Window Signals">
@@ -202,12 +199,10 @@
 		<signal name="MoveFocus" />
 		<signal name="SetFocus" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.Misc,gtk-sharp" wrapper="Stetic.Wrapper.Misc">
+    <object type="Gtk.Misc,gtk-sharp" wrapper="Stetic.Wrapper.Misc" base-type="Gtk.Widget">
 	<itemgroups>
 	    <itemgroup label="Miscellaneous Alignment Properties">
 		<property name="Xpad" />
@@ -221,13 +216,12 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Paned,gtk-sharp" wrapper="Stetic.Wrapper.Paned">
+    <object type="Gtk.Paned,gtk-sharp" wrapper="Stetic.Wrapper.Paned" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Pane Properties">
 		<property name="Position" />
 		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Paned Signals">
@@ -237,8 +231,6 @@
 		<signal name="CancelPosition" />
 		<signal name="MoveHandle" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
     <object type="Gtk.Paned+PanedChild,gtk-sharp">
@@ -250,7 +242,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Range,gtk-sharp" wrapper="Stetic.Wrapper.Range">
+    <object type="Gtk.Range,gtk-sharp" wrapper="Stetic.Wrapper.Range" base-type="Gtk.Widget">
 	<itemgroups>
 	    <itemgroup label="Range Properties">
 		<property name="UpdatePolicy" />
@@ -262,7 +254,6 @@
 		<property name="Adjustment.StepIncrement" />
 		<property name="Adjustment.Value" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Range Signals">
@@ -270,19 +261,12 @@
 		<signal name="ValueChanged" />
 		<signal name="MoveSlider" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</signals>
     </object>
 
-    <object type="Gtk.Scale,gtk-sharp" wrapper="Stetic.Wrapper.Scale">
+    <object type="Gtk.Scale,gtk-sharp" wrapper="Stetic.Wrapper.Scale" base-type="Gtk.Range">
 	<itemgroups>
 	    <itemgroup label="Scale Properties">
-		<property name="Adjustment.Lower" />
-		<property name="Adjustment.Upper" />
-		<property name="Adjustment.PageIncrement" />
-		<property name="Adjustment.PageSize" />
-		<property name="Adjustment.StepIncrement" />
-		<property name="Adjustment.Value" />
 		<property name="DrawValue" ignore-default="true" />
 		<property name="Digits">
 		    <disabled-if name="DrawValue" value="false" />
@@ -290,21 +274,16 @@
 		<property name="ValuePos" ignore-default="true" >
 		    <disabled-if name="DrawValue" value="false" />
 		</property>
-		<property name="Inverted" />
-		<property name="UpdatePolicy" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Scale Signals">
 		<signal name="FormatValue" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Range" />
 	</signals>
     </object>
 
-    <object type="Gtk.Alignment,gtk-sharp" label="Alignment" icon="alignment.png" 
+    <object type="Gtk.Alignment,gtk-sharp" base-type="Gtk.Container" label="Alignment" icon="alignment.png" 
     		 init-properties="Xalign Yalign Xscale Yscale" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Alignment Properties">
@@ -318,42 +297,24 @@
 		<property name="BottomPadding" />
 		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
     </object>
 
-    <object type="Gtk.Arrow,gtk-sharp"
+    <object type="Gtk.Arrow,gtk-sharp" base-type="Gtk.Misc"
 	    label="Arrow" icon="arrow.png" palette-category="widget" init-properties="ArrowType ShadowType">
 	<itemgroups>
 	    <itemgroup label="Arrow Properties">
 		<property name="ArrowType" />
 		<property name="ShadowType" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Misc" important="true" />
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	</signals>
     </object>
 
-    <object type="Gtk.Bin,gtk-sharp" wrapper="Stetic.Wrapper.Bin"
+    <object type="Gtk.Bin,gtk-sharp" base-type="Gtk.Widget" wrapper="Stetic.Wrapper.Bin"
     	label="Bin" icon="custom.png">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	</signals>
     </object>
 
-    <object type="Gtk.Box,gtk-sharp" wrapper="Stetic.Wrapper.Box">
+    <object type="Gtk.Box,gtk-sharp" wrapper="Stetic.Wrapper.Box" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Box Properties">
 			<property name="Homogeneous" />
@@ -367,10 +328,6 @@
 	    <command name="InsertAfter" label="Insert After"
 		     description="Insert an empty row/column after the selected one" />
 	</contextmenu>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
     </object>
     
     <object type="Gtk.Box+BoxChild,gtk-sharp" wrapper="Stetic.Wrapper.Box+BoxChild">
@@ -394,22 +351,15 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.ButtonBox,gtk-sharp" wrapper="Stetic.Wrapper.ButtonBox">
+    <object type="Gtk.ButtonBox,gtk-sharp" base-type="Gtk.Box" wrapper="Stetic.Wrapper.ButtonBox">
 	<itemgroups>
 	    <itemgroup label="Button Box Properties">
 		<property name="Size" label="Size"
 			  description="The number of buttons"
 			  min="0" />
 		<property name="LayoutStyle" />
-		<property name="Spacing" />
-		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
 	<contextmenu>
 	    <command name="InsertBefore" label="Insert Button Before"
 		     description="Insert a new button before the selected one" />
@@ -434,7 +384,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Button,gtk-sharp" wrapper="Stetic.Wrapper.Button"
+    <object type="Gtk.Button,gtk-sharp" wrapper="Stetic.Wrapper.Button" base-type="Gtk.Container"
 	    label="Button" icon="button.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Button Properties">
@@ -477,8 +427,6 @@
 		<property name="Yalign" />
 		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Button Signals">
@@ -489,12 +437,10 @@
 		<signal name="Pressed" />
 		<signal name="Released" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.Calendar,gtk-sharp"
+    <object type="Gtk.Calendar,gtk-sharp" base-type="Gtk.Widget"
 	    label="Calendar" icon="calendar.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Calendar Properties">
@@ -504,7 +450,6 @@
 		<property name="ShowWeekNumbers" />
 		<property name="NoMonthChange" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Calendar Signals">
@@ -516,13 +461,12 @@
 		<signal name="DaySelectedDoubleClick" />
 		<signal name="NextYear" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</signals>
     </object>
 
     <object type="Gtk.CheckButton,gtk-sharp" wrapper="Stetic.Wrapper.CheckButton"
 	    label="Check Box" icon="checkbutton.png" palette-category="widget"
-	    hexpandable="true">
+	    hexpandable="true" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Check Box Properties">
 		<property name="Label" init-with-name="true" translatable="true" />
@@ -540,10 +484,8 @@
 		</command>
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
-	    <itemgroup ref="Gtk.Widget" />
 	    <itemgroup ref="Gtk.Button" />
 	</signals>
 	<contextmenu>
@@ -625,7 +567,7 @@
     </object>
 
     <object type="Gtk.ColorButton,gtk-sharp" wrapper="Stetic.Wrapper.ColorButton"
-	    label="Color Button" icon="colorbutton.png" palette-category="widget">
+	    label="Color Button" icon="colorbutton.png" palette-category="widget" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Color Button Properties">
 		<property name="Title" translatable="true" />
@@ -633,21 +575,17 @@
 		<property name="Alpha" min="-1" max="65535" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Color Button Signals">
 		<signal name="ColorSet" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	    <itemgroup ref="Gtk.Button" />
 	</signals>
     </object>
 
     <object type="Gtk.ComboBox,gtk-sharp" wrapper="Stetic.Wrapper.ComboBox"
-	    label="Combo Box" icon="combo.png" palette-category="widget">
+	    label="Combo Box" icon="combo.png" palette-category="widget" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Combo Box Properties">
 		<property name="IsTextCombo" label="Text ComboBox" 
@@ -661,73 +599,35 @@
 		<!-- 2.6 <property name="AddTearoffs" /> -->
 		<!-- 2.6 <property name="FocusOnClick" /> -->
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="ComboBox Signals">
 		<signal name="Changed" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
     <object type="Gtk.ComboBoxEntry,gtk-sharp" wrapper="Stetic.Wrapper.ComboBoxEntry" 
-	    label="Combo Box Entry" palette-category="widget">
-	<itemgroups>
-	    <itemgroup label="Combo Box Entry Properties">
-		<property ref="Gtk.ComboBox.IsTextCombo" />
-		<property ref="Gtk.ComboBox.Items" />
-		<property name="Active" min="-1"/>
-		<!-- 2.6 <property name="AddTearoffs" /> -->
-		<!-- 2.6 <property name="HasFrame" /> -->
-	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	    <itemgroup ref="Gtk.ComboBox" />
-	</signals>
+	    label="Combo Box Entry" palette-category="widget" base-type="Gtk.ComboBox">
     </object>
 
     <object type="Gtk.Dialog,gtk-sharp" wrapper="Stetic.Wrapper.Dialog"
-	    label="Dialog Box" icon="dialog.png" palette-category="window">
+	    label="Dialog Box" icon="dialog.png" palette-category="window" base-type="Gtk.Window">
 	<itemgroups>
 	    <itemgroup label="Dialog Properties">
-		<property ref="Gtk.Window.Title" />
 		<property name="Buttons" label="Number of Buttons"
 			  description="The number of buttons"
 			  min="1" />
 		<property name="HelpButton" label="Help Button"
 			  description="Whether or not to display a 'Help' button" />
-		<property ref="Gtk.Window.Icon" />
-		<property ref="Gtk.Window.WindowPosition" />
-		<property ref="Gtk.Window.Modal" />
-		<property name="BorderWidth" />
-	    </itemgroup>
-	    <itemgroup label="Miscellaneous Dialog Properties" name="Misc">
 		<property name="HasSeparator" />
-		<property name="AcceptFocus" />
-		<property name="Decorated" />
-		<property name="DestroyWithParent" />
-		<property name="Gravity" />
-		<property name="Role" />
-		<property name="SkipPagerHint" />
-		<property name="SkipTaskbarHint" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Window.Size" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Dialog Signals">
 		<signal name="Close" />
 		<signal name="Response" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	    <itemgroup ref="Gtk.Window" />
 	</signals>
 	<internal-children>
 	    <property name="VBox" glade-name="vbox" />
@@ -735,18 +635,12 @@
 	</internal-children>
     </object>
 
-    <object type="Gtk.DrawingArea,gtk-sharp"
+    <object type="Gtk.DrawingArea,gtk-sharp" base-type="Gtk.Widget"
 	    label="Drawing Area" icon="drawingarea.png" palette-category="widget"
 	    hexpandable="true" vexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Widget" important="false" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	</signals>
     </object>
 
-    <object type="Gtk.Entry,gtk-sharp"
+    <object type="Gtk.Entry,gtk-sharp" base-type="Gtk.Widget"
 	    label="Entry" icon="entry.png" palette-category="widget"
 	    hexpandable="true" wrapper="Stetic.Wrapper.Entry">
 	<itemgroups>
@@ -763,7 +657,6 @@
 		<property name="InvisibleChar" />
 		<property name="Xalign" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Entry Signals">
@@ -782,11 +675,10 @@
 		<signal name="EditingDone" />
 		<signal name="WidgetRemoved" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</signals>
     </object>
 
-    <object type="Gtk.EventBox,gtk-sharp"
+    <object type="Gtk.EventBox,gtk-sharp" base-type="Gtk.Container"
 	    label="Event Box" icon="eventbox.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Event Box Properties">
@@ -794,16 +686,10 @@
 		<property name="VisibleWindow" />
 		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
     </object>
 
-    <object type="Gtk.Expander,gtk-sharp" wrapper="Stetic.Wrapper.Expander"
+    <object type="Gtk.Expander,gtk-sharp" base-type="Gtk.Container" wrapper="Stetic.Wrapper.Expander"
 	    label="Expander" icon="expander.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Expander Properties">
@@ -811,31 +697,21 @@
 		<property name="Spacing" />
 		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Expander Signals">
 		<signal name="Activated" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.Fixed,gtk-sharp" wrapper="Stetic.Wrapper.Fixed"
+    <object type="Gtk.Fixed,gtk-sharp" wrapper="Stetic.Wrapper.Fixed" base-type="Gtk.Container"
 	    label="Fixed" icon="fixed.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Fixed Properties">
 		<property name="HasWindow" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
     </object>
 
     <object type="Gtk.Fixed+FixedChild,gtk-sharp" wrapper="Stetic.Wrapper.Fixed+FixedChild">
@@ -848,7 +724,7 @@
     </object>
     
     <object type="Gtk.FontButton,gtk-sharp" wrapper="Stetic.Wrapper.FontButton"
-	    label="Font Button" icon="fontbutton.png" palette-category="widget">
+	    label="Font Button" icon="fontbutton.png" palette-category="widget" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Font Button Properties">
 		<property name="Title" translatable="true" />
@@ -861,20 +737,16 @@
 		</property>
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Font Button Signals">
 		<signal name="FontSet" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	    <itemgroup ref="Gtk.Button" />
 	</signals>
     </object>
 
-    <object type="Gtk.Frame,gtk-sharp" wrapper="Stetic.Wrapper.Frame"
+    <object type="Gtk.Frame,gtk-sharp" wrapper="Stetic.Wrapper.Frame" base-type="Gtk.Container"
 	    label="Frame" icon="frame.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Frame Properties">
@@ -883,42 +755,16 @@
 		<property name="LabelYalign" />
 		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
     </object>
 
-    <object type="Gtk.HBox,gtk-sharp"
+    <object type="Gtk.HBox,gtk-sharp" base-type="Gtk.Box"
 	    label="HBox" icon="hbox.png" palette-category="container">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Box" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
-	<contextmenu ref="Gtk.Box" />
     </object>
 
-    <object type="Gtk.HButtonBox,gtk-sharp"
+    <object type="Gtk.HButtonBox,gtk-sharp" base-type="Gtk.ButtonBox"
 	    label="HButtonBox" icon="hbuttonbox.png" palette-category="container"
 	    hexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.ButtonBox" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
-	<contextmenu ref="Gtk.ButtonBox" />
 	<glade-transform>
 	    <!-- If a child has a "response_id" of -11 (GTK_RESPONSE_HELP), it should be packed with the "secondary" property -->
 	    <import>
@@ -936,72 +782,33 @@
 	</glade-transform>
     </object>
 
-    <object type="Gtk.HPaned,gtk-sharp"
+    <object type="Gtk.HPaned,gtk-sharp" base-type="Gtk.Paned"
 	    label="HPaned" icon="hpaned.png" palette-category="container"
 	    hexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Paned" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	    <itemgroup ref="Gtk.Paned" />
-	</signals>
     </object>
 
     <object type="Gtk.HScale,gtk-sharp" wrapper="Stetic.Wrapper.HScale"
 	    label="Horizontal Scale" icon="hscale.png" palette-category="widget"
-	    hexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Scale" />
-	    <itemgroup ref="Gtk.Widget" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Range" />
-	    <itemgroup ref="Gtk.Scale" />
-	</signals>
+	    hexpandable="true" base-type="Gtk.Scale">
     </object>
 
     <object type="Gtk.HScrollbar,gtk-sharp" wrapper="Stetic.Wrapper.HScrollbar"
 	    label="Horizontal Scrollbar" icon="hscrollbar.png" palette-category="widget"
-	    hexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Range" />
-	    <itemgroup ref="Gtk.Widget" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Range" />
-	    <itemgroup ref="Gtk.Scale" />
-	</signals>
+	    hexpandable="true" base-type="Gtk.Range">
     </object>
 
-    <object type="Gtk.HSeparator,gtk-sharp"
+    <object type="Gtk.HSeparator,gtk-sharp" base-type="Gtk.Widget"
 	    label="Horizontal Separator" icon="hseparator.png" palette-category="widget"
 	    hexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Widget" important="false" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	</signals>
     </object>
 
     <object type="Gtk.Image,gtk-sharp" wrapper="Stetic.Wrapper.Image"
-	    label="Image" icon="image.png" palette-category="widget">
+	    label="Image" icon="image.png" palette-category="widget" base-type="Gtk.Misc">
 	<itemgroups>
 	    <itemgroup label="Image Properties">
 		<property name="Pixbuf" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Misc" />
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	</signals>
     </object>
 
     <object type="Gtk.ImageMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.ImageMenuItem"
@@ -1023,7 +830,7 @@
     </object>
 
     <object type="Gtk.Label,gtk-sharp" wrapper="Stetic.Wrapper.Label"
-	    label="Label" icon="label.png" palette-category="widget">
+	    label="Label" icon="label.png" palette-category="widget" base-type="Gtk.Misc">
 	<itemgroups>
 	    <itemgroup label="Label Properties">
 		<property name="LabelProp" init-with-name="true" translatable="true" />
@@ -1038,8 +845,6 @@
 		<!-- 2.6 <property name="SingleLineMode" /> -->
 		<!-- 2.6 <property name="Angle" /> -->
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Misc" />
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Label Signals">
@@ -1047,16 +852,11 @@
 		<signal name="MoveCursor" />
 		<signal name="PopulatePopup" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</signals>
     </object>
 
     <object type="Gtk.MenuBar,gtk-sharp" wrapper="Stetic.Wrapper.MenuBar"
-	    label="Menu Bar" icon="menubar.png" palette-category="widget">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Widget" important="false" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
+	    label="Menu Bar" icon="menubar.png" palette-category="widget" base-type="Gtk.Container">
 	<signals>
     	<itemgroup label="Menu Bar Signals">
 		<signal name="Deactivated" />
@@ -1065,15 +865,10 @@
 		<signal name="ActivateCurrent" />
 		<signal name="Canceled" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.Menu,gtk-sharp" label="Menu" icon="menu.png">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Widget" important="false" />
-	</itemgroups>
+    <object type="Gtk.Menu,gtk-sharp" label="Menu" icon="menu.png" base-type="Gtk.Container">
 	<signals>
     	<itemgroup label="Menu Signals">
 		<signal name="Deactivated" />
@@ -1082,13 +877,13 @@
 		<signal name="ActivateCurrent" />
 		<signal name="Canceled" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
     <object type="Gtk.Menu+MenuChild,gtk-sharp" />
 
-    <object type="Stetic.MessageDialog" cname="GtkMessageDialog" wrapper="Stetic.Wrapper.Window"
+<!-- Code generation not implemented for MessageDialog
+	    
+	<object type="Stetic.MessageDialog" cname="GtkMessageDialog" wrapper="Stetic.Wrapper.Window"
 	    label="Message Dialog" icon="messagedialog.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="Message Dialog Properties">
@@ -1118,8 +913,9 @@
 	    <itemgroup ref="Gtk.Dialog" />
 	</signals>
     </object>
+-->
 
-    <object type="Gtk.Notebook,gtk-sharp" wrapper="Stetic.Wrapper.Notebook"
+    <object type="Gtk.Notebook,gtk-sharp" wrapper="Stetic.Wrapper.Notebook" base-type="Gtk.Container"
 	    label="Notebook" icon="notebook.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Notebook Properties">
@@ -1136,8 +932,6 @@
 		<command name="InsertAfter" label="Insert Page After"
 			 description="Insert a blank page after this one" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Notebook Signals">
@@ -1147,8 +941,6 @@
 		<signal name="SwitchPage" />
 		<signal name="SelectPage" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
 	<contextmenu>
 	    <command name="PreviousPage" label="Go to Previous Page"
@@ -1188,21 +980,17 @@
     </object>
 
     <object type="Gtk.OptionMenu,gtk-sharp" wrapper="Stetic.Wrapper.OptionMenu"
-	    label="Option Menu" icon="optionmenu.png" deprecated="true">
+	    label="Option Menu" icon="optionmenu.png" deprecated="true" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Option Menu Properties">
 		<property name="Active" glade-name="history" label="Active"
 			  description="The active menu item" min="0" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Option Menu Signals">
 		<signal name="Changed" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	    <itemgroup ref="Gtk.Button" />
 	</signals>
 	<internal-children>
@@ -1210,7 +998,7 @@
 	</internal-children>
     </object>
 
-    <object type="Gtk.ProgressBar,gtk-sharp"
+    <object type="Gtk.ProgressBar,gtk-sharp" base-type="Gtk.Widget"
 	    label="Progress Bar" icon="progressbar.png" palette-category="widget"
 	    hexpandable="true">
 	<itemgroups>
@@ -1220,44 +1008,25 @@
 		<property name="Fraction" />
 		<property name="PulseStep" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	</signals>
     </object>
 
     <object type="Gtk.RadioButton,gtk-sharp" wrapper="Stetic.Wrapper.RadioButton"
 	    label="Radio Button" icon="radiobutton.png" palette-category="widget"
-	    hexpandable="true" init-properties="Label">
+	    hexpandable="true" init-properties="Label" base-type="Gtk.CheckButton">
 	<itemgroups>
 	    <itemgroup label="Radio Button Properties">
-		<property ref="Gtk.CheckButton.Label" />
 		<property name="Group" label="Group"
 			  description="The name of the radio button group that this button belongs to"
 			  editor="Stetic.Editor.GroupPicker" />
-		<property ref="Gtk.CheckButton.Active" />
-		<property ref="Gtk.CheckButton.Inconsistent" />
-		<property ref="Gtk.CheckButton.DrawIndicator" />
-		<command ref="Gtk.CheckButton.RemoveLabel" />
-		<command ref="Gtk.CheckButton.RestoreLabel" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Button.Extra" />
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Radio Button Signals">
 		<signal name="Toggled" />
 		<signal name="GroupChanged" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	    <itemgroup ref="Gtk.Button" />
 	</signals>
-	<contextmenu>
-	    <command ref="Gtk.CheckButton.RemoveLabel" />
-	    <command ref="Gtk.CheckButton.RestoreLabel" />
-	</contextmenu>
     </object>
 <!--
     <object type="Gtk.RadioMenuItem,gtk-sharp" wrapper="Stetic.Wrapper.RadioMenuItem"
@@ -1357,7 +1126,7 @@
 
     <object type="Gtk.ScrolledWindow,gtk-sharp" wrapper="Stetic.Wrapper.ScrolledWindow"
 	    label="Scrolled Window" icon="scrolledwindow.png" palette-category="container"
-	    hexpandable="true" vexpandable="true">
+	    hexpandable="true" vexpandable="true" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Scrolled Window Properties">
 		<property name="VscrollbarPolicy" />
@@ -1366,16 +1135,12 @@
 		<property name="WindowPlacement" />
 		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Scrolled Window Signals">
 		<signal name="MoveFocusOut" />
 		<signal name="ScrollChild" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
@@ -1407,7 +1172,7 @@
     </object>
 -->
 
-    <object type="Gtk.SpinButton,gtk-sharp" wrapper="Stetic.Wrapper.SpinButton"
+    <object type="Gtk.SpinButton,gtk-sharp" wrapper="Stetic.Wrapper.SpinButton" base-type="Gtk.Widget"
 	    label="Spin Button" icon="spinbutton.png" palette-category="widget" init-properties="Lower Upper StepIncrement">
 	<itemgroups>
 	    <itemgroup label="Range Properties">
@@ -1426,7 +1191,6 @@
 		<property name="Value" />
 		<property name="Wrap" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Spin Button Signals">
@@ -1435,32 +1199,27 @@
 		<signal name="ValueChanged" />
 		<signal name="Output" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	    <itemgroup ref="Gtk.Entry" />
 	</signals>
     </object>
 
-    <object type="Gtk.Statusbar,gtk-sharp"
+    <object type="Gtk.Statusbar,gtk-sharp" base-type="Gtk.HBox"
 	    label="Statusbar" icon="statusbar.png" palette-category="widget"
 	    hexpandable="true">
 	<itemgroups>
 	    <itemgroup label="Status Bar Properties">
 		<property name="HasResizeGrip" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Statusbar Signals">
 		<signal name="TextPopped" />
 		<signal name="TextPushed" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.Table,gtk-sharp" wrapper="Stetic.Wrapper.Table"
+    <object type="Gtk.Table,gtk-sharp" wrapper="Stetic.Wrapper.Table" base-type="Gtk.Container"
 	    label="Table" icon="table.png" palette-category="container" init-properties="NRows NColumns Homogeneous">
 	<itemgroups>
 	    <itemgroup label="Table Properties">
@@ -1471,13 +1230,7 @@
 		<property name="ColumnSpacing" />
 		<property name="BorderWidth" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
 	<contextmenu>
 	    <command name="InsertRowBefore" label="Insert Row Before"
 		     description="Insert an empty row above the selected row" />
@@ -1595,7 +1348,7 @@
 
     <object type="Gtk.TextView,gtk-sharp" wrapper="Stetic.Wrapper.TextView"
 	    label="Text View" icon="textview.png" palette-category="widget"
-	    hexpandable="true" vexpandable="true">
+	    hexpandable="true" vexpandable="true" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Text View Properties">
 		<property name="Editable" />
@@ -1615,7 +1368,6 @@
 		<property name="RightMargin" />
 		<property name="Indent" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Text View Signals">
@@ -1632,12 +1384,10 @@
 		<signal name="SetAnchor" />
 		<signal name="ScrollAdjustmentsSet" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.ToggleButton,gtk-sharp"
+    <object type="Gtk.ToggleButton,gtk-sharp" base-type="Gtk.Container"
 	    label="Toggle Button" icon="togglebutton.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Toggle Button Properties">
@@ -1651,15 +1401,11 @@
 		<property name="Inconsistent" />
 	    </itemgroup>
 	    <itemgroup ref="Gtk.Button.Extra" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Toggle Button Signals">
 		<signal name="Toggled" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	    <itemgroup ref="Gtk.Button" />
 	</signals>
     </object>
@@ -1687,7 +1433,7 @@
     </object>
 -->
     <object type="Gtk.Toolbar,gtk-sharp" wrapper="Stetic.Wrapper.ActionToolbarWrapper"
-	    label="Toolbar" icon="toolbar.png" palette-category="widget">
+	    label="Toolbar" icon="toolbar.png" palette-category="widget" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Tool Bar Properties">
 		<property name="Orientation" />
@@ -1697,8 +1443,6 @@
 		<property name="ToolbarStyle" ignore-default="true" internal="true"/>
 		<property name="IconSize" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Toolbar Signals">
@@ -1706,8 +1450,6 @@
 		<signal name="PopupContextMenu" />
 		<signal name="StyleChanged" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 <!--
@@ -1724,9 +1466,9 @@
 	</itemgroups>
     </object>
 -->
-    <object type="Gtk.TreeView,gtk-sharp"
+    <object type="Gtk.TreeView,gtk-sharp" wrapper="Stetic.Wrapper.TreeView"
 	    label="Tree View" icon="treeview.png" palette-category="widget"
-	    hexpandable="true" vexpandable="true">
+	    hexpandable="true" vexpandable="true" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Tree View Properties">
 		<property name="EnableSearch" />
@@ -1739,8 +1481,6 @@
 		<!-- 2.6 <property name="HoverSelection" /> -->
 		<!-- 2.6 <property name="HoverExpand" /> -->
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Tree View Signals">
@@ -1761,113 +1501,53 @@
 		<signal name="ToggleCursorRow" />
 		<signal name="ScrollAdjustmentsSet" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.VBox,gtk-sharp"
+    <object type="Gtk.VBox,gtk-sharp" base-type="Gtk.Box"
 	    label="VBox" icon="vbox.png" palette-category="container">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Box" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
-	<contextmenu ref="Gtk.Box" />
     </object>
 
-    <object type="Gtk.VButtonBox,gtk-sharp"
+    <object type="Gtk.VButtonBox,gtk-sharp" base-type="Gtk.ButtonBox"
 	    label="VButtonBox" icon="vbuttonbox.png" palette-category="container"
 	    vexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.ButtonBox" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
-	<contextmenu ref="Gtk.ButtonBox" />
     </object>
 
     <object type="Gtk.Viewport,gtk-sharp" wrapper="Stetic.Wrapper.Viewport"
-	    label="Viewport" icon="viewport.png">
+	    label="Viewport" icon="viewport.png" base-type="Gtk.Container">
 	<itemgroups>
 	    <itemgroup label="Viewport Properties">
 		<property name="ShadowType" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Viewport Signals">
 		<signal name="ScrollAdjustmentsSet" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.VPaned,gtk-sharp"
+    <object type="Gtk.VPaned,gtk-sharp" base-type="Gtk.Paned"
 	    label="VPaned" icon="vpaned.png" palette-category="container"
 	    vexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Paned" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	    <itemgroup ref="Gtk.Paned" />
-	</signals>
     </object>
 
     <object type="Gtk.VScale,gtk-sharp" wrapper="Stetic.Wrapper.VScale"
 	    label="Vertical Scale" icon="vscale.png" palette-category="widget"
-	    vexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Scale" />
-	    <itemgroup ref="Gtk.Widget" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Range" />
-	    <itemgroup ref="Gtk.Scale" />
-	</signals>
+	    vexpandable="true" base-type="Gtk.Scale">
     </object>
 
     <object type="Gtk.VScrollbar,gtk-sharp" wrapper="Stetic.Wrapper.VScrollbar"
 	    label="Vertical Scrollbar" icon="vscrollbar.png" palette-category="widget"
-	    vexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Range" />
-	    <itemgroup ref="Gtk.Widget" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Range" />
-	    <itemgroup ref="Gtk.Scale" />
-	</signals>
+	    vexpandable="true" base-type="Gtk.Range">
     </object>
 
-    <object type="Gtk.VSeparator,gtk-sharp"
+    <object type="Gtk.VSeparator,gtk-sharp" base-type="Gtk.Widget"
 	    label="Vertical Separator" icon="vseparator.png" palette-category="widget"
 	    vexpandable="true">
-	<itemgroups>
-	    <itemgroup ref="Gtk.Widget" important="false" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	</signals>
     </object>
 
-    <object type="Stetic.Custom" cname="Custom"
+    <object type="Stetic.Custom" cname="Custom" base-type="Gtk.Widget"
 	    label="Custom Widget" icon="custom.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Custom Widget Properties">
@@ -1878,7 +1558,6 @@
 		<property name="Int1" glade-name="int1" />
 		<property name="Int2" glade-name="int2" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
     </object>
 
@@ -1913,55 +1592,35 @@
 
     <object type="Gtk.ColorSelection,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
 	    label="Color Selection" icon="colorselection.png" palette-category="widget"
-	    hexpandable="true" vexpandable="true">
+	    hexpandable="true" vexpandable="true" base-type="Gtk.Widget">
 	<itemgroups>
 	    <itemgroup label="Color Selection Properties">
 		<property name="HasPalette" />
 		<property name="HasOpacityControl" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Color Selection Signals">
 		<signal name="ColorChanged" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
-    <object type="Gtk.ColorSelectionDialog,gtk-sharp" wrapper="Stetic.Wrapper.Window"
+    <object type="Gtk.ColorSelectionDialog,gtk-sharp" base-type="Gtk.Dialog" wrapper="Stetic.Wrapper.Dialog"
 	    label="Color Selection Dialog" icon="colorselectiondialog.png" palette-category="window">
-	<itemgroups>
-	    <itemgroup label="Color Selection Dialog Properties">
-		<property ref="Gtk.Window.Title" />
-		<property ref="Gtk.Window.Icon" />
-		<property ref="Gtk.Window.WindowPosition" />
-		<property ref="Gtk.Window.Modal" />
-	    </itemgroup>
-	    <itemgroup ref="Gtk.Dialog.Misc" />
-	    <itemgroup ref="Gtk.Window.Size" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	    <itemgroup ref="Gtk.Window" />
-	    <itemgroup ref="Gtk.Dialog" />
-	</signals>
 	<internal-children>
 	    <property name="ColorSelection" glade-name="color_selection" />
 	    <property name="OkButton" glade-name="ok_button" />
 	    <property name="CancelButton" glade-name="cancel_button" />
 	    <property name="HelpButton" glade-name="help_button" />
+	    <property name="VBox" glade-name="vbox" />
+	    <property name="ActionArea" glade-name="action_area" />
 	</internal-children>
     </object>
 
     <object type="Gtk.FileChooserWidget,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
 	    label="File Chooser Widget" icon="fileselection.png" palette-category="widget"
-	    hexpandable="true" vexpandable="true" init-properties="Action">
+	    hexpandable="true" vexpandable="true" init-properties="Action" base-type="Gtk.Widget">
 	<itemgroups>
 	    <itemgroup label="File Chooser Widget Properties">
 		<property name="Action" />
@@ -1972,8 +1631,6 @@
 		</property>
 		<!-- 2.6 <property name="ShowHidden" /> -->
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="File Chooser Widget Signals">
@@ -1982,8 +1639,6 @@
 		<signal name="UpdatePreview" />
 		<signal name="CurrentFolderChanged" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
 	</signals>
     </object>
 
@@ -2007,26 +1662,17 @@
     </object>
     -->
 
-    <object type="Gtk.FileChooserDialog,gtk-sharp"
+    <object type="Gtk.FileChooserDialog,gtk-sharp" base-type="Gtk.Dialog"
 	    label="File Chooser Dialog" icon="fileselection.png" palette-category="window">
 	<itemgroups>
 	    <itemgroup label="File Chooser Dialog Properties">
-		<property ref="Gtk.Window.Title" />
 		<property name="Action" />
 		<property name="LocalOnly" />
 		<property name="SelectMultiple">
 		    <disabled-if name="Action" value="Save" />
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
-		<!-- 2.6 <property name="ShowHidden" /> -->
-		<property ref="Gtk.Window.Icon" />
-		<property ref="Gtk.Window.WindowPosition" />
-		<property ref="Gtk.Window.Modal" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Dialog.Misc" />
-	    <itemgroup ref="Gtk.Window.Size" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="File Chooser Dialog Signals">
@@ -2035,10 +1681,6 @@
 		<signal name="UpdatePreview" />
 		<signal name="CurrentFolderChanged" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	    <itemgroup ref="Gtk.Window" />
-	    <itemgroup ref="Gtk.Dialog" />
 	</signals>
 	<internal-children>
 	    <property name="VBox" glade-name="vbox" />
@@ -2048,42 +1690,20 @@
 
     <object type="Gtk.FontSelection,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
 	    label="Font Selection" icon="fontselection.png" palette-category="widget"
-	    hexpandable="true" vexpandable="true">
+	    hexpandable="true" vexpandable="true" base-type="Gtk.Widget">
 	<itemgroups>
 	    <itemgroup label="Font Selection Properties">
 		<property name="FontName" />
 		<property name="PreviewText" translatable="true" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
 	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	</signals>
     </object>
 
-    <object type="Gtk.FontSelectionDialog,gtk-sharp" wrapper="Stetic.Wrapper.FontSelectionDialog"
+    <object type="Gtk.FontSelectionDialog,gtk-sharp" base-type="Gtk.Dialog" wrapper="Stetic.Wrapper.FontSelectionDialog"
 	    label="Font Selection Dialog" icon="fontselectiondialog.png" palette-category="window">
-	<itemgroups>
-	    <itemgroup label="Font Selection Dialog Properties">
-		<property ref="Gtk.Window.Title" />
-		<property ref="Gtk.Window.Icon" />
-		<property ref="Gtk.Window.WindowPosition" />
-		<property ref="Gtk.Window.Modal" />
-	    </itemgroup>
-	    <itemgroup ref="Gtk.Dialog.Misc" />
-	    <itemgroup ref="Gtk.Window.Size" />
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container.Commands" />
-	</itemgroups>
-	<signals>
-	    <itemgroup ref="Gtk.Widget" />
-	    <itemgroup ref="Gtk.Container" />
-	    <itemgroup ref="Gtk.Window" />
-	    <itemgroup ref="Gtk.Dialog" />
-	</signals>
 	<internal-children>
+	    <property name="VBox" glade-name="vbox" />
+	    <property name="ActionArea" glade-name="action_area" />
 	    <property name="FontSelection" glade-name="font_selection" />
 	    <property name="OkButton" glade-name="ok_button" />
 	    <property name="CancelButton" glade-name="cancel_button" />

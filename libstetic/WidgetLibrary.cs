@@ -25,6 +25,19 @@ namespace Stetic
 			get { return false; }
 		}
 		
+		// Returns true if it is possible to generate code using this widget library.
+		// Not all widget libraries can generate code. For example, when a widget 
+		// depends on a wrapper class, and the wrapper class can't be loaded in memory,
+		// then it is not possible to generate code.
+		public virtual bool CanGenerateCode {
+			get { return true; }
+		}
+		
+		public virtual string[] GetLibraryDependencies ()
+		{
+			return new string [0];
+		}
+		
 		public virtual void Reload ()
 		{
 			Load ();
@@ -39,6 +52,9 @@ namespace Stetic
 			classes_by_cname.Clear ();
 			classes_by_csname.Clear ();
 			enums.Clear ();
+			
+			if (objects == null)
+				return;
 			
 			foreach (XmlElement element in objects.SelectNodes ("/objects/enum")) {
 				EnumDescriptor enm = new EnumDescriptor (element);
