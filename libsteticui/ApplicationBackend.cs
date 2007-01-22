@@ -130,7 +130,7 @@ namespace Stetic
 			set { allowInProcLibraries = value; }
 		}
 		
-		public bool UpdateLibraries (ArrayList libraries, bool allowBackendRestart, bool forceUnload)
+		public bool UpdateLibraries (ArrayList libraries, ArrayList projects, bool allowBackendRestart, bool forceUnload)
 		{
 			try {
 				Registry.BeginChangeSet ();
@@ -140,19 +140,30 @@ namespace Stetic
 				if (!Registry.ReloadWidgetLibraries () && allowBackendRestart)
 					return false;
 				
-				// Check which libraries need to be unloaded
+				// Store a list of registered libraries, used later to know which
+				// ones need to be unloaded
 				
-				foreach (WidgetLibrary alib in Registry.RegisteredWidgetLibraries) {
-					if (!libraries.Contains (alib.Name)) {
+				ArrayList loaded = new ArrayList ();
+				foreach (WidgetLibrary alib in Registry.RegisteredWidgetLibraries)
+					loaded.Add (alib.Name);
+				
+				// Load required libraries
+				
+				Hashtable visited = new Hashtable ();
+				LoadLibraries (null, visited, libraries);
+				
+				foreach (ProjectBackend project in projects)
+					LoadLibraries (project.ImportContext, visited, project.WidgetLibraries);
+				
+				// Unload libraries which are not required
+				
+				foreach (string name in loaded) {
+					if (!visited.Contains (name)) {
 						if (forceUnload && allowBackendRestart)
 							return false;
-						Registry.UnregisterWidgetLibrary (alib);
+						Registry.UnregisterWidgetLibrary (Registry.GetWidgetLibrary (name));
 					}
 				}
-				
-				// Load new libraries
-				
-				LoadLibraries (null, libraries);
 				
 				return true;
 			}
@@ -163,22 +174,35 @@ namespace Stetic
 		
 		internal void LoadLibraries (ImportContext ctx, IEnumerable libraries)
 		{
-			Hashtable visited = new Hashtable ();
-			
+			try {
+				Registry.BeginChangeSet ();
+				Hashtable visited = new Hashtable ();
+				LoadLibraries (ctx, visited, libraries);
+			} finally {
+				Registry.EndChangeSet ();
+			}
+		}
+		
+		internal void LoadLibraries (ImportContext ctx, Hashtable visited, IEnumerable libraries)
+		{
 			foreach (string s in libraries)
 				AddLibrary (ctx, visited, s);
 		}
 		
-		void AddLibrary (ImportContext ctx, Hashtable visited, string s)
+		WidgetLibrary AddLibrary (ImportContext ctx, Hashtable visited, string s)
 		{
-			if (Registry.IsRegistered (s))
-				return;
-				
+			if (Registry.IsRegistered (s)) {
+				WidgetLibrary lib = Registry.GetWidgetLibrary (s);
+				CheckDependencies (ctx, visited, lib);
+				return lib;
+			}
+
 			WidgetLibrary alib = CreateLibrary (ctx, s);
 			if (alib == null)
-				return;
+				return null;
 				
 			RegisterLibrary (ctx, visited, alib);
+			return alib;
 		}
 		
 		void RegisterLibrary (ImportContext ctx, Hashtable visited, WidgetLibrary lib)
@@ -188,11 +212,11 @@ namespace Stetic
 				
 			visited [lib.Name] = lib;
 
-			if (Registry.IsRegistered (lib.Name))
-				return;
-			
-			foreach (WidgetLibrary dlib in GetDependentLibraries (ctx, lib))
-				RegisterLibrary (ctx, visited, dlib);
+			foreach (string s in lib.GetLibraryDependencies ()) {
+				if (!Application.InternalIsWidgetLibrary (ctx, s))
+					continue;
+				AddLibrary (ctx, visited, s);
+			}
 			
 			try {
 				Registry.RegisterWidgetLibrary (lib);
@@ -225,17 +249,22 @@ namespace Stetic
 			return null;
 		}
 		
-		IEnumerable GetDependentLibraries (ImportContext ctx, WidgetLibrary lib)
+		void CheckDependencies (ImportContext ctx, Hashtable visited, WidgetLibrary lib)
 		{
-			foreach (string s in lib.GetLibraryDependencies ()) {
-				if (!Application.InternalIsWidgetLibrary (ctx, s))
-					continue;
-				WidgetLibrary dlib = CreateLibrary (ctx, s);
-				if (dlib != null)
-					yield return dlib;
+			if (visited.Contains (lib.Name))
+				return;
+				
+			visited [lib.Name] = lib;
+			
+			foreach (string dep in lib.GetLibraryDependencies ()) {
+				WidgetLibrary depLib = Registry.GetWidgetLibrary (dep);
+				if (depLib == null)
+					AddLibrary (ctx, visited, dep);
+				else
+					CheckDependencies (ctx, visited, depLib);
 			}
 		}
-
+		
 		public ProjectBackend ActiveProject {
 			get { return activeProject; }
 			set {

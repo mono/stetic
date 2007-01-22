@@ -1,5 +1,13 @@
 2007-01-22  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/ApplicationBackend.cs, libsteticui/ProjectBackend.cs,
+	  libsteticui/Application.cs: Fixed problem when updating project
+	  libraries. Make sure referenced libraries are not unloaded when
+	  they are still needed.
+	* libsteticui/CecilWidgetLibrary.cs: Null check.
+
+2007-01-22  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ActionGroupDesigner.cs, libsteticui/ProjectView.cs,
 	  libsteticui/SignalsEditor.cs, libsteticui/PluggableWidget.cs: Some
 	  protection to avoid dispatching some events after the object has

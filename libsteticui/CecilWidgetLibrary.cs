@@ -99,7 +99,7 @@ namespace Stetic
 				// this one can't
 				foreach (string dlib in GetLibraryDependencies ()) {
 					WidgetLibrary lib = Registry.GetWidgetLibrary (dlib);
-					if (!lib.CanGenerateCode) {
+					if (lib != null && !lib.CanGenerateCode) {
 						canGenerateCode = false;
 						break;
 					}

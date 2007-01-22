@@ -89,13 +89,11 @@ namespace Stetic
 			ArrayList assemblies = new ArrayList ();
 			assemblies.AddRange (widgetLibraries);
 			
-			foreach (Project p in projects) {
-				foreach (string s in p.WidgetLibraries)
-					if (!assemblies.Contains (s))
-						assemblies.Add (s);
-			}
+			ArrayList projectBackends = new ArrayList ();
+			foreach (Project p in projects)
+				projectBackends.Add (p.ProjectBackend);
 			
-			if (!Backend.UpdateLibraries (assemblies, allowBackendRestart, forceUnload))
+			if (!Backend.UpdateLibraries (assemblies, projectBackends, allowBackendRestart, forceUnload))
 			{
 				// The backend process needs to be restarted.
 				// This is done in background.

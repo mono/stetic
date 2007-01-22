@@ -242,6 +242,7 @@ namespace Stetic {
 					}
 					widgetLibraries.Add (libname);
 				}
+				
 				app.LoadLibraries (importContext, widgetLibraries);
 				
 				ObjectReader reader = new ObjectReader (this, FileFormat.Native);
@@ -511,6 +512,10 @@ namespace Stetic {
 					OnModifiedChanged (EventArgs.Empty);
 				}
 			}
+		}
+		
+		public ImportContext ImportContext {
+			get { return importContext; }
 		}
 		
 		public void AddWindow (Gtk.Window window)
