@@ -72,6 +72,13 @@ namespace Stetic
 				return;
 			}
 
+			met.Statements.Add (
+					new CodeMethodInvokeExpression (
+						new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
+						"Initialize"
+					)
+			);
+
 			Stetic.Wrapper.Widget wwidget = Stetic.Wrapper.Widget.Lookup (w);
 			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, w, new CodeThisReferenceExpression (), met.Statements, options, warnings);
 			CodeGenerator.BindSignalHandlers (new CodeThisReferenceExpression (), wwidget, map, met.Statements, options);
@@ -102,6 +109,13 @@ namespace Stetic
 			met.ReturnType = new CodeTypeReference (typeof(void));
 			met.Attributes = MemberAttributes.Public;
 			
+			met.Statements.Add (
+					new CodeMethodInvokeExpression (
+						new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
+						"Initialize"
+					)
+			);
+
 			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, agroup, new CodeThisReferenceExpression (), met.Statements, options, warnings);
 			
 			foreach (Wrapper.Action ac in agroup.Actions)

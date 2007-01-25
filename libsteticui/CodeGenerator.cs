@@ -59,7 +59,7 @@ namespace Stetic
 			CodeMemberMethod initMethod = new CodeMemberMethod ();
 			initMethod.Name = "Initialize";
 			initMethod.ReturnType = new CodeTypeReference (typeof(void));
-			initMethod.Attributes = MemberAttributes.Private | MemberAttributes.Static;
+			initMethod.Attributes = MemberAttributes.Assembly | MemberAttributes.Static;
 			GeneratorContext initContext = new ProjectGeneratorContext (globalNs, globalType, initMethod.Statements, options);
 			
 			// Generate icon factory creation
@@ -81,32 +81,31 @@ namespace Stetic
 			
 			// Final step. If there is some initialization code, add all needed infrastructure
 			
-			if (initMethod.Statements.Count > 0) {
-				globalType.Members.Add (initMethod);
-				
-				CodeMemberField initField = new CodeMemberField (typeof(bool), "initialized");
-				initField.Attributes = MemberAttributes.Private | MemberAttributes.Static;
-				globalType.Members.Add (initField);
-				
-				CodeFieldReferenceExpression initVar = new CodeFieldReferenceExpression (
-					new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
-					"initialized"
-				);
-				
-				CodeConditionStatement initCondition = new CodeConditionStatement ();
-				initCondition.Condition = new CodeBinaryOperatorExpression (
-					initVar, 
-					CodeBinaryOperatorType.IdentityEquality,
-					new CodePrimitiveExpression (false)
-				);
-				initCondition.TrueStatements.Add (
-					new CodeMethodInvokeExpression (
-						new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
-						"Initialize"
-					)
-				);
-				initMethod.Statements.Insert (0, initCondition);
-			}
+			globalType.Members.Add (initMethod);
+			
+			CodeMemberField initField = new CodeMemberField (typeof(bool), "initialized");
+			initField.Attributes = MemberAttributes.Private | MemberAttributes.Static;
+			globalType.Members.Add (initField);
+			
+			CodeFieldReferenceExpression initVar = new CodeFieldReferenceExpression (
+				new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
+				"initialized"
+			);
+			
+			CodeConditionStatement initCondition = new CodeConditionStatement ();
+			initCondition.Condition = new CodeBinaryOperatorExpression (
+				initVar, 
+				CodeBinaryOperatorType.IdentityEquality,
+				new CodePrimitiveExpression (false)
+			);
+			initCondition.TrueStatements.Add (new CodeAssignStatement (
+				initVar,
+				new CodePrimitiveExpression (true)
+			));
+			initCondition.TrueStatements.AddRange (initMethod.Statements);
+			initMethod.Statements.Clear ();
+			initMethod.Statements.Add (initCondition);
+			
 			return new CodeGenerationResult (units.ToArray (), (string[]) warningList.ToArray (typeof(string)));
 		}
 		

@@ -84,6 +84,13 @@ namespace Stetic
 			
 			CodeStatementCollection projectCol = met.Statements;
 			
+			met.Statements.Add (
+					new CodeMethodInvokeExpression (
+						new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
+						"Initialize"
+					)
+			);
+					
 			// Generate code for each project
 			
 			foreach (ProjectBackend gp in projects) {

@@ -278,19 +278,19 @@ namespace Stetic.Editor
 			
 			Gtk.CheckMenuItem item = new Gtk.CheckMenuItem (Catalog.GetString ("Action"));
 			item.DrawAsRadio = true;
-			item.Active = (node.Action.Type == Action.ActionType.Action);
+			item.Active = (node.Action.Type == Stetic.Wrapper.Action.ActionType.Action);
 			item.Activated += OnSetActionType;
 			menu.Insert (item, -1);
 			
 			item = new Gtk.CheckMenuItem (Catalog.GetString ("Radio Action"));
 			item.DrawAsRadio = true;
-			item.Active = (node.Action.Type == Action.ActionType.Radio);
+			item.Active = (node.Action.Type == Stetic.Wrapper.Action.ActionType.Radio);
 			item.Activated += OnSetRadioType;
 			menu.Insert (item, -1);
 			
 			item = new Gtk.CheckMenuItem (Catalog.GetString ("Toggle Action"));
 			item.DrawAsRadio = true;
-			item.Active = (node.Action.Type == Action.ActionType.Toggle);
+			item.Active = (node.Action.Type == Stetic.Wrapper.Action.ActionType.Toggle);
 			item.Activated += OnSetToggleType;
 			menu.Insert (item, -1);
 			
@@ -333,7 +333,7 @@ namespace Stetic.Editor
 		void OnSetToggleType (object ob, EventArgs args)
 		{
 			using (node.Action.UndoManager.AtomicChange) {
-				node.Action.Type = Action.ActionType.Toggle;
+				node.Action.Type = Stetic.Wrapper.Action.ActionType.Toggle;
 				node.Action.NotifyChanged ();
 			}
 		}
@@ -341,7 +341,7 @@ namespace Stetic.Editor
 		void OnSetRadioType (object ob, EventArgs args)
 		{
 			using (node.Action.UndoManager.AtomicChange) {
-				node.Action.Type = Action.ActionType.Radio;
+				node.Action.Type = Stetic.Wrapper.Action.ActionType.Radio;
 				node.Action.NotifyChanged ();
 			}
 		}
@@ -349,7 +349,7 @@ namespace Stetic.Editor
 		void OnSetActionType (object ob, EventArgs args)
 		{
 			using (node.Action.UndoManager.AtomicChange) {
-				node.Action.Type = Action.ActionType.Action;
+				node.Action.Type = Stetic.Wrapper.Action.ActionType.Action;
 				node.Action.NotifyChanged ();
 			}
 		}

@@ -1,3 +1,13 @@
+2007-01-25  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/CodeGenerator.cs,
+	  libsteticui/CodeGeneratorInternalClass.cs,
+	  libsteticui/CodeGeneratorPartialClass.cs: Make sure the globla
+	  Initialization is called from internal and partial classes.
+	* libstetic/editor/ActionMenuItem.cs,
+	  libstetic/editor/ActionToolItem.cs: Fix compilation conflict with
+	  recent gtk# versions.
+
 2007-01-22  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/WidgetDesigner.cs: Avoid disposing twice the designer.
