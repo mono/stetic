@@ -746,11 +746,13 @@ namespace Stetic.Wrapper
 
 		void PlaceholderDragDataReceived (object obj, Gtk.DragDataReceivedArgs args)
 		{
-			Widget dropped = GladeUtils.Paste (proj, args.SelectionData);
+			Widget dropped = WidgetUtils.Paste (proj, args.SelectionData);
 			Gtk.Drag.Finish (args.Context, dropped != null,
 					 dropped != null, args.Time);
-			if (dropped != null)
+			if (dropped != null) {
+				dropped.RequiresUndoStatusUpdate = true;
 				PlaceholderDrop ((Placeholder)obj, dropped);
+			}
 		}
 
 		protected virtual void ChildContentsChanged (Container child) {
@@ -799,15 +801,24 @@ namespace Stetic.Wrapper
 				return container.AllChildren;
 			}
 		}
+		
+		public void PasteChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		{
+			using (UndoManager.AtomicChange) {
+				Widget w = Widget.Lookup (newChild);
+				w.RequiresUndoStatusUpdate = true;
+				ReplaceChild (oldChild, newChild, true);
+			}
+		}
 
-		public void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild, bool destroyOld)
+		protected void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild, bool destroyOld)
 		{
 			ReplaceChild (oldChild, newChild);
 			if (destroyOld)
 				oldChild.Destroy ();
 		}
 		
-		public virtual void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		protected virtual void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			using (UndoManager.AtomicChange)
 			{

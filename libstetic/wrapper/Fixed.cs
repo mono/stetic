@@ -46,7 +46,7 @@ namespace Stetic.Wrapper
 
 		void FixedDragDataReceived (object obj, Gtk.DragDataReceivedArgs args)
 		{
-			Widget dropped = GladeUtils.Paste (proj, args.SelectionData);
+			Widget dropped = WidgetUtils.Paste (proj, args.SelectionData);
 			Gtk.Drag.Finish (args.Context, dropped != null, dropped != null, args.Time);
 			if (dropped != null) {
 				gtkfixed.Put (dropped.Wrapped, 0, 0);

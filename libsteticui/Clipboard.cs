@@ -78,9 +78,7 @@ namespace Stetic {
 			if (wrapper == null)
 				return;
 
-			using (wrapper.UndoManager.AtomicChange) {
-				parent.ReplaceChild (target, wrapper.Wrapped, true);
-			}
+			parent.PasteChild (target, wrapper.Wrapped);
 			target = null;
 		}
 

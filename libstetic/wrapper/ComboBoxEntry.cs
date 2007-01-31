@@ -16,7 +16,7 @@ namespace Stetic.Wrapper {
 		
 		internal protected override CodeExpression GenerateObjectCreation (GeneratorContext ctx)
 		{
-			if (Items != null && Items.Length > 0) {
+			if (IsTextCombo) {
 				return new CodeMethodInvokeExpression (
 					new CodeTypeReferenceExpression ("Gtk.ComboBoxEntry"),
 					"NewText"

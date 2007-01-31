@@ -47,7 +47,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			if (oldChild == expander.LabelWidget)
 				expander.LabelWidget = newChild;

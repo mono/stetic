@@ -167,7 +167,7 @@ namespace Stetic {
 			if (args.Info == GladeType) {
 				Gtk.Widget w = Cancel ();
 				if (w != null)
-					GladeUtils.Copy (w, args.SelectionData, false);
+					WidgetUtils.Copy (w, args.SelectionData, false);
 			}
 		}
 
@@ -504,7 +504,7 @@ namespace Stetic {
 
 			Stetic.Wrapper.Widget faultOwner = Stetic.Wrapper.Widget.Lookup ((Gtk.Widget)obj);
 			if (faultOwner != null)
-				dropped = GladeUtils.Paste (faultOwner.Project, args.SelectionData);
+				dropped = WidgetUtils.Paste (faultOwner.Project, args.SelectionData);
 			Gtk.Drag.Finish (args.Context, dropped != null,
 					 dropped != null, args.Time);
 			if (dropped != null) {

@@ -1,3 +1,27 @@
+2007-01-31  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/Clipboard.cs: Use the new PasteChild method, since
+	  ReplaceChild is now protected.
+	* libsteticui/Glade.cs: Don't try to resolve references when loading a
+	  glade file.
+	* libsteticui/libsteticui.dll.config, libstetic/libstetic.dll.config:
+	  Added dlls maps for MacOSX
+	* libstetic/wrapper/Button.cs, libstetic/wrapper/CheckButton.cs: Set
+	  UseUnderline = true by default.
+	* libstetic/wrapper/Container.cs: Made ReplaceChild protected. Make
+	  sure widgets copied from clipboard are properly registered in the
+	  undo system.
+	* libstetic/wrapper/Paned.cs, libstetic/wrapper/Box.cs,
+	  libstetic/wrapper/Frame.cs, libstetic/wrapper/Fixed.cs,
+	  libstetic/wrapper/ScrolledWindow.cs, libstetic/wrapper/Toolbar.cs,
+	  libstetic/wrapper/Notebook.cs, libstetic/wrapper/Expander.cs: Made
+	  ReplaceChild protected.
+	* libstetic/wrapper/ComboBoxEntry.cs: Fix code generation issue for
+	  text combo box.
+	* libstetic/wrapper/objects.xml: Added UseUnderline property to
+	  CheckButton.
+	* libstetic/DND.cs: Use the native format for copy/paste widgets.
+
 2007-01-25  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/CodeGenerator.cs,

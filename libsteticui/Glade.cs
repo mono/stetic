@@ -15,6 +15,7 @@ namespace Stetic {
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
+			doc.XmlResolver = null;
 			doc.Load (filename);
 			project.SetFileName (filename);
 			project.Id = System.IO.Path.GetFileName (filename);

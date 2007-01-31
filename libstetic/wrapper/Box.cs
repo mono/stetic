@@ -194,7 +194,7 @@ namespace Stetic.Wrapper {
 			base.ChildContentsChanged (child);
 		}
 
-		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			base.ReplaceChild (oldChild, newChild);
 

@@ -72,7 +72,7 @@ namespace Stetic.Wrapper {
 				base.GenerateChildBuildCode (ctx, parentVar, wrapper);
 		}
 		
-		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			if (oldChild == frame.LabelWidget)
 				frame.LabelWidget = newChild;

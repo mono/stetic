@@ -120,7 +120,7 @@ namespace Stetic.Wrapper {
 			base.Select (widget);
 		}
 
-		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			int index = tabs.IndexOf (oldChild);
 			if (index != -1) {

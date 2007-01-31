@@ -13,6 +13,9 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 
+			if (!initialized)
+				UseUnderline = true;
+
 			if (button.UseStock) {
 				type = ButtonType.StockItem;
 				StockId = button.Label;
@@ -20,7 +23,7 @@ namespace Stetic.Wrapper {
 				type = ButtonType.TextOnly;
 				Label = button.Name;
 			} else if (button.Child is Gtk.Label) {
-				type = ButtonType.TextOnly;
+				type = ButtonType.TextOnly; 
 				label = button.Label;
 				useUnderline = button.UseUnderline;
 			} else {
@@ -29,6 +32,12 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		public override void Read (ObjectReader reader, XmlElement elem)
+		{
+			base.Read (reader, elem);
+			if (reader.Format == FileFormat.Glade)
+				UseUnderline = true;
+		}
 		protected override ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
 		{
 			ObjectWrapper ret = null;

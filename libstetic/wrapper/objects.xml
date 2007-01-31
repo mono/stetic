@@ -474,6 +474,7 @@
 		<property name="Inconsistent" />
 		<property name="DrawIndicator" />
 		<property name="HasLabel" internal="true" />
+		<property name="UseUnderline" />
 		<command name="RestoreLabel" label="Restore Label" icon="res:add-check-label.png"
 			 description="Restore the button's label">
 		    <disabled-if name="HasLabel" value="true" />

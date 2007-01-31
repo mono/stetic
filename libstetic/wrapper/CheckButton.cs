@@ -6,6 +6,19 @@ namespace Stetic.Wrapper {
 
 	public class CheckButton : Container {
 
+		public override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
+			if (!initialized)
+				checkbutton.UseUnderline = true;
+		}
+		
+		public override void Read (ObjectReader reader, XmlElement elem)
+		{
+			base.Read (reader, elem);
+			if (reader.Format == FileFormat.Glade)
+				checkbutton.UseUnderline = true;
+		}
 		protected override ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
 		{
 			hasLabel = false;
@@ -46,7 +59,7 @@ namespace Stetic.Wrapper {
 			HasLabel = true;
 		}
 
-		public override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
+		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
 			base.ReplaceChild (oldChild, newChild);
 			EmitNotify ("HasContents");
