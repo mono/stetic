@@ -1,5 +1,9 @@
 2007-02-01  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* configure.in: More dependency removal.
+
+2007-02-01  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* autogen.sh: Removed gnome-common dependency.
 
 2007-01-31  Lluis Sanchez Gual <lluis@novell.com> 
