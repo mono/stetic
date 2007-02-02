@@ -10,6 +10,7 @@ namespace Stetic
 	{
 		static Gdk.Atom steticAtom;
 		static int undoIdCount;
+		static Gdk.Pixbuf missingIcon;
 		
 		public static Gdk.Atom ApplicationXSteticAtom {
 			get {
@@ -361,6 +362,19 @@ namespace Stetic
 		internal static string GetUndoId ()
 		{
 			return (undoIdCount++).ToString ();
+		}
+		
+		internal static Gdk.Pixbuf MissingIcon {
+			get {
+				if (missingIcon == null) {
+					try {
+						missingIcon = Gtk.IconTheme.Default.LoadIcon ("gtk-missing-image", 16, 0);
+					} catch {}
+					if (missingIcon == null)
+						missingIcon = Gdk.Pixbuf.LoadFromResource ("missing.png");
+				}
+				return missingIcon;
+			}
 		}
 	}
 }

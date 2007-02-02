@@ -172,7 +172,7 @@ namespace Stetic.Editor
 				}
 			}
 			if (icon == null)
-				icon = Gtk.IconTheme.Default.LoadIcon ("gtk-missing-image", h, 0);
+				icon = WidgetUtils.MissingIcon;
 			previewIcon.Pixbuf = icon;
 		}
 		
@@ -248,7 +248,7 @@ namespace Stetic.Editor
 				previewResource.Pixbuf = pix;
 			else {
 				if (missingThumbnail == null)
-					missingThumbnail = Gtk.IconTheme.Default.LoadIcon ("gtk-missing-image", thumbnailSize, 0);
+					missingThumbnail = WidgetUtils.MissingIcon;
 				previewResource.Pixbuf = missingThumbnail;
 			}
 			UpdateButtons ();

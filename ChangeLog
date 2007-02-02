@@ -1,3 +1,13 @@
+2007-02-02  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/editor/SelectImageDialog.cs,
+	  libstetic/editor/StockIconSelectorItem.cs,
+	  libstetic/editor/SelectIconDialog.cs, libstetic/WidgetUtils.cs,
+	  libstetic/TypedClassDescriptor.cs,
+	  libstetic/wrapper/pixmaps/missing.png: Looks like some themes don't
+	  have icon for gtk-missing-image. Added a fallback to avoid crashes.
+	* stetic/UIManager.cs: Action fixes.
+
 2007-02-01  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* configure.in: More dependency removal.

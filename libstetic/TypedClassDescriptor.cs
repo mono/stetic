@@ -163,7 +163,7 @@ namespace Stetic
 		Gdk.Pixbuf GetDefaultIcon ()
 		{
 			if (missingIcon == null)
-				missingIcon = Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
+				missingIcon = WidgetUtils.MissingIcon;
 			return missingIcon;
 		}
 		

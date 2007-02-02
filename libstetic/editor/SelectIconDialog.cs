@@ -121,7 +121,7 @@ namespace Stetic.Editor
 				}
 			}
 			if (icon == null)
-				icon = Gtk.IconTheme.Default.LoadIcon ("gtk-missing-image", 16, 0);
+				icon = WidgetUtils.MissingIcon;
 			previewIcon.Pixbuf = icon;
 		}
 		

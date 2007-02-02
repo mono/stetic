@@ -203,7 +203,7 @@ namespace Stetic {
 			if (focus != null)
 				focus.CutClipboard ();
 			else
-				project.PasteToSelection ();
+				project.CutSelection ();
 		}
 
 		void Copy (object obj, EventArgs e)
@@ -221,7 +221,7 @@ namespace Stetic {
 			if (focus != null)
 				focus.PasteClipboard ();
 			else
-				project.CutSelection ();
+				project.PasteToSelection ();
 		}
 
 		void Delete (object obj, EventArgs e)
