@@ -76,7 +76,7 @@ namespace Stetic {
 				gproject.ActionGroups = win.Project.ActionGroups;
 				gproject.IconFactory = win.Project.IconFactory;
 				gproject.ResourceProvider = win.Project.ResourceProvider;
-				gproject.WidgetLibraries = ((ProjectBackend)win.Project).WidgetLibraries;
+				gproject.WidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).WidgetLibraries.Clone ();
 				
 				rootWidget = editingBackend.GetTopLevelWrapper (sourceWidget, false);
 				if (rootWidget == null) {

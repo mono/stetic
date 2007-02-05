@@ -324,7 +324,9 @@ namespace Stetic.Wrapper {
 			
 			if (Type != ButtonType.TextAndIcon) {
 				CodePropertyReferenceExpression cprop = new CodePropertyReferenceExpression (var, "Label");
-				CodeExpression val = ctx.GenerateValue (button.Label, typeof(string), true);
+				PropertyDescriptor prop = (PropertyDescriptor) this.ClassDescriptor ["Label"];
+				bool trans = Type != ButtonType.StockItem && prop.IsTranslated (Wrapped);
+				CodeExpression val = ctx.GenerateValue (button.Label, typeof(string), trans);
 				ctx.Statements.Add (new CodeAssignStatement (cprop, val));
 			}
 		}

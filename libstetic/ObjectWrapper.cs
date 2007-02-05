@@ -244,7 +244,7 @@ namespace Stetic {
 				CodeExpression[] paramters = new CodeExpression [ClassDescriptor.InitializationProperties.Length];
 				for (int n=0; n < paramters.Length; n++) {
 					PropertyDescriptor prop = ClassDescriptor.InitializationProperties [n];
-					paramters [n] = ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType, prop.Translatable);
+					paramters [n] = ctx.GenerateValue (prop.GetValue (Wrapped), prop.RuntimePropertyType, prop.Translatable && prop.IsTranslated (Wrapped));
 				}
 				return new CodeObjectCreateExpression (WrappedTypeName, paramters);
 			} else
@@ -256,8 +256,8 @@ namespace Stetic {
 			object oval = prop.GetValue (Wrapped);
 			if (oval == null || (prop.HasDefault && prop.IsDefaultValue (oval)))
 				return;
-
-			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType, prop.Translatable);
+				
+			CodeExpression val = ctx.GenerateValue (oval, prop.RuntimePropertyType, prop.Translatable && prop.IsTranslated (Wrapped));
 			CodeExpression cprop;
 			
 			TypedPropertyDescriptor tprop = prop as TypedPropertyDescriptor;

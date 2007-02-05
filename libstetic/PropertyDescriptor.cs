@@ -219,14 +219,21 @@ namespace Stetic {
 
 		public virtual bool IsTranslated (object obj)
 		{
-			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
-			if (wrapper == null || wrapper.translationInfo == null) return false;
-			
-			TranslationInfo info = (TranslationInfo)wrapper.translationInfo[obj];
+			if (!translatable)
+				return false;
 
+			ObjectWrapper wrapper = ObjectWrapper.Lookup (obj);
+			if (wrapper == null)
+				return false;
+			
 			// Since translatable properties are assumed to be translated
 			// by default, we return true if there is no TranslationInfo
 			// for the object
+			
+			if (wrapper.translationInfo == null)
+				return true;
+				
+			TranslationInfo info = (TranslationInfo)wrapper.translationInfo[obj];
 			return (info == null || info.Translated == true);
 		}
 

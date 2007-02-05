@@ -81,11 +81,13 @@ namespace Stetic
 
 					if (prop.Translatable && prop.IsTranslated (wrapper.Wrapped)) {
 						prop_elem.SetAttribute ("translatable", "yes");
-						if (prop.TranslationContext (wrapper.Wrapped) != null) {
+						string tcx = prop.TranslationContext (wrapper.Wrapped);
+						if (tcx != null && tcx.Length > 0) {
 							prop_elem.SetAttribute ("context", "yes");
-							prop_elem.InnerText = prop.TranslationContext (wrapper.Wrapped) + "|" + prop_elem.InnerText;
+							prop_elem.InnerText = tcx + "|" + prop_elem.InnerText;
 						}
-						if (prop.TranslationComment (wrapper.Wrapped) != null)
+						string tcm = prop.TranslationComment (wrapper.Wrapped);
+						if (tcm != null && tcm.Length > 0)
 							prop_elem.SetAttribute ("comments", prop.TranslationComment (wrapper.Wrapped));
 					}
 
