@@ -14,7 +14,7 @@ namespace Stetic
 		TreeViewColumn editorColumn;
 		Hashtable propertyRows;
 		Hashtable sensitives, invisibles;
-		TreeModelFilter filter;
+//		TreeModelFilter filter;
 		ArrayList expandStatus = new ArrayList ();
 		
 		public PropertyTree ()
@@ -25,11 +25,11 @@ namespace Stetic
 			
 			store = new TreeStore (typeof (string), typeof(object), typeof(bool), typeof(object));
 			
-			TreeModelFilterVisibleFunc filterFunct = new TreeModelFilterVisibleFunc (FilterHiddenProperties); 
-			filter = new TreeModelFilter (store, null);
-            filter.VisibleFunc = filterFunct;
+//			TreeModelFilterVisibleFunc filterFunct = new TreeModelFilterVisibleFunc (FilterHiddenProperties); 
+//			filter = new TreeModelFilter (store, null);
+//            filter.VisibleFunc = filterFunct;
 			
-			tree = new InternalTree (this, filter);
+			tree = new InternalTree (this, store);
 
 			CellRendererText crt;
 			
@@ -234,7 +234,7 @@ namespace Stetic
 			PropertyDescriptor prop = (PropertyDescriptor) model.GetValue (iter, 1);
 			if (prop != null) {
 				InstanceData idata = (InstanceData) model.GetValue (iter, 3);
-				rc.SensitiveProperty = prop.EnabledFor (idata.Instance);
+				rc.SensitiveProperty = prop.EnabledFor (idata.Instance) && prop.VisibleFor (idata.Instance);
 			} else
 				rc.SensitiveProperty = true;
 		}
@@ -289,7 +289,19 @@ namespace Stetic
 		
 		public virtual void Update ()
 		{
-			((TreeModelFilter)Model).Refilter ();
+/*			TreeIter iter;
+			if (!Model.GetIterFirst (out iter))
+				return;
+			do {
+				PropertyDescriptor prop = (PropertyDescriptor) model.GetValue (iter, 1);
+				if (prop != null) {
+					InstanceData idata = (InstanceData) model.GetValue (iter, 3);
+					if (idata != null && idata.Instance != null) {
+						
+					}
+					return prop.VisibleFor (idata.Instance);
+					*/
+//			((TreeModelFilter)Model).Refilter ();
 		}
 	}
 	
@@ -331,7 +343,7 @@ namespace Stetic
 			else
 				this.CellBackground = null;
 			
-			sensitive = property != null ? property.EnabledFor (instance) : true;
+			sensitive = property != null ? property.EnabledFor (instance) && property.VisibleFor (instance): true;
 			editorCell = editor;
 		}
 

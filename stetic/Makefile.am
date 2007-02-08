@@ -1,40 +1,55 @@
-pkglib_DATA = stetic.exe stetic.exe.mdb
+ASSEMBLY_DIR = $(top_builddir)/bin
+
+ASSEMBLY = $(ASSEMBLY_DIR)/stetic.exe
+
+ASSEMBLY_FILES = $(ASSEMBLY_DIR)/stetic.exe $(ASSEMBLY_DIR)/stetic.exe.mdb
+
+pkglib_DATA = $(ASSEMBLY_FILES)
 bin_SCRIPTS = stetic
 
-stetic_exe_sources =			\
-	Stetic.cs			\
-	LibraryManagerDialog.cs			\
-	DesignerView.cs			\
-	RecentFiles.cs		\
-	Configuration.cs		\
+stetic_exe_sources =  \
+	Configuration.cs \
+	DesignerView.cs \
+	LibraryManagerDialog.cs \
+	RecentFiles.cs \
+	Stetic.cs \
 	UIManager.cs
+	
+
+stetic_exe_resources = 
+
+stetic_exe_references =  \
+	-r:Mono.Posix \
+	-pkg:glade-sharp-2.0 \
+	-pkg:gnome-sharp-2.0 \
+	-r:$(top_builddir)/bin/libstetic.dll \
+	-r:$(top_builddir)/bin/libsteticui.dll
 
 comma = ,
-RESOURCE_FILES = $(wildcard $(srcdir)/*.png) $(srcdir)/stetic.glade
+RESOURCE_FILES = $(addprefix $(srcdir)/, $(stetic_exe_resources))
 RESOURCES = $(foreach file,$(RESOURCE_FILES),-resource:$(file)$(comma)$(notdir $(file)))
 
-stetic.exe: $(stetic_exe_sources) $(RESOURCE_FILES) ../libstetic/libstetic.dll
-	$(GMCS) -debug -r:Mono.Posix -pkg:gnome-sharp-2.0 -pkg:glade-sharp-2.0 -r:../libstetic/libstetic.dll -r:../libsteticui/libsteticui.dll -out:stetic.exe $(stetic_exe_sources:%=$(srcdir)/%) $(RESOURCES)
+all: $(ASSEMBLY)
+
+$(ASSEMBLY): $(stetic_exe_sources) $(stetic_exe_resources) $(top_builddir)/bin/libstetic.dll $(top_builddir)/bin/libsteticui.dll
+	$(GMCS) -debug $(stetic_exe_references) -out:$(ASSEMBLY) $(stetic_exe_sources:%=$(srcdir)/%) $(RESOURCES)
 
 stetic: stetic.in
 	sed -e "s:\@MONO\@:$(MONO):" -e "s:\@pkglibdir\@:$(pkglibdir):" $< > $@
 	chmod a+x $@
 
-EXTRA_DIST = $(stetic_exe_sources) stetic.in stetic.glade
+EXTRA_DIST = $(stetic_exe_sources) $(RESOURCE_FILES) stetic.in
 
-dist-hook:
-	cp -p $(srcdir)/*.png $(distdir)/
-
-CLEANFILES = stetic stetic.exe stetic.exe.mdb
+CLEANFILES = $(ASSEMBLY_FILES) stetic
 
 run:
-	LD_LIBRARY_PATH=../glue/.libs:$$LD_LIBRARY_PATH MONO_PATH=../libstetic $(MONO) --debug stetic.exe
+	$(MONO) --debug $(ASSEMBLY_DIR)/stetic.exe
 
 trace:
-	LD_LIBRARY_PATH=../glue/.libs:$$LD_LIBRARY_PATH MONO_PATH=../libstetic $(MONO) --trace --debug stetic.exe
+	$(MONO) --trace --debug $(ASSEMBLY_DIR)/stetic.exe
 
 mdb:
-	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic mdb stetic.exe
+	mdb $(ASSEMBLY_DIR)/stetic.exe
 
 gdb:
-	LD_LIBRARY_PATH=../glue/.libs:/opt/debug/lib:$$LD_LIBRARY_PATH MONO_PATH=../libstetic gdb --args $(MONO) stetic.exe
+	gdb --args $(MONO) $(ASSEMBLY_DIR)/stetic.exe

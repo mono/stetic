@@ -27,7 +27,7 @@ PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.4.0)
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
-PKG_CHECK_MODULES(STETIC, gtk-sharp-2.0 >= 2.3.91 gnome-sharp-2.0)
+PKG_CHECK_MODULES(STETIC, gtk-sharp-2.0 >= 2.3.91 glade-sharp-2.0 >= 2.4.0 gnome-sharp-2.0)
 AC_SUBST(STETIC_LIBS)
 
 AC_OUTPUT([

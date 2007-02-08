@@ -167,11 +167,12 @@ namespace Stetic
 				);
 			}
 			
-			if (value is string && translatable && options.UseGettext) {
+			string str = value as string;
+			if (translatable && str != null && str.Length > 0 && options.UseGettext) {
 				return new CodeMethodInvokeExpression (
 					new CodeTypeReferenceExpression (typeof(Mono.Unix.Catalog)),
 					"GetString",
-					new CodePrimitiveExpression (value)
+					new CodePrimitiveExpression (str)
 				);
 			}
 			
