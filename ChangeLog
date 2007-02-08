@@ -1,5 +1,11 @@
 2007-02-08  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/libsteticui.mdp, libsteticui/Makefile.am: Fixed
+	  references.
+	* configure.in: Added missing modules.
+
+2007-02-08  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/Makefile.am, libstetic/Makefile.am, stetic/Makefile.am:
 	  Distcheck fixes.
 	* libstetic/GeneratorContext.cs: Don't generate gettext for empty

@@ -80,13 +80,11 @@ libsteticui_dll_resources =  \
 	
 
 libsteticui_dll_references =  \
-	-r:./lib/Mono.Cecil.dll \
-	-r:./lib/Mono.Cecil.dll \
-	-r:./lib/Mono.Cecil.dll \
-	-r:./lib/Mono.Cecil.dll \
-	-r:./lib/Mono.Cecil.dll \
-	-r:./lib/Mono.Cecil.dll \
-	-r:./lib/Mono.Cecil.dll \
+	-r:System.Runtime.Remoting \
+	-r:Mono.Posix \
+	-pkg:gconf-sharp-2.0 \
+	-pkg:gnome-sharp-2.0 \
+	-pkg:gtk-sharp-2.0 \
 	-r:./lib/Mono.Cecil.dll \
 	-r:$(top_builddir)/bin/libstetic.dll
 
