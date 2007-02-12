@@ -1,5 +1,13 @@
 2007-02-12  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/PropertyTree.cs: Refiltering the tree while it is being
+	  edited has lots of issues, so filtering has been completely
+	  removed. Now, the label of hidden properties are shown as disabled,
+	  and the content blank.
+	* stetic/Makefile.am, stetic/stetic.mdp: Added missing resource.
+
+2007-02-12  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/libsteticui.mdp, libsteticui/Makefile.am,
 	  libstetic/Makefile.am, stetic/Makefile.am: Flush.
 	* libsteticui/WidgetDesigner.cs: When disposing the active project,

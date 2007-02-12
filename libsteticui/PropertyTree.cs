@@ -14,7 +14,6 @@ namespace Stetic
 		TreeViewColumn editorColumn;
 		Hashtable propertyRows;
 		Hashtable sensitives, invisibles;
-//		TreeModelFilter filter;
 		ArrayList expandStatus = new ArrayList ();
 		
 		public PropertyTree ()
@@ -24,10 +23,6 @@ namespace Stetic
 			invisibles = new Hashtable ();
 			
 			store = new TreeStore (typeof (string), typeof(object), typeof(bool), typeof(object));
-			
-//			TreeModelFilterVisibleFunc filterFunct = new TreeModelFilterVisibleFunc (FilterHiddenProperties); 
-//			filter = new TreeModelFilter (store, null);
-//            filter.VisibleFunc = filterFunct;
 			
 			tree = new InternalTree (this, store);
 
@@ -115,39 +110,6 @@ namespace Stetic
 		{
 			// Just repaint the cells
 			QueueDraw ();
-			
-/*			if (tree.Editing) {
-			
-				TreeModel model;
-				TreeIter iterSelected;
-				tree.Selection.GetSelected (out model, out iterSelected);
-				
-				TreePath[] rows = tree.Selection.GetSelectedRows ();
-				
-//				string spath = model.GetStringFromIter (iterSelected);
-				string spath = rows != null && rows.Length > 0 ? rows[0].ToString () : "";
-				Console.WriteLine ("UPDATE " + spath + " " + model.GetPath (iterSelected));
-				
-				foreach (DictionaryEntry entry in propertyRows) {
-					PropertyDescriptor prop = (PropertyDescriptor) entry.Key;
-					string ppath = (string) entry.Value;
-					if (prop.HasDependencies && spath != ppath) {
-						TreeIter iter;
-						Console.WriteLine ("  UPD " + prop.Name + " " + ppath + " " + prop.HasDependencies);
-						store.GetIterFromString (out iter, ppath);
-						store.EmitRowChanged (new TreePath (ppath), iter);
-						break;
-					}
-				}
-			} else {
-				Console.WriteLine ("REFILTERING");
-			//	filter.Refilter ();
-			}
-			
-//			if (rows != null && rows.Length > 0) {
-//				SetCursor (rows[0], GetColumn (1), true);
-//			}
-*/
 		}
 		
 		public void AddGroup (ItemGroup igroup, object instance)
@@ -289,19 +251,6 @@ namespace Stetic
 		
 		public virtual void Update ()
 		{
-/*			TreeIter iter;
-			if (!Model.GetIterFirst (out iter))
-				return;
-			do {
-				PropertyDescriptor prop = (PropertyDescriptor) model.GetValue (iter, 1);
-				if (prop != null) {
-					InstanceData idata = (InstanceData) model.GetValue (iter, 3);
-					if (idata != null && idata.Instance != null) {
-						
-					}
-					return prop.VisibleFor (idata.Instance);
-					*/
-//			((TreeModelFilter)Model).Refilter ();
 		}
 	}
 	
@@ -321,6 +270,7 @@ namespace Stetic
 		Gdk.Color darkColor;
 		PropertyEditorCell editorCell;
 		bool sensitive;
+		bool visible;
 		
 		public CellRendererProperty (TreeView tree)
 		{
@@ -343,6 +293,7 @@ namespace Stetic
 			else
 				this.CellBackground = null;
 			
+			visible = property != null ? property.VisibleFor (instance): true;
 			sensitive = property != null ? property.EnabledFor (instance) && property.VisibleFor (instance): true;
 			editorCell = editor;
 		}
@@ -367,7 +318,7 @@ namespace Stetic
 
 		protected override void Render (Drawable window, Widget widget, Rectangle background_area, Rectangle cell_area, Rectangle expose_area, CellRendererState flags)
 		{
-			if (instance == null)
+			if (instance == null || !visible)
 				return;
 			int width = 0, height = 0;
 			int iwidth = cell_area.Width - (int) this.Xpad * 2;

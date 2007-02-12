@@ -15,7 +15,7 @@ stetic_exe_sources =  \
 	UIManager.cs
 
 	
-stetic_exe_resources =                
+stetic_exe_resources = stetic.glade                
  
 stetic_exe_references =  \
 	-pkg:glade-sharp-2.0 \
