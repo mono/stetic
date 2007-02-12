@@ -9,7 +9,6 @@ ASSEMBLY_FILES = \
 	$(DATA_FILE_BUILD)
 	
 pkglib_DATA = $(ASSEMBLY_FILES)
-
 libsteticui_dll_sources =  \
 	ActionComponent.cs \
 	ActionGroupComponent.cs \
@@ -77,18 +76,19 @@ libsteticui_dll_sources =  \
 libsteticui_dll_resources =  \
 	action.png \
 	missing.png
-	
 
+	
 libsteticui_dll_references =  \
-	-r:System.Runtime.Remoting \
-	-r:Mono.Posix \
 	-pkg:gconf-sharp-2.0 \
 	-pkg:gnome-sharp-2.0 \
 	-pkg:gtk-sharp-2.0 \
+	-r:$(top_builddir)/bin/libstetic.dll \
 	-r:./lib/Mono.Cecil.dll \
-	-r:$(top_builddir)/bin/libstetic.dll
+	-r:Mono.Posix \
+	-r:System.Runtime.Remoting
 
 libsteticui_dll_datafiles = libsteticui.dll.config
+
 
 all: $(ASSEMBLY) $(DATA_FILE_BUILD) $(CECIL_DLL)
 	

@@ -8,7 +8,6 @@ ASSEMBLY_FILES = \
 	$(DATA_FILE_BUILD)
 
 pkglib_DATA = $(ASSEMBLY_FILES)
-
 libstetic_dll_sources =  \
 	ClassDescriptor.cs \
 	CommandDescriptor.cs \
@@ -236,12 +235,13 @@ libstetic_dll_resources =  \
 	wrapper/pixmaps/window.png
 
 libstetic_dll_datafiles = libstetic.dll.config
-	
 
+	
 libstetic_dll_references =  \
-	-r:Mono.Posix \
 	-pkg:glade-sharp-2.0 \
-	-pkg:gnome-sharp-2.0
+	-pkg:gnome-sharp-2.0 \
+	-r:Mono.Posix
+
 
 all: $(ASSEMBLY) $(DATA_FILE_BUILD)
 

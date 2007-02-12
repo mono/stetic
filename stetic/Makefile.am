@@ -6,7 +6,6 @@ ASSEMBLY_FILES = $(ASSEMBLY_DIR)/stetic.exe $(ASSEMBLY_DIR)/stetic.exe.mdb
 
 pkglib_DATA = $(ASSEMBLY_FILES)
 bin_SCRIPTS = stetic
-
 stetic_exe_sources =  \
 	Configuration.cs \
 	DesignerView.cs \
@@ -14,16 +13,17 @@ stetic_exe_sources =  \
 	RecentFiles.cs \
 	Stetic.cs \
 	UIManager.cs
+
 	
-
-stetic_exe_resources = 
-
+stetic_exe_resources =                
+ 
 stetic_exe_references =  \
-	-r:Mono.Posix \
 	-pkg:glade-sharp-2.0 \
 	-pkg:gnome-sharp-2.0 \
 	-r:$(top_builddir)/bin/libstetic.dll \
-	-r:$(top_builddir)/bin/libsteticui.dll
+	-r:$(top_builddir)/bin/libsteticui.dll \
+	-r:Mono.Posix
+
 
 comma = ,
 RESOURCE_FILES = $(addprefix $(srcdir)/, $(stetic_exe_resources))

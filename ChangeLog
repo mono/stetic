@@ -1,3 +1,12 @@
+2007-02-12  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/libsteticui.mdp, libsteticui/Makefile.am,
+	  libstetic/Makefile.am, stetic/Makefile.am: Flush.
+	* libsteticui/WidgetDesigner.cs: When disposing the active project,
+	  reset the active project property.
+	* libstetic/GeneratorContext.cs: Added a code generation option for
+	  specifying the Gettext class to use.
+
 2007-02-08  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/libsteticui.mdp, libsteticui/Makefile.am: Fixed

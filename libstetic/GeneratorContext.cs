@@ -170,7 +170,7 @@ namespace Stetic
 			string str = value as string;
 			if (translatable && str != null && str.Length > 0 && options.UseGettext) {
 				return new CodeMethodInvokeExpression (
-					new CodeTypeReferenceExpression (typeof(Mono.Unix.Catalog)),
+					new CodeTypeReferenceExpression (options.GettextClass),
 					"GetString",
 					new CodePrimitiveExpression (str)
 				);
@@ -234,10 +234,21 @@ namespace Stetic
 		bool failForUnknownWidgets = false;
 		string path;
 		string globalNamespace = "Stetic";
+		string gettextClass;
 		
 		public bool UseGettext {
 			get { return useGettext; }
 			set { useGettext = value; }
+		}
+		
+		public string GettextClass {
+			get {
+				if (gettextClass == null || gettextClass.Length == 0)
+					return "Mono.Unix.Catalog";
+				else
+					return gettextClass;
+			}
+			set { gettextClass = value; }
 		}
 		
 		public bool UsePartialClasses {
