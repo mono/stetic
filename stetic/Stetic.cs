@@ -485,6 +485,7 @@ namespace Stetic {
 					MainWindow.Maximize ();
 				else if (Configuration.WindowState == Gdk.WindowState.Iconified)
 					MainWindow.Iconify ();
+				SteticApp.ShowNonContainerWarning = Configuration.ShowNonContainerWarning;
 			}
 			else {
 				Configuration = new Configuration ();
@@ -499,7 +500,9 @@ namespace Stetic {
 					
 			MainWindow.GetPosition (out Configuration.WindowX, out Configuration.WindowY);
 			MainWindow.GetSize (out Configuration.WindowWidth, out Configuration.WindowHeight);
-			Configuration.WindowState = MainWindow.GdkWindow.State; 
+			Configuration.WindowState = MainWindow.GdkWindow.State;
+			
+			Configuration.ShowNonContainerWarning = SteticApp.ShowNonContainerWarning;
 			
 			string file = Path.Combine (SteticMain.ConfigDir, "configuration.xml");
 			try {

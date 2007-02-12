@@ -13,6 +13,8 @@ namespace Stetic
 		public int WindowHeight;
 		public Gdk.WindowState WindowState;
 		
+		public bool ShowNonContainerWarning = true;
+		
 		public StringCollection WidgetLibraries = new StringCollection ();
 	}
 }

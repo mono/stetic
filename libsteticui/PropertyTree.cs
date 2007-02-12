@@ -200,18 +200,6 @@ namespace Stetic
 			} else
 				rc.SensitiveProperty = true;
 		}
-
-		bool FilterHiddenProperties (TreeModel model, TreeIter iter)
-		{
-			PropertyDescriptor prop = (PropertyDescriptor) model.GetValue (iter, 1);
-			if (prop == null)
-				return true;
-			InstanceData idata = (InstanceData) model.GetValue (iter, 3);
-			if (idata == null || idata.Instance == null)
-				return true;
-			
-			return prop.VisibleFor (idata.Instance);
-		}
 	}
 	
 	class InternalTree: TreeView

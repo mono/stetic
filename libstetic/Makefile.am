@@ -41,6 +41,7 @@ libstetic_dll_sources =  \
 	editor/ImageFile.cs \
 	editor/ImageSelector.cs \
 	editor/IntRange.cs \
+	editor/NonContainerWarningDialog.cs \
 	editor/OptIntRange.cs \
 	editor/ProjectIconList.cs \
 	editor/ProjectIconSelectorItem.cs \
@@ -240,6 +241,7 @@ libstetic_dll_datafiles = libstetic.dll.config
 libstetic_dll_references =  \
 	-pkg:glade-sharp-2.0 \
 	-pkg:gnome-sharp-2.0 \
+	-pkg:gtk-sharp-2.0 \
 	-r:Mono.Posix
 
 

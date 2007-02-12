@@ -103,6 +103,11 @@ namespace Stetic
 			set { widgetLibraryResolver = value; }
 		}
 		
+		public bool ShowNonContainerWarning {
+			get { return Wrapper.Container.ShowNonContainerWarning; }
+			set { Wrapper.Container.ShowNonContainerWarning = value; }
+		}
+		
 		public ProjectBackend LoadProject (string path)
 		{
 			ProjectBackend p = new ProjectBackend (this);

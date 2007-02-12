@@ -74,6 +74,11 @@ namespace Stetic
 			}
 		}
 		
+		public bool ShowNonContainerWarning {
+			get { return backend.ShowNonContainerWarning; }
+			set { backend.ShowNonContainerWarning = value; }
+		}
+		
 		// Loads the libraries registered in the projects or in the application.
 		// It will reload the libraries if they have changed. Libraries won't be
 		// unloaded unless forceUnload is set to true

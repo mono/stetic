@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml;
 using Stetic.Undo;
+using Stetic.Editor;
 
 namespace Stetic.Wrapper
 {
@@ -14,6 +15,7 @@ namespace Stetic.Wrapper
 		int designHeight;
 		IDesignArea designer;
 		static DiffGenerator containerDiffGenerator;
+		static bool showNonContainerWarning = true;
 
 		static Container ()
 		{
@@ -724,9 +726,34 @@ namespace Stetic.Wrapper
 				args.RetVal = true;
 			}
 		}
+		
+		public static bool ShowNonContainerWarning {
+			get { return showNonContainerWarning; }
+			set { showNonContainerWarning = value; }
+		}
+		
+		static IList nonContainers = new string[] {
+			"Gtk.Button", "Gtk.Entry", "Gtk.Label", "Gtk.Arrow", "Gtk.Calendar", "Gtk.CheckButton",
+			"Gtk.ColorButton", "Gtk.ComboBox", "Gtk.ComboBoxEntry", "Gtk.Entry", "Gtk.FontButton",
+			"Gtk.HScale", "Gtk.VScale", "Gtk.Image", "Gtk.MenuBar", "Gtk.Toolbar", "Gtk.RadioButton",
+			"Gtk.ProgressBar", "Stetic.Editor.ActionToolbar", "Stetic.Editor.ActionMenuBar",
+			"Gtk.ToggleButton", "Gtk.TextView", "Gtk.VScrollbar", "Gtk.HScrollbar", "Gtk.SpinButton",
+			"Gtk.Statusbar", "Gtk.HSeparator", "Gtk.VSeparator"
+		};
 
 		void PlaceholderDrop (Placeholder ph, Stetic.Wrapper.Widget wrapper)
 		{
+			Gtk.Dialog parentDialog = Wrapped.Parent as Gtk.Dialog;
+			if (showNonContainerWarning && (IsTopLevel || (parentDialog != null && parentDialog.VBox == Wrapped))) {
+				if (nonContainers.Contains (wrapper.Wrapped.GetType ().ToString ())) {
+					using (NonContainerWarningDialog dlg = new NonContainerWarningDialog ()) {
+						int res = dlg.Run ();
+						showNonContainerWarning = dlg.ShowAgain;
+						if (res != (int) Gtk.ResponseType.Ok)
+							return;
+					}
+				}
+			}
 			using (UndoManager.AtomicChange) {
 				ReplaceChild (ph, wrapper.Wrapped, true);
 				wrapper.Select ();

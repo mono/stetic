@@ -1,5 +1,17 @@
 2007-02-12  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/ApplicationBackend.cs, libsteticui/Application.cs,
+	  libstetic/stetic.glade, libstetic/wrapper/Container.cs,
+	  libstetic/editor/NonContainerWarningDialog.cs,
+	  libstetic/libstetic.mdp, libstetic/Makefile.am, stetic/Stetic.cs,
+	  stetic/Configuration.cs: When dropping a non-container into a main
+	  window, warn the user whether they really wanted that, or if they
+	  instead wanted a container to be in place. Make this warning dialog
+	  configurable.
+	* libsteticui/PropertyTree.cs: Removed unused code.
+
+2007-02-12  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/PropertyTree.cs: Refiltering the tree while it is being
 	  edited has lots of issues, so filtering has been completely
 	  removed. Now, the label of hidden properties are shown as disabled,
