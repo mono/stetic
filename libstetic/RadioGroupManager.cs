@@ -38,8 +38,9 @@ namespace Stetic {
 			Widgets = new ArrayList ();
 		}
 	}
-
-	public class RadioGroupManager {
+	
+	public class RadioGroupManager: IRadioGroupManager
+	{
 		PropertyInfo groupProperty;
 		ArrayList groups;
 		Hashtable widgets;
@@ -54,8 +55,7 @@ namespace Stetic {
 			widgets = new Hashtable ();
 		}
 
-		public delegate void GroupsChangedDelegate ();
-		public event GroupsChangedDelegate GroupsChanged;
+		public event GroupsChangedDelegate GroupsChanged; 
 
 		void EmitGroupsChanged ()
 		{
@@ -91,6 +91,11 @@ namespace Stetic {
 			return null;
 		}
 
+		void IRadioGroupManager.Add (string name)
+		{
+			Add (name);
+		}
+		
 		public RadioGroup Add (string name)
 		{
 			RadioGroup group = new RadioGroup (name);
@@ -99,14 +104,13 @@ namespace Stetic {
 			return group;
 		}
 
-		public RadioGroup Rename (string oldName, string newName)
+		public void Rename (string oldName, string newName)
 		{
 			RadioGroup group = FindGroup (oldName);
 			if (group != null) {
 				group.Name = newName;
 				EmitGroupsChanged ();
 			}
-			return group;
 		}
 
 		void RadioDestroyed (object obj, EventArgs args)

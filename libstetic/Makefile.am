@@ -72,6 +72,7 @@ libstetic_dll_sources =  \
 	ImageInfo.cs \
 	IProject.cs \
 	IPropertyEditor.cs \
+	IRadioGroupManager.cs \
 	IResourceProvider.cs \
 	ItemDescriptor.cs \
 	ItemGroup.cs \
@@ -134,6 +135,7 @@ libstetic_dll_sources =  \
 	wrapper/Object.cs \
 	wrapper/OptionMenu.cs \
 	wrapper/Paned.cs \
+	wrapper/RadioActionGroupManager.cs \
 	wrapper/RadioButton.cs \
 	wrapper/RadioMenuItem.cs \
 	wrapper/RadioToolButton.cs \
@@ -242,7 +244,8 @@ libstetic_dll_references =  \
 	-pkg:glade-sharp-2.0 \
 	-pkg:gnome-sharp-2.0 \
 	-pkg:gtk-sharp-2.0 \
-	-r:Mono.Posix
+	-r:Mono.Posix \
+	-r:System
 
 
 all: $(ASSEMBLY) $(DATA_FILE_BUILD)

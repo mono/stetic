@@ -12,10 +12,9 @@ namespace Stetic.Editor {
 	class GroupPicker : Gtk.HBox, IPropertyEditor {
 
 		Gtk.ComboBox combo;
-		RadioGroupManager manager;
+		IRadioGroupManager manager;
 		ArrayList values;
 		string group;
-		PropertyDescriptor prop;
 
 		const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
@@ -25,19 +24,18 @@ namespace Stetic.Editor {
 		
 		public void Initialize (PropertyDescriptor prop)
 		{
-			this.prop = prop;
 		}
 		
 		public void AttachObject (object ob)
 		{
 			ob = ObjectWrapper.Lookup (ob);
-			Type owner = ob.GetType ();
+			
+			IRadioGroupManagerProvider provider = ob as IRadioGroupManagerProvider;
+			
+			if (provider == null)
+				throw new ArgumentException ("The class " + ob.GetType() + " does not implement IRadioGroupManagerProvider");
 
-			FieldInfo managerInfo = owner.GetField (prop.Name + "Manager", flags);
-			if (managerInfo == null || managerInfo.FieldType != typeof (Stetic.RadioGroupManager))
-				throw new ArgumentException ("No 'static RadioGroupManager " + prop.Name + "Manager' property on " + owner.FullName);
-
-			manager = managerInfo.GetValue (null) as RadioGroupManager;
+			manager = provider.GetGroupManager ();
 			manager.GroupsChanged += GroupsChanged;
 			GroupsChanged ();
 		}

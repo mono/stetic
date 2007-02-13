@@ -1732,13 +1732,19 @@
 		<property name="Visible" />
 		<property name="VisibleHorizontal" />
 		<property name="VisibleVertical" />
-		<property name="DrawAsRadio">
+		<property name="DrawAsRadio" label="Draw as radio">
 		    <invisible-if name="Type" value="Action" />
 		</property>
 		<property name="Active">
 		    <invisible-if name="Type" value="Action" />
 		</property>
 		<property name="Value">
+		    <invisible-if name="Type" value="Action" />
+		    <invisible-if name="Type" value="Toggle" />
+		</property>
+		<property name="Group" label="Group"
+			  description="The name of the radio action group that this action belongs to"
+			  editor="Stetic.Editor.GroupPicker">
 		    <invisible-if name="Type" value="Action" />
 		    <invisible-if name="Type" value="Toggle" />
 		</property>

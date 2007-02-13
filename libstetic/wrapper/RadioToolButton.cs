@@ -5,7 +5,7 @@ using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
-	public class RadioToolButton : ToggleToolButton {
+	public class RadioToolButton : ToggleToolButton, IRadioGroupManagerProvider {
 
 		public static new Gtk.ToolButton CreateInstance ()
 		{
@@ -23,6 +23,11 @@ namespace Stetic.Wrapper {
 				Group = GroupManager.LastGroup;
 			else if (radio.Group == null)
 				Group = radio.Name;
+		}
+		
+		IRadioGroupManager IRadioGroupManagerProvider.GetGroupManager ()
+		{
+			return GroupManager;
 		}
 
 		protected override void ReadProperties (ObjectReader reader, XmlElement elem)

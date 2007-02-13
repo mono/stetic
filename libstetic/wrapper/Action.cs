@@ -8,7 +8,7 @@ using Stetic.Undo;
 
 namespace Stetic.Wrapper
 {
-	public sealed class Action: Stetic.Wrapper.Object
+	public sealed class Action: Stetic.Wrapper.Object, IRadioGroupManagerProvider
 	{
 		ActionType type;
 		bool drawAsRadio;
@@ -21,6 +21,8 @@ namespace Stetic.Wrapper
 		string oldDefaultName;
 		string nameRoot;
 
+		static RadioActionGroupManager GroupManager = new RadioActionGroupManager ();
+		
 		public enum ActionType {
 			Action,
 			Toggle,
@@ -31,6 +33,11 @@ namespace Stetic.Wrapper
 		public event EventHandler Toggled;
 		public event Gtk.ChangedHandler Changed;
 		public event EventHandler Deleted;
+
+		public override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
+		}
 		
 		public Gtk.Action GtkAction {
 			get { return (Gtk.Action) Wrapped; }
@@ -64,6 +71,11 @@ namespace Stetic.Wrapper
 			}
 		}
 		
+		IRadioGroupManager IRadioGroupManagerProvider.GetGroupManager ()
+		{
+			return GroupManager;
+		}
+
 		internal void UpdateNameIndex ()
 		{
 			// Adds a number to the action name if the current name already
@@ -90,7 +102,17 @@ namespace Stetic.Wrapper
 		
 		public ActionType Type {
 			get { return type; }
-			set { type = value; EmitNotify ("Type"); }
+			set {
+				if (type == value)
+					return;
+				type = value;
+				if (type == ActionType.Radio)
+					Group = GroupManager.LastGroup;
+				else
+					Group = null;
+
+				EmitNotify ("Type");
+			}
 		}
 		
 		public bool DrawAsRadio {
@@ -148,6 +170,17 @@ namespace Stetic.Wrapper
 		
 		public ActionGroup ActionGroup {
 			get { return group; }
+		}
+
+		public string Group {
+			get {
+				return GroupManager.GetGroup (this);
+			}
+			set {
+				Type = ActionType.Radio;
+				GroupManager.SetGroup (this, value);
+				EmitNotify ("Group");
+			}
 		}
 		
 		public void Delete ()
@@ -284,6 +317,19 @@ namespace Stetic.Wrapper
 				exp.Parameters.Add (ctx.GenerateValue (prop.GetValue (Wrapped), typeof(int)));
 			}
 			return exp;
+		}
+		
+		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
+		{
+			if (Type == ActionType.Radio) {
+				CodeExpression groupExp = GroupManager.GenerateGroupExpression (ctx, this);
+				ctx.Statements.Add (
+					new CodeAssignStatement (
+						new CodePropertyReferenceExpression (var, "Group"),
+						groupExp)
+				);
+			}
+			base.GenerateBuildCode (ctx, var);
 		}
 		
 		internal void SetActionGroup (ActionGroup g)

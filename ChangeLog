@@ -1,3 +1,20 @@
+2007-02-13  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/RadioGroupManager.cs: Implement the IRadioGroupManager
+	  interface.
+	* libstetic/wrapper/Action.cs, libstetic/wrapper/objects.xml,
+	  libstetic/wrapper/RadioActionGroupManager.cs: Implemented support
+	  for radio groups in RadioAction objects.
+	* libstetic/wrapper/RadioToolButton.cs,
+	  libstetic/wrapper/RadioButton.cs,
+	  libstetic/wrapper/RadioMenuItem.cs: Implement the new
+	  IRadioGroupManagerProvider interface.
+	* libstetic/IRadioGroupManager.cs: Added new interface for wrapping
+	  group managers.
+	* libstetic/editor/GroupPicker.cs: Get the group manager from the
+	  manager provider, instead of looking for a static method.
+	* libstetic/libstetic.mdp, libstetic/Makefile.am: Updated.
+
 2007-02-12  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ApplicationBackend.cs, libsteticui/Application.cs,

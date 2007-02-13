@@ -5,7 +5,7 @@ using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
-	public class RadioButton : CheckButton {
+	public class RadioButton : CheckButton, IRadioGroupManagerProvider {
 
 		static RadioGroupManager GroupManager = new RadioGroupManager (typeof (Gtk.RadioButton));
 
@@ -18,6 +18,11 @@ namespace Stetic.Wrapper {
 				Group = GroupManager.LastGroup;
 			else if (radiobutton.Group == null)
 				Group = radiobutton.Name;
+		}
+		
+		IRadioGroupManager IRadioGroupManagerProvider.GetGroupManager ()
+		{
+			return GroupManager;
 		}
 
 		protected override void ReadProperties (ObjectReader reader, XmlElement elem)
