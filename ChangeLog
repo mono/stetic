@@ -1,5 +1,12 @@
 2007-02-13  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/Container.cs: Emit the content changed event when a
+	  new child is added.
+	* libstetic/wrapper/Paned.cs: Add1 and Add2 does not fire the child
+	  added event, so the parent has to be manually notified.
+
+2007-02-13  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/RadioGroupManager.cs: Implement the IRadioGroupManager
 	  interface.
 	* libstetic/wrapper/Action.cs, libstetic/wrapper/objects.xml,

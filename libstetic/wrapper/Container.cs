@@ -69,10 +69,16 @@ namespace Stetic.Wrapper
 		
 		void OnChildAdded (object o, Gtk.AddedArgs args)
 		{
-			NotifyChildAdded (args.Widget);
+			HandleNewChild (args.Widget);
 		}
 		
 		protected void NotifyChildAdded (Gtk.Widget child)
+		{
+			HandleNewChild (child);
+			EmitContentsChanged ();
+		}
+		
+		void HandleNewChild (Gtk.Widget child)
 		{
 			// Make sure children's IDs don't conflict with other widgets
 			// in the parent container.

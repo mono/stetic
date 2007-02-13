@@ -28,6 +28,7 @@ namespace Stetic.Wrapper {
 				paned.Remove (oldChild);
 				paned.Add2 (newChild);
 			}
+			NotifyChildAdded (newChild);
 		}
 		
 		public override void Delete (Stetic.Placeholder ph)
