@@ -1,3 +1,10 @@
+
+
+2007-02-19  Nate Hancock <nchancock@yahoo.com>
+
+	* libstetic/wrapper/object.xml: Gtk.ToggleButton now has base class 
+     Gtk.Button instead of Gtk.Container.
+
 2007-02-19  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/WidgetFactory.cs, libsteticui/WidgetEditSession.cs:

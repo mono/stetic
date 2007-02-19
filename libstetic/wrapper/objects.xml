@@ -1388,7 +1388,7 @@
 	</signals>
     </object>
 
-    <object type="Gtk.ToggleButton,gtk-sharp" base-type="Gtk.Container"
+    <object type="Gtk.ToggleButton,gtk-sharp" base-type="Gtk.Button"
 	    label="Toggle Button" icon="togglebutton.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Toggle Button Properties">
