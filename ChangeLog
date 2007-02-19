@@ -1,3 +1,33 @@
+2007-02-19  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/WidgetFactory.cs, libsteticui/WidgetEditSession.cs:
+	  Several fixes in the disposing code.
+	* libsteticui/ActionGroupToolbar.cs: Unsubscribe all events, since gtk#
+	  seems to leak if not done. Replaced all anonymous methods, since
+	  keep to many references in memory.
+	* libsteticui/ActionGroupDesignerBackend.cs: Removed the Dispose
+	  method, since everything will be disposed when the backend is
+	  destroyed.
+	* libsteticui/libsteticui.mdp, libstetic/libstetic.mdp,
+	  stetic/stetic.mdp: Updated.
+	* libsteticui/WidgetDesigner.cs: Added some checks to avoid operating
+	  on disposed designers.
+	* libsteticui/ActionGroupEditSession.cs: Delay the creation of the
+	  action group designer until it is really required.
+	* libsteticui/PluggableWidget.cs: Explicitely destroy replaced
+	  children.
+	* libstetic/undo/UndoManager.cs: Don't use an anonymous method since it
+	  will hold a reference to the object to which the event is being
+	  added, and we don't want this.
+	* libstetic/wrapper/Container.cs, libstetic/wrapper/Widget.cs: Moved
+	  tooltip generation code from Widget to Container. Reset the
+	  generated widget code when starting code generation.
+	* libstetic/wrapper/MenuBar.cs: Dispose the attached ActionTreeNode
+	  object when the palette item is disposed.
+	* libstetic/wrapper/ActionTree.cs: Recursively dispose node children. 
+	* libstetic/editor/ActionGroupEditor.cs: Unsubscribe events when
+	  disposing.
+
 2007-02-13  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/Container.cs: Emit the content changed event when a

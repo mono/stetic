@@ -58,6 +58,10 @@ namespace Stetic.Editor
 		
 		public override void Dispose ()
 		{
+			headerLabel.Changed -= OnGroupNameChanged;
+			if (emptyLabel != null)
+				emptyLabel.ButtonPressEvent -= OnAddClicked;
+			
 			foreach (ActionMenuItem aitem in items) {
 				aitem.KeyPressEvent -= OnItemKeyPress;
 				aitem.Dispose ();
@@ -83,6 +87,8 @@ namespace Stetic.Editor
 					actionGroup.ObjectChanged -= OnGroupChanged;
 					actionGroup.ActionAdded -= OnActionAdded;
 					actionGroup.ActionRemoved -= OnActionRemoved;
+					foreach (Action a in actionGroup.Actions)
+						a.ObjectChanged -= changedEvent;
 				}
 				actionGroup = value;
 				if (actionGroup != null) {
@@ -222,8 +228,10 @@ namespace Stetic.Editor
 		
 		void HideAddLabel ()
 		{
-			if (emptyLabel != null)
+			if (emptyLabel != null) {
 				table.Remove (emptyLabel);
+				emptyLabel.ButtonPressEvent -= OnAddClicked;
+			}
 			emptyLabel = null;
 		}
 		

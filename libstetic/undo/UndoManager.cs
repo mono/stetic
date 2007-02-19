@@ -73,9 +73,14 @@ namespace Stetic
 
 			elements [w] = GetLocalElement (status);
 			
-			w.Disposed += delegate {
-				UnregisterObject (w);
-			};
+			w.Disposed += OnObjectDisposed;
+		}
+		
+		void OnObjectDisposed (object s, EventArgs a)
+		{
+			ObjectWrapper w = (ObjectWrapper) s;
+			UnregisterObject (w);
+			w.Disposed -= OnObjectDisposed;
 		}
 		
 		// This method can be called to update the xml tree, for example when a change in the

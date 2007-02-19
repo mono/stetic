@@ -32,7 +32,7 @@
     <ProjectReference type="Project" localcopy="True" refto="libstetic" />
     <ProjectReference type="Project" localcopy="True" refto="libsteticui" />
   </References>
-  <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="./Makefile.am" ExecuteTargetName="" SyncReferences="True" IsAutotoolsProject="True" RelativeConfigureInPath="../" OutputDirVar="" AssemblyNameVar="">
+  <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="./Makefile.am" SyncReferences="True" IsAutotoolsProject="True" RelativeConfigureInPath="../">
     <BuildFilesVar Sync="True" Name="stetic_exe_sources" />
     <DeployFilesVar />
     <ResourcesVar Sync="True" Name="stetic_exe_resources" />

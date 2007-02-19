@@ -15,6 +15,7 @@ namespace Stetic
 		string containerName;
 		ProjectBackend project;
 		bool modified;
+		bool allowActionBinding;
 		ActionGroupToolbar groupToolbar;
 			
 		Stetic.Wrapper.ActionGroup groupCopy;
@@ -37,8 +38,6 @@ namespace Stetic
 				if (group == null)
 					throw new InvalidOperationException ("Unknown action group: " + groupToEdit);
 				Load (group);
-				groupToolbar = new ActionGroupToolbar (frontend, groupCopy);
-				
 				undoManager = new UndoRedoManager ();
 				undoQueue = new UndoQueue ();
 				undoManager.UndoQueue = undoQueue;
@@ -47,13 +46,8 @@ namespace Stetic
 			else {
 				if (!autoCommitChanges)
 					throw new System.NotSupportedException ();
-				Stetic.Wrapper.Container container = project.GetTopLevelWrapper (containerName, true);
-				groupToolbar = new ActionGroupToolbar (frontend, container.LocalActionGroups);
 			}
-			designer = UserInterface.CreateActionGroupDesigner (project, groupToolbar);
-			designer.Editor.GroupModified += OnModified;
-			
-			project.ProjectReloaded += new EventHandler (OnProjectReloaded);
+			project.ProjectReloaded += OnProjectReloaded;
 		}
 		
 		public Wrapper.ActionGroup EditedActionGroup {
@@ -125,22 +119,26 @@ namespace Stetic
 		
 		public void CopySelection ()
 		{
-			designer.Editor.Copy ();
+			if (designer != null)
+				designer.Editor.Copy ();
 		}
 		
 		public void CutSelection ()
 		{
-			designer.Editor.Cut ();
+			if (designer != null)
+				designer.Editor.Cut ();
 		}
 		
 		public void PasteToSelection ()
 		{
-			designer.Editor.Paste ();
+			if (designer != null)
+				designer.Editor.Paste ();
 		}
 		
 		public void DeleteSelection ()
 		{
-			designer.Editor.Delete ();
+			if (designer != null)
+				designer.Editor.Delete ();
 		}
 		
 		void OnProjectReloaded (object s, EventArgs a)
@@ -172,7 +170,12 @@ namespace Stetic
 		}
 		
 		public bool HasData {
-			get { return groupToolbar.ActionGroups.Count > 0; }
+			get {
+				if (groupToEdit != null)
+					return true;
+				Stetic.Wrapper.Container container = project.GetTopLevelWrapper (containerName, true);
+				return container.LocalActionGroups.Count > 0;
+			}
 		}
 		
 		public bool Modified {
@@ -182,34 +185,61 @@ namespace Stetic
 		
 		public string ActiveGroup {
 			get {
-				Wrapper.ActionGroup grp = designer.Toolbar.ActiveGroup;
-				if (grp != null)
-					return grp.Name;
-				else
-					return null;
+				if (designer != null) {
+					Wrapper.ActionGroup grp = designer.Toolbar.ActiveGroup;
+					if (grp != null)
+						return grp.Name;
+				}
+				return null;
 			}
 			set {
-				Wrapper.ActionGroup grp = designer.Toolbar.ActionGroups [value];
-				designer.Toolbar.ActiveGroup = grp;
+				if (value != null || designer != null) {
+					// No need to create the designer if the active group is being set to null.
+					Wrapper.ActionGroup grp = Backend.Toolbar.ActionGroups [value];
+					Backend.Toolbar.ActiveGroup = grp;
+				}
 			}
 		}
 		
 		public void SetSelectedAction (Wrapper.Action action)
 		{
-			designer.Editor.SelectedAction = action;
+			// No need to create the designer if the active action is being set to null.
+			if (action != null || designer != null)
+				Backend.Editor.SelectedAction = action;
 		}
 		
 		public void GetSelectedAction (out Wrapper.Action action, out string name)
 		{
-			action = designer.Editor.SelectedAction;
-			if (action != null)
-				name = action.Name;
-			else
+			if (designer != null) {
+				action = designer.Editor.SelectedAction;
+				if (action != null)
+					name = action.Name;
+				else
+					name = null;
+			} else {
+				action = null;
 				name = null;
+			}
 		}
 		
 		public ActionGroupDesignerBackend Backend {
-			get { return designer; }
+			get {
+				if (designer == null) {
+					
+					if (groupToEdit != null) {
+						groupToolbar = new ActionGroupToolbar (frontend, groupCopy);
+					}
+					else {
+						Stetic.Wrapper.Container container = project.GetTopLevelWrapper (containerName, true);
+						groupToolbar = new ActionGroupToolbar (frontend, container.LocalActionGroups);
+					}
+
+					designer = UserInterface.CreateActionGroupDesigner (project, groupToolbar);
+					designer.Editor.GroupModified += OnModified;
+					designer.Toolbar.AllowActionBinding = allowActionBinding;
+				}
+				return designer;
+			}
 		}
 		
 		[NoGuiDispatch]
@@ -225,20 +255,33 @@ namespace Stetic
 		
 		public void DestroyBackendWidgetPlug ()
 		{
-			Gtk.Plug plug = (Gtk.Plug) Backend.Parent;
-			plug.Remove (Backend);
-			plug.Destroy ();
+			if (designer != null) {
+				Gtk.Plug plug = (Gtk.Plug) designer.Parent;
+				plug.Remove (designer);
+				plug.Destroy ();
+			}
 		}
 		
 		public bool AllowActionBinding {
-			get { return designer.Toolbar.AllowActionBinding; }
-			set { designer.Toolbar.AllowActionBinding = value; }
+			get {
+				return allowActionBinding;
+			}
+			set {
+				allowActionBinding = value;
+				if (designer != null)
+					designer.Toolbar.AllowActionBinding = value;
+			}
 		}
 		
 		public void Dispose ()
 		{
+			if (designer != null)
+				designer.Editor.GroupModified -= OnModified;
+			project.ProjectReloaded -= OnProjectReloaded;
+			
 			if (plug != null)
 				plug.Destroy ();
+
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 		}
 

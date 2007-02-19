@@ -21,8 +21,11 @@ namespace Stetic
 		
 		protected void AddCustomWidget (Gtk.Widget w)
 		{
-			if (initialized)
+			if (initialized) {
+				Gtk.Widget cw = Child;
 				Remove (Child);
+				cw.Destroy ();
+			}
 			else
 				initialized = true;
 			Add (w);
@@ -65,8 +68,11 @@ namespace Stetic
 				return;
 
 			if (!app.UseExternalBackend) {
-				if (Child != null)
+				if (Child != null) {
+					Gtk.Widget cw = Child;
 					Remove (Child);
+					cw.Destroy ();
+				}
 				Gtk.Widget w = OnCreateWidget ();
 				w.Show ();
 				Add (w);
@@ -93,7 +99,9 @@ namespace Stetic
 				return;
 
 			if (app.UseExternalBackend) {
+				Gtk.Widget w = Child;
 				Remove (Child);
+				w.Destroy ();
 				socket.Dispose ();
 				ConnectPlug ();
 			}

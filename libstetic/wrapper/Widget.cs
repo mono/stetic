@@ -21,7 +21,6 @@ namespace Stetic.Wrapper {
 		ActionGroupCollection actionGroups;
 		string member;
 		string tooltip;
-		CodeExpression generatedTooltips;
 		
 		bool requiresUndoStatusUpdate;
 		
@@ -638,29 +637,6 @@ namespace Stetic.Wrapper {
 				);
 			}
 			return null;
-		}
-		
-		void GenerateTooltip (GeneratorContext ctx, Widget widget)
-		{
-			if (generatedTooltips == null) {
-				string tid = ctx.NewId ();
-				CodeVariableDeclarationStatement vardec = new CodeVariableDeclarationStatement (
-					typeof(Gtk.Tooltips),
-					tid,
-					new CodeObjectCreateExpression (typeof(Gtk.Tooltips))
-				);
-				ctx.Statements.Add (vardec);
-				generatedTooltips = new CodeVariableReferenceExpression (tid);
-			}
-			ctx.Statements.Add (
-				new CodeMethodInvokeExpression (
-					generatedTooltips,
-					"SetTip",
-					ctx.WidgetMap.GetWidgetExp (widget),
-					new CodePrimitiveExpression (widget.Tooltip),
-					new CodePrimitiveExpression (widget.Tooltip)
-				)
-			);
 		}
 
 		public static new Widget Lookup (GLib.Object obj)

@@ -16,6 +16,9 @@ namespace Stetic
 		bool singleGroupMode;
 		bool allowBinding;
 		ActionGroupDesignerFrontend frontend;
+		Editor.ActionGroupEditor agroupEditor;
+		Gtk.ToolButton addButton;
+		Gtk.ToolButton removeButton;
 		
 		public event ActionGroupEventHandler ActiveGroupChanged;
 		public event ActionGroupEventHandler ActiveGroupCreated;
@@ -63,15 +66,15 @@ namespace Stetic
 				Insert (comboItem, -1);
 				internalButtons.Add (comboItem);
 				
-				Gtk.ToolButton but = new Gtk.ToolButton (Gtk.Stock.Add);
-				but.Clicked += OnAddGroup;
-				Insert (but, -1);
-				internalButtons.Add (but);
+				addButton = new Gtk.ToolButton (Gtk.Stock.Add);
+				addButton.Clicked += OnAddGroup;
+				Insert (addButton, -1);
+				internalButtons.Add (addButton);
 				
-				but = new Gtk.ToolButton (Gtk.Stock.Remove);
-				but.Clicked += OnRemoveGroup;
-				Insert (but, -1);
-				internalButtons.Add (but);
+				removeButton = new Gtk.ToolButton (Gtk.Stock.Remove);
+				removeButton.Clicked += OnRemoveGroup;
+				Insert (removeButton, -1);
+				internalButtons.Add (removeButton);
 				
 				ActionGroups = actionGroups;
 				
@@ -86,6 +89,17 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
+			combo.Changed -= OnActiveChanged;
+			if (addButton != null) {
+				addButton.Clicked -= OnAddGroup;
+				removeButton.Clicked -= OnRemoveGroup;
+			}
+				
+			if (agroupEditor != null) {
+				agroupEditor.SelectionChanged -= OnEditorSelectionChanged;
+				agroupEditor = null;
+			}
+			
 			base.Dispose ();
 			if (!singleGroupMode)
 				ActionGroups = null;
@@ -116,17 +130,14 @@ namespace Stetic
 		
 		public void Bind (Editor.ActionGroupEditor agroupEditor)
 		{
-			ActiveGroupChanged += delegate (object s, Wrapper.ActionGroupEventArgs args) {
-				agroupEditor.ActionGroup = args.ActionGroup;
-			};
-			ActiveGroupCreated += delegate (object s, Wrapper.ActionGroupEventArgs args) {
-				agroupEditor.StartEditing ();
-			};
-			
-			agroupEditor.SelectionChanged += delegate (object s, EventArgs args) {
-				UpdateActionCommands (agroupEditor.SelectedAction);
-			};
+			this.agroupEditor = agroupEditor;
+			agroupEditor.SelectionChanged += OnEditorSelectionChanged;
 			agroupEditor.ActionGroup = ActiveGroup;
+		}
+		
+		public void OnEditorSelectionChanged (object s, EventArgs a)
+		{
+			UpdateActionCommands (agroupEditor.SelectedAction);
 		}
 		
 		public ActionGroup ActiveGroup {
@@ -137,8 +148,7 @@ namespace Stetic
 				if (singleGroupMode) {
 					currentGroup = value;
 					UpdateActionCommands (null);
-					if (ActiveGroupChanged != null)
-						ActiveGroupChanged (this, new ActionGroupEventArgs (ActiveGroup));
+					NotifyActiveGroupChanged ();
 				} else {
 					int i = actionGroups.IndexOf (value);
 					if (i != -1)
@@ -196,6 +206,9 @@ namespace Stetic
 			combo.Active = actionGroups.Count - 1;
 			if (ActiveGroupCreated != null)
 				ActiveGroupCreated (this, new ActionGroupEventArgs (ActiveGroup));
+			
+			if (agroupEditor != null)
+				agroupEditor.StartEditing ();
 		}
 		
 		void OnRemoveGroup (object s, EventArgs args)
@@ -212,9 +225,16 @@ namespace Stetic
 					currentGroup = (ActionGroup) actionGroups [combo.Active];
 				else
 					currentGroup = null;
-				if (ActiveGroupChanged != null)
-					ActiveGroupChanged (this, new ActionGroupEventArgs (ActiveGroup));
+				NotifyActiveGroupChanged ();
 			}
+		}
+		
+		void NotifyActiveGroupChanged ()
+		{
+			if (agroupEditor != null)
+				agroupEditor.ActionGroup = ActiveGroup;
+			if (ActiveGroupChanged != null)
+				ActiveGroupChanged (this, new ActionGroupEventArgs (ActiveGroup));
 		}
 		
 		void UpdateActionCommands (Action action)

@@ -94,7 +94,7 @@
     <ProjectReference type="Project" localcopy="True" refto="libstetic" />
     <ProjectReference type="Assembly" localcopy="True" refto="./lib/Mono.Cecil.dll" />
   </References>
-  <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="./Makefile.am" ExecuteTargetName="" SyncReferences="True" IsAutotoolsProject="True" RelativeConfigureInPath="../" OutputDirVar="" AssemblyNameVar="">
+  <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="./Makefile.am" SyncReferences="True" IsAutotoolsProject="True" RelativeConfigureInPath="../">
     <BuildFilesVar Sync="True" Name="libsteticui_dll_sources" />
     <DeployFilesVar Sync="True" Name="libsteticui_dll_datafiles" />
     <ResourcesVar Sync="True" Name="libsteticui_dll_resources" />

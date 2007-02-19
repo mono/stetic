@@ -187,21 +187,25 @@ namespace Stetic {
 			if (toolbar != null)
 				toolbar.Destroy ();
 			
-			gproject.ProjectReloaded -= new EventHandler (OnProjectReloaded);
+			gproject.ModifiedChanged -= new EventHandler (OnModifiedChanged);
+			gproject.Changed -= new EventHandler (OnChanged);
+			gproject.ProjectReloaded -= OnProjectReloaded;
 //			gproject.WidgetMemberNameChanged -= new Stetic.Wrapper.WidgetNameChangedHandler (OnWidgetNameChanged);
 			
 			if (!autoCommitChanges) {
 				// The global action group is being managed by the real stetic project,
 				// so we need to remove it from the project copy before disposing it.
 				gproject.ActionGroups = null;
-				gproject.Dispose ();
+				
+				// Don't dispose the project here! it will be disposed by the frontend
 				if (widget != null) {
 					widget.SelectionChanged -= OnSelectionChanged;
-					widget.Dispose ();
-					widget.Destroy ();
+					// Don't dispose the widget. It will be disposed when destroyed together
+					// with the container
 					widget = null;
 				}
 			}
+			
 			if (plug != null)
 				plug.Destroy ();
 			gproject = null;

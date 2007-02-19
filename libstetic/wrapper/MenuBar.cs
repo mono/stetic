@@ -219,10 +219,12 @@ namespace Stetic.Wrapper
 	public class ActionPaletteItem: Gtk.HBox
 	{
 		ActionTreeNode node;
+		bool disposeNode;
 		
 		public ActionPaletteItem (Gtk.UIManagerItemType type, string name, Action action) 
 		: this (new ActionTreeNode (type, name, action))
 		{
+			disposeNode = true;
 		}
 		
 		public ActionPaletteItem (ActionTreeNode node)
@@ -246,5 +248,13 @@ namespace Stetic.Wrapper
 		public ActionTreeNode Node {
 			get { return node; }
 		}
+		
+		public override void Dispose ()
+		{
+			base.Dispose ();
+			if (disposeNode)
+				node.Dispose ();
+		}
+
 	}
 }

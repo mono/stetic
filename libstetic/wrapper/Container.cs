@@ -14,6 +14,8 @@ namespace Stetic.Wrapper
 		int designWidth;
 		int designHeight;
 		IDesignArea designer;
+		CodeExpression generatedTooltips;
+		
 		static DiffGenerator containerDiffGenerator;
 		static bool showNonContainerWarning = true;
 
@@ -468,6 +470,8 @@ namespace Stetic.Wrapper
 		
 		internal protected override void GenerateBuildCode (GeneratorContext ctx, CodeExpression var)
 		{
+			generatedTooltips = null;
+			
 			base.GenerateBuildCode (ctx, var);
 			
 			if (ClassDescriptor.AllowChildren) {
@@ -604,6 +608,28 @@ namespace Stetic.Wrapper
 			}
 		}
 		
+		internal void GenerateTooltip (GeneratorContext ctx, Widget widget)
+		{
+			if (generatedTooltips == null) {
+				string tid = ctx.NewId ();
+				CodeVariableDeclarationStatement vardec = new CodeVariableDeclarationStatement (
+					typeof(Gtk.Tooltips),
+					tid,
+					new CodeObjectCreateExpression (typeof(Gtk.Tooltips))
+				);
+				ctx.Statements.Add (vardec);
+				generatedTooltips = new CodeVariableReferenceExpression (tid);
+			}
+			ctx.Statements.Add (
+				new CodeMethodInvokeExpression (
+					generatedTooltips,
+					"SetTip",
+					ctx.WidgetMap.GetWidgetExp (widget),
+					new CodePrimitiveExpression (widget.Tooltip),
+					new CodePrimitiveExpression (widget.Tooltip)
+				)
+			);
+		}
 		
 		internal protected override void OnDesignerAttach (IDesignArea designer)
 		{

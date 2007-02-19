@@ -82,6 +82,9 @@ namespace Stetic.Wrapper
 				action.Deleted -= OnActionDeleted;
 				action.ObjectChanged -= OnActionChanged;
 			}
+			if (children != null)
+				foreach (ActionTreeNode node in children)
+					node.Dispose ();
 		}
 		
 		void OnActionDeleted (object s, EventArgs args)

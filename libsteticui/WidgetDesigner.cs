@@ -58,6 +58,8 @@ namespace Stetic
 		// Creates an action group designer for the widget being edited by this widget designer
 		public ActionGroupDesigner CreateActionGroupDesigner ()
 		{
+			if (disposed)
+				throw new ObjectDisposedException ("WidgetDesigner");
 			return new ActionGroupDesigner (editedProject, componentName, null, this, true);
 		}
 		
@@ -67,7 +69,8 @@ namespace Stetic
 		
 		public void SetActive ()
 		{
-			project.App.ActiveProject = editedProject;
+			if (!disposed)
+				project.App.ActiveProject = editedProject;
 		}
 		
 		public bool AllowWidgetBinding {
@@ -166,14 +169,20 @@ namespace Stetic
 			editedProject.BackendChanged -= OnProjectBackendChanged;
 			project.BackendChanged -= OnProjectBackendChanged;
 			
+			if (session != null) {
+				session.Dispose ();
+				session = null;
+			}
+				
 			if (!autoCommitChanges)
 				editedProject.Dispose ();
-
-			if (session != null)
-				session.Dispose ();
+				
 			base.Dispose ();
 
 			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
+			frontend = null;
+			rootWidget = null;
+			selection = null;
 		}
 		
 		public void Save ()
@@ -184,7 +193,7 @@ namespace Stetic
 		
 		void OnComponentNameChanged (object s, ComponentNameEventArgs args)
 		{
-			if (ComponentNameChanged != null)
+			if (!disposed && ComponentNameChanged != null)
 				ComponentNameChanged (this, args);
 		}
 		
