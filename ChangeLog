@@ -1,3 +1,12 @@
+2007-02-20  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ActionGroupEditSession.cs: Added null check.
+	* libstetic/wrapper/Action.cs: Don't set the type to Radio unless a
+	  real group name is provided.
+	* libstetic/editor/ActionMenu.cs: Set AppPaintable, since we do some
+	  custom painting in the Expose event. Also call the base
+	  OnExposeEvent after painting the background. Fixes bug #80864.
+
 
 
 2007-02-19  Nate Hancock <nchancock@yahoo.com>

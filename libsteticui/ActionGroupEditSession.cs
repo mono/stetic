@@ -145,11 +145,13 @@ namespace Stetic
 		{
 			// Called when the underlying project has changed. Object references need to be updated.
 			if (autoCommitChanges) {
-				if (groupToEdit != null) {
-					groupToolbar.ActiveGroup = project.ActionGroups [groupToEdit];
-				} else {
-					Stetic.Wrapper.Container container = project.GetTopLevelWrapper (containerName, true);
-					groupToolbar.ActionGroups = container.LocalActionGroups;
+				if (designer != null) {
+					if (groupToEdit != null) {
+						groupToolbar.ActiveGroup = project.ActionGroups [groupToEdit];
+					} else {
+						Stetic.Wrapper.Container container = project.GetTopLevelWrapper (containerName, true);
+						groupToolbar.ActionGroups = container.LocalActionGroups;
+					}
 				}
 			} else {
 				// We only need to remap the actions

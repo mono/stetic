@@ -33,6 +33,7 @@ namespace Stetic.Editor
 			table.ColumnSpacing = 5;
 			table.RowSpacing = 5;
 			table.BorderWidth = 5;
+			this.AppPaintable = true;
 			
 			Add (table);
 			
@@ -239,11 +240,12 @@ namespace Stetic.Editor
 		
 		protected override bool OnExposeEvent (Gdk.EventExpose ev)
 		{
-			bool r = base.OnExposeEvent (ev);
 			int w, h;
 			this.GdkWindow.GetSize (out w, out h);
 			Gdk.Rectangle clip = new Gdk.Rectangle (0,0,w,h);
 			Gtk.Style.PaintBox (this.Style, this.GdkWindow, Gtk.StateType.Normal, Gtk.ShadowType.Out, clip, this, "menu", 0, 0, w, h);
+			
+			bool r = base.OnExposeEvent (ev);
 			
 			if (dropPosition != -1) {
 				GdkWindow.DrawRectangle (this.Style.BlackGC, true, 0, dropPosition - 1, w - 2, 3);

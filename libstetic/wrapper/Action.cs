@@ -177,7 +177,8 @@ namespace Stetic.Wrapper
 				return GroupManager.GetGroup (this);
 			}
 			set {
-				Type = ActionType.Radio;
+				if (value != null && value.Length > 0)
+					Type = ActionType.Radio;
 				GroupManager.SetGroup (this, value);
 				EmitNotify ("Group");
 			}
