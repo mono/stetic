@@ -1,3 +1,10 @@
+
+
+2007-02-24  Zach Lute <zach.lute@gmail.com>
+
+	* libstetic/ImageInfo.cs: Fixed an issue in which an image thumbnail
+	  wouldn't be scaled if width and height were equal. Fixes bug #80927.
+
 2007-03-02  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/ObjectReader.cs, libstetic/wrapper/Container.cs: Fixed

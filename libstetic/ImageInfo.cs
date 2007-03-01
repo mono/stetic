@@ -150,7 +150,7 @@ namespace Stetic
 			if (pix == null)
 				return null;
 
-			if (pix.Width > pix.Height && pix.Width > thumbnailSize) {
+			if (pix.Width >= pix.Height && pix.Width > thumbnailSize) {
 				return ScaleImage (pix, thumbnailSize, thumbnailSize);
 			} else if (pix.Height > pix.Width && pix.Height > thumbnailSize) {
 				return ScaleImage (pix, thumbnailSize, thumbnailSize);
