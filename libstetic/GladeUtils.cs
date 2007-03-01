@@ -225,9 +225,9 @@ namespace Stetic {
 			case GLib.TypeFundamentals.TypeUInt64:
 				return new GLib.Value (UInt64.Parse (strval));
 			case GLib.TypeFundamentals.TypeFloat:
-				return new GLib.Value (Single.Parse (strval));
+				return new GLib.Value (Single.Parse (strval, System.Globalization.CultureInfo.InvariantCulture));
 			case GLib.TypeFundamentals.TypeDouble:
-				return new GLib.Value (Double.Parse (strval));
+				return new GLib.Value (Double.Parse (strval, System.Globalization.CultureInfo.InvariantCulture));
 			case GLib.TypeFundamentals.TypeString:
 				return new GLib.Value (strval);
 			default:

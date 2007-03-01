@@ -291,6 +291,8 @@ namespace Stetic.Wrapper
 		
 		protected virtual void ReadChildren (ObjectReader reader, XmlElement elem)
 		{
+			int gladeChildStackPos = reader.GladeChildStack.Count;
+			
 			foreach (XmlElement child_elem in elem.SelectNodes ("./child")) {
 				try {
 					if (child_elem.HasAttribute ("internal-child"))
@@ -299,15 +301,27 @@ namespace Stetic.Wrapper
 						ReadPlaceholder (reader, child_elem);
 					else {
 						ObjectWrapper cw = ReadChild (reader, child_elem);
+
 						// Set a temporary id used for the undo/redo operations
-						string cid = child_elem.GetAttribute ("undoId");
-						if (cid.Length > 0)
-							ChildWrapper ((Widget)cw).UndoId = cid;
-						else
-							child_elem.SetAttribute ("undoId", ChildWrapper ((Widget)cw).UndoId);
+						ObjectWrapper ccw = ChildWrapper ((Widget)cw);
+						if (ccw != null) {
+							string cid = child_elem.GetAttribute ("undoId");
+							if (cid.Length > 0)
+								ChildWrapper ((Widget)cw).UndoId = cid;
+							else
+								child_elem.SetAttribute ("undoId", ChildWrapper ((Widget)cw).UndoId);
+						}
 					}
 				} catch (GladeException ge) {
 					Console.Error.WriteLine (ge.Message);
+				}
+			}
+			
+			if (reader.Format == FileFormat.Glade) {
+				for (int n = reader.GladeChildStack.Count - 1; n >= gladeChildStackPos; n--) {
+					ObjectWrapper ob = ReadInternalChild (reader, (XmlElement) reader.GladeChildStack [n]);
+					if (ob != null)
+						reader.GladeChildStack.RemoveAt (n);
 				}
 			}
 
@@ -371,8 +385,15 @@ namespace Stetic.Wrapper
 					return wrapper;
 				}
 			}
-			
-			throw new GladeException ("Unrecognized internal child name", Wrapped.GetType ().FullName, false, "internal-child", childId);
+
+			// In Glade, internal children may not be direct children of the root container. This is handled in a special way.
+			if (reader.Format == FileFormat.Glade) {
+				if (!reader.GladeChildStack.Contains (child_elem))
+					reader.GladeChildStack.Add (child_elem);
+				return null;
+			}
+			else
+				throw new GladeException ("Unrecognized internal child name", Wrapped.GetType ().FullName, false, "internal-child", childId);
 		}
 
 		public override XmlElement Write (ObjectWriter writer)

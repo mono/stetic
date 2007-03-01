@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections;
 using System.Xml;
 
 namespace Stetic
@@ -8,6 +9,7 @@ namespace Stetic
 	{
 		FileFormat format;
 		IProject proj;
+		internal ArrayList GladeChildStack = new ArrayList ();
 		
 		public ObjectReader (IProject proj, FileFormat format)
 		{
