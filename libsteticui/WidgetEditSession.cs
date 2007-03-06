@@ -73,10 +73,14 @@ namespace Stetic {
 			if (!autoCommitChanges) {
 				// Reuse the action groups and icon factory of the main project
 				gproject = editingBackend;
-				gproject.ActionGroups = win.Project.ActionGroups;
+				
+				// Attach will prevent the destruction of the action group list by gproject
+				gproject.AttachActionGroups (win.Project.ActionGroups);
+				
 				gproject.IconFactory = win.Project.IconFactory;
 				gproject.ResourceProvider = win.Project.ResourceProvider;
 				gproject.WidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).WidgetLibraries.Clone ();
+				sourceProject.ComponentTypesChanged += OnSourceProjectLibsChanged;
 				
 				rootWidget = editingBackend.GetTopLevelWrapper (sourceWidget, false);
 				if (rootWidget == null) {
@@ -187,16 +191,14 @@ namespace Stetic {
 			if (toolbar != null)
 				toolbar.Destroy ();
 			
+			sourceProject.ComponentTypesChanged -= OnSourceProjectLibsChanged;
+			
 			gproject.ModifiedChanged -= new EventHandler (OnModifiedChanged);
 			gproject.Changed -= new EventHandler (OnChanged);
 			gproject.ProjectReloaded -= OnProjectReloaded;
 //			gproject.WidgetMemberNameChanged -= new Stetic.Wrapper.WidgetNameChangedHandler (OnWidgetNameChanged);
 			
 			if (!autoCommitChanges) {
-				// The global action group is being managed by the real stetic project,
-				// so we need to remove it from the project copy before disposing it.
-				gproject.ActionGroups = null;
-				
 				// Don't dispose the project here! it will be disposed by the frontend
 				if (widget != null) {
 					widget.SelectionChanged -= OnSelectionChanged;
@@ -255,8 +257,22 @@ namespace Stetic {
 				frontend.NotifyChanged ();
 		}
 		
+		void OnSourceProjectLibsChanged (object s, EventArgs a)
+		{
+			// If component types have changed in the source project, they must also change
+			// in this project.
+			gproject.WidgetLibraries = (ArrayList) sourceProject.WidgetLibraries.Clone ();
+			gproject.NotifyComponentTypesChanged ();
+		}
+		
 		void OnProjectReloaded (object s, EventArgs a)
 		{
+			// Update the actions group list
+			if (!autoCommitChanges) {
+				gproject.AttachActionGroups (sourceProject.ActionGroups);
+				gproject.WidgetLibraries = (ArrayList) sourceProject.WidgetLibraries.Clone ();
+			}
+			
 			Gtk.Widget[] tops = gproject.Toplevels;
 			if (tops.Length > 0) {
 				rootWidget = Stetic.Wrapper.Container.Lookup (tops[0]);
@@ -270,6 +286,8 @@ namespace Stetic {
 					OnRootWidgetChanged ();
 					if (oldWidget != null)
 						oldWidget.Destroy ();
+						
+					gproject.NotifyComponentTypesChanged ();
 					return;
 				}
 			}

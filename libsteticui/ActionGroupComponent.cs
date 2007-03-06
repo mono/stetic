@@ -33,12 +33,16 @@ namespace Stetic
 		public ActionComponent[] GetActions ()
 		{
 			Wrapper.ActionCollection acts = ((Wrapper.ActionGroup)backend).Actions;
-			ActionComponent[] comps = new ActionComponent [acts.Count];
 			
-			for (int n=0; n<acts.Count; n++)
-				comps [n] = (ActionComponent) app.GetComponent (acts[n], null, null);
+			ArrayList comps = new ArrayList (acts.Count);
+			
+			for (int n=0; n<acts.Count; n++) {
+				ActionComponent ac = (ActionComponent) app.GetComponent (acts[n], null, null);
+				if (ac != null)
+					comps.Add (ac);
+			}
 				
-			return comps;
+			return (ActionComponent[]) comps.ToArray (typeof(ActionComponent));
 		}
 		
 		public override Component[] GetChildren ()

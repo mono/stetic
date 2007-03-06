@@ -54,6 +54,7 @@ namespace Stetic.Editor {
 		
 		public IntRangeEditor () : base (0, 0, 1.0)
 		{
+			this.HasFrame = false;
 		}
 		
 		public void Initialize (PropertyDescriptor prop)

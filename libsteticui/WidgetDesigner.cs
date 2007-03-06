@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections;
 
 namespace Stetic
 {
@@ -27,6 +28,7 @@ namespace Stetic
 		public event ComponentSignalEventHandler SignalRemoved;
 		public event ComponentSignalEventHandler SignalChanged;
 		public event ComponentNameEventHandler ComponentNameChanged;
+		public event EventHandler ComponentTypesChanged;
 		
 		internal WidgetDesigner (Project project, string componentName, bool autoCommitChanges): base (project.App)
 		{
@@ -44,6 +46,7 @@ namespace Stetic
 			editedProject.SignalRemoved += OnSignalRemoved;
 			editedProject.SignalChanged += OnSignalChanged;
 			editedProject.ComponentNameChanged += OnComponentNameChanged;
+			editedProject.ComponentTypesChanged += OnComponentTypesChanged;
 			
 			project.BackendChanged += OnProjectBackendChanged;
 			editedProject.BackendChanged += OnProjectBackendChanged;
@@ -53,6 +56,33 @@ namespace Stetic
 		
 		public Component RootComponent {
 			get { return rootWidget; }
+		}
+		
+		public ComponentType[] GetComponentTypes ()
+		{
+			if (!disposed) {
+				ArrayList types = new ArrayList ();
+				types.AddRange (editedProject.GetComponentTypes ());
+				
+				// Add actions from the local action groups
+				
+				WidgetComponent c = rootWidget as WidgetComponent;
+				if (c != null) {
+					foreach (ActionGroupComponent grp in c.GetActionGroups ()) {
+						foreach (ActionComponent ac in grp.GetActions ())
+							types.Add (new ComponentType (app, ac));
+					}
+				}
+				return (ComponentType[]) types.ToArray (typeof(ComponentType)); 
+			}
+			else
+				return new ComponentType[0];
+		}
+		
+		public void BeginComponentDrag (ComponentType type, Gtk.Widget source, Gdk.DragContext ctx)
+		{
+			Stetic.ObjectWrapper wrapper = type.Action != null ? (Stetic.ObjectWrapper) type.Action.Backend : null;
+			app.Backend.BeginComponentDrag (editedProject.ProjectBackend, type.ClassName, wrapper, source, ctx);
 		}
 		
 		// Creates an action group designer for the widget being edited by this widget designer
@@ -167,6 +197,7 @@ namespace Stetic
 			editedProject.SignalChanged -= OnSignalChanged;
 			editedProject.ComponentNameChanged -= OnComponentNameChanged;
 			editedProject.BackendChanged -= OnProjectBackendChanged;
+			editedProject.ComponentTypesChanged -= OnComponentTypesChanged;
 			project.BackendChanged -= OnProjectBackendChanged;
 			
 			if (session != null) {
@@ -245,6 +276,12 @@ namespace Stetic
 				base.OnBackendChanged (oldBackend);
 				NotifyRootWidgetChanged ();
 			}
+		}
+		
+		void OnComponentTypesChanged (object s, EventArgs a)
+		{
+			if (ComponentTypesChanged != null)
+				ComponentTypesChanged (this, a);
 		}
 		
 		void OnSignalAdded (object sender, Stetic.ComponentSignalEventArgs args)

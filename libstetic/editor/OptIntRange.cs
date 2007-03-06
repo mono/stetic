@@ -43,6 +43,7 @@ namespace Stetic.Editor {
 
 			spin = new Gtk.SpinButton (min, max, 1.0);
 			spin.Show ();
+			spin.HasFrame = false;
 			spin.ValueChanged += spin_ValueChanged;
 			PackStart (spin, true, true, 0);
 		}

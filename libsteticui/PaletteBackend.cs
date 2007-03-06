@@ -138,10 +138,8 @@ namespace Stetic {
 				foreach (ClassDescriptor klass in Registry.AllClasses)
 					classes.Add (klass);
 			} else {
-				classes.AddRange (Registry.CoreWidgetLibrary.AllClasses);
 				foreach (WidgetLibrary lib in libraries) {
-					if (lib != Registry.CoreWidgetLibrary)
-						classes.AddRange (lib.AllClasses);
+					classes.AddRange (lib.AllClasses);
 				}
 			}
 			

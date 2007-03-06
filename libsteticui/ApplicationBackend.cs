@@ -289,11 +289,17 @@ namespace Stetic
 		
 		public WidgetLibrary[] GetActiveLibraries ()
 		{
+			return GetProjectLibraries (activeProject);
+		}
+		
+		public WidgetLibrary[] GetProjectLibraries (ProjectBackend project)
+		{
 			ArrayList projectLibs = new ArrayList ();
-			if (activeProject != null)
-				projectLibs.AddRange (activeProject.WidgetLibraries);
+			if (project != null)
+				projectLibs.AddRange (project.WidgetLibraries);
 				
 			ArrayList list = new ArrayList ();
+			list.Add (Registry.CoreWidgetLibrary);
 			foreach (WidgetLibrary alib in Registry.RegisteredWidgetLibraries) {
 				string aname = alib.Name;
 				if (projectLibs.Contains (aname) || globalWidgetLibraries.Contains (aname))
@@ -439,17 +445,19 @@ namespace Stetic
 			return list;
 		}
 		
-		public bool GetClassDescriptorInfo (string name, out string desc, out string className, out byte[] icon)
+		public bool GetClassDescriptorInfo (string name, out string desc, out string className, out string category, out byte[] icon)
 		{
 			ClassDescriptor cls = Registry.LookupClassByName (name);
 			if (cls == null) {
 				icon = null;
 				desc = null;
 				className = null;
+				category = null;
 				return false;
 			}
 			desc = cls.Label;
 			className = cls.WrappedTypeName;
+			category = cls.Category;
 			icon = cls.Icon != null ? cls.Icon.SaveToBuffer ("png") : null;
 			return true;
 		}
@@ -520,6 +528,8 @@ namespace Stetic
 		internal byte[] GetActionIcon (Wrapper.Action ac)
 		{
 			Gdk.Pixbuf pix = ac.RenderIcon (Gtk.IconSize.Menu);
+			if (pix == null)
+				return null;
 			return pix.SaveToBuffer ("png");
 		}
 		
@@ -561,6 +571,18 @@ namespace Stetic
 		internal ObjectWrapper GetPropertyTreeTarget ()
 		{
 			return targetViewerObject as ObjectWrapper;
+		}
+		
+		internal void BeginComponentDrag (ProjectBackend project, string className, ObjectWrapper wrapper, Gtk.Widget source, Gdk.DragContext ctx)
+		{
+			if (wrapper != null) {
+				Stetic.Wrapper.ActionPaletteItem it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menuitem, null, (Wrapper.Action) wrapper);
+				DND.Drag (source, ctx, it);
+			}
+			else {
+				ClassDescriptor cls = Registry.LookupClassByName (className);
+				DND.Drag (source, ctx, cls.NewInstance (project) as Gtk.Widget);
+			}
 		}
 	}
 }

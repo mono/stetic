@@ -14,10 +14,13 @@ namespace Stetic.Editor
 		
 		public TextEditor()
 		{
+			Spacing = 3;
 			entry = new Entry ();
+			entry.HasFrame = false;
 			PackStart (entry, true, true, 0);
 			button = new Button ("...");
-			PackStart (button, false, false, 3);
+			button.Relief = ReliefStyle.Half;
+			PackStart (button, false, false, 0);
 			button.Clicked += ButtonClicked;
 			entry.Changed += TextChanged;
 			ShowAll ();

@@ -51,6 +51,7 @@ namespace Stetic.Editor {
 				throw new ApplicationException ("Flags editor does not support editing values of type " + prop.PropertyType);
 				
 			property = prop.Label;
+			Spacing = 3;
 
 			// For small enums, the editor is a list of checkboxes inside a frame
 			// For large enums (>5), use a selector dialog.
@@ -88,13 +89,14 @@ namespace Stetic.Editor {
 			{
 				flagsLabel = new Gtk.Entry ();
 				flagsLabel.IsEditable = false;
+				flagsLabel.HasFrame = false;
 				flagsLabel.ShowAll ();
 				PackStart (flagsLabel, true, true, 0);
 				
 				Gtk.Button but = new Gtk.Button ("...");
 				but.Clicked += OnSelectFlags;
 				but.ShowAll ();
-				PackStart (but, false, false, 3);
+				PackStart (but, false, false, 0);
 			}
 		}
 		

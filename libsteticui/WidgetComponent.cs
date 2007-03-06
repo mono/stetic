@@ -38,10 +38,13 @@ namespace Stetic
 			ArrayList wws = app.Backend.GetWidgetChildren ((Wrapper.Widget)backend);
 			if (wws == null)
 				return new Component [0];
-			Component[] children = new Component [wws.Count];
-			for (int n=0; n<wws.Count; n++)
-				children [n] = app.GetComponent (wws[n], null, null);
-			return children;
+			ArrayList children = new ArrayList (wws.Count);
+			for (int n=0; n<wws.Count; n++) {
+				Component c = app.GetComponent (wws[n], null, null);
+				if (c != null)
+					children.Add (c);
+			}
+			return (Component[]) children.ToArray (typeof(Component));
 		}
 		
 		protected override void OnGetClipboardStatus ()
@@ -72,12 +75,15 @@ namespace Stetic
 			if (app == null)
 				return new ActionGroupComponent [0];
 			
+			ArrayList comps = new ArrayList ();
 			Wrapper.ActionGroup[] groups = app.Backend.GetActionGroups ((Wrapper.Widget)backend);
-			ActionGroupComponent[] comps = new ActionGroupComponent [groups.Length];
-			for (int n=0; n<groups.Length; n++)
-				comps [n] = (ActionGroupComponent) app.GetComponent (groups[n], null, null);
+			for (int n=0; n<groups.Length; n++) {
+				ActionGroupComponent ag = (ActionGroupComponent) app.GetComponent (groups[n], null, null);
+				if (ag != null)
+					comps.Add (ag);
+			}
 				
-			return comps;
+			return (ActionGroupComponent[]) comps.ToArray (typeof(ActionGroupComponent));
 		}
 		
 		public bool IsWindow {

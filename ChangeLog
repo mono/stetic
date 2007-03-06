@@ -1,3 +1,31 @@
+2007-03-06  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ApplicationBackend.cs: Added some null checks. Added
+	  BeginComponentDrag, to allow using an external toolbox.
+	* libsteticui/ProjectBackend.cs, libsteticui/WidgetDesigner.cs,
+	  libsteticui/Project.cs: Added method for getting all component
+	  types accessible from a project. Added some null checks.
+	* libsteticui/WidgetEditSession.cs: Reload the project when the widget
+	  libraries change.
+	* libsteticui/Application.cs: Fill ComponentType with category
+	  information.
+	* libsteticui/PropertyTree.cs: Removed the horizontall scrollbar. Cell
+	  size will always fit the available space. Allow changing the column
+	  width by dragging the divider.
+	* libsteticui/PaletteBackend.cs: The library list of a project now
+	  includes the core library.
+	* libsteticui/ActionGroupComponent.cs: Added null check.
+	* libsteticui/ComponentType.cs: Added category information. Allow
+	  creating a ComponentType from an action.
+	* libsteticui/WidgetComponent.cs: Added some null checks.
+	* libstetic/editor/Enumeration.cs: Use a combo box entry with no frame
+	  as selector. It takes less space.
+	* libstetic/editor/TextEditor.cs, libstetic/editor/Flags.cs,
+	  libstetic/editor/String.cs, libstetic/editor/IntRange.cs,
+	  libstetic/editor/Identifier.cs, libstetic/editor/OptIntRange.cs,
+	  libstetic/editor/StringArray.cs: Removed frames from all editors.
+	  Take less space.
+
 
 
 2007-02-24  Zach Lute <zach.lute@gmail.com>

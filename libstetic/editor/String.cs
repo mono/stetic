@@ -12,6 +12,7 @@ namespace Stetic.Editor {
 			base.Initialize (prop);
 			
 			entry = new Gtk.Entry ();
+			entry.HasFrame = false;
 			entry.Show ();
 			entry.Changed += EntryChanged;
 			Add (entry);

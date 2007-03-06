@@ -27,7 +27,7 @@ namespace Stetic.Editor {
 	public class EnumerationEditor : Gtk.HBox, IPropertyEditor {
 
 		Gtk.EventBox ebox;
-		Gtk.ComboBox combo;
+		Gtk.ComboBoxEntry combo;
 		Gtk.Tooltips tips;
 		EnumDescriptor enm;
 
@@ -44,8 +44,11 @@ namespace Stetic.Editor {
 			ebox.Show ();
 			PackStart (ebox, true, true, 0);
 
-			combo = Gtk.ComboBox.NewText ();
+			combo = Gtk.ComboBoxEntry.NewText ();
 			combo.Changed += combo_Changed;
+			combo.Entry.IsEditable = false;
+			combo.Entry.HasFrame = false;
+			combo.Entry.HeightRequest = combo.SizeRequest ().Height;	// The combo does not set the entry to the correct size when it does not have a frame
 			combo.Show ();
 			ebox.Add (combo);
 

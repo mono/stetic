@@ -395,18 +395,18 @@ namespace Stetic
 			if (t != null) return t;
 			
 			if (typeName == "Gtk.Action" || typeName == "Gtk.ActionGroup") {
-				t = new ComponentType (this, typeName, "", typeName, ComponentType.Unknown.Icon);
+				t = new ComponentType (this, typeName, "", typeName, "Actions", ComponentType.Unknown.Icon);
 				types [typeName] = t;
 				return t;
 			}
 			
-			string desc = null, className = null;
+			string desc = null, className = null, category = null;
 			Gdk.Pixbuf px = null;
 			
 			if (externalBackend) {
 				byte[] icon;
 				
-				if (Backend.GetClassDescriptorInfo (typeName, out desc, out className, out icon)) {
+				if (Backend.GetClassDescriptorInfo (typeName, out desc, out className, out category, out icon)) {
 					if (icon != null)
 						px = new Gdk.Pixbuf (icon);
 				}
@@ -422,11 +422,12 @@ namespace Stetic
 				if (cls != null) {
 					desc = cls.Label;
 					className = cls.WrappedTypeName;
+					category = cls.Category;
 					px = cls.Icon;
 				}
 			}
 			
-			t = new ComponentType (this, typeName, desc, className, px);
+			t = new ComponentType (this, typeName, desc, className, category, px);
 			types [typeName] = t;
 			return t;
 		}

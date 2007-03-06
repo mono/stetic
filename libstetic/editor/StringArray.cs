@@ -34,7 +34,7 @@ namespace Stetic.Editor
 		public StringArrayEditor()
 		{
 			label = new Gtk.Entry ();
-			label.Sensitive = false;
+			label.IsEditable = false;
 			PackStart (label, true, true, 0);
 			button = new Button ("...");
 			PackStart (button, false, false, 3);

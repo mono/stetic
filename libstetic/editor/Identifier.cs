@@ -15,6 +15,7 @@ namespace Stetic.Editor
 		public Identifier()
 		{
 			ShowAll ();
+			HasFrame = false;
 		}
 		
 		public void Initialize (PropertyDescriptor descriptor)

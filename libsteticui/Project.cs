@@ -16,6 +16,7 @@ namespace Stetic
 		IResourceProvider resourceProvider;
 		Component selection;
 		string tmpProjectFile;
+		bool reloadRequested;
 		
 		internal event BackendChangingHandler BackendChanging;
 		internal event BackendChangedHandler BackendChanged;
@@ -24,6 +25,7 @@ namespace Stetic
 		public event ComponentRemovedEventHandler ComponentRemoved;
 		public event ComponentEventHandler SelectionChanged;
 		public event ComponentNameEventHandler ComponentNameChanged;
+		public event EventHandler ComponentTypesChanged;
 		
 		public event EventHandler ActionGroupsChanged;
 		public event EventHandler ModifiedChanged;
@@ -162,11 +164,19 @@ namespace Stetic
 		
 		public ComponentType[] GetComponentTypes ()
 		{
-			ArrayList typeNames = app.Backend.GetComponentTypes ();
-			ComponentType[] types = new ComponentType [typeNames.Count];
+			ArrayList types = new ArrayList ();
+			
+			ArrayList typeNames = backend.GetComponentTypes ();
 			for (int n=0; n<typeNames.Count; n++)
-				types [n] = app.GetComponentType ((string) typeNames [n]);
-			return types;
+				types.Add (app.GetComponentType ((string) typeNames [n]));
+
+			// Global action groups
+			foreach (ActionGroupComponent grp in GetActionGroups ()) {
+				foreach (ActionComponent ac in grp.GetActions ())
+					types.Add (new ComponentType (app, ac));
+			}
+			
+			return (ComponentType[]) types.ToArray (typeof(ComponentType));
 		}
 		
 		public void RemoveComponent (WidgetComponent component)
@@ -177,8 +187,11 @@ namespace Stetic
 		public WidgetComponent[] GetComponents ()
 		{
 			ArrayList list = new ArrayList ();
-			foreach (object ob in backend.GetTopLevelWrappers ())
-				list.Add (App.GetComponent (ob, null, null));
+			foreach (object ob in backend.GetTopLevelWrappers ()) {
+				WidgetComponent wc = App.GetComponent (ob, null, null) as WidgetComponent;
+				if (wc != null)
+					list.Add (wc);
+			}
 			return (WidgetComponent[]) list.ToArray (typeof(WidgetComponent));
 		}
 		
@@ -212,33 +225,45 @@ namespace Stetic
 		{
 			Wrapper.ActionGroup[] acs = ProjectBackend.GetActionGroups ();
 			
-			ActionGroupComponent[] comps = new ActionGroupComponent [acs.Length];
-			for (int n=0; n<acs.Length; n++)
-				comps [n] = (ActionGroupComponent) App.GetComponent (acs[n], null, null);
+			ArrayList comps = new ArrayList (acs.Length);
+			for (int n=0; n<acs.Length; n++) {
+				ActionGroupComponent ag = (ActionGroupComponent) App.GetComponent (acs[n], null, null);
+				if (ag != null)
+					comps.Add (ag);
+			}
 				
-			return comps;
+			return (ActionGroupComponent[]) comps.ToArray (typeof(ActionGroupComponent));
 		}
 		
 		public void AddWidgetLibrary (string assemblyPath)
 		{
+			reloadRequested = false;
 			backend.AddWidgetLibrary (assemblyPath);
 			app.UpdateWidgetLibraries (false, false);
+			if (!reloadRequested)
+				backend.Reload ();
 		}
 		
 		public void RemoveWidgetLibrary (string assemblyPath)
 		{
+			reloadRequested = false;
 			backend.RemoveWidgetLibrary (assemblyPath);
 			app.UpdateWidgetLibraries (false, false);
+			if (!reloadRequested)
+				backend.Reload ();
 		}
 		
 		public string[] WidgetLibraries {
 			get {
 				return (string[]) backend.WidgetLibraries.ToArray (typeof(string));
 			} set {
+				reloadRequested = false;
 				ArrayList libs = new ArrayList ();
 				libs.AddRange (value);
 				backend.WidgetLibraries = libs;
 				app.UpdateWidgetLibraries (false, false);
+				if (!reloadRequested)
+					backend.Reload ();
 			}
 		}
 		
@@ -280,8 +305,8 @@ namespace Stetic
 		public void EditIcons ()
 		{
 			backend.EditIcons ();
-		}		
-
+		}
+		
 		internal void NotifyWidgetAdded (object obj, string name, string typeName, bool topLevel)
 		{
 			if (topLevel) {
@@ -412,6 +437,14 @@ namespace Stetic
 			Gtk.Application.Invoke (delegate {
 				if (ProjectReloaded != null)
 					ProjectReloaded (this, EventArgs.Empty);
+			});
+		}
+		
+		internal void NotifyComponentTypesChanged ()
+		{
+			Gtk.Application.Invoke (delegate {
+				if (ComponentTypesChanged != null)
+					ComponentTypesChanged (this, EventArgs.Empty);
 			});
 		}
 		

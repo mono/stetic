@@ -48,8 +48,14 @@ namespace Stetic
 			
 			editorColumn.PackStart (crp, true);
 			editorColumn.SetCellDataFunc (crp, new TreeCellDataFunc (PropertyData));
-			editorColumn.Resizable = true;
+			editorColumn.Sizing = TreeViewColumnSizing.Fixed;
+			editorColumn.Resizable = false;
+			editorColumn.Expand = true;
 			tree.AppendColumn (editorColumn);
+			
+			tree.HeadersVisible = false;
+			this.ShadowType = Gtk.ShadowType.In;
+			this.HscrollbarPolicy = Gtk.PolicyType.Never;
 			
 			Add (tree);
 			ShowAll ();
@@ -162,7 +168,7 @@ namespace Stetic
 		void OnSelectionChanged (object s, EventArgs a)
 		{
 			TreePath[] rows = tree.Selection.GetSelectedRows ();
-			if (rows != null && rows.Length > 0) {
+			if (!tree.dragging && rows != null && rows.Length > 0) {
 				tree.SetCursor (rows[0], editorColumn, true);
 			}
 		}
@@ -208,6 +214,9 @@ namespace Stetic
 		Pango.Layout layout;
 		bool editing;
 		PropertyTree tree;
+		internal bool dragging;
+		int dragPos;
+		Gdk.Cursor resizeCursor = new Gdk.Cursor (CursorType.SbHDoubleArrow);
 		
 		public InternalTree (PropertyTree tree, TreeModel model): base (model)
 		{
@@ -230,12 +239,54 @@ namespace Stetic
 			bool res = base.OnExposeEvent (e);
 			
 			foreach (TreeGroup grp in Groups) {
-				layout.SetText (grp.Group);
+				layout.SetMarkup ("<b>" + GLib.Markup.EscapeText (grp.Group) + "</b>");
 				e.Window.DrawLayout (this.Style.TextGC (grp.State), grp.X, grp.Y, layout);
 			}
 			
 			return res;
 		}
+		
+		protected override bool OnMotionNotifyEvent (EventMotion evnt)
+		{
+			if (dragging) {
+				int nw = (int)(evnt.X) + dragPos;
+				if (nw <= 40) nw = 40;
+				GLib.Idle.Add (delegate {
+					Columns[0].FixedWidth = nw;
+					return false;
+				});
+			} else {
+				int w = Columns[0].Width;
+				if (Math.Abs (w - evnt.X) < 5)
+					this.GdkWindow.Cursor = resizeCursor;
+				else
+					this.GdkWindow.Cursor = null;
+			}
+			return base.OnMotionNotifyEvent (evnt);
+		}
+		
+		protected override bool OnButtonPressEvent (EventButton evnt)
+		{
+			int w = Columns[0].Width;
+			if (Math.Abs (w - evnt.X) < 5) {
+				TreePath[] rows = Selection.GetSelectedRows ();
+				if (rows != null && rows.Length > 0)
+					SetCursor (rows[0], Columns[0], false);
+				dragging = true;
+				dragPos = w - (int) evnt.X;
+				this.GdkWindow.Cursor = resizeCursor;
+			}
+			return base.OnButtonPressEvent (evnt);
+		}
+		
+		protected override bool OnButtonReleaseEvent (EventButton evnt)
+		{
+			if (dragging) {
+				this.GdkWindow.Cursor = null;
+				dragging = false;
+			}
+			return base.OnButtonReleaseEvent (evnt);
+		}		
 		
 		public virtual void Update ()
 		{
@@ -269,6 +320,7 @@ namespace Stetic
 			
 			Mode |= Gtk.CellRendererMode.Editable;
 			Entry dummyEntry = new Gtk.Entry ();
+			dummyEntry.HasFrame = false;
 			rowHeight = dummyEntry.SizeRequest ().Height;
 		}
 		

@@ -21,7 +21,11 @@ namespace Stetic {
 		XmlDocument tempDoc;
 		bool loading;
 		IResourceProvider resourceProvider;
+		
+		// Global action groups of the project
 		Stetic.Wrapper.ActionGroupCollection actionGroups;
+		bool ownedGlobalActionGroups = true;	// It may be false when reusing groups from another project
+		
 		Stetic.ProjectIconFactory iconFactory;
 		Project frontend;
 		int componentIdCounter;
@@ -29,11 +33,15 @@ namespace Stetic {
 		ApplicationBackend app;
 		ImportContext importContext;
 		
+		// The action collection of the last selected widget
+		Stetic.Wrapper.ActionGroupCollection oldTopActionCollection;
+		
 		public event Wrapper.WidgetNameChangedHandler WidgetNameChanged;
 		public event Wrapper.WidgetNameChangedHandler WidgetMemberNameChanged;
 		public event Wrapper.WidgetEventHandler WidgetAdded;
 		public event Wrapper.WidgetEventHandler WidgetRemoved;
 		public event ObjectWrapperEventHandler ObjectChanged;
+		public event EventHandler ComponentTypesChanged;
 		
 		public event SignalEventHandler SignalAdded;
 		public event SignalEventHandler SignalRemoved;
@@ -69,6 +77,9 @@ namespace Stetic {
 			// to avoid sending notifications while disposing
 			frontend = null;
 			
+			if (oldTopActionCollection != null)
+				oldTopActionCollection.ActionGroupChanged -= OnComponentTypesChanged;
+
 			Registry.RegistryChanging -= OnRegistryChanging;
 			Registry.RegistryChanged -= OnRegistryChanged;
 			Close ();
@@ -123,6 +134,18 @@ namespace Stetic {
 			widgetLibraries.Remove (lib);
 		}
 		
+		public ArrayList GetComponentTypes ()
+		{
+			ArrayList list = new ArrayList ();
+			foreach (WidgetLibrary lib in app.GetProjectLibraries (this)) {
+				foreach (ClassDescriptor cd in lib.AllClasses) {
+					if (!cd.Deprecated && cd.Category.Length > 0)
+						list.Add (cd.Name);
+				}
+			}
+			return list;
+		}
+		
 		public IResourceProvider ResourceProvider { 
 			get { return resourceProvider; }
 			set { resourceProvider = value; }
@@ -134,13 +157,22 @@ namespace Stetic {
 				if (actionGroups != null) {
 					actionGroups.ActionGroupAdded -= OnGroupAdded;
 					actionGroups.ActionGroupRemoved -= OnGroupRemoved;
+					actionGroups.ActionGroupChanged -= OnComponentTypesChanged;
 				}
 				actionGroups = value;
 				if (actionGroups != null) {
 					actionGroups.ActionGroupAdded += OnGroupAdded;
 					actionGroups.ActionGroupRemoved += OnGroupRemoved;
+					actionGroups.ActionGroupChanged += OnComponentTypesChanged;
 				}
+				ownedGlobalActionGroups = true;
 			}
+		}
+		
+		public void AttachActionGroups (Stetic.Wrapper.ActionGroupCollection groups)
+		{
+			ActionGroups = groups;
+			ownedGlobalActionGroups = false;
 		}
 		
 		public Stetic.ProjectIconFactory IconFactory {
@@ -162,7 +194,7 @@ namespace Stetic {
 		{
 			fileName = null;
 			
-			if (actionGroups != null) {
+			if (actionGroups != null && ownedGlobalActionGroups) {
 				foreach (Stetic.Wrapper.ActionGroup ag in actionGroups)
 					ag.Dispose ();
 				actionGroups.Clear ();
@@ -247,10 +279,12 @@ namespace Stetic {
 				
 				ObjectReader reader = new ObjectReader (this, FileFormat.Native);
 				
-				foreach (XmlElement groupElem in node.SelectNodes ("action-group")) {
-					Wrapper.ActionGroup actionGroup = new Wrapper.ActionGroup ();
-					actionGroup.Read (reader, groupElem);
-					actionGroups.Add (actionGroup);
+				if (ownedGlobalActionGroups) {
+					foreach (XmlElement groupElem in node.SelectNodes ("action-group")) {
+						Wrapper.ActionGroup actionGroup = new Wrapper.ActionGroup ();
+						actionGroup.Read (reader, groupElem);
+						actionGroups.Add (actionGroup);
+					}
 				}
 				
 				XmlElement iconsElem = node.SelectSingleNode ("icon-factory") as XmlElement;
@@ -316,9 +350,11 @@ namespace Stetic {
 			}
 
 			ObjectWriter writer = new ObjectWriter (doc, FileFormat.Native);
-			foreach (Wrapper.ActionGroup agroup in actionGroups) {
-				XmlElement elem = agroup.Write (writer);
-				toplevel.AppendChild (elem);
+			if (ownedGlobalActionGroups) {
+				foreach (Wrapper.ActionGroup agroup in actionGroups) {
+					XmlElement elem = agroup.Write (writer);
+					toplevel.AppendChild (elem);
+				}
 			}
 			
 			if (iconFactory.Icons.Count > 0)
@@ -494,7 +530,14 @@ namespace Stetic {
 					frontend.NotifyProjectReloaded ();
 				if (ProjectReloaded != null)
 					ProjectReloaded (this, EventArgs.Empty);
+				NotifyComponentTypesChanged ();
 			}
+		}
+		
+		public void Reload ()
+		{
+			OnRegistryChanging (null, null);
+			OnRegistryChanged (null, null);
 		}
 
 		public string Id {
@@ -787,6 +830,8 @@ namespace Stetic {
 				if (selection == value)
 					return;
 
+				Wrapper.ActionGroupCollection newCollection = null;
+				
 				// FIXME: should there be an IsDestroyed property?
 				if (selection != null && selection.Handle != IntPtr.Zero) {
 					Stetic.Wrapper.Container parent = Stetic.Wrapper.Container.LookupParent (selection);
@@ -804,6 +849,9 @@ namespace Stetic {
 						parent = Stetic.Wrapper.Container.Lookup (selection);
 					if (parent != null)
 						parent.Select (selection);
+					Wrapper.Widget w = Wrapper.Widget.Lookup (selection);
+					if (w != null)
+						newCollection = w.LocalActionGroups;
 				}
 
 				if (frontend != null) {
@@ -823,6 +871,15 @@ namespace Stetic {
 				}
 				if (SelectionChanged != null)
 					SelectionChanged (this, new Wrapper.WidgetEventArgs (Wrapper.Widget.Lookup (selection)));
+				
+				if (oldTopActionCollection != newCollection) {
+					if (oldTopActionCollection != null)
+						oldTopActionCollection.ActionGroupChanged -= OnComponentTypesChanged;
+					if (newCollection != null)
+						newCollection.ActionGroupChanged += OnComponentTypesChanged;
+					oldTopActionCollection = newCollection;
+					OnComponentTypesChanged (null, null);
+				}
 			}
 		}
 
@@ -887,6 +944,20 @@ namespace Stetic {
 			return erg;
 		}
 		
+		void OnComponentTypesChanged (object s, EventArgs a)
+		{
+			if (!loading)
+				NotifyComponentTypesChanged ();
+		}
+		
+		public void NotifyComponentTypesChanged ()
+		{
+			if (frontend != null)
+				frontend.NotifyComponentTypesChanged ();
+			if (ComponentTypesChanged != null)
+				ComponentTypesChanged (this, EventArgs.Empty);
+		}
+		
 		void OnGroupAdded (object s, Stetic.Wrapper.ActionGroupEventArgs args)
 		{
 			args.ActionGroup.SignalAdded += OnSignalAdded;
@@ -894,6 +965,7 @@ namespace Stetic {
 			args.ActionGroup.SignalChanged += OnSignalChanged;
 			if (frontend != null)
 				frontend.NotifyActionGroupAdded (args.ActionGroup.Name);
+			OnComponentTypesChanged (null, null);
 		}
 		
 		void OnGroupRemoved (object s, Stetic.Wrapper.ActionGroupEventArgs args)
@@ -903,6 +975,7 @@ namespace Stetic {
 			args.ActionGroup.SignalChanged -= OnSignalChanged;
 			if (frontend != null)
 				frontend.NotifyActionGroupRemoved (args.ActionGroup.Name);
+			OnComponentTypesChanged (null, null);
 		}
 		
 		void NotifyChanged ()
