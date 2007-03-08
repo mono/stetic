@@ -158,7 +158,8 @@ namespace Stetic.Wrapper {
 			if (widget is Stetic.Placeholder)
 				return;
 
-			widget.Events |= Gdk.EventMask.ButtonPressMask;
+			if (!widget.IsRealized)
+				widget.Events |= Gdk.EventMask.ButtonPressMask;
 			widget.WidgetEvent += WidgetEvent;
 
 			Gtk.Container container = widget as Gtk.Container;

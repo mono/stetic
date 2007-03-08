@@ -360,7 +360,6 @@ namespace Stetic {
 			base.Dispose ();
 			foreach (ActionPaletteGroup grp in Children)
 				grp.Destroy ();
-			SetActionGroups (null);
 		}
 		
 		public void Update ()

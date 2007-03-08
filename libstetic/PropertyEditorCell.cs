@@ -228,6 +228,7 @@ namespace Stetic
 		Gtk.Widget container;
 		IPropertyEditor currentEditor;
 		bool syncing;
+		object initialVal;
 		
 		public EditSession (Gtk.Widget container, object instance, PropertyDescriptor property, IPropertyEditor currentEditor)
 		{
@@ -236,6 +237,7 @@ namespace Stetic
 			this.container = container;
 			this.currentEditor = currentEditor;
 			currentEditor.ValueChanged += OnValueChanged;
+			initialVal = currentEditor.Value;
 		}
 		
 		public object Instance {
@@ -289,6 +291,12 @@ namespace Stetic
 				currentEditor.Value = property.GetValue (obj);
 				syncing = false;
 			}
+		}
+		
+		public void Dispose ()
+		{
+			if (!object.Equals (initialVal, currentEditor.Value))
+				OnValueChanged (null, null);
 		}
 	}
 }

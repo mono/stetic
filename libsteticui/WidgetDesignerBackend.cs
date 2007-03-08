@@ -324,6 +324,7 @@ namespace Stetic
 		{
 			fixd = new Fixed ();
 			Add (fixd);
+			this.CanFocus = true;
 			this.Events = EventMask.ButtonPressMask | EventMask.ButtonReleaseMask | EventMask.PointerMotionMask;
 //			fixd.ModifyBg (Gtk.StateType.Normal, this.Style.Mid (Gtk.StateType.Normal));
 //			VisibleWindow = false;
@@ -448,6 +449,14 @@ namespace Stetic
 					// This makes the property editor to flicker
 					// when changing widget selection
 					// UpdateObjectViewers ();
+				}
+				if (widget == null) {
+					Gtk.Container cc = this as Gtk.Container;
+					while (cc.Parent != null)
+						cc = cc.Parent as Gtk.Container;
+					if (cc is Gtk.Window) {
+						((Gtk.Window)cc).Focus = this;
+					}
 				}
 			}
 		}

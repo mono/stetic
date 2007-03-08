@@ -1,3 +1,20 @@
+2007-03-08  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/WidgetDesignerBackend.cs: ResetSelection now sets the
+	  focus to the fixed container.
+	* libsteticui/PropertyTree.cs: Dispose the edit session of a cell when
+	  losing the focus.
+	* libsteticui/PaletteBackend.cs: Don't call SetActionGroups when
+	  disposing, since it ends calling show().
+	* libstetic/wrapper/Container.cs: Use ResetSelection to remove the
+	  focus from the current widget.
+	* libstetic/editor/TextEditor.cs: Don't fire the changed event at every
+	  key press, only when pressing enter or losing the focus.
+	* libstetic/PropertyEditorCell.cs: When losing the focus, update the
+	  property value.
+	* libstetic/wrapper/Widget.cs: Don't try to change widget event flags
+	  if the widget is already realized.
+
 2007-03-06  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ApplicationBackend.cs: Added some null checks. Added

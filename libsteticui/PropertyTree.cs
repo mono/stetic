@@ -38,7 +38,7 @@ namespace Stetic
 			col.Resizable = true;
 			col.Expand = false;
 			col.Sizing = TreeViewColumnSizing.Fixed;
-			col.FixedWidth = 180;
+			col.FixedWidth = 150;
 			tree.AppendColumn (col);
 			
 			editorColumn = new TreeViewColumn ();
@@ -389,7 +389,7 @@ namespace Stetic
 				return null;
 			Gtk.Widget propEditor = (Gtk.Widget) session.Editor;
 			propEditor.Show ();
-			HackEntry e = new HackEntry (propEditor);
+			HackEntry e = new HackEntry (propEditor, session);
 			e.Show ();
 			return e;
 		}
@@ -494,9 +494,11 @@ namespace Stetic
 	class HackEntry: Entry
 	{
 		EventBox box;
+		EditSession session;
 		
-		public HackEntry (Gtk.Widget child)
+		public HackEntry (Gtk.Widget child, EditSession session)
 		{
+			this.session = session;
 			box = new EventBox ();
 			box.ButtonPressEvent += new ButtonPressEventHandler (OnClickBox);
 			box.ModifyBg (StateType.Normal, Style.White);
@@ -523,6 +525,7 @@ namespace Stetic
 				((InternalTree)Parent).Editing = true;
 			}
 			else {
+				session.Dispose ();
 				((InternalTree)parent).Editing = false;
 				box.Unparent ();
 			}

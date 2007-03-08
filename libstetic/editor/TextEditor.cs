@@ -22,7 +22,7 @@ namespace Stetic.Editor
 			button.Relief = ReliefStyle.Half;
 			PackStart (button, false, false, 0);
 			button.Clicked += ButtonClicked;
-			entry.Changed += TextChanged;
+			entry.Activated += TextChanged;
 			ShowAll ();
 		}
 		
@@ -45,6 +45,7 @@ namespace Stetic.Editor
 						}
 					}
 					entry.Text = dlg.Text;
+					TextChanged (null, null);
 				}
 			}
 		}
