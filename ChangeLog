@@ -1,5 +1,11 @@
 2007-03-08  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/Container.cs: Fix null ref.
+	* libstetic/wrapper/Widget.cs: Use a wrapper property for CanFocus
+	  since it may be changed by the designer.
+
+2007-03-08  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/WidgetDesignerBackend.cs: ResetSelection now sets the
 	  focus to the fixed container.
 	* libsteticui/PropertyTree.cs: Dispose the edit session of a cell when

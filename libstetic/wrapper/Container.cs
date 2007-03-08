@@ -985,7 +985,8 @@ namespace Stetic.Wrapper
 					} else
 						win.Focus = w;
 				} else {
-					this.designer.ResetSelection (null);
+					if (designer != null)
+						designer.ResetSelection (null);
 				}
 			}
 				

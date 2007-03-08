@@ -18,6 +18,8 @@ namespace Stetic.Wrapper {
 		bool window_visible = true;
 		bool hasDefault;
 		Gdk.EventMask events;
+		bool canFocus;
+		
 		ActionGroupCollection actionGroups;
 		string member;
 		string tooltip;
@@ -50,8 +52,12 @@ namespace Stetic.Wrapper {
 			base.Wrap (obj, initialized);
 			
 			oldName = ((Gtk.Widget)obj).Name;
-			events = Wrapped.Events;
-
+			
+			if (!initialized) {
+				events = Wrapped.Events;
+				canFocus = Wrapped.CanFocus;
+			}
+		
 			if (!(Wrapped is Gtk.Window))
 				Wrapped.ShowAll ();
 			
@@ -711,6 +717,16 @@ namespace Stetic.Wrapper {
 			set {
 				events = value;
 				EmitNotify ("Events");
+			}
+		}
+
+		public bool CanFocus {
+			get {
+				return canFocus;
+			}
+			set {
+				canFocus = value;
+				EmitNotify ("CanFocus");
 			}
 		}
 
