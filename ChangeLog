@@ -1,3 +1,17 @@
+2007-03-26  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/WidgetEditSession.cs,
+	  libsteticui/CodeGeneratorPartialClass.cs,
+	  libstetic/wrapper/Widget.cs, libstetic/wrapper/objects.xml: Support
+	  generating private classes.
+	* libsteticui/ComponentType.cs, libstetic/ImageInfo.cs,
+	  libstetic/wrapper/Action.cs, libstetic/wrapper/ImageMenuItem.cs,
+	  libstetic/editor/StockItem.cs, libstetic/WidgetUtils.cs: Use the
+	  new MissingIcon constant.
+	* libstetic/wrapper/ComboBox.cs: Made combo values translatable. Fixes
+	  bug #81033.
+	* libstetic/HandleWindow.cs: Removed unused file.
+
 2007-03-08  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/Container.cs: Fix null ref.

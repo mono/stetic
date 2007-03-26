@@ -89,7 +89,7 @@ namespace Stetic.Wrapper {
 					ctx.Statements.Add (new CodeMethodInvokeExpression (
 						var,
 						"AppendText",
-						new CodePrimitiveExpression (str)
+						ctx.GenerateValue (str, typeof(string), true)
 					));
 				}
 			}

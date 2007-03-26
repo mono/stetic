@@ -366,7 +366,7 @@ namespace Stetic
 			return (undoIdCount++).ToString ();
 		}
 		
-		internal static Gdk.Pixbuf MissingIcon {
+		public static Gdk.Pixbuf MissingIcon {
 			get {
 				if (missingIcon == null) {
 					try {

@@ -14,6 +14,7 @@ namespace Stetic.Wrapper {
 		string oldMemberName;
 		internal bool settingFocus;
 		bool hexpandable, vexpandable;
+		bool generatePublic = true;
 
 		bool window_visible = true;
 		bool hasDefault;
@@ -129,6 +130,11 @@ namespace Stetic.Wrapper {
 				return ParentWrapper.UndoManager;
 			else
 				return base.GetUndoManagerInternal ();
+		}
+		
+		public bool GeneratePublic {
+			get { return generatePublic; }
+			set { generatePublic = value; }
 		}
 		
 		public bool Unselectable {

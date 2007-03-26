@@ -62,9 +62,7 @@ namespace Stetic
 		internal static ComponentType Unknown {
 			get {
 				if (unknown == null) {
-					Gtk.IconSet iset = Gtk.IconFactory.LookupDefault (Gtk.Stock.MissingImage);
-					Gdk.Pixbuf px = iset.RenderIcon (new Gtk.Style (), Gtk.TextDirection.Ltr, Gtk.StateType.Normal, Gtk.IconSize.Menu, null, "");
-					unknown = new ComponentType (null, "Unknown", "Unknown", "", "", px);
+					unknown = new ComponentType (null, "Unknown", "Unknown", "", "", WidgetUtils.MissingIcon);
 				}
 				return unknown;
 			}

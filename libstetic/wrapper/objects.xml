@@ -20,6 +20,7 @@
 <!--		<property name="HasFocus" /> -->
 		<property name="Events" />
 		<property name="ExtensionEvents" />
+		<property name="GeneratePublic" internal="true" default="true"/>
 		<property name="Name" internal="true"
 			min="1"
 			init-with-name="true" 

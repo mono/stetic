@@ -51,7 +51,7 @@ namespace Stetic.Wrapper {
 				} else if (image.StartsWith ("file:"))
 					icon = new Gtk.Image (image.Substring (5));
 				else
-					icon = new Gtk.Image (Gtk.Stock.MissingImage, Gtk.IconSize.Menu);
+					icon = new Gtk.Image (WidgetUtils.MissingIcon);
 
 				((Gtk.ImageMenuItem)Wrapped).Image = icon;
 

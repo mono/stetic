@@ -174,7 +174,12 @@ namespace Stetic {
 				XmlElement data = Stetic.WidgetUtils.ExportWidget (rootWidget.Wrapped);
 				
 				Wrapper.Widget sw = sourceProject.GetTopLevelWrapper (sourceWidget, false);
+				
+				// GeneratePublic can't be changed in the designer. Keep the vaule it
+				// had in the source project
+				bool generatePublic = sw.GeneratePublic;
 				sw.Read (new ObjectReader (gproject, FileFormat.Native), data);
+				sw.GeneratePublic = generatePublic;
 				
 				sourceWidget = ((Gtk.Widget)sw.Wrapped).Name;
 				sw.NotifyChanged ();

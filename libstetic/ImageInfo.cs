@@ -116,7 +116,7 @@ namespace Stetic
 						return image = new Gdk.Pixbuf (s);
 					} catch {
 						// Not a valid image
-						return Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
+						return WidgetUtils.MissingIcon;
 					}
 					
 				case ImageSource.Theme:
@@ -126,7 +126,7 @@ namespace Stetic
 						return image = Gtk.IconTheme.Default.LoadIcon (name, w, 0);
 					} catch {
 						// Icon not in theme
-						return Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
+						return WidgetUtils.MissingIcon;
 					}
 					
 				case ImageSource.File:
@@ -138,7 +138,7 @@ namespace Stetic
 						}
 						return image = new Gdk.Pixbuf (file);
 					} catch {
-						return Gtk.IconTheme.Default.LoadIcon (Gtk.Stock.MissingImage, 16, 0);
+						return WidgetUtils.MissingIcon;
 					}
 			}
 			return null;

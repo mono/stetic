@@ -26,16 +26,9 @@ namespace Stetic.Editor {
 				
 				Gtk.IconSet iset = Gtk.IconFactory.LookupDefault (name);
 				if (iset == null)
-					iset = Gtk.IconFactory.LookupDefault (Gtk.Stock.MissingImage);
-				
-				Image = iset.RenderIcon (new Gtk.Style (), Gtk.TextDirection.Ltr, Gtk.StateType.Normal, Gtk.IconSize.Menu, null, "");
-				
-/*				try {
-					Image = Container.RenderIcon (name, Gtk.IconSize.Menu, "");
-				} catch (Exception ex) {
-					Image = Container.RenderIcon (Gtk.Stock.MissingImage, Gtk.IconSize.Menu, "");
-				}
-*/
+					Image = WidgetUtils.MissingIcon;
+				else
+					Image = iset.RenderIcon (new Gtk.Style (), Gtk.TextDirection.Ltr, Gtk.StateType.Normal, Gtk.IconSize.Menu, null, "");
 			} else {
 				Image = null;
 				label = "";
@@ -88,10 +81,8 @@ namespace Stetic.Editor {
 			Gtk.Frame frame = new Gtk.Frame ();
 			entry = new Gtk.Entry ();
 			entry.Changed += OnTextChanged;
-			frame.Shadow = Gtk.ShadowType.In;
-			frame.BorderWidth = 2;
-			frame.Add (entry);
-			PackStart (frame, true, true, 0);
+			entry.HasFrame = false;
+			PackStart (entry, true, true, 0);
 
 			button = new Gtk.Button ();
 			button.Add (new Gtk.Arrow (Gtk.ArrowType.Down, Gtk.ShadowType.Out));

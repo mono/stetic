@@ -80,6 +80,11 @@ namespace Stetic
 			);
 
 			Stetic.Wrapper.Widget wwidget = Stetic.Wrapper.Widget.Lookup (w);
+			if (wwidget.GeneratePublic)
+				type.TypeAttributes = TypeAttributes.Public;
+			else
+				type.TypeAttributes = TypeAttributes.NotPublic;
+			
 			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, w, new CodeThisReferenceExpression (), met.Statements, options, warnings);
 			CodeGenerator.BindSignalHandlers (new CodeThisReferenceExpression (), wwidget, map, met.Statements, options);
 		}
