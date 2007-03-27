@@ -1,3 +1,12 @@
+2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/wrapper/ScrolledWindow.cs: Don't generate the viewport if
+	  there isn't any child. Make scrollbars always visible in the
+	  designer.
+	* libstetic/wrapper/objects.xml: Ignore the default for DrawIndicator,
+	  since the default is 'false', but a default CheckButton has 'true'
+	  as value. 
+
 2007-03-26  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/WidgetEditSession.cs,

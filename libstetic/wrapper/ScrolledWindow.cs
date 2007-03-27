@@ -1,23 +1,43 @@
 using System;
 using System.Collections;
+using System.CodeDom;
 
 namespace Stetic.Wrapper {
 
 	public class ScrolledWindow : Container {
 
+		Gtk.PolicyType hpolicy;
+		Gtk.PolicyType vpolicy;
+		
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
-				scrolled.SetPolicy (Gtk.PolicyType.Always, Gtk.PolicyType.Always);
 				if (scrolled.Child == null)
 					AddPlaceholder ();
 			}
+			scrolled.SetPolicy (Gtk.PolicyType.Always, Gtk.PolicyType.Always);
 		}
 
 		public Gtk.ScrolledWindow scrolled {
 			get {
 				return (Gtk.ScrolledWindow)Wrapped;
+			}
+		}
+		
+		public Gtk.PolicyType HscrollbarPolicy {
+			get { return hpolicy; }
+			set {
+				hpolicy = value;
+				EmitNotify ("HscrollbarPolicy");
+			}
+		}
+
+		public Gtk.PolicyType VscrollbarPolicy {
+			get { return vpolicy; }
+			set {
+				vpolicy = value;
+				EmitNotify ("VscrollbarPolicy");
 			}
 		}
 
@@ -63,5 +83,13 @@ namespace Stetic.Wrapper {
 			AddWithViewport (ph);
 			return ph;
 		}
+		
+		protected override void GenerateChildBuildCode (GeneratorContext ctx, CodeExpression parentVar, Widget wrapper)
+		{
+			Gtk.Viewport vp = wrapper.Wrapped as Gtk.Viewport;
+			if (vp == null || (vp.Child != null && !(vp.Child is Placeholder)))
+				base.GenerateChildBuildCode (ctx, parentVar, wrapper);
+		}
+
 	}
 }

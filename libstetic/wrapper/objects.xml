@@ -473,7 +473,7 @@
 		<property name="Label" init-with-name="true" translatable="true" />
 		<property name="Active" />
 		<property name="Inconsistent" />
-		<property name="DrawIndicator" />
+		<property name="DrawIndicator" ignore-default="true"/>
 		<property name="HasLabel" internal="true" />
 		<property name="UseUnderline" />
 		<command name="RestoreLabel" label="Restore Label" icon="res:add-check-label.png"
