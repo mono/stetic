@@ -499,8 +499,8 @@ namespace Stetic
 		{
 			Stetic.Wrapper.Widget wrapper = obj as Stetic.Wrapper.Widget;
 			if (wrapper != null) {
-				canCut = wrapper.InternalChildProperty == null;
-				canCopy = true;
+				canCut = wrapper.InternalChildProperty == null && !wrapper.IsTopLevel;
+				canCopy = !wrapper.IsTopLevel;
 				canPaste = false;
 			}
 			else if (obj is Placeholder) {

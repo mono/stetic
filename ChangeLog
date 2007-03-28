@@ -1,5 +1,10 @@
 2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/ApplicationBackend.cs: Don't allow cutting/copying top
+	  level widgets. Fixes bug #81015.
+
+2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/wrapper/Container.cs, libstetic/wrapper/Widget.cs: When
 	  selecting a widget, avoid setting the focus to the parent
 	  container, since it may end changing the selection. Fixes bug
