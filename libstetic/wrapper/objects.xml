@@ -1393,16 +1393,9 @@
 	    label="Toggle Button" icon="togglebutton.png" palette-category="widget">
 	<itemgroups>
 	    <itemgroup label="Toggle Button Properties">
-		<property ref="Gtk.Button.Type" />
-		<property ref="Gtk.Button.StockId" />
-		<property ref="Gtk.Button.Icon" />
-		<!-- 2.6 <property ref="Gtk.Button.ThemedIcon" /> -->
-		<property ref="Gtk.Button.Label" />
-		<property ref="Gtk.Button.UseUnderline" />
 		<property name="Active" />
 		<property name="Inconsistent" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Button.Extra" />
 	</itemgroups>
 	<signals>
     	<itemgroup label="Toggle Button Signals">

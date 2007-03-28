@@ -1,5 +1,10 @@
 2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/objects.xml: Removed properties already inherited
+	  from Gtk.Button.
+
+2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/undo/XmlDiffAdaptor.cs: Don't crash if a child element
 	  doesn't exist.
 	* libstetic/editor/StockItem.cs: Fix warning.
