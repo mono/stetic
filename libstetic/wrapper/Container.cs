@@ -964,26 +964,22 @@ namespace Stetic.Wrapper
 			
 			selection = widget;
 			if (win != null) {
-				if (widget != null && widget.CanFocus)
-					win.Focus = widget;
-				else if (widget != null) {
-					// Remove the focus from the window. In this way we ensure
-					// that the current selected widget will lose the focus,
-					// even if the new selection is not focusable.
-					Gtk.Widget w = widget.Parent;
-					while (w != null && !w.CanFocus) {
-						w = w.Parent;
+				if (widget != null) {
+					if (widget.CanFocus)
+						win.Focus = widget;
+					else {
+						// Look for a focusable parent container
+						Widget wr = GetTopLevel ();
+						Gtk.Widget w = wr.Wrapped;
+						while (w != null && !w.CanFocus)
+							w = w.Parent;
+
+						// If the widget is not focusable,
+						// remove the focus from the window. In this way we ensure
+						// that the current selected widget will lose the focus,
+						// even if the new selection is not focusable.
+						win.Focus = w;
 					}
-					Widget wr = Widget.Lookup (w);
-					
-					if (wr != null) {
-						// This flags avoids calling Select() again
-						// when the focusIn event is received.
-						wr.settingFocus = true;
-						win.Focus = w;
-						wr.settingFocus = false;
-					} else
-						win.Focus = w;
 				} else {
 					if (designer != null)
 						designer.ResetSelection (null);

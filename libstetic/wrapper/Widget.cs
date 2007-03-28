@@ -12,7 +12,6 @@ namespace Stetic.Wrapper {
 		
 		string oldName;
 		string oldMemberName;
-		internal bool settingFocus;
 		bool hexpandable, vexpandable;
 		bool generatePublic = true;
 
@@ -115,9 +114,6 @@ namespace Stetic.Wrapper {
 		
 		void OnFocusIn (object s, Gtk.FocusInEventArgs a)
 		{
-			if (settingFocus)
-				return;
-
 			if (!Unselectable)
 				Select ();
 			else if (ParentWrapper != null)

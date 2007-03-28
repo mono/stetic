@@ -1,5 +1,12 @@
 2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/Container.cs, libstetic/wrapper/Widget.cs: When
+	  selecting a widget, avoid setting the focus to the parent
+	  container, since it may end changing the selection. Fixes bug
+	  #81014. 
+
+2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/wrapper/objects.xml: Removed properties already inherited
 	  from Gtk.Button.
 
