@@ -78,7 +78,6 @@ namespace Stetic.Editor {
 			image = new Gtk.Image (Gnome.Stock.Blank, Gtk.IconSize.Button);
 			imageFrame.Add (image);
 			
-			Gtk.Frame frame = new Gtk.Frame ();
 			entry = new Gtk.Entry ();
 			entry.Changed += OnTextChanged;
 			entry.HasFrame = false;

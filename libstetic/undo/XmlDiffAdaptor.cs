@@ -96,17 +96,23 @@ namespace Stetic.Undo
 				return this;
 		}
 		
-		XmlElement GetPropsElem (object obj)
+		XmlElement GetPropsElem (object obj, bool create)
 		{
-			if (propsElementName != null)
-				return ((XmlElement)obj) [propsElementName];
+			if (propsElementName != null) {
+				XmlElement elem = ((XmlElement)obj) [propsElementName];
+				if (elem == null && create) {
+					elem = ((XmlElement)obj).OwnerDocument.CreateElement (propsElementName);
+					((XmlElement)obj).AppendChild (elem);
+				}
+				return elem;
+			}
 			else
 				return (XmlElement) obj;
 		}
 		
 		public IEnumerable GetProperties (object obj)
 		{
-			XmlElement elem = GetPropsElem (obj);
+			XmlElement elem = GetPropsElem (obj, false);
 			if (elem != null && processProperties) {
 				XmlAttribute at = elem.Attributes ["name"];
 				if (at != null)
@@ -122,7 +128,9 @@ namespace Stetic.Undo
 		
 		public object GetPropertyByName (object obj, string name)
 		{
-			XmlElement elem = GetPropsElem (obj);
+			XmlElement elem = GetPropsElem (obj, false);
+			if (elem == null)
+				return null;
 			XmlElement prop = (XmlElement) elem.SelectSingleNode ("property[@name='" + name + "']");
 			if (prop != null)
 				return prop;
@@ -147,7 +155,7 @@ namespace Stetic.Undo
 		
 		public void SetPropertyValue (object obj, string name, string value)
 		{
-			XmlElement elem = GetPropsElem (obj);
+			XmlElement elem = GetPropsElem (obj, true);
 			if (name == "id" || name == "name") {
 				elem.SetAttribute (name, value);
 			} else {
@@ -163,7 +171,9 @@ namespace Stetic.Undo
 		
 		public void ResetPropertyValue (object obj, string name)
 		{
-			XmlElement elem = GetPropsElem (obj);
+			XmlElement elem = GetPropsElem (obj, false);
+			if (elem == null)
+				return;
 			XmlElement prop = (XmlElement) elem.SelectSingleNode ("property[@name='" + name + "']");
 			if (prop != null)
 				elem.RemoveChild (prop);
@@ -176,7 +186,7 @@ namespace Stetic.Undo
 		
 		public IEnumerable GetSignals (object obj)
 		{
-			XmlElement elem = GetPropsElem (obj);
+			XmlElement elem = GetPropsElem (obj, false);
 			if (elem != null && processProperties)
 				return elem.SelectNodes ("signal");
 			else
@@ -185,7 +195,10 @@ namespace Stetic.Undo
 		
 		public object GetSignal (object obj, string name, string handler)
 		{
-			return GetPropsElem (obj).SelectSingleNode ("signal[@name='" + name + "' and @handler='" + handler + "']");
+			XmlElement elem = GetPropsElem (obj, false);
+			if (elem == null)
+				return null;
+			return elem.SelectSingleNode ("signal[@name='" + name + "' and @handler='" + handler + "']");
 		}
 		
 		public void GetSignalInfo (object signal, out string name, out string handler)
@@ -197,7 +210,7 @@ namespace Stetic.Undo
 		
 		public void AddSignal (object obj, string name, string handler)
 		{
-			XmlElement elem = GetPropsElem (obj);
+			XmlElement elem = GetPropsElem (obj, true);
 			XmlElement signal = elem.OwnerDocument.CreateElement ("signal");
 			signal.SetAttribute ("name", name);
 			signal.SetAttribute ("handler", handler);
@@ -206,7 +219,9 @@ namespace Stetic.Undo
 		
 		public void RemoveSignal (object obj, string name, string handler)
 		{
-			XmlElement elem = GetPropsElem (obj);
+			XmlElement elem = GetPropsElem (obj, false);
+			if (elem == null)
+				return;
 			XmlElement prop = (XmlElement) elem.SelectSingleNode ("signal[@name='" + name + "' && @handler='" + handler + "']");
 			if (prop != null)
 				elem.RemoveChild (prop);

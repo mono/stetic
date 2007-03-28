@@ -1,5 +1,11 @@
 2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/undo/XmlDiffAdaptor.cs: Don't crash if a child element
+	  doesn't exist.
+	* libstetic/editor/StockItem.cs: Fix warning.
+
+2007-03-28  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/wrapper/ScrolledWindow.cs: Don't generate the viewport if
 	  there isn't any child. Make scrollbars always visible in the
 	  designer.
