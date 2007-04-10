@@ -60,8 +60,10 @@ namespace Stetic {
 			if (elem.HasAttribute ("translatable"))
 				translatable = true;
 				
-			if (elem.HasAttribute ("default"))
+			if (elem.HasAttribute ("default")) {
 				defaultValue = StringToValue (elem.GetAttribute ("default"));
+				hasDefault = true;
+			}
 				
 			string convTypeName = elem.GetAttribute ("type-converter");
 			if (convTypeName.Length > 0) {

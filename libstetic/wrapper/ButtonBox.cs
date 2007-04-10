@@ -125,13 +125,23 @@ namespace Stetic.Wrapper {
 					CodeExpression dialogVar = ctx.WidgetMap.GetWidgetExp (actionDialog);
 					ctx.Statements.Add (new CodeCommentStatement ("Container child " + Wrapped.Name + "." + childwrapper.Wrapped.GetType ()));
 					CodeExpression var = ctx.GenerateNewInstanceCode (wrapper);
-					CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
-						dialogVar,
-						"AddActionWidget",
-						var,
-						new CodePrimitiveExpression (button.ResponseId)
-					);
-					ctx.Statements.Add (invoke);
+					if (button.ResponseId != (int) Gtk.ResponseType.None) {
+						CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
+							dialogVar,
+							"AddActionWidget",
+							var,
+							new CodePrimitiveExpression (button.ResponseId)
+						);
+						ctx.Statements.Add (invoke);
+					}
+					else {
+						CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression (
+							parentVar,
+							"Add",
+							var
+						);
+						ctx.Statements.Add (invoke);
+					}
 					GenerateSetPacking (ctx, parentVar, var, childwrapper);
 				}
 			} else

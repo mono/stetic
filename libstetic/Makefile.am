@@ -101,6 +101,8 @@ libstetic_dll_sources =  \
 	undo/IDiffAdaptor.cs \
 	undo/UndoManager.cs \
 	undo/XmlDiffAdaptor.cs \
+	WidgetLibrary.cs \
+	WidgetUtils.cs \
 	wrapper/Action.cs \
 	wrapper/ActionGroup.cs \
 	wrapper/ActionToolbarWrapper.cs \
@@ -159,9 +161,7 @@ libstetic_dll_sources =  \
 	wrapper/Widget.cs \
 	wrapper/WidgetEventHandler.cs \
 	wrapper/WidgetNameChangedHandler.cs \
-	wrapper/Window.cs \
-	WidgetLibrary.cs \
-	WidgetUtils.cs
+	wrapper/Window.cs
 
 libstetic_dll_resources =  \
 	stetic.glade \

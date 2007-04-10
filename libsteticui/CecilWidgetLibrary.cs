@@ -20,6 +20,7 @@ namespace Stetic
 		string[] dependencies;
 		ImportContext importContext;
 		bool canGenerateCode;
+		Hashtable resolvedCache;
 		
 		public CecilWidgetLibrary (ImportContext importContext, string assemblyPath)
 		{
@@ -63,6 +64,7 @@ namespace Stetic
 		{
 			// Assume that it can generate code
 			canGenerateCode = true;
+			resolvedCache = new Hashtable ();
 			
 			if (assembly == null) {
 				if (!File.Exists (fileName)) {
@@ -111,6 +113,7 @@ namespace Stetic
 			objects = null;
 			steticGui = null;
 			resolver = null;
+			resolvedCache = null;
 		}
 
 		protected override ClassDescriptor LoadClassDescriptor (XmlElement element)
@@ -156,12 +159,16 @@ namespace Stetic
 			return FindType (asm, bcls);
 		}
 		
-		AssemblyDefinition ResolveAssembly (AssemblyNameReference aref, out string filePath)
+		AssemblyDefinition ResolveAssembly (AssemblyNameReference aref)
 		{
+			AssemblyDefinition adef = (AssemblyDefinition) resolvedCache [aref.FullName];
+			if (adef != null)
+				return adef;
+			
 			if (resolver == null)
 				resolver = new DefaultAssemblyResolver ();
 			
-			filePath = null;
+			string filePath = null;
 			string bpath = Path.Combine (Path.GetDirectoryName (fileName), aref.Name);
 			if (File.Exists (bpath + ".dll"))
 				filePath = bpath + ".dll";
@@ -169,20 +176,25 @@ namespace Stetic
 				filePath = bpath + ".exe";
 				
 			if (filePath != null) {
-				return AssemblyFactory.GetAssembly (filePath);
+				adef = AssemblyFactory.GetAssembly (filePath);
 			}
-
-			try {
-				return resolver.Resolve (aref);
-			} catch {
-				// If can't resolve, just return null
-				return null;
+			else {
+				try {
+					adef = resolver.Resolve (aref);
+				} catch {
+					// If can't resolve, just return null
+					return null;
+				}
 			}
+			
+			resolvedCache [aref.FullName] = adef;
+			return adef;
 		}
 		
 		internal TypeDefinition FindTypeDefinition (string fullName)
 		{
-			return FindTypeDefinition (new Hashtable (), assembly, fullName);
+			TypeDefinition t = FindTypeDefinition (new Hashtable (), assembly, fullName);
+			return t;
 		}
 		
 		TypeDefinition FindTypeDefinition (Hashtable visited, AssemblyDefinition asm, string fullName)
@@ -197,13 +209,15 @@ namespace Stetic
 				return cls;
 			
 			foreach (AssemblyNameReference aref in asm.MainModule.AssemblyReferences) {
-				string file;
-				AssemblyDefinition basm = ResolveAssembly (aref, out file);
+				AssemblyDefinition basm = ResolveAssembly (aref);
 				if (basm != null) {
-					cls = FindTypeDefinition (visited, basm, fullName);
+					cls = basm.MainModule.Types [fullName];
 					if (cls != null)
 						return cls;
-				}
+/*					cls = FindTypeDefinition (visited, basm, fullName);
+					if (cls != null)
+						return cls;
+*/				}
 			}
 			return null;
 		}
