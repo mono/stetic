@@ -179,7 +179,7 @@ namespace Stetic
 				return;
 			defaultValuesLoaded = true;
 			
-			object ob = NewInstance (null);
+			object ob = NewInstance (null, false);
 			
 			foreach (ItemGroup group in ItemGroups) {
 				foreach (ItemDescriptor item in group) {

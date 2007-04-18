@@ -12,7 +12,10 @@ namespace Stetic.Wrapper {
 
 		public static new Gtk.Table CreateInstance ()
 		{
-			return new Gtk.Table (3, 3, false);
+			Gtk.Table t = new Gtk.Table (3, 3, false);
+			t.RowSpacing = 6;
+			t.ColumnSpacing = 6;
+			return t;
 		}
 
 		public override void Wrap (object obj, bool initialized)

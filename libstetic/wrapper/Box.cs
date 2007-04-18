@@ -11,6 +11,7 @@ namespace Stetic.Wrapper {
 			if (!initialized) {
 				box.PackStart (CreatePlaceholder ());
 				box.PackStart (CreatePlaceholder ());
+				box.Spacing = 6;
 			}
 			box.SizeAllocated += box_SizeAllocated;
 			ContainerOrientation = obj is Gtk.HBox ? Gtk.Orientation.Horizontal : Gtk.Orientation.Vertical;

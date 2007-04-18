@@ -1,3 +1,15 @@
+2007-04-18  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/libsteticui.mdp, libstetic/libstetic.mdp: Updated.
+	* libstetic/wrapper/Box.cs, libstetic/wrapper/Table.cs: Set spacing to
+	  6 by default.
+	* libstetic/wrapper/ScrolledWindow.cs: Set scrolling to automatic by
+	  default.
+	* libstetic/WidgetUtils.cs, libstetic/ClassDescriptor.cs,
+	  libstetic/TypedClassDescriptor.cs: When looking for default values,
+	  avoid initializing the test instance, make sure the get an instance
+	  with all default values.
+
 2007-04-10  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/CecilWidgetLibrary.cs: Performance improvements in the

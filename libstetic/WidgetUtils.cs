@@ -124,11 +124,10 @@ namespace Stetic
 			Gtk.Widget widget = (Gtk.Widget) wrapper.Wrapped;
 			if (widget == null) {
 				widget = (Gtk.Widget) klass.CreateInstance (wrapper.Project);
-				widget.Name = elem.GetAttribute ("id");
 				ObjectWrapper.Bind (wrapper.Project, klass, wrapper, widget, true);
 			}
-			else
-				widget.Name = elem.GetAttribute ("id");
+			
+			widget.Name = elem.GetAttribute ("id");
 			
 			ReadMembers (klass, wrapper, widget, elem);
 			

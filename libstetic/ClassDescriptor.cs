@@ -183,6 +183,11 @@ namespace Stetic {
 		
 		public object NewInstance (IProject proj)
 		{
+			return NewInstance (proj, true);
+		}
+		
+		public object NewInstance (IProject proj, bool initialize)
+		{
 			object ob = CreateInstance (proj);
 			
 			string name = WrappedTypeName.ToLower () + (++counter).ToString ();
@@ -203,7 +208,7 @@ namespace Stetic {
 			}
 			
 			ObjectWrapper ow = CreateWrapper ();
-			ObjectWrapper.Bind (proj, this, ow, ob, false);
+			ObjectWrapper.Bind (proj, this, ow, ob, !initialize);
 			return ob;
 		}
 		
