@@ -357,9 +357,9 @@ namespace Stetic {
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			foreach (ActionPaletteGroup grp in Children)
 				grp.Destroy ();
+			base.Dispose ();
 		}
 		
 		public void Update ()
