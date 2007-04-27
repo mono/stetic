@@ -1,3 +1,8 @@
+2007-04-27  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/ObjectWrapper.cs:  ContainerChildHashItem.Equals needs
+	to return avoid cast and return false if comparing to another type.
+
 2007-04-26  Mike Kestner <mkestner@novell.com> 
 
 	* libsteticui/PaletteBackend.cs:  ActionGroupBox.Dispose needs to 

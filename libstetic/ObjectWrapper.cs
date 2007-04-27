@@ -130,6 +130,9 @@ namespace Stetic {
 
 		public virtual void Dispose ()
 		{
+			if (IsDisposed)
+				return;
+
 			if (Disposed != null)
 				Disposed (this, EventArgs.Empty);
 			disposed = true;
@@ -413,6 +416,8 @@ namespace Stetic {
 		
 		public override bool Equals (object ob)
 		{
+			if (!(ob is ContainerChildHashItem))
+				return false;
 			ContainerChildHashItem ot = (ContainerChildHashItem) ob;
 			return ot.ContainerChild.Child == ContainerChild.Child && ot.ContainerChild.Parent == ContainerChild.Parent;
 		}
