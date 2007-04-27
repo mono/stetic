@@ -1,5 +1,10 @@
 2007-04-27  Mike Kestner <mkestner@novell.com> 
 
+	* libstetic/editor/ActionToolbar.cs (FillMenu):  can't Destroy
+	after Disposing the widgets. Just Destroy, as it disposes.
+
+2007-04-27  Mike Kestner <mkestner@novell.com> 
+
 	* libsteticui/ObjectWrapper.cs:  ContainerChildHashItem.Equals needs
 	to return avoid cast and return false if comparing to another type.
 
