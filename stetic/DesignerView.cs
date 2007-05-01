@@ -40,9 +40,9 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			design.Dispose ();
 			actionbox.Dispose ();
+			base.Dispose ();
 		}
 	}
 }

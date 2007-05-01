@@ -34,9 +34,9 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			frontend.disposed = true;
 			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
+			base.Dispose ();
 		}
 	}
 	

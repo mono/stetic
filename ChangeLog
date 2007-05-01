@@ -1,5 +1,17 @@
 2007-04-27  Mike Kestner <mkestner@novell.com> 
 
+	* libsteticui/WidgetFactory.cs:
+	* libsteticui/ProjectView.cs:
+	* libsteticui/PaletteBackend.cs:
+	* libsteticui/SignalsEditor.cs:
+	* libsteticui/ActionGroupToolbar.cs:
+	* libsteticui/WidgetDesigner.cs:
+	* libsteticui/PluggableWidget.cs:
+	* stetic/DesignerView.cs: Call base.Dispose on GLib.Objects after
+	all other dispose actions are performed.
+
+2007-04-27  Mike Kestner <mkestner@novell.com> 
+
 	* libstetic/editor/ActionToolbar.cs (FillMenu):  can't Destroy
 	after Disposing the widgets. Just Destroy, as it disposes.
 

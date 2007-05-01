@@ -86,11 +86,11 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			if (app.UseExternalBackend) {
 				app.BackendChanged -= OnBackendChanged;
 				app.BackendChanging -= OnBackendChanging;
 			}
+			base.Dispose ();
 		}
 		
 		internal virtual void OnBackendChanged (ApplicationBackend oldBackend)

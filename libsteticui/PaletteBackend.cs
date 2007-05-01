@@ -291,11 +291,11 @@ namespace Stetic {
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			group.ActionAdded -= OnActionGroupChanged;
 			group.ActionRemoved -= OnActionGroupChanged;
 			group.ActionChanged -= OnActionGroupChanged;
 			group.ObjectChanged -= OnActionGroupChanged;
+			base.Dispose ();
 		}
 		
 		public void Fill ()

@@ -42,10 +42,10 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			session.Dispose ();
 			frontend.disposed = true;
 			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
+			base.Dispose ();
 		}
 		
 		internal void NotifySignalActivated ()

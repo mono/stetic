@@ -208,12 +208,11 @@ namespace Stetic
 			if (!autoCommitChanges)
 				editedProject.Dispose ();
 				
-			base.Dispose ();
-
 			System.Runtime.Remoting.RemotingServices.Disconnect (frontend);
 			frontend = null;
 			rootWidget = null;
 			selection = null;
+			base.Dispose ();
 		}
 		
 		public void Save ()

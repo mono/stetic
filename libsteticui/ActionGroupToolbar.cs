@@ -100,9 +100,9 @@ namespace Stetic
 				agroupEditor = null;
 			}
 			
-			base.Dispose ();
 			if (!singleGroupMode)
 				ActionGroups = null;
+			base.Dispose ();
 		}
 		
 		public Wrapper.ActionGroupCollection ActionGroups {
