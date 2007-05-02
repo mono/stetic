@@ -130,7 +130,6 @@ namespace Stetic {
 		
 		public override void Dispose ()
 		{
-			instance.Destroy ();
 			base.Dispose ();
 		}
 	}

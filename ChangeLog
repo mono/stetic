@@ -1,3 +1,9 @@
+2007-05-02  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/WidgetFactory.cs: don't Destroy from Dispose override
+	since the circular ref GC mechanism can get to the child before the
+	parent.
+
 2007-05-01  Mike Kestner <mkestner@novell.com> 
 
 	* libstetic/wrapper/MenuBar.cs:
