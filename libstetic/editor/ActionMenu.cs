@@ -50,10 +50,10 @@ namespace Stetic.Editor
 				w.Destroy ();
 			}
 			
-			base.Dispose ();
 			parentNode.ChildNodeAdded -= OnChildAdded;
 			parentNode.ChildNodeRemoved -= OnChildRemoved;
 			parentNode = null;
+			base.Dispose ();
 		}
 		
 		public void Select (ActionTreeNode node)

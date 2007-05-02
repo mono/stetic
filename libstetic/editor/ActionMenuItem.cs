@@ -66,7 +66,6 @@ namespace Stetic.Editor
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			if (menuBarItem != null) {
 				menuBarItem.ButtonPressEvent -= OnMenuItemPress;
 				menuBarItem.ButtonReleaseEvent -= OnMemuItemRelease;
@@ -74,6 +73,7 @@ namespace Stetic.Editor
 			}
 			if (node.Action != null)
 				node.Action.ObjectChanged -= OnActionChanged;
+			base.Dispose ();
 		}
 		
 		public ActionTreeNode Node {

@@ -1,5 +1,14 @@
 2007-05-01  Mike Kestner <mkestner@novell.com> 
 
+	* libstetic/wrapper/MenuBar.cs:
+	* libstetic/wrapper/ActionToolbarWrapper.cs:
+	* libstetic/editor/ActionMenuItem.cs:
+	* libstetic/editor/IconSelectorMenuItem.cs:
+	* libstetic/editor/ActionMenu.cs: Call base.Dispose on GLib.Objects 
+	after all other dispose actions are performed.
+
+2007-05-01  Mike Kestner <mkestner@novell.com> 
+
 	* libsteticui/WidgetFactory.cs:
 	* libsteticui/ProjectView.cs:
 	* libsteticui/PaletteBackend.cs:

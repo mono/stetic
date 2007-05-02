@@ -19,7 +19,7 @@ namespace Stetic.Editor
 		{
 			if (IconSelected != null)
 				IconSelected (this, new IconEventArgs (selector.SelectedIcon));
-			selector.Dispose ();
+			selector.Destroy ();
 			return base.OnButtonPressEvent (ev);
 		}
 		

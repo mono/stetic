@@ -19,8 +19,8 @@ namespace Stetic.Wrapper
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			DisposeTree ();
+			base.Dispose ();
 		}
 		
 		public static new Gtk.MenuBar CreateInstance ()
@@ -251,9 +251,9 @@ namespace Stetic.Wrapper
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			if (disposeNode)
 				node.Dispose ();
+			base.Dispose ();
 		}
 
 	}

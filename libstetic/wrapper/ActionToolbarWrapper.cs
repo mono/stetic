@@ -30,8 +30,8 @@ namespace Stetic.Wrapper
 		
 		public override void Dispose ()
 		{
-			base.Dispose ();
 			DisposeTree ();
+			base.Dispose ();
 		}
 
 		public static new Gtk.Toolbar CreateInstance ()
