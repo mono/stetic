@@ -378,7 +378,7 @@ namespace Stetic {
 			ArrayList values = new ArrayList ();
 
 			foreach (XmlElement prop in props) {
-				string name = prop.GetAttribute ("name");
+				string name = prop.GetAttribute ("name").Replace ("_","-");
 				string strval = prop.InnerText;
 
 				// Skip translation context

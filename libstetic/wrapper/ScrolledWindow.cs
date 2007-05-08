@@ -77,6 +77,8 @@ namespace Stetic.Wrapper {
 				scrolled.Add (newChild);
 			else
 				AddWithViewport (newChild);
+			
+			NotifyChildAdded (scrolled.Child);
 		}
 
 		public override Placeholder AddPlaceholder ()

@@ -1,3 +1,9 @@
+2007-05-08  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/wrapper/ScrolledWindow.cs: Manually notify that a child has
+	  been added, since the child added event is not being fired.
+	* libstetic/GladeUtils.cs: Normalize glade field names when loading.
+
 2007-05-02  Mike Kestner <mkestner@novell.com> 
 
 	* libsteticui/WidgetFactory.cs: don't Destroy from Dispose override
