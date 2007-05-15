@@ -17,6 +17,11 @@ namespace Stetic
 			remove { frontend.ComponentActivated -= value; }
 		}
 		
+		public event ComponentEventHandler SelectionChanged {
+			add { frontend.SelectionChanged += value; }
+			remove { frontend.SelectionChanged -= value; }
+		}
+		
 		protected override void OnCreatePlug (uint socketId)
 		{
 			app.Backend.CreateProjectWidgetPlug (frontend, socketId);
@@ -47,6 +52,7 @@ namespace Stetic
 		internal bool disposed;
 		
 		public event ComponentEventHandler ComponentActivated;
+		public event ComponentEventHandler SelectionChanged;
 		
 		public ProjectViewFrontend (Application app)
 		{
@@ -61,6 +67,18 @@ namespace Stetic
 					Component c = app.GetComponent (ob, widgetName, widgetType);
 					if (c != null && ComponentActivated != null)
 						ComponentActivated (null, new ComponentEventArgs (app.ActiveProject, c));
+				}
+			);
+		}
+
+		public void NotifySelectionChanged (object ob, string widgetName, string widgetType)
+		{
+			Gtk.Application.Invoke (
+				delegate {
+					if (disposed) return;
+					Component c = ob != null ? app.GetComponent (ob, widgetName, widgetType) : null;
+					if (SelectionChanged != null)
+						SelectionChanged (null, new ComponentEventArgs (app.ActiveProject, c));
 				}
 			);
 		}

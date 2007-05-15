@@ -9,9 +9,9 @@ namespace Stetic
 	{
 		WidgetDesigner design;
 		Gtk.Widget actionbox;
-		Component widget;
+		WidgetInfo widget;
 		
-		public DesignerView (Stetic.Project project, Component widget)
+		public DesignerView (Stetic.Project project, WidgetInfo widget)
 		{
 			this.widget = widget;
 
@@ -31,7 +31,11 @@ namespace Stetic
 		}
 		
 		public Component Component {
-			get { return widget; }
+			get { return widget.Component; }
+		}
+		
+		public WidgetDesigner Designer {
+			get { return design; }
 		}
 		
 		public UndoQueue UndoQueue {

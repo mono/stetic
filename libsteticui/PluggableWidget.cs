@@ -68,12 +68,12 @@ namespace Stetic
 				return;
 
 			if (!app.UseExternalBackend) {
+				Gtk.Widget w = OnCreateWidget ();
 				if (Child != null) {
 					Gtk.Widget cw = Child;
 					Remove (Child);
 					cw.Destroy ();
 				}
-				Gtk.Widget w = OnCreateWidget ();
 				w.Show ();
 				Add (w);
 			}

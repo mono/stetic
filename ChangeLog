@@ -1,3 +1,30 @@
+2007-05-15  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ActionGroupDesigner.cs, libsteticui/ProjectBackend.cs,
+	  libsteticui/WidgetInfoEventHandler.cs, libsteticui/Application.cs,
+	  libsteticui/Project.cs, libsteticui/PluggableWidget.cs,
+	  stetic/Stetic.cs, stetic/DesignerView.cs, stetic/UIManager.cs:
+	  Implemented lazy loading of projects. Project widgets won't be
+	  instantiated until necessary. The new WidgetInfo class allows
+	  getting the list of toplevels in a project without having to
+	  completely load it.
+	* libsteticui/CecilSignalDescriptor.cs,
+	  libsteticui/CecilPropertyDescriptor.cs,
+	  libsteticui/LibraryCache.cs, libsteticui/CecilClassDescriptor.cs,
+	  libsteticui/CecilWidgetLibrary.cs: Store parsed information in a
+	  cache file. When loading the library again stetic will check if the
+	  library has changed, and it if has not it will load widget info
+	  from the cache file.
+	* libsteticui/libsteticui.mdp, libsteticui/Makefile.am: Updated.
+	* libsteticui/ProjectView.cs, libsteticui/ProjectViewBackend.cs: Added
+	  SelectionChanged event. Moved from the Project class, since project
+	  doesn't have the concept of Selection anymore.
+	* libsteticui/WidgetDesigner.cs: Added clipboard check operations from
+	  the Project class.
+	* libstetic/wrapper/Widget.cs: After reading the info of a widget,
+	  store the oldName field, so it can properly track name changes.
+	* stetic/Makefile.am, stetic/stetic.mdp: Added new files.
+
 2007-05-08  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/ScrolledWindow.cs: Manually notify that a child has

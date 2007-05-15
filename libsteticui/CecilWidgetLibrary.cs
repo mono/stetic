@@ -21,19 +21,75 @@ namespace Stetic
 		ImportContext importContext;
 		bool canGenerateCode;
 		Hashtable resolvedCache;
+		bool fromCache;
 		
 		public CecilWidgetLibrary (ImportContext importContext, string assemblyPath)
 		{
+			ReadCachedDescription (assemblyPath);
+			fromCache = objects != null;
+	
+			this.name = assemblyPath;
+			fileName = assemblyPath;
 			this.importContext = importContext;
 			if (File.Exists (assemblyPath))
 				timestamp = System.IO.File.GetLastWriteTime (assemblyPath);
 			else
 				timestamp = DateTime.MinValue;
-
-			this.name = assemblyPath;
-			fileName = assemblyPath;
-
+			
 			ScanDependencies ();
+		}
+		
+		void ReadCachedDescription (string assemblyPath)
+		{
+			string path = LibraryCache.GetCachedFilePath (assemblyPath);
+			if (path == null)
+				return;
+			
+			if (!File.Exists (path + ".objects"))
+				return;
+			
+			try {
+				objects = new XmlDocument ();
+				objects.Load (path + ".objects");
+			}
+			catch (Exception ex) {
+				Console.WriteLine (ex);
+				objects = null;
+				return;
+			}
+			
+			if (File.Exists (path + ".steticGui")) {
+				try {
+					steticGui = new XmlDocument ();
+					steticGui.Load (path + ".steticGui");
+				}
+				catch (Exception ex) {
+					Console.WriteLine (ex);
+					objects = null;
+					steticGui = null;
+				}
+			}
+		}
+		
+		void StoreCachedDescription ()
+		{
+			string path = LibraryCache.UpdateCachedFile (fileName);
+			if (path == null)
+				return;
+			
+			try {
+				string objfile = path + ".objects";
+				string guifile = path + ".steticGui";
+				
+				objects.Save (objfile);
+				if (steticGui != null)
+					steticGui.Save (guifile);
+				else if (File.Exists (guifile))
+					File.Delete (guifile);
+			}
+			catch (Exception ex) {
+				Console.WriteLine (ex);
+			}
 		}
 		
 		public override string Name {
@@ -66,34 +122,36 @@ namespace Stetic
 			canGenerateCode = true;
 			resolvedCache = new Hashtable ();
 			
-			if (assembly == null) {
-				if (!File.Exists (fileName)) {
-					base.Load (new XmlDocument ());
-					return;
+			if (!fromCache) {
+				if (assembly == null) {
+					if (!File.Exists (fileName)) {
+						base.Load (new XmlDocument ());
+						return;
+					}
+					
+					timestamp = System.IO.File.GetLastWriteTime (fileName);
+					
+					assembly = AssemblyFactory.GetAssembly (fileName);
 				}
 				
-				timestamp = System.IO.File.GetLastWriteTime (fileName);
-				
-				assembly = AssemblyFactory.GetAssembly (fileName);
+				foreach (Resource res in assembly.MainModule.Resources) {
+					EmbeddedResource eres = res as EmbeddedResource;
+					if (eres == null) continue;
+					
+					if (eres.Name == "objects.xml") {
+						MemoryStream ms = new MemoryStream (eres.Data);
+						objects = new XmlDocument ();
+						objects.Load (ms);
+					}
+					
+					if (eres.Name == "gui.stetic") {
+						MemoryStream ms = new MemoryStream (eres.Data);
+						steticGui = new XmlDocument ();
+						steticGui.Load (ms);
+					}
+				}
 			}
 			
-			foreach (Resource res in assembly.MainModule.Resources) {
-				EmbeddedResource eres = res as EmbeddedResource;
-				if (eres == null) continue;
-				
-				if (eres.Name == "objects.xml") {
-					MemoryStream ms = new MemoryStream (eres.Data);
-					objects = new XmlDocument ();
-					objects.Load (ms);
-				}
-				
-				if (eres.Name == "gui.stetic") {
-					MemoryStream ms = new MemoryStream (eres.Data);
-					steticGui = new XmlDocument ();
-					steticGui.Load (ms);
-				}
-			}
-
 			Load (objects);
 			
 			if (canGenerateCode) {
@@ -107,6 +165,18 @@ namespace Stetic
 					}
 				}
 			}
+			if (!fromCache) {
+				// Store dependencies in the cached xml
+				XmlElement elem = objects.CreateElement ("dependencies");
+				objects.DocumentElement.AppendChild (elem);
+				
+				foreach (string dep in dependencies) {
+					XmlElement edep = objects.CreateElement ("dependency");
+					edep.InnerText = dep;
+					elem.AppendChild (edep);
+				}
+				StoreCachedDescription ();
+			}
 			
 			// This information is not needed after loading
 			assembly = null;
@@ -114,22 +184,35 @@ namespace Stetic
 			steticGui = null;
 			resolver = null;
 			resolvedCache = null;
+			fromCache = false;
 		}
 
 		protected override ClassDescriptor LoadClassDescriptor (XmlElement element)
 		{
 			string name = element.GetAttribute ("type");
 			
-			TypeDefinition cls = assembly.MainModule.Types [name];
-			if (cls == null)
-				return null;
+			TypeDefinition cls = null;
+			Stetic.ClassDescriptor typeClassDescriptor;
+			string tname;
 			
+			if (!fromCache) {
+				cls = assembly.MainModule.Types [name];
+				if (cls == null)
+					return null;
 			
-			// Find the nearest type that can be loaded
-			Stetic.ClassDescriptor typeClassDescriptor = FindType (assembly, cls);
-
+				// Find the nearest type that can be loaded
+				typeClassDescriptor = FindType (assembly, cls);
+				tname = cls.Name;
+				if (typeClassDescriptor != null)
+					element.SetAttribute ("baseClassType", typeClassDescriptor.Name);
+			}
+			else {
+				tname = element.GetAttribute ("baseClassType");
+				typeClassDescriptor = Stetic.Registry.LookupClassByName (tname);
+			}
+			
 			if (typeClassDescriptor == null) {
-				Console.WriteLine ("Descriptor not found: " + cls.Name);
+				Console.WriteLine ("Descriptor not found: " + tname);
 				return null;
 			}
 			
@@ -231,16 +314,25 @@ namespace Stetic
 		
 		void ScanDependencies ()
 		{
-			if (assembly == null) {
-				if (!File.Exists (fileName)) {
-					dependencies = new string [0];
-					return;
-				}
-				assembly = AssemblyFactory.GetAssembly (fileName);
+			if (fromCache) {
+				XmlElement elem = objects.DocumentElement ["dependencies"];
+				ArrayList list = new ArrayList ();
+				foreach (XmlElement dep in elem.SelectNodes ("dependency"))
+					list.Add (dep.InnerText);
+				dependencies = (string[]) list.ToArray (typeof(string));
 			}
-			ArrayList list = new ArrayList ();
-			ScanDependencies (list, assembly);
-			dependencies = (string[]) list.ToArray (typeof(string));
+			else {
+				if (assembly == null) {
+					if (!File.Exists (fileName)) {
+						dependencies = new string [0];
+						return;
+					}
+					assembly = AssemblyFactory.GetAssembly (fileName);
+				}
+				ArrayList list = new ArrayList ();
+				ScanDependencies (list, assembly);
+				dependencies = (string[]) list.ToArray (typeof(string));
+			}
 		}
 		
 		void ScanDependencies (ArrayList list, AssemblyDefinition asm)

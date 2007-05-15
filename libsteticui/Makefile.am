@@ -41,6 +41,7 @@ libsteticui_dll_sources =  \
 	Grid.cs \
 	GuiDispatchServerSink.cs \
 	GuiDispatchServerSinkProvider.cs \
+	LibraryCache.cs \
 	Metacity/ButtonFunction.cs \
 	Metacity/ButtonLayout.cs \
 	Metacity/FrameFlags.cs \
@@ -69,6 +70,7 @@ libsteticui_dll_sources =  \
 	WidgetDesignerBackend.cs \
 	WidgetEditSession.cs \
 	WidgetFactory.cs \
+	WidgetInfoEventHandler.cs \
 	WidgetPropertyTree.cs \
 	WidgetPropertyTreeBackend.cs \
 	WidgetTreeCombo.cs
@@ -83,9 +85,10 @@ libsteticui_dll_references =  \
 	-pkg:gnome-sharp-2.0 \
 	-pkg:gtk-sharp-2.0 \
 	-r:$(top_builddir)/bin/libstetic.dll \
-	-r:./lib/Mono.Cecil.dll \
+	-r:$(top_srcdir)/libsteticui/lib/Mono.Cecil.dll \
 	-r:Mono.Posix \
-	-r:System.Runtime.Remoting
+	-r:System.Runtime.Remoting \
+	-r:System.Xml
 
 libsteticui_dll_datafiles = libsteticui.dll.config
 

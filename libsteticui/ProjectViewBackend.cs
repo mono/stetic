@@ -102,10 +102,10 @@ namespace Stetic {
 			if (!syncing) {
 				syncing = true;
 				Stetic.Wrapper.Widget selection = SelectedWrapper;
-				if (selection != null) {
+				if (selection != null)
 					selection.Select ();
-				}
 				syncing = false;
+				NotifySelectionChanged (selection);
 			}
 		}
 
@@ -117,12 +117,25 @@ namespace Stetic {
 					ProjectNode node = project.GetNode (args.Widget);
 					if (node != null) {
 						NodeSelection.SelectNode (node);
+						NotifySelectionChanged (node.Wrapper);
 					}
 				}
-				else
+				else {
 					NodeSelection.UnselectAll ();
+					NotifySelectionChanged (null);
+				}
 				syncing = false;
 			}
+		}
+		
+		void NotifySelectionChanged (Stetic.Wrapper.Widget w)
+		{
+			if (frontend == null)
+				return;
+			if (w != null)
+				frontend.NotifySelectionChanged (Component.GetSafeReference (w), w.Wrapped.Name, w.ClassDescriptor.Name);
+			else
+				frontend.NotifySelectionChanged (null, null, null);
 		}
 
 		protected override bool OnButtonPressEvent (Gdk.EventButton evt)

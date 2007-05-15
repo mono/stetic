@@ -489,6 +489,7 @@ namespace Stetic.Wrapper {
 			string uid = elem.GetAttribute ("undoId");
 			if (uid.Length > 0)
 				UndoId = uid;
+			oldName = Wrapped.Name;
 		}
 		
 		public override XmlElement Write (ObjectWriter writer)

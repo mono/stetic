@@ -96,7 +96,8 @@ namespace Stetic
 			
 			ArrayList projectBackends = new ArrayList ();
 			foreach (Project p in projects)
-				projectBackends.Add (p.ProjectBackend);
+				if (p.IsBackendLoaded)
+					projectBackends.Add (p.ProjectBackend);
 			
 			if (!Backend.UpdateLibraries (assemblies, projectBackends, allowBackendRestart, forceUnload))
 			{

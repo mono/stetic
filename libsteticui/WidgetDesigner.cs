@@ -149,6 +149,18 @@ namespace Stetic
 			}
 		}
 		
+		public bool CanCopySelection {
+			get { return Selection != null ? Selection.CanCopy : false; }
+		}
+		
+		public bool CanCutSelection {
+			get { return Selection != null ? Selection.CanCut : false; }
+		}
+		
+		public bool CanPasteToSelection {
+			get { return Selection != null ? Selection.CanPaste : false; }
+		}
+		
 		public void CopySelection ()
 		{
 			if (session != null)

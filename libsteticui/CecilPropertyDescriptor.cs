@@ -14,22 +14,36 @@ namespace Stetic
 		
 		public CecilPropertyDescriptor (CecilWidgetLibrary lib, XmlElement elem, Stetic.ItemGroup group, Stetic.ClassDescriptor klass, PropertyDefinition pinfo): base (elem, group, klass)
 		{
-			name = pinfo.Name;
+			string tname;
+			
+			if (pinfo != null) {
+				name = pinfo.Name;
+				tname = pinfo.PropertyType.FullName;
+				canWrite = pinfo.SetMethod != null;
+			}
+			else {
+				name = elem.GetAttribute ("name");
+				tname = elem.GetAttribute ("type");
+				canWrite = elem.Attributes ["canWrite"] == null;
+			}
+			
 			Load (elem);
 			
-			type = Stetic.Registry.GetType (pinfo.PropertyType.FullName, false);
+			type = Stetic.Registry.GetType (tname, false);
+			
 			if (type == null) {
-				Console.WriteLine ("Could not find type: " + pinfo.PropertyType.FullName);
+				Console.WriteLine ("Could not find type: " + tname);
 				type = typeof(string);
 			}
 			if (type.IsValueType)
 				initialValue = Activator.CreateInstance (type);
 				
-			canWrite = pinfo.SetMethod != null;
-			
 			// Consider all properties runtime-properties, since they have been created
 			// from class properties.
 			isRuntimeProperty = true;
+			
+			if (pinfo != null)
+				SaveCecilXml (elem);
 		}
 		
 		public CecilPropertyDescriptor (XmlElement elem, Stetic.ItemGroup group, Stetic.ClassDescriptor klass, PropertyDescriptor prop): base (elem, group, klass)
@@ -45,6 +59,14 @@ namespace Stetic
 			this.minimum = prop.Minimum;
 			this.initWithName = prop.InitWithName;
 			this.translatable = prop.Translatable;
+		}
+		
+		internal void SaveCecilXml (XmlElement elem)
+		{
+			elem.SetAttribute ("name", name);
+			elem.SetAttribute ("type", type.FullName);
+			if (!canWrite)
+				elem.SetAttribute ("canWrite", "false");
 		}
 		
 		public override string Name {

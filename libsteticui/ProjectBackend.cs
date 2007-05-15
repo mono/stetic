@@ -854,21 +854,6 @@ namespace Stetic {
 						newCollection = w.LocalActionGroups;
 				}
 
-				if (frontend != null) {
-					Gtk.Widget w = selection as Gtk.Widget;
-					if (w != null) {
-						ProjectNode node = GetNode (w);
-						if (node != null) {
-							Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (w);
-							frontend.NotifySelectionChanged (Component.GetSafeReference (ww), w.Name, ww.ClassDescriptor.Name);
-						} else {
-							// FIXME
-							frontend.NotifySelectionChanged ("__placeholder", null, null);
-						}
-					} else if (selection == null) {
-						frontend.NotifySelectionChanged (null, null, null);
-					}
-				}
 				if (SelectionChanged != null)
 					SelectionChanged (this, new Wrapper.WidgetEventArgs (Wrapper.Widget.Lookup (selection)));
 				

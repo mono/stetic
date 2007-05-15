@@ -19,13 +19,13 @@ namespace Stetic
 		public event ComponentSignalEventHandler SignalAdded;
 		public event ComponentSignalEventHandler SignalChanged;
 		
-		internal ActionGroupDesigner (Project project, string componentName, ActionGroupComponent actionGroup, WidgetDesigner relatedWidgetDesigner, bool autoCommitChanges): base (project.App)
+		internal ActionGroupDesigner (Project project, string componentName, string actionGroupName, WidgetDesigner relatedWidgetDesigner, bool autoCommitChanges): base (project.App)
 		{
 			this.componentName = componentName;
 			this.relatedWidgetDesigner = relatedWidgetDesigner;
 			
-			if (actionGroup != null)
-				this.actionGroupName = actionGroup.Name;
+			if (actionGroupName != null)
+				this.actionGroupName = actionGroupName;
 			this.autoCommitChanges = autoCommitChanges;
 			this.project = project;
 

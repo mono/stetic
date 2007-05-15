@@ -115,6 +115,7 @@ namespace Stetic {
 			
 			ReadRecentFiles ();
 
+			SteticMain.ProjectView.SelectionChanged += Selected;
 			Project = project;
 		}
 
@@ -124,16 +125,8 @@ namespace Stetic {
 				return project;
 			}
 			set {
-				if (project != null)
-					project.SelectionChanged -= Selected;
-
 				project = value;
-
-				if (project != null) {
-					project.SelectionChanged += Selected;
-				}
 				UpdateEdit ();
-
 				GetAction ("/menubar/FileMenu/ImportGlade").Sensitive = (project != null);
 				GetAction ("/menubar/FileMenu/ExportGlade").Sensitive = (project != null);
 			}
@@ -202,8 +195,11 @@ namespace Stetic {
 			Gtk.Editable focus = Focus;
 			if (focus != null)
 				focus.CutClipboard ();
-			else
-				project.CutSelection ();
+			else {
+				WidgetDesigner wd = SteticMain.CurrentDesigner;
+				if (wd != null)
+					wd.CutSelection ();
+			}
 		}
 
 		void Copy (object obj, EventArgs e)
@@ -211,8 +207,11 @@ namespace Stetic {
 			Gtk.Editable focus = Focus;
 			if (focus != null)
 				focus.CopyClipboard ();
-			else
-				project.CopySelection ();
+			else {
+				WidgetDesigner wd = SteticMain.CurrentDesigner;
+				if (wd != null)
+					wd.CopySelection ();
+			}
 		}
 
 		void Paste (object obj, EventArgs e)
@@ -220,8 +219,11 @@ namespace Stetic {
 			Gtk.Editable focus = Focus;
 			if (focus != null)
 				focus.PasteClipboard ();
-			else
-				project.PasteToSelection ();
+			else {
+				WidgetDesigner wd = SteticMain.CurrentDesigner;
+				if (wd != null)
+					wd.PasteToSelection ();
+			}
 		}
 
 		void Delete (object obj, EventArgs e)
@@ -229,8 +231,11 @@ namespace Stetic {
 			Gtk.Editable focus = Focus;
 			if (focus != null)
 				focus.DeleteSelection ();
-			else if (project.Selection != null)
-				project.DeleteSelection ();
+			else {
+				WidgetDesigner wd = SteticMain.CurrentDesigner;
+				if (wd != null && wd.Selection != null)
+					wd.DeleteSelection ();
+			}
 		}
 
 		void Help (object obj, EventArgs e)
@@ -256,7 +261,6 @@ namespace Stetic {
 
 		void About (object obj, EventArgs e)
 		{
-#if GTK_SHARP_2_6
 			Gtk.AboutDialog about = new Gtk.AboutDialog ();
 			about.Name = AppName;
 			about.Version = AppVersion;
@@ -264,12 +268,6 @@ namespace Stetic {
 			about.Authors = AppAuthors;
 			about.Copyright = AppCopyright;
 			about.Website = "http://mono-project.com/Stetic";
-#else
-			Gnome.About about = new Gnome.About (AppName, AppVersion, AppCopyright,
-							     AppComments, AppAuthors,
-							     new string[0],
-							     null, null);
-#endif
 			about.Run ();
 		}
 
@@ -332,7 +330,12 @@ namespace Stetic {
 
 		void UpdateEdit ()
 		{
-			UpdateEdit (Project.CanCutSelection, Project.CanCopySelection, Project.CanPasteToSelection);
+			WidgetDesigner wd = SteticMain.CurrentDesigner;
+			if (wd != null) {
+				UpdateEdit (wd.CanCutSelection, wd.CanCopySelection, wd.CanPasteToSelection);
+			}
+			else
+				UpdateEdit (false, false, false);
 		}
 
 		void Selected (object s, ComponentEventArgs args)

@@ -128,14 +128,22 @@ namespace Stetic
 		{
 			string mname = elem.GetAttribute ("name");
 			if (elem.Name == "property") {
-				PropertyDefinition propInfo = FindProperty (type, mname);
-				if (propInfo != null)
-					return new CecilPropertyDescriptor (cecilLib, elem, group, this, propInfo);
+				if (type != null) {
+					PropertyDefinition propInfo = FindProperty (type, mname);
+					if (propInfo != null)
+						return new CecilPropertyDescriptor (cecilLib, elem, group, this, propInfo);
+				}
+				else
+					return new CecilPropertyDescriptor (cecilLib, elem, group, this, null);
 			}
 			else if (elem.Name == "signal") {
-				EventDefinition signalInfo = FindEvent (type, mname);
-				if (signalInfo != null)
-					return new CecilSignalDescriptor (cecilLib, elem, group, this, signalInfo);
+				if (type != null) {
+					EventDefinition signalInfo = FindEvent (type, mname);
+					if (signalInfo != null)
+						return new CecilSignalDescriptor (cecilLib, elem, group, this, signalInfo);
+				}
+				else
+					return new CecilSignalDescriptor (cecilLib, elem, group, this, null);
 			}
 			else
 				return base.CreateItemDescriptor (elem, group);

@@ -17,7 +17,7 @@ namespace Stetic {
 
 		static Stetic.Palette Palette;
 		static Stetic.Project Project;
-		static Stetic.ProjectView ProjectView;
+		public static Stetic.ProjectView ProjectView;
 		static Stetic.SignalsEditor Signals;
 		static Gtk.Notebook WidgetNotebook; 
 		static Stetic.WidgetPropertyTree propertyTree;
@@ -30,6 +30,8 @@ namespace Stetic {
 		
 		static Hashtable openWindows = new Hashtable ();
 		public static Configuration Configuration;
+		
+		public static event EventHandler CurrentDesignerChanged;
 		
 
 		public static int Main (string[] args)
@@ -129,9 +131,8 @@ namespace Stetic {
 			Project = SteticApp.CreateProject ();
 			SteticApp.ActiveProject = Project;
 			
-			Project.ComponentAdded += OnWidgetAdded;
-			Project.ComponentRemoved += OnWidgetRemoved;
-			Project.SelectionChanged += OnSelectionChanged;
+			Project.WidgetAdded += OnWidgetAdded;
+			Project.WidgetRemoved += OnWidgetRemoved;
 			Project.ModifiedChanged += OnProjectModified;
 			Project.ProjectReloaded += OnProjectReloaded;
 
@@ -164,7 +165,9 @@ namespace Stetic {
 			}
 			MainWindow = (Gtk.Window)Palette.Toplevel;
 			WidgetNotebook = (Gtk.Notebook) glade ["notebook"];
+			WidgetNotebook.SwitchPage += OnPageChanged;
 			ProjectView.ComponentActivated += OnWidgetActivated;
+			ProjectView.SelectionChanged += OnSelectionChanged;
 
 #if GTK_SHARP_2_6
 			// This is needed for both our own About dialog and for ones
@@ -219,15 +222,15 @@ namespace Stetic {
 			Quit ();
 		}
 		
-		static void OnWidgetAdded (object s, ComponentEventArgs args)
+		static void OnWidgetAdded (object s, WidgetInfoEventArgs args)
 		{
-			OpenWindow (args.Component);
+			OpenWindow (args.WidgetInfo);
 		}
 		
-		static void OnWidgetRemoved (object s, ComponentRemovedEventArgs args)
+		static void OnWidgetRemoved (object s, WidgetInfoEventArgs args)
 		{
-			foreach (Component c in openWindows.Keys) {
-				if (c.Name == args.ComponentName) {
+			foreach (WidgetInfo c in openWindows.Keys) {
+				if (c.Name == args.WidgetInfo.Name) {
 					CloseWindow (c);
 					return;
 				}
@@ -236,13 +239,17 @@ namespace Stetic {
 		
 		static void OnSelectionChanged (object s, ComponentEventArgs args)
 		{
-			if (args.Component != null && IsWindowOpen (args.Component))
-				OpenWindow (args.Component);
+			if (args.Component == null)
+				return;
+			WidgetInfo wi = Project.GetWidget (args.Component.Name);
+			if (wi != null && IsWindowOpen (wi))
+				OpenWindow (wi);
 		}
 		
 		static void OnWidgetActivated (object s, ComponentEventArgs args)
 		{
-			OpenWindow (args.Component);
+			WidgetInfo wi = Project.GetWidget (args.Component.Name);
+			OpenWindow (wi);
 		}
 		
 		static void OnProjectModified (object s, EventArgs a)
@@ -272,20 +279,32 @@ namespace Stetic {
 			
 			// Reopen the components
 			foreach (string s in pages) {
-				Component w = Project.GetComponent (s);
+				WidgetInfo w = Project.GetWidget (s);
 				if (w != null)
 					OpenWindow (w);
 			}
 			WidgetNotebook.Page = active;
 		}
 		
-		static bool IsWindowOpen (Component component)
+		public static WidgetDesigner CurrentDesigner {
+			get {
+				if (WidgetNotebook == null)
+					return null;
+				DesignerView view = WidgetNotebook.CurrentPageWidget as DesignerView;
+				if (view == null)
+					return null;
+				else
+					return view.Designer;
+			}
+		}
+		
+		static bool IsWindowOpen (WidgetInfo component)
 		{
 			Gtk.Widget w = openWindows [component] as Gtk.Widget;
 			return w != null && w.Visible;
 		}
 		
-		static void OpenWindow (Component widget)
+		static void OpenWindow (WidgetInfo widget)
 		{
 			Gtk.Widget page = (Gtk.Widget) openWindows [widget];
 			if (page != null) {
@@ -298,7 +317,7 @@ namespace Stetic {
 				// Tab label
 				
 				HBox tabLabel = new HBox ();
-				tabLabel.PackStart (new Gtk.Image (widget.Type.Icon), true, true, 0);
+				tabLabel.PackStart (new Gtk.Image (widget.Component.Type.Icon), true, true, 0);
 				tabLabel.PackStart (new Label (widget.Name), true, true, 3);
 				Button b = new Button (new Gtk.Image ("gtk-close", IconSize.Menu));
 				b.Relief = Gtk.ReliefStyle.None;
@@ -321,7 +340,7 @@ namespace Stetic {
 			}
 		}
 		
-		static void CloseWindow (Component widget)
+		static void CloseWindow (WidgetInfo widget)
 		{
 			if (widget != null) {
 				Gtk.Widget page = (Gtk.Widget) openWindows [widget];
@@ -331,6 +350,12 @@ namespace Stetic {
 					page.Dispose ();
 				}
 			}
+		}
+		
+		static void OnPageChanged (object s, EventArgs a)
+		{
+			if (CurrentDesignerChanged != null)
+				CurrentDesignerChanged (null, a);
 		}
 		
 		public static UndoQueue GetUndoQueue ()
@@ -351,6 +376,7 @@ namespace Stetic {
 				MainWindow.Title = title;
 				
 			} catch (Exception ex) {
+				Console.WriteLine (ex);
 				string msg = string.Format ("The file '{0}' could not be loaded.", file);
 				msg += " " + ex.Message;
 				Gtk.MessageDialog dlg = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, ButtonsType.Close, msg);

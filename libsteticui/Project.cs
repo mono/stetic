@@ -3,6 +3,7 @@ using System;
 using System.Xml;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 
 namespace Stetic
@@ -17,42 +18,63 @@ namespace Stetic
 		Component selection;
 		string tmpProjectFile;
 		bool reloadRequested;
+		List<WidgetInfo> widgets = new List<WidgetInfo> ();
+		List<ActionGroupInfo> groups = new List<ActionGroupInfo> ();
+		bool modified;
 		
-		internal event BackendChangingHandler BackendChanging;
-		internal event BackendChangedHandler BackendChanged;
-
-		public event ComponentEventHandler ComponentAdded;
-		public event ComponentRemovedEventHandler ComponentRemoved;
-		public event ComponentEventHandler SelectionChanged;
+		public event WidgetInfoEventHandler WidgetAdded;
+		public event WidgetInfoEventHandler WidgetRemoved;
 		public event ComponentNameEventHandler ComponentNameChanged;
 		public event EventHandler ComponentTypesChanged;
 		
 		public event EventHandler ActionGroupsChanged;
 		public event EventHandler ModifiedChanged;
 		public event EventHandler Changed;
+
 		
-		public event ComponentSignalEventHandler SignalAdded;
-		public event ComponentSignalEventHandler SignalRemoved;
-		public event ComponentSignalEventHandler SignalChanged;
+		// Internal events
+		internal event BackendChangingHandler BackendChanging;
+		internal event BackendChangedHandler BackendChanged;
+		internal event ComponentSignalEventHandler SignalAdded;
+		internal event ComponentSignalEventHandler SignalRemoved;
+		internal event ComponentSignalEventHandler SignalChanged;
 
 		public event EventHandler ProjectReloaded;
 
-		internal Project (Application app): this (app, app.Backend.CreateProject ())
+		internal Project (Application app): this (app, null)
 		{
 		}
 		
 		internal Project (Application app, ProjectBackend backend)
 		{
 			this.app = app;
-			this.backend = backend;
-			backend.SetFrontend (this);
+			if (backend != null) {
+				this.backend = backend;
+				backend.SetFrontend (this);
+			}
 
 			app.BackendChanging += OnBackendChanging;
 			app.BackendChanged += OnBackendChanged;
 		}
 		
 		internal ProjectBackend ProjectBackend {
-			get { return backend; }
+			get {
+				if (backend == null) {
+					backend = app.Backend.CreateProject ();
+					backend.SetFrontend (this);
+					if (iconFactory != null)
+						backend.IconFactory = iconFactory;
+					if (resourceProvider != null)
+						backend.ResourceProvider = resourceProvider;
+					if (fileName != null)
+						backend.Load (fileName);
+				}
+				return backend; 
+			}
+		}
+		
+		internal bool IsBackendLoaded {
+			get { return backend != null; }
 		}
 		
 		internal Application App {
@@ -68,7 +90,8 @@ namespace Stetic
 				File.Delete (tmpProjectFile);
 				tmpProjectFile = null;
 			}
-			backend.Dispose ();
+			if (backend != null)
+				backend.Dispose ();
 			app.DisposeProject (this);
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 			app.UpdateWidgetLibraries (false, false);
@@ -88,7 +111,8 @@ namespace Stetic
 			get { return resourceProvider; }
 			set { 
 				resourceProvider = value;
-				backend.ResourceProvider = value;
+				if (backend != null)
+					backend.ResourceProvider = value;
 			}
 		}
 		
@@ -96,7 +120,8 @@ namespace Stetic
 			get { return iconFactory; }
 			set { 
 				iconFactory = value;
-				backend.IconFactory = value;
+				if (backend != null)
+					backend.IconFactory = value;
 			}
 		}
 		
@@ -110,63 +135,162 @@ namespace Stetic
 		
 		public void Close ()
 		{
-			backend.Close ();
+			if (backend != null)
+				backend.Close ();
 		}
 		
 		public void Load (string fileName)
 		{
 			this.fileName = fileName;
-			backend.Load (fileName);
+			if (backend != null)
+				backend.Load (fileName);
+			
+			using (StreamReader sr = new StreamReader (fileName)) {
+				XmlTextReader reader = new XmlTextReader (sr); 
+				
+				reader.MoveToContent ();
+				if (reader.IsEmptyElement)
+					return;
+				
+				reader.ReadStartElement ("stetic-interface");
+				while (reader.NodeType != XmlNodeType.EndElement && !reader.IsEmptyElement) {
+					if (reader.NodeType == XmlNodeType.Element) {
+						if (reader.LocalName == "widget")
+							ReadWidget (reader);
+						else if (reader.LocalName == "action-group")
+							ReadActionGroup (reader);
+						else
+							reader.Skip ();
+					}
+					else {
+						reader.Skip ();
+					}
+					reader.MoveToContent ();
+				}
+			}
+		}
+		
+		void ReadWidget (XmlTextReader reader)
+		{
+			WidgetInfo w = new WidgetInfo (this, reader.GetAttribute ("id"), reader.GetAttribute ("class"));
+			widgets.Add (w);
+			if (reader.IsEmptyElement) {
+				reader.Skip ();
+				return;
+			}
+			reader.ReadStartElement ();
+			reader.MoveToContent ();
+			while (reader.NodeType != XmlNodeType.EndElement) {
+				if (reader.NodeType == XmlNodeType.Element && reader.LocalName == "action-group") {
+					w.AddGroup (reader.GetAttribute ("name"));
+				}
+				reader.Skip ();
+				reader.MoveToContent ();
+			}
+			reader.ReadEndElement ();
+		}
+		
+		void ReadActionGroup (XmlTextReader reader)
+		{
+			groups.Add (new ActionGroupInfo (this, reader.GetAttribute ("name")));
+			reader.Skip ();
 		}
 		
 		public void Save (string fileName)
 		{
 			this.fileName = fileName;
-			backend.Save (fileName);
+			if (backend != null)
+				backend.Save (fileName);
 		}
 		
 		public void ImportGlade (string fileName)
 		{
-			backend.ImportGlade (fileName);
+			ProjectBackend.ImportGlade (fileName);
 		}
 		
 		public void ExportGlade (string fileName)
 		{
-			backend.ExportGlade (fileName);
+			ProjectBackend.ExportGlade (fileName);
 		}
 		
 		public bool Modified {
-			get { return backend.Modified; }
-			set { backend.Modified = value;	}
+			get {
+				if (backend != null)
+					return backend.Modified; 
+				else
+					return modified;
+			}
+			set {
+				if (backend != null)
+					backend.Modified = value;	
+				else
+					modified = true;
+			}
 		}
 		
-		public WidgetDesigner CreateWidgetDesigner (Component component, bool autoCommitChanges)
-		{
-			return new WidgetDesigner (this, component.Name, autoCommitChanges);
+		public IEnumerable<WidgetInfo> Widgets {
+			get { return widgets; }
 		}
 		
-		public ActionGroupDesigner CreateActionGroupDesigner (ActionGroupComponent actionGroup, bool autoCommitChanges)
+		public IEnumerable<ActionGroupInfo> ActionGroups {
+			get { return groups; }
+		}
+		
+		public WidgetInfo GetWidget (string name)
 		{
-			return new ActionGroupDesigner (this, null, actionGroup, null, autoCommitChanges);
+			foreach (WidgetInfo w in widgets)
+				if (w.Name == name)
+					return w;
+			return null;
+		}
+		
+		public ActionGroupInfo GetActionGroup (string name)
+		{
+			foreach (ActionGroupInfo w in groups)
+				if (w.Name == name)
+					return w;
+			return null;
+		}
+		
+		public WidgetDesigner CreateWidgetDesigner (WidgetInfo widgetInfo, bool autoCommitChanges)
+		{
+			return new WidgetDesigner (this, widgetInfo.Name, autoCommitChanges);
+		}
+		
+		public ActionGroupDesigner CreateActionGroupDesigner (ActionGroupInfo actionGroup, bool autoCommitChanges)
+		{
+			return new ActionGroupDesigner (this, null, actionGroup.Name, null, autoCommitChanges);
 		}
 
-		public WidgetComponent AddNewComponent (ComponentType type, string name)
+		public WidgetInfo AddNewComponent (ComponentType type, string name)
 		{
-			object ob = backend.AddNewWidget (type.Name, name);
-			return (WidgetComponent) App.GetComponent (ob, null, null);
+			object ob = ProjectBackend.AddNewWidget (type.Name, name);
+			WidgetComponent wc = (WidgetComponent) App.GetComponent (ob, null, null);
+			WidgetInfo wi = GetWidget (wc.Name);
+			if (wi == null) {
+				wi = new WidgetInfo (this, wc);
+				widgets.Add (wi);
+			}
+			return wi;
 		}
 		
-		public WidgetComponent AddNewComponent (XmlElement template)
+		public WidgetInfo AddNewComponent (XmlElement template)
 		{
-			object ob = backend.AddNewWidgetFromTemplate (template.OuterXml);
-			return (WidgetComponent) App.GetComponent (ob, null, null);
+			object ob = ProjectBackend.AddNewWidgetFromTemplate (template.OuterXml);
+			WidgetComponent wc = (WidgetComponent) App.GetComponent (ob, null, null);
+			WidgetInfo wi = GetWidget (wc.Name);
+			if (wi == null) {
+				wi = new WidgetInfo (this, wc);
+				widgets.Add (wi);
+			}
+			return wi;
 		}
 		
 		public ComponentType[] GetComponentTypes ()
 		{
 			ArrayList types = new ArrayList ();
 			
-			ArrayList typeNames = backend.GetComponentTypes ();
+			ArrayList typeNames = ProjectBackend.GetComponentTypes ();
 			for (int n=0; n<typeNames.Count; n++)
 				types.Add (app.GetComponentType ((string) typeNames [n]));
 
@@ -179,25 +303,14 @@ namespace Stetic
 			return (ComponentType[]) types.ToArray (typeof(ComponentType));
 		}
 		
-		public void RemoveComponent (WidgetComponent component)
+		public void RemoveComponent (WidgetInfo component)
 		{
-			backend.RemoveWidget (component.Name);
-		}
-		
-		public WidgetComponent[] GetComponents ()
-		{
-			ArrayList list = new ArrayList ();
-			foreach (object ob in backend.GetTopLevelWrappers ()) {
-				WidgetComponent wc = App.GetComponent (ob, null, null) as WidgetComponent;
-				if (wc != null)
-					list.Add (wc);
-			}
-			return (WidgetComponent[]) list.ToArray (typeof(WidgetComponent));
+			ProjectBackend.RemoveWidget (component.Name);
 		}
 		
 		public WidgetComponent GetComponent (string name)
 		{
-			object ob = backend.GetTopLevelWrapper (name, false);
+			object ob = ProjectBackend.GetTopLevelWrapper (name, false);
 			if (ob != null)
 				return (WidgetComponent) App.GetComponent (ob, name, null);
 			else
@@ -206,22 +319,23 @@ namespace Stetic
 		
 		public ActionGroupComponent AddNewActionGroup (string id)
 		{
-			object ob = backend.AddNewActionGroup (id);
+			object ob = ProjectBackend.AddNewActionGroup (id);
 			return (ActionGroupComponent) App.GetComponent (ob, id, null);
 		}
 		
 		public ActionGroupComponent AddNewActionGroup (XmlElement template)
 		{
-			object ob = backend.AddNewActionGroupFromTemplate (template.OuterXml);
+			object ob = ProjectBackend.AddNewActionGroupFromTemplate (template.OuterXml);
 			return (ActionGroupComponent) App.GetComponent (ob, null, null);
 		}
 		
-		public void RemoveActionGroup (ActionGroupComponent group)
+		public void RemoveActionGroup (ActionGroupInfo group)
 		{
-			backend.RemoveActionGroup ((Stetic.Wrapper.ActionGroup) group.Backend);
+			ActionGroupComponent ac = (ActionGroupComponent) group.Component;
+			ProjectBackend.RemoveActionGroup ((Stetic.Wrapper.ActionGroup) ac.Backend);
 		}
 		
-		public ActionGroupComponent[] GetActionGroups ()
+		internal ActionGroupComponent[] GetActionGroups ()
 		{
 			Wrapper.ActionGroup[] acs = ProjectBackend.GetActionGroups ();
 			
@@ -234,40 +348,40 @@ namespace Stetic
 				
 			return (ActionGroupComponent[]) comps.ToArray (typeof(ActionGroupComponent));
 		}
-		
+
 		public void AddWidgetLibrary (string assemblyPath)
 		{
 			reloadRequested = false;
-			backend.AddWidgetLibrary (assemblyPath);
+			ProjectBackend.AddWidgetLibrary (assemblyPath);
 			app.UpdateWidgetLibraries (false, false);
 			if (!reloadRequested)
-				backend.Reload ();
+				ProjectBackend.Reload ();
 		}
 		
 		public void RemoveWidgetLibrary (string assemblyPath)
 		{
 			reloadRequested = false;
-			backend.RemoveWidgetLibrary (assemblyPath);
+			ProjectBackend.RemoveWidgetLibrary (assemblyPath);
 			app.UpdateWidgetLibraries (false, false);
 			if (!reloadRequested)
-				backend.Reload ();
+				ProjectBackend.Reload ();
 		}
 		
 		public string[] WidgetLibraries {
 			get {
-				return (string[]) backend.WidgetLibraries.ToArray (typeof(string));
+				return (string[]) ProjectBackend.WidgetLibraries.ToArray (typeof(string));
 			} set {
 				reloadRequested = false;
 				ArrayList libs = new ArrayList ();
 				libs.AddRange (value);
-				backend.WidgetLibraries = libs;
+				ProjectBackend.WidgetLibraries = libs;
 				app.UpdateWidgetLibraries (false, false);
 				if (!reloadRequested)
-					backend.Reload ();
+					ProjectBackend.Reload ();
 			}
 		}
 		
-		public bool CanCopySelection {
+/*		public bool CanCopySelection {
 			get { return Selection != null ? Selection.CanCopy : false; }
 		}
 		
@@ -301,10 +415,11 @@ namespace Stetic
 		{
 			backend.DeleteSelection ();
 		}
+*/
 		
 		public void EditIcons ()
 		{
-			backend.EditIcons ();
+			ProjectBackend.EditIcons ();
 		}
 		
 		internal void NotifyWidgetAdded (object obj, string name, string typeName, bool topLevel)
@@ -313,8 +428,15 @@ namespace Stetic
 				Gtk.Application.Invoke (
 					delegate {
 						Component c = App.GetComponent (obj, name, typeName);
-						if (c != null && ComponentAdded != null)
-							ComponentAdded (this, new ComponentEventArgs (this, c));
+						if (c != null) {
+							WidgetInfo wi = GetWidget (c.Name);
+							if (wi == null) {
+								wi = new WidgetInfo (this, c);
+								widgets.Add (wi);
+							}
+							if (WidgetAdded != null)
+								WidgetAdded (this, new WidgetInfoEventArgs (this, wi));
+						}
 					}
 				);
 			}
@@ -325,28 +447,15 @@ namespace Stetic
 			if (topLevel) {
 				Gtk.Application.Invoke (
 					delegate {
-						if (ComponentRemoved != null)
-							ComponentRemoved (this, new ComponentRemovedEventArgs (this, name));
+						WidgetInfo wi = GetWidget (name);
+						if (wi != null) {
+							widgets.Remove (wi);
+							if (WidgetRemoved != null)
+								WidgetRemoved (this, new WidgetInfoEventArgs (this, wi));
+						}
 					}
 				);
 			}
-		}
-		
-		internal void NotifySelectionChanged (object obj, string name, string typeName)
-		{
-			Gtk.Application.Invoke (
-				delegate {
-					if (obj == null)
-						selection = null;
-					else if (obj is Stetic.Wrapper.Widget)
-						selection = App.GetComponent (obj, name, typeName);
-					else
-						selection = WidgetComponent.Placeholder;
-
-					if (SelectionChanged != null)
-						SelectionChanged (this, new ComponentEventArgs (this, selection));
-				}
-			);
 		}
 		
 		internal void NotifyModifiedChanged ()
@@ -365,6 +474,12 @@ namespace Stetic
 				delegate {
 					if (Changed != null)
 						Changed (this, EventArgs.Empty);
+				
+					// TODO: Optimize
+					foreach (ProjectItemInfo it in widgets)
+						it.NotifyChanged ();
+					foreach (ProjectItemInfo it in groups)
+						it.NotifyChanged ();
 				}
 			);
 		}
@@ -377,8 +492,12 @@ namespace Stetic
 				
 			Gtk.Application.Invoke (
 				delegate {
-					if (ComponentNameChanged != null && c != null)
-						ComponentNameChanged (this, new ComponentNameEventArgs (this, c, oldName));
+					if (c != null) {
+						WidgetInfo wi = GetWidget (oldName);
+						if (wi != null) wi.NotifyNameChanged (newName);
+						if (ComponentNameChanged != null)
+							ComponentNameChanged (this, new ComponentNameEventArgs (this, c, oldName));
+					}
 				}
 			);
 		}
@@ -456,8 +575,6 @@ namespace Stetic
 		void OnBackendChanging ()
 		{
 			selection = null;
-			if (SelectionChanged != null)
-				SelectionChanged (this, new ComponentEventArgs (this, selection));
 				
 			if (BackendChanging != null)
 				BackendChanging ();
@@ -489,6 +606,116 @@ namespace Stetic
 				
 			if (ProjectReloaded != null)
 				ProjectReloaded (this, EventArgs.Empty);
+		}
+	}
+
+	public abstract class ProjectItemInfo
+	{
+		string name;
+		protected Project project;
+		
+		public event EventHandler Changed;
+
+		internal ProjectItemInfo (Project project, string name)
+		{
+			this.name = name;
+			this.project = project;
+		}
+		
+		public string Name {
+			get { return name; }
+			set { Component.Name = value; name = value; }
+		}
+		
+		internal void NotifyNameChanged (string name)
+		{
+			this.name = name;
+			NotifyChanged ();
+		}
+		
+		internal void NotifyChanged ()
+		{
+			if (Changed != null)
+				Changed (this, EventArgs.Empty);
+		}
+		
+		public abstract Component Component { get; }
+	}
+		
+	public class WidgetInfo: ProjectItemInfo
+	{
+		string type;
+		List<ActionGroupInfo> groups;
+		
+		internal WidgetInfo (Project project, string name, string type): base (project, name)
+		{
+			this.type = type;
+		}
+		
+		internal WidgetInfo (Project project, Component c): base (project, c.Name)
+		{
+			type = c.Type.Name;
+		}
+		
+		public IEnumerable<ActionGroupInfo> ActionGroups {
+			get {
+				if (groups != null)
+					return groups;
+				else
+					return new ActionGroupInfo [0];
+			}
+		}
+		
+		public string Type {
+			get { return type; }
+		}
+		
+		public bool IsWindow {
+			get { return type == "Gtk.Dialog" || type == "Gtk.Window"; }
+		}
+		
+		public override Component Component {
+			get { return project.GetComponent (Name); }
+		}
+		
+		internal void AddGroup (string group)
+		{
+			if (groups == null)
+				groups = new List<ActionGroupInfo> ();
+			groups.Add (new ActionGroupInfo (project, group, Name));
+		}
+	}
+	
+	public class ActionGroupInfo: ProjectItemInfo
+	{
+		string widgetName;
+		
+		internal ActionGroupInfo (Project project, string name): base (project, name)
+		{
+		}
+		
+		internal ActionGroupInfo (Project project, string name, string widgetName): base (project, name)
+		{
+			this.widgetName = widgetName;
+		}
+		
+		public override Component Component {
+			get {
+				ActionGroupComponent[] ags;
+				if (widgetName != null) {
+					WidgetComponent c = project.GetComponent (widgetName) as WidgetComponent;
+					if (c == null)
+						return null;
+					ags = c.GetActionGroups ();
+				}
+				else {
+					ags = project.GetActionGroups ();
+				}
+				foreach (ActionGroupComponent ag in ags)
+					if (ag.Name == Name)
+						return ag;
+				return null;
+			}
 		}
 	}
 }
