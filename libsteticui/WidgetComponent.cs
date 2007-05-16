@@ -26,6 +26,11 @@ namespace Stetic
 			}
 		}
 		
+		public override bool GeneratePublic {
+			get { return ((Wrapper.Widget)backend).GeneratePublic; }
+			set { ((Wrapper.Widget)backend).GeneratePublic = value; }
+		}
+		
 		internal void UpdateName (string name)
 		{
 			this.name = name;

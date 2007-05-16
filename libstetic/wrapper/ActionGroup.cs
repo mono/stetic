@@ -12,6 +12,7 @@ namespace Stetic.Wrapper
 		string name;
 		ActionCollection actions;
 		ObjectWrapper owner;
+		bool generatePublic = true;
 		
 		public event ActionEventHandler ActionAdded;
 		public event ActionEventHandler ActionRemoved;
@@ -44,6 +45,11 @@ namespace Stetic.Wrapper
 				name = value;
 				NotifyChanged ();
 			}
+		}
+		
+		public bool GeneratePublic {
+			get { return generatePublic; }
+			set { generatePublic = value; }
 		}
 		
 		public Action GetAction (string name)

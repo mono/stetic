@@ -142,7 +142,7 @@ namespace Stetic
 			if (sources.Count == 1 && sources[0].AllWildcarded) {
 				varDec.InitExpression = new CodeObjectCreateExpression (
 					typeof(Gtk.IconSet),
-					sources[0].Image.ToCodeExpression ()
+					sources[0].Image.ToCodeExpression (ctx)
 				);
 			} else {
 				varDec.InitExpression = new CodeObjectCreateExpression (typeof(Gtk.IconSet));
@@ -249,7 +249,7 @@ namespace Stetic
 			
 			ctx.Statements.Add (new CodeAssignStatement (
 				new CodePropertyReferenceExpression (var, "Pixbuf"),
-				imageInfo.ToCodeExpression ()
+				imageInfo.ToCodeExpression (ctx)
 			));
 			
 			if (!SizeWildcarded) {

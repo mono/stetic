@@ -134,7 +134,7 @@ namespace Stetic
 			}
 			
 			if (value is ImageInfo && typeof(Gdk.Pixbuf).IsAssignableFrom (type))
-				return ((ImageInfo)value).ToCodeExpression ();
+				return ((ImageInfo)value).ToCodeExpression (this);
 			
 			if (value is Wrapper.ActionGroup) {
 				return new CodeMethodInvokeExpression (
@@ -197,6 +197,217 @@ namespace Stetic
 			generatedWrappers.Clear ();
 			map = new WidgetMap (vars);
 			n = 0;
+		}
+		
+		public CodeExpression GenerateLoadPixbuf (string name, int sz)
+		{
+			bool found = false;
+			foreach (CodeTypeDeclaration t in cns.Types) {
+				if (t.Name == "IconLoader") {
+					found = true;
+					break;
+				}
+			}
+			
+			if (!found)
+			{
+				CodeTypeDeclaration cls = new CodeTypeDeclaration ("IconLoader");
+				cls.Attributes = MemberAttributes.Assembly;
+				cns.Types.Add (cls);
+				
+				CodeMemberMethod met = new CodeMemberMethod ();
+				cls.Members.Add (met);
+				met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
+				met.Name = "LoadIcon";
+				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "name"));
+				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(int), "sz"));
+				met.ReturnType = new CodeTypeReference (typeof(Gdk.Pixbuf));
+				
+				CodeExpression nameExp = new CodeVariableReferenceExpression ("name");
+				CodeExpression szExp = new CodeVariableReferenceExpression ("sz");
+				CodeExpression mgExp = new CodeBinaryOperatorExpression (szExp,  CodeBinaryOperatorType.Divide, new CodePrimitiveExpression (4));
+				CodeExpression pmapExp = new CodeVariableReferenceExpression ("pmap");
+				CodeExpression gcExp = new CodeVariableReferenceExpression ("gc");
+				CodeExpression szM1Exp = new CodeBinaryOperatorExpression (szExp, CodeBinaryOperatorType.Subtract, new CodePrimitiveExpression (1));
+				CodeExpression zeroExp = new CodePrimitiveExpression (0);
+				
+				CodeTryCatchFinallyStatement trycatch = new CodeTryCatchFinallyStatement ();
+				met.Statements.Add (trycatch);
+				trycatch.TryStatements.Add (
+					new CodeMethodReturnStatement (
+						new CodeMethodInvokeExpression (
+							new CodePropertyReferenceExpression (
+								new CodeTypeReferenceExpression (typeof(Gtk.IconTheme)),
+								"Default"
+							),
+							"LoadIcon",
+							nameExp,
+							szExp,
+							zeroExp
+						)
+					)
+				);
+				
+				CodeCatchClause ccatch = new CodeCatchClause ();
+				trycatch.CatchClauses.Add (ccatch);
+				
+				CodeConditionStatement cond = new CodeConditionStatement ();
+				ccatch.Statements.Add (cond);
+				
+				cond.Condition = new CodeBinaryOperatorExpression (
+					nameExp,
+					CodeBinaryOperatorType.IdentityInequality,
+					new CodePrimitiveExpression ("gtk-missing-image")
+				);
+				
+				cond.TrueStatements.Add (
+					new CodeMethodReturnStatement (
+						new CodeMethodInvokeExpression (
+							new CodeTypeReferenceExpression (cns.Name + "." + cls.Name),
+							"LoadIcon", new CodePrimitiveExpression ("gtk-missing-image"), 
+							szExp
+						)
+					)
+				);
+				
+				CodeStatementCollection stms = cond.FalseStatements;
+				
+				stms.Add (
+					new CodeVariableDeclarationStatement (typeof(Gdk.Pixmap), "pmap", 
+						new CodeObjectCreateExpression (
+							typeof(Gdk.Pixmap),
+							new CodePropertyReferenceExpression (
+								new CodePropertyReferenceExpression (
+									new CodeTypeReferenceExpression (typeof(Gdk.Screen)),
+									"Default"
+								),
+								"RootWindow"
+							),
+							szExp,
+							szExp
+						)
+					)
+				);
+				stms.Add (
+					new CodeVariableDeclarationStatement (typeof(Gdk.GC), "gc", 
+						new CodeObjectCreateExpression (typeof(Gdk.GC), pmapExp)
+					)
+				);
+				stms.Add (
+					new CodeAssignStatement (
+						new CodePropertyReferenceExpression (
+							gcExp,
+							"RgbFgColor"
+						),
+						new CodeObjectCreateExpression (
+							typeof(Gdk.Color),
+							new CodePrimitiveExpression (255),
+							new CodePrimitiveExpression (255),
+							new CodePrimitiveExpression (255)
+						)
+					)
+				);
+				stms.Add (
+					new CodeMethodInvokeExpression (
+						pmapExp,
+						"DrawRectangle",
+						gcExp,
+						new CodePrimitiveExpression (true),
+						zeroExp,
+						zeroExp,
+						szExp,
+						szExp
+					)
+				);
+				stms.Add (
+					new CodeAssignStatement (
+						new CodePropertyReferenceExpression (
+							gcExp,
+							"RgbFgColor"
+						),
+						new CodeObjectCreateExpression (
+							typeof(Gdk.Color),
+							zeroExp, zeroExp, zeroExp
+						)
+					)
+				);
+				stms.Add (
+					new CodeMethodInvokeExpression (
+						pmapExp,
+						"DrawRectangle",
+						gcExp,
+						new CodePrimitiveExpression (false),
+						zeroExp,
+						zeroExp,
+						szM1Exp,
+						szM1Exp
+					)
+				);
+				stms.Add (
+					new CodeMethodInvokeExpression (
+						gcExp,
+						"SetLineAttributes",
+						new CodePrimitiveExpression (3),
+						new CodeFieldReferenceExpression (new CodeTypeReferenceExpression (typeof(Gdk.LineStyle)), "Solid"),
+						new CodeFieldReferenceExpression (new CodeTypeReferenceExpression (typeof(Gdk.CapStyle)), "Round"),
+						new CodeFieldReferenceExpression (new CodeTypeReferenceExpression (typeof(Gdk.JoinStyle)), "Round")
+					)
+				);
+				stms.Add (
+					new CodeAssignStatement (
+						new CodePropertyReferenceExpression (
+							gcExp,
+							"RgbFgColor"
+						),
+						new CodeObjectCreateExpression (
+							typeof(Gdk.Color),
+							new CodePrimitiveExpression (255),
+							zeroExp,
+							zeroExp
+						)
+					)
+				);
+				stms.Add (
+					new CodeMethodInvokeExpression (
+						pmapExp,
+						"DrawLine",
+						gcExp,
+						mgExp,
+						mgExp,
+						new CodeBinaryOperatorExpression (szM1Exp, CodeBinaryOperatorType.Subtract, mgExp),
+						new CodeBinaryOperatorExpression (szM1Exp, CodeBinaryOperatorType.Subtract, mgExp)
+					)
+				);
+				stms.Add (
+					new CodeMethodInvokeExpression (
+						pmapExp,
+						"DrawLine",
+						gcExp,
+						new CodeBinaryOperatorExpression (szM1Exp, CodeBinaryOperatorType.Subtract, mgExp),
+						mgExp,
+						mgExp,
+						new CodeBinaryOperatorExpression (szM1Exp, CodeBinaryOperatorType.Subtract, mgExp)
+					)
+				);
+				stms.Add (
+					new CodeMethodReturnStatement (
+						new CodeMethodInvokeExpression (
+							new CodeTypeReferenceExpression (typeof(Gdk.Pixbuf)),
+							"FromDrawable",
+							pmapExp,
+							new CodePropertyReferenceExpression (pmapExp, "Colormap"),
+							zeroExp, zeroExp, zeroExp, zeroExp, szExp, szExp
+						)
+					)
+				);
+			}
+			
+			return new CodeMethodInvokeExpression (
+				new CodeTypeReferenceExpression (cns.Name + ".IconLoader"),
+				"LoadIcon",
+				new CodePrimitiveExpression (name),
+				new CodePrimitiveExpression (sz)
+			);
 		}
 	}
 

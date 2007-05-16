@@ -19,6 +19,7 @@ namespace Stetic {
 		protected ItemGroup contextMenu;
 		protected ItemGroup internalChildren;
 		protected string baseType;
+		protected bool isInternal;
 		
 		WidgetLibrary library;
 		PropertyDescriptor[] initializationProperties;
@@ -38,7 +39,7 @@ namespace Stetic {
 				label = WrappedTypeName;
 			
 			if (elem.HasAttribute ("allow-children"))
-				allowChildren = elem.GetAttribute ("allow-children") == "yes";
+				allowChildren = elem.GetAttribute ("allow-children") == "yes" || elem.GetAttribute ("allow-children") == "true";
 				
 			category = elem.GetAttribute ("palette-category");
 
@@ -48,6 +49,8 @@ namespace Stetic {
 				hexpandable = true;
 			if (elem.HasAttribute ("vexpandable"))
 				vexpandable = true;
+			if (elem.GetAttribute ("internal") == "true")
+				isInternal = true;
 			
 			contextMenu = ItemGroup.Empty;
 			
@@ -131,6 +134,10 @@ namespace Stetic {
 			get {
 				return WrappedTypeName;
 			}
+		}
+		
+		public virtual bool IsInternal {
+			get { return isInternal; }
 		}
 
 		public abstract string WrappedTypeName {

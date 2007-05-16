@@ -80,6 +80,7 @@ namespace Stetic {
 				gproject.IconFactory = win.Project.IconFactory;
 				gproject.ResourceProvider = win.Project.ResourceProvider;
 				gproject.WidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).WidgetLibraries.Clone ();
+				gproject.InternalWidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).InternalWidgetLibraries.Clone ();
 				sourceProject.ComponentTypesChanged += OnSourceProjectLibsChanged;
 				
 				rootWidget = editingBackend.GetTopLevelWrapper (sourceWidget, false);
@@ -174,12 +175,7 @@ namespace Stetic {
 				XmlElement data = Stetic.WidgetUtils.ExportWidget (rootWidget.Wrapped);
 				
 				Wrapper.Widget sw = sourceProject.GetTopLevelWrapper (sourceWidget, false);
-				
-				// GeneratePublic can't be changed in the designer. Keep the vaule it
-				// had in the source project
-				bool generatePublic = sw.GeneratePublic;
 				sw.Read (new ObjectReader (gproject, FileFormat.Native), data);
-				sw.GeneratePublic = generatePublic;
 				
 				sourceWidget = ((Gtk.Widget)sw.Wrapped).Name;
 				sw.NotifyChanged ();
@@ -267,6 +263,7 @@ namespace Stetic {
 			// If component types have changed in the source project, they must also change
 			// in this project.
 			gproject.WidgetLibraries = (ArrayList) sourceProject.WidgetLibraries.Clone ();
+			gproject.InternalWidgetLibraries = (ArrayList) sourceProject.InternalWidgetLibraries.Clone ();
 			gproject.NotifyComponentTypesChanged ();
 		}
 		
@@ -276,6 +273,7 @@ namespace Stetic {
 			if (!autoCommitChanges) {
 				gproject.AttachActionGroups (sourceProject.ActionGroups);
 				gproject.WidgetLibraries = (ArrayList) sourceProject.WidgetLibraries.Clone ();
+				gproject.InternalWidgetLibraries = (ArrayList) sourceProject.InternalWidgetLibraries.Clone ();
 			}
 			
 			Gtk.Widget[] tops = gproject.Toplevels;

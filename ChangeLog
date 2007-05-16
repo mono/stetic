@@ -1,3 +1,22 @@
+2007-05-16  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs, libsteticui/WidgetEditSession.cs,
+	  libsteticui/PaletteBackend.cs, libsteticui/Project.cs: Added
+	  support for internal widgets and internal widget libraries.
+	  Internal widgets won't be shown in the palette unless the library
+	  to which they belong is internal to the project.
+	* libsteticui/Component.cs, libsteticui/ActionGroupComponent.cs,
+	  libsteticui/WidgetComponent.cs: Added properties for changing the
+	  GeneratePublic flag.
+	* libstetic/ImageInfo.cs, libstetic/ProjectIconFactory.cs,
+	  libstetic/GeneratorContext.cs: Added a GenerateLoadPixbuf method
+	  which creates a pixbuf from a stock image name in safe way (it
+	  won't crash if the image doesn't exist, but it will return a
+	  'missing image' icon).
+	* libstetic/wrapper/ActionGroup.cs: Allow generatic private action
+	  groups.
+	* libstetic/ClassDescriptor.cs: Added support for internal widgets.
+
 2007-05-15  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ActionGroupDesigner.cs, libsteticui/ProjectBackend.cs,

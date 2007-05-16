@@ -351,6 +351,11 @@ namespace Stetic
 
 		public void AddWidgetLibrary (string assemblyPath)
 		{
+			AddWidgetLibrary (assemblyPath, false);
+		}
+		
+		public void AddWidgetLibrary (string assemblyPath, bool isInternal)
+		{
 			reloadRequested = false;
 			ProjectBackend.AddWidgetLibrary (assemblyPath);
 			app.UpdateWidgetLibraries (false, false);
@@ -370,15 +375,25 @@ namespace Stetic
 		public string[] WidgetLibraries {
 			get {
 				return (string[]) ProjectBackend.WidgetLibraries.ToArray (typeof(string));
-			} set {
-				reloadRequested = false;
-				ArrayList libs = new ArrayList ();
-				libs.AddRange (value);
-				ProjectBackend.WidgetLibraries = libs;
-				app.UpdateWidgetLibraries (false, false);
-				if (!reloadRequested)
-					ProjectBackend.Reload ();
 			}
+		}
+		
+		public void SetWidgetLibraries (string[] libraries, string[] internalLibraries)
+		{
+			reloadRequested = false;
+			
+			ArrayList libs = new ArrayList ();
+			libs.AddRange (libraries);
+			libs.AddRange (internalLibraries);
+			ProjectBackend.WidgetLibraries = libs;
+			
+			libs = new ArrayList ();
+			libs.AddRange (internalLibraries);
+			ProjectBackend.InternalWidgetLibraries = libs;
+			
+			app.UpdateWidgetLibraries (false, false);
+			if (!reloadRequested)
+				ProjectBackend.Reload ();
 		}
 		
 /*		public bool CanCopySelection {

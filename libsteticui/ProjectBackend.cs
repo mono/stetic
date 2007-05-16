@@ -30,6 +30,7 @@ namespace Stetic {
 		Project frontend;
 		int componentIdCounter;
 		ArrayList widgetLibraries;
+		ArrayList internalLibs;
 		ApplicationBackend app;
 		ImportContext importContext;
 		
@@ -69,6 +70,7 @@ namespace Stetic {
 			
 			iconFactory = new ProjectIconFactory ();
 			widgetLibraries = new ArrayList ();
+			internalLibs = new ArrayList ();
 		}
 		
 		public void Dispose ()
@@ -111,6 +113,16 @@ namespace Stetic {
 			set { widgetLibraries = value; }
 		}
 		
+		internal ArrayList InternalWidgetLibraries {
+			get { return internalLibs; }
+			set { internalLibs = value; }
+		}
+		
+		public bool IsInternalLibrary (string lib)
+		{
+			return internalLibs.Contains (lib);
+		}
+		
 		public bool CanGenerateCode {
 			get {
 				// It can generate code if all libraries on which depend can generate code
@@ -125,21 +137,38 @@ namespace Stetic {
 		
 		public void AddWidgetLibrary (string lib)
 		{
+			AddWidgetLibrary (lib, false);
+		}
+		
+		public void AddWidgetLibrary (string lib, bool isInternal)
+		{
 			if (!widgetLibraries.Contains (lib))
 				widgetLibraries.Add (lib);
+			if (isInternal) {
+				if (!internalLibs.Contains (lib))
+					internalLibs.Add (lib);
+			}
+			else {
+				internalLibs.Remove (lib);
+			}
 		}
 		
 		public void RemoveWidgetLibrary (string lib)
 		{
 			widgetLibraries.Remove (lib);
+			internalLibs.Remove (lib);
 		}
 		
 		public ArrayList GetComponentTypes ()
 		{
 			ArrayList list = new ArrayList ();
 			foreach (WidgetLibrary lib in app.GetProjectLibraries (this)) {
+				// Don't include in the list widgets which are internal (when the library is
+				// not internal to the project), widgets not assigned to any category, and deprecated ones.
+				bool isInternalLib = IsInternalLibrary (lib.Name);
+				Console.WriteLine ("pp1: " + IsInternalLibrary (lib.Name) + " " + lib.Name);
 				foreach (ClassDescriptor cd in lib.AllClasses) {
-					if (!cd.Deprecated && cd.Category.Length > 0)
+					if (!cd.Deprecated && cd.Category.Length > 0 && (isInternalLib || !cd.IsInternal))
 						list.Add (cd.Name);
 				}
 			}
@@ -273,6 +302,8 @@ namespace Stetic {
 						}
 					}
 					widgetLibraries.Add (libname);
+					if (libElem.GetAttribute ("internal") == "true")
+						internalLibs.Add (libname);
 				}
 				
 				app.LoadLibraries (importContext, widgetLibraries);
@@ -345,6 +376,8 @@ namespace Stetic {
 					}
 
 					libElem.SetAttribute ("name", libName);
+					if (IsInternalLibrary (wlib))
+						libElem.SetAttribute ("internal", "true");
 					importElem.AppendChild (libElem);
 				}
 			}

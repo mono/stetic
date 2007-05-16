@@ -190,7 +190,7 @@ namespace Stetic
 			return pix;
 		}
 		
-		public CodeExpression ToCodeExpression ()
+		public CodeExpression ToCodeExpression (GeneratorContext ctx)
 		{
 			switch (source) {
 				case ImageSource.Resource:
@@ -203,16 +203,7 @@ namespace Stetic
 				case ImageSource.Theme:
 					int w, h;
 					Gtk.Icon.SizeLookup (size, out w, out h);
-					return new CodeMethodInvokeExpression (
-						new CodePropertyReferenceExpression (
-							new CodeTypeReferenceExpression (typeof(Gtk.IconTheme)), 
-							"Default"
-						),
-						"LoadIcon",
-						new CodePrimitiveExpression (name),
-						new CodePrimitiveExpression (w),
-						new CodePrimitiveExpression (0)
-					);
+					return ctx.GenerateLoadPixbuf (name, w);
 					
 				case ImageSource.File:
 					return new CodeObjectCreateExpression (

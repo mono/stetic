@@ -137,17 +137,19 @@ namespace Stetic {
 			if (libraries == null) {
 				foreach (ClassDescriptor klass in Registry.AllClasses)
 					classes.Add (klass);
-			} else {
+			} else if (project != null) {
 				foreach (WidgetLibrary lib in libraries) {
-					classes.AddRange (lib.AllClasses);
+					bool isInternalLib = project.IsInternalLibrary (lib.Name);
+					foreach (ClassDescriptor cd in lib.AllClasses) {
+						if (!cd.Deprecated && cd.Category.Length > 0 && (isInternalLib || !cd.IsInternal))
+							classes.Add (cd);
+					}
 				}
 			}
 			
 			classes.Sort (this);
 
 			foreach (ClassDescriptor klass in classes) {
-				if (klass.Deprecated || klass.Category == "")
-					continue;
 
 				if (!groups.Contains (klass.Category))
 					continue;

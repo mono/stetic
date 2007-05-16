@@ -24,6 +24,11 @@ namespace Stetic
 			}
 		}
 		
+		public override bool GeneratePublic {
+			get { return ((Wrapper.ActionGroup)backend).GeneratePublic; }
+			set { ((Wrapper.ActionGroup)backend).GeneratePublic = value; }
+		}
+		
 		protected override void OnChanged ()
 		{
 			name = null;

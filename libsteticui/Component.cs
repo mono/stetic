@@ -108,6 +108,11 @@ namespace Stetic
 			}
 		}
 		
+		public virtual bool GeneratePublic {
+			get { return true; }
+			set {}
+		}
+		
 		internal object Backend {
 			get { return backend; }
 		}
