@@ -22,19 +22,21 @@ namespace Stetic
 						handlerParameters [n] = new ParameterDescriptor (pars[n].Name, pars[n].ParameterType.FullName);
 				} else {
 					TypeDefinition td = lib.FindTypeDefinition (handlerTypeName);
-					MethodDefinition mi = null;
-					foreach (MethodDefinition md in td.Methods) {
-						if (md.Name == "Invoke") {
-							mi = md;
-							break;
+					if (td != null) {
+						MethodDefinition mi = null;
+						foreach (MethodDefinition md in td.Methods) {
+							if (md.Name == "Invoke") {
+								mi = md;
+								break;
+							}
 						}
-					}
-					if (mi != null) {
-						handlerReturnTypeName = mi.ReturnType.ReturnType.FullName;
-						handlerParameters = new ParameterDescriptor [mi.Parameters.Count];
-						for (int n=0; n<handlerParameters.Length; n++) {
-							ParameterDefinition par = mi.Parameters [n];
-							handlerParameters [n] = new ParameterDescriptor (par.Name, par.ParameterType.FullName);
+						if (mi != null) {
+							handlerReturnTypeName = mi.ReturnType.ReturnType.FullName;
+							handlerParameters = new ParameterDescriptor [mi.Parameters.Count];
+							for (int n=0; n<handlerParameters.Length; n++) {
+								ParameterDefinition par = mi.Parameters [n];
+								handlerParameters [n] = new ParameterDescriptor (par.Name, par.ParameterType.FullName);
+							}
 						}
 					}
 				}

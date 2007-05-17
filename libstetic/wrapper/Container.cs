@@ -619,7 +619,7 @@ namespace Stetic.Wrapper
 		{
 			base.GeneratePostBuildCode (ctx, var);
 			
-			if (IsTopLevel && Wrapped is Gtk.Bin) {
+			if (IsTopLevel && (Wrapped is Gtk.Bin) && Visible) {
 				ctx.Statements.Add (
 					new CodeMethodInvokeExpression (
 						var,

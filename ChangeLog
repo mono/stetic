@@ -1,5 +1,12 @@
 2007-05-17  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/CecilSignalDescriptor.cs: Added missing null check.
+	* libsteticui/ProjectBackend.cs: Remove debug cwl.
+	* libstetic/wrapper/Container.cs: Don't show the main window if the
+	  visible flag is not set. Fixes bug #81365.
+
+2007-05-17  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/WidgetActionBar.cs, libstetic/CommandDescriptor.cs: Fix
 	  bug about widget commands without an icon not being properly shown.
 	* libstetic/wrapper/Notebook.cs: Implemented Swap methods.
