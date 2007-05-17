@@ -184,11 +184,12 @@ namespace Stetic
 			}
 				
 			Gtk.Image img = cmd.GetImage ();
-			if (img != null)
+			if (img != null) {
 				button.IconWidget = img;
 				button.Label = cmd.Label;
 				if (cmd.Label != null && cmd.Label.Length > 0)
 					button.SetTooltip (tips, cmd.Label, "");
+			}
 			else {
 				button.Label = cmd.Label;
 				button.IsImportant = true;

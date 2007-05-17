@@ -181,12 +181,22 @@ namespace Stetic.Wrapper {
 
 		internal void SwapPrevious ()
 		{
-			// FIXME
+			object ob = tabs [notebook.CurrentPage];
+			tabs [notebook.CurrentPage] = tabs [notebook.CurrentPage - 1];
+			tabs [notebook.CurrentPage - 1] = ob;
+			
+			Gtk.Widget cp = notebook.GetNthPage (notebook.CurrentPage);
+			notebook.ReorderChild (cp, notebook.CurrentPage - 1);
 		}
 
 		internal void SwapNext ()
 		{
-			// FIXME
+			object ob = tabs [notebook.CurrentPage];
+			tabs [notebook.CurrentPage] = tabs [notebook.CurrentPage + 1];
+			tabs [notebook.CurrentPage + 1] = ob;
+			
+			Gtk.Widget cp = notebook.GetNthPage (notebook.CurrentPage);
+			notebook.ReorderChild (cp, notebook.CurrentPage + 1);
 		}
 
 		internal void InsertBefore ()

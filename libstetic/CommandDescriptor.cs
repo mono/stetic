@@ -73,7 +73,7 @@ namespace Stetic {
 		
 		public Gtk.Image GetImage ()
 		{
-			if (icon == null)
+			if (icon == null || icon.Length == 0)
 				return null;
 			if (icon.StartsWith ("res:")) {
 				System.IO.Stream s = this.ClassDescriptor.Library.GetResource (icon.Substring (4));
