@@ -921,6 +921,7 @@
 	    label="Notebook" icon="notebook.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Notebook Properties">
+		<property name="CurrentPage" />
 		<property name="EnablePopup" />
 		<property name="TabPos" />
 		<property name="ShowBorder" />

@@ -19,6 +19,13 @@ namespace Stetic.Wrapper {
 				}
 				InsertPage (0);
 			}
+			notebook.SwitchPage += OnPageChanged;
+		}
+		
+		public override void Dispose ()
+		{
+			notebook.SwitchPage -= OnPageChanged;
+			base.Dispose ();
 		}
 
 		protected override ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
@@ -39,6 +46,12 @@ namespace Stetic.Wrapper {
 			if (tabs.Contains (wrapper.Wrapped))
 				GladeUtils.SetChildProperty (child_elem, "type", "tab");
 			return child_elem;
+		}
+		public override void Read (ObjectReader reader, XmlElement element)
+		{
+			object cp = GladeUtils.ExtractProperty (element, "CurrentPage", 0);
+			base.Read (reader, element);
+			notebook.CurrentPage = (int) cp;
 		}
 
 		protected override void GenerateChildBuildCode (GeneratorContext ctx, CodeExpression parentExp, Widget wrapper)
@@ -232,6 +245,11 @@ namespace Stetic.Wrapper {
 				}
 				return false;
 			}
+		}
+		
+		void OnPageChanged (object s, Gtk.SwitchPageArgs args)
+		{
+			EmitNotify ("CurrentPage");
 		}
 	}
 }

@@ -1,5 +1,10 @@
 2007-05-17  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/Notebook.cs, libstetic/wrapper/objects.xml: Added
+	  CurrentPage property to Notebook.
+
+2007-05-17  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/CecilSignalDescriptor.cs: Added missing null check.
 	* libsteticui/ProjectBackend.cs: Remove debug cwl.
 	* libstetic/wrapper/Container.cs: Don't show the main window if the
