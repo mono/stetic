@@ -1,3 +1,18 @@
+2007-05-19  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs, libsteticui/WidgetEditSession.cs,
+	  libsteticui/WidgetDesigner.cs, libsteticui/Project.cs,
+	  libstetic/IProject.cs: Added ImagesRootPath, which is the root path
+	  where to start looking for images. Added the ImportFileCallback
+	  callback, called when an image file is referenced from the stetic
+	  project.
+	* libstetic/ImageInfo.cs: Image files are now relative to
+	  ImagesRootPath.
+	* libstetic/stetic.glade, libstetic/editor/SelectImageDialog.cs: Use
+	  the new root image path to create relative paths to images.
+	* libstetic/editor/ImageSelector.cs: Make the clean button smaller.
+	* libstetic/WidgetUtils.cs: Added AbsoluteToRelative function.
+
 2007-05-17  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/Notebook.cs, libstetic/wrapper/objects.xml: Added

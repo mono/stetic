@@ -51,7 +51,7 @@ namespace Stetic
 			else if (source == ImageSource.Resource)
 				return "resource:" + name;
 			else
-				return "file:" + Path.GetFileName (name);
+				return "file:" + name;
 		}
 		
 		public static ImageInfo FromResource (string resourceName)
@@ -131,11 +131,7 @@ namespace Stetic
 					
 				case ImageSource.File:
 					try {
-						string file = name;
-						if (!Path.IsPathRooted (name) && project.FileName != null) {
-							file = Path.Combine (Path.GetDirectoryName (project.FileName), "pixmaps");
-							file = Path.Combine (file, name);
-						}
+						string file = Path.Combine (project.ImagesRootPath, name);
 						return image = new Gdk.Pixbuf (file);
 					} catch {
 						return WidgetUtils.MissingIcon;

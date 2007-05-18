@@ -33,6 +33,7 @@ namespace Stetic {
 		ArrayList internalLibs;
 		ApplicationBackend app;
 		ImportContext importContext;
+		string imagesRootPath;
 		
 		// The action collection of the last selected widget
 		Stetic.Wrapper.ActionGroupCollection oldTopActionCollection;
@@ -134,6 +135,27 @@ namespace Stetic {
 				return true;
 			}
 		}
+		
+		public string ImagesRootPath {
+			get {
+				if (string.IsNullOrEmpty (imagesRootPath)) {
+					if (string.IsNullOrEmpty (fileName))
+						return ".";
+					else
+						return Path.GetDirectoryName (fileName);
+				}
+				else {
+					if (Path.IsPathRooted (imagesRootPath))
+						return imagesRootPath;
+					else if (!string.IsNullOrEmpty (fileName))
+						return Path.GetFullPath (Path.Combine (Path.GetDirectoryName (fileName), imagesRootPath));
+					else
+						return imagesRootPath;
+				}
+			}
+			set { imagesRootPath = value; }
+		}
+
 		
 		public void AddWidgetLibrary (string lib)
 		{
@@ -276,6 +298,15 @@ namespace Stetic {
 				if (node == null)
 					throw new ApplicationException (Catalog.GetString ("Not a Stetic file according to node name."));
 				
+				// Load configuration options
+				foreach (XmlNode configNode in node.SelectNodes ("configuration/*")) {
+					XmlElement config = configNode as XmlElement;
+					if (config == null) continue;
+					
+					if (config.LocalName == "images-root-path")
+						imagesRootPath = config.InnerText;
+				}
+				
 				// Load the assembly directories
 				importContext = new ImportContext ();
 				foreach (XmlElement libElem in node.SelectNodes ("import/assembly-directory")) {
@@ -349,6 +380,16 @@ namespace Stetic {
 
 			XmlElement toplevel = doc.CreateElement ("stetic-interface");
 			doc.AppendChild (toplevel);
+
+			XmlElement config = doc.CreateElement ("configuration");
+			if (!string.IsNullOrEmpty (imagesRootPath)) {
+				XmlElement iroot = doc.CreateElement ("images-root-path");
+				iroot.InnerText = imagesRootPath;
+				config.AppendChild (iroot);
+			}
+			
+			if (config.ChildNodes.Count > 0)
+				toplevel.AppendChild (config);
 			
 			if (widgetLibraries.Count > 0 || (importContext != null && importContext.Directories.Count > 0)) {
 				XmlElement importElem = doc.CreateElement ("import");
@@ -593,6 +634,11 @@ namespace Stetic {
 			get { return importContext; }
 		}
 		
+		public string ImportFile (string filePath)
+		{
+			return frontend.ImportFile (filePath);
+		}
+
 		public void AddWindow (Gtk.Window window)
 		{
 			AddWindow (window, false);

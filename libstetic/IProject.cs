@@ -19,6 +19,9 @@ namespace Stetic
 		
 		Wrapper.ActionGroupCollection ActionGroups { get; }
 		ProjectIconFactory IconFactory { get; }
+		string ImagesRootPath { get; }
+		
+		string ImportFile (string filePath);
 		
 		event Wrapper.WidgetEventHandler SelectionChanged;
 	}

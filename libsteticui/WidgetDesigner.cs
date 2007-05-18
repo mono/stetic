@@ -111,6 +111,11 @@ namespace Stetic
 			}
 		}
 		
+		public ImportFileDelegate ImportFileCallback {
+			get { return editedProject.ImportFileCallback; }
+			set { editedProject.ImportFileCallback = value; }
+		}
+		
 		void CreateSession ()
 		{
 			try {

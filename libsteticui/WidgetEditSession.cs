@@ -78,6 +78,8 @@ namespace Stetic {
 				gproject.AttachActionGroups (win.Project.ActionGroups);
 				
 				gproject.IconFactory = win.Project.IconFactory;
+				gproject.FileName = win.Project.FileName;
+				gproject.ImagesRootPath = win.Project.ImagesRootPath;
 				gproject.ResourceProvider = win.Project.ResourceProvider;
 				gproject.WidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).WidgetLibraries.Clone ();
 				gproject.InternalWidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).InternalWidgetLibraries.Clone ();

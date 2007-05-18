@@ -21,6 +21,7 @@ namespace Stetic
 		List<WidgetInfo> widgets = new List<WidgetInfo> ();
 		List<ActionGroupInfo> groups = new List<ActionGroupInfo> ();
 		bool modified;
+		ImportFileDelegate importFileDelegate;
 		
 		public event WidgetInfoEventHandler WidgetAdded;
 		public event WidgetInfoEventHandler WidgetRemoved;
@@ -125,6 +126,11 @@ namespace Stetic
 			}
 		}
 		
+		public ImportFileDelegate ImportFileCallback {
+			get { return importFileDelegate; }
+			set { importFileDelegate = value; }
+		}
+		
 		public bool CanGenerateCode {
 			get { return backend.CanGenerateCode; }
 		}
@@ -132,6 +138,12 @@ namespace Stetic
 		public Component Selection {
 			get { return selection; }
 		}
+		
+		public string ImagesRootPath {
+			get { return ProjectBackend.ImagesRootPath; }
+			set { ProjectBackend.ImagesRootPath = value; }
+		}
+		
 		
 		public void Close ()
 		{
@@ -251,7 +263,7 @@ namespace Stetic
 					return w;
 			return null;
 		}
-		
+				
 		public WidgetDesigner CreateWidgetDesigner (WidgetInfo widgetInfo, bool autoCommitChanges)
 		{
 			return new WidgetDesigner (this, widgetInfo.Name, autoCommitChanges);
@@ -582,6 +594,33 @@ namespace Stetic
 			});
 		}
 		
+		internal string ImportFile (string filePath)
+		{
+			if (importFileDelegate != null) {
+				string res = null;
+				if (Gtk.Main.Level () > 0) {
+					return importFileDelegate (filePath);
+				}
+
+				object ob = new Object ();
+				lock (ob) {
+					Gtk.Application.Invoke (delegate {
+						lock (ob) {
+							try {
+								res = importFileDelegate (filePath);
+							} finally {
+								System.Threading.Monitor.PulseAll (ob);
+							}
+						}
+					});
+					System.Threading.Monitor.Wait (ob);
+				}
+				return res;
+			}
+			else
+				return filePath;
+		}
+		
 		internal void NotifyUpdateLibraries ()
 		{
 			app.UpdateWidgetLibraries (false, false);
@@ -733,4 +772,6 @@ namespace Stetic
 			}
 		}
 	}
+	
+	public delegate string ImportFileDelegate (string fileName);
 }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using System.Collections;
 using System.Xml;
@@ -376,6 +377,42 @@ namespace Stetic
 				}
 				return missingIcon;
 			}
+		}
+		
+		public static string AbsoluteToRelativePath (string baseDirectoryPath, string absPath)
+		{
+			if (! Path.IsPathRooted (absPath))
+				return absPath;
+			
+			absPath = Path.GetFullPath (absPath);
+			baseDirectoryPath = Path.GetFullPath (baseDirectoryPath);
+			
+			char[] separators = { Path.DirectorySeparatorChar, Path.VolumeSeparatorChar, Path.AltDirectorySeparatorChar };
+			baseDirectoryPath = baseDirectoryPath.TrimEnd (separators);
+			string[] bPath = baseDirectoryPath.Split (separators);
+			string[] aPath = absPath.Split (separators);
+			int indx = 0;
+			for(; indx < Math.Min(bPath.Length, aPath.Length); ++indx){
+				if(!bPath[indx].Equals(aPath[indx]))
+					break;
+			}
+			
+			if (indx == 0) {
+				return absPath;
+			}
+			
+			string erg = "";
+			
+			if(indx == bPath.Length) {
+				erg += "." + Path.DirectorySeparatorChar;
+			} else {
+				for (int i = indx; i < bPath.Length; ++i) {
+					erg += ".." + Path.DirectorySeparatorChar;
+				}
+			}
+			erg += String.Join(Path.DirectorySeparatorChar.ToString(), aPath, indx, aPath.Length-indx);
+			
+			return erg;
 		}
 	}
 }

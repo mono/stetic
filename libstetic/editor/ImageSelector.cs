@@ -109,7 +109,7 @@ namespace Stetic.Editor
 			frame.Add (entry);
 			PackStart (frame, true, true, 0);
 
-			clearButton = new Gtk.Button (new Gtk.Image (Gtk.Stock.Clear, Gtk.IconSize.Button));
+			clearButton = new Gtk.Button (new Gtk.Image (Gtk.Stock.Clear, Gtk.IconSize.Menu));
 			clearButton.Clicked += OnClearImage;
 			PackStart (clearButton, false, false, 0);
 

@@ -31,10 +31,13 @@ namespace Stetic.Editor
 		Hashtable resources = new Hashtable ();	// Stores resourceName -> thumbnail pixbuf
 		Gdk.Pixbuf missingThumbnail;
 		IResourceProvider resourceProvider;
+		string importedImageFile;
+		Stetic.IProject project;
 		
 		public SelectImageDialog (Gtk.Window parent, Stetic.IProject project)
 		{
 			this.parent = parent;
+			this.project = project;
 			Glade.XML xml = new Glade.XML (null, "stetic.glade", "SelectImageDialog", null);
 			xml.Autoconnect (this);
 			
@@ -78,16 +81,20 @@ namespace Stetic.Editor
 			resourceList.Selection.Changed += OnResourceSelectionChanged;
 			
 			if (project.FileName != null)
-				fileChooser.SetCurrentFolder (Path.GetDirectoryName (project.FileName));
+				fileChooser.SetCurrentFolder (project.ImagesRootPath);
 
 			fileChooser.SelectionChanged += delegate (object s, EventArgs a) {
 				UpdateButtons ();
 			};
 
 			fileChooser.FileActivated += delegate (object s, EventArgs a) {
-				if (Icon != null)
-					dialog.Respond (Gtk.ResponseType.Ok);
+				if (Icon != null) {
+					if (Validate ())
+						dialog.Respond (Gtk.ResponseType.Ok);
+				}
 			};
+			
+			okButton.Clicked += OnOkClicked;
 
 			UpdateButtons ();
 		}
@@ -115,6 +122,8 @@ namespace Stetic.Editor
 						return null;
 					return ImageInfo.FromResource (resourceNameEntry.Text);
 				} else {
+					if (importedImageFile != null)
+						return ImageInfo.FromFile (importedImageFile);
 					if (fileChooser.Filename == null || fileChooser.Filename.Length == 0 || !File.Exists (fileChooser.Filename))
 						return null;
 					return ImageInfo.FromFile (fileChooser.Filename);
@@ -282,6 +291,26 @@ namespace Stetic.Editor
 				}
 				msg.Destroy ();
 			}
+		}
+		
+		bool Validate ()
+		{
+			if (notebook.Page == 2) {
+				if (fileChooser.Filename == null || fileChooser.Filename.Length == 0 || !File.Exists (fileChooser.Filename))
+					return true;
+				
+				importedImageFile = project.ImportFile (fileChooser.Filename);
+				if (importedImageFile != null)
+					importedImageFile = WidgetUtils.AbsoluteToRelativePath (project.ImagesRootPath, importedImageFile);
+				return importedImageFile != null;
+			}
+			return true;
+		}
+		
+		void OnOkClicked (object s, EventArgs args)
+		{
+			if (Validate ())
+				dialog.Respond (Gtk.ResponseType.Ok);
 		}
 	}
 }
