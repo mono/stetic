@@ -377,5 +377,24 @@ namespace Stetic
 			}
 			return null;
 		}
+
+		public static string GetInstanceType (TypeDefinition td, TypeReference sourceType, TypeReference tref)
+		{
+			string tn = null;
+			if (sourceType is GenericInstanceType) {
+				GenericInstanceType it = (GenericInstanceType) sourceType;
+				foreach (GenericParameter gc in td.GenericParameters) {
+					if (gc.Name == tref.FullName) {
+						tn = it.GenericArguments [gc.Position].FullName;
+						break;
+					}
+				}
+			}
+			if (tn == null)
+				tn = tref.FullName;
+			tn = tn.Replace ('<', '[');
+			tn = tn.Replace ('>', ']');
+			return tn;
+		}
 	}
 }

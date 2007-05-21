@@ -21,7 +21,16 @@ namespace Stetic
 					for (int n=0; n<pars.Length; n++)
 						handlerParameters [n] = new ParameterDescriptor (pars[n].Name, pars[n].ParameterType.FullName);
 				} else {
-					TypeDefinition td = lib.FindTypeDefinition (handlerTypeName);
+					// If the type is generic, the type arguments must be ignored when looking for the type 
+					string tn = handlerTypeName;
+					int i = handlerTypeName.IndexOf ('<');
+					if (i != -1) {
+						tn = handlerTypeName.Substring (0, i);
+						// Convert the type name to a type reference
+						handlerTypeName = handlerTypeName.Replace ('<', '[');
+						handlerTypeName = handlerTypeName.Replace ('>', ']');
+					}
+					TypeDefinition td = lib.FindTypeDefinition (tn);
 					if (td != null) {
 						MethodDefinition mi = null;
 						foreach (MethodDefinition md in td.Methods) {
@@ -31,11 +40,11 @@ namespace Stetic
 							}
 						}
 						if (mi != null) {
-							handlerReturnTypeName = mi.ReturnType.ReturnType.FullName;
+							handlerReturnTypeName = CecilWidgetLibrary.GetInstanceType (td, sinfo.EventType, mi.ReturnType.ReturnType);
 							handlerParameters = new ParameterDescriptor [mi.Parameters.Count];
 							for (int n=0; n<handlerParameters.Length; n++) {
 								ParameterDefinition par = mi.Parameters [n];
-								handlerParameters [n] = new ParameterDescriptor (par.Name, par.ParameterType.FullName);
+								handlerParameters [n] = new ParameterDescriptor (par.Name, CecilWidgetLibrary.GetInstanceType (td, sinfo.EventType, par.ParameterType));
 							}
 						}
 					}
@@ -63,11 +72,13 @@ namespace Stetic
 		{
 			elem.SetAttribute ("handlerTypeName", handlerTypeName);
 			elem.SetAttribute ("handlerReturnTypeName", handlerReturnTypeName);
-			foreach (ParameterDescriptor par in handlerParameters) {
-				XmlElement epar = elem.OwnerDocument.CreateElement ("param");
-				epar.SetAttribute ("name", par.Name);
-				epar.SetAttribute ("type", par.TypeName);
-				elem.AppendChild (epar);
+			if (handlerParameters != null) {
+				foreach (ParameterDescriptor par in handlerParameters) {
+					XmlElement epar = elem.OwnerDocument.CreateElement ("param");
+					epar.SetAttribute ("name", par.Name);
+					epar.SetAttribute ("type", par.TypeName);
+					elem.AppendChild (epar);
+				}
 			}
 		}
 	}
