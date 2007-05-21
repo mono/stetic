@@ -367,10 +367,20 @@ namespace Stetic {
 			this.fileName = fileName;
 			XmlDocument doc = Write ();
 			
-			XmlTextWriter writer = new XmlTextWriter (fileName, System.Text.Encoding.UTF8);
-			writer.Formatting = Formatting.Indented;
-			doc.Save (writer);
-			writer.Close ();
+			XmlTextWriter writer = null;
+			try {
+				// Write to a temporary file first, just in case something fails
+				writer = new XmlTextWriter (fileName + "~", System.Text.Encoding.UTF8);
+				writer.Formatting = Formatting.Indented;
+				doc.Save (writer);
+				writer.Close ();
+				
+				File.Copy (fileName + "~", fileName, true);
+				File.Delete (fileName + "~");
+			} finally {
+				if (writer != null)
+					writer.Close ();
+			}
 		}
 		
 		XmlDocument Write ()

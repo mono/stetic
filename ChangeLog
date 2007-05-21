@@ -1,5 +1,10 @@
 2007-05-21  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/ProjectBackend.cs: When saving write to a temporary file
+	  first, just in case something fails.
+
+2007-05-21  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/CecilSignalDescriptor.cs,
 	  libsteticui/CecilWidgetLibrary.cs: Properly handle generic event
 	  handler types. Fixes bug #80783.
