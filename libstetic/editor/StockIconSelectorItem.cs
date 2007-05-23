@@ -6,6 +6,10 @@ namespace Stetic.Editor
 {
 	public class StockIconSelectorItem: IconSelectorItem
 	{
+		public StockIconSelectorItem (IntPtr ptr): base (ptr)
+		{
+		}
+		
 		public StockIconSelectorItem (): base (Catalog.GetString ("Stock Icons"))
 		{
 		}

@@ -1,3 +1,9 @@
+2007-05-23  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/editor/StockIconSelectorItem.cs,
+	  libstetic/editor/IconSelectorItem.cs: Added IntPtr constructors. It
+	  seems to crash without them in some contexts.
+
 2007-05-21  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ProjectBackend.cs: When saving write to a temporary file

@@ -22,6 +22,10 @@ namespace Stetic.Editor
 		Gtk.Window tipWindow;
 		bool inited;
 		
+		public IconSelectorItem (IntPtr ptr): base (ptr)
+		{
+		}
+		
 		public IconSelectorItem (string title)
 		{
 			this.title = title;
