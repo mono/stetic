@@ -11,16 +11,18 @@ namespace Stetic.Wrapper {
 		public override void Wrap (object obj, bool initialized)
 		{
 			base.Wrap (obj, initialized);
-			dialog.HasSeparator = false;
 
 			ActionArea = (ButtonBox)Container.Lookup (dialog.ActionArea);
 			ActionArea.SetActionDialog (this);
 
-			if (!initialized && dialog.VBox.Children.Length == 1) {
-				Container vbox = Container.Lookup (dialog.VBox);
-				Placeholder ph = vbox.AddPlaceholder ();
-				ph.SetSizeRequest (200, 200);
-				Buttons = 1;
+			if (!initialized) {
+				dialog.HasSeparator = false;
+				if (!initialized && dialog.VBox.Children.Length == 1) {
+					Container vbox = Container.Lookup (dialog.VBox);
+					Placeholder ph = vbox.AddPlaceholder ();
+					ph.SetSizeRequest (200, 200);
+					Buttons = 1;
+				}
 			} else
 				ButtonsChanged (ActionArea);
 

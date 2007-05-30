@@ -1,5 +1,15 @@
 2007-05-30  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/Window.cs: Store the WindowPosition property in the
+	  Window wrapper, since it may sometimes be changed by the embedder
+	  widget.
+	* libstetic/wrapper/objects.xml: Added default value for Widget.Events
+	  property.
+	* libstetic/wrapper/Dialog.cs: (Wrap) Don't initialize the HasSeparator
+	  property if the provided instance is already initialized.
+
+2007-05-30  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/editor/ActionMenuBar.cs, libstetic/editor/ActionMenu.cs:
 	  When a menu bar loses the focus, reset the menu item selection
 	  before hiding the submenus. Fixes bug #81761.

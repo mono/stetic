@@ -73,6 +73,17 @@ namespace Stetic.Wrapper {
 			}
 		}
 
+		Gtk.WindowPosition windowPosition;
+		public Gtk.WindowPosition WindowPosition {
+			get {
+				return windowPosition;
+			}
+			set {
+				windowPosition = value;
+				EmitNotify ("WindowPosition");
+			}
+		}
+
 		ImageInfo icon;
 		public ImageInfo Icon {
 			get {

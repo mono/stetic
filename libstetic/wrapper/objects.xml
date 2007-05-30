@@ -18,7 +18,7 @@
 		<property name="HasDefault" glade-override="true" />
 		<property name="CanFocus" />
 <!--		<property name="HasFocus" /> -->
-		<property name="Events" />
+		<property name="Events" default="0"/>
 		<property name="ExtensionEvents" />
 		<property name="GeneratePublic" internal="true" default="true"/>
 		<property name="Name" internal="true"
