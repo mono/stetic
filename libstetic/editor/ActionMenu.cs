@@ -181,6 +181,20 @@ namespace Stetic.Editor
 			}
 		}
 		
+		internal void ResetSelection ()
+		{
+			if (OpenSubmenu != null)
+				OpenSubmenu.ResetSelection ();
+			IDesignArea area = wrapper.GetDesignArea ();
+			if (area != null) {
+				foreach (Gtk.Widget w in table.Children) {
+					ActionMenuItem ami = w as ActionMenuItem;
+					if (ami != null)
+						area.ResetSelection (w);
+				}
+			}
+		}
+		
 		void InsertAction (int pos)
 		{
 			using (wrapper.UndoManager.AtomicChange) {

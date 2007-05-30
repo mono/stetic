@@ -177,8 +177,9 @@ namespace Stetic.Editor
 		public void Unselect ()
 		{
 			// Unselects any selected item and hides any open submenu menu
-			OpenSubmenu = null;
 			Widget wrapper = Widget.Lookup (this);
+			if (OpenSubmenu != null)
+				OpenSubmenu.ResetSelection ();
 			IDesignArea area = wrapper.GetDesignArea ();
 			if (area != null) {
 				foreach (Gtk.Widget w in Children) {
@@ -187,6 +188,7 @@ namespace Stetic.Editor
 						area.ResetSelection (it.ActionMenuItem);
 				}
 			}
+			OpenSubmenu = null;
 		}
 		
 		void OnChildAdded (object ob, ActionTreeNodeArgs args)
