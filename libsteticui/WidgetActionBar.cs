@@ -33,7 +33,7 @@ namespace Stetic
 			invisibles = new Hashtable ();
 			toggles = new ArrayList ();
 
-			IconSize = IconSize.SmallToolbar;
+			IconSize = IconSize.Menu;
 			Orientation = Orientation.Horizontal;
 			ToolbarStyle = ToolbarStyle.BothHoriz;
 

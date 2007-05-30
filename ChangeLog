@@ -1,5 +1,14 @@
 2007-05-30  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/libsteticui.mdp, libsteticui/Makefile.am: Added reference
+	  to glib.
+	* libsteticui/WidgetActionBar.cs, libstetic/CommandDescriptor.cs: Use
+	  Menu size for command icons.
+	* libsteticui/WidgetTreeCombo.cs: Replaced the popup widget menu by a
+	  popup widget tree view. Fixes bug #81762.
+
+2007-05-30  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/wrapper/Window.cs: Store the WindowPosition property in the
 	  Window wrapper, since it may sometimes be changed by the embedder
 	  widget.

@@ -83,7 +83,7 @@ namespace Stetic {
 					return new Gtk.Image (new Gdk.Pixbuf (s));
 				}
 			} else {
-				return new Gtk.Image (icon, Gtk.IconSize.SmallToolbar);
+				return new Gtk.Image (icon, Gtk.IconSize.Menu);
 			}
 		}
 

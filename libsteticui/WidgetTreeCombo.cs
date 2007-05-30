@@ -11,6 +11,7 @@ namespace Stetic
 		Stetic.Wrapper.Widget rootWidget;
 		Stetic.IProject project;
 		Stetic.Wrapper.Widget selection;
+		WidgetTreePopup popup;
 		
 		public WidgetTreeCombo ()
 		{
@@ -21,13 +22,21 @@ namespace Stetic
 			bb.PackStart (image, false, false, 3);
 			bb.PackStart (label, true, true, 3);
 			label.Xalign = 0;
-			label.HeightRequest = 24;
+			label.HeightRequest = 18;
 			bb.PackStart (new VSeparator (), false, false, 1);
 			bb.PackStart (new Arrow (ArrowType.Down, ShadowType.None), false, false, 1);
 			Child = bb;
 			this.WidthRequest = 300;
 			Sensitive = false;
 		}
+		
+		public override void Dispose ()
+		{
+			if (popup != null)
+				popup.Destroy ();
+			base.Dispose ();
+		}
+
 		
 		public Stetic.Wrapper.Widget RootWidget {
 			get { return rootWidget; }
@@ -50,7 +59,7 @@ namespace Stetic
 		{
 			if (selection != null) {
 				label.Text = selection.Wrapped.Name;
-				image.Pixbuf = selection.ClassDescriptor.Icon;
+				image.Pixbuf = selection.ClassDescriptor.Icon.ScaleSimple (16, 16, Gdk.InterpType.Bilinear);
 				image.Show ();
 			} else {
 				label.Text = "             ";
@@ -61,59 +70,38 @@ namespace Stetic
 		protected override void OnPressed ()
 		{
 			base.OnPressed ();
-
-			Gtk.Menu menu = new Gtk.Menu ();
-			FillCombo (menu, RootWidget.Wrapped, 0);
-			menu.ShowAll ();
-			menu.Popup (null, null, new Gtk.MenuPositionFunc (OnPosition), 0, Gtk.Global.CurrentEventTime);
-		}
-		
-		void OnPosition (Gtk.Menu menu, out int x, out int y, out bool pushIn)
-		{
+			if (popup == null) {
+				popup = new WidgetTreePopup (project);
+				popup.WidgetActivated += OnPopupActivated;
+				popup.SetDefaultSize (Allocation.Width, 500);
+			}
+			else if (popup.Visible) {
+				popup.Hide ();
+				return;
+			}
+			
+			int x, y;
 			ParentWindow.GetOrigin (out x, out y);
 			x += Allocation.X;
 			y += Allocation.Y + Allocation.Height;
-			pushIn = true;
+			
+			popup.Fill (RootWidget.Wrapped);
+			popup.Move (x, y);
+			popup.ShowAll ();
 		}
 		
-		void FillCombo (Menu menu, Gtk.Widget widget, int level)
+		protected override bool OnFocusOutEvent (Gdk.EventFocus evnt)
 		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			if (wrapper == null) return;
-			
-			if (!wrapper.Unselectable) {
-				MenuItem item = new WidgetMenuItem (widget);
-				item.Activated += new EventHandler (OnItemSelected);
-				
-				HBox box = new HBox ();
-				Gtk.Image img = new Gtk.Image (wrapper.ClassDescriptor.Icon);
-				img.Xalign = 1;
-				img.WidthRequest = level*30;
-				box.PackStart (img, false, false, 0);
-				
-				Label lab = new Label ();
-				if (widget == project.Selection)
-					lab.Markup = "<b>" + widget.Name + "</b>";
-				else
-					lab.Text = widget.Name;
-					
-				box.PackStart (lab, false, false, 3);
-				item.Child = box;
-				menu.Append (item);
-			} else
-				level--;
-			
-			Gtk.Container cc = widget as Gtk.Container;
-			if (cc != null && wrapper.ClassDescriptor.AllowChildren) {
-				foreach (Gtk.Widget child in cc.Children)
-					FillCombo (menu, child, level + 1);
-			}
+			if (popup != null)
+				popup.Hide ();
+			return base.OnFocusOutEvent (evnt);
 		}
+
 		
-		void OnItemSelected (object sender, EventArgs args)
+		void OnPopupActivated (object s, EventArgs a)
 		{
-			WidgetMenuItem item = (WidgetMenuItem) sender;
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (item.Widget);
+			popup.Hide ();
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (popup.Selection);
 			GLib.Timeout.Add (10, delegate {
 				wrapper.Select ();
 				return false;
@@ -121,13 +109,105 @@ namespace Stetic
 		}
 	}
 	
-	class WidgetMenuItem: MenuItem
+	class WidgetTreePopup: Window
 	{
-		internal Gtk.Widget Widget;
+		TreeView tree;
+		TreeStore store;
+		Gtk.Widget selection;
+		Stetic.IProject project;
 		
-		public WidgetMenuItem (Gtk.Widget widget)
+		public event EventHandler WidgetActivated;
+		
+		public WidgetTreePopup (Stetic.IProject project): base (WindowType.Popup)
 		{
-			this.Widget = widget;
+			this.project = project;
+			Gtk.Frame frame = new Frame ();
+			frame.ShadowType = Gtk.ShadowType.Out;
+			Add (frame);
+			
+			Gtk.ScrolledWindow sc = new ScrolledWindow ();
+			sc.VscrollbarPolicy = PolicyType.Automatic;
+			sc.HscrollbarPolicy = PolicyType.Automatic;
+			frame.Add (sc);
+			
+			tree = new TreeView ();
+			store = new TreeStore (typeof(Gdk.Pixbuf), typeof(string), typeof(Widget));
+			tree.Model = store;
+			tree.HeadersVisible = false;
+			
+			TreeViewColumn col = new TreeViewColumn ();
+			CellRendererPixbuf cr = new CellRendererPixbuf ();
+			col.PackStart (cr, false);
+			col.AddAttribute (cr, "pixbuf", 0);
+			
+			CellRendererText tr = new CellRendererText ();
+			col.PackStart (tr, true);
+			col.AddAttribute (tr, "markup", 1);
+			
+			tree.AppendColumn (col);
+			
+			tree.ButtonReleaseEvent += OnButtonRelease;
+			tree.RowActivated += OnButtonRelease;
+			sc.Add (tree);
+			tree.GrabFocus ();
+			
+		}
+		
+		public void Fill (Gtk.Widget widget)
+		{
+			store.Clear ();
+			Fill (TreeIter.Zero, widget);
+		}
+		
+		public void Fill (TreeIter iter, Gtk.Widget widget)
+		{
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
+			if (wrapper == null) return;
+			
+			if (!wrapper.Unselectable) {
+				
+				Gdk.Pixbuf icon = wrapper.ClassDescriptor.Icon.ScaleSimple (16, 16, Gdk.InterpType.Bilinear);
+				string txt;
+				if (widget == project.Selection)
+					txt = "<b>" + GLib.Markup.EscapeText (widget.Name) + "</b>";
+				else
+					txt = GLib.Markup.EscapeText (widget.Name);
+				
+				if (!iter.Equals (TreeIter.Zero))
+					iter = store.AppendValues (iter, icon, txt, widget);
+				else
+					iter = store.AppendValues (icon, txt, widget);
+			}
+			
+			Gtk.Container cc = widget as Gtk.Container;
+			if (cc != null && wrapper.ClassDescriptor.AllowChildren) {
+				foreach (Gtk.Widget child in cc.Children)
+					Fill (iter, child);
+			}
+			if (widget == project.Selection) {
+				tree.ExpandToPath (store.GetPath (iter));
+				tree.ExpandRow (store.GetPath (iter), false);
+				tree.Selection.SelectIter (iter);
+			}
+		}
+		
+		public Gtk.Widget Selection {
+			get { return selection; }
+		}
+		
+		void OnButtonRelease (object s, EventArgs a)
+		{
+			NotifyActivated ();
+		}
+		
+		void NotifyActivated ()
+		{
+			TreeIter iter;
+			if (!tree.Selection.GetSelected (out iter))
+				return;
+			selection = (Gtk.Widget) store.GetValue (iter, 2);
+			if (WidgetActivated != null)
+				WidgetActivated (this, EventArgs.Empty);
 		}
 	}
 }
