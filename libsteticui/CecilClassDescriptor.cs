@@ -183,6 +183,9 @@ namespace Stetic
 				if (eventInfo.Name == name)
 					return eventInfo;
 			
+			if (cls.BaseType == null)
+				return null;
+			
 			string baseType = cls.BaseType.FullName;
 			Type t = Registry.GetType (baseType, false);
 			if (t != null) {

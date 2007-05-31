@@ -1,3 +1,8 @@
+2007-05-31  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/CecilClassDescriptor.cs: Added missing null check when
+	  checking for base classes in FindEvent.
+
 2007-05-30  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/libsteticui.mdp, libsteticui/Makefile.am: Added reference
