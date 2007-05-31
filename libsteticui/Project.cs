@@ -315,6 +315,12 @@ namespace Stetic
 			return (ComponentType[]) types.ToArray (typeof(ComponentType));
 		}
 		
+		// Returns a list of all support widget types (including base classes)
+		public string[] GetWidgetTypes ()
+		{
+			return ProjectBackend.GetWidgetTypes ();
+		}
+		
 		public void RemoveComponent (WidgetInfo component)
 		{
 			ProjectBackend.RemoveWidget (component.Name);

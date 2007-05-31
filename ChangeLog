@@ -1,5 +1,12 @@
 2007-05-31  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/ProjectBackend.cs, libsteticui/Project.cs: Added method
+	  for getting all widget types included in a project.
+	* libstetic/wrapper/objects.xml: Gtk.Bin now inherits the properties of
+	  Gtk.Container.
+
+2007-05-31  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/CecilClassDescriptor.cs: Added missing null check when
 	  checking for base classes in FindEvent.
 

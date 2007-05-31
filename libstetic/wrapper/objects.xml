@@ -311,7 +311,7 @@
 	</itemgroups>
     </object>
 
-    <object type="Gtk.Bin,gtk-sharp" base-type="Gtk.Widget" wrapper="Stetic.Wrapper.Bin"
+    <object type="Gtk.Bin,gtk-sharp" base-type="Gtk.Container" wrapper="Stetic.Wrapper.Bin"
     	label="Bin" icon="custom.png">
     </object>
 

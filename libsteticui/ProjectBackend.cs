@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.CodeDom;
 using Mono.Unix;
@@ -194,6 +195,21 @@ namespace Stetic {
 				}
 			}
 			return list;
+		}
+		
+		public string[] GetWidgetTypes ()
+		{
+			List<string> list = new List<string> ();
+			foreach (WidgetLibrary lib in app.GetProjectLibraries (this)) {
+				// Don't include in the list widgets which are internal (when the library is
+				// not internal to the project) and deprecated ones.
+				bool isInternalLib = IsInternalLibrary (lib.Name);
+				foreach (ClassDescriptor cd in lib.AllClasses) {
+					if (!cd.Deprecated && (isInternalLib || !cd.IsInternal))
+						list.Add (cd.Name);
+				}
+			}
+			return list.ToArray ();
 		}
 		
 		public IResourceProvider ResourceProvider { 
