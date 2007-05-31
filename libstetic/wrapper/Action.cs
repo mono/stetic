@@ -331,6 +331,22 @@ namespace Stetic.Wrapper
 						groupExp)
 				);
 			}
+			else if (type == ActionType.Toggle) {
+				if (Active) {
+					ctx.Statements.Add (
+						new CodeAssignStatement (
+							new CodePropertyReferenceExpression (var, "Active"),
+							new CodePrimitiveExpression (true))
+					);
+				}
+				if (DrawAsRadio) {
+					ctx.Statements.Add (
+						new CodeAssignStatement (
+							new CodePropertyReferenceExpression (var, "DrawAsRadio"),
+							new CodePrimitiveExpression (true))
+					);
+				}
+			}
 			base.GenerateBuildCode (ctx, var);
 		}
 		
