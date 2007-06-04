@@ -212,7 +212,8 @@ namespace Stetic
 			if (!found)
 			{
 				CodeTypeDeclaration cls = new CodeTypeDeclaration ("IconLoader");
-				cls.Attributes = MemberAttributes.Assembly;
+				cls.Attributes = MemberAttributes.Private;
+				cls.TypeAttributes = System.Reflection.TypeAttributes.NestedAssembly;
 				cns.Types.Add (cls);
 				
 				CodeMemberMethod met = new CodeMemberMethod ();
