@@ -1,5 +1,10 @@
 2007-06-11  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/ImageInfo.cs: Load images from a path relative to the entry
+	  assembly location.
+
+2007-06-11  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/Project.cs: Fix problem with reading empty action groups.
 
 2007-06-04  Lluis Sanchez Gual <lluis@novell.com> 

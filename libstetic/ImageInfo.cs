@@ -204,7 +204,18 @@ namespace Stetic
 				case ImageSource.File:
 					return new CodeObjectCreateExpression (
 						typeof(Gdk.Pixbuf),
-						new CodePrimitiveExpression (name)
+						new CodeMethodInvokeExpression (
+							new CodeTypeReferenceExpression (typeof(System.IO.Path)),
+							"Combine",
+							new CodePropertyReferenceExpression (
+								new CodePropertyReferenceExpression (
+									new CodeTypeReferenceExpression (typeof(AppDomain)),
+									"CurrentDomain"
+								),
+								"BaseDirectory"
+							),
+							new CodePrimitiveExpression (name)
+						)
 					);
 			}
 			return new CodePrimitiveExpression (null);
