@@ -132,7 +132,7 @@ namespace Stetic
 		}
 		
 		public bool CanGenerateCode {
-			get { return backend.CanGenerateCode; }
+			get { return ProjectBackend.CanGenerateCode; }
 		}
 		
 		public Component Selection {

@@ -1,5 +1,10 @@
 2007-06-11  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/Project.cs: Make sure the project backend is loaded when
+	  checking the CanGenerateCode property.
+
+2007-06-11  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/ImageInfo.cs: Load images from a path relative to the entry
 	  assembly location.
 
