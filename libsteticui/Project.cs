@@ -165,7 +165,9 @@ namespace Stetic
 					return;
 				
 				reader.ReadStartElement ("stetic-interface");
-				while (reader.NodeType != XmlNodeType.EndElement && !reader.IsEmptyElement) {
+				if (reader.IsEmptyElement)
+					return;
+				while (reader.NodeType != XmlNodeType.EndElement) {
 					if (reader.NodeType == XmlNodeType.Element) {
 						if (reader.LocalName == "widget")
 							ReadWidget (reader);
