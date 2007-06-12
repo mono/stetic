@@ -1,3 +1,8 @@
+2007-06-12  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/lib/Mono.Cecil.dll: Updated from SVN, to keep in sync
+	  with MD.
+
 2007-06-11  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/Project.cs: Make sure the project backend is loaded when
