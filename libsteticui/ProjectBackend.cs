@@ -35,6 +35,7 @@ namespace Stetic {
 		ApplicationBackend app;
 		ImportContext importContext;
 		string imagesRootPath;
+		string targetGtkVersion;
 		
 		// The action collection of the last selected widget
 		Stetic.Wrapper.ActionGroupCollection oldTopActionCollection;
@@ -137,6 +138,19 @@ namespace Stetic {
 			}
 		}
 		
+		public string TargetGtkVersion {
+			get { return targetGtkVersion != null ? targetGtkVersion : "2.4"; }
+			set {
+				if (targetGtkVersion == value)
+					return;
+				targetGtkVersion = value;
+				
+				// Update the project
+				OnRegistryChanging (null, null);
+				OnRegistryChanged (null, null);
+			}
+		}
+		
 		public string ImagesRootPath {
 			get {
 				if (string.IsNullOrEmpty (imagesRootPath)) {
@@ -190,7 +204,7 @@ namespace Stetic {
 				// not internal to the project), widgets not assigned to any category, and deprecated ones.
 				bool isInternalLib = IsInternalLibrary (lib.Name);
 				foreach (ClassDescriptor cd in lib.AllClasses) {
-					if (!cd.Deprecated && cd.Category.Length > 0 && (isInternalLib || !cd.IsInternal))
+					if (!cd.Deprecated && cd.Category.Length > 0 && (isInternalLib || !cd.IsInternal) && cd.SupportsGtkVersion (TargetGtkVersion))
 						list.Add (cd.Name);
 				}
 			}
@@ -321,6 +335,8 @@ namespace Stetic {
 					
 					if (config.LocalName == "images-root-path")
 						imagesRootPath = config.InnerText;
+					else if (config.LocalName == "target-gtk-version")
+						targetGtkVersion = config.InnerText;
 				}
 				
 				// Load the assembly directories
@@ -411,6 +427,11 @@ namespace Stetic {
 			if (!string.IsNullOrEmpty (imagesRootPath)) {
 				XmlElement iroot = doc.CreateElement ("images-root-path");
 				iroot.InnerText = imagesRootPath;
+				config.AppendChild (iroot);
+			}
+			if (!string.IsNullOrEmpty (targetGtkVersion)) {
+				XmlElement iroot = doc.CreateElement ("target-gtk-version");
+				iroot.InnerText = targetGtkVersion;
 				config.AppendChild (iroot);
 			}
 			

@@ -65,7 +65,7 @@ namespace Stetic
 			get { return rootWidget; }
 			set {
 				if (project != null) {
-					project.SelectionChanged -= new Wrapper.WidgetEventHandler (OnSelectionChanged);
+					project.SelectionChanged -= OnSelectionChanged;
 					project = null;
 				}
 				
@@ -75,7 +75,7 @@ namespace Stetic
 				if (rootWidget != null) {
 					project = (Stetic.ProjectBackend) rootWidget.Project;
 					UpdateSelection (Wrapper.Widget.Lookup (project.Selection));
-					project.SelectionChanged += new Wrapper.WidgetEventHandler (OnSelectionChanged);
+					project.SelectionChanged += OnSelectionChanged;
 				}
 			}
 		}
@@ -157,7 +157,7 @@ namespace Stetic
 		{
 			foreach (ItemGroup igroup in wrapper.ClassDescriptor.ItemGroups) {
 				foreach (ItemDescriptor desc in igroup) {
-					if (desc is CommandDescriptor)
+					if ((desc is CommandDescriptor) && desc.SupportsGtkVersion (project.TargetGtkVersion))
 						AppendCommand ((CommandDescriptor) desc, wrapper);
 				}
 			}

@@ -63,10 +63,10 @@ namespace Stetic
 			tree.Selection.Changed += OnSelectionChanged;
 		}
 		
-		public void AddProperties (ItemGroupCollection itemGroups, object instance)
+		public void AddProperties (ItemGroupCollection itemGroups, object instance, string targetGtkVersion)
 		{
 			foreach (ItemGroup igroup in itemGroups)
-				AddGroup (igroup, instance);
+				AddGroup (igroup, instance, targetGtkVersion);
 		}
 		
 		public void SaveStatus ()
@@ -118,13 +118,13 @@ namespace Stetic
 			QueueDraw ();
 		}
 		
-		public void AddGroup (ItemGroup igroup, object instance)
+		public void AddGroup (ItemGroup igroup, object instance, string targetGtkVersion)
 		{
 			ArrayList props = new ArrayList ();
 			foreach (ItemDescriptor item in igroup) {
 				if (item.IsInternal)
 					continue;
-				if (item is PropertyDescriptor)
+				if (item is PropertyDescriptor && item.SupportsGtkVersion (targetGtkVersion))
 					props.Add (item);
 			}
 			

@@ -19,7 +19,9 @@ namespace Stetic
 		
 		Wrapper.ActionGroupCollection ActionGroups { get; }
 		ProjectIconFactory IconFactory { get; }
+
 		string ImagesRootPath { get; }
+		string TargetGtkVersion { get; }
 		
 		string ImportFile (string filePath);
 		

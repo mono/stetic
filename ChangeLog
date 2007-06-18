@@ -1,3 +1,18 @@
+2007-06-18  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs, libsteticui/SignalsEditorBackend.cs,
+	  libsteticui/WidgetPropertyTreeBackend.cs,
+	  libsteticui/WidgetEditSession.cs, libsteticui/PropertyTree.cs,
+	  libsteticui/WidgetActionBar.cs, libsteticui/ApplicationBackend.cs,
+	  libsteticui/PaletteBackend.cs, libsteticui/Project.cs,
+	  libstetic/IProject.cs, libstetic/ItemDescriptor.cs,
+	  libstetic/ObjectWrapper.cs, libstetic/WidgetLibrary.cs,
+	  libstetic/ErrorWidget.cs, libstetic/WidgetUtils.cs,
+	  libstetic/ClassDescriptor.cs: Allow selecting the target the gtk#
+	  version of a project.
+	* libstetic/wrapper/objects.xml: Added new widgets, properties and
+	  events for gtk# 2.6.
+
 2007-06-12  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/lib/Mono.Cecil.dll: Updated from SVN, to keep in sync

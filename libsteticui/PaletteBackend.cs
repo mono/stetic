@@ -63,12 +63,15 @@ namespace Stetic {
 		public ProjectBackend ProjectBackend {
 			get { return project; }
 			set {
-				if (project != null)
+				if (project != null) {
 					project.SelectionChanged -= OnSelectionChanged;
+					project.ProjectReloaded -= OnProjectReloaded;
+				}
 				project = value;
 				if (project != null) {
 					UpdateSelection (Wrapper.Widget.Lookup (project.Selection));
 					project.SelectionChanged += OnSelectionChanged;
+					project.ProjectReloaded += OnProjectReloaded;
 				} else
 					UpdateSelection (null);
 
@@ -82,6 +85,11 @@ namespace Stetic {
 				libraries = value; 
 				LoadWidgets (project);
 			}
+		}
+
+		void OnProjectReloaded (object s, EventArgs args)
+		{
+			LoadWidgets (project);
 		}
 		
 		void OnSelectionChanged (object ob, Stetic.Wrapper.WidgetEventArgs args)
@@ -136,12 +144,13 @@ namespace Stetic {
 			ArrayList classes = new ArrayList ();
 			if (libraries == null) {
 				foreach (ClassDescriptor klass in Registry.AllClasses)
-					classes.Add (klass);
+					if (klass.SupportsGtkVersion (project.TargetGtkVersion))
+					    classes.Add (klass);
 			} else if (project != null) {
 				foreach (WidgetLibrary lib in libraries) {
 					bool isInternalLib = project.IsInternalLibrary (lib.Name);
 					foreach (ClassDescriptor cd in lib.AllClasses) {
-						if (!cd.Deprecated && cd.Category.Length > 0 && (isInternalLib || !cd.IsInternal))
+						if (!cd.Deprecated && cd.Category.Length > 0 && (isInternalLib || !cd.IsInternal) && cd.SupportsGtkVersion (project.TargetGtkVersion))
 							classes.Add (cd);
 					}
 				}

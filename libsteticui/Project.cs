@@ -144,6 +144,10 @@ namespace Stetic
 			set { ProjectBackend.ImagesRootPath = value; }
 		}
 		
+		public string TargetGtkVersion {
+			get { return ProjectBackend.TargetGtkVersion; }
+			set { ProjectBackend.TargetGtkVersion = value; }
+		}
 		
 		public void Close ()
 		{

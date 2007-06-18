@@ -19,6 +19,8 @@ namespace Stetic
 		
 		[NonSerialized]
 		ClassDescriptor klass;
+		
+		protected string targetGtkVersion;
 
 		protected ItemDescriptor () {}
 
@@ -28,6 +30,9 @@ namespace Stetic
 			isInternal = elem.HasAttribute ("internal");
 			deps = AddSubprops (elem.SelectNodes ("./disabled-if"), group, klass);
 			visdeps = AddSubprops (elem.SelectNodes ("./invisible-if"), group, klass);
+			targetGtkVersion = elem.GetAttribute ("gtk-version");
+			if (targetGtkVersion.Length == 0)
+				targetGtkVersion = null;
 		}
 
 		ArrayList AddSubprops (XmlNodeList nodes, ItemGroup group, ClassDescriptor klass)
@@ -70,6 +75,20 @@ namespace Stetic
 
 		// The property's display name
 		public abstract string Name { get; }
+		
+		public virtual string TargetGtkVersion {
+			get {
+				if (targetGtkVersion == null)
+					return klass.TargetGtkVersion;
+				else
+					return targetGtkVersion; 
+			}
+		}
+		
+		public bool SupportsGtkVersion (string targetVersion)
+		{
+			return WidgetUtils.CompareVersions (TargetGtkVersion, targetVersion) >= 0;
+		}
 
 		public bool HasDependencies {
 			get {

@@ -20,6 +20,7 @@ namespace Stetic {
 		protected ItemGroup internalChildren;
 		protected string baseType;
 		protected bool isInternal;
+		protected string targetGtkVersion;
 		
 		WidgetLibrary library;
 		PropertyDescriptor[] initializationProperties;
@@ -128,6 +129,10 @@ namespace Stetic {
 				initializationProperties = (PropertyDescriptor[]) list.ToArray (typeof(PropertyDescriptor));
 			} else
 				initializationProperties = emptyPropArray;
+			
+			targetGtkVersion = elem.GetAttribute ("gtk-version");
+			if (targetGtkVersion.Length == 0)
+				targetGtkVersion = null;
 		}
 		
 		public virtual string Name {
@@ -184,6 +189,20 @@ namespace Stetic {
 			}
 		}
 		
+		public virtual string TargetGtkVersion {
+			get {
+				if (targetGtkVersion == null)
+					return library.TargetGtkVersion;
+				else
+					return targetGtkVersion; 
+			}
+		}
+		
+		public bool SupportsGtkVersion (string targetVersion)
+		{
+			return WidgetUtils.CompareVersions (TargetGtkVersion, targetVersion) >= 0;
+		}
+
 		public PropertyDescriptor[] InitializationProperties {
 			get { return initializationProperties; }
 		}

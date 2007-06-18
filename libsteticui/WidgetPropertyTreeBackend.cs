@@ -18,8 +18,9 @@ namespace Stetic
 		public ProjectBackend ProjectBackend {
 			get { return project; }
 			set {
-				if (project != null)
+				if (project != null) {
 					project.SelectionChanged -= Selected;
+				}
 					
 				project = value;
 				if (project != null) {
@@ -82,14 +83,14 @@ namespace Stetic
 				AppendProperty (name, selection.Wrapped);
 			}
 
-			AddProperties (selection.ClassDescriptor.ItemGroups, selection.Wrapped);
+			AddProperties (selection.ClassDescriptor.ItemGroups, selection.Wrapped, project.TargetGtkVersion);
 			
 			if (selWidget != null) {
 				packingSelection = Stetic.Wrapper.Container.ChildWrapper (selWidget);
 				if (packingSelection != null) {
 					ClassDescriptor childklass = packingSelection.ClassDescriptor;
 					if (childklass.ItemGroups.Count > 0) {
-						AddProperties (childklass.ItemGroups, packingSelection.Wrapped);
+						AddProperties (childklass.ItemGroups, packingSelection.Wrapped, project.TargetGtkVersion);
 						packingSelection.Notify += Notified;
 					}
 				}

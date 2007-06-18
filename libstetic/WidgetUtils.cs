@@ -414,5 +414,30 @@ namespace Stetic
 			
 			return erg;
 		}
+		
+		public static int CompareVersions (string v1, string v2)
+		{
+			string[] a1 = v1.Split ('.');
+			string[] a2 = v2.Split ('.');
+			
+			for (int n=0; n<a1.Length; n++) {
+				if (a1[n] == "") {
+					if (a2[n] != "")
+						return 1;
+					continue;
+				}
+				try {
+					int n1 = int.Parse (a1[n]);
+					int n2 = int.Parse (a2[n]);
+					if (n1 < n2)
+						return 1;
+					else if (n1 > n2)
+						return -1;
+				} catch {
+					return 1;
+				}
+			}
+			return 0;
+		}
 	}
 }

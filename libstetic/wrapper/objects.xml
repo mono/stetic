@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<objects xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<objects xmlns:xsl="http://www.w3.org/1999/XSL/Transform" gtk-version="2.4">
 
     <object type="Gtk.Widget,gtk-sharp" wrapper="Stetic.Wrapper.Widget">
 	<itemgroups>
@@ -17,7 +17,6 @@
 		<property name="CanDefault" />
 		<property name="HasDefault" glade-override="true" />
 		<property name="CanFocus" />
-<!--		<property name="HasFocus" /> -->
 		<property name="Events" default="0"/>
 		<property name="ExtensionEvents" />
 		<property name="GeneratePublic" internal="true" default="true"/>
@@ -184,11 +183,11 @@
 		<property name="AcceptFocus" />
 		<property name="Decorated" />
 		<property name="DestroyWithParent" />
-		<!-- 2.6 <property name="FocusOnMap" /> -->
 		<property name="Gravity" />
 		<property name="Role" />
 		<property name="SkipPagerHint" />
 		<property name="SkipTaskbarHint" />
+		<property name="FocusOnMap" gtk-version="2.6"/>
 	    </itemgroup>
 	</itemgroups>
 	<signals>
@@ -261,6 +260,7 @@
 		<signal name="AdjustBounds" />
 		<signal name="ValueChanged" />
 		<signal name="MoveSlider" />
+		<signal name="ChangeValue" gtk-version="2.6"/>
 	    </itemgroup>
 	</signals>
     </object>
@@ -598,13 +598,16 @@
 		    <disabled-if name="IsTextCombo" value="false" />
 		</property>
 		<property name="Active" min="-1"/>
-		<!-- 2.6 <property name="AddTearoffs" /> -->
-		<!-- 2.6 <property name="FocusOnClick" /> -->
+		<property name="HasFrame" gtk-version="2.6"/>
+		<property name="AddTearoffs" gtk-version="2.6"/>
+		<property name="FocusOnClick" gtk-version="2.6"/>
 	    </itemgroup>
 	</itemgroups>
 	<signals>
     	<itemgroup label="ComboBox Signals">
 		<signal name="Changed" />
+		<signal name="EditingDone" gtk-version="2.6"/>
+		<signal name="WidgetRemoved" gtk-version="2.6"/>
 	    </itemgroup>
 	</signals>
     </object>
@@ -676,6 +679,7 @@
 		<signal name="TextInserted" />
 		<signal name="EditingDone" />
 		<signal name="WidgetRemoved" />
+		<signal name="Backspace" gtk-version="2.6"/>
 	    </itemgroup>
 	</signals>
     </object>
@@ -842,10 +846,11 @@
 		<property name="MnemonicWidget" glade-override="true" editor="Stetic.Editor.WidgetSelector"/>
 		<property name="Justify" />
 		<property name="Selectable" />
-		<!-- 2.6 <property name="Ellipsize" /> -->
-		<!-- 2.6 <property name="WidthChars" /> -->
-		<!-- 2.6 <property name="SingleLineMode" /> -->
-		<!-- 2.6 <property name="Angle" /> -->
+		<property name="Ellipsize" gtk-version="2.6"/>
+		<property name="WidthChars" min="-1" gtk-version="2.6" />
+		<property name="MaxWidthChars" min="-1" gtk-version="2.6" />
+		<property name="SingleLineMode" gtk-version="2.6" />
+		<property name="Angle" gtk-version="2.6" />
 	    </itemgroup>
 	</itemgroups>
 	<signals>
@@ -1010,6 +1015,7 @@
 		<property name="Text" translatable="true" />
 		<property name="Fraction" />
 		<property name="PulseStep" />
+		<property name="Ellipsize" gtk-version="2.6"/>
 	    </itemgroup>
 	</itemgroups>
     </object>
@@ -1386,6 +1392,7 @@
 		<signal name="MoveCursor" />
 		<signal name="SetAnchor" />
 		<signal name="ScrollAdjustmentsSet" />
+		<signal name="Backspace" gtk-version="2.6"/>
 	    </itemgroup>
 	</signals>
     </object>
@@ -1474,8 +1481,9 @@
 		<property name="RulesHint" />
 		<property name="SearchColumn" min="-1"/>
 		<property name="Model" />
-		<!-- 2.6 <property name="HoverSelection" /> -->
-		<!-- 2.6 <property name="HoverExpand" /> -->
+		<property name="HeadersClickable" gtk-version="2.6" />
+		<property name="HoverSelection" gtk-version="2.6" />
+		<property name="HoverExpand" gtk-version="2.6" />
 	    </itemgroup>
 	</itemgroups>
 	<signals>
@@ -1500,6 +1508,36 @@
 	</signals>
     </object>
 
+    <object type="Gtk.IconView,gtk-sharp" wrapper="Stetic.Wrapper.Container"
+	    label="Icon View" icon="iconview.png" palette-category="widget"
+	    hexpandable="true" vexpandable="true" base-type="Gtk.Container" gtk-version="2.6">
+	<itemgroups>
+	    <itemgroup label="Icon View Properties">
+		<property name="Columns" />
+		<property name="ColumnSpacing" />
+		<property name="ItemWidth" min="-1" />
+		<property name="Margin" min="0" />
+		<property name="Orientation" />
+		<property name="Reorderable" gtk-version="2.8"/>
+		<property name="RowSpacing" />
+		<property name="SelectionMode" />
+		<property name="Spacing" />
+	    </itemgroup>
+	</itemgroups>
+	<signals>
+    	<itemgroup label="Icon View Signals">
+		<signal name="SelectionChanged" />
+		<signal name="AllUnselected" />
+		<signal name="ItemActivated" />
+		<signal name="AllSelected" />
+		<signal name="ToggleCursorItem" />
+		<signal name="MoveCursor" />
+		<signal name="ActivateCursorItem" />
+		<signal name="SelectCursorItem" />
+	    </itemgroup>
+	</signals>
+    </object>
+    
     <object type="Gtk.VBox,gtk-sharp" base-type="Gtk.Box"
 	    label="VBox" icon="vbox.png" palette-category="container">
     </object>
@@ -1625,7 +1663,7 @@
 		    <disabled-if name="Action" value="Save" />
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
-		<!-- 2.6 <property name="ShowHidden" /> -->
+		<property name="ShowHidden" gtk-version="2.6"/>
 	    </itemgroup>
 	</itemgroups>
 	<signals>
@@ -1638,10 +1676,9 @@
 	</signals>
     </object>
 
-    <!-- 2.6
-    <object type="Gtk.FileChooserButton,gtk-sharp" wrapper="Stetic.Wrapper.Widget"
+    <object type="Gtk.FileChooserButton,gtk-sharp" wrapper="Stetic.Wrapper.Container"
 	    label="File Chooser Button" icon="fileselection.png" palette-category="widget"
-	    hexpandable="true">
+	    hexpandable="true" base-type="Gtk.Container" gtk-version="2.6">
 	<itemgroups>
 	    <itemgroup label="File Chooser Button Properties">
 		<property name="Title" translatable="true" />
@@ -1652,11 +1689,20 @@
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
 		<property name="ShowHidden" />
+		<property name="WidthChars" min="-1"/>
+		<property name="DoOverwriteConfirmation" gtk-version="2.8" />
 	    </itemgroup>
-	    <itemgroup ref="Gtk.Widget" />
 	</itemgroups>
+	<signals>
+    	<itemgroup label="File Chooser Button Signals">
+		<signal name="SelectionChanged" />
+		<signal name="FileActivated" />
+		<signal name="UpdatePreview" />
+		<signal name="CurrentFolderChanged" />
+		<signal name="ConfirmOverwrite" gtk-version="2.8"/>
+	    </itemgroup>
+	</signals>
     </object>
-    -->
 
     <object type="Gtk.FileChooserDialog,gtk-sharp" base-type="Gtk.Dialog"
 	    label="File Chooser Dialog" icon="fileselection.png" palette-category="window">
@@ -1727,6 +1773,7 @@
 		<property name="Visible" />
 		<property name="VisibleHorizontal" />
 		<property name="VisibleVertical" />
+		<property name="VisibleOverflown" gtk-version="2.6"/>
 		<property name="DrawAsRadio" label="Draw as radio">
 		    <invisible-if name="Type" value="Action" />
 		</property>
@@ -1753,6 +1800,8 @@
 		</itemgroup>
 	</signals>
     </object>
+    
+    
 
     <enum type="Gdk.ExtensionMode,gdk-sharp">
 	<value name="None" label="None"
@@ -2136,6 +2185,28 @@
 	       description="The action can be toggled between two states" />
 	<value name="Radio" label="Radio Action"
 	       description="The action is controlled by a radio button" />
+    </enum>
+
+    <enum type="Pango.EllipsizeMode, pango-sharp, Version=2.6.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+	<value name="None" label="None"
+	       description="No ellipsization" />
+	<value name="Start" label="Start"
+	       description="Omit characters at the start of the text" />
+	<value name="Middle" label="Middle"
+	       description="Omit characters in the middle of the text" />
+	<value name="End" label="End"
+	       description="Omit characters at the end of the text" />
+    </enum>
+
+    <enum type="Gtk.SelectionMode, gtk-sharp">
+	<value name="None" label="None"
+	       description="Nothing can be selected" />
+	<value name="Single" label="Single"
+	       description="Only one item can be selected at any given moment. Other items can have focus, but will not be marked as selected" />
+	<value name="Browse" label="Browse"
+	       description="Only one item can be selected at any given moment. Any item currently having focus will be marked as selected" />
+	<value name="Multiple" label="Multiple"
+	       description="Several items may be selected or unselected with a click or using the spacebar. The selection can be done using the Ctrl and Shift modifier keys in the usual way" />
     </enum>
 
 </objects>

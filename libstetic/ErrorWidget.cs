@@ -24,6 +24,12 @@ namespace Stetic
 			Init (Catalog.GetString ("Unknown widget:") + " " + className, id);
 		}
 		
+		public ErrorWidget (string className, string minGtkVersion, string foundGtkVersion, string id)
+		{
+			this.className = className;
+			Init (string.Format (Catalog.GetString ("Widget '{0}' not available in GTK# {1}"), className, foundGtkVersion), id);
+		}
+		
 		void Init (string message, string id)
 		{
 			Gtk.Label lab = new Gtk.Label ();

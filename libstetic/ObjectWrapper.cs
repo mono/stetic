@@ -193,6 +193,12 @@ namespace Stetic {
 				wrap.Read (reader, elem);
 				return wrap;
 			}
+			if (!klass.SupportsGtkVersion (reader.Project.TargetGtkVersion)) {
+				ErrorWidget we = new ErrorWidget (className, klass.TargetGtkVersion, reader.Project.TargetGtkVersion, elem.GetAttribute ("id"));
+				ErrorWidgetWrapper wrap = (ErrorWidgetWrapper) Create (reader.Project, we);
+				wrap.Read (reader, elem);
+				return wrap;
+			}
 
 			ObjectWrapper wrapper = klass.CreateWrapper ();
 			wrapper.classDescriptor = klass;
@@ -227,6 +233,8 @@ namespace Stetic {
 			// Write the widget properties
 			foreach (ItemGroup group in ClassDescriptor.ItemGroups) {
 				foreach (ItemDescriptor item in group) {
+					if (!item.SupportsGtkVersion (Project.TargetGtkVersion))
+						continue;
 					PropertyDescriptor prop = item as PropertyDescriptor;
 					if (prop == null || !prop.IsRuntimeProperty)
 						continue;

@@ -9,6 +9,7 @@ namespace Stetic
 		Hashtable classes_by_cname = new Hashtable ();
 		Hashtable classes_by_csname = new Hashtable ();
 		Hashtable enums = new Hashtable ();
+		string targetGtkVersion;
 
 		XmlElement[] importElems = new XmlElement [0];
 		XmlElement[] exportElems = new XmlElement [0];
@@ -38,6 +39,15 @@ namespace Stetic
 			return new string [0];
 		}
 		
+		public string TargetGtkVersion {
+			get { return targetGtkVersion; }
+		}
+		
+		public bool SupportsGtkVersion (string targetVersion)
+		{
+			return WidgetUtils.CompareVersions (TargetGtkVersion, targetVersion) >= 0;
+		}
+		
 		public virtual void Reload ()
 		{
 			Load ();
@@ -55,6 +65,10 @@ namespace Stetic
 			
 			if (objects == null)
 				return;
+			
+			targetGtkVersion = objects.DocumentElement.GetAttribute ("gtk-version");
+			if (targetGtkVersion.Length == 0)
+				targetGtkVersion = "2.4";
 			
 			foreach (XmlElement element in objects.SelectNodes ("/objects/enum")) {
 				EnumDescriptor enm = new EnumDescriptor (element);

@@ -149,6 +149,9 @@ namespace Stetic
 		{
 			bool hasSignals = false;
 			foreach (SignalDescriptor sd in group) {
+				if (!sd.SupportsGtkVersion (project.TargetGtkVersion))
+					continue;
+				
 				bool foundSignal = false;
 				Gtk.TreeIter signalParent = parentIter;
 				

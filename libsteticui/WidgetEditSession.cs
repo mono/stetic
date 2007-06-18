@@ -84,6 +84,7 @@ namespace Stetic {
 				gproject.WidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).WidgetLibraries.Clone ();
 				gproject.InternalWidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).InternalWidgetLibraries.Clone ();
 				sourceProject.ComponentTypesChanged += OnSourceProjectLibsChanged;
+				sourceProject.ProjectReloaded += OnSourceProjectReloaded;
 				
 				rootWidget = editingBackend.GetTopLevelWrapper (sourceWidget, false);
 				if (rootWidget == null) {
@@ -195,6 +196,7 @@ namespace Stetic {
 				toolbar.Destroy ();
 			
 			sourceProject.ComponentTypesChanged -= OnSourceProjectLibsChanged;
+			sourceProject.ProjectReloaded -= OnSourceProjectReloaded;
 			
 			gproject.ModifiedChanged -= new EventHandler (OnModifiedChanged);
 			gproject.Changed -= new EventHandler (OnChanged);
@@ -258,6 +260,13 @@ namespace Stetic {
 		{
 			if (frontend != null)
 				frontend.NotifyChanged ();
+		}
+		
+		void OnSourceProjectReloaded (object s, EventArgs a)
+		{
+			// Propagate gtk version change
+			if (sourceProject.TargetGtkVersion != gproject.TargetGtkVersion)
+				gproject.TargetGtkVersion = sourceProject.TargetGtkVersion;
 		}
 		
 		void OnSourceProjectLibsChanged (object s, EventArgs a)
