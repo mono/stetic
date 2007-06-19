@@ -1,3 +1,7 @@
+2007-06-19  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/wrapper/objects.xml: Added some missing gtk 2.8 properties.
+
 2007-06-18  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ProjectBackend.cs, libsteticui/SignalsEditorBackend.cs,

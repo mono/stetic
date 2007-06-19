@@ -52,6 +52,7 @@
 		<signal name="FocusGrabbed" />
 		<signal name="FocusInEvent" />
 		<signal name="FocusOutEvent" />
+		<signal name="GrabBrokenEvent" gtk-version="2.8"/>
 		<signal name="GrabNotify" />
 		<signal name="HelpShown" />
 		<signal name="Hidden" />
@@ -864,6 +865,12 @@
 
     <object type="Gtk.MenuBar,gtk-sharp" wrapper="Stetic.Wrapper.MenuBar"
 	    label="Menu Bar" icon="menubar.png" palette-category="widget" base-type="Gtk.Container">
+	<itemgroups>
+	    <itemgroup label="MenuBar Properties">
+		<property name="PackDirection" gtk-version="2.8" />
+		<property name="ChildPackDirection" gtk-version="2.8" />
+	    </itemgroup>
+	</itemgroups>
 	<signals>
     	<itemgroup label="Menu Bar Signals">
 		<signal name="Deactivated" />
@@ -1664,6 +1671,7 @@
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
 		<property name="ShowHidden" gtk-version="2.6"/>
+		<property name="DoOverwriteConfirmation" gtk-version="2.8" />
 	    </itemgroup>
 	</itemgroups>
 	<signals>
@@ -1672,6 +1680,7 @@
 		<signal name="FileActivated" />
 		<signal name="UpdatePreview" />
 		<signal name="CurrentFolderChanged" />
+		<signal name="ConfirmOverwrite" gtk-version="2.8"/>
 	    </itemgroup>
 	</signals>
     </object>
@@ -1688,8 +1697,8 @@
 		    <disabled-if name="Action" value="Save" />
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
-		<property name="ShowHidden" />
 		<property name="WidthChars" min="-1"/>
+		<property name="ShowHidden" gtk-version="2.6"/>
 		<property name="DoOverwriteConfirmation" gtk-version="2.8" />
 	    </itemgroup>
 	</itemgroups>
@@ -1714,6 +1723,8 @@
 		    <disabled-if name="Action" value="Save" />
 		    <disabled-if name="Action" value="CreateFolder" />
 		</property>
+		<property name="ShowHidden" gtk-version="2.6"/>
+		<property name="DoOverwriteConfirmation" gtk-version="2.8" />
 	    </itemgroup>
 	</itemgroups>
 	<signals>
@@ -1722,6 +1733,7 @@
 		<signal name="FileActivated" />
 		<signal name="UpdatePreview" />
 		<signal name="CurrentFolderChanged" />
+		<signal name="ConfirmOverwrite" gtk-version="2.8"/>
 	    </itemgroup>
 	</signals>
 	<internal-children>
@@ -2207,6 +2219,17 @@
 	       description="Only one item can be selected at any given moment. Any item currently having focus will be marked as selected" />
 	<value name="Multiple" label="Multiple"
 	       description="Several items may be selected or unselected with a click or using the spacebar. The selection can be done using the Ctrl and Shift modifier keys in the usual way" />
+    </enum>
+
+    <enum type="Gtk.PackDirection, gtk-sharp">
+	<value name="Ttb" label="Top to bottom"
+	       description="Top to bottom" />
+	<value name="Btt" label="Bottom to top"
+	       description="Bottom to top" />
+	<value name="Rtl" label="Right to left"
+	       description="Right to left" />
+	<value name="Ltr" label="Left to right"
+	       description="Left to right" />
     </enum>
 
 </objects>
