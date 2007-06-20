@@ -306,8 +306,14 @@ namespace Stetic {
 						widget = null;
 					}
 					OnRootWidgetChanged ();
-					if (oldWidget != null)
-						oldWidget.Destroy ();
+					if (oldWidget != null) {
+						// Delay the destruction of the old widget, so the designer has time to
+						// show the new widget. This avoids flickering.
+						GLib.Timeout.Add (500, delegate {
+							oldWidget.Destroy ();
+							return false;
+						});
+					}
 						
 					gproject.NotifyComponentTypesChanged ();
 					return;

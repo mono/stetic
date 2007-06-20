@@ -81,10 +81,10 @@ namespace Stetic
 				return new ComponentType[0];
 		}
 		
-		public void BeginComponentDrag (ComponentType type, Gtk.Widget source, Gdk.DragContext ctx, ComponentDropCallback callback)
+		public void BeginComponentDrag (ComponentType type, Gtk.Widget source, Gdk.DragContext ctx)
 		{
 			Stetic.ObjectWrapper wrapper = type.Action != null ? (Stetic.ObjectWrapper) type.Action.Backend : null;
-			app.Backend.BeginComponentDrag (editedProject.ProjectBackend, type.Description, type.ClassName, wrapper, source, ctx, callback);
+			app.Backend.BeginComponentDrag (editedProject.ProjectBackend, type.Description, type.ClassName, wrapper, source, ctx, null);
 		}
 		
 		public void BeginComponentDrag (string title, string className, Gtk.Widget source, Gdk.DragContext ctx, ComponentDropCallback callback)

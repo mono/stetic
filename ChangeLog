@@ -1,5 +1,11 @@
 2007-06-20  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/WidgetEditSession.cs: Flickering fixes.
+	* libsteticui/WidgetDesigner.cs: In BeginComponentDrag, don't take a
+	  callback when the component type is known.
+
+2007-06-20  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ProjectBackend.cs, libsteticui/WidgetEditSession.cs,
 	  libsteticui/WidgetDesigner.cs, libsteticui/PluggableWidget.cs,
 	  libsteticui/Project.cs: Fixed flickering in widget designers caused
