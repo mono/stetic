@@ -4,6 +4,8 @@ using System.Collections;
 
 namespace Stetic
 {
+	public delegate void ComponentDropCallback ();
+		
 	public class WidgetDesigner: PluggableWidget
 	{
 		WidgetEditSession session;
@@ -79,10 +81,15 @@ namespace Stetic
 				return new ComponentType[0];
 		}
 		
-		public void BeginComponentDrag (ComponentType type, Gtk.Widget source, Gdk.DragContext ctx)
+		public void BeginComponentDrag (ComponentType type, Gtk.Widget source, Gdk.DragContext ctx, ComponentDropCallback callback)
 		{
 			Stetic.ObjectWrapper wrapper = type.Action != null ? (Stetic.ObjectWrapper) type.Action.Backend : null;
-			app.Backend.BeginComponentDrag (editedProject.ProjectBackend, type.ClassName, wrapper, source, ctx);
+			app.Backend.BeginComponentDrag (editedProject.ProjectBackend, type.Description, type.ClassName, wrapper, source, ctx, callback);
+		}
+		
+		public void BeginComponentDrag (string title, string className, Gtk.Widget source, Gdk.DragContext ctx, ComponentDropCallback callback)
+		{
+			app.Backend.BeginComponentDrag (editedProject.ProjectBackend, title, className, null, source, ctx, callback);
 		}
 		
 		// Creates an action group designer for the widget being edited by this widget designer
@@ -244,6 +251,11 @@ namespace Stetic
 				ComponentNameChanged (this, args);
 		}
 		
+		internal void NotifyRootWidgetChanging ()
+		{
+			PrepareUpdateWidget ();
+		}
+		
 		internal void NotifyRootWidgetChanged ()
 		{
 			object rw = session.RootWidget;
@@ -390,6 +402,13 @@ namespace Stetic
 		{
 			Gtk.Application.Invoke (
 				delegate { if (!disposed) designer.NotifyRootWidgetChanged (); }
+			);
+		}
+
+		public void NotifyRootWidgetChanging ()
+		{
+			Gtk.Application.Invoke (
+				delegate { if (!disposed) designer.NotifyRootWidgetChanging (); }
 			);
 		}
 		

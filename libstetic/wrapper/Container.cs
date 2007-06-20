@@ -816,11 +816,21 @@ namespace Stetic.Wrapper
 		void PlaceholderDragDrop (object obj, Gtk.DragDropArgs args)
 		{
 			Placeholder ph = (Placeholder)obj;
-			Gtk.Widget w = DND.Drop (args.Context, ph, args.Time);
-			Widget dropped = Stetic.Wrapper.Widget.Lookup (w);
-			if (dropped != null) {
-				PlaceholderDrop (ph, dropped);
-				args.RetVal = true;
+			
+			// This Drop call will end calling DropObject()
+			DND.Drop (args.Context, args.Time, this, ph.UndoId);
+			args.RetVal = true;
+		}
+		
+		internal protected override void DropObject (string data, Gtk.Widget w)
+		{
+			foreach (Gtk.Widget cw in container.AllChildren) {
+				Placeholder ph = cw as Placeholder;
+				if (ph != null && ph.UndoId == data) {
+					Widget dropped = Stetic.Wrapper.Widget.Lookup (w);
+					if (dropped != null)
+						PlaceholderDrop (ph, dropped);
+				}
 			}
 		}
 

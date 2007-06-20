@@ -1,3 +1,25 @@
+2007-06-20  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs, libsteticui/WidgetEditSession.cs,
+	  libsteticui/WidgetDesigner.cs, libsteticui/PluggableWidget.cs,
+	  libsteticui/Project.cs: Fixed flickering in widget designers caused
+	  by project reloading. The new ProjectReloading event is fired
+	  before the whole process reloading starts, and the designer takes a
+	  'screenshot' of the old desiger, which is shown in place of the
+	  real designer during the reloading process.
+	* libsteticui/CecilWidgetLibrary.cs, libsteticui/Application.cs: Added
+	  GetComponentTypes method, which returns a list of widgets
+	  implemented in a library, without having to load it.
+	* libsteticui/ApplicationBackend.cs, libstetic/IProject.cs,
+	  libstetic/ObjectWriter.cs, libstetic/ObjectWrapper.cs,
+	  libstetic/wrapper/Container.cs, libstetic/DND.cs: Added support for
+	  dragging widgets from a palette before loading the widget library
+	  that implements them. When the widget is dropped, a callback is
+	  called (which is supposed to load the library) and the new widget
+	  is created.
+	* libstetic/wrapper/pixmaps/widget.png, libstetic/libstetic.mdp,
+	  libstetic/Makefile.am: Added new image.
+
 2007-06-19  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/objects.xml: Added some missing gtk 2.8 properties.

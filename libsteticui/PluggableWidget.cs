@@ -9,9 +9,16 @@ namespace Stetic
 		bool initialized;
 		Gtk.Socket socket;
 		bool customWidget;
+		Gtk.Notebook book;
 		
 		public PluggableWidget (Application app)
 		{
+			book = new Gtk.Notebook ();
+			book.ShowTabs = false;
+			book.ShowBorder = false;
+			book.Show ();
+			Add (book);
+			
 			this.app = app;
 			if (app.UseExternalBackend) {
 				app.BackendChanged += OnBackendChanged;
@@ -21,15 +28,17 @@ namespace Stetic
 		
 		protected void AddCustomWidget (Gtk.Widget w)
 		{
+			w.ShowAll ();
+			book.AppendPage (w, null);
+			book.Page = book.NPages - 1;
+			
 			if (initialized) {
-				Gtk.Widget cw = Child;
-				Remove (Child);
+				Gtk.Widget cw = book.GetNthPage (0);
+				book.RemovePage (0);
 				cw.Destroy ();
 			}
 			else
 				initialized = true;
-			Add (w);
-			w.ShowAll ();
 			customWidget = true;
 		}
 		
@@ -48,7 +57,7 @@ namespace Stetic
 				else {
 					Gtk.Widget w = OnCreateWidget ();
 					w.Show ();
-					Add (w);
+					book.AppendPage (w, null);
 				}
 			}
 		}
@@ -62,6 +71,24 @@ namespace Stetic
 			base.OnUnrealized ();
 		}
 		
+		protected void PrepareUpdateWidget ()
+		{
+			// This method is called when the child widget is going to be changed.
+			// It takes a 'screenshot' of the widget. This image will be shown until
+			// UpdateWidget is called.
+			
+			if (book.NPages == 1) {
+				Gtk.Widget w = book.GetNthPage (0);
+				Gdk.Window win = w.GdkWindow;
+				Gdk.Pixbuf img = Gdk.Pixbuf.FromDrawable (win, win.Colormap, w.Allocation.X, w.Allocation.Y, 0, 0, w.Allocation.Width, w.Allocation.Height);
+				Gtk.Image oldImage = new Gtk.Image (img);
+				oldImage.Show ();
+				book.AppendPage (oldImage, null);
+				book.Page = 1;
+				book.RemovePage (0);
+			}
+		}
+		
 		protected void UpdateWidget ()
 		{
 			if (!initialized || app.Disposed)
@@ -69,13 +96,14 @@ namespace Stetic
 
 			if (!app.UseExternalBackend) {
 				Gtk.Widget w = OnCreateWidget ();
-				if (Child != null) {
-					Gtk.Widget cw = Child;
-					Remove (Child);
+				w.Show ();
+				book.AppendPage (w, null);
+				book.Page = book.NPages - 1;
+				if (book.NPages > 1) {
+					Gtk.Widget cw = book.GetNthPage (0);
+					book.RemovePage (0);
 					cw.Destroy ();
 				}
-				w.Show ();
-				Add (w);
 			}
 		}
 		
@@ -99,8 +127,8 @@ namespace Stetic
 				return;
 
 			if (app.UseExternalBackend) {
-				Gtk.Widget w = Child;
-				Remove (Child);
+				Gtk.Widget w = book.GetNthPage (0);
+				book.RemovePage (0);
 				w.Destroy ();
 				socket.Dispose ();
 				ConnectPlug ();
@@ -115,7 +143,7 @@ namespace Stetic
 		{
 			socket = new Gtk.Socket ();
 			socket.Show ();
-			Add (socket);
+			book.AppendPage (socket, null);
 			OnCreatePlug (socket.Id);
 		}
 	}

@@ -40,6 +40,7 @@ namespace Stetic
 		internal event ComponentSignalEventHandler SignalRemoved;
 		internal event ComponentSignalEventHandler SignalChanged;
 
+		public event EventHandler ProjectReloading;
 		public event EventHandler ProjectReloaded;
 
 		internal Project (Application app): this (app, null)
@@ -595,6 +596,14 @@ namespace Stetic
 			Gtk.Application.Invoke (delegate {
 				if (ProjectReloaded != null)
 					ProjectReloaded (this, EventArgs.Empty);
+			});
+		}
+		
+		internal void NotifyProjectReloading ()
+		{
+			Gtk.Application.Invoke (delegate {
+				if (ProjectReloading != null)
+					ProjectReloading (this, EventArgs.Empty);
 			});
 		}
 		

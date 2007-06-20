@@ -245,6 +245,11 @@ namespace Stetic
 			return p;
 		}
 		
+		public ComponentType[] GetComponentTypes (string fileName)
+		{
+			return CecilWidgetLibrary.GetComponentTypes (this, fileName).ToArray ();
+		}
+		
 		public void AddWidgetLibrary (string assemblyPath)
 		{
 			if (!widgetLibraries.Contains (assemblyPath)) {

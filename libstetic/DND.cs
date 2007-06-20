@@ -7,12 +7,14 @@ namespace Stetic {
 		static Gtk.TargetEntry[] targets;
 		static Gtk.TargetList targetList;
 		static Gdk.Atom steticWidgetType;
+		static Gdk.Pixbuf widgetIcon;
 
 		const int SteticType = 0;
 		const int GladeType = 1;
 
 		static DND ()
 		{
+			widgetIcon = Gdk.Pixbuf.LoadFromResource ("widget.png");
 			steticWidgetType = Gdk.Atom.Intern ("application/x-stetic-widget", false);
 
 			targets = new Gtk.TargetEntry[2];
@@ -47,6 +49,7 @@ namespace Stetic {
 		}
 
 		static Gtk.Widget dragWidget;
+		static WidgetDropCallback dropCallback;
 		static int dragHotX;
 		static int dragHotY;
 
@@ -61,7 +64,30 @@ namespace Stetic {
 		}
 
 		// Drag function for automatic sources, called from DragBegin
+		public static void Drag (Gtk.Widget source, Gdk.DragContext ctx, WidgetDropCallback dropCallback, string label)
+		{
+			Gtk.Frame fr = new Gtk.Frame ();
+			fr.ShadowType = Gtk.ShadowType.Out;
+			Gtk.HBox box = new Gtk.HBox ();
+			box.Spacing = 3;
+			box.BorderWidth = 3;
+			box.PackStart (new Gtk.Image (widgetIcon), false, false, 0);
+			Gtk.Label lab = new Gtk.Label (label);
+			lab.Xalign = 0;
+			box.PackStart (lab, true, true, 0);
+			fr.Add (box);
+			fr.ShowAll ();
+			Drag (source, ctx, dropCallback, fr);
+		}
+		
+		// Drag function for automatic sources, called from DragBegin
 		public static void Drag (Gtk.Widget source, Gdk.DragContext ctx, Gtk.Widget dragWidget)
+		{
+			Drag (source, ctx, null, dragWidget);
+		}
+		
+		// Drag function for automatic sources, called from DragBegin
+		static void Drag (Gtk.Widget source, Gdk.DragContext ctx, WidgetDropCallback dropCallback, Gtk.Widget dragWidget)
 		{
 			if (ctx == null)
 				return;
@@ -71,6 +97,7 @@ namespace Stetic {
 
 			ShowFaults ();
 			DND.dragWidget = dragWidget;
+			DND.dropCallback = dropCallback;
 
 			dragWin = new Gtk.Window (Gtk.WindowType.Popup);
 			dragWin.Add (dragWidget);
@@ -123,8 +150,51 @@ namespace Stetic {
 		}
 
 		// Call this from a DragDrop event to receive the dragged widget
+		public static void Drop (Gdk.DragContext ctx, uint time, ObjectWrapper targetWrapper, string dropData)
+		{
+			if (dropCallback == null) {
+				Gtk.Widget w = Drop (ctx, (Gtk.Widget) targetWrapper.Wrapped, time);
+				targetWrapper.DropObject (dropData, w);
+				return;
+			}
+			
+			Cancel ();
+			Gtk.Drag.Finish (ctx, true, true, time);
+			
+			Gtk.Application.Invoke (delegate {
+				IProject project = targetWrapper.Project;
+				string uid = targetWrapper.UndoId;
+				
+				// This call may cause the project to be reloaded
+				dragWidget = dropCallback ();
+				
+				if (targetWrapper.IsDisposed) {
+					// The project has been reloaded. Find the wrapper again.
+					targetWrapper = null;
+					foreach (Gtk.Widget w in project.Toplevels) {
+						ObjectWrapper ow = ObjectWrapper.Lookup (w);
+						if (ow != null) {
+							targetWrapper = ow.FindObjectByUndoId (uid);
+							if (targetWrapper != null)
+								break;
+						}
+					}
+					if (targetWrapper == null) {
+						// Target wrapper not found. Just ignore the drop.
+						return;
+					}
+				}
+				
+				targetWrapper.DropObject (dropData, dragWidget);
+			});
+		}
+		
 		public static Gtk.Widget Drop (Gdk.DragContext ctx, Gtk.Widget target, uint time)
 		{
+			if (dropCallback != null) {
+				dragWidget = dropCallback ();
+			}
+		
 			if (dragWidget == null) {
 				Gtk.Drag.GetData (target, ctx, GladeUtils.ApplicationXGladeAtom, time);
 				return null;
@@ -546,4 +616,6 @@ namespace Stetic {
 			return win;
 		}
 	}
+
+	public delegate Gtk.Widget WidgetDropCallback ();
 }

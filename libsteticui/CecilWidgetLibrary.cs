@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Xml;
@@ -395,6 +396,64 @@ namespace Stetic
 			tn = tn.Replace ('<', '[');
 			tn = tn.Replace ('>', ']');
 			return tn;
+		}
+		
+		public static List<ComponentType> GetComponentTypes (Application app, string fileName)
+		{
+			List<ComponentType> list = new List<ComponentType> ();
+			AssemblyDefinition asm = AssemblyFactory.GetAssembly (fileName);
+			
+			EmbeddedResource res = GetResource (asm, "objects.xml");
+			if (res == null)
+				return list;
+				
+			MemoryStream ms = new MemoryStream (res.Data);
+			XmlDocument objects = new XmlDocument ();
+			objects.Load (ms);
+			
+			foreach (XmlElement elem in objects.SelectNodes ("objects/object")) {
+				if (elem.GetAttribute ("internal") == "true" || elem.HasAttribute ("deprecated"))
+					continue;
+					
+				string iconname = elem.GetAttribute ("icon");
+				Gdk.Pixbuf icon = null;
+				if (iconname.Length > 0) {
+					try {
+						// Using the pixbuf resource constructor generates a gdk warning.
+						res = GetResource (asm, iconname);
+						Gdk.PixbufLoader loader = new Gdk.PixbufLoader (res.Data);
+						icon = loader.Pixbuf;
+					} catch {
+						// Ignore
+					}
+				}
+				
+				if (icon == null) {
+					ClassDescriptor cc = Registry.LookupClassByName ("Gtk.Bin");
+					icon = cc.Icon;
+				}
+				
+				ComponentType ct = new ComponentType (app,
+					elem.GetAttribute ("type"),
+					elem.GetAttribute ("label"), 
+					elem.GetAttribute ("type"),
+					elem.GetAttribute ("palette-category"), 
+					icon);
+					
+				list.Add (ct);
+			}
+			
+			return list;
+		}
+		
+		static EmbeddedResource GetResource (AssemblyDefinition asm, string name)
+		{
+			foreach (Resource res in asm.MainModule.Resources) {
+				EmbeddedResource eres = res as EmbeddedResource;
+				if (eres != null && eres.Name == name)
+					return eres;
+			}
+			return null;
 		}
 	}
 }

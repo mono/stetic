@@ -235,6 +235,7 @@ libstetic_dll_resources =  \
 	wrapper/pixmaps/vscale.png \
 	wrapper/pixmaps/vscrollbar.png \
 	wrapper/pixmaps/vseparator.png \
+	wrapper/pixmaps/widget.png \
 	wrapper/pixmaps/window.png
 
 libstetic_dll_datafiles = libstetic.dll.config

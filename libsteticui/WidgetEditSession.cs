@@ -109,6 +109,7 @@ namespace Stetic {
 			gproject.ModifiedChanged += new EventHandler (OnModifiedChanged);
 			gproject.Changed += new EventHandler (OnChanged);
 			gproject.ProjectReloaded += new EventHandler (OnProjectReloaded);
+			gproject.ProjectReloading += new EventHandler (OnProjectReloading);
 //			gproject.WidgetMemberNameChanged += new Stetic.Wrapper.WidgetNameChangedHandler (OnWidgetNameChanged);
 		}
 		
@@ -201,6 +202,7 @@ namespace Stetic {
 			gproject.ModifiedChanged -= new EventHandler (OnModifiedChanged);
 			gproject.Changed -= new EventHandler (OnChanged);
 			gproject.ProjectReloaded -= OnProjectReloaded;
+			gproject.ProjectReloading -= OnProjectReloading;
 //			gproject.WidgetMemberNameChanged -= new Stetic.Wrapper.WidgetNameChangedHandler (OnWidgetNameChanged);
 			
 			if (!autoCommitChanges) {
@@ -276,6 +278,12 @@ namespace Stetic {
 			gproject.WidgetLibraries = (ArrayList) sourceProject.WidgetLibraries.Clone ();
 			gproject.InternalWidgetLibraries = (ArrayList) sourceProject.InternalWidgetLibraries.Clone ();
 			gproject.NotifyComponentTypesChanged ();
+		}
+		
+		void OnProjectReloading (object s, EventArgs a)
+		{
+			if (frontend != null)
+				frontend.NotifyRootWidgetChanging ();
 		}
 		
 		void OnProjectReloaded (object s, EventArgs a)

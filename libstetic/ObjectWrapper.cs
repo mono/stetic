@@ -404,6 +404,11 @@ namespace Stetic {
 		internal protected virtual void OnWrapped ()
 		{
 		}
+		
+		internal protected virtual void DropObject (string data, Gtk.Widget obj)
+		{
+			// Called by DND.Drop
+		}
 
 		public override object InitializeLifetimeService ()
 		{

@@ -57,6 +57,7 @@ namespace Stetic {
 		
 		// Fired when the project has been reloaded, due for example to
 		// a change in the registry
+		public event EventHandler ProjectReloading;
 		public event EventHandler ProjectReloaded;
 
 		public ProjectBackend (ApplicationBackend app)
@@ -397,7 +398,7 @@ namespace Stetic {
 		public void Save (string fileName)
 		{
 			this.fileName = fileName;
-			XmlDocument doc = Write ();
+			XmlDocument doc = Write (false);
 			
 			XmlTextWriter writer = null;
 			try {
@@ -415,7 +416,7 @@ namespace Stetic {
 			}
 		}
 		
-		XmlDocument Write ()
+		XmlDocument Write (bool includeUndoInfo)
 		{
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
@@ -470,6 +471,7 @@ namespace Stetic {
 			}
 
 			ObjectWriter writer = new ObjectWriter (doc, FileFormat.Native);
+			writer.CreateUndoInfo = includeUndoInfo;
 			if (ownedGlobalActionGroups) {
 				foreach (Wrapper.ActionGroup agroup in actionGroups) {
 					XmlElement elem = agroup.Write (writer);
@@ -635,7 +637,7 @@ namespace Stetic {
 			// Store a copy of the current tree. The tree will
 			// be recreated once the registry change is completed.
 			
-			tempDoc = Write ();
+			tempDoc = Write (true);
 			Selection = null;
 		}
 		
@@ -644,6 +646,10 @@ namespace Stetic {
 			if (loading) return;
 			
 			if (tempDoc != null) {
+				if (frontend != null)
+					frontend.NotifyProjectReloading ();
+				if (ProjectReloading != null)
+					ProjectReloading (this, EventArgs.Empty);
 				Read (tempDoc);
 				tempDoc = null;
 				if (frontend != null)

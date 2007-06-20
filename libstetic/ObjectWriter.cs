@@ -25,7 +25,7 @@ namespace Stetic
 			get { return doc; }
 		}
 		
-		internal bool CreateUndoInfo {
+		public bool CreateUndoInfo {
 			get { return createUndo; }
 			set { createUndo = value; }
 		}

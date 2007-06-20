@@ -575,11 +575,20 @@ namespace Stetic
 			return targetViewerObject as ObjectWrapper;
 		}
 		
-		internal void BeginComponentDrag (ProjectBackend project, string className, ObjectWrapper wrapper, Gtk.Widget source, Gdk.DragContext ctx)
+		internal void BeginComponentDrag (ProjectBackend project, string desc, string className, ObjectWrapper wrapper, Gtk.Widget source, Gdk.DragContext ctx, ComponentDropCallback callback)
 		{
 			if (wrapper != null) {
 				Stetic.Wrapper.ActionPaletteItem it = new Stetic.Wrapper.ActionPaletteItem (Gtk.UIManagerItemType.Menuitem, null, (Wrapper.Action) wrapper);
 				DND.Drag (source, ctx, it);
+			}
+			else if (callback != null) {
+				DND.Drag (source, ctx, delegate () {
+					callback ();
+					ClassDescriptor cls = Registry.LookupClassByName (className);
+					return cls.NewInstance (project) as Gtk.Widget;
+				},
+				(desc != null && desc.Length > 0) ? desc : className
+				);
 			}
 			else {
 				ClassDescriptor cls = Registry.LookupClassByName (className);
