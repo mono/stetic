@@ -412,7 +412,7 @@ namespace Stetic
 			objects.Load (ms);
 			
 			foreach (XmlElement elem in objects.SelectNodes ("objects/object")) {
-				if (elem.GetAttribute ("internal") == "true" || elem.HasAttribute ("deprecated"))
+				if (elem.GetAttribute ("internal") == "true" || elem.HasAttribute ("deprecated") || !elem.HasAttribute ("palette-category"))
 					continue;
 					
 				string iconname = elem.GetAttribute ("icon");

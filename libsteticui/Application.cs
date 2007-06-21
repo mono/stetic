@@ -247,7 +247,10 @@ namespace Stetic
 		
 		public ComponentType[] GetComponentTypes (string fileName)
 		{
-			return CecilWidgetLibrary.GetComponentTypes (this, fileName).ToArray ();
+			if (IsWidgetLibrary (fileName))
+				return CecilWidgetLibrary.GetComponentTypes (this, fileName).ToArray ();
+			else
+				return new ComponentType [0];
 		}
 		
 		public void AddWidgetLibrary (string assemblyPath)

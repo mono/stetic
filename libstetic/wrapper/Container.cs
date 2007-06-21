@@ -816,7 +816,6 @@ namespace Stetic.Wrapper
 		void PlaceholderDragDrop (object obj, Gtk.DragDropArgs args)
 		{
 			Placeholder ph = (Placeholder)obj;
-			
 			// This Drop call will end calling DropObject()
 			DND.Drop (args.Context, args.Time, this, ph.UndoId);
 			args.RetVal = true;
@@ -824,14 +823,28 @@ namespace Stetic.Wrapper
 		
 		internal protected override void DropObject (string data, Gtk.Widget w)
 		{
-			foreach (Gtk.Widget cw in container.AllChildren) {
+			Placeholder ph = FindPlaceholder (container, data);
+			if (ph != null) {
+				Widget dropped = Stetic.Wrapper.Widget.Lookup (w);
+				if (dropped != null)
+					PlaceholderDrop (ph, dropped);
+			}
+		}
+		
+		Placeholder FindPlaceholder (Gtk.Container c, string pid)
+		{
+			foreach (Gtk.Widget cw in c.AllChildren) {
 				Placeholder ph = cw as Placeholder;
-				if (ph != null && ph.UndoId == data) {
-					Widget dropped = Stetic.Wrapper.Widget.Lookup (w);
-					if (dropped != null)
-						PlaceholderDrop (ph, dropped);
+				if (ph != null && ph.UndoId == pid)
+					return ph;
+				Gtk.Container cc = cw as Gtk.Container;
+				if (cc != null) {
+					ph = FindPlaceholder (cc, pid);
+					if (ph != null)
+						return ph;
 				}
 			}
+			return null;
 		}
 
 		void PlaceholderDragDataReceived (object obj, Gtk.DragDataReceivedArgs args)

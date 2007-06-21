@@ -32,13 +32,15 @@ namespace Stetic {
 			
 			values = new Hashtable ();
 
-			Array enumvalues = Enum.GetValues (enumType);
+			// This gets the list of enum names and gets the value of each of them.
+			// This is not done the other way (get the values, and then the names from them)
+			// because it won't work if two different enum members have the same value
 			ArrayList list = new ArrayList ();
 			Hashtable evalues = new Hashtable ();
-			for (int i = 0; i < enumvalues.Length; i++) {
-				Enum value = (Enum)Enum.ToObject (enumType, (int)enumvalues.GetValue (i));
+			foreach (string name in Enum.GetNames (enumType)) {
+				object value = Enum.Parse (enumType, name);
 				list.Add (value);
-				evalues[Enum.GetName (enumType, value)] = value;
+				evalues[name] = value;
 			}
 
 			foreach (XmlElement valueElem in elem.SelectNodes ("value")) {

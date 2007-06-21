@@ -1,3 +1,18 @@
+2007-06-22  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/CecilWidgetLibrary.cs: When looking for widgets in a
+	  library, ignore those without a palette category.
+	* libsteticui/ApplicationBackend.cs: Added null check.
+	* libsteticui/Application.cs: Don't try to load widgets from an
+	  assembly if we know that's not a widget library.
+	* libstetic/CustomWidget.cs: Add IntPtr constructor.
+	* libstetic/EnumDescriptor.cs: Fix problem with the enum loading code,
+	  which was not working when loading Gtk.SelectionMode, because it
+	  has two members with the same value.
+	* libstetic/wrapper/Container.cs: When dropping an object, look for
+	  placeholders in all the child hierarchy, not only the direct
+	  childs.
+
 2007-06-20  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/WidgetEditSession.cs: Flickering fixes.

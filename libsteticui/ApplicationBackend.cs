@@ -301,7 +301,7 @@ namespace Stetic
 			ArrayList list = new ArrayList ();
 			list.Add (Registry.CoreWidgetLibrary);
 			foreach (WidgetLibrary alib in Registry.RegisteredWidgetLibraries) {
-				if (!alib.SupportsGtkVersion (project.TargetGtkVersion))
+				if (project != null && !alib.SupportsGtkVersion (project.TargetGtkVersion))
 					continue;
 				string aname = alib.Name;
 				if (projectLibs.Contains (aname) || globalWidgetLibraries.Contains (aname))

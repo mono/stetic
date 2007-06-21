@@ -8,6 +8,10 @@ namespace Stetic
 	
 	public class CustomWidget: Gtk.EventBox
 	{
+		public CustomWidget (IntPtr ptr): base (ptr)
+		{
+		}
+		
 		public CustomWidget ()
 		{
 			this.VisibleWindow = false;
