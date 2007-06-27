@@ -12,9 +12,10 @@ namespace Stetic
 		string category;
 		Gdk.Pixbuf icon;
 		ActionComponent action;
+		string targetGtkVersion;
 		static ComponentType unknown;
 		
-		internal ComponentType (Application app, string name, string desc, string className, string category, Gdk.Pixbuf icon)
+		internal ComponentType (Application app, string name, string desc, string className, string category, string targetGtkVersion, Gdk.Pixbuf icon)
 		{
 			this.app = app;
 			this.name = name;
@@ -22,6 +23,7 @@ namespace Stetic
 			this.icon = icon;
 			this.className = className;
 			this.category = category;
+			this.targetGtkVersion = targetGtkVersion;
 		}
 		
 		internal ComponentType (Application app, ActionComponent action)
@@ -33,6 +35,7 @@ namespace Stetic
 			this.icon = action.Icon;
 			this.className = "Gtk.Action";
 			this.category = "Actions / " + action.ActionGroup.Name;
+			this.targetGtkVersion = "2.4"; // Not version-specific
 		}
 		
 		public string Name {
@@ -62,7 +65,7 @@ namespace Stetic
 		internal static ComponentType Unknown {
 			get {
 				if (unknown == null) {
-					unknown = new ComponentType (null, "Unknown", "Unknown", "", "", WidgetUtils.MissingIcon);
+					unknown = new ComponentType (null, "Unknown", "Unknown", "", "", "2.4", WidgetUtils.MissingIcon);
 				}
 				return unknown;
 			}
@@ -73,6 +76,12 @@ namespace Stetic
 				if (app == null)
 					return new object [0];
 				return app.Backend.GetClassDescriptorInitializationValues (name);
+			}
+		}
+
+		public string TargetGtkVersion {
+			get {
+				return targetGtkVersion;
 			}
 		}
 	}

@@ -40,7 +40,7 @@ namespace Stetic
 		}
 		
 		public string TargetGtkVersion {
-			get { return targetGtkVersion; }
+			get { return targetGtkVersion != null && targetGtkVersion.Length > 0 ? targetGtkVersion : "2.4"; }
 		}
 		
 		public bool SupportsGtkVersion (string targetVersion)

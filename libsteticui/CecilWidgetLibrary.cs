@@ -411,6 +411,8 @@ namespace Stetic
 			XmlDocument objects = new XmlDocument ();
 			objects.Load (ms);
 			
+			string defTargetGtkVersion = objects.DocumentElement.GetAttribute ("gtk-version");
+			
 			foreach (XmlElement elem in objects.SelectNodes ("objects/object")) {
 				if (elem.GetAttribute ("internal") == "true" || elem.HasAttribute ("deprecated") || !elem.HasAttribute ("palette-category"))
 					continue;
@@ -433,11 +435,16 @@ namespace Stetic
 					icon = cc.Icon;
 				}
 				
+				string targetGtkVersion = elem.GetAttribute ("gtk-version");
+				if (targetGtkVersion.Length == 0)
+					targetGtkVersion = defTargetGtkVersion;
+				
 				ComponentType ct = new ComponentType (app,
 					elem.GetAttribute ("type"),
 					elem.GetAttribute ("label"), 
 					elem.GetAttribute ("type"),
 					elem.GetAttribute ("palette-category"), 
+					elem.GetAttribute ("gtk-version"), 
 					icon);
 					
 				list.Add (ct);

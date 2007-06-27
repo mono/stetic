@@ -1,3 +1,12 @@
+2007-06-27  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/CecilWidgetLibrary.cs, libsteticui/Application.cs,
+	  libsteticui/ComponentType.cs: When reading the component list of a
+	  library, get the target version.
+	* libsteticui/ApplicationBackend.cs: Properly report an error when
+	  dropping a widget of a class that doesn't exist.
+	* libstetic/WidgetLibrary.cs, libstetic/DND.cs: Added null check.
+
 2007-06-27  Jacob Ilsø Christensen  <jacobilsoe@gmail.com>
 
 	* libstetic/WidgetLibrary.cs: Added handling of

@@ -447,7 +447,7 @@ namespace Stetic
 			return list;
 		}
 		
-		public bool GetClassDescriptorInfo (string name, out string desc, out string className, out string category, out byte[] icon)
+		public bool GetClassDescriptorInfo (string name, out string desc, out string className, out string category, out string targetGtkVersion, out byte[] icon)
 		{
 			ClassDescriptor cls = Registry.LookupClassByName (name);
 			if (cls == null) {
@@ -455,11 +455,13 @@ namespace Stetic
 				desc = null;
 				className = null;
 				category = null;
+				targetGtkVersion = null;
 				return false;
 			}
 			desc = cls.Label;
 			className = cls.WrappedTypeName;
 			category = cls.Category;
+			targetGtkVersion = cls.TargetGtkVersion;
 			icon = cls.Icon != null ? cls.Icon.SaveToBuffer ("png") : null;
 			return true;
 		}
@@ -585,7 +587,16 @@ namespace Stetic
 				DND.Drag (source, ctx, delegate () {
 					callback ();
 					ClassDescriptor cls = Registry.LookupClassByName (className);
-					return cls.NewInstance (project) as Gtk.Widget;
+					if (cls != null)
+						return cls.NewInstance (project) as Gtk.Widget;
+					else {
+						// Class not found, show an error
+						string msg = string.Format ("The widget '{0}' could not be found.", className);
+						Gtk.MessageDialog dlg = new Gtk.MessageDialog (null, Gtk.DialogFlags.Modal, Gtk.MessageType.Error, Gtk.ButtonsType.Close, msg);
+						dlg.Run ();
+						dlg.Destroy ();
+						return null;
+					}
 				},
 				(desc != null && desc.Length > 0) ? desc : className
 				);

@@ -167,6 +167,8 @@ namespace Stetic {
 				
 				// This call may cause the project to be reloaded
 				dragWidget = dropCallback ();
+				if (dragWidget == null)
+					return;
 				
 				if (targetWrapper.IsDisposed) {
 					// The project has been reloaded. Find the wrapper again.
