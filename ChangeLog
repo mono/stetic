@@ -1,3 +1,8 @@
+2007-06-27  Jacob Ilsø Christensen  <jacobilsoe@gmail.com>
+
+	* libstetic/WidgetLibrary.cs: Added handling of
+	an empty objects.xml file.
+
 2007-06-22  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/CecilWidgetLibrary.cs: When looking for widgets in a

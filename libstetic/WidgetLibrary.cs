@@ -63,7 +63,7 @@ namespace Stetic
 			classes_by_csname.Clear ();
 			enums.Clear ();
 			
-			if (objects == null)
+			if (objects == null || objects.DocumentElement == null)
 				return;
 			
 			targetGtkVersion = objects.DocumentElement.GetAttribute ("gtk-version");
