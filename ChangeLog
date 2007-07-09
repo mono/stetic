@@ -1,5 +1,9 @@
 2007-07-09  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/ProjectViewBackend.cs: Cosmetic fixes.
+
+2007-07-09  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/CecilWidgetLibrary.cs: Return 2.4 target gtk version is
 	  none is provided.
 	* libsteticui/ApplicationBackend.cs, libsteticui/Application.cs,

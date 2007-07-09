@@ -10,6 +10,7 @@ namespace Stetic {
 		
 		public ProjectViewBackend (ProjectViewFrontend frontend)
 		{
+			ShadowType = Gtk.ShadowType.In;
 			nodeView = new ProjectViewBackendNodeView (frontend);
 			Add (nodeView);
 			ShowAll ();
@@ -36,12 +37,12 @@ namespace Stetic {
 		public ProjectViewBackendNodeView (ProjectViewFrontend frontend)
 		{
 			this.frontend = frontend;
+			HeadersVisible = false;
 			
 			TreeViewColumn col;
 			CellRenderer renderer;
 
 			col = new TreeViewColumn ();
-			col.Title = Catalog.GetString ("Widget");
 
 			renderer = new CellRendererPixbuf ();
 			col.PackStart (renderer, false);
