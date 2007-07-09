@@ -1,5 +1,12 @@
 2007-07-09  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/editor/ActionMenuItem.cs,
+	  libstetic/editor/ActionToolItem.cs: Show menu items and tool
+	  buttons insensitive when bound to an insensitive action. Fixes bug
+	  #81810.
+
+2007-07-09  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ProjectViewBackend.cs: Cosmetic fixes.
 
 2007-07-09  Lluis Sanchez Gual <lluis@novell.com> 

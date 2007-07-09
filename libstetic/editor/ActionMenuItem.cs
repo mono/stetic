@@ -203,6 +203,14 @@ namespace Stetic.Editor
 				if (label.SizeRequest().Width < minWidth)
 					label.WidthRequest = minWidth;
 			}
+			
+			bool sens = editing || node.Action == null || node.Action.GtkAction.Sensitive;
+			if (icon != null)
+				icon.Sensitive = sens;
+			if (label != null)
+				label.Sensitive = sens;
+			if (accel != null)
+				accel.Sensitive = sens;
 		}
 		
 		void CreateControls ()
@@ -472,6 +480,7 @@ namespace Stetic.Editor
 			CreateControls ();
 			Gtk.Table.TableChild tc = (Gtk.Table.TableChild)table[this];
 			AttachChildren (table, tc.TopAttach, tc.LeftAttach);
+			
 			table.ShowAll ();
 		}
 		
