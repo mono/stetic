@@ -80,12 +80,14 @@ namespace Stetic
 			if (book.NPages == 1) {
 				Gtk.Widget w = book.GetNthPage (0);
 				Gdk.Window win = w.GdkWindow;
-				Gdk.Pixbuf img = Gdk.Pixbuf.FromDrawable (win, win.Colormap, w.Allocation.X, w.Allocation.Y, 0, 0, w.Allocation.Width, w.Allocation.Height);
-				Gtk.Image oldImage = new Gtk.Image (img);
-				oldImage.Show ();
-				book.AppendPage (oldImage, null);
-				book.Page = 1;
-				book.RemovePage (0);
+				if (win != null) {
+					Gdk.Pixbuf img = Gdk.Pixbuf.FromDrawable (win, win.Colormap, w.Allocation.X, w.Allocation.Y, 0, 0, w.Allocation.Width, w.Allocation.Height);
+					Gtk.Image oldImage = new Gtk.Image (img);
+					oldImage.Show ();
+					book.AppendPage (oldImage, null);
+					book.Page = 1;
+					book.RemovePage (0);
+				}
 			}
 		}
 		

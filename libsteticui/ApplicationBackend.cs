@@ -447,7 +447,7 @@ namespace Stetic
 			return list;
 		}
 		
-		public bool GetClassDescriptorInfo (string name, out string desc, out string className, out string category, out string targetGtkVersion, out byte[] icon)
+		public bool GetClassDescriptorInfo (string name, out string desc, out string className, out string category, out string targetGtkVersion, out string library, out byte[] icon)
 		{
 			ClassDescriptor cls = Registry.LookupClassByName (name);
 			if (cls == null) {
@@ -456,12 +456,14 @@ namespace Stetic
 				className = null;
 				category = null;
 				targetGtkVersion = null;
+				library = null;
 				return false;
 			}
 			desc = cls.Label;
 			className = cls.WrappedTypeName;
 			category = cls.Category;
 			targetGtkVersion = cls.TargetGtkVersion;
+			library = cls.Library.Name;
 			icon = cls.Icon != null ? cls.Icon.SaveToBuffer ("png") : null;
 			return true;
 		}
@@ -586,6 +588,12 @@ namespace Stetic
 			else if (callback != null) {
 				DND.Drag (source, ctx, delegate () {
 					callback ();
+					
+					// If the class name has an assembly name, remove it now
+					int i = className.IndexOf (',');
+					if (i != -1)
+						className = className.Substring (0, i);
+					
 					ClassDescriptor cls = Registry.LookupClassByName (className);
 					if (cls != null)
 						return cls.NewInstance (project) as Gtk.Widget;

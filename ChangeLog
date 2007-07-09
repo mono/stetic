@@ -1,3 +1,14 @@
+2007-07-09  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/CecilWidgetLibrary.cs: Return 2.4 target gtk version is
+	  none is provided.
+	* libsteticui/ApplicationBackend.cs, libsteticui/Application.cs,
+	  libsteticui/ComponentType.cs: Added Library property to
+	  ComponentType.
+	* libsteticui/PluggableWidget.cs: The widget may be unrealized after
+	  adding the notebook. Added a null check for this case. Fixes bug
+	  #81977.
+
 2007-06-27  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/CecilWidgetLibrary.cs, libsteticui/Application.cs,

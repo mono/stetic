@@ -412,6 +412,8 @@ namespace Stetic
 			objects.Load (ms);
 			
 			string defTargetGtkVersion = objects.DocumentElement.GetAttribute ("gtk-version");
+			if (defTargetGtkVersion.Length == 0)
+				defTargetGtkVersion = "2.4";
 			
 			foreach (XmlElement elem in objects.SelectNodes ("objects/object")) {
 				if (elem.GetAttribute ("internal") == "true" || elem.HasAttribute ("deprecated") || !elem.HasAttribute ("palette-category"))
@@ -444,7 +446,8 @@ namespace Stetic
 					elem.GetAttribute ("label"), 
 					elem.GetAttribute ("type"),
 					elem.GetAttribute ("palette-category"), 
-					elem.GetAttribute ("gtk-version"), 
+					targetGtkVersion,
+					fileName,
 					icon);
 					
 				list.Add (ct);
