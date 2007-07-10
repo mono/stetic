@@ -772,11 +772,11 @@ namespace Stetic {
 				ww.SignalAdded -= OnSignalAdded;
 				ww.SignalRemoved -= OnSignalRemoved;
 				ww.SignalChanged -= OnSignalChanged;
+				ww.Destroyed -= WidgetDestroyed;
 				Stetic.Wrapper.Container container = ww as Stetic.Wrapper.Container;
 				if (container != null)
 					container.ContentsChanged -= ContentsChanged;
 			}
-			ww.Destroyed -= WidgetDestroyed;
 			
 			if (node.Parent == null)
 				topLevels.Remove (node.Widget);

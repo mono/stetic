@@ -1,3 +1,7 @@
+2007-07-10  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs: Fix NRE (bug #82052).
+
 2007-07-09  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/editor/ActionMenuItem.cs,
