@@ -196,6 +196,7 @@ namespace Stetic
 			updating = false;
 			if (currentGroup != oldGroup)
 				OnActiveChanged (null, null);
+			frontend.NotifyModified ();
 		}
 		
 		void OnAddGroup (object s, EventArgs args)

@@ -1,3 +1,11 @@
+2007-07-16  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ActionGroupToolbar.cs: Notify group changes to the
+	  frontend.
+	* libsteticui/ActionGroupEditSession.cs: Don't delay the creation of
+	  the designer because when used in combination with the widget
+	  designer, change events are subscribed since the begining
+
 2007-07-10  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ProjectBackend.cs: Fix NRE (bug #82052).

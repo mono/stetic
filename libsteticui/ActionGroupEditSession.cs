@@ -42,12 +42,23 @@ namespace Stetic
 				undoQueue = new UndoQueue ();
 				undoManager.UndoQueue = undoQueue;
 				undoManager.RootObject = groupCopy;
+				
+				groupToolbar = new ActionGroupToolbar (frontend, groupCopy);
 			}
 			else {
 				if (!autoCommitChanges)
 					throw new System.NotSupportedException ();
+				
+				Stetic.Wrapper.Container container = project.GetTopLevelWrapper (containerName, true);
+				groupToolbar = new ActionGroupToolbar (frontend, container.LocalActionGroups);
 			}
-			project.ProjectReloaded += OnProjectReloaded;
+			
+			// Don't delay the creation of the designer because when used in combination with the
+			// widget designer, change events are subscribed since the begining
+			
+			designer = UserInterface.CreateActionGroupDesigner (project, groupToolbar);
+			designer.Editor.GroupModified += OnModified;
+			designer.Toolbar.AllowActionBinding = allowActionBinding;
 		}
 		
 		public Wrapper.ActionGroup EditedActionGroup {
@@ -226,20 +237,6 @@ namespace Stetic
 		
 		public ActionGroupDesignerBackend Backend {
 			get {
-				if (designer == null) {
-					
-					if (groupToEdit != null) {
-						groupToolbar = new ActionGroupToolbar (frontend, groupCopy);
-					}
-					else {
-						Stetic.Wrapper.Container container = project.GetTopLevelWrapper (containerName, true);
-						groupToolbar = new ActionGroupToolbar (frontend, container.LocalActionGroups);
-					}
-
-					designer = UserInterface.CreateActionGroupDesigner (project, groupToolbar);
-					designer.Editor.GroupModified += OnModified;
-					designer.Toolbar.AllowActionBinding = allowActionBinding;
-				}
 				return designer;
 			}
 		}
