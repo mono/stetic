@@ -1,5 +1,9 @@
 2007-07-16  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/Project.cs: Fixes on ActionGroup management.
+
+2007-07-16  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ActionGroupToolbar.cs: Notify group changes to the
 	  frontend.
 	* libsteticui/ActionGroupEditSession.cs: Don't delay the creation of

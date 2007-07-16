@@ -345,13 +345,31 @@ namespace Stetic
 		public ActionGroupComponent AddNewActionGroup (string id)
 		{
 			object ob = ProjectBackend.AddNewActionGroup (id);
-			return (ActionGroupComponent) App.GetComponent (ob, id, null);
+			ActionGroupComponent ac = (ActionGroupComponent) App.GetComponent (ob, id, null);
+			
+			// Don't wait for the group added event to come to update the groups list since
+			// it may be too late.
+			ActionGroupInfo gi = GetActionGroup (ac.Name);
+			if (gi == null) {
+				gi = new ActionGroupInfo (this, ac.Name);
+				groups.Add (gi);
+			}
+			return ac;
 		}
 		
 		public ActionGroupComponent AddNewActionGroup (XmlElement template)
 		{
 			object ob = ProjectBackend.AddNewActionGroupFromTemplate (template.OuterXml);
-			return (ActionGroupComponent) App.GetComponent (ob, null, null);
+			ActionGroupComponent ac = (ActionGroupComponent) App.GetComponent (ob, null, null);
+			
+			// Don't wait for the group added event to come to update the groups list since
+			// it may be too late.
+			ActionGroupInfo gi = GetActionGroup (ac.Name);
+			if (gi == null) {
+				gi = new ActionGroupInfo (this, ac.Name);
+				groups.Add (gi);
+			}
+			return ac;
 		}
 		
 		public void RemoveActionGroup (ActionGroupInfo group)
@@ -545,6 +563,11 @@ namespace Stetic
 		internal void NotifyActionGroupAdded (string group)
 		{
 			Gtk.Application.Invoke (delegate {
+				ActionGroupInfo gi = GetActionGroup (group);
+				if (gi == null) {
+					gi = new ActionGroupInfo (this, group);
+					groups.Add (gi);
+				}
 				if (ActionGroupsChanged != null)
 					ActionGroupsChanged (this, EventArgs.Empty);
 			});
@@ -553,8 +576,12 @@ namespace Stetic
 		internal void NotifyActionGroupRemoved (string group)
 		{
 			Gtk.Application.Invoke (delegate {
-				if (ActionGroupsChanged != null)
-					ActionGroupsChanged (this, EventArgs.Empty);
+				ActionGroupInfo gi = GetActionGroup (group);
+				if (gi != null) {
+					groups.Remove (gi);
+					if (ActionGroupsChanged != null)
+						ActionGroupsChanged (this, EventArgs.Empty);
+				}
 			});
 		}
 		
