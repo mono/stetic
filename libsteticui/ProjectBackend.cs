@@ -531,6 +531,14 @@ namespace Stetic {
 			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (Selection);
 			if (wrapper != null)
 				wrapper.Delete ();
+			else {
+				Placeholder ph = Selection as Placeholder;
+				if (ph != null) {
+					Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.LookupParent (ph);
+					if (wc != null)
+						wc.Delete (ph);
+				}
+			}
 		}
 		
 		internal WidgetEditSession CreateWidgetDesignerSession (WidgetDesignerFrontend frontend, string windowName, Stetic.ProjectBackend editingBackend, bool autoCommitChanges)

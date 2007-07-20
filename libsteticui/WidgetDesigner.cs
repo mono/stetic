@@ -21,6 +21,8 @@ namespace Stetic
 		bool autoCommitChanges;
 		bool disposed;
 		
+		bool canCut, canCopy, canPaste, canDelete;
+		
 		public event EventHandler BindField;
 		public event EventHandler ModifiedChanged;
 		public event EventHandler Changed;
@@ -161,18 +163,6 @@ namespace Stetic
 			}
 		}
 		
-		public bool CanCopySelection {
-			get { return Selection != null ? Selection.CanCopy : false; }
-		}
-		
-		public bool CanCutSelection {
-			get { return Selection != null ? Selection.CanCut : false; }
-		}
-		
-		public bool CanPasteToSelection {
-			get { return Selection != null ? Selection.CanPaste : false; }
-		}
-		
 		public void CopySelection ()
 		{
 			if (session != null)
@@ -195,6 +185,22 @@ namespace Stetic
 		{
 			if (session != null)
 				session.EditingBackend.DeleteSelection ();
+		}
+		
+		public bool CanDeleteSelection {
+			get { return canDelete; }
+		}
+		
+		public bool CanCutSelection {
+			get { return canCut; }
+		}
+		
+		public bool CanCopySelection {
+			get { return canCopy; }
+		}
+		
+		public bool CanPasteToSelection {
+			get { return canPaste; }
 		}
 		
 		public UndoQueue UndoQueue {
@@ -348,8 +354,13 @@ namespace Stetic
 				Changed (this, EventArgs.Empty);
 		}
 		
-		internal void NotifySelectionChanged (object ob)
+		internal void NotifySelectionChanged (object ob, bool canCut, bool canCopy, bool canPaste, bool canDelete)
 		{
+			this.canCut = canCut;
+			this.canCopy = canCopy;
+			this.canPaste = canPaste;
+			this.canDelete = canDelete;
+			
 			if (ob != null)
 				selection = app.GetComponent (ob, null, null);
 			else
@@ -391,10 +402,10 @@ namespace Stetic
 			);
 		}
 		
-		internal void NotifySelectionChanged (object ob)
+		internal void NotifySelectionChanged (object ob, bool canCut, bool canCopy, bool canPaste, bool canDelete)
 		{
 			Gtk.Application.Invoke (
-				delegate { if (!disposed) designer.NotifySelectionChanged (ob); }
+				delegate { if (!disposed) designer.NotifySelectionChanged (ob, canCut, canCopy, canPaste, canDelete); }
 			);
 		}
 

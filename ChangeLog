@@ -1,3 +1,11 @@
+2007-07-20  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs: Make DeleteSelection work for
+	  placeholders.
+	* libsteticui/WidgetEditSession.cs, libsteticui/Component.cs,
+	  libsteticui/WidgetDesigner.cs, libsteticui/WidgetComponent.cs:
+	  Moved all clipboard checking properties to WidgetDesigner.
+
 2007-07-16  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/Project.cs: Fixes on ActionGroup management.

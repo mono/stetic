@@ -52,12 +52,6 @@ namespace Stetic
 			return (Component[]) children.ToArray (typeof(Component));
 		}
 		
-		protected override void OnGetClipboardStatus ()
-		{
-			if (app != null)
-				app.Backend.GetClipboardOperations (backend, out canCut, out canCopy, out canPaste);
-		}
-		
 		void UpdateComponentInfo ()
 		{
 			if (app == null)

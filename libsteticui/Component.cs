@@ -9,10 +9,6 @@ namespace Stetic
 		protected string name;
 		protected ComponentType type;
 		protected string typeName;
-		bool gotClipboardStatus;
-		protected bool canCut;
-		protected bool canCopy;
-		protected bool canPaste;
 		protected object backend;
 		protected Application app;
 		
@@ -63,19 +59,6 @@ namespace Stetic
 				Changed (this, EventArgs.Empty);
 		}
 		
-		void GetClipboardStatus ()
-		{
-			if (gotClipboardStatus)
-				return;
-
-			gotClipboardStatus = true;
-			OnGetClipboardStatus ();
-		}
-		
-		protected virtual void OnGetClipboardStatus ()
-		{
-		}
-
 		public virtual string Name {
 			get { return name; }
 			set { name = value; }
@@ -84,27 +67,6 @@ namespace Stetic
 		public virtual ComponentType Type {
 			get {
 				return type;
-			}
-		}
-		
-		public bool CanCut {
-			get {
-				GetClipboardStatus ();
-				return canCut;
-			}
-		}
-		
-		public bool CanCopy {
-			get {
-				GetClipboardStatus ();
-				return canCopy;
-			}
-		}
-		
-		public bool CanPaste {
-			get {
-				GetClipboardStatus ();
-				return canPaste;
 			}
 		}
 		

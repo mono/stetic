@@ -359,8 +359,26 @@ namespace Stetic {
 		
 		void OnSelectionChanged (object ob, EventArgs a)
 		{
-			if (frontend != null)
-				frontend.NotifySelectionChanged (Component.GetSafeReference (ObjectWrapper.Lookup (widget.Selection)));
+			if (frontend != null) {
+				bool canCut, canCopy, canPaste, canDelete;
+				ObjectWrapper obj = ObjectWrapper.Lookup (widget.Selection);
+				Stetic.Wrapper.Widget wrapper = obj as Stetic.Wrapper.Widget;
+				if (wrapper != null) {
+					canCut = wrapper.InternalChildProperty == null && !wrapper.IsTopLevel;
+					canCopy = !wrapper.IsTopLevel;
+					canPaste = false;
+					canDelete = canCut;
+				}
+				else if (widget.Selection is Placeholder) {
+					canCut = canCopy = false;
+					canPaste = canDelete = true;
+				}
+				else {
+					canCut = canCopy = canPaste = canDelete = false;
+				}
+				
+				frontend.NotifySelectionChanged (Component.GetSafeReference (obj), canCut, canCopy, canPaste, canDelete);
+			}
 		}
 		
 		public object SaveState ()
