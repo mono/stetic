@@ -17,6 +17,7 @@ namespace Stetic.Wrapper {
 
 		bool window_visible = true;
 		bool hasDefault;
+		bool canDefault;
 		Gdk.EventMask events;
 		bool canFocus;
 		
@@ -103,7 +104,6 @@ namespace Stetic.Wrapper {
 			Wrapped.PopupMenu -= PopupMenu;
 			Wrapped.FocusInEvent -= OnFocusIn;
 			UninterceptClicks (Wrapped);
-			Wrapped.HierarchyChanged -= HierarchyChanged;
 			
 			if (actionGroups != null) {
 				foreach (ActionGroup ag in actionGroups)
@@ -605,11 +605,25 @@ namespace Stetic.Wrapper {
 					)
 				);
 			}
+			
+			// The HasDefault property can only be assigned when the widget is added to the window
+			prop = ClassDescriptor ["HasDefault"] as PropertyDescriptor;
+			if ((bool) prop.GetValue (Wrapped)) {
+				ctx.Statements.Add (
+					new CodeAssignStatement (
+						new CodePropertyReferenceExpression (
+							var,
+							"HasDefault"
+						),
+						new CodePrimitiveExpression (true)
+					)
+				);
+			}
 		}
 		
 		protected override void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
 		{
-			if (prop.Name != "Visible")
+			if (prop.Name != "Visible" && prop.Name != "HasDefault")
 				base.GeneratePropertySet (ctx, var, prop);
 		}
 		
@@ -688,11 +702,21 @@ namespace Stetic.Wrapper {
 			}
 			set {
 				hasDefault = value;
+				EmitNotify ("HasDefault");
+				if (hasDefault && !CanDefault)
+					CanDefault = true;
+			}
+		}
 
-				if (Wrapped.Toplevel != null && Wrapped.Toplevel.IsTopLevel)
-					Wrapped.HasDefault = hasDefault;
-				else
-					Wrapped.HierarchyChanged += HierarchyChanged;
+		public bool CanDefault {
+			get {
+				return canDefault;
+			}
+			set {
+				canDefault = value;
+				EmitNotify ("CanDefault");
+				if (!canDefault && HasDefault)
+					HasDefault = false;
 			}
 		}
 
@@ -733,20 +757,18 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		void HierarchyChanged (object obj, Gtk.HierarchyChangedArgs args)
-		{
-			if (Wrapped.Toplevel != null && Wrapped.Toplevel.IsTopLevel) {
-				Wrapped.HasDefault = hasDefault;
-				Wrapped.HierarchyChanged -= HierarchyChanged;
-			}
-		}
-
 		public string Tooltip {
 			get {
 				return tooltip;
 			}
 			set {
 				tooltip = value;
+			}
+		}
+		
+		public bool InWindow {
+			get {
+				return this.GetTopLevel ().Wrapped is Gtk.Window;
 			}
 		}
 

@@ -98,8 +98,10 @@ namespace Stetic
 
 			if (!app.UseExternalBackend) {
 				Gtk.Widget w = OnCreateWidget ();
-				w.Show ();
-				book.AppendPage (w, null);
+				if (w.Parent != book) {
+					book.AppendPage (w, null);
+					w.Show ();
+				}
 				book.Page = book.NPages - 1;
 				if (book.NPages > 1) {
 					Gtk.Widget cw = book.GetNthPage (0);

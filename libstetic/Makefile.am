@@ -185,6 +185,7 @@ libstetic_dll_resources =  \
 	wrapper/pixmaps/colorselection.png \
 	wrapper/pixmaps/colorselectiondialog.png \
 	wrapper/pixmaps/combo.png \
+	wrapper/pixmaps/comboentry.png \
 	wrapper/pixmaps/custom.png \
 	wrapper/pixmaps/dec-border.png \
 	wrapper/pixmaps/dialog.png \
@@ -207,6 +208,7 @@ libstetic_dll_resources =  \
 	wrapper/pixmaps/hscale.png \
 	wrapper/pixmaps/hscrollbar.png \
 	wrapper/pixmaps/hseparator.png \
+	wrapper/pixmaps/iconview.png \
 	wrapper/pixmaps/image.png \
 	wrapper/pixmaps/inc-border.png \
 	wrapper/pixmaps/label.png \

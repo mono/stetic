@@ -1,3 +1,17 @@
+2007-07-27  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/CecilWidgetLibrary.cs: Added null check.
+	* libsteticui/PluggableWidget.cs: When updating the child widget, do
+	  not add it to the notebook if it is already a child of the
+	  notebook.
+	* libstetic/wrapper/pixmaps/comboentry.png,
+	  libstetic/wrapper/pixmaps/iconview.png, libstetic/libstetic.mdp,
+	  libstetic/Makefile.am: Added some missing icons.
+	* libstetic/wrapper/Widget.cs, libstetic/wrapper/objects.xml: Fixed
+	  some issues with HasDefault. It can only be assigned when the
+	  widget already has a parent.
+	* libstetic/TypedClassDescriptor.cs: Report icon loading errors.
+
 2007-07-20  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ProjectBackend.cs: Make DeleteSelection work for

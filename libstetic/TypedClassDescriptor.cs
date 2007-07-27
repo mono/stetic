@@ -61,6 +61,7 @@ namespace Stetic
 					Gdk.PixbufLoader loader = new Gdk.PixbufLoader (assembly, iconname);
 					icon = loader.Pixbuf;
 				} catch {
+					Console.WriteLine ("Could not load icon: " + iconname);
 					icon = GetDefaultIcon ();
 				}
 			} else

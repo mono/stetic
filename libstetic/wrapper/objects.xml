@@ -15,7 +15,10 @@
 			  description="Tooltip for this widget"
 			  translatable="true" />
 		<property name="CanDefault" />
-		<property name="HasDefault" glade-override="true" />
+		<property name="InWindow" internal="true"/>
+		<property name="HasDefault" glade-override="true">
+		    <invisible-if name="InWindow" value="false" />
+		</property>
 		<property name="CanFocus" />
 		<property name="Events" default="0"/>
 		<property name="ExtensionEvents" />
@@ -613,7 +616,7 @@
 	</signals>
     </object>
 
-    <object type="Gtk.ComboBoxEntry,gtk-sharp" wrapper="Stetic.Wrapper.ComboBoxEntry" 
+    <object type="Gtk.ComboBoxEntry,gtk-sharp" wrapper="Stetic.Wrapper.ComboBoxEntry" icon="comboentry.png" 
 	    label="Combo Box Entry" palette-category="widget" base-type="Gtk.ComboBox">
     </object>
 

@@ -166,7 +166,7 @@ namespace Stetic
 					}
 				}
 			}
-			if (!fromCache) {
+			if (!fromCache && objects != null) {
 				// Store dependencies in the cached xml
 				XmlElement elem = objects.CreateElement ("dependencies");
 				objects.DocumentElement.AppendChild (elem);
