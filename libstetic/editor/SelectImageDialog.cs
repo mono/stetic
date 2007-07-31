@@ -170,15 +170,9 @@ namespace Stetic.Editor
 		
 		void UpdateIconSelection ()
 		{
-			int w, h;
-			Gtk.Icon.SizeLookup (SelectedIconSize, out w, out h);
 			Gdk.Pixbuf icon = null;
 			if (iconNameEntry.Text.Length > 0) {
-				try {
-					icon = Gtk.IconTheme.Default.LoadIcon (iconNameEntry.Text, h, 0);
-				} catch {
-					// If the icon can't be found in the theme, just use a default icon
-				}
+				icon = WidgetUtils.LoadIcon (iconNameEntry.Text, SelectedIconSize);
 			}
 			if (icon == null)
 				icon = WidgetUtils.MissingIcon;

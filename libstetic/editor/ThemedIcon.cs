@@ -60,9 +60,10 @@ namespace Stetic.Editor {
 					return;
 
 				icon = val;
-				try {
-					image.Pixbuf = Gtk.IconTheme.Default.LoadIcon (icon, 16, 0);
-				} catch {
+				Gdk.Pixbuf pix = WidgetUtils.LoadIcon (icon, Gtk.IconSize.Menu);
+				if (pix != null) {
+					image.Pixbuf = pix;
+				} else {
 					image.Stock = Gnome.Stock.Blank;
 				}
 

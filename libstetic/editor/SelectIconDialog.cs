@@ -114,11 +114,7 @@ namespace Stetic.Editor
 				
 			Gdk.Pixbuf icon = null;
 			if (stockIconEntry.Text.Length > 0) {
-				try {
-					icon = Gtk.IconTheme.Default.LoadIcon (stockIconEntry.Text, 16, 0);
-				} catch {
-					// If the icon can't be found in the theme, just use a default icon
-				}
+				icon = WidgetUtils.LoadIcon (stockIconEntry.Text, Gtk.IconSize.Menu);
 			}
 			if (icon == null)
 				icon = WidgetUtils.MissingIcon;

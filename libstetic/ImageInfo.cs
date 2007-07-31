@@ -120,14 +120,7 @@ namespace Stetic
 					}
 					
 				case ImageSource.Theme:
-					int w, h;
-					Gtk.Icon.SizeLookup (size, out w, out h);
-					try {
-						return image = Gtk.IconTheme.Default.LoadIcon (name, w, 0);
-					} catch {
-						// Icon not in theme
-						return WidgetUtils.MissingIcon;
-					}
+					return image = WidgetUtils.LoadIcon (name, size);
 					
 				case ImageSource.File:
 					try {
@@ -197,9 +190,7 @@ namespace Stetic
 					);
 					
 				case ImageSource.Theme:
-					int w, h;
-					Gtk.Icon.SizeLookup (size, out w, out h);
-					return ctx.GenerateLoadPixbuf (name, w);
+					return ctx.GenerateLoadPixbuf (name, size);
 					
 				case ImageSource.File:
 					return new CodeObjectCreateExpression (

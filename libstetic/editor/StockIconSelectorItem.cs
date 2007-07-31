@@ -18,7 +18,7 @@ namespace Stetic.Editor
 		{
 			foreach (string s in StockIconHelper.StockIcons) {
 				if (s != "-" && s != "|") {
-					Gdk.Pixbuf pix = RenderIcon (s, Gtk.IconSize.Menu, "");
+					Gdk.Pixbuf pix = WidgetUtils.LoadIcon (s, Gtk.IconSize.Menu);
 					if (pix != null) AddIcon (s, pix, s);
 				}
 				else

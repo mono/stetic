@@ -13,13 +13,13 @@ namespace Stetic.Editor
 			foreach (PropertyInfo info in typeof (Gtk.Stock).GetProperties (BindingFlags.Public | BindingFlags.Static)) {
 				if (info.CanRead && info.PropertyType == typeof (string)) {
 					string name = (string) info.GetValue (null, null);
-					AddIcon (name, RenderIcon (name, Gtk.IconSize.Menu, ""), name);
+					AddIcon (name, WidgetUtils.LoadIcon (name, Gtk.IconSize.Menu), name);
 				}
 			}
 			foreach (PropertyInfo info in typeof (Gnome.Stock).GetProperties (BindingFlags.Public | BindingFlags.Static)) {
 				if (info.CanRead && info.PropertyType == typeof (string)) {
 					string name = (string) info.GetValue (null, null);
-					AddIcon (name, RenderIcon (name, Gtk.IconSize.Menu, ""), name);
+					AddIcon (name, WidgetUtils.LoadIcon (name, Gtk.IconSize.Menu), name);
 				}
 			}
 		}

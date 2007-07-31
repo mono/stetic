@@ -15,6 +15,7 @@ namespace Stetic
 		CodeStatementCollection statements;
 		GenerationOptions options;
 		ArrayList warnings = new ArrayList ();
+		CodeExpression rootObject;
 		
 		public GeneratorContext (CodeNamespace cns, string idPrefix, CodeStatementCollection statements, GenerationOptions options)
 		{
@@ -70,6 +71,7 @@ namespace Stetic
 		
 		public virtual void GenerateCreationCode (ObjectWrapper wrapper, CodeExpression varExp)
 		{
+			rootObject = varExp;
 			wrapper.GenerateInitCode (this, varExp);
 			GenerateBuildCode (wrapper, varExp);
 		}
@@ -83,6 +85,7 @@ namespace Stetic
 		
 		public virtual void GenerateCreationCode (Wrapper.ActionGroup agroup, CodeExpression var)
 		{
+			rootObject = var;
 			vars [agroup] = var;
 			agroup.GenerateBuildCode (this, var);
 		}
@@ -199,7 +202,7 @@ namespace Stetic
 			n = 0;
 		}
 		
-		public CodeExpression GenerateLoadPixbuf (string name, int sz)
+		public CodeExpression GenerateLoadPixbuf (string name, Gtk.IconSize size)
 		{
 			bool found = false;
 			foreach (CodeTypeDeclaration t in cns.Types) {
@@ -220,20 +223,46 @@ namespace Stetic
 				cls.Members.Add (met);
 				met.Attributes = MemberAttributes.Public | MemberAttributes.Static;
 				met.Name = "LoadIcon";
+				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(Gtk.Widget), "widget"));
 				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(string), "name"));
+				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(Gtk.IconSize), "size"));
 				met.Parameters.Add (new CodeParameterDeclarationExpression (typeof(int), "sz"));
 				met.ReturnType = new CodeTypeReference (typeof(Gdk.Pixbuf));
 				
+				CodeExpression widgetExp = new CodeVariableReferenceExpression ("widget");
 				CodeExpression nameExp = new CodeVariableReferenceExpression ("name");
+				CodeExpression sizeExp = new CodeVariableReferenceExpression ("size");
 				CodeExpression szExp = new CodeVariableReferenceExpression ("sz");
 				CodeExpression mgExp = new CodeBinaryOperatorExpression (szExp,  CodeBinaryOperatorType.Divide, new CodePrimitiveExpression (4));
 				CodeExpression pmapExp = new CodeVariableReferenceExpression ("pmap");
 				CodeExpression gcExp = new CodeVariableReferenceExpression ("gc");
 				CodeExpression szM1Exp = new CodeBinaryOperatorExpression (szExp, CodeBinaryOperatorType.Subtract, new CodePrimitiveExpression (1));
 				CodeExpression zeroExp = new CodePrimitiveExpression (0);
+				CodeExpression resExp = new CodeVariableReferenceExpression ("res");
+				
+				met.Statements.Add (
+					new CodeVariableDeclarationStatement (typeof(Gdk.Pixbuf), "res",
+						new CodeMethodInvokeExpression (
+							widgetExp,
+							"RenderIcon",
+							nameExp,
+							sizeExp,
+							new CodePrimitiveExpression (null)
+						)
+					)
+				);
+				
+				CodeConditionStatement nullcheck = new CodeConditionStatement ();
+				met.Statements.Add (nullcheck);
+				nullcheck.Condition = new CodeBinaryOperatorExpression (
+					resExp,
+					CodeBinaryOperatorType.IdentityInequality,
+					new CodePrimitiveExpression (null)
+				);
+				nullcheck.TrueStatements.Add (new CodeMethodReturnStatement (resExp));
 				
 				CodeTryCatchFinallyStatement trycatch = new CodeTryCatchFinallyStatement ();
-				met.Statements.Add (trycatch);
+				nullcheck.FalseStatements.Add (trycatch);
 				trycatch.TryStatements.Add (
 					new CodeMethodReturnStatement (
 						new CodeMethodInvokeExpression (
@@ -250,7 +279,7 @@ namespace Stetic
 				);
 				
 				CodeCatchClause ccatch = new CodeCatchClause ();
-				trycatch.CatchClauses.Add (ccatch);
+				trycatch.CatchClauses.Add (ccatch);				
 				
 				CodeConditionStatement cond = new CodeConditionStatement ();
 				ccatch.Statements.Add (cond);
@@ -265,7 +294,10 @@ namespace Stetic
 					new CodeMethodReturnStatement (
 						new CodeMethodInvokeExpression (
 							new CodeTypeReferenceExpression (cns.Name + "." + cls.Name),
-							"LoadIcon", new CodePrimitiveExpression ("gtk-missing-image"), 
+							"LoadIcon",
+							widgetExp,
+							new CodePrimitiveExpression ("gtk-missing-image"),
+							sizeExp,
 							szExp
 						)
 					)
@@ -403,10 +435,18 @@ namespace Stetic
 				);
 			}
 			
+			int sz, h;
+			Gtk.Icon.SizeLookup (size, out sz, out h);
+			
 			return new CodeMethodInvokeExpression (
 				new CodeTypeReferenceExpression (cns.Name + ".IconLoader"),
 				"LoadIcon",
+				rootObject,
 				new CodePrimitiveExpression (name),
+			    new CodeFieldReferenceExpression (
+					new CodeTypeReferenceExpression (typeof(Gtk.IconSize)),
+					size.ToString ()
+				),
 				new CodePrimitiveExpression (sz)
 			);
 		}

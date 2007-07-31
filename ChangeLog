@@ -1,5 +1,15 @@
 2007-07-31  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/ImageInfo.cs, libstetic/editor/ThemedIcon.cs,
+	  libstetic/editor/SelectImageDialog.cs,
+	  libstetic/editor/StockIconSelectorItem.cs,
+	  libstetic/editor/StockIconList.cs, libstetic/editor/StockItem.cs,
+	  libstetic/editor/SelectIconDialog.cs,
+	  libstetic/GeneratorContext.cs, libstetic/WidgetUtils.cs: Fixed
+	  loading of theme and gtk stock icons.
+
+2007-07-31  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/WidgetPropertyTreeBackend.cs: Added missing null check.
 
 2007-07-27  Lluis Sanchez Gual <lluis@novell.com> 

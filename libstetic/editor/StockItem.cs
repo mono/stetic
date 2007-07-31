@@ -144,7 +144,7 @@ namespace Stetic.Editor {
 					entry.Text = icon;
 					Gdk.Pixbuf px = project.IconFactory.RenderIcon (project, icon, Gtk.IconSize.Menu);
 					if (px == null)
-						px = this.RenderIcon (icon, Gtk.IconSize.Menu, "");
+						px = WidgetUtils.LoadIcon (icon, Gtk.IconSize.Menu);
 					image.Pixbuf = px;
 					imageFrame.Show ();
 				} else {

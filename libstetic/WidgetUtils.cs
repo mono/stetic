@@ -12,6 +12,7 @@ namespace Stetic
 		static Gdk.Atom steticAtom;
 		static int undoIdCount;
 		static Gdk.Pixbuf missingIcon;
+		static Gtk.Widget renderer;
 		
 		public static Gdk.Atom ApplicationXSteticAtom {
 			get {
@@ -438,6 +439,24 @@ namespace Stetic
 				}
 			}
 			return 0;
+		}
+		
+		public static Gdk.Pixbuf LoadIcon (string name, Gtk.IconSize size)
+		{
+			if (renderer == null)
+				renderer = new Gtk.HBox ();
+			Gdk.Pixbuf image = renderer.RenderIcon (name, size, null);
+			if (image != null)
+				return image;
+			
+			int w, h;
+			Gtk.Icon.SizeLookup (size, out w, out h);
+			try {
+				return Gtk.IconTheme.Default.LoadIcon (name, w, 0);
+			} catch {
+				// Icon not in theme
+				return MissingIcon;
+			}
 		}
 	}
 }
