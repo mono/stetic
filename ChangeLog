@@ -1,5 +1,11 @@
 2007-07-31  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/Button.cs, libstetic/wrapper/ButtonBox.cs: Don't
+	  store the IsDialogButton property. The value can be determined on
+	  the fly.
+
+2007-07-31  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/WidgetEditSession.cs: Assign the target gtk version to
 	  the project being edited.
 	* libstetic/wrapper/IconView.cs, libstetic/wrapper/objects.xml,

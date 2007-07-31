@@ -26,8 +26,7 @@ namespace Stetic.Wrapper {
 		Gtk.Button NewButton ()
 		{
 			Gtk.Button button = (Gtk.Button)Registry.NewInstance ("Gtk.Button", proj);
-			if (InternalChildProperty != null && InternalChildProperty.Name == "ActionArea")
-				((Button)Widget.Lookup (button)).IsDialogButton = true;
+			button.CanDefault = true;
 			return button;
 		}
 

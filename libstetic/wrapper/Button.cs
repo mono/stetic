@@ -275,15 +275,10 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		bool isDialogButton;
 		public bool IsDialogButton {
 			get {
-				return isDialogButton;
-			}
-			set {
-				isDialogButton = value;
-				if (isDialogButton)
-					button.CanDefault = true;
+				ButtonBox box = this.ParentWrapper as ButtonBox;
+				return (box != null && box.InternalChildProperty != null && box.InternalChildProperty.Name == "ActionArea");
 			}
 		}
 
