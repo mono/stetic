@@ -71,7 +71,7 @@ namespace Stetic
 			Clear ();
 			
 			selection = newSelection;
-			if (selection == null || selection.Wrapped is ErrorWidget) {
+			if (selection == null || selection.Wrapped is ErrorWidget || project == null) {
 				return false;
 			}
 
