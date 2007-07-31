@@ -296,7 +296,7 @@ namespace Stetic
 			get {
 				if (gladeName != null)
 					return gladeName;
-				else if (pspec != null)
+				else if (pspec != null && pspec.Name != null)
 					return pspec.Name.Replace ('-', '_');
 				else
 					return null;

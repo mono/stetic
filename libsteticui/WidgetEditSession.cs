@@ -83,6 +83,7 @@ namespace Stetic {
 				gproject.ResourceProvider = win.Project.ResourceProvider;
 				gproject.WidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).WidgetLibraries.Clone ();
 				gproject.InternalWidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).InternalWidgetLibraries.Clone ();
+				gproject.TargetGtkVersion = sourceProject.TargetGtkVersion;
 				sourceProject.ComponentTypesChanged += OnSourceProjectLibsChanged;
 				sourceProject.ProjectReloaded += OnSourceProjectReloaded;
 				

@@ -1518,7 +1518,7 @@
 	</signals>
     </object>
 
-    <object type="Gtk.IconView,gtk-sharp" wrapper="Stetic.Wrapper.Container"
+    <object type="Gtk.IconView,gtk-sharp" wrapper="Stetic.Wrapper.IconView"
 	    label="Icon View" icon="iconview.png" palette-category="widget"
 	    hexpandable="true" vexpandable="true" base-type="Gtk.Container" gtk-version="2.6">
 	<itemgroups>

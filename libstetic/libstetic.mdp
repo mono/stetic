@@ -246,6 +246,7 @@
     <File name="./wrapper/pixmaps/widget.png" subtype="Code" buildaction="EmbedAsResource" />
     <File name="./wrapper/pixmaps/comboentry.png" subtype="Code" buildaction="EmbedAsResource" />
     <File name="./wrapper/pixmaps/iconview.png" subtype="Code" buildaction="EmbedAsResource" />
+    <File name="./wrapper/IconView.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="gnome-sharp, Version=2.4.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />

@@ -1,5 +1,14 @@
 2007-07-31  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/WidgetEditSession.cs: Assign the target gtk version to
+	  the project being edited.
+	* libstetic/wrapper/IconView.cs, libstetic/wrapper/objects.xml,
+	  libstetic/libstetic.mdp, libstetic/Makefile.am: Added wrapper for
+	  IconView.
+	* libstetic/TypedPropertyDescriptor.cs: Added null check.
+
+2007-07-31  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/ImageInfo.cs, libstetic/editor/ThemedIcon.cs,
 	  libstetic/editor/SelectImageDialog.cs,
 	  libstetic/editor/StockIconSelectorItem.cs,

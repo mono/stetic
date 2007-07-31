@@ -126,6 +126,7 @@ libstetic_dll_sources =  \
 	wrapper/Frame.cs \
 	wrapper/HScale.cs \
 	wrapper/HScrollbar.cs \
+	wrapper/IconView.cs \
 	wrapper/Image.cs \
 	wrapper/ImageMenuItem.cs \
 	wrapper/Label.cs \
