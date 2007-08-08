@@ -608,7 +608,7 @@ namespace Stetic.Wrapper {
 			
 			// The HasDefault property can only be assigned when the widget is added to the window
 			prop = ClassDescriptor ["HasDefault"] as PropertyDescriptor;
-			if ((bool) prop.GetValue (Wrapped)) {
+			if (prop != null && (bool) prop.GetValue (Wrapped)) {
 				ctx.Statements.Add (
 					new CodeAssignStatement (
 						new CodePropertyReferenceExpression (
@@ -623,8 +623,15 @@ namespace Stetic.Wrapper {
 		
 		protected override void GeneratePropertySet (GeneratorContext ctx, CodeExpression var, PropertyDescriptor prop)
 		{
-			if (prop.Name != "Visible" && prop.Name != "HasDefault")
-				base.GeneratePropertySet (ctx, var, prop);
+			// Those properties are handled in GeneratePostBuildCode
+			if (prop.Name == "Visible" || prop.Name == "HasDefault")
+				return;
+			
+			// Don't generate a name for unselectable widgets
+			if (prop.Name == "Name" && Unselectable)
+				return;
+			
+			base.GeneratePropertySet (ctx, var, prop);
 		}
 		
 		protected CodeExpression GenerateUiManagerElement (GeneratorContext ctx, ActionTree tree)
