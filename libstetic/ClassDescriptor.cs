@@ -36,8 +36,12 @@ namespace Stetic {
 				cname = elem.GetAttribute ("type");
 
 			label = elem.GetAttribute ("label");
-			if (label == "")
+			if (label == "") {
 				label = WrappedTypeName;
+				int i = label.LastIndexOf ('.');
+				if (i != -1)
+					label = label.Substring (i+1);
+			}
 			
 			if (elem.HasAttribute ("allow-children"))
 				allowChildren = elem.GetAttribute ("allow-children") == "yes" || elem.GetAttribute ("allow-children") == "true";

@@ -21,16 +21,14 @@ namespace Stetic
 		WidgetLibraryResolveHandler widgetLibraryResolver;
 		object targetViewerObject;
 		bool allowInProcLibraries = true;
+		Application appFrontend;
 		
 		ProjectBackend activeProject;
 		static ApplicationBackendController controller;
 		
-		static ApplicationBackend ()
+		public ApplicationBackend (Application app)
 		{
-		}
-		
-		public ApplicationBackend ()
-		{
+			appFrontend = app;
 			Registry.Initialize (new AssemblyWidgetLibrary (typeof(Registry).Assembly.FullName, typeof(Registry).Assembly));
 			WidgetDesignerBackend.DefaultObjectViewer = this;
 		}
@@ -73,7 +71,7 @@ namespace Stetic
 			BinaryFormatter bf = new BinaryFormatter ();
 			
 			controller = (ApplicationBackendController) bf.Deserialize (ms);
-			ApplicationBackend backend = new ApplicationBackend ();
+			ApplicationBackend backend = new ApplicationBackend (controller.Application);
 			
 			controller.Connect (backend);
 			
@@ -142,6 +140,13 @@ namespace Stetic
 				
 				libraries.Add (Registry.CoreWidgetLibrary.Name);
 				
+				// Notify libraries that need to be unloaded and loaded again
+				
+				foreach (WidgetLibrary lib in Registry.RegisteredWidgetLibraries) {
+					if (lib.NeedsReload)
+						appFrontend.NotifyLibraryUnloaded (lib.Name);
+				}
+				
 				if (!Registry.ReloadWidgetLibraries () && allowBackendRestart)
 					return false;
 				
@@ -166,6 +171,7 @@ namespace Stetic
 					if (!visited.Contains (name)) {
 						if (forceUnload && allowBackendRestart)
 							return false;
+						appFrontend.NotifyLibraryUnloaded (name);
 						Registry.UnregisterWidgetLibrary (Registry.GetWidgetLibrary (name));
 					}
 				}

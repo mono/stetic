@@ -54,12 +54,12 @@ namespace Stetic
 		public Application (IsolationMode mode)
 		{
 			if (mode == IsolationMode.None) {
-				backend = new ApplicationBackend ();
+				backend = new ApplicationBackend (this);
 				externalBackend = false;
 			} else {
 				externalBackend = true;
 				channelId = RegisterRemotingChannel (mode);
-				backendController = new ApplicationBackendController (channelId);
+				backendController = new ApplicationBackendController (this, channelId);
 				backendController.StartBackend ();
 				OnBackendChanged (false);
 			}
@@ -107,7 +107,7 @@ namespace Stetic
 				ThreadPool.QueueUserWorkItem (delegate {
 					try {
 						// Start the new backend
-						ApplicationBackendController newController = new ApplicationBackendController (channelId);
+						ApplicationBackendController newController = new ApplicationBackendController (this, channelId);
 						newController.StartBackend ();
 						Gtk.Application.Invoke (newController, EventArgs.Empty, OnNewBackendStarted);
 					} catch {
@@ -136,7 +136,7 @@ namespace Stetic
 		{
 			// The backend process crashed, try to restart it
 			backend = null;
-			backendController = new ApplicationBackendController (channelId);
+			backendController = new ApplicationBackendController (this, channelId);
 			backendController.StartBackend ();
 			OnBackendChanged (true);
 		}
@@ -148,7 +148,9 @@ namespace Stetic
 			backend = backendController.Backend;
 			backendController.Stopped += OnBackendStopped;
 			UpdateWidgetLibraries (false, false);
-			types.Clear ();
+			lock (types) {
+				types.Clear ();
+			}
 			
 			Component[] comps;
 			lock (components) {
@@ -398,49 +400,65 @@ namespace Stetic
 			}
 		}
 		
+		internal void NotifyLibraryUnloaded (string name)
+		{
+			// Remove cached types from the unloaded library
+			ArrayList toDelete = new ArrayList ();
+			lock (types) {
+				foreach (ComponentType ct in types.Values) {
+					if (ct.Library == name)
+						toDelete.Add (ct.Name);
+				}
+				foreach (string s in toDelete)
+					types.Remove (s);
+			}
+		}
+		
 		internal ComponentType GetComponentType (string typeName)
 		{
-			ComponentType t = (ComponentType) types [typeName];
-			if (t != null) return t;
-			
-			if (typeName == "Gtk.Action" || typeName == "Gtk.ActionGroup") {
-				t = new ComponentType (this, typeName, "", typeName, "Actions", "2.4", null, ComponentType.Unknown.Icon);
+			lock (types) {
+				ComponentType t = (ComponentType) types [typeName];
+				if (t != null) return t;
+				
+				if (typeName == "Gtk.Action" || typeName == "Gtk.ActionGroup") {
+					t = new ComponentType (this, typeName, "", typeName, "Actions", "2.4", null, ComponentType.Unknown.Icon);
+					types [typeName] = t;
+					return t;
+				}
+				
+				string desc = null, className = null, category = null, targetGtkVersion = null, library = null;
+				Gdk.Pixbuf px = null;
+				
+				if (externalBackend) {
+					byte[] icon;
+					
+					if (Backend.GetClassDescriptorInfo (typeName, out desc, out className, out category, out targetGtkVersion, out library, out icon)) {
+						if (icon != null)
+							px = new Gdk.Pixbuf (icon);
+					}
+					
+					if (px == null) {
+						px = ComponentType.Unknown.Icon;
+					}
+					
+					if (desc == null)
+						desc = typeName;
+				} else {
+					ClassDescriptor cls = Registry.LookupClassByName (typeName);
+					if (cls != null) {
+						desc = cls.Label;
+						className = cls.WrappedTypeName;
+						category = cls.Category;
+						targetGtkVersion = cls.TargetGtkVersion;
+						px = cls.Icon;
+						library = cls.Library.Name;
+					}
+				}
+				
+				t = new ComponentType (this, typeName, desc, className, category, targetGtkVersion, library, px);
 				types [typeName] = t;
 				return t;
 			}
-			
-			string desc = null, className = null, category = null, targetGtkVersion = null, library = null;
-			Gdk.Pixbuf px = null;
-			
-			if (externalBackend) {
-				byte[] icon;
-				
-				if (Backend.GetClassDescriptorInfo (typeName, out desc, out className, out category, out targetGtkVersion, out library, out icon)) {
-					if (icon != null)
-						px = new Gdk.Pixbuf (icon);
-				}
-				
-				if (px == null) {
-					px = ComponentType.Unknown.Icon;
-				}
-				
-				if (desc == null)
-					desc = typeName;
-			} else {
-				ClassDescriptor cls = Registry.LookupClassByName (typeName);
-				if (cls != null) {
-					desc = cls.Label;
-					className = cls.WrappedTypeName;
-					category = cls.Category;
-					targetGtkVersion = cls.TargetGtkVersion;
-					px = cls.Icon;
-					library = cls.Library.Name;
-				}
-			}
-			
-			t = new ComponentType (this, typeName, desc, className, category, targetGtkVersion, library, px);
-			types [typeName] = t;
-			return t;
 		}
 		
 		internal Component GetComponent (object cbackend, string name, string type)

@@ -1,3 +1,13 @@
+2007-08-16  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ApplicationBackend.cs, libsteticui/Application.cs,
+	  libsteticui/ApplicationBackendController.cs: When a library is unloaded
+	  notify the application frontend. The frontend can then clear cached data
+	  from the library.
+	* libstetic/wrapper/objects.xml: Update EventBox category to 'container'.
+	* libstetic/ClassDescriptor.cs: When no label is set for a widget, use the
+	  class name, without namespace.
+
 2007-08-08  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/Widget.cs: Added missing null check. Don't set the Name

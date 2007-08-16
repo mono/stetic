@@ -689,7 +689,7 @@
     </object>
 
     <object type="Gtk.EventBox,gtk-sharp" base-type="Gtk.Container"
-	    label="Event Box" icon="eventbox.png" palette-category="widget">
+	    label="Event Box" icon="eventbox.png" palette-category="container">
 	<itemgroups>
 	    <itemgroup label="Event Box Properties">
 		<property name="AboveChild" />
