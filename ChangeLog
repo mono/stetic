@@ -1,3 +1,8 @@
+2007-09-03   <> 
+
+	* libstetic/wrapper/objects.xml: FileChooserButton doesn't have a default
+	  constructor, it requires the title and the action. Fixes bug #82671.
+
 2007-08-16  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ApplicationBackend.cs, libsteticui/Application.cs,

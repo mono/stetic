@@ -1688,7 +1688,7 @@
 	</signals>
     </object>
 
-    <object type="Gtk.FileChooserButton,gtk-sharp" wrapper="Stetic.Wrapper.Container"
+    <object type="Gtk.FileChooserButton,gtk-sharp" wrapper="Stetic.Wrapper.Container" init-properties="Title Action"
 	    label="File Chooser Button" icon="fileselection.png" palette-category="widget"
 	    hexpandable="true" base-type="Gtk.Container" gtk-version="2.6">
 	<itemgroups>
