@@ -1,5 +1,10 @@
 2007-09-04  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/objects.xml: Added support for NodeView. Fixes bug
+	  #81238.
+
+2007-09-04  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/wrapper/ComboBox.cs: Comboboxes are now of type Text by default.
 	  Fixes bug #81763.
 

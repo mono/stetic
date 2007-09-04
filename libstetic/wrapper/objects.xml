@@ -1518,6 +1518,11 @@
 	</signals>
     </object>
 
+    <object type="Gtk.NodeView,gtk-sharp" wrapper="Stetic.Wrapper.TreeView"
+	    label="Node View" icon="treeview.png" palette-category="widget"
+	    hexpandable="true" vexpandable="true" base-type="Gtk.TreeView">
+    </object>
+    
     <object type="Gtk.IconView,gtk-sharp" wrapper="Stetic.Wrapper.IconView"
 	    label="Icon View" icon="iconview.png" palette-category="widget"
 	    hexpandable="true" vexpandable="true" base-type="Gtk.Container" gtk-version="2.6">
