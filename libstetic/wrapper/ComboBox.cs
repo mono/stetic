@@ -14,6 +14,14 @@ namespace Stetic.Wrapper {
 			c.EnsureStyle ();
 			return c;
 		}
+		
+		public override void Wrap (object obj, bool initialized)
+		{
+			base.Wrap (obj, initialized);
+			if (!initialized)
+				textCombo = true;
+		}
+
 
 		string items = "";
 		string[] item = new string[0];
