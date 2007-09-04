@@ -231,6 +231,9 @@ namespace Stetic.Editor
 		void OnEditingDone (object ob, EventArgs args)
 		{
 			Widget wrapper = Widget.Lookup (this);
+			if (wrapper == null)
+				return;
+			
 			IDesignArea area = wrapper.GetDesignArea ();
 			if (area == null)	// The toolbar may be disposed before ending editing
 				return;

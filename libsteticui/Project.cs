@@ -13,7 +13,6 @@ namespace Stetic
 		Application app;
 		ProjectBackend backend;
 		string fileName;
-		Stetic.ProjectIconFactory iconFactory;
 		IResourceProvider resourceProvider;
 		Component selection;
 		string tmpProjectFile;
@@ -64,8 +63,6 @@ namespace Stetic
 				if (backend == null) {
 					backend = app.Backend.CreateProject ();
 					backend.SetFrontend (this);
-					if (iconFactory != null)
-						backend.IconFactory = iconFactory;
 					if (resourceProvider != null)
 						backend.ResourceProvider = resourceProvider;
 					if (fileName != null)
@@ -119,12 +116,8 @@ namespace Stetic
 		}
 		
 		public Stetic.ProjectIconFactory IconFactory {
-			get { return iconFactory; }
-			set { 
-				iconFactory = value;
-				if (backend != null)
-					backend.IconFactory = value;
-			}
+			get { return ProjectBackend.IconFactory; }
+			set { backend.IconFactory = value; }
 		}
 		
 		public ImportFileDelegate ImportFileCallback {

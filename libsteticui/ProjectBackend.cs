@@ -142,7 +142,7 @@ namespace Stetic {
 		public string TargetGtkVersion {
 			get { return targetGtkVersion != null ? targetGtkVersion : "2.4"; }
 			set {
-				if (targetGtkVersion == value)
+				if (TargetGtkVersion == value)
 					return;
 				targetGtkVersion = value;
 				
@@ -658,7 +658,15 @@ namespace Stetic {
 					frontend.NotifyProjectReloading ();
 				if (ProjectReloading != null)
 					ProjectReloading (this, EventArgs.Empty);
+				
+				ProjectIconFactory icf = iconFactory;
+				
 				Read (tempDoc);
+
+				// Reuse the same icon factory, since a registry change has no effect to it
+				// and it may be inherited from another project
+				iconFactory = icf;
+				
 				tempDoc = null;
 				if (frontend != null)
 					frontend.NotifyProjectReloaded ();

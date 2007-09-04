@@ -75,7 +75,8 @@ namespace Stetic
 			met.Statements.Add (
 					new CodeMethodInvokeExpression (
 						new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
-						"Initialize"
+						"Initialize",
+			            new CodeThisReferenceExpression ()
 					)
 			);
 
@@ -114,13 +115,6 @@ namespace Stetic
 			met.ReturnType = new CodeTypeReference (typeof(void));
 			met.Attributes = MemberAttributes.Public;
 			
-			met.Statements.Add (
-					new CodeMethodInvokeExpression (
-						new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
-						"Initialize"
-					)
-			);
-
 			Stetic.WidgetMap map = Stetic.CodeGenerator.GenerateCreationCode (globalNs, type, agroup, new CodeThisReferenceExpression (), met.Statements, options, warnings);
 			
 			foreach (Wrapper.Action ac in agroup.Actions)

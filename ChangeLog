@@ -1,3 +1,18 @@
+2007-09-04  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs: When reloading a project, reuse the same
+	  icon factory instance, since it may be inherited from another project.
+	  Fixes bug #82527.
+	* libsteticui/WidgetEditSession.cs: Removed unneeded assignement.
+	* libsteticui/CodeGenerator.cs, libsteticui/CodeGeneratorInternalClass.cs,
+	  libsteticui/CodeGeneratorPartialClass.cs, libstetic/GeneratorContext.cs:
+	  Fix crash when generating the icon factory (the root object was not set
+	  in the GeneratorContext).
+	* libsteticui/Project.cs: Special handling of IconFactory is not needed.
+	* libstetic/editor/ActionToolItem.cs: In CreateControls, fix crash caused by
+	  the icon property being set too early, when it might be null.
+	* libstetic/editor/ActionToolbar.cs: Added missing null check.
+
 2007-09-03   <> 
 
 	* libstetic/wrapper/objects.xml: FileChooserButton doesn't have a default

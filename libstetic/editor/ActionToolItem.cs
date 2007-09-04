@@ -171,7 +171,6 @@ namespace Stetic.Editor
 				} else if (!gaction.IsImportant) {
 					icon = CreateFakeItem ();
 				}
-				icon.Sensitive = editing || node.Action == null || node.Action.GtkAction.Sensitive;
 			}
 			
 			Gtk.Tooltips tooltips = null;
@@ -227,6 +226,8 @@ namespace Stetic.Editor
 			if (icon == null) {
 				icon = CreateFakeItem ();
 			}
+			
+			icon.Sensitive = editing || node.Action == null || node.Action.GtkAction.Sensitive;
 			
 			if (!editing) {
 				Gtk.Button but = new Gtk.Button (icon);

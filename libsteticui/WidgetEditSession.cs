@@ -68,7 +68,6 @@ namespace Stetic {
 			
 			sourceWidget = win.Wrapped.Name;
 			sourceProject = (ProjectBackend) win.Project;
-			gproject = editingBackend;
 			
 			if (!autoCommitChanges) {
 				// Reuse the action groups and icon factory of the main project

@@ -60,7 +60,10 @@ namespace Stetic
 			initMethod.Name = "Initialize";
 			initMethod.ReturnType = new CodeTypeReference (typeof(void));
 			initMethod.Attributes = MemberAttributes.Assembly | MemberAttributes.Static;
+			initMethod.Parameters.Add (new CodeParameterDeclarationExpression (typeof(Gtk.Widget), "iconRenderer"));
+			
 			GeneratorContext initContext = new ProjectGeneratorContext (globalNs, globalType, initMethod.Statements, options);
+			initContext.RootObject = new CodeArgumentReferenceExpression ("iconRenderer");
 			
 			// Generate icon factory creation
 

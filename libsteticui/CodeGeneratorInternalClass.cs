@@ -84,10 +84,14 @@ namespace Stetic
 			
 			CodeStatementCollection projectCol = met.Statements;
 			
-			met.Statements.Add (
+			CodeConditionStatement tcond = new CodeConditionStatement ();
+			tcond.Condition = new CodeMethodInvokeExpression (new CodeTypeOfExpression (typeof(Gtk.Widget)), "IsAssignableFrom", cobj);
+			
+			tcond.TrueStatements.Add (
 					new CodeMethodInvokeExpression (
 						new CodeTypeReferenceExpression (globalNs.Name + ".Gui"),
-						"Initialize"
+						"Initialize",
+			            cobj
 					)
 			);
 					

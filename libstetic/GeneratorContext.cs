@@ -185,6 +185,15 @@ namespace Stetic
 		public WidgetMap WidgetMap {
 			get { return map; }
 		}
+
+		public System.CodeDom.CodeExpression RootObject {
+			get {
+				return rootObject;
+			}
+			set {
+				rootObject = value;
+			}
+		}
 		
 		public void EndGeneration ()
 		{
