@@ -1,5 +1,10 @@
 2007-09-04  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/Notebook.cs: Workaround for GTK bug. ShowAll is not
+	  propagated to tab labels. Fixes bug #82476.
+
+2007-09-04  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ProjectBackend.cs: When reloading a project, reuse the same
 	  icon factory instance, since it may be inherited from another project.
 	  Fixes bug #82527.
@@ -13,7 +18,7 @@
 	  the icon property being set too early, when it might be null.
 	* libstetic/editor/ActionToolbar.cs: Added missing null check.
 
-2007-09-03   <> 
+2007-09-03  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/objects.xml: FileChooserButton doesn't have a default
 	  constructor, it requires the title and the action. Fixes bug #82671.

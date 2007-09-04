@@ -112,6 +112,13 @@ namespace Stetic.Wrapper {
 					var
 				);
 				ctx.Statements.Add (invoke);
+				
+				// Workaround for GTK bug. ShowAll is not propagated to tab labels.
+				invoke = new CodeMethodInvokeExpression (
+					var,
+					"ShowAll"
+				);
+				ctx.Statements.Add (invoke);
 			} else
 				base.GenerateChildBuildCode (ctx, parentExp, wrapper);
 		}
