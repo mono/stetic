@@ -4,26 +4,22 @@ using System.Collections;
 namespace Stetic.Wrapper {
 	public abstract class Object : Stetic.ObjectWrapper {
 
-		public override void Wrap (object obj, bool initialized)
-		{
-			base.Wrap (obj, initialized);
-			if (!Loading) {
-				((GLib.Object)Wrapped).AddNotification (NotifyHandler);
-			}
-
-			// FIXME; arrange for wrapper disposal?
-		}
-
 		public override void Dispose ()
 		{
 			((GLib.Object)Wrapped).RemoveNotification (NotifyHandler);
 			base.Dispose ();
 		}
 
-		protected override void OnEndRead (FileFormat format)
+		internal protected override void OnDesignerAttach (IDesignArea designer)
 		{
-			base.OnEndRead (format);
+			base.OnDesignerAttach (designer);
 			((GLib.Object)Wrapped).AddNotification (NotifyHandler);
+		}
+		
+		internal protected override void OnDesignerDetach (IDesignArea designer)
+		{
+			base.OnDesignerDetach (designer);
+			((GLib.Object)Wrapped).RemoveNotification (NotifyHandler);
 		}
 		
 		public static Object Lookup (GLib.Object obj)

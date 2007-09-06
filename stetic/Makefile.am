@@ -12,7 +12,8 @@ stetic_exe_sources =  \
 	LibraryManagerDialog.cs \
 	RecentFiles.cs \
 	Stetic.cs \
-	UIManager.cs
+	UIManager.cs \
+	WindowListWidget.cs
 
 	
 stetic_exe_resources = stetic.glade                

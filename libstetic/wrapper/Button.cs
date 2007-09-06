@@ -176,8 +176,11 @@ namespace Stetic.Wrapper {
 		protected override void OnEndRead (FileFormat format)
 		{
 			base.OnEndRead (format);
-			if (format == FileFormat.Native && Type == ButtonType.TextAndIcon)
+			if (format == FileFormat.Native && Type == ButtonType.TextAndIcon) {
+				Loading = true;
 				ConstructContents ();
+				Loading = false;
+			}
 		}
 		
 		void ConstructContents ()

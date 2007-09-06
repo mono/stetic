@@ -36,6 +36,7 @@ libsteticui_dll_sources =  \
 	ComponentType.cs \
 	ContainerUndoRedoManager.cs \
 	ContextMenu.cs \
+	Designer.cs \
 	EmbedWindow.cs \
 	Glade.cs \
 	Grid.cs \
@@ -54,7 +55,6 @@ libsteticui_dll_sources =  \
 	PluggableWidget.cs \
 	Project.cs \
 	ProjectBackend.cs \
-	ProjectView.cs \
 	ProjectViewBackend.cs \
 	PropertyEditor.cs \
 	PropertyGrid.cs \
@@ -73,6 +73,7 @@ libsteticui_dll_sources =  \
 	WidgetInfoEventHandler.cs \
 	WidgetPropertyTree.cs \
 	WidgetPropertyTreeBackend.cs \
+	WidgetTree.cs \
 	WidgetTreeCombo.cs
 
 libsteticui_dll_resources =  \

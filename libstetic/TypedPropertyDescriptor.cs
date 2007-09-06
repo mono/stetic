@@ -218,7 +218,7 @@ namespace Stetic
 		public override void SetValue (object obj, object value)
 		{
 			ObjectWrapper ww = ObjectWrapper.Lookup (obj);
-			IDisposable t = ww != null ? ww.UndoManager.AtomicChange : null;
+			IDisposable t = ww != null && !ww.Loading? ww.UndoManager.AtomicChange : null;
 			try {
 				if (isWrapperProperty)
 					obj = ww;

@@ -164,6 +164,7 @@ namespace Stetic {
 			Gtk.Application.Invoke (delegate {
 				IProject project = targetWrapper.Project;
 				string uid = targetWrapper.UndoId;
+				string tname = ((Wrapper.Widget)targetWrapper).GetTopLevel ().Wrapped.Name;
 				
 				// This call may cause the project to be reloaded
 				dragWidget = dropCallback ();
@@ -172,15 +173,13 @@ namespace Stetic {
 				
 				if (targetWrapper.IsDisposed) {
 					// The project has been reloaded. Find the wrapper again.
-					targetWrapper = null;
-					foreach (Gtk.Widget w in project.Toplevels) {
-						ObjectWrapper ow = ObjectWrapper.Lookup (w);
-						if (ow != null) {
-							targetWrapper = ow.FindObjectByUndoId (uid);
-							if (targetWrapper != null)
-								break;
-						}
-					}
+					Gtk.Widget twidget = project.GetTopLevel (tname);
+					ObjectWrapper ow = ObjectWrapper.Lookup (twidget);
+					if (ow != null)
+						targetWrapper = ow.FindObjectByUndoId (uid);
+					else
+						targetWrapper = null;
+					
 					if (targetWrapper == null) {
 						// Target wrapper not found. Just ignore the drop.
 						return;

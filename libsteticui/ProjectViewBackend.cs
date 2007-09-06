@@ -1,6 +1,7 @@
 using Gtk;
 using System;
 using Mono.Unix;
+using System.Collections.Generic;
 
 namespace Stetic {
 
@@ -21,16 +22,22 @@ namespace Stetic {
 			remove { nodeView.WidgetActivated -= value; }
 		}
 		
-		public ProjectBackend ProjectBackend {
-			get { return nodeView.ProjectBackend; }
-			set { nodeView.ProjectBackend = value; }
+		public void Bind (WidgetEditSession newSession) 
+		{
+			nodeView.Bind (newSession);
 		}
 	}
 	
-	internal class ProjectViewBackendNodeView : NodeView 
+	internal class ProjectViewBackendNodeView : TreeView 
 	{
-		ProjectBackend project;
 		ProjectViewFrontend frontend;
+		TreeStore store;
+		WidgetEditSession editSession;
+		
+		const int ColIcon = 0;
+		const int ColName = 1;
+		const int ColWrapper = 2;
+		const int ColFilled = 3;
 		
 		public event Wrapper.WidgetEventHandler WidgetActivated;
 		
@@ -38,6 +45,9 @@ namespace Stetic {
 		{
 			this.frontend = frontend;
 			HeadersVisible = false;
+			
+			store = new TreeStore (typeof(Gdk.Pixbuf), typeof(string), typeof(ObjectWrapper), typeof(bool));
+			Model = store;
 			
 			TreeViewColumn col;
 			CellRenderer renderer;
@@ -54,45 +64,166 @@ namespace Stetic {
 
 			AppendColumn (col);
 
-			NodeSelection.Mode = SelectionMode.Single;
-			NodeSelection.Changed += RowSelected;
+			Selection.Mode = SelectionMode.Single;
+			Selection.Changed += RowSelected;
+			TestExpandRow += OnTestExpandRow;
 			ShowAll ();
 		}
 		
-		public ProjectBackend ProjectBackend {
-			get { return project; }
-			set {
-				if (project != null) {
-					project.SelectionChanged -= WidgetSelected;
-					project.ProjectReloaded -= OnProjectReloaded;
-					project.WidgetNameChanged -= OnWidgetNameChanged;
-				}
-				project = value;
-				if (project != null) {
-					NodeStore = project.Store;
-					project.SelectionChanged += WidgetSelected;
-					project.ProjectReloaded += OnProjectReloaded;
-					project.WidgetNameChanged += OnWidgetNameChanged;
-				} else {
-					NodeStore = null;
+		public void Bind (WidgetEditSession newSession) 
+		{
+			if (editSession != null) {
+				editSession.SelectionChanged -= WidgetSelected;
+				editSession.EditingBackend.ProjectReloaded -= OnProjectReloaded;
+				editSession.EditingBackend.WidgetNameChanged -= OnWidgetNameChanged;
+				editSession.EditingBackend.WidgetContentsChanged -= OnContentsChanged;
+			}
+			editSession = newSession;
+			if (editSession != null) {
+				editSession.SelectionChanged += WidgetSelected;
+				editSession.EditingBackend.ProjectReloaded += OnProjectReloaded;
+				editSession.EditingBackend.WidgetNameChanged += OnWidgetNameChanged;
+				editSession.EditingBackend.WidgetContentsChanged += OnContentsChanged;
+			}
+			LoadProject ();
+		}
+		
+		public override void Dispose ()
+		{
+			if (editSession != null) {
+				editSession.SelectionChanged -= WidgetSelected;
+				editSession.EditingBackend.ProjectReloaded -= OnProjectReloaded;
+				editSession.EditingBackend.WidgetNameChanged -= OnWidgetNameChanged;
+				editSession.EditingBackend.WidgetContentsChanged -= OnContentsChanged;
+			}
+			base.Dispose ();
+		}
+		
+		public void LoadProject ()
+		{
+			Clear ();
+			if (editSession == null || editSession.RootWidget == null)
+				return;
+			
+			AddNode (TreeIter.Zero, editSession.RootWidget.Wrapped);
+		}
+		
+		public void AddNode (TreeIter iter, Gtk.Widget widget)
+		{
+			Stetic.Wrapper.Widget wrapper = GetVisibleWrapper (widget);
+			if (wrapper == null)
+				return;
+			
+			Gdk.Pixbuf icon = wrapper.ClassDescriptor.Icon.ScaleSimple (16, 16, Gdk.InterpType.Bilinear);
+			string txt = widget.Name;
+			
+			if (!iter.Equals (TreeIter.Zero))
+				iter = store.AppendValues (iter, icon, txt, wrapper, true);
+			else
+				iter = store.AppendValues (icon, txt, wrapper, true);
+			
+			FillChildren (iter, wrapper);
+		}
+		
+		void FillChildren (TreeIter it, Wrapper.Widget wrapper)
+		{
+			Stetic.Wrapper.Container container = wrapper as Wrapper.Container;
+			if (container != null) {
+				foreach (Gtk.Widget w in container.RealChildren) {
+					Stetic.Wrapper.Widget ww = GetVisibleWrapper (w);
+					if (ww != null) {
+						// Add a dummy node to allow lazy loading
+						store.SetValue (it, ColFilled, false);
+						store.AppendValues (it, null, "", null, false);
+						return;
+					}
 				}
 			}
+			store.SetValue (it, ColFilled, true);
+		}
+		
+		Wrapper.Widget GetVisibleWrapper (Gtk.Widget w)
+		{
+			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (w);
+			if (wrapper == null || wrapper.Unselectable)
+				return null;
+			else
+				return wrapper;
+		}
+		
+		void EnsureFilled (TreeIter it)
+		{
+			bool filled = (bool) store.GetValue (it, ColFilled);
+			if (filled)
+				return;
+			
+			// Remove the dummy node
+			TreeIter cit;
+			store.IterChildren (out cit, it);
+			store.Remove (ref cit);
+			
+			// Add the real children
+			Stetic.Wrapper.Container container = store.GetValue (it, ColWrapper) as Wrapper.Container;
+			if (container != null) {
+				foreach (Gtk.Widget w in container.RealChildren)
+					AddNode (it, w);
+			}
+			
+			store.SetValue (it, ColFilled, true);
+		}
+		
+		void OnTestExpandRow (object s, Gtk.TestExpandRowArgs args)
+		{
+			EnsureFilled (args.Iter);
+			args.RetVal = false;
+		}
+		
+		public void Clear ()
+		{
+			TreeIter it;
+			while (store.GetIterFirst (out it)) {
+				store.Remove (ref it);
+			}
+		}
+		
+		void RefreshNode (TreeIter it)
+		{
+			Wrapper.Widget wrapper = (Wrapper.Widget) store.GetValue (it, ColWrapper);
+			store.SetValue (it, ColName, wrapper.Wrapped.Name);
+			TreeIter cit;
+			while (store.IterChildren (out cit, it)) {
+				store.Remove (ref cit);
+			}
+			FillChildren (it, wrapper);
+		}
+		
+		void OnWidgetNameChanged (object s, Wrapper.WidgetNameChangedArgs args)
+		{
+			TreeIter? node = FindNode (args.WidgetWrapper, false);
+			if (node == null)
+				return;
+			store.SetValue (node.Value, ColName, args.NewName);
+		}
+			
+		void OnContentsChanged (object s, Wrapper.WidgetEventArgs args)
+		{
+			TreeIter? node = FindNode (args.WidgetWrapper, false);
+			if (node != null)
+				RefreshNode (node.Value);
 		}
 		
 		void OnProjectReloaded (object o, EventArgs a)
 		{
-			NodeStore = project.Store;
+			LoadProject ();
 		}
 		
 		Stetic.Wrapper.Widget SelectedWrapper {
 			get {
-				ITreeNode[] nodes = NodeSelection.SelectedNodes;
-
-				if (nodes == null || nodes.Length == 0)
+				TreeIter iter;
+				if (!Selection.GetSelected (out iter))
 					return null;
-
-				ProjectNode node = (ProjectNode)nodes[0];
-				return Stetic.Wrapper.Widget.Lookup (node.Widget);
+				Wrapper.Widget w = (Wrapper.Widget) store.GetValue (iter, ColWrapper);
+				return w;
 			}
 		}
 
@@ -115,18 +246,50 @@ namespace Stetic {
 			if (!syncing) {
 				syncing = true;
 				if (args.Widget != null) {
-					ProjectNode node = project.GetNode (args.Widget);
-					if (node != null) {
-						NodeSelection.SelectNode (node);
-						NotifySelectionChanged (node.Wrapper);
+					Wrapper.Widget w = Wrapper.Widget.Lookup (args.Widget);
+					if (w != null) {
+						TreeIter? it = FindNode (w, true);
+						if (it != null) {
+							ExpandToPath (store.GetPath (it.Value));
+							Selection.SelectIter (it.Value);
+							ScrollToCell (store.GetPath (it.Value), Columns[0], false, 0, 0);
+							NotifySelectionChanged (w);
+						}
 					}
 				}
 				else {
-					NodeSelection.UnselectAll ();
+					Selection.UnselectAll ();
 					NotifySelectionChanged (null);
 				}
 				syncing = false;
 			}
+		}
+		
+		TreeIter? FindNode (Wrapper.Widget w, bool loadBranches)
+		{
+			Wrapper.Widget parent = w.ParentWrapper;
+			TreeIter it;
+			
+			if (parent == null) {
+				if (!store.GetIterFirst (out it))
+					return null;
+			} else {
+				TreeIter? pi = FindNode (parent, loadBranches);
+				if (pi == null)
+					return null;
+				if (loadBranches)
+					EnsureFilled (pi.Value);
+				if (!store.IterChildren (out it, pi.Value))
+					return null;
+			}
+			
+			do {
+				Wrapper.Widget cw = (Wrapper.Widget) store.GetValue (it, ColWrapper);
+				if (cw == w)
+					return it;
+			} while (store.IterNext (ref it));
+			
+			return null;
 		}
 		
 		void NotifySelectionChanged (Stetic.Wrapper.Widget w)
@@ -167,11 +330,6 @@ namespace Stetic {
 				return base.OnPopupMenu ();
 		}
 
-		void OnWidgetNameChanged (object s, Wrapper.WidgetNameChangedArgs args)
-		{
-			QueueDraw ();
-		}
-		
 		protected override void OnRowActivated (TreePath path, TreeViewColumn col)
 		{
 			base.OnRowActivated (path, col);

@@ -3,7 +3,7 @@ using System;
 
 namespace Stetic
 {
-	public class ActionGroupDesigner: PluggableWidget
+	public class ActionGroupDesigner: Designer
 	{
 		ActionGroupEditSession editSession;
 		ActionGroupDesignerFrontend frontend;
@@ -32,6 +32,11 @@ namespace Stetic
 			frontend = new ActionGroupDesignerFrontend (this);
 
 			CreateSession ();
+		}
+		
+		internal override void SetActive ()
+		{
+			app.ActiveProject = project;
 		}
 		
 		public Component RootComponent {

@@ -37,10 +37,11 @@ namespace Stetic
 		ArrayList widgetLibraries = new ArrayList ();
 		ArrayList projects = new ArrayList ();
 		Project activeProject;
+		Designer activeDesigner;
 		
 		WidgetPropertyTree propertiesWidget;
 		Palette paletteWidget;
-		ProjectView projectWidget;
+		WidgetTree projectWidget;
 		SignalsEditor signalsWidget;
 		bool allowInProcLibraries = true;
 		bool disposed;
@@ -347,16 +348,39 @@ namespace Stetic
 			return Backend.GenerateProjectCode (options, pbs);
 		}
 		
+		public Designer ActiveDesigner {
+			get {
+				return activeDesigner; 
+			}
+			set {
+				if (activeDesigner != value) {
+					activeDesigner = value;
+					if (activeDesigner != null)
+						activeDesigner.SetActive ();
+					else
+						ActiveProject = null;
+				}
+			}
+		}
+		
 		internal bool UseExternalBackend {
 			get { return externalBackend; }
 		}
 			
-		public Project ActiveProject {
+		internal Project ActiveProject {
 			get { return activeProject; }
 			set { 
 				activeProject = value;
 				Backend.ActiveProject = value != null ? value.ProjectBackend : null;
+				Backend.SetActiveDesignSession (null);
 			}
+		}
+		
+		internal void SetActiveDesignSession (Project p, WidgetEditSession session)
+		{
+			activeProject = p;
+			Backend.ActiveProject = p != null ? p.ProjectBackend : null;
+			Backend.SetActiveDesignSession (session);
 		}
 		
 		public WidgetPropertyTree PropertiesWidget {
@@ -375,10 +399,10 @@ namespace Stetic
 			}
 		}
 		
-		public ProjectView ProjectWidget {
+		public WidgetTree WidgetTreeWidget {
 			get {
 				if (projectWidget == null)
-					projectWidget = new ProjectView (this);
+					projectWidget = new WidgetTree (this);
 				return projectWidget;
 			}
 		}

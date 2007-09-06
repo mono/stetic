@@ -848,6 +848,8 @@ namespace Stetic.Wrapper {
 		
 		protected virtual void OnNameChanged (WidgetNameChangedArgs args)
 		{
+			if (Project != null)
+				Project.NotifyNameChanged (args);
 			if (NameChanged != null)
 				NameChanged (this, args);
 		}

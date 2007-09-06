@@ -57,6 +57,7 @@ namespace Stetic {
 		
 		public event EventHandler ModifiedChanged;
 		public event EventHandler RootWidgetChanged;
+		public event Stetic.Wrapper.WidgetEventHandler SelectionChanged;
 		
 		public WidgetEditSession (WidgetDesignerFrontend frontend, Stetic.Wrapper.Container win, Stetic.ProjectBackend editingBackend, bool autoCommitChanges)
 		{
@@ -378,6 +379,8 @@ namespace Stetic {
 				}
 				
 				frontend.NotifySelectionChanged (Component.GetSafeReference (obj), canCut, canCopy, canPaste, canDelete);
+				if (SelectionChanged != null)
+					SelectionChanged (this, new Stetic.Wrapper.WidgetEventArgs (wrapper));
 			}
 		}
 		

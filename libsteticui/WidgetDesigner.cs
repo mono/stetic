@@ -6,7 +6,7 @@ namespace Stetic
 {
 	public delegate void ComponentDropCallback ();
 		
-	public class WidgetDesigner: PluggableWidget
+	public class WidgetDesigner: Designer
 	{
 		WidgetEditSession session;
 		WidgetDesignerFrontend frontend;
@@ -106,10 +106,10 @@ namespace Stetic
 			get { return session != null && session.Modified; }
 		}
 		
-		public void SetActive ()
+		internal override void SetActive ()
 		{
 			if (!disposed)
-				project.App.ActiveProject = editedProject;
+				project.App.SetActiveDesignSession (editedProject, session);
 		}
 		
 		public bool AllowWidgetBinding {

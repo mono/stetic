@@ -473,40 +473,36 @@ namespace Stetic
 			ProjectBackend.EditIcons ();
 		}
 		
-		internal void NotifyWidgetAdded (object obj, string name, string typeName, bool topLevel)
+		internal void NotifyWidgetAdded (object obj, string name, string typeName)
 		{
-			if (topLevel) {
-				Gtk.Application.Invoke (
-					delegate {
-						Component c = App.GetComponent (obj, name, typeName);
-						if (c != null) {
-							WidgetInfo wi = GetWidget (c.Name);
-							if (wi == null) {
-								wi = new WidgetInfo (this, c);
-								widgets.Add (wi);
-							}
-							if (WidgetAdded != null)
-								WidgetAdded (this, new WidgetInfoEventArgs (this, wi));
+			Gtk.Application.Invoke (
+				delegate {
+					Component c = App.GetComponent (obj, name, typeName);
+					if (c != null) {
+						WidgetInfo wi = GetWidget (c.Name);
+						if (wi == null) {
+							wi = new WidgetInfo (this, c);
+							widgets.Add (wi);
 						}
+						if (WidgetAdded != null)
+							WidgetAdded (this, new WidgetInfoEventArgs (this, wi));
 					}
-				);
-			}
+				}
+			);
 		}
 		
-		internal void NotifyWidgetRemoved (object obj, string name, string typeName, bool topLevel)
+		internal void NotifyWidgetRemoved (string name)
 		{
-			if (topLevel) {
-				Gtk.Application.Invoke (
-					delegate {
-						WidgetInfo wi = GetWidget (name);
-						if (wi != null) {
-							widgets.Remove (wi);
-							if (WidgetRemoved != null)
-								WidgetRemoved (this, new WidgetInfoEventArgs (this, wi));
-						}
+			Gtk.Application.Invoke (
+				delegate {
+					WidgetInfo wi = GetWidget (name);
+					if (wi != null) {
+						widgets.Remove (wi);
+						if (WidgetRemoved != null)
+							WidgetRemoved (this, new WidgetInfoEventArgs (this, wi));
 					}
-				);
-			}
+				}
+			);
 		}
 		
 		internal void NotifyModifiedChanged ()

@@ -3,11 +3,11 @@ using System;
 
 namespace Stetic
 {
-	public class ProjectView: PluggableWidget
+	public class WidgetTree: PluggableWidget
 	{
 		ProjectViewFrontend frontend;
 		
-		internal ProjectView (Application app): base (app)
+		internal WidgetTree (Application app): base (app)
 		{
 			frontend = new ProjectViewFrontend (app);
 		}

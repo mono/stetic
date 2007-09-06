@@ -24,6 +24,7 @@ namespace Stetic
 		Application appFrontend;
 		
 		ProjectBackend activeProject;
+		WidgetEditSession activeDesignSession;
 		static ApplicationBackendController controller;
 		
 		public ApplicationBackend (Application app)
@@ -279,6 +280,8 @@ namespace Stetic
 		public ProjectBackend ActiveProject {
 			get { return activeProject; }
 			set {
+				if (activeProject == value)
+					return;
 				activeProject = value;
 				if (paletteWidget != null) {
 					paletteWidget.ProjectBackend = activeProject;
@@ -288,9 +291,14 @@ namespace Stetic
 					propertiesWidget.ProjectBackend = activeProject;
 				if (signalsWidget != null)
 					signalsWidget.ProjectBackend = activeProject;
-				if (projectWidget != null)
-					projectWidget.ProjectBackend = activeProject;
 			}
+		}
+		
+		public void SetActiveDesignSession (WidgetEditSession session)
+		{
+			activeDesignSession = session;
+			if (projectWidget != null)
+				projectWidget.Bind (session);
 		}
 		
 		public WidgetLibrary[] GetActiveLibraries ()
@@ -422,7 +430,7 @@ namespace Stetic
 		{
 			if (projectWidget == null) {
 				projectWidget = new ProjectViewBackend (frontend);
-				projectWidget.ProjectBackend = activeProject;
+				projectWidget.Bind (activeDesignSession);
 			}
 			return projectWidget;
 		}

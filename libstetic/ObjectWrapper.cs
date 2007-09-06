@@ -153,10 +153,12 @@ namespace Stetic {
 		{
 			ClassDescriptor klass = Registry.LookupClassByName (wrapped.GetType ().FullName);
 			ObjectWrapper wrapper = klass.CreateWrapper ();
+			wrapper.Loading = true;
 			wrapper.proj = proj;
 			wrapper.classDescriptor = klass;
 			wrapper.Wrap (wrapped, true);
 			wrapper.OnWrapped ();
+			wrapper.Loading = false;
 			return wrapper;
 		}
 
@@ -361,36 +363,54 @@ namespace Stetic {
 		{
 			if (frontend != null)
 				frontend.NotifyChanged ();
-			if (!loading && ObjectChanged != null)
-				ObjectChanged (this, args);
+			if (!Loading) {
+				if (proj != null)
+					proj.NotifyObjectChanged (args);
+				if (ObjectChanged != null)
+					ObjectChanged (this, args);
+			}
 		}
 		
 		protected virtual void EmitNotify (string propertyName)
 		{
-			NotifyChanged ();
-			if (!loading && Notify != null)
-				Notify (this, propertyName);
+			if (!Loading) {
+				NotifyChanged ();
+				if (!Loading && Notify != null)
+					Notify (this, propertyName);
+			}
 		}
 
 		internal protected virtual void OnSignalAdded (SignalEventArgs args)
 		{
 			OnObjectChanged (args);
-			if (!loading && SignalAdded != null)
-				SignalAdded (this, args);
+			if (!Loading) {
+				if (proj != null)
+					proj.NotifySignalAdded (args);
+				if (SignalAdded != null)
+					SignalAdded (this, args);
+			}
 		}
 		
 		internal protected virtual void OnSignalRemoved (SignalEventArgs args)
 		{
 			OnObjectChanged (args);
-			if (!loading && SignalRemoved != null)
-				SignalRemoved (this, args);
+			if (!Loading) {
+				if (proj != null)
+					proj.NotifySignalRemoved (args);
+				if (SignalRemoved != null)
+					SignalRemoved (this, args);
+			}
 		}
 		
 		internal protected virtual void OnSignalChanged (SignalChangedEventArgs args)
 		{
 			OnObjectChanged (args);
-			if (!loading && SignalChanged != null)
-				SignalChanged (this, args);
+			if (!Loading) {
+				if (proj != null)
+					proj.NotifySignalChanged (args);
+				if (SignalChanged != null)
+					SignalChanged (this, args);
+			}
 		}
 		
 		internal protected virtual void OnDesignerAttach (IDesignArea designer)

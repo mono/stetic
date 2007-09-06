@@ -12,9 +12,7 @@ namespace Stetic {
 
 	internal class ProjectBackend : MarshalByRefObject, IProject, IDisposable 
 	{
-		Hashtable nodes;
-		ArrayList topLevels;
-		NodeStore store;
+		List<WidgetData> topLevels;
 		bool modified;
 		Gtk.Widget selection;
 		string id;
@@ -29,7 +27,6 @@ namespace Stetic {
 		
 		Stetic.ProjectIconFactory iconFactory;
 		Project frontend;
-		int componentIdCounter;
 		ArrayList widgetLibraries;
 		ArrayList internalLibs;
 		ApplicationBackend app;
@@ -41,9 +38,8 @@ namespace Stetic {
 		Stetic.Wrapper.ActionGroupCollection oldTopActionCollection;
 		
 		public event Wrapper.WidgetNameChangedHandler WidgetNameChanged;
-		public event Wrapper.WidgetNameChangedHandler WidgetMemberNameChanged;
 		public event Wrapper.WidgetEventHandler WidgetAdded;
-		public event Wrapper.WidgetEventHandler WidgetRemoved;
+		public event Wrapper.WidgetEventHandler WidgetContentsChanged;
 		public event ObjectWrapperEventHandler ObjectChanged;
 		public event EventHandler ComponentTypesChanged;
 		
@@ -63,9 +59,7 @@ namespace Stetic {
 		public ProjectBackend (ApplicationBackend app)
 		{
 			this.app = app;
-			nodes = new Hashtable ();
-			store = new NodeStore (typeof (ProjectNode));
-			topLevels = new ArrayList ();
+			topLevels = new List<WidgetData> ();
 			
 			ActionGroups = new Stetic.Wrapper.ActionGroupCollection ();
 
@@ -89,7 +83,6 @@ namespace Stetic {
 			Registry.RegistryChanging -= OnRegistryChanging;
 			Registry.RegistryChanged -= OnRegistryChanged;
 			Close ();
-			store.Dispose ();
 			iconFactory = null;
 			ActionGroups = null;
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
@@ -281,18 +274,12 @@ namespace Stetic {
 				actionGroups.Clear ();
 			}
 
-			foreach (Gtk.Widget w in Toplevels) {
-				Wrapper.Widget ww = Wrapper.Widget.Lookup (w);
-				ww.Destroyed -= WidgetDestroyed;
-				ProjectNode node = nodes[w] as ProjectNode;
-				if (node != null)
-					UnhashNodeRecursive (node);
-				w.Destroy ();
+			foreach (WidgetData wd in topLevels) {
+				if (wd.Widget != null)
+					wd.Widget.Destroy ();
 			}
 
 			selection = null;
-			store.Clear ();
-			nodes.Clear ();
 			topLevels.Clear ();
 			widgetLibraries.Clear ();
 
@@ -307,6 +294,7 @@ namespace Stetic {
 		public void Load (string xmlFile, string fileName)
 		{
 			this.fileName = fileName;
+			DateTime tim = DateTime.Now;
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
 			doc.Load (xmlFile);
@@ -321,6 +309,7 @@ namespace Stetic {
 			string basePath = fileName != null ? Path.GetDirectoryName (fileName) : null;
 			
 			try {
+				DateTime tim = DateTime.Now;
 				string fn = fileName;
 				Close ();
 				fileName = fn;
@@ -385,19 +374,31 @@ namespace Stetic {
 				if (iconsElem != null)
 					iconFactory.Read (this, iconsElem);
 				
+				tim = DateTime.Now;
+				
 				foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
-					Wrapper.Container wrapper = Stetic.ObjectWrapper.ReadObject (reader, toplevel) as Wrapper.Container;
-					if (wrapper != null)
-						AddWidget ((Gtk.Widget)wrapper.Wrapped);
+					topLevels.Add (new WidgetData (toplevel.GetAttribute ("id"), toplevel, null));
 				}
 			} finally {
 				loading = false;
 			}
 		}
 		
+		public Gtk.Widget GetWidget (WidgetData data)
+		{
+			if (data.Widget == null) {
+				ObjectReader reader = new ObjectReader (this, FileFormat.Native);
+				Wrapper.Container wrapper = Stetic.ObjectWrapper.ReadObject (reader, data.XmlData) as Wrapper.Container;
+				data.Widget = wrapper.Wrapped;
+			}
+			
+			return data.Widget;
+		}
+		
 		public void Save (string fileName)
 		{
 			this.fileName = fileName;
+			DateTime tim = DateTime.Now;
 			XmlDocument doc = Write (false);
 			
 			XmlTextWriter writer = null;
@@ -482,14 +483,18 @@ namespace Stetic {
 			if (iconFactory.Icons.Count > 0)
 				toplevel.AppendChild (iconFactory.Write (doc));
 
-			foreach (Widget w in Toplevels) {
-				Stetic.Wrapper.Container wrapper = Stetic.Wrapper.Container.Lookup (w);
-				if (wrapper == null)
-					continue;
+			foreach (WidgetData data in topLevels) {
+				if (data.Widget != null) {
+					Stetic.Wrapper.Container wrapper = Stetic.Wrapper.Container.Lookup (data.Widget);
+					if (wrapper == null)
+						continue;
 
-				XmlElement elem = wrapper.Write (writer);
-				if (elem != null)
-					toplevel.AppendChild (elem);
+					XmlElement elem = wrapper.Write (writer);
+					if (elem != null)
+						toplevel.AppendChild (elem);
+				} else {
+					toplevel.AppendChild (doc.ImportNode (data.XmlData, true));
+				}
 			}
 			return doc;
 		}
@@ -543,11 +548,11 @@ namespace Stetic {
 		
 		internal WidgetEditSession CreateWidgetDesignerSession (WidgetDesignerFrontend frontend, string windowName, Stetic.ProjectBackend editingBackend, bool autoCommitChanges)
 		{
-			foreach (Gtk.Container w in Toplevels) {
-				if (w.Name == windowName)
-					return new WidgetEditSession (frontend, Stetic.Wrapper.Container.Lookup (w), editingBackend, autoCommitChanges);
-			}
-			throw new InvalidOperationException ("Component not found: " + windowName);
+			Gtk.Widget w = GetTopLevel (windowName);
+			if (w != null)
+				return new WidgetEditSession (frontend, Stetic.Wrapper.Container.Lookup (w), editingBackend, autoCommitChanges);
+			else
+				throw new InvalidOperationException ("Component not found: " + windowName);
 		}
 		
 		internal ActionGroupEditSession CreateGlobalActionGroupDesignerSession (ActionGroupDesignerFrontend frontend, string groupName, bool autoCommitChanges)
@@ -560,23 +565,13 @@ namespace Stetic {
 			return new ActionGroupEditSession (frontend, this, windowName, null, autoCommitChanges);
 		}
 		
-		public ArrayList GetTopLevelWrappers ()
-		{
-			ArrayList list = new ArrayList ();
-			foreach (Gtk.Container w in Toplevels)
-				list.Add (Component.GetSafeReference (ObjectWrapper.Lookup (w)));
-			return list;
-		}
-		
 		public Wrapper.Container GetTopLevelWrapper (string name, bool throwIfNotFound)
 		{
-			foreach (Gtk.Container w in Toplevels) {
-				if (w.Name == name) {
-					Wrapper.Container ww = Wrapper.Container.Lookup (w);
-					if (ww != null)
-						return (Wrapper.Container) Component.GetSafeReference (ww);
-					break;
-				}
+			Gtk.Widget w = GetTopLevel (name);
+			if (w != null) {
+				Wrapper.Container ww = Wrapper.Container.Lookup (w);
+				if (ww != null)
+					return (Wrapper.Container) Component.GetSafeReference (ww);
 			}
 			if (throwIfNotFound)
 				throw new InvalidOperationException ("Component not found: " + name);
@@ -603,9 +598,22 @@ namespace Stetic {
 		
 		public void RemoveWidget (string name)
 		{
-			Wrapper.Widget ww = this.GetTopLevelWrapper (name, false);
-			if (ww != null)
-				ww.Delete ();
+			WidgetData data = null;
+			foreach (WidgetData d in topLevels) {
+				if (d.Name == name) {
+					data = d;
+					break;
+				}
+			}
+			if (data == null)
+				return;
+			
+			if (frontend != null)
+				frontend.NotifyWidgetRemoved (data.Name);
+		
+			topLevels.Remove (data);
+			if (data.Widget != null)
+				data.Widget.Destroy ();
 		}
 		
 		public Stetic.Wrapper.ActionGroup AddNewActionGroup (string name)
@@ -715,7 +723,7 @@ namespace Stetic {
 
 		public void AddWindow (Gtk.Window window, bool select)
 		{
-			AddWidget (window, null, -1);
+			AddWidget (window);
 			if (select)
 				Selection = window;
 		}
@@ -724,143 +732,74 @@ namespace Stetic {
 		{
 			if (!typeof(Gtk.Container).IsInstanceOfType (widget))
 				throw new System.ArgumentException ("widget", "Only containers can be top level widgets");
-			AddWidget (widget, null, -1);
-		}
-		
-		void AddWidget (Widget widget, ProjectNode parent)
-		{
-			AddWidget (widget, parent, -1);
-		}
-
-		void AddWidget (Widget widget, ProjectNode parent, int position)
-		{
-			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (widget);
-			if (ww == null || ww.Unselectable)
-				return;
-				
-			ww.ObjectChanged += OnObjectChanged;
-			ww.NameChanged += OnWidgetNameChanged;
-			ww.MemberNameChanged += OnWidgetMemberNameChanged;
-			ww.SignalAdded += OnSignalAdded;
-			ww.SignalRemoved += OnSignalRemoved;
-			ww.SignalChanged += OnSignalChanged;
-
-			ProjectNode node = new ProjectNode (ww);
-			node.Id = ++componentIdCounter;
-			nodes[widget] = node;
-			if (parent == null) {
-				topLevels.Add (widget);
-				if (position == -1)
-					store.AddNode (node);
-				else
-					store.AddNode (node, position);
-			} else {
-				if (position == -1)
-					parent.AddChild (node);
-				else
-					parent.AddChild (node, position);
-			}
-			ww.Destroyed += WidgetDestroyed;
-
-			parent = node;
-
+			topLevels.Add (new WidgetData (null, null, widget));
+			
 			if (!loading) {
+				Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (widget);
+				if (ww == null)
+					throw new InvalidOperationException ("Widget not wrapped");
 				if (frontend != null)
-					frontend.NotifyWidgetAdded (Component.GetSafeReference (ww), widget.Name, ww.ClassDescriptor.Name, ww.IsTopLevel);
+					frontend.NotifyWidgetAdded (Component.GetSafeReference (ww), widget.Name, ww.ClassDescriptor.Name);
 				OnWidgetAdded (new Stetic.Wrapper.WidgetEventArgs (ww));
 			}
-			
-			Stetic.Wrapper.Container container = Stetic.Wrapper.Container.Lookup (widget);
-			if (container != null) {
-				container.ContentsChanged += ContentsChanged;
-				foreach (Gtk.Widget w in container.RealChildren)
-					AddWidget (w, parent);
-			}
-		}
-
-		void UnhashNodeRecursive (ProjectNode node)
-		{
-			Stetic.Wrapper.Widget ww = Stetic.Wrapper.Widget.Lookup (node.Widget);
-			if (ww != null) {
-				ww.ObjectChanged -= OnObjectChanged;
-				ww.NameChanged -= OnWidgetNameChanged;
-				ww.MemberNameChanged -= OnWidgetMemberNameChanged;
-				ww.SignalAdded -= OnSignalAdded;
-				ww.SignalRemoved -= OnSignalRemoved;
-				ww.SignalChanged -= OnSignalChanged;
-				ww.Destroyed -= WidgetDestroyed;
-				Stetic.Wrapper.Container container = ww as Stetic.Wrapper.Container;
-				if (container != null)
-					container.ContentsChanged -= ContentsChanged;
-			}
-			
-			if (node.Parent == null)
-				topLevels.Remove (node.Widget);
-
-			if (!loading) {
-				if (frontend != null)
-					frontend.NotifyWidgetRemoved (node.Wrapper, node.Widget.Name, null, node.Parent == null);
-				OnWidgetRemoved (new Stetic.Wrapper.WidgetEventArgs (node.Widget));
-			}
-			
-			nodes.Remove (node.Widget);
-			
-			for (int i = 0; i < node.ChildCount; i++)
-				UnhashNodeRecursive (node[i] as ProjectNode);
-			node.Widget = null;
-			node.Wrapper = null;
 		}
 		
-		void RemoveNode (ProjectNode node)
+		void IProject.NotifyObjectChanged (ObjectWrapperEventArgs args)
 		{
-			UnhashNodeRecursive (node);
-
-			ProjectNode parent = node.Parent as ProjectNode;
-			if (parent == null)
-				store.RemoveNode (node);
-			else
-				parent.RemoveChild (node);
-		}
-
-		void WidgetDestroyed (object obj, EventArgs args)
-		{
-			Wrapper.Widget ww = (Wrapper.Widget) obj;
-			ProjectNode node = nodes[ww.Wrapped] as ProjectNode;
-			if (node != null)
-				RemoveNode (node);
-		}
-		
-		void OnObjectChanged (object sender, ObjectWrapperEventArgs args)
-		{
+			if (loading)
+				return;
 			NotifyChanged ();
 			if (ObjectChanged != null)
 				ObjectChanged (this, args);
 		}
-
-		void OnWidgetNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
+		
+		void IProject.NotifyNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args)
 		{
+			if (loading)
+				return;
 			NotifyChanged ();
 			OnWidgetNameChanged (args);
 		}
-
+		
+		void IProject.NotifySignalAdded (SignalEventArgs args)
+		{
+			if (loading)
+				return;
+			if (frontend != null)
+				frontend.NotifySignalAdded (Component.GetSafeReference (args.Wrapper), null, args.Signal);
+			OnSignalAdded (args);
+		}
+		
+		void IProject.NotifySignalRemoved (SignalEventArgs args)
+		{
+			if (loading)
+				return;
+			if (frontend != null)
+				frontend.NotifySignalRemoved (Component.GetSafeReference (args.Wrapper), null, args.Signal);
+			OnSignalRemoved (args);
+		}
+		
+		void IProject.NotifySignalChanged (SignalChangedEventArgs args)
+		{
+			if (loading)
+				return;
+			OnSignalChanged (args);
+		}
+		
+		void IProject.NotifyWidgetContentsChanged (Wrapper.Widget w)
+		{
+			if (loading)
+				return;
+			if (WidgetContentsChanged != null)
+				WidgetContentsChanged (this, new Wrapper.WidgetEventArgs (w));
+		}
+		
 		protected virtual void OnWidgetNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args)
 		{
 			if (frontend != null)
 				frontend.NotifyWidgetNameChanged (Component.GetSafeReference (args.WidgetWrapper), args.OldName, args.NewName);
 			if (WidgetNameChanged != null)
 				WidgetNameChanged (this, args);
-		}
-		
-		void OnWidgetMemberNameChanged (object sender, Stetic.Wrapper.WidgetNameChangedArgs args)
-		{
-			NotifyChanged ();
-			OnWidgetMemberNameChanged (args);
-		}
-
-		protected virtual void OnWidgetMemberNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args)
-		{
-			if (WidgetMemberNameChanged != null)
-				WidgetMemberNameChanged (this, args);
 		}
 		
 		void OnSignalAdded (object sender, SignalEventArgs args)
@@ -902,69 +841,22 @@ namespace Stetic {
 				SignalChanged (this, args);
 		}
 
-		void ContentsChanged (Stetic.Wrapper.Container cwrap)
-		{
-			Container container = cwrap.Wrapped as Container;
-			ProjectNode node = nodes[container] as ProjectNode;
-			if (node == null)
-				return;
-
-			ArrayList children = new ArrayList ();
-			foreach (Gtk.Widget w in cwrap.RealChildren) {
-				if (w != null)
-					children.Add (w);
-			}
-
-			int i = 0;
-			while (i < node.ChildCount && i < children.Count) {
-				Widget widget = children[i] as Widget;
-				ITreeNode child = nodes[widget] as ITreeNode;
-
-				if (child == null)
-					AddWidget (widget, node, i);
-				else if (child != node[i]) {
-					int index = node.IndexOf (child);
-					while (index > i) {
-						RemoveNode (node[i] as ProjectNode);
-						index--;
-					}
-				}
-				i++;
-			}
-
-			while (i < node.ChildCount)
-				RemoveNode (node[i] as ProjectNode);
-
-			while (i < children.Count)
-				AddWidget (children[i++] as Widget, node);
-
-			NotifyChanged ();
-		}
-
 		public Gtk.Widget[] Toplevels {
 			get {
-				return (Gtk.Widget[]) topLevels.ToArray (typeof(Gtk.Widget));
+				List<Gtk.Widget> list = new List<Gtk.Widget> ();
+				foreach (WidgetData w in topLevels)
+					list.Add (GetWidget (w));
+				return list.ToArray ();
 			}
 		}
-
-		public void RemoveWidget (Container widget)
+		
+		public Gtk.Widget GetTopLevel (string name)
 		{
-			ProjectNode node = nodes[widget] as ProjectNode;
-			store.RemoveNode (node);
-			UnhashNodeRecursive (node);
-		}
-
-		public NodeStore Store {
-			get {
-				return store;
+			foreach (WidgetData w in topLevels) {
+				if (w.Name == name)
+					return GetWidget (w);
 			}
-		}
-
-		public void Clear ()
-		{
-			nodes.Clear ();
-			topLevels.Clear ();
-			store = new NodeStore (typeof (ProjectNode));
+			return null;
 		}
 
 		// IProject
@@ -1027,20 +919,6 @@ namespace Stetic {
 			m.Popup ();
 		}
 		
-		internal ProjectNode GetNode (object widget)
-		{
-			return (ProjectNode) nodes[widget];
-		}
-		
-		internal int GetWidgetId (object widget)
-		{
-			ProjectNode node = GetNode (widget);
-			if (node != null)
-				return node.Id;
-			else
-				return -1;
-		}
-
 		internal static string AbsoluteToRelativePath (string baseDirectoryPath, string absPath)
 		{
 			if (!Path.IsPathRooted (absPath))
@@ -1125,13 +1003,6 @@ namespace Stetic {
 				ModifiedChanged (this, args);
 		}
 		
-		protected virtual void OnWidgetRemoved (Stetic.Wrapper.WidgetEventArgs args)
-		{
-			NotifyChanged ();
-			if (WidgetRemoved != null)
-				WidgetRemoved (this, args);
-		}
-		
 		protected virtual void OnWidgetAdded (Stetic.Wrapper.WidgetEventArgs args)
 		{
 			NotifyChanged ();
@@ -1139,78 +1010,33 @@ namespace Stetic {
 				WidgetAdded (this, args);
 		}
 	}
-
-	[TreeNode (ColumnCount=2)]
-	public class ProjectNode : TreeNode {
-		Widget widget;
-		ClassDescriptor klass;
-		int id;
-		Wrapper.Widget wrapper;
-
-		public ProjectNode (Stetic.Wrapper.Widget wrapper)
-		{
-			this.widget = (Widget) wrapper.Wrapped;
-			this.wrapper = wrapper;
-			klass = wrapper.ClassDescriptor;
-		}
-		
-		public int Id {
-			get { return id; }
-			set { id = value; }
-		}
-
-		public Widget Widget {
-			get {
-				return widget;
-			}
-			set {
-				widget = value;
-			}
-		}
-
-		public Wrapper.Widget Wrapper {
-			get {
-				return wrapper;
-			}
-			set {
-				wrapper = value;
-			}
-		}
-
-		[TreeNodeValue (Column=0)]
-		public Gdk.Pixbuf Icon {
-			get {
-				return klass.Icon;
-			}
-		}
-
-		[TreeNodeValue (Column=1)]
-		public string Name {
-			get {
-				if (widget == null)
-					return "";
-				else
-					return widget.Name;
-			}
-		}
-		
-		public ProjectNode RootNode {
-			get {
-				ProjectNode p = this;
-				while (p.Parent != null)
-					p = (ProjectNode) p.Parent;
-				return p;
-			}
-		}
-		
-		public override string ToString ()
-		{
-			return "[ProjectNode " + GetHashCode().ToString() + " " + widget.GetType().FullName + " '" + Name + "']";
-		}
-	}
 	
 	class ImportContext
 	{
 		public StringCollection Directories = new StringCollection ();
+	}
+	
+	class WidgetData
+	{
+		string name;
+		
+		public WidgetData (string name, XmlElement data, Gtk.Widget widget)
+		{
+			this.name = name;
+			XmlData = data;
+			Widget = widget;
+		}
+		
+		public XmlElement XmlData;
+		public Gtk.Widget Widget;
+		
+		public string Name {
+			get {
+				if (Widget != null)
+					return Widget.Name;
+				else
+					return name;
+			}
+		}
 	}
 }

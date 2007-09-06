@@ -6,6 +6,7 @@ namespace Stetic
 	{
 		string FileName { get; }
 		Gtk.Widget[] Toplevels { get; }
+		Gtk.Widget GetTopLevel (string name);
 		Gtk.Widget Selection { get; set; }
 		Wrapper.ActionGroupCollection ActionGroups { get; }
 		ProjectIconFactory IconFactory { get; }
@@ -20,5 +21,12 @@ namespace Stetic
 		string ImportFile (string filePath);
 		
 		event Wrapper.WidgetEventHandler SelectionChanged;
+		
+		void NotifyObjectChanged (ObjectWrapperEventArgs args);
+		void NotifyNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args);
+		void NotifySignalAdded (SignalEventArgs args);
+		void NotifySignalRemoved (SignalEventArgs args);
+		void NotifySignalChanged (SignalChangedEventArgs args);
+		void NotifyWidgetContentsChanged (Wrapper.Widget w);
 	}
 }

@@ -1,3 +1,34 @@
+2007-09-06  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ActionGroupDesigner.cs, libsteticui/ApplicationBackend.cs,
+	  libsteticui/Designer.cs, libsteticui/Application.cs,
+	  libsteticui/WidgetDesigner.cs: The Application.ActiveProject has been
+	  replaced by Application.ActiveDesigner, which coveys more information
+	  about what to show in the designer widgets.
+	* libsteticui/ProjectBackend.cs, libsteticui/Project.cs, libstetic/DND.cs:
+	  Implemented lazy loading of windows. The project now only loads the xml,
+	  and only creates the widgets when they have to be shown in the designer.
+	* libsteticui/WidgetEditSession.cs, libsteticui/WidgetTree.cs,
+	  libsteticui/ProjectView.cs, libsteticui/ProjectViewBackend.cs: Renamed
+	  ProjectView to WidgetTree. This widget now only displays the widget tree
+	  of the currently active designer.
+	* libsteticui/libsteticui.mdp, libsteticui/Makefile.am: Added new files.
+	* libsteticui/PaletteBackend.cs: Hide the palette if there is no active
+	  project.
+	* libstetic/IProject.cs, libstetic/ObjectWrapper.cs,
+	  libstetic/wrapper/Widget.cs: Added notification methods to IProject, in
+	  this way some common events can be forwarded to the project without
+	  having to subscribe them on every widget.
+	* libstetic/wrapper/Button.cs, libstetic/wrapper/Object.cs,
+	  libstetic/wrapper/Container.cs, libstetic/TypedPropertyDescriptor.cs:
+	  Make sure change events are not fired when widgets are loaded from xml.
+	* libstetic/WidgetUtils.cs: Removed unused code.
+	* stetic/Stetic.cs, stetic/DesignerView.cs, stetic/stetic.glade,
+	  stetic/Makefile.am, stetic/stetic.mdp, stetic/WindowListWidget.cs,
+	  stetic/UIManager.cs: Added a new widget for displaying the list of all
+	  windows in the project, since the project view now only displays the
+	  widget tree of the active designer. Track other api changes.
+
 2007-09-04  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/objects.xml: Added support for NodeView. Fixes bug

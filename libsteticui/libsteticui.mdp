@@ -54,7 +54,7 @@
     <File name="./Palette.cs" subtype="Code" buildaction="Compile" />
     <File name="./WidgetPropertyTree.cs" subtype="Code" buildaction="Compile" />
     <File name="./ComponentEventHandler.cs" subtype="Code" buildaction="Compile" />
-    <File name="./ProjectView.cs" subtype="Code" buildaction="Compile" />
+    <File name="./WidgetTree.cs" subtype="Code" buildaction="Compile" />
     <File name="./SignalsEditor.cs" subtype="Code" buildaction="Compile" />
     <File name="./ActionGroupDesigner.cs" subtype="Code" buildaction="Compile" />
     <File name="./ActionGroupEditSession.cs" subtype="Code" buildaction="Compile" />
@@ -82,6 +82,7 @@
     <File name="./missing.png" subtype="Code" buildaction="EmbedAsResource" />
     <File name="./LibraryCache.cs" subtype="Code" buildaction="Compile" />
     <File name="./WidgetInfoEventHandler.cs" subtype="Code" buildaction="Compile" />
+    <File name="./Designer.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System.Runtime.Remoting, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />

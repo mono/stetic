@@ -11,9 +11,9 @@ namespace Stetic
 		Gtk.Widget actionbox;
 		WidgetInfo widget;
 		
-		public DesignerView (Stetic.Project project, WidgetInfo widget)
+		public DesignerView (Stetic.Project project, ProjectItemInfo item)
 		{
-			this.widget = widget;
+			this.widget = (WidgetInfo) item;
 
 			// Widget design tab
 			
@@ -28,6 +28,10 @@ namespace Stetic
 			AppendPage (design, new Gtk.Label (Catalog.GetString ("Designer")));
 			AppendPage (actionbox, new Gtk.Label (Catalog.GetString ("Actions")));
 			TabPos = Gtk.PositionType.Bottom;
+		}
+		
+		public ProjectItemInfo ProjectItem {
+			get { return widget; }
 		}
 		
 		public Component Component {

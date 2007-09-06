@@ -10,6 +10,7 @@ namespace Stetic {
 	
 		RecentFiles recentFiles;
 		Menu recentFilesMenu;
+		WidgetDesigner lastDesigner;
 
 		static string menuXml =
 		"<ui>" +
@@ -115,7 +116,7 @@ namespace Stetic {
 			
 			ReadRecentFiles ();
 
-			SteticMain.ProjectView.SelectionChanged += Selected;
+			SteticMain.CurrentDesignerChanged += OnDesignerChanged;
 			Project = project;
 		}
 
@@ -130,6 +131,16 @@ namespace Stetic {
 				GetAction ("/menubar/FileMenu/ImportGlade").Sensitive = (project != null);
 				GetAction ("/menubar/FileMenu/ExportGlade").Sensitive = (project != null);
 			}
+		}
+		
+		void OnDesignerChanged (object s, EventArgs args)
+		{
+			if (lastDesigner != null)
+				lastDesigner.SelectionChanged -= Selected;
+			lastDesigner = SteticMain.CurrentDesigner;
+			if (lastDesigner != null)
+				lastDesigner.SelectionChanged += Selected;
+			UpdateEdit ();
 		}
 
 		void OpenFile (object obj, EventArgs e)
@@ -338,7 +349,7 @@ namespace Stetic {
 				UpdateEdit (false, false, false);
 		}
 
-		void Selected (object s, ComponentEventArgs args)
+		void Selected (object s, EventArgs args)
 		{
 			UpdateEdit ();
 		}

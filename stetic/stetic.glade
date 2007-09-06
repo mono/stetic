@@ -155,12 +155,38 @@
 			  <property name="shadow_type">GTK_SHADOW_NONE</property>
 
 			  <child>
-			    <widget class="Custom" id="ProjectView">
+			    <widget class="GtkVPaned" id="vpaned2">
 			      <property name="visible">True</property>
-			      <property name="events">GDK_BUTTON_PRESS_MASK</property>
-			      <property name="int1">0</property>
-			      <property name="int2">0</property>
-			      <property name="last_modification_time">Wed, 01 Jun 2005 15:17:33 GMT</property>
+			      <property name="can_focus">True</property>
+			      <property name="position">150</property>
+
+			      <child>
+				<widget class="Custom" id="ProjectView">
+				  <property name="visible">True</property>
+				  <property name="events">GDK_BUTTON_PRESS_MASK</property>
+				  <property name="int1">0</property>
+				  <property name="int2">0</property>
+				  <property name="last_modification_time">Wed, 01 Jun 2005 15:17:33 GMT</property>
+				</widget>
+				<packing>
+				  <property name="shrink">True</property>
+				  <property name="resize">False</property>
+				</packing>
+			      </child>
+
+			      <child>
+				<widget class="Custom" id="WidgetTree">
+				  <property name="visible">True</property>
+				  <property name="events">GDK_BUTTON_PRESS_MASK</property>
+				  <property name="int1">0</property>
+				  <property name="int2">0</property>
+				  <property name="last_modification_time">Wed, 01 Jun 2005 15:17:33 GMT</property>
+				</widget>
+				<packing>
+				  <property name="shrink">True</property>
+				  <property name="resize">True</property>
+				</packing>
+			      </child>
 			    </widget>
 			  </child>
 			</widget>

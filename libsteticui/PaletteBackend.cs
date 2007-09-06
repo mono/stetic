@@ -74,7 +74,6 @@ namespace Stetic {
 					project.ProjectReloaded += OnProjectReloaded;
 				} else
 					UpdateSelection (null);
-
 				LoadWidgets (project);
 			}
 		}
@@ -131,6 +130,13 @@ namespace Stetic {
 		
 		public void LoadWidgets (ProjectBackend project)
 		{
+			if (project == null) {
+				box.Hide ();
+				return;
+			}
+			
+			box.Show ();
+			
 			foreach (PaletteGroup g in groups.Values) {
 				box.Remove (g);
 				g.Destroy ();

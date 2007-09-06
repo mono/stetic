@@ -338,17 +338,30 @@ namespace Stetic.Wrapper
 		protected virtual ObjectWrapper ReadChild (ObjectReader reader, XmlElement child_elem)
 		{
 			ObjectWrapper wrapper = reader.ReadObject (child_elem["widget"]);
+			Container.ContainerChild childwrapper = null;
+			
+			try {
+				wrapper.Loading = true;
 
-			Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
+				Gtk.Widget child = (Gtk.Widget)wrapper.Wrapped;
 
-			AutoSize[child] = false;
-			container.Add (child);
-
-			if (reader.Format == FileFormat.Glade)
-				GladeUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
-			else
-				WidgetUtils.SetPacking (ChildWrapper ((Widget)wrapper), child_elem);
-			return wrapper;
+				AutoSize[child] = false;
+				container.Add (child);
+				
+				childwrapper = ChildWrapper ((Widget)wrapper);
+				if (childwrapper != null)
+					childwrapper.Loading = true;
+				
+				if (reader.Format == FileFormat.Glade)
+					GladeUtils.SetPacking (childwrapper, child_elem);
+				else
+					WidgetUtils.SetPacking (childwrapper, child_elem);
+				return wrapper;
+			} finally {
+				wrapper.Loading = false;
+				if (childwrapper != null)
+					childwrapper.Loading = false;
+			}
 		}
 		
 		void ReadPlaceholder (ObjectReader reader, XmlElement child_elem)
@@ -744,10 +757,14 @@ namespace Stetic.Wrapper
 
 		protected void EmitContentsChanged ()
 		{
+			if (Loading)
+				return;
 			if (ContentsChanged != null)
 				ContentsChanged (this);
 			if (ParentWrapper != null)
 				ParentWrapper.ChildContentsChanged (this);
+			if (Project != null)
+				Project.NotifyWidgetContentsChanged (this);
 			NotifyChanged ();
 		}
 
@@ -858,8 +875,8 @@ namespace Stetic.Wrapper
 			}
 		}
 
-		protected virtual void ChildContentsChanged (Container child) {
-			;
+		protected virtual void ChildContentsChanged (Container child)
+		{
 		}
 
 		void ChildRemoved (object obj, Gtk.RemovedArgs args)

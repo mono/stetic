@@ -17,10 +17,11 @@ namespace Stetic {
 
 		static Stetic.Palette Palette;
 		static Stetic.Project Project;
-		public static Stetic.ProjectView ProjectView;
-		static Stetic.SignalsEditor Signals;
+		public static WindowListWidget ProjectView;
+		static SignalsEditor Signals;
 		static Gtk.Notebook WidgetNotebook; 
-		static Stetic.WidgetPropertyTree propertyTree;
+		static WidgetPropertyTree propertyTree;
+		static WidgetTree widgetTree;
 
 		public static Stetic.UIManager UIManager;
 		public static Gtk.Window MainWindow;
@@ -129,7 +130,6 @@ namespace Stetic {
 		static int RunApp (string[] args, int n)
 		{
 			Project = SteticApp.CreateProject ();
-			SteticApp.ActiveProject = Project;
 			
 			Project.WidgetAdded += OnWidgetAdded;
 			Project.WidgetRemoved += OnWidgetRemoved;
@@ -137,9 +137,10 @@ namespace Stetic {
 			Project.ProjectReloaded += OnProjectReloaded;
 
 			Palette = SteticApp.PaletteWidget;
-			ProjectView = SteticApp.ProjectWidget;
+			widgetTree = SteticApp.WidgetTreeWidget;
 			Signals = SteticApp.SignalsWidget;
 			propertyTree = SteticApp.PropertiesWidget;
+			ProjectView = new WindowListWidget ();
 			
 			UIManager = new Stetic.UIManager (Project);
 
@@ -167,7 +168,7 @@ namespace Stetic {
 			WidgetNotebook = (Gtk.Notebook) glade ["notebook"];
 			WidgetNotebook.SwitchPage += OnPageChanged;
 			ProjectView.ComponentActivated += OnWidgetActivated;
-			ProjectView.SelectionChanged += OnSelectionChanged;
+			widgetTree.SelectionChanged += OnSelectionChanged;
 
 #if GTK_SHARP_2_6
 			// This is needed for both our own About dialog and for ones
@@ -185,6 +186,8 @@ namespace Stetic {
 				SteticApp.AddWidgetLibrary (s);
 			}
 			SteticApp.UpdateWidgetLibraries (false);
+			
+			ProjectView.Fill (Project);
 			
 			Program.Run ();
 			return 0;
@@ -206,6 +209,8 @@ namespace Stetic {
 				return UIManager.MenuBar;
 			else if (name == "Toolbar")
 				return UIManager.Toolbar;
+			else if (name == "WidgetTree")
+				return widgetTree;
 			else
 				return null;
 		}
@@ -246,9 +251,9 @@ namespace Stetic {
 				OpenWindow (wi);
 		}
 		
-		static void OnWidgetActivated (object s, ComponentEventArgs args)
+		static void OnWidgetActivated (object s, EventArgs args)
 		{
-			WidgetInfo wi = Project.GetWidget (args.Component.Name);
+			ProjectItemInfo wi = ProjectView.Selection;
 			OpenWindow (wi);
 		}
 		
@@ -304,21 +309,21 @@ namespace Stetic {
 			return w != null && w.Visible;
 		}
 		
-		static void OpenWindow (WidgetInfo widget)
+		static void OpenWindow (ProjectItemInfo item)
 		{
-			Gtk.Widget page = (Gtk.Widget) openWindows [widget];
+			Gtk.Widget page = (Gtk.Widget) openWindows [item];
 			if (page != null) {
 				page.Show ();
 				WidgetNotebook.Page = WidgetNotebook.PageNum (page);
 			}
 			else {
-				DesignerView view = new DesignerView (Project, widget);
+				DesignerView view = new DesignerView (Project, item);
 				
 				// Tab label
 				
 				HBox tabLabel = new HBox ();
-				tabLabel.PackStart (new Gtk.Image (widget.Component.Type.Icon), true, true, 0);
-				tabLabel.PackStart (new Label (widget.Name), true, true, 3);
+				tabLabel.PackStart (new Gtk.Image (item.Component.Type.Icon), true, true, 0);
+				tabLabel.PackStart (new Label (item.Name), true, true, 3);
 				Button b = new Button (new Gtk.Image ("gtk-close", IconSize.Menu));
 				b.Relief = Gtk.ReliefStyle.None;
 				b.WidthRequest = b.HeightRequest = 24;
@@ -335,7 +340,7 @@ namespace Stetic {
 				
 				int p = WidgetNotebook.AppendPage (view, tabLabel);
 				view.ShowAll ();
-				openWindows [widget] = view;
+				openWindows [item] = view;
 				WidgetNotebook.Page = p;
 			}
 		}
@@ -348,12 +353,22 @@ namespace Stetic {
 					WidgetNotebook.Remove (page);
 					openWindows.Remove (widget);
 					page.Dispose ();
+					if (openWindows.Count == 0)
+						SteticApp.ActiveDesigner = null;
 				}
 			}
 		}
 		
 		static void OnPageChanged (object s, EventArgs a)
 		{
+			if (WidgetNotebook != null) {
+				DesignerView view = WidgetNotebook.CurrentPageWidget as DesignerView;
+				if (view != null) {
+					ProjectView.Selection = view.ProjectItem;
+					SteticApp.ActiveDesigner = view.Designer;
+				}
+			}
+			
 			if (CurrentDesignerChanged != null)
 				CurrentDesignerChanged (null, a);
 		}
@@ -374,6 +389,7 @@ namespace Stetic {
 				
 				string title = "Stetic - " + Path.GetFileName (file);
 				MainWindow.Title = title;
+				ProjectView.Fill (Project);
 				
 			} catch (Exception ex) {
 				Console.WriteLine (ex);
@@ -461,6 +477,7 @@ namespace Stetic {
 
 			Project.Close ();
 			MainWindow.Title = "Stetic";
+			ProjectView.Clear ();
 			return true;
 		}
 		
