@@ -1,5 +1,12 @@
 2007-09-06  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/ProjectBackend.cs, libsteticui/WidgetEditSession.cs: When
+	  creating the designer, about creating twice the window widget (once for
+	  the source project and once for the project being edited). Removed some
+	  debug code.
+
+2007-09-06  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ActionGroupDesigner.cs, libsteticui/ApplicationBackend.cs,
 	  libsteticui/Designer.cs, libsteticui/Application.cs,
 	  libsteticui/WidgetDesigner.cs: The Application.ActiveProject has been

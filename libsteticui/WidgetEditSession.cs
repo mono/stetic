@@ -59,7 +59,7 @@ namespace Stetic {
 		public event EventHandler RootWidgetChanged;
 		public event Stetic.Wrapper.WidgetEventHandler SelectionChanged;
 		
-		public WidgetEditSession (WidgetDesignerFrontend frontend, Stetic.Wrapper.Container win, Stetic.ProjectBackend editingBackend, bool autoCommitChanges)
+		public WidgetEditSession (ProjectBackend sourceProject, WidgetDesignerFrontend frontend, string windowName, Stetic.ProjectBackend editingBackend, bool autoCommitChanges)
 		{
 			this.frontend = frontend;
 			this.autoCommitChanges = autoCommitChanges;
@@ -67,8 +67,13 @@ namespace Stetic {
 			undoQueue = new UndoQueue ();
 			undoManager.UndoQueue = undoQueue;
 			
-			sourceWidget = win.Wrapped.Name;
-			sourceProject = (ProjectBackend) win.Project;
+			sourceWidget = windowName;
+			this.sourceProject = sourceProject;
+			
+			Gtk.Widget tw = sourceProject.GetTopLevel (windowName);
+			if (tw == null)
+				throw new InvalidOperationException ("Component not found: " + windowName);
+			Stetic.Wrapper.Container win = Stetic.Wrapper.Container.Lookup (tw);
 			
 			if (!autoCommitChanges) {
 				// Reuse the action groups and icon factory of the main project
@@ -77,12 +82,12 @@ namespace Stetic {
 				// Attach will prevent the destruction of the action group list by gproject
 				gproject.AttachActionGroups (win.Project.ActionGroups);
 				
-				gproject.IconFactory = win.Project.IconFactory;
-				gproject.FileName = win.Project.FileName;
-				gproject.ImagesRootPath = win.Project.ImagesRootPath;
-				gproject.ResourceProvider = win.Project.ResourceProvider;
-				gproject.WidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).WidgetLibraries.Clone ();
-				gproject.InternalWidgetLibraries = (ArrayList) ((ProjectBackend)win.Project).InternalWidgetLibraries.Clone ();
+				gproject.IconFactory = sourceProject.IconFactory;
+				gproject.FileName = sourceProject.FileName;
+				gproject.ImagesRootPath = sourceProject.ImagesRootPath;
+				gproject.ResourceProvider = sourceProject.ResourceProvider;
+				gproject.WidgetLibraries = (ArrayList) sourceProject.WidgetLibraries.Clone ();
+				gproject.InternalWidgetLibraries = (ArrayList) sourceProject.InternalWidgetLibraries.Clone ();
 				gproject.TargetGtkVersion = sourceProject.TargetGtkVersion;
 				sourceProject.ComponentTypesChanged += OnSourceProjectLibsChanged;
 				sourceProject.ProjectReloaded += OnSourceProjectReloaded;
@@ -91,17 +96,15 @@ namespace Stetic {
 				if (rootWidget == null) {
 					// Copy the widget to edit from the source project
 					// When saving the file, this project will be merged with the main project.
-					XmlElement data = Stetic.WidgetUtils.ExportWidget (win.Wrapped);
-					Gtk.Widget w = Stetic.WidgetUtils.ImportWidget (gproject, data);
-					gproject.AddWidget (w);
-					rootWidget = Stetic.Wrapper.Container.Lookup (w);
+					sourceProject.CopyWidgetToProject (windowName, gproject);
+					rootWidget = gproject.GetTopLevelWrapper (windowName, true);
 				}
 				
 				gproject.Modified = false;
 			}
 			else {
-				gproject = (Stetic.ProjectBackend) win.Project;
-				rootWidget = win;
+				rootWidget = sourceProject.GetTopLevelWrapper (windowName, true);
+				gproject = sourceProject;
 			}
 			
 			rootWidget.Select ();

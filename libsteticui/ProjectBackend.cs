@@ -294,7 +294,6 @@ namespace Stetic {
 		public void Load (string xmlFile, string fileName)
 		{
 			this.fileName = fileName;
-			DateTime tim = DateTime.Now;
 			XmlDocument doc = new XmlDocument ();
 			doc.PreserveWhitespace = true;
 			doc.Load (xmlFile);
@@ -309,7 +308,6 @@ namespace Stetic {
 			string basePath = fileName != null ? Path.GetDirectoryName (fileName) : null;
 			
 			try {
-				DateTime tim = DateTime.Now;
 				string fn = fileName;
 				Close ();
 				fileName = fn;
@@ -374,8 +372,6 @@ namespace Stetic {
 				if (iconsElem != null)
 					iconFactory.Read (this, iconsElem);
 				
-				tim = DateTime.Now;
-				
 				foreach (XmlElement toplevel in node.SelectNodes ("widget")) {
 					topLevels.Add (new WidgetData (toplevel.GetAttribute ("id"), toplevel, null));
 				}
@@ -398,7 +394,6 @@ namespace Stetic {
 		public void Save (string fileName)
 		{
 			this.fileName = fileName;
-			DateTime tim = DateTime.Now;
 			XmlDocument doc = Write (false);
 			
 			XmlTextWriter writer = null;
@@ -548,11 +543,7 @@ namespace Stetic {
 		
 		internal WidgetEditSession CreateWidgetDesignerSession (WidgetDesignerFrontend frontend, string windowName, Stetic.ProjectBackend editingBackend, bool autoCommitChanges)
 		{
-			Gtk.Widget w = GetTopLevel (windowName);
-			if (w != null)
-				return new WidgetEditSession (frontend, Stetic.Wrapper.Container.Lookup (w), editingBackend, autoCommitChanges);
-			else
-				throw new InvalidOperationException ("Component not found: " + windowName);
+			return new WidgetEditSession (this, frontend, windowName, editingBackend, autoCommitChanges);
 		}
 		
 		internal ActionGroupEditSession CreateGlobalActionGroupDesignerSession (ActionGroupDesignerFrontend frontend, string groupName, bool autoCommitChanges)
@@ -598,13 +589,7 @@ namespace Stetic {
 		
 		public void RemoveWidget (string name)
 		{
-			WidgetData data = null;
-			foreach (WidgetData d in topLevels) {
-				if (d.Name == name) {
-					data = d;
-					break;
-				}
-			}
+			WidgetData data = GetWidgetData (name);
 			if (data == null)
 				return;
 			
@@ -644,6 +629,22 @@ namespace Stetic {
 		{
 			// Needed since ActionGroupCollection can't be made serializable
 			return ActionGroups.ToArray ();
+		}
+				
+		public void CopyWidgetToProject (string name, ProjectBackend other)
+		{
+			WidgetData wdata = GetWidgetData (name);
+			if (name == null)
+				throw new InvalidOperationException ("Component not found: " + name);
+			
+			XmlElement data;
+			if (wdata.Widget != null)
+				data = Stetic.WidgetUtils.ExportWidget (wdata.Widget);
+			else
+				data = wdata.XmlData;
+			
+			wdata = new WidgetData (name, data, null);
+			other.topLevels.Add (wdata);
 		}
 		
 		void OnRegistryChanging (object o, EventArgs args)
@@ -852,9 +853,18 @@ namespace Stetic {
 		
 		public Gtk.Widget GetTopLevel (string name)
 		{
+			WidgetData w = GetWidgetData (name);
+			if (w != null)
+				return GetWidget (w);
+			else
+				return null;
+		}
+
+		public WidgetData GetWidgetData (string name)
+		{
 			foreach (WidgetData w in topLevels) {
 				if (w.Name == name)
-					return GetWidget (w);
+					return w;
 			}
 			return null;
 		}
