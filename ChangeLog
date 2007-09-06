@@ -1,5 +1,9 @@
 2007-09-06  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libsteticui/WidgetEditSession.cs: Removed unneeded code.
+
+2007-09-06  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/ProjectBackend.cs, libsteticui/WidgetEditSession.cs: When
 	  creating the designer, about creating twice the window widget (once for
 	  the source project and once for the project being edited). Removed some

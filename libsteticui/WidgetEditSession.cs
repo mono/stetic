@@ -70,17 +70,12 @@ namespace Stetic {
 			sourceWidget = windowName;
 			this.sourceProject = sourceProject;
 			
-			Gtk.Widget tw = sourceProject.GetTopLevel (windowName);
-			if (tw == null)
-				throw new InvalidOperationException ("Component not found: " + windowName);
-			Stetic.Wrapper.Container win = Stetic.Wrapper.Container.Lookup (tw);
-			
 			if (!autoCommitChanges) {
 				// Reuse the action groups and icon factory of the main project
 				gproject = editingBackend;
 				
 				// Attach will prevent the destruction of the action group list by gproject
-				gproject.AttachActionGroups (win.Project.ActionGroups);
+				gproject.AttachActionGroups (sourceProject.ActionGroups);
 				
 				gproject.IconFactory = sourceProject.IconFactory;
 				gproject.FileName = sourceProject.FileName;
