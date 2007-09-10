@@ -631,7 +631,7 @@ namespace Stetic {
 			return ActionGroups.ToArray ();
 		}
 				
-		public void CopyWidgetToProject (string name, ProjectBackend other)
+		public void CopyWidgetToProject (string name, ProjectBackend other, string replacedName)
 		{
 			WidgetData wdata = GetWidgetData (name);
 			if (name == null)
@@ -643,10 +643,27 @@ namespace Stetic {
 			else
 				data = wdata.XmlData;
 			
-			wdata = new WidgetData (name, data, null);
-			other.topLevels.Add (wdata);
+			// If widget already exist, replace it
+			wdata = other.GetWidgetData (replacedName);
+			if (wdata == null) {
+				wdata = new WidgetData (name, data, null);
+				other.topLevels.Add (wdata);
+			} else {
+				if (wdata.Widget != null) {
+					// If a widget instance already exist, load the new data on it
+					Wrapper.Widget sw = Wrapper.Widget.Lookup (wdata.Widget);
+					sw.Read (new ObjectReader (other, FileFormat.Native), data);
+					sw.NotifyChanged ();
+					if (name != replacedName)
+						other.OnWidgetNameChanged (new Wrapper.WidgetNameChangedArgs (sw, replacedName, name), true);
+				} else {
+					wdata.SetXmlData (name, data);
+					if (name != replacedName)
+						other.OnWidgetNameChanged (new Wrapper.WidgetNameChangedArgs (null, replacedName, name), true);
+				}
+			}
 		}
-		
+
 		void OnRegistryChanging (object o, EventArgs args)
 		{
 			if (loading) return;
@@ -759,7 +776,7 @@ namespace Stetic {
 			if (loading)
 				return;
 			NotifyChanged ();
-			OnWidgetNameChanged (args);
+			OnWidgetNameChanged (args, args.WidgetWrapper.IsTopLevel);
 		}
 		
 		void IProject.NotifySignalAdded (SignalEventArgs args)
@@ -795,11 +812,11 @@ namespace Stetic {
 				WidgetContentsChanged (this, new Wrapper.WidgetEventArgs (w));
 		}
 		
-		protected virtual void OnWidgetNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args)
+		void OnWidgetNameChanged (Stetic.Wrapper.WidgetNameChangedArgs args, bool isTopLevel)
 		{
 			if (frontend != null)
-				frontend.NotifyWidgetNameChanged (Component.GetSafeReference (args.WidgetWrapper), args.OldName, args.NewName);
-			if (WidgetNameChanged != null)
+				frontend.NotifyWidgetNameChanged (Component.GetSafeReference (args.WidgetWrapper), args.OldName, args.NewName, isTopLevel);
+			if (args.WidgetWrapper != null && WidgetNameChanged != null)
 				WidgetNameChanged (this, args);
 		}
 		
@@ -1032,9 +1049,15 @@ namespace Stetic {
 		
 		public WidgetData (string name, XmlElement data, Gtk.Widget widget)
 		{
+			SetXmlData (name, data);
+			Widget = widget;
+		}
+		
+		public void SetXmlData (string name, XmlElement data)
+		{
 			this.name = name;
 			XmlData = data;
-			Widget = widget;
+			Widget = null;
 		}
 		
 		public XmlElement XmlData;

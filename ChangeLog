@@ -1,3 +1,9 @@
+2007-09-10  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs, libsteticui/WidgetEditSession.cs,
+	  libsteticui/Project.cs: Properly propagate the widget name change event
+	  when saving the contents of the designer.
+
 2007-09-06  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/WidgetEditSession.cs: Removed unneeded code.

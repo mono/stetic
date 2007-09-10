@@ -91,7 +91,7 @@ namespace Stetic {
 				if (rootWidget == null) {
 					// Copy the widget to edit from the source project
 					// When saving the file, this project will be merged with the main project.
-					sourceProject.CopyWidgetToProject (windowName, gproject);
+					sourceProject.CopyWidgetToProject (windowName, gproject, windowName);
 					rootWidget = gproject.GetTopLevelWrapper (windowName, true);
 				}
 				
@@ -175,13 +175,8 @@ namespace Stetic {
 		public void Save ()
 		{
 			if (!autoCommitChanges) {
-				XmlElement data = Stetic.WidgetUtils.ExportWidget (rootWidget.Wrapped);
-				
-				Wrapper.Widget sw = sourceProject.GetTopLevelWrapper (sourceWidget, false);
-				sw.Read (new ObjectReader (gproject, FileFormat.Native), data);
-				
-				sourceWidget = ((Gtk.Widget)sw.Wrapped).Name;
-				sw.NotifyChanged ();
+				gproject.CopyWidgetToProject (rootWidget.Wrapped.Name, sourceProject, sourceWidget);
+				sourceWidget = rootWidget.Wrapped.Name;
 				gproject.Modified = false;
 			}
 		}
