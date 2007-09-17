@@ -62,6 +62,10 @@ namespace Stetic
 			get { return rootWidget; }
 		}
 		
+		public override ProjectItemInfo ProjectItem {
+			get { return project.GetWidget (rootWidget.Name); }
+		}
+		
 		public ComponentType[] GetComponentTypes ()
 		{
 			if (!disposed) {

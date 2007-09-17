@@ -39,6 +39,10 @@ namespace Stetic
 		public string OldName {
 			get { return oldName; }
 		}
+		
+		public string NewName {
+			get { return Component.Name; }
+		}
 	}
 	
 	public class ComponentRemovedEventArgs: EventArgs

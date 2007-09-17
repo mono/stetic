@@ -39,6 +39,10 @@ namespace Stetic
 			app.ActiveProject = project;
 		}
 		
+		public override ProjectItemInfo ProjectItem {
+			get { return project.GetWidget (RootComponent.Name); }
+		}
+		
 		public Component RootComponent {
 			get { return app.GetComponent (editSession.EditedActionGroup, null, null); }
 		}

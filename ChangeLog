@@ -1,3 +1,11 @@
+2007-09-17  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ActionGroupDesigner.cs, libsteticui/Designer.cs,
+	  libsteticui/WidgetDesigner.cs: Added a property for getting the project
+	  element being edited in the designer.
+	* libsteticui/ComponentEventHandler.cs: Added property for getting the new
+	  name in the args for the name change event.
+
 2007-09-13  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/WidgetUtils.cs: Fix version comparison logic.

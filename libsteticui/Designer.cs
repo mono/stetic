@@ -38,5 +38,7 @@ namespace Stetic
 		internal virtual void SetActive ()
 		{
 		}
+		
+		public abstract ProjectItemInfo ProjectItem { get; }
 	}
 }
