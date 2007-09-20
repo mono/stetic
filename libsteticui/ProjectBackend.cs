@@ -329,6 +329,7 @@ namespace Stetic {
 				
 				// Load the assembly directories
 				importContext = new ImportContext ();
+				importContext.App = app;
 				foreach (XmlElement libElem in node.SelectNodes ("import/assembly-directory")) {
 					string dir = libElem.GetAttribute ("path");
 					if (dir.Length > 0) {
@@ -1041,6 +1042,7 @@ namespace Stetic {
 	class ImportContext
 	{
 		public StringCollection Directories = new StringCollection ();
+		public ApplicationBackend App;
 	}
 	
 	class WidgetData

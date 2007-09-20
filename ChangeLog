@@ -1,3 +1,10 @@
+2007-09-20  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/ProjectBackend.cs, libsteticui/AssemblyWidgetLibrary.cs,
+	  libsteticui/CecilWidgetLibrary.cs, libsteticui/ApplicationBackend.cs,
+	  libsteticui/Application.cs: Added a callback for resolving assembly
+	  names.
+
 2007-09-17  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ActionGroupDesigner.cs, libsteticui/Designer.cs,

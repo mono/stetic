@@ -18,7 +18,7 @@ namespace Stetic
 		SignalsEditorEditSession signalsWidget;
 		ProjectViewBackend projectWidget;
 		ArrayList globalWidgetLibraries = new ArrayList ();
-		WidgetLibraryResolveHandler widgetLibraryResolver;
+		AssemblyResolverCallback widgetLibraryResolver;
 		object targetViewerObject;
 		bool allowInProcLibraries = true;
 		Application appFrontend;
@@ -97,7 +97,7 @@ namespace Stetic
 			return null;
 		}
 		
-		public WidgetLibraryResolveHandler WidgetLibraryResolver {
+		public AssemblyResolverCallback WidgetLibraryResolver {
 			get { return widgetLibraryResolver; }
 			set { widgetLibraryResolver = value; }
 		}
@@ -243,22 +243,16 @@ namespace Stetic
 		
 		WidgetLibrary CreateLibrary (ImportContext ctx, string name)
 		{
-			// Try loading the library using the resolved delegate
-			WidgetLibrary alib = null;
-			if (widgetLibraryResolver != null)
-				alib = widgetLibraryResolver (name);
-			if (alib == null) {
-				try {
-					if (allowInProcLibraries)
-						return new AssemblyWidgetLibrary (ctx, name);
-					else
-						return new CecilWidgetLibrary (ctx, name);
-				} catch (Exception ex) {
-					// FIXME: handle the error, but keep loading.
-					Console.WriteLine (ex);
-				}
+			try {
+				if (allowInProcLibraries)
+					return new AssemblyWidgetLibrary (ctx, name);
+				else
+					return new CecilWidgetLibrary (ctx, name);
+			} catch (Exception ex) {
+				// FIXME: handle the error, but keep loading.
+				Console.WriteLine (ex);
+				return null;
 			}
-			return null;
 		}
 		
 		void CheckDependencies (ImportContext ctx, Hashtable visited, WidgetLibrary lib)
@@ -627,6 +621,14 @@ namespace Stetic
 				ClassDescriptor cls = Registry.LookupClassByName (className);
 				DND.Drag (source, ctx, cls.NewInstance (project) as Gtk.Widget);
 			}
+		}
+		
+		public string ResolveAssembly (string assemblyName)
+		{
+			if (widgetLibraryResolver != null)
+				return widgetLibraryResolver (assemblyName);
+			else
+				return null;
 		}
 	}
 }

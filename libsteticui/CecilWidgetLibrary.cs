@@ -30,6 +30,12 @@ namespace Stetic
 			fromCache = objects != null;
 	
 			this.name = assemblyPath;
+			if (importContext != null) {
+				string ares = importContext.App.ResolveAssembly (assemblyPath);
+				if (ares != null)
+					assemblyPath = ares;
+			}
+			
 			fileName = assemblyPath;
 			this.importContext = importContext;
 			if (File.Exists (assemblyPath))
@@ -252,12 +258,18 @@ namespace Stetic
 			if (resolver == null)
 				resolver = new DefaultAssemblyResolver ();
 			
-			string filePath = null;
 			string bpath = Path.Combine (Path.GetDirectoryName (fileName), aref.Name);
-			if (File.Exists (bpath + ".dll"))
-				filePath = bpath + ".dll";
-			if (File.Exists (bpath + ".exe"))
-				filePath = bpath + ".exe";
+			string filePath = null;
+			
+			if (importContext != null)
+				filePath = importContext.App.ResolveAssembly (aref.FullName);
+			    
+			if (filePath != null) {
+				if (File.Exists (bpath + ".dll"))
+					filePath = bpath + ".dll";
+				if (File.Exists (bpath + ".exe"))
+					filePath = bpath + ".exe";
+			}
 				
 			if (filePath != null) {
 				adef = AssemblyFactory.GetAssembly (filePath);
@@ -364,6 +376,12 @@ namespace Stetic
 		
 		public static string FindAssembly (ImportContext importContext, string assemblyName, string basePath)
 		{
+			if (importContext != null) {
+				string ares = importContext.App.ResolveAssembly (assemblyName);
+				if (ares != null)
+					return ares;
+			}
+			
 			StringCollection col = new StringCollection ();
 			col.Add (basePath);
 			if (importContext != null) {

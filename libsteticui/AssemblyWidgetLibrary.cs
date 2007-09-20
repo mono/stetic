@@ -25,6 +25,12 @@ namespace Stetic
 		
 		public AssemblyWidgetLibrary (ImportContext importContext, string assemblyPath)
 		{
+			this.name = assemblyPath;
+			
+			string ares = importContext.App.ResolveAssembly (assemblyPath);
+			if (ares != null)
+				assemblyPath = ares;
+			
 			this.importContext = importContext;
 			if (assemblyPath.EndsWith (".dll") || assemblyPath.EndsWith (".exe")) {
 				if (File.Exists (assemblyPath))
@@ -37,7 +43,6 @@ namespace Stetic
 			else
 				timestamp = DateTime.MinValue;
 
-			this.name = assemblyPath;
 			Init ();
 		}
 		

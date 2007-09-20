@@ -23,7 +23,7 @@ namespace Stetic
 		ProcessUnix
 	}
 	
-	public delegate WidgetLibrary WidgetLibraryResolveHandler (string name);
+	public delegate string AssemblyResolverCallback (string assemblyName);
 	
 	public class Application: MarshalByRefObject, IDisposable
 	{
@@ -66,13 +66,9 @@ namespace Stetic
 			}
 		}
 		
-		public WidgetLibraryResolveHandler WidgetLibraryResolver {
+		public AssemblyResolverCallback WidgetLibraryResolver {
 			get { return Backend.WidgetLibraryResolver; }
-			set { 
-				if (UseExternalBackend)
-					throw new InvalidOperationException ("Can use a custom library resolver when running in isolated mode.");
-				Backend.WidgetLibraryResolver = value;
-			}
+			set { Backend.WidgetLibraryResolver = value; }
 		}
 		
 		public bool ShowNonContainerWarning {
@@ -279,7 +275,9 @@ namespace Stetic
 		
 		public bool IsWidgetLibrary (string assemblyRef)
 		{
-			return Application.InternalIsWidgetLibrary (null, assemblyRef);
+			ImportContext ic = new ImportContext ();
+			ic.App = this.Backend;
+			return Application.InternalIsWidgetLibrary (ic, assemblyRef);
 		}
 		
 		internal static bool InternalIsWidgetLibrary (ImportContext ic, string assemblyRef)
