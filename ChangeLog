@@ -1,3 +1,7 @@
+2007-10-01  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/CecilWidgetLibrary.cs: Added missing null check.
+
 2007-09-20  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ProjectBackend.cs, libsteticui/AssemblyWidgetLibrary.cs,

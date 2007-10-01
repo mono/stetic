@@ -239,6 +239,8 @@ namespace Stetic
 		
 		Stetic.ClassDescriptor FindType (AssemblyDefinition asm, TypeDefinition cls)
 		{
+			if (cls.BaseType == null)
+				return null;
 			Stetic.ClassDescriptor klass = Stetic.Registry.LookupClassByName (cls.BaseType.FullName);
 			if (klass != null) return klass;
 			
