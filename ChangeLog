@@ -1,3 +1,8 @@
+2007-10-04  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/wrapper/Action.cs: Avoid providing a null name in the Gtk.Action
+	  constructor. Fixes crash in gtk+ 2.12.
+
 2007-10-01  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/CecilWidgetLibrary.cs: Added missing null check.

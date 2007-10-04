@@ -218,7 +218,7 @@ namespace Stetic.Wrapper
 		
 		public override void Read (ObjectReader reader, XmlElement elem)
 		{
-			Gtk.Action ac = new Gtk.Action (name, "");
+			Gtk.Action ac = new Gtk.Action ("", "");
 			
 			ClassDescriptor klass = Registry.LookupClassByName ("Gtk.Action");
 			ObjectWrapper.Bind (reader.Project, klass, this, ac, true);
