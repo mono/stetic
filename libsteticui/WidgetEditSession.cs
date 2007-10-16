@@ -187,9 +187,6 @@ namespace Stetic {
 		
 		public void Dispose ()
 		{
-			if (toolbar != null)
-				toolbar.Destroy ();
-			
 			sourceProject.ComponentTypesChanged -= OnSourceProjectLibsChanged;
 			sourceProject.ProjectReloaded -= OnSourceProjectReloaded;
 			
@@ -294,7 +291,7 @@ namespace Stetic {
 				rootWidget = Stetic.Wrapper.Container.Lookup (tops[0]);
 				undoManager.RootObject = rootWidget;
 				if (rootWidget != null) {
-					WidgetDesignerBackend oldWidget = widget;
+					Gtk.Widget oldWidget = designer;
 					if (widget != null) {
 						widget.SelectionChanged -= OnSelectionChanged;
 						widget = null;
@@ -334,7 +331,6 @@ namespace Stetic {
 			if (designer != null) {
 				if (designer.Parent is Gtk.Plug)
 					((Gtk.Plug)designer.Parent).Remove (designer);
-				designer.Dispose ();
 				designer = null;
 			}
 			

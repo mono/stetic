@@ -32,5 +32,14 @@ namespace Stetic
 		{
 			groupDesign.UpdateObjectViewers ();
 		}
+		
+		public override void Dispose ()
+		{
+			this.editor = null;
+			this.toolbar = null;
+			this.groupDesign = null;
+			base.Dispose ();
+		}
+
 	}
 }

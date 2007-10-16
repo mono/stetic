@@ -64,8 +64,9 @@ namespace Stetic.Editor
 			
 			foreach (ActionMenuItem aitem in items) {
 				aitem.KeyPressEvent -= OnItemKeyPress;
-				aitem.Dispose ();
 				aitem.Node.Dispose ();
+				aitem.Detach ();
+				aitem.Destroy ();
 			}
 			items.Clear ();
 			ActionGroup = null;
@@ -290,6 +291,7 @@ namespace Stetic.Editor
 				item.Detach ();
 				item.Node.Dispose ();
 				items.Remove (item);
+				item.Destroy ();
 				PlaceAddLabel (actionGroup.Actions.Count);
 				ShowAll ();
 			}

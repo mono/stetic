@@ -50,9 +50,6 @@ namespace Stetic
 		{
 			RootWidget = null;
 			Clear ();
-			combo.Dispose ();
-			combo.Destroy ();
-			combo = null;
 			base.Dispose ();
 		}
 		
@@ -101,7 +98,6 @@ namespace Stetic
 				if (child != comboItem) {
 					Remove (child);
 					child.Destroy ();
-					child.Dispose ();
 				}
 		}
 		

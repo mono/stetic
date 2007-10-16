@@ -111,8 +111,6 @@ namespace Stetic
 			}
 			
 			resizableFixed.Put (preview, container);
-		//	Gtk.Fixed realFixed = new Gtk.Fixed ();
-		//	realFixed.Put (fixd, 0, 0);
 
 			if (designWidth != -1) {
 				preview.WidthRequest = designWidth;
@@ -134,16 +132,16 @@ namespace Stetic
 		
 		public override void Dispose ()
 		{
-			if (preview == null)
-				return;
-			if (wrapper != null)
-				wrapper.DetachDesigner (resizableFixed);
-			preview.SizeAllocated -= new Gtk.SizeAllocatedHandler (OnResized);
-			resizableFixed.SelectionChanged -= OnSelectionChanged;
-			resizableFixed.Dispose ();
-			resizableFixed = null;
-			preview = null;
-			wrapper = null;
+			if (preview != null) {
+				if (wrapper != null)
+					wrapper.DetachDesigner (resizableFixed);
+				preview.SizeAllocated -= new Gtk.SizeAllocatedHandler (OnResized);
+				resizableFixed.SelectionChanged -= OnSelectionChanged;
+//				resizableFixed.Destroy ();
+				resizableFixed = null;
+				preview = null;
+				wrapper = null;
+			}
 			base.Dispose ();
 		}
 		
@@ -215,10 +213,10 @@ namespace Stetic
 		static Metacity.Theme GetTheme ()
 		{
 			if (theme == null) {
-				GConf.Client client = new GConf.Client ();
-//				client.AddNotify ("/apps/metacity/general", GConfNotify);
-				string themeName = (string)client.Get ("/apps/metacity/general/theme");
 				try {
+					GConf.Client client = new GConf.Client ();
+					// client.AddNotify ("/apps/metacity/general", GConfNotify);
+					string themeName = (string)client.Get ("/apps/metacity/general/theme");
 					theme = Metacity.Theme.Load (themeName);
 				} catch {
 					// Don't crash if metacity is not available

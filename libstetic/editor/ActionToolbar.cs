@@ -133,6 +133,7 @@ namespace Stetic.Editor
 					AddCreateItemLabel ();
 				} else if (!value && addLabel != null) {
 					Remove (addLabel);
+					addLabel.Destroy ();
 					addLabel = null;
 					if (actionTree.Children.Count == 0)
 						AddSpacerItem ();
@@ -165,6 +166,7 @@ namespace Stetic.Editor
 				if (w is CustomToolbarItem && ((CustomToolbarItem)w).ActionToolItem.Node == args.Node) {
 					Remove (w);
 					toolItems.Remove (((CustomToolbarItem)w).ActionToolItem);
+					w.Destroy ();
 					if (!showPlaceholder && toolItems.Count == 0)
 						AddSpacerItem ();
 					break;
@@ -188,7 +190,6 @@ namespace Stetic.Editor
 					area.ResetSelection (it.ActionToolItem);
 				}
 				Remove (w);
-				w.Dispose ();
 				w.Destroy ();
 			}
 			

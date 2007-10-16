@@ -16,6 +16,7 @@ namespace Stetic
 		ProjectBackend project;
 		bool modified;
 		bool allowActionBinding;
+		bool designerRequested;
 		ActionGroupToolbar groupToolbar;
 			
 		Stetic.Wrapper.ActionGroup groupCopy;
@@ -237,6 +238,7 @@ namespace Stetic
 		
 		public ActionGroupDesignerBackend Backend {
 			get {
+				designerRequested = true;
 				return designer;
 			}
 		}
@@ -276,6 +278,10 @@ namespace Stetic
 		{
 			if (designer != null)
 				designer.Editor.GroupModified -= OnModified;
+			if (!designerRequested) {
+				designer.Destroy ();
+			}
+			
 			project.ProjectReloaded -= OnProjectReloaded;
 			
 			if (plug != null)

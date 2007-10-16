@@ -1,3 +1,22 @@
+2007-10-16  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/WidgetEditSession.cs: Removed unneeded dispose and destroy
+	  calls. The toolbar will be destroyed together with the parent.
+	* libsteticui/ActionGroupEditSession.cs: If the designer has not been
+	  requested, it means it has not been added to a container, so it has to
+	  be explicitely destroyed.
+	* libsteticui/WidgetActionBar.cs: Removed unneeded Dispose and Destroy calls
+	  (Destroy already calls dispose).
+	* libsteticui/WidgetDesignerBackend.cs: Make sure base.Dispose is always
+	  called. Handle exceptions thrown by the GConf query.
+	* libsteticui/ActionGroupDesignerBackend.cs: Remove references on dispose.
+	  Helps tracking down leaks.
+	* libsteticui/PluggableWidget.cs: Don't try to create an image of the
+	  designer if it is not visible. Don't explicitely destroy the child
+	  designer. It will be destroyed by the subclass.
+	* libstetic/editor/ActionToolbar.cs, libstetic/editor/ActionGroupEditor.cs:
+	  Properly destroy items.
+
 2007-10-04  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/Action.cs: Avoid providing a null name in the Gtk.Action
