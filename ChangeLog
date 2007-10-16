@@ -1,5 +1,28 @@
 2007-10-16  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/Clipboard.cs, libsteticui/Clipboard.cs: Moved to libstetic.
+	* libstetic/editor/ActionGroupEditor.cs, libstetic/editor/ActionItem.cs,
+	  libstetic/editor/ActionMenuItem.cs, libstetic/editor/ActionToolItem.cs:
+	  Factorized common code in ActionMenuItem and ActionToolItem into
+	  ActionItem. Implemented IEditableObject.
+	* libstetic/editor/ActionMenu.cs: Improved support for keyboard. Return now
+	  edits the selected item, and ctrl+right/left adds/removes submenus.
+	* libstetic/editor/ActionMenuBar.cs, libstetic/editor/ActionToolbar.cs: Keep
+	  the selection when a node is deleted. Track other api changes.
+	* libstetic/IEditableObject.cs: New interface to be implemented by objects
+	  which can handle clipboard operations.
+	* libstetic/libstetic.mdp, libstetic/Makefile.am,
+	  libsteticui/libsteticui.mdp, libsteticui/Makefile.am: Updated.
+	* libstetic/Placeholder.cs, libstetic/wrapper/Widget.cs: Implemented
+	  IEditableObject.
+	* libsteticui/ContextMenu.cs: Use the new IEditableObject interface to
+	  implement the clipboard operations.
+	* libsteticui/ProjectBackend.cs, libsteticui/WidgetDesigner.cs,
+	  libsteticui/WidgetEditSession.cs: Use IEditableObject to handle
+	  clipboard operations.
+
+2007-10-16  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/WidgetEditSession.cs: Removed unneeded dispose and destroy
 	  calls. The toolbar will be destroyed together with the parent.
 	* libsteticui/ActionGroupEditSession.cs: If the designer has not been

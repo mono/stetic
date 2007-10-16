@@ -198,6 +198,14 @@ namespace Stetic.Editor
 		
 		void OnChildRemoved (object ob, ActionTreeNodeArgs args)
 		{
+			OpenSubmenu = null;
+			
+			Widget wrapper = Widget.Lookup (this);
+			IDesignArea area = wrapper.GetDesignArea ();
+			IObjectSelection asel = area.GetSelection ();
+			ActionMenuItem curSel = asel != null ? asel.DataObject as ActionMenuItem : null;
+			int pos = menuItems.IndexOf (curSel);
+			
 			foreach (Gtk.Widget w in Children) {
 				if (w is CustomMenuBarItem && ((CustomMenuBarItem)w).ActionMenuItem.Node == args.Node) {
 					Remove (w);
@@ -207,6 +215,10 @@ namespace Stetic.Editor
 					break;
 				}
 			}
+			if (pos != -1 && pos < menuItems.Count)
+				((ActionMenuItem)menuItems[pos]).Select ();
+			else if (menuItems.Count > 0)
+				((ActionMenuItem)menuItems[menuItems.Count-1]).Select ();
 		}
 		
 		void Refresh ()
@@ -476,8 +488,10 @@ namespace Stetic.Editor
 		{
 		}
 		
-		public void ShowContextMenu (ActionMenuItem menuItem)
+		public void ShowContextMenu (ActionItem aitem)
 		{
+			ActionMenuItem menuItem = (ActionMenuItem) aitem;
+			
 			Gtk.Menu m = new Gtk.Menu ();
 			Gtk.MenuItem item = new Gtk.MenuItem (Catalog.GetString ("Insert Before"));
 			m.Add (item);

@@ -392,8 +392,10 @@ namespace Stetic.Editor
 			md.Destroy ();
 		}
 		
-		public void ShowContextMenu (ActionMenuItem menuItem)
+		void IMenuItemContainer.ShowContextMenu (ActionItem aitem)
 		{
+			ActionMenuItem menuItem = aitem as ActionMenuItem;
+			
 			Gtk.Menu m = new Gtk.Menu ();
 			Gtk.MenuItem item = new Gtk.ImageMenuItem (Gtk.Stock.Cut, null);
 			m.Add (item);

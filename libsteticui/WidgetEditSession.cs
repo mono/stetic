@@ -353,15 +353,14 @@ namespace Stetic {
 				bool canCut, canCopy, canPaste, canDelete;
 				ObjectWrapper obj = ObjectWrapper.Lookup (widget.Selection);
 				Stetic.Wrapper.Widget wrapper = obj as Stetic.Wrapper.Widget;
-				if (wrapper != null) {
-					canCut = wrapper.InternalChildProperty == null && !wrapper.IsTopLevel;
-					canCopy = !wrapper.IsTopLevel;
-					canPaste = false;
-					canDelete = canCut;
-				}
-				else if (widget.Selection is Placeholder) {
-					canCut = canCopy = false;
-					canPaste = canDelete = true;
+				IEditableObject editable = widget.Selection as IEditableObject;
+				if (editable == null)
+					editable = obj as IEditableObject;
+				if (editable != null) {
+					canCut = editable.CanCut;
+					canCopy = editable.CanCopy;
+					canPaste = editable.CanPaste;
+					canDelete = editable.CanDelete;
 				}
 				else {
 					canCut = canCopy = canPaste = canDelete = false;
@@ -380,6 +379,42 @@ namespace Stetic {
 		
 		public void RestoreState (object sessionData)
 		{
+		}
+		
+		internal void ClipboardCopySelection ()
+		{
+			IEditableObject editable = widget.Selection as IEditableObject;
+			if (editable == null)
+				editable = ObjectWrapper.Lookup (widget.Selection) as IEditableObject;
+			if (editable != null)
+				editable.Copy ();
+		}
+		
+		public void ClipboardCutSelection ()
+		{
+			IEditableObject editable = widget.Selection as IEditableObject;
+			if (editable == null)
+				editable = ObjectWrapper.Lookup (widget.Selection) as IEditableObject;
+			if (editable != null)
+				editable.Cut ();
+		}
+		
+		public void ClipboardPaste ()
+		{
+			IEditableObject editable = widget.Selection as IEditableObject;
+			if (editable == null)
+				editable = ObjectWrapper.Lookup (widget.Selection) as IEditableObject;
+			if (editable != null)
+				editable.Paste ();
+		}
+		
+		public void DeleteSelection ()
+		{
+			IEditableObject editable = widget.Selection as IEditableObject;
+			if (editable == null)
+				editable = ObjectWrapper.Lookup (widget.Selection) as IEditableObject;
+			if (editable != null)
+				editable.Delete ();
 		}
 	}
 }

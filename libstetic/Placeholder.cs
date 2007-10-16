@@ -3,7 +3,7 @@ using System;
 
 namespace Stetic {
 
-	public class Placeholder : Gtk.DrawingArea
+	public class Placeholder : Gtk.DrawingArea, IEditableObject
 	{
 		// This id is used by the undo methods to identify a child of a container.
 		string undoId;
@@ -80,6 +80,42 @@ namespace Stetic {
 			GdkWindow.DrawLine (dark, width - 1, 0, width - 1, height - 1);
 
 			return base.OnExposeEvent (evt);
+		}
+
+		bool IEditableObject.CanDelete {
+			get { return true; }
+		}
+
+		bool IEditableObject.CanPaste {
+			get { return true; }
+		}
+
+		bool IEditableObject.CanCut {
+			get { return false; }
+		}
+
+		bool IEditableObject.CanCopy {
+			get { return false; }
+		}
+
+		void IEditableObject.Delete ()
+		{
+			Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.LookupParent (this);
+			if (wc != null)
+				wc.Delete (this);
+		}
+
+		void IEditableObject.Paste ()
+		{
+			Clipboard.Paste (this);
+		}
+
+		void IEditableObject.Cut ()
+		{
+		}
+
+		void IEditableObject.Copy ()
+		{
 		}
 	}
 }

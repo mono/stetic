@@ -10,11 +10,13 @@ ASSEMBLY_FILES = \
 pkglib_DATA = $(ASSEMBLY_FILES)
 libstetic_dll_sources =  \
 	ClassDescriptor.cs \
+	Clipboard.cs \
 	CommandDescriptor.cs \
 	CustomWidget.cs \
 	DND.cs \
 	editor/Accelerator.cs \
 	editor/ActionGroupEditor.cs \
+	editor/ActionItem.cs \
 	editor/ActionMenu.cs \
 	editor/ActionMenuBar.cs \
 	editor/ActionMenuItem.cs \
@@ -69,6 +71,7 @@ libstetic_dll_sources =  \
 	GladeException.cs \
 	GladeUtils.cs \
 	IDesignArea.cs \
+	IEditableObject.cs \
 	ImageInfo.cs \
 	IProject.cs \
 	IPropertyEditor.cs \

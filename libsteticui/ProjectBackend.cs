@@ -505,40 +505,10 @@ namespace Stetic {
 			GladeFiles.Export (this, fileName);
 		}
 		
-		internal void ClipboardCopySelection ()
-		{
-			Clipboard.Copy (Selection);
-		}
-		
-		public void ClipboardCutSelection ()
-		{
-			Clipboard.Cut (Selection);
-		}
-		
-		public void ClipboardPaste ()
-		{
-			Clipboard.Paste (Selection as Placeholder);
-		}
-		
 		public void EditIcons ()
 		{
 			using (Stetic.Editor.EditIconFactoryDialog dlg = new Stetic.Editor.EditIconFactoryDialog (null, this, this.IconFactory)) {
 				dlg.Run ();
-			}
-		}
-		
-		public void DeleteSelection ()
-		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (Selection);
-			if (wrapper != null)
-				wrapper.Delete ();
-			else {
-				Placeholder ph = Selection as Placeholder;
-				if (ph != null) {
-					Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.LookupParent (ph);
-					if (wc != null)
-						wc.Delete (ph);
-				}
 			}
 		}
 		

@@ -7,7 +7,7 @@ using Mono.Unix;
 
 namespace Stetic.Editor
 {
-	class ActionToolbar: Gtk.Toolbar
+	class ActionToolbar: Gtk.Toolbar, IMenuItemContainer
 	{
 		ActionTree actionTree;
 		int dropPosition = -1;
@@ -43,7 +43,7 @@ namespace Stetic.Editor
 			
 			HideSpacerItem ();
 			toolItems.Clear ();
-			Widget wrapper = Widget.Lookup (this);
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (this);
 			
 			foreach (Gtk.Widget w in Children) {
 				Remove (w);
@@ -140,11 +140,24 @@ namespace Stetic.Editor
 				}
 			}
 		}
+
+		public Stetic.Editor.ActionMenu OpenSubmenu {
+			get { return null; }
+			set { }
+		}
+
+		public bool IsTopMenu {
+			get { return true; }
+		}
+
+		public Gtk.Widget Widget {
+			get { return this; }
+		}
 		
 		public void Unselect ()
 		{
 			// Unselects any selected item
-			Widget wrapper = Widget.Lookup (this);
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (this);
 			IDesignArea area = wrapper.GetDesignArea ();
 			if (area != null) {
 				foreach (Gtk.Widget w in Children) {
@@ -162,6 +175,12 @@ namespace Stetic.Editor
 		
 		void OnChildRemoved (object ob, ActionTreeNodeArgs args)
 		{
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (this);
+			IDesignArea area = wrapper.GetDesignArea ();
+			IObjectSelection asel = area.GetSelection ();
+			ActionToolItem curSel = asel != null ? asel.DataObject as ActionToolItem : null;
+			int pos = toolItems.IndexOf (curSel);
+			
 			foreach (Gtk.Widget w in Children) {
 				if (w is CustomToolbarItem && ((CustomToolbarItem)w).ActionToolItem.Node == args.Node) {
 					Remove (w);
@@ -172,11 +191,16 @@ namespace Stetic.Editor
 					break;
 				}
 			}
+			
+			if (pos != -1 && pos < toolItems.Count)
+				((ActionToolItem)toolItems[pos]).Select ();
+			else if (toolItems.Count > 0)
+				((ActionToolItem)toolItems[toolItems.Count-1]).Select ();
 		}
 		
 		void Refresh ()
 		{
-			Widget wrapper = Widget.Lookup (this);
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (this);
 			IDesignArea area = wrapper.GetDesignArea ();
 			if (area == null)
 				return;
@@ -211,7 +235,7 @@ namespace Stetic.Editor
 		
 		void InsertAction (int pos)
 		{
-			Widget wrapper = Widget.Lookup (this);
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (this);
 			using (wrapper.UndoManager.AtomicChange) {
 				Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
 				ActionTreeNode node = new ActionTreeNode (Gtk.UIManagerItemType.Toolitem, "", ac);
@@ -231,7 +255,7 @@ namespace Stetic.Editor
 		
 		void OnEditingDone (object ob, EventArgs args)
 		{
-			Widget wrapper = Widget.Lookup (this);
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (this);
 			if (wrapper == null)
 				return;
 			
@@ -334,7 +358,7 @@ namespace Stetic.Editor
 				newNode.Type = Gtk.UIManagerItemType.Toolitem;
 			}
 
-			Widget wrapper = Widget.Lookup (this);
+			Widget wrapper = Stetic.Wrapper.Widget.Lookup (this);
 			using (wrapper.UndoManager.AtomicChange) {
 				if (dropIndex < actionTree.Children.Count) {
 					// Do nothing if trying to drop the node over the same node
@@ -415,8 +439,10 @@ namespace Stetic.Editor
 		{
 		}
 		
-		public void ShowContextMenu (ActionToolItem menuItem)
+		public void ShowContextMenu (ActionItem aitem)
 		{
+			ActionToolItem menuItem = aitem as ActionToolItem;
+			
 			Gtk.Menu m = new Gtk.Menu ();
 			Gtk.MenuItem item = new Gtk.MenuItem (Catalog.GetString ("Insert Before"));
 			m.Add (item);

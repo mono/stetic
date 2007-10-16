@@ -6,7 +6,7 @@ using Stetic.Undo;
 
 namespace Stetic.Wrapper {
 
-	public class Widget : Object
+	public class Widget : Object, IEditableObject
 	{
 		static DiffGenerator propDiffGenerator;
 		
@@ -858,6 +858,72 @@ namespace Stetic.Wrapper {
 		{
 			if (MemberNameChanged != null)
 				MemberNameChanged (this, args);
+		}
+		
+		bool IEditableObject.CanCopy {
+			get { return ClipboardCanCopy; }
+		}
+		
+		bool IEditableObject.CanCut {
+			get { return ClipboardCanCut; }
+		}
+		
+		bool IEditableObject.CanPaste {
+			get { return ClipboardCanPaste; }
+		}
+		
+		bool IEditableObject.CanDelete {
+			get { return CanDelete; }
+		}
+		
+		void IEditableObject.Copy ()
+		{
+			ClipboardCopy ();
+		}
+		
+		void IEditableObject.Cut ()
+		{
+			ClipboardCut ();
+		}
+		
+		void IEditableObject.Paste ()
+		{
+			ClipboardPaste ();
+		}
+		
+		void IEditableObject.Delete ()
+		{
+			Delete ();
+		}
+		
+		protected virtual bool ClipboardCanCopy {
+			get { return !IsTopLevel; }
+		}
+		
+		protected virtual bool ClipboardCanCut {
+			get { return InternalChildProperty == null && !IsTopLevel; }
+		}
+		
+		protected virtual bool ClipboardCanPaste {
+			get { return false; }
+		}
+		
+		protected virtual bool CanDelete {
+			get { return ClipboardCanCut; }
+		}
+		
+		protected virtual void ClipboardCopy ()
+		{
+			Clipboard.Copy (Wrapped);
+		}
+		
+		protected virtual void ClipboardCut ()
+		{
+			Clipboard.Cut (Wrapped);
+		}
+		
+		protected virtual void ClipboardPaste ()
+		{
 		}
 	}
 

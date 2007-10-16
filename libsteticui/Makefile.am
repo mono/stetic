@@ -25,7 +25,6 @@ libsteticui_dll_sources =  \
 	CecilPropertyDescriptor.cs \
 	CecilSignalDescriptor.cs \
 	CecilWidgetLibrary.cs \
-	Clipboard.cs \
 	CodeGenerationResult.cs \
 	CodeGenerator.cs \
 	CodeGeneratorInternalClass.cs \

@@ -9,11 +9,13 @@ namespace Stetic {
 	class ContextMenu : Gtk.Menu {
 
 		Gtk.Widget widget;
+		IEditableObject editable;
 
 		public ContextMenu (Placeholder ph)
 		{
 			MenuItem item;
 
+			editable = ph;
 			this.widget = ph;
 
 			item = LabelItem (ph);
@@ -24,7 +26,7 @@ namespace Stetic {
 			item.Sensitive = false;
 			Add (item);
 
-			BuildContextMenu (Stetic.Wrapper.Container.LookupParent (ph), false, false, true, ph);
+			BuildContextMenu (Stetic.Wrapper.Container.LookupParent (ph), true, ph);
 		}
 
 		public ContextMenu (Stetic.Wrapper.Widget wrapper) : this (wrapper, wrapper.Wrapped) {}
@@ -33,6 +35,7 @@ namespace Stetic {
 		{
 			MenuItem item;
 
+			editable = wrapper;
 			widget = wrapper.Wrapped;
 
 			if (widget == context) {
@@ -61,35 +64,35 @@ namespace Stetic {
 				}
 			}
 
-			BuildContextMenu (wrapper.ParentWrapper, true, wrapper.InternalChildProperty != null, widget == context, context);
+			BuildContextMenu (wrapper.ParentWrapper, widget == context, context);
 		}
 
-		void BuildContextMenu (Stetic.Wrapper.Widget parentWrapper, bool occupied, bool isInternal, bool top, Widget context)
+		void BuildContextMenu (Stetic.Wrapper.Widget parentWrapper, bool top, Widget context)
 		{
 			MenuItem item;
 
 			item = new ImageMenuItem (Gtk.Stock.Cut, null);
-			if (occupied && !isInternal && parentWrapper != null)
+			if (editable.CanCut)
 				item.Activated += DoCut;
 			else
 				item.Sensitive = false;
 			Add (item);
 
 			item = new ImageMenuItem (Gtk.Stock.Copy, null);
-			if (occupied)
+			if (editable.CanCopy)
 				item.Activated += DoCopy;
 			else
 				item.Sensitive = false;
 			Add (item);
 
 			item = new ImageMenuItem (Gtk.Stock.Paste, null);
-			if (!occupied)
+			if (editable.CanPaste)
 				item.Activated += DoPaste;
 			else
 				item.Sensitive = false;
 			Add (item);
 
-			if (!isInternal && parentWrapper != null) {
+			if (editable.CanDelete) {
 				item = new ImageMenuItem (Gtk.Stock.Delete, null);
 				item.Activated += DoDelete;
 				Add (item);
@@ -122,32 +125,22 @@ namespace Stetic {
 
 		void DoCut (object obj, EventArgs args)
 		{
-			Clipboard.Cut (widget);
+			editable.Cut ();
 		}
 
 		void DoCopy (object obj, EventArgs args)
 		{
-			Clipboard.Copy (widget);
+			editable.Copy ();
 		}
 
 		void DoPaste (object obj, EventArgs args)
 		{
-			Clipboard.Paste (widget as Placeholder);
+			editable.Paste ();
 		}
 
 		void DoDelete (object obj, EventArgs args)
 		{
-			Stetic.Wrapper.Widget wrapper = Stetic.Wrapper.Widget.Lookup (widget);
-			if (wrapper != null) {
-				wrapper.Delete ();
-			} else {
-				Placeholder ph = widget as Placeholder;
-				if (ph != null) {
-					Stetic.Wrapper.Container wc = Stetic.Wrapper.Container.LookupParent (ph);
-					if (wc != null)
-						wc.Delete (ph);
-				}
-			}
+			editable.Delete ();
 		}
 
 		static MenuItem LabelItem (Gtk.Widget widget)

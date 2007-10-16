@@ -5,31 +5,18 @@ using Mono.Unix;
 
 namespace Stetic.Editor
 {
-	public class ActionMenuItem: Gtk.EventBox
+	class ActionMenuItem: ActionItem
 	{
-		ActionTreeNode node;
-		Widget wrapper;
-		IMenuItemContainer parentMenu;
-		
 		Gtk.Widget icon;
 		Gtk.Widget label;
 		Gtk.Widget accel;
-		bool editing;
-		bool localUpdate;
-		bool editOnRelease;
 		bool motionDrag;
 		CustomMenuBarItem menuBarItem;
-		uint itemSpacing;
-		int minWidth;
 		
 		static Gdk.Pixbuf addMenuImage;
 		static Gdk.Pixbuf removeMenuImage;
 		
-		// To use in the action editor
-		IDesignArea designArea;
-		IProject project;
-		
-		public event EventHandler EditingDone;
+		public event MenuItemEditEventHandler EditingDone;
 		
 		static ActionMenuItem ()
 		{
@@ -49,18 +36,9 @@ namespace Stetic.Editor
 			this.designArea = designArea;
 		}
 		
-		internal ActionMenuItem (Widget wrapper, IMenuItemContainer parent, ActionTreeNode node, uint itemSpacing)
+		internal ActionMenuItem (Widget wrapper, IMenuItemContainer parent, ActionTreeNode node, uint itemSpacing): base (node, parent, itemSpacing)
 		{
-			DND.SourceSet (this);
-			this.parentMenu = parent;
 			this.wrapper = wrapper;
-			this.node = node;
-			if (node.Action != null)
-				node.Action.ObjectChanged += OnActionChanged;
-			this.VisibleWindow = false;
-			this.CanFocus = true;
-			this.Events |= Gdk.EventMask.KeyPressMask;
-			this.itemSpacing = itemSpacing;
 			CreateControls ();
 		}
 		
@@ -76,39 +54,29 @@ namespace Stetic.Editor
 			base.Dispose ();
 		}
 		
-		public ActionTreeNode Node {
-			get { return node; }
-		}
-		
 		public bool HasSubmenu {
 			get { return node.Type == Gtk.UIManagerItemType.Menu; }
-		}
-		
-		public uint ItemSpacing {
-			get { return itemSpacing; }
-			set { itemSpacing = value; }
-		}
-		
-		public int MinWidth {
-			get { return minWidth; }
-			set { minWidth = value; }
 		}
 		
 		public void StartEditing ()
 		{
 			if (!editing) {
 				editing = true;
+				
 				Refresh ();
 				if (node.Type == Gtk.UIManagerItemType.Menu)
 					HideSubmenu ();
+				
+				UpdateSelectionStatus ();
 			}
 		}
 		
-		public void EndEditing ()
+		
+		protected override void EndEditing (Gdk.Key exitKey)
 		{
 			if (editing) {
 				Gtk.Entry entry = label as Gtk.Entry;
-				if (entry != null) {
+				if (entry != null && exitKey != Gdk.Key.Escape) {
 					localUpdate = true;
 					if (entry.Text.Length > 0 || node.Action.GtkAction.StockId != null) {
 						using (node.Action.UndoManager.AtomicChange) {
@@ -131,47 +99,25 @@ namespace Stetic.Editor
 					}
 				}
 				GrabFocus ();
-				if (EditingDone != null)
-					EditingDone (this, EventArgs.Empty);
+				UpdateSelectionStatus ();
+				
+				if (EditingDone != null) {
+					MenuItemEditEventArgs args = new MenuItemEditEventArgs ();
+					args.ExitKey = exitKey;
+					EditingDone (this, args);
+				}
 			}
 		}
 		
-		public void Select ()
+		public override void Select ()
 		{
-			IDesignArea area = GetDesignArea ();
-			if (area.IsSelected (this))
-				return;
-			IObjectSelection sel = area.SetSelection (this, node.Action != null ? node.Action.GtkAction : null);
-			sel.Drag += HandleItemDrag;
-			sel.Disposed += OnSelectionDisposed;
+			base.Select ();
 			
 			parentMenu.OpenSubmenu = null;
 				
 			if (HasSubmenu)
-				ShowSubmenu (area, this);
+				ShowSubmenu (GetDesignArea (), this);
 			GrabFocus ();
-		}
-		
-		public bool IsSelected {
-			get {
-				IDesignArea area = GetDesignArea ();
-				return area.IsSelected (this);
-			}
-		}
-		
-		public void Copy ()
-		{
-		}
-		
-		public void Cut ()
-		{
-		}
-		
-		public void Delete ()
-		{
-			if (node.ParentNode != null)
-				node.ParentNode.Children.Remove (node);
-			Destroy ();
 		}
 		
 		public void Attach (Gtk.Table table, uint row, uint col)
@@ -292,6 +238,7 @@ namespace Stetic.Editor
 				Gtk.Entry entry = new Gtk.Entry ();
 				entry.Text = text;
 				entry.Activated += OnLabelActivated;
+				entry.KeyPressEvent += OnEntryKeyPress;
 				entry.HasFrame = false;
 				this.label = entry;
 				tooltips.SetTip (entry, Catalog.GetString ("Action label"), "");
@@ -307,10 +254,10 @@ namespace Stetic.Editor
 				string tip;
 				if (node.Type != Gtk.UIManagerItemType.Menu) {
 					img = addMenuImage;
-					tip = Catalog.GetString ("Add submenu");
+					tip = Catalog.GetString ("Add submenu (Ctrl+Right)");
 				} else {
 					img = removeMenuImage;
-					tip = Catalog.GetString ("Remove submenu");
+					tip = Catalog.GetString ("Remove submenu (Ctrl+Left)");
 				}
 					
 				Gtk.Button sb = new Gtk.Button (new Gtk.Image (img));
@@ -364,14 +311,28 @@ namespace Stetic.Editor
 					node.Type = Gtk.UIManagerItemType.Menu;
 				}
 				
-				EndEditing ();
+				EndEditing (Gdk.Key.Return);
 				node.Action.NotifyChanged ();
 			}
 		}
 		
 		void OnLabelActivated (object ob, EventArgs args)
 		{
-			EndEditing ();
+			EndEditing (Gdk.Key.Return);
+		}
+		
+		[GLib.ConnectBefore]
+		void OnEntryKeyPress (object ob, Gtk.KeyPressEventArgs args)
+		{
+			switch (args.Event.Key) {
+				case Gdk.Key.Down:
+				case Gdk.Key.Escape:
+				case Gdk.Key.Up:
+					EndEditing (args.Event.Key);
+					args.RetVal = true;
+					break;
+			}
+			args.RetVal = false;
 		}
 		
 		[GLib.ConnectBeforeAttribute]
@@ -463,7 +424,7 @@ namespace Stetic.Editor
 			}
 		}
 		
-		public void Refresh ()
+		public override void Refresh ()
 		{
 			Gtk.Table table = (Gtk.Table)Parent;
 			if (table == null)
@@ -525,31 +486,6 @@ namespace Stetic.Editor
 			}
 		}
 		
-		protected override bool OnButtonPressEvent (Gdk.EventButton ev)
-		{
-			return ProcessButtonPress (ev);
-		}
-		
-		public bool ProcessButtonPress (Gdk.EventButton ev)
-		{
-			if (ev.Button == 1) {
-				IDesignArea area = GetDesignArea ();
-				if (area == null)
-					return true;
-
-				// Clicking a selected item starts the edit mode
-				if (area.IsSelected (this)) {
-					editOnRelease = true;
-					return true;
-				}
-			} else if (ev.Button == 3) {
-				parentMenu.ShowContextMenu (this);
-			}
-			
-			Select ();
-			return true;
-		}
-		
 		protected override bool OnButtonReleaseEvent (Gdk.EventButton ev)
 		{
 			return ProcessButtonRelease (ev);
@@ -565,21 +501,11 @@ namespace Stetic.Editor
 			return true;
 		}
 		
-		protected override void OnDragBegin (Gdk.DragContext ctx)
-		{
-			ProcessDragBegin (ctx, null);
-		}
-		
-		public void ProcessDragBegin (Gdk.DragContext ctx, Gdk.EventMotion evt)
+		public override void ProcessDragBegin (Gdk.DragContext ctx, Gdk.EventMotion evt)
 		{
 			if (HasSubmenu)
 				HideSubmenu ();
-			editOnRelease = false;
-			ActionPaletteItem item = new ActionPaletteItem (node);
-			if (ctx != null)
-				DND.Drag (parentMenu.Widget, ctx, item);
-			else
-				DND.Drag (parentMenu.Widget, evt, item);
+			base.ProcessDragBegin (ctx, evt);
 		}
 		
 		void OnActionChanged (object ob, ObjectWrapperEventArgs a)
@@ -588,18 +514,13 @@ namespace Stetic.Editor
 				Refresh ();
 		}
 		
-		void OnSelectionDisposed (object ob, EventArgs a)
-		{
-			EndEditing ();
-		}
-		
 		public bool IsSubmenuVisible {
 			get {
 				ActionMenu menu = parentMenu.OpenSubmenu;
 				return (menu != null && menu.ParentNode == node);
 			}
 		}
-		
+
 		public void ShowSubmenu ()
 		{
 			ShowSubmenu (wrapper.GetDesignArea (), this);
@@ -620,28 +541,6 @@ namespace Stetic.Editor
 		void HideSubmenu ()
 		{
 			parentMenu.OpenSubmenu = null;
-		}
-		
-		void HandleItemDrag (Gdk.EventMotion evt, int dx, int dy)
-		{
-			ActionPaletteItem item = new ActionPaletteItem (node);
-			DND.Drag (parentMenu.Widget, evt, item);
-		}
-		
-		IDesignArea GetDesignArea ()
-		{
-			if (wrapper != null)
-				return wrapper.GetDesignArea ();
-			else
-				return designArea;
-		}
-		
-		IProject GetProject ()
-		{
-			if (wrapper != null)
-				return wrapper.Project;
-			else
-				return project;
 		}
 	}
 	
@@ -669,5 +568,12 @@ namespace Stetic.Editor
 				Gtk.Style.PaintCheck (this.Style, this.GdkWindow, this.State, sh, rect, this, "", rect.X, rect.Y, rect.Width, rect.Height);
 			return true;
 		}
+	}
+	
+	delegate void MenuItemEditEventHandler (object s, MenuItemEditEventArgs args);
+	
+	class MenuItemEditEventArgs: EventArgs
+	{
+		public Gdk.Key ExitKey;
 	}
 }

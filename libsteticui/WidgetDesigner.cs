@@ -170,25 +170,25 @@ namespace Stetic
 		public void CopySelection ()
 		{
 			if (session != null)
-				session.EditingBackend.ClipboardCopySelection ();
+				session.ClipboardCopySelection ();
 		}
 		
 		public void CutSelection ()
 		{
 			if (session != null)
-				session.EditingBackend.ClipboardCutSelection ();
+				session.ClipboardCutSelection ();
 		}
 		
 		public void PasteToSelection ()
 		{
 			if (session != null)
-				session.EditingBackend.ClipboardPaste ();
+				session.ClipboardPaste ();
 		}
 		
 		public void DeleteSelection ()
 		{
 			if (session != null)
-				session.EditingBackend.DeleteSelection ();
+				session.DeleteSelection ();
 		}
 		
 		public bool CanDeleteSelection {

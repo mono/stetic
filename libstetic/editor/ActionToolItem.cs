@@ -5,19 +5,12 @@ using Mono.Unix;
 
 namespace Stetic.Editor
 {
-	public class ActionToolItem: Gtk.EventBox
+	class ActionToolItem: ActionItem
 	{
-		ActionTreeNode node;
-		Widget wrapper;
-		ActionToolbar parentMenu;
+		ActionToolbar parentToolbar;
 		
-		bool editing;
-		bool localUpdate;
-		bool editOnRelease;
 		bool motionDrag;
-		uint itemSpacing;
 		bool showingText;
-		int minWidth;
 		Gtk.Widget dropButton;
 		
 		public event EventHandler EditingDone;
@@ -27,33 +20,11 @@ namespace Stetic.Editor
 		{
 		}
 		
-		internal ActionToolItem (Widget wrapper, ActionToolbar parent, ActionTreeNode node, uint itemSpacing)
+		internal ActionToolItem (Widget wrapper, ActionToolbar parent, ActionTreeNode node, uint itemSpacing): base (node, parent, itemSpacing)
 		{
-			DND.SourceSet (this);
-			this.parentMenu = parent;
+			this.parentToolbar = parent;
 			this.wrapper = wrapper;
-			this.node = node;
-			if (node.Action != null)
-				node.Action.ObjectChanged += OnActionChanged;
-			this.VisibleWindow = false;
-			this.CanFocus = true;
-			this.Events |= Gdk.EventMask.KeyPressMask;
-			this.itemSpacing = itemSpacing;
 			CreateControls ();
-		}
-		
-		public ActionTreeNode Node {
-			get { return node; }
-		}
-		
-		public uint ItemSpacing {
-			get { return itemSpacing; }
-			set { itemSpacing = value; }
-		}
-		
-		public int MinWidth {
-			get { return minWidth; }
-			set { minWidth = value; }
 		}
 		
 		public void StartEditing (bool doClick)
@@ -74,7 +45,7 @@ namespace Stetic.Editor
 			}
 		}
 		
-		public void EndEditing ()
+		protected override void EndEditing (Gdk.Key exitKey)
 		{
 			if (editing) {
 				editing = false;
@@ -86,40 +57,7 @@ namespace Stetic.Editor
 					EditingDone (this, EventArgs.Empty);
 			}
 		}
-		
-		public void Select ()
-		{
-			IDesignArea area = GetDesignArea ();
-			if (area.IsSelected (this))
-				return;
-			IObjectSelection sel = area.SetSelection (this, node.Action != null ? node.Action.GtkAction : null);
-			sel.Drag += HandleItemDrag;
-			sel.Disposed += OnSelectionDisposed;
-			GrabFocus ();
-		}
-		
-		public bool IsSelected {
-			get {
-				IDesignArea area = GetDesignArea ();
-				return area.IsSelected (this);
-			}
-		}
-		
-		public void Copy ()
-		{
-		}
-		
-		public void Cut ()
-		{
-		}
-		
-		public void Delete ()
-		{
-			if (node.ParentNode != null)
-				node.ParentNode.Children.Remove (node);
-			Destroy ();
-		}
-		
+
 		void CreateControls ()
 		{
 			Gtk.Widget icon = null;
@@ -134,7 +72,7 @@ namespace Stetic.Editor
 			
 			if (node.Type == Gtk.UIManagerItemType.Separator) {
 				Gtk.Widget sep;
-				if (parentMenu.Orientation == Gtk.Orientation.Horizontal) {
+				if (parentToolbar.Orientation == Gtk.Orientation.Horizontal) {
 					sep = new Gtk.VSeparator ();
 				} else {
 					sep = new Gtk.HSeparator ();
@@ -151,13 +89,13 @@ namespace Stetic.Editor
 				
 			Gtk.Action gaction = node.Action.GtkAction;
 			
-			bool showText = parentMenu.ToolbarStyle == Gtk.ToolbarStyle.Text;
-			bool showIcon = parentMenu.ToolbarStyle == Gtk.ToolbarStyle.Icons;
-			if (parentMenu.ToolbarStyle == Gtk.ToolbarStyle.Both) {
+			bool showText = parentToolbar.ToolbarStyle == Gtk.ToolbarStyle.Text;
+			bool showIcon = parentToolbar.ToolbarStyle == Gtk.ToolbarStyle.Icons;
+			if (parentToolbar.ToolbarStyle == Gtk.ToolbarStyle.Both) {
 				showText = showIcon = true;
 			}
-			else if (parentMenu.ToolbarStyle == Gtk.ToolbarStyle.BothHoriz) {
-				showText = parentMenu.Orientation == Gtk.Orientation.Vertical || gaction.IsImportant;
+			else if (parentToolbar.ToolbarStyle == Gtk.ToolbarStyle.BothHoriz) {
+				showText = parentToolbar.Orientation == Gtk.Orientation.Vertical || gaction.IsImportant;
 				showIcon = true;
 			}
 		
@@ -167,7 +105,7 @@ namespace Stetic.Editor
 			if (showIcon)
 			{
 				if (gaction.StockId != null) {
-					icon = node.Action.CreateIcon (parentMenu.IconSize);
+					icon = node.Action.CreateIcon (parentToolbar.IconSize);
 				} else if (!gaction.IsImportant) {
 					icon = CreateFakeItem ();
 				}
@@ -206,12 +144,12 @@ namespace Stetic.Editor
 			}
 			
 			if (icon != null && label != null) {
-				if (parentMenu.ToolbarStyle == Gtk.ToolbarStyle.BothHoriz) {
+				if (parentToolbar.ToolbarStyle == Gtk.ToolbarStyle.BothHoriz) {
 					Gtk.HBox box = new Gtk.HBox ();
 					box.PackStart (icon, false, false, 0);
 					box.PackStart (label, true, true, 0);
 					icon = box;
-				} else if (parentMenu.ToolbarStyle == Gtk.ToolbarStyle.Both) {
+				} else if (parentToolbar.ToolbarStyle == Gtk.ToolbarStyle.Both) {
 					Gtk.VBox box = new Gtk.VBox ();
 					Gtk.Alignment al = new Gtk.Alignment (0.5f, 0f, 0f, 0f);
 					al.Add (icon);
@@ -249,7 +187,7 @@ namespace Stetic.Editor
 			Gtk.Frame frm = new Gtk.Frame ();
 			frm.ShadowType = Gtk.ShadowType.Out;
 			int w, h;
-			Gtk.Icon.SizeLookup (parentMenu.IconSize, out w, out h);
+			Gtk.Icon.SizeLookup (parentToolbar.IconSize, out w, out h);
 			frm.WidthRequest = w;
 			frm.HeightRequest = h;
 			return frm;
@@ -271,7 +209,7 @@ namespace Stetic.Editor
 		
 		void OnLabelActivated (object ob, EventArgs args)
 		{
-			EndEditing ();
+			EndEditing (Gdk.Key.Return);
 		}
 		
 		[GLib.ConnectBeforeAttribute]
@@ -373,7 +311,7 @@ namespace Stetic.Editor
 			}
 		}
 		
-		public void Refresh ()
+		public override void Refresh ()
 		{
 			CreateControls ();
 		}
@@ -409,31 +347,6 @@ namespace Stetic.Editor
 			}
 		}
 		
-		protected override bool OnButtonPressEvent (Gdk.EventButton ev)
-		{
-			return ProcessButtonPress (ev);
-		}
-		
-		public bool ProcessButtonPress (Gdk.EventButton ev)
-		{
-			if (ev.Button == 1) {
-				IDesignArea area = GetDesignArea ();
-				if (area == null)
-					return true;
-
-				// Clicking a selected item starts the edit mode
-				if (area.IsSelected (this)) {
-					editOnRelease = true;
-					return true;
-				}
-			} else if (ev.Button == 3) {
-				parentMenu.ShowContextMenu (this);
-			}
-			
-			Select ();
-			return true;
-		}
-		
 		protected override bool OnButtonReleaseEvent (Gdk.EventButton ev)
 		{
 			return ProcessButtonRelease (ev);
@@ -453,50 +366,10 @@ namespace Stetic.Editor
 		protected override bool OnKeyPressEvent (Gdk.EventKey e)
 		{
 			if (e.Key == Gdk.Key.Return)
-				EndEditing ();
+				EndEditing (Gdk.Key.Return);
+			else if (e.Key == Gdk.Key.Escape)
+				EndEditing (Gdk.Key.Escape);
 			return base.OnKeyPressEvent (e);
-		}
-		
-		protected override void OnDragBegin (Gdk.DragContext ctx)
-		{
-			ProcessDragBegin (ctx, null);
-		}
-		
-		public void ProcessDragBegin (Gdk.DragContext ctx, Gdk.EventMotion evt)
-		{
-			editOnRelease = false;
-			ActionPaletteItem item = new ActionPaletteItem (node);
-			if (ctx != null)
-				DND.Drag (parentMenu, ctx, item);
-			else
-				DND.Drag (parentMenu, evt, item);
-		}
-		
-		void OnActionChanged (object ob, ObjectWrapperEventArgs a)
-		{
-			if (!localUpdate)
-				Refresh ();
-		}
-		
-		void OnSelectionDisposed (object ob, EventArgs a)
-		{
-			EndEditing ();
-		}
-		
-		void HandleItemDrag (Gdk.EventMotion evt, int dx, int dy)
-		{
-			ActionPaletteItem item = new ActionPaletteItem (node);
-			DND.Drag (parentMenu, evt, item);
-		}
-		
-		IDesignArea GetDesignArea ()
-		{
-			return wrapper.GetDesignArea ();
-		}
-		
-		IProject GetProject ()
-		{
-			return wrapper.Project;
 		}
 	}
 }

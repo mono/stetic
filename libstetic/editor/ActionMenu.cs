@@ -65,6 +65,8 @@ namespace Stetic.Editor
 			} else {
 				if (menuItems.Count > 0)
 					((ActionMenuItem)menuItems [0]).Select ();
+				else
+					InsertAction (0);
 			}
 		}
 		
@@ -195,7 +197,7 @@ namespace Stetic.Editor
 			}
 		}
 		
-		void InsertAction (int pos)
+		ActionTreeNode InsertAction (int pos)
 		{
 			using (wrapper.UndoManager.AtomicChange) {
 				Action ac = (Action) ObjectWrapper.Create (wrapper.Project, new Gtk.Action ("", "", null, null));
@@ -210,10 +212,21 @@ namespace Stetic.Editor
 				if (wrapper.LocalActionGroups.Count == 0)
 					wrapper.LocalActionGroups.Add (new ActionGroup ("Default"));
 				wrapper.LocalActionGroups [0].Actions.Add (ac);
+				return newNode;
 			}
 		}
 		
-		void OnEditingDone (object ob, EventArgs args)
+		void DeleteAction (ActionMenuItem item)
+		{
+			int pos = menuItems.IndexOf (item);
+			item.Delete ();
+			if (pos >= menuItems.Count)
+				SelectLastItem ();
+			else
+				((ActionMenuItem)menuItems [pos]).Select ();
+		}
+		
+		void OnEditingDone (object ob, MenuItemEditEventArgs args)
 		{
 			ActionMenuItem item = (ActionMenuItem) ob;
 			item.EditingDone -= OnEditingDone;
@@ -224,6 +237,25 @@ namespace Stetic.Editor
 					nodes.Remove (item.Node);
 					wrapper.LocalActionGroups [0].Actions.Remove (item.Node.Action);
 				}
+				SelectLastItem ();
+			}
+			else {
+				if (args.ExitKey == Gdk.Key.Up || args.ExitKey == Gdk.Key.Down)
+					ProcessKey (item, args.ExitKey, Gdk.ModifierType.None);
+			}
+		}
+		
+		void SelectLastItem ()
+		{
+			if (menuItems.Count > 0)
+				((ActionMenuItem)menuItems [menuItems.Count - 1]).Select ();
+			else if (parentMenu.Widget is ActionMenuBar) {
+				ActionMenuBar bar = (ActionMenuBar) parentMenu.Widget;
+				bar.Select (parentNode);
+			}
+			else if (parentMenu.Widget is ActionMenu) {
+				ActionMenu parentAM = (ActionMenu) parentMenu.Widget;
+				parentAM.Select (parentNode);
 			}
 		}
 		
@@ -234,6 +266,11 @@ namespace Stetic.Editor
 		
 		void OnChildRemoved (object ob, ActionTreeNodeArgs args)
 		{
+			IDesignArea area = wrapper.GetDesignArea ();
+			IObjectSelection asel = area.GetSelection ();
+			ActionMenuItem curSel = asel != null ? asel.DataObject as ActionMenuItem : null;
+			int pos = menuItems.IndexOf (curSel);
+			
 			ActionMenuItem mi = FindMenuItem (args.Node);
 			if (mi != null) {
 				// Remove the table row that contains the menu item
@@ -248,6 +285,10 @@ namespace Stetic.Editor
 					if (tc.BottomAttach > row)
 						tc.BottomAttach--;
 				}
+				if (pos != -1 && pos < menuItems.Count)
+					((ActionMenuItem)menuItems[pos]).Select ();
+				else
+					SelectLastItem ();
 				GLib.Timeout.Add (50, new GLib.TimeoutHandler (RepositionSubmenu));
 			}
 		}
@@ -376,12 +417,19 @@ namespace Stetic.Editor
 			return base.OnDragDrop (context, x,	y, time);
 		}
 		
+		[GLib.ConnectBefore]
 		void OnItemKeyPress (object s, Gtk.KeyPressEventArgs args)
 		{
-			int pos = menuItems.IndexOf (s);
 			ActionMenuItem item = (ActionMenuItem) s;
+			ProcessKey (item, args.Event.Key, args.Event.State);
+			args.RetVal = true;
+		}
+		
+		void ProcessKey (ActionMenuItem item, Gdk.Key key, Gdk.ModifierType modifier)
+		{
+			int pos = menuItems.IndexOf (item);
 			
-			switch (args.Event.Key) {
+			switch (key) {
 				case Gdk.Key.Up:
 					if (pos > 0)
 						((ActionMenuItem)menuItems[pos - 1]).Select ();
@@ -398,6 +446,13 @@ namespace Stetic.Editor
 					}
 					break;
 				case Gdk.Key.Right:
+					if ((modifier & Gdk.ModifierType.ControlMask) != 0 && item.Node.Type == Gtk.UIManagerItemType.Menuitem) {
+						// Create a submenu
+						using (item.Node.Action.UndoManager.AtomicChange) {
+							item.Node.Type = Gtk.UIManagerItemType.Menu;
+						}
+						item.Node.Action.NotifyChanged ();
+					}
 					if (item.HasSubmenu) {
 						item.ShowSubmenu ();
 						if (openSubmenu != null)
@@ -412,6 +467,16 @@ namespace Stetic.Editor
 					}
 					break;
 				case Gdk.Key.Left:
+					if ((modifier & Gdk.ModifierType.ControlMask) != 0 && item.Node.Type == Gtk.UIManagerItemType.Menu) {
+						// Remove the submenu
+						OpenSubmenu = null;
+						using (item.Node.Action.UndoManager.AtomicChange) {
+							item.Node.Type = Gtk.UIManagerItemType.Menuitem;
+							item.Node.Children.Clear ();
+						}
+						item.Node.Action.NotifyChanged ();
+						break;
+					}
 					if (parentNode != null) {
 						ActionMenu parentAM = parentMenu.Widget as ActionMenu;
 						if (parentAM != null) {
@@ -425,8 +490,20 @@ namespace Stetic.Editor
 						}
 					}
 					break;
+				case Gdk.Key.Return:
+					item.EditingDone += OnEditingDone;
+					item.StartEditing ();
+					break;
+				case Gdk.Key.Insert:
+					if ((modifier & Gdk.ModifierType.ControlMask) != 0)
+						InsertActionAt (item, true, true);
+					else
+						InsertActionAt (item, false, false);
+					break;
+				case Gdk.Key.Delete:
+					DeleteAction (item);
+					break;
 			}
-			args.RetVal = true;
 		}
 		
 		void InsertActionAt (ActionMenuItem item, bool after, bool separator)
@@ -441,6 +518,7 @@ namespace Stetic.Editor
 			if (separator) {
 				ActionTreeNode newNode = new ActionTreeNode (Gtk.UIManagerItemType.Separator, null, null);
 				nodes.Insert (pos, newNode);
+				Select (newNode);
 			} else
 				InsertAction (pos);
 		}
@@ -449,8 +527,9 @@ namespace Stetic.Editor
 		{
 		}
 		
-		public void ShowContextMenu (ActionMenuItem menuItem)
+		void IMenuItemContainer.ShowContextMenu (ActionItem aitem)
 		{
+			ActionMenuItem menuItem = aitem as ActionMenuItem;
 			Gtk.Menu m = new Gtk.Menu ();
 			Gtk.MenuItem item = new Gtk.MenuItem (Catalog.GetString ("Insert Before"));
 			m.Add (item);
@@ -497,7 +576,7 @@ namespace Stetic.Editor
 			item = new Gtk.ImageMenuItem (Gtk.Stock.Delete, null);
 			m.Add (item);
 			item.Activated += delegate (object s, EventArgs a) {
-				menuItem.Delete ();
+				DeleteAction (menuItem);
 			};
 			m.ShowAll ();
 			m.Popup ();
@@ -568,6 +647,6 @@ namespace Stetic.Editor
 		ActionMenu OpenSubmenu { get; set; }
 		bool IsTopMenu { get; }
 		Gtk.Widget Widget { get; }
-		void ShowContextMenu (ActionMenuItem item);
+		void ShowContextMenu (ActionItem item);
 	}
 }
