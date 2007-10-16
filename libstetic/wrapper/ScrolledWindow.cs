@@ -52,7 +52,7 @@ namespace Stetic.Wrapper {
 			}
 		}
 
-		void AddWithViewport (Gtk.Widget child)
+		internal void AddWithViewport (Gtk.Widget child)
 		{
 			Gtk.Viewport viewport = new Gtk.Viewport (scrolled.Hadjustment, scrolled.Vadjustment);
 			ObjectWrapper.Create (proj, viewport);
@@ -64,6 +64,13 @@ namespace Stetic.Wrapper {
 
 		protected override void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild)
 		{
+			Widget ww = Widget.Lookup (oldChild);
+			if (ww != null && ww.ShowScrollbars && ParentWrapper != null) {
+				// The viewport is bound to the child widget. Remove it together with the child
+				ParentWrapper.ReplaceChild (Wrapped, newChild, false);
+				return;
+			}
+			
 			if (scrolled.Child is Gtk.Viewport) {
 				Gtk.Viewport vp = (Gtk.Viewport)scrolled.Child;
 				vp.Remove (oldChild);

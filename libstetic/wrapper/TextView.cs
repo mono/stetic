@@ -10,6 +10,8 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 			((Gtk.TextView)Wrapped).Buffer.Changed += Buffer_Changed;
+			if (!initialized)
+				ShowScrollbars = true;
 		}
 
 		public override void Dispose ()

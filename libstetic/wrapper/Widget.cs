@@ -33,6 +33,7 @@ namespace Stetic.Wrapper {
 		ArrayList includedActionGroups;
 		
 		bool unselectable;
+		bool boundToScrollWindow;
 		
 		public event EventHandler Destroyed;
 		
@@ -773,9 +774,60 @@ namespace Stetic.Wrapper {
 			}
 		}
 		
+		public bool ShowScrollbars {
+			get {
+				return boundToScrollWindow;
+			}
+			set {
+				if (boundToScrollWindow != value) {
+					boundToScrollWindow = value;
+					UpdateScrolledWindow ();
+					EmitNotify ("ShowScrollbars");
+				}
+			}
+		}
+		
+		internal void UpdateScrolledWindow ()
+		{
+			if (ParentWrapper == null)
+				return;
+			if (boundToScrollWindow) {
+				if (!(Wrapped.Parent is Gtk.Viewport) && !(Wrapped.Parent is Gtk.ScrolledWindow)) {
+					Gtk.ScrolledWindow scw = new Gtk.ScrolledWindow ();
+					scw.HscrollbarPolicy = scw.VscrollbarPolicy = Gtk.PolicyType.Automatic;
+					scw.ShadowType = Gtk.ShadowType.In;
+					ScrolledWindow wrapper = (ScrolledWindow) ObjectWrapper.Create (Project, scw);
+					ParentWrapper.ReplaceChild (Wrapped, scw, false);
+					if (Wrapped.SetScrollAdjustments (null, null))
+						scw.Add (Wrapped);
+					else
+						wrapper.AddWithViewport (Wrapped);
+					Select ();
+				}
+			}
+			else if (((Wrapped.Parent is Gtk.Viewport) || (Wrapped.Parent is Gtk.ScrolledWindow)) && ParentWrapper.ParentWrapper != null) {
+				Gtk.Container parent = (Gtk.Container) Wrapped.Parent;
+				parent.Remove (Wrapped);
+				Container grandParent;
+				if (parent is Gtk.Viewport) {
+					parent = (Gtk.Container) parent.Parent;
+					grandParent = Container.LookupParent (parent);
+				}
+				else
+					grandParent = Container.LookupParent (parent);
+				grandParent.ReplaceChild (parent, Wrapped, true);
+			}
+		}
+		
 		public bool InWindow {
 			get {
 				return this.GetTopLevel ().Wrapped is Gtk.Window;
+			}
+		}
+		
+		public bool IsScrollable {
+			get {
+				return !IsTopLevel && !(Wrapped is Gtk.ScrolledWindow);
 			}
 		}
 

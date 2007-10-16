@@ -8,8 +8,12 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
-				paned.Pack1 (CreatePlaceholder (), true, false);
+				Placeholder ph = CreatePlaceholder ();
+				paned.Pack1 (ph, true, false);
+				NotifyChildAdded (ph);
+				ph = CreatePlaceholder ();
 				paned.Pack2 (CreatePlaceholder (), true, false);
+				NotifyChildAdded (ph);
 			}
 		}
 

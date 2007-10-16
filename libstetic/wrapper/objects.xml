@@ -22,6 +22,10 @@
 		<property name="CanFocus" />
 		<property name="Events" default="0"/>
 		<property name="ExtensionEvents" />
+		<property name="IsScrollable" internal="true"/>
+		<property name="ShowScrollbars" label="Show Scrollbars">
+		    <invisible-if name="IsScrollable" value="false" />
+		</property>
 		<property name="GeneratePublic" internal="true" default="true"/>
 		<property name="Name" internal="true"
 			min="1"

@@ -15,6 +15,7 @@ namespace Stetic.Wrapper
 		int designHeight;
 		IDesignArea designer;
 		CodeExpression generatedTooltips;
+		bool internalAdd;
 		
 		static DiffGenerator containerDiffGenerator;
 		static bool showNonContainerWarning = true;
@@ -46,11 +47,11 @@ namespace Stetic.Wrapper
 					child.Name = container.Name + "_" + prop.Name;
 			}
 
-			if (!initialized && container.Children.Length == 0 && AllowPlaceholders)
-				AddPlaceholder ();
-
 			container.Removed += ChildRemoved;
 			container.Added += OnChildAdded;
+			
+			if (!initialized && container.Children.Length == 0 && AllowPlaceholders)
+				AddPlaceholder ();
 
 			if (Wrapped.GetType ().ToString ()[0] == 'H')
 				ContainerOrientation = Gtk.Orientation.Horizontal;
@@ -71,7 +72,8 @@ namespace Stetic.Wrapper
 		
 		void OnChildAdded (object o, Gtk.AddedArgs args)
 		{
-			HandleNewChild (args.Widget);
+			if (!internalAdd)
+				HandleNewChild (args.Widget);
 		}
 		
 		protected void NotifyChildAdded (Gtk.Widget child)
@@ -87,11 +89,23 @@ namespace Stetic.Wrapper
 			if (!Loading)
 				ValidateChildNames (Wrapped);
 
-			ObjectWrapper w = ObjectWrapper.Lookup (child);
+			Widget w = Widget.Lookup (child);
 			if (w != null) {
-				((Widget)w).RequiresUndoStatusUpdate = true;
+				w.RequiresUndoStatusUpdate = true;
 				if (designer != null)
 					w.OnDesignerAttach (designer);
+				
+				// If the ShowScrollbars flag is set, make sure the scrolled window is created.
+				if (w.ShowScrollbars)
+					w.UpdateScrolledWindow ();
+			}
+			
+			Placeholder ph = child as Placeholder;
+			if (ph != null) {
+				ph.DragDrop += PlaceholderDragDrop;
+				ph.DragDataReceived += PlaceholderDragDataReceived;
+				ph.ButtonPressEvent += PlaceholderButtonPress;
+				AutoSize[ph] = true;
 			}
 		}
 		
@@ -774,10 +788,6 @@ namespace Stetic.Wrapper
 		{
 			Placeholder ph = new Placeholder ();
 			ph.Show ();
-			ph.DragDrop += PlaceholderDragDrop;
-			ph.DragDataReceived += PlaceholderDragDataReceived;
-			ph.ButtonPressEvent += PlaceholderButtonPress;
-			AutoSize[ph] = true;
 			return ph;
 		}
 
@@ -931,7 +941,7 @@ namespace Stetic.Wrapper
 			}
 		}
 
-		protected void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild, bool destroyOld)
+		internal protected void ReplaceChild (Gtk.Widget oldChild, Gtk.Widget newChild, bool destroyOld)
 		{
 			ReplaceChild (oldChild, newChild);
 			if (destroyOld)
@@ -955,14 +965,21 @@ namespace Stetic.Wrapper
 				container.Remove (oldChild);
 				AutoSize[oldChild] = false;
 				AutoSize[newChild] = true;
-				container.Add (newChild);
+				
+				try {
+					// Don't fire the child added event until the packing info is set
+					internalAdd = true;
+					container.Add (newChild);
+				} finally {
+					internalAdd = false;
+				}
 
 				cc = container[newChild];
 				foreach (PropertyInfo pinfo in props.Keys)
 					pinfo.SetValue (cc, props[pinfo], null);
 
 				Sync ();
-				EmitContentsChanged ();
+				NotifyChildAdded (newChild);
 				if (Project != null)
 					Project.Selection = newChild;
 			}
@@ -1125,9 +1142,10 @@ namespace Stetic.Wrapper
 			using (UndoManager.AtomicChange) {
 				if (AllowPlaceholders)
 					ReplaceChild (wrapper.Wrapped, CreatePlaceholder (), true);
-				else
+				else {
 					container.Remove (wrapper.Wrapped);
-				wrapper.Wrapped.Destroy ();
+					wrapper.Wrapped.Destroy ();
+				}
 			}
 		}
 

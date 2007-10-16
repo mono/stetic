@@ -153,7 +153,9 @@ namespace Stetic.Wrapper {
 				base.ReplaceChild (oldChild, newChild);
 				notebook.CurrentPage = current;
 				notebook.SetTabLabel (newChild, tab);
-				Widget.Lookup (tab).RequiresUndoStatusUpdate = true;
+				Widget ww = Widget.Lookup (tab);
+				if (ww != null)
+					ww.RequiresUndoStatusUpdate = true;
 			}
 		}
 
@@ -163,8 +165,9 @@ namespace Stetic.Wrapper {
 			label.LabelProp = "page" + (notebook.NPages + 1).ToString ();
 			tabs.Insert (position, label);
 
-			int i = notebook.InsertPage (CreatePlaceholder (), label, position);
-			EmitContentsChanged ();
+			Placeholder ph = CreatePlaceholder ();
+			int i = notebook.InsertPage (ph, label, position);
+			NotifyChildAdded (ph);
 			return i;
 		}
 

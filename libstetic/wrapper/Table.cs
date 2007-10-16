@@ -113,6 +113,7 @@ namespace Stetic.Wrapper {
 						if (w == null) {
 							w = CreatePlaceholder ();
 							table.Attach (w, col, col + 1, row, row + 1);
+							NotifyChildAdded (w);
 							grid[row,col] = w;
 							addedPlaceholders = true;
 						} else if (!ChildVExpandable (w) || !AutoSize[w])

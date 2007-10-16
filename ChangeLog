@@ -1,5 +1,22 @@
 2007-10-16  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/TextView.cs, libstetic/wrapper/TreeView.cs: By default,
+	  show TextView and TreeView widgets wrapped in a ScrolledWindow. Fixes
+	  bug #324439.
+	* libstetic/wrapper/Widget.cs, libstetic/wrapper/Container.cs,
+	  libstetic/wrapper/ScrolledWindow.cs, libstetic/wrapper/Viewport.cs,
+	  libstetic/wrapper/objects.xml: Implemented new ShowScrollbars
+	  pseudo-property for widgets. When set, the widget will be wrapped inside
+	  a ScrolledWindow. This scrolled window will be bound to the widget, so
+	  if the widget is deleted or moved, the ScrolledWindow will also be
+	  deleted or moved.
+	* libstetic/wrapper/Table.cs, libstetic/wrapper/Paned.cs,
+	  libstetic/wrapper/Box.cs, libstetic/wrapper/Notebook.cs: Methods for
+	  adding widgets to a container other than Add() do not fire the child
+	  Added event, so it has to be manually called.
+
+2007-10-16  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/Clipboard.cs, libsteticui/Clipboard.cs: Moved to libstetic.
 	* libstetic/editor/ActionGroupEditor.cs, libstetic/editor/ActionItem.cs,
 	  libstetic/editor/ActionMenuItem.cs, libstetic/editor/ActionToolItem.cs:

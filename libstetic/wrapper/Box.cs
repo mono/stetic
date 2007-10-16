@@ -9,8 +9,12 @@ namespace Stetic.Wrapper {
 		{
 			base.Wrap (obj, initialized);
 			if (!initialized) {
-				box.PackStart (CreatePlaceholder ());
-				box.PackStart (CreatePlaceholder ());
+				Placeholder ph = CreatePlaceholder ();
+				box.PackStart (ph);
+				NotifyChildAdded (ph);
+				ph = CreatePlaceholder ();
+				box.PackStart (ph);
+				NotifyChildAdded (ph);
 				box.Spacing = 6;
 			}
 			box.SizeAllocated += box_SizeAllocated;
@@ -153,7 +157,7 @@ namespace Stetic.Wrapper {
 				box.PackEnd (ph);
 				box.ReorderChild (ph, position + 1);
 			}
-			EmitContentsChanged ();
+			NotifyChildAdded (ph);
 		}
 
 		internal void InsertAfter (Gtk.Widget context)
@@ -178,7 +182,7 @@ namespace Stetic.Wrapper {
 				box.PackEnd (ph);
 				box.ReorderChild (ph, position);
 			}
-			EmitContentsChanged ();
+			NotifyChildAdded (ph);
 		}
 
 		protected override void ChildContentsChanged (Container child) {
