@@ -72,7 +72,7 @@ namespace Stetic.Editor
 			IDesignArea area = GetDesignArea ();
 			if (area.IsSelected (this))
 				return;
-			IObjectSelection sel = area.SetSelection (this, this);
+			IObjectSelection sel = area.SetSelection (this, node.Action != null ? node.Action.GtkAction : null);
 			sel.Drag += HandleItemDrag;
 			sel.Disposed += OnSelectionDisposed;
 			GrabFocus ();
