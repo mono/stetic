@@ -23,7 +23,7 @@
 		<property name="Events" default="0"/>
 		<property name="ExtensionEvents" />
 		<property name="IsScrollable" internal="true"/>
-		<property name="ShowScrollbars" label="Show Scrollbars">
+		<property name="ShowScrollbars" label="Show Scrollbars" default="false">
 		    <invisible-if name="IsScrollable" value="false" />
 		</property>
 		<property name="GeneratePublic" internal="true" default="true"/>

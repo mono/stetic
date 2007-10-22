@@ -1,3 +1,8 @@
+2007-10-22  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/wrapper/objects.xml: Set default value for ShowScrollbars
+	  property.
+
 2007-10-18  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/editor/ActionItem.cs: The selected object needs to be the action
