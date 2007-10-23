@@ -492,6 +492,10 @@ namespace Stetic {
 					toplevel.AppendChild (doc.ImportNode (data.XmlData, true));
 				}
 			}
+			
+			// Remove undo annotations from the xml document
+			CleanUndoData (doc.DocumentElement);
+			
 			return doc;
 		}
 		
@@ -612,7 +616,7 @@ namespace Stetic {
 			if (wdata.Widget != null)
 				data = Stetic.WidgetUtils.ExportWidget (wdata.Widget);
 			else
-				data = wdata.XmlData;
+				data = (XmlElement) wdata.XmlData.Clone ();
 			
 			// If widget already exist, replace it
 			wdata = other.GetWidgetData (replacedName);
@@ -632,6 +636,16 @@ namespace Stetic {
 					if (name != replacedName)
 						other.OnWidgetNameChanged (new Wrapper.WidgetNameChangedArgs (null, replacedName, name), true);
 				}
+			}
+		}
+			
+		void CleanUndoData (XmlElement elem)
+		{
+			elem.RemoveAttribute ("undoId");
+			foreach (XmlNode cn in elem.ChildNodes) {
+				XmlElement ce = cn as XmlElement;
+				if (ce != null)
+					CleanUndoData (ce);
 			}
 		}
 
