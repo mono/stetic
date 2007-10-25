@@ -1,3 +1,8 @@
+2007-10-25  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/editor/ActionItem.cs: Ignore the SelectionDisposed event if the
+	  action item has already been disposed.
+
 2007-10-23  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/ProjectBackend.cs: Remove undo annotations from the xml

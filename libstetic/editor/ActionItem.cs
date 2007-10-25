@@ -18,6 +18,7 @@ namespace Stetic.Editor
 		// To use in the action editor
 		protected IDesignArea designArea;
 		protected IProject project;
+		bool disposed;
 		
 		public ActionItem (ActionTreeNode node, IMenuItemContainer parent, uint itemSpacing)
 		{
@@ -80,12 +81,20 @@ namespace Stetic.Editor
 		
 		void OnSelectionDisposed (object ob, EventArgs a)
 		{
-			EndEditing (Gdk.Key.Return);
+			if (!disposed)
+				EndEditing (Gdk.Key.Return);
 		}
 		
 		protected virtual void EndEditing (Gdk.Key exitKey)
 		{
 		}
+		
+		public override void Dispose ()
+		{
+			disposed = true;
+			base.Dispose ();
+		}
+
 
 		void HandleItemDrag (Gdk.EventMotion evt, int dx, int dy)
 		{
