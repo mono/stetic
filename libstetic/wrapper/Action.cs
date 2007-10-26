@@ -60,6 +60,11 @@ namespace Stetic.Wrapper
 			}
 		}
 		
+		public string ActionLabel {
+			get { return GtkAction.Label; }
+			set { GtkAction.Label = value; }
+		}
+		
 		public override string WrappedTypeName {
 			get { 
 				if (type == ActionType.Action)

@@ -6,6 +6,14 @@ namespace Stetic
 	public class ActionComponent: Component
 	{
 		Gdk.Pixbuf icon;
+		string label;
+		
+		internal static Gdk.Pixbuf DefaultActionIcon;
+		
+		static ActionComponent ()
+		{
+			DefaultActionIcon = Gdk.Pixbuf.LoadFromResource ("action.png");
+		}
 		
 		public ActionComponent (Application owner, object backend, string name): base (owner, backend, name, owner.GetComponentType ("Gtk.Action"))
 		{
@@ -22,10 +30,24 @@ namespace Stetic
 				((Wrapper.Action)backend).Name = value;
 			}
 		}
+
+		public string Label {
+			get {
+				if (label == null)
+					label = ((Wrapper.Action)backend).ActionLabel;
+				return label;
+			}
+			set {
+				label = value;
+				((Wrapper.Action)backend).ActionLabel = value;
+			}
+		}
 		
 		protected override void OnChanged ()
 		{
 			name = null;
+			icon = null;
+			label = null;
 			base.OnChanged ();
 		}
 		
@@ -34,7 +56,7 @@ namespace Stetic
 				if (icon == null) {
 					byte[] data = app.Backend.GetActionIcon ((Wrapper.Action)backend);
 					if (data == null)
-						icon = ComponentType.Unknown.Icon;
+						return DefaultActionIcon;
 					else
 						icon = new Gdk.Pixbuf (data);
 				}

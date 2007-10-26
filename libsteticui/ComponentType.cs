@@ -33,7 +33,7 @@ namespace Stetic
 			this.action = action;
 			this.app = app;
 			this.name = action.Name;
-			this.description = name;
+			this.description = action.Label != null ? action.Label.Replace ("_", "") : action.Name;
 			this.icon = action.Icon;
 			this.className = "Gtk.Action";
 			this.category = "Actions / " + action.ActionGroup.Name;
