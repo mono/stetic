@@ -430,11 +430,11 @@ namespace Stetic.Editor
 			if (table == null)
 				return;
 			
-			if (icon != null)
+			if (icon != null && icon.Parent != null)
 				table.Remove (icon);
-			if (label != null)
+			if (label != null && label.Parent != null)
 				table.Remove (label);
-			if (accel != null)
+			if (accel != null && accel.Parent != null)
 				table.Remove (accel);
 
 			icon = label = accel = null;

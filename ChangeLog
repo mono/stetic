@@ -1,5 +1,10 @@
 2007-12-12  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/editor/ActionMenuItem.cs: Don't try to remove the menu item
+	  controls if they have not been added to the table.
+
+2007-12-12  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libsteticui/libsteticui.mdp, libstetic/libstetic.mdp, stetic/stetic.mdp,
 	  stetic.mds: Updated.
 	* libstetic/wrapper/objects.xml: In ScrolledWindow, ignore the default for
