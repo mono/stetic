@@ -1,4 +1,4 @@
-<Combine name="stetic" fileversion="2.0" outputpath="./build/bin/">
+<Combine name="stetic" fileversion="2.0" outputpath="build/bin/">
   <Configurations active="Debug">
     <Configuration name="Debug" ctype="CombineConfiguration">
       <Entry build="True" name="stetic" configuration="Debug" />
@@ -17,8 +17,8 @@
     <Execute type="None" entry="libsteticui" />
   </StartMode>
   <Entries>
-    <Entry filename="./stetic/stetic.mdp" />
-    <Entry filename="./libstetic/libstetic.mdp" />
-    <Entry filename="./libsteticui/libsteticui.mdp" />
+    <Entry filename="stetic/stetic.mdp" />
+    <Entry filename="libstetic/libstetic.mdp" />
+    <Entry filename="libsteticui/libsteticui.mdp" />
   </Entries>
 </Combine>

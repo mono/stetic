@@ -1,3 +1,13 @@
+2007-12-12  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/libsteticui.mdp, libstetic/libstetic.mdp, stetic/stetic.mdp,
+	  stetic.mds: Updated.
+	* libstetic/wrapper/objects.xml: In ScrolledWindow, ignore the default for
+	  scrollbar policy. The default value returned by gtk is not correct.
+	  Fixes bug #344196.
+	* libstetic/ErrorWidget.cs: Allow exporting projects with unknown widgets.
+	* stetic/UIManager.cs: Use gtk stock icons instead of gnome's.
+
 2007-10-26  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libsteticui/PaletteBackend.cs: Moved defaultActionIcon to ActionComponent.

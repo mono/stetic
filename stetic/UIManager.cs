@@ -88,7 +88,7 @@ namespace Stetic {
 
 				new ActionEntry ("HelpMenu", null, Catalog.GetString ("_Help"), null, null, null),
 				new ActionEntry ("Contents", Stock.Help, Catalog.GetString ("_Contents"), "F1", Catalog.GetString ("Help"), Help),
-				new ActionEntry ("About", Gnome.Stock.About, null, null, Catalog.GetString ("About Stetic"), About),
+				new ActionEntry ("About", Stock.About, null, null, Catalog.GetString ("About Stetic"), About),
 			};
 
 			ActionGroup actions = new ActionGroup ("group");
