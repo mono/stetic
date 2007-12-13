@@ -681,6 +681,7 @@ namespace Stetic.Wrapper
 		
 		internal protected override void OnDesignerAttach (IDesignArea designer)
 		{
+			base.OnDesignerAttach (designer);
 			this.designer = designer;
 			foreach (Gtk.Widget w in RealChildren) {
 				ObjectWrapper wr = ObjectWrapper.Lookup (w);
@@ -691,6 +692,7 @@ namespace Stetic.Wrapper
 		
 		internal protected override void OnDesignerDetach (IDesignArea designer)
 		{
+			base.OnDesignerDetach (designer);
 			foreach (Gtk.Widget w in RealChildren) {
 				ObjectWrapper wr = ObjectWrapper.Lookup (w);
 				if (wr != null)

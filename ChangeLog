@@ -1,5 +1,10 @@
 2007-12-13  Lluis Sanchez Gual <lluis@novell.com> 
 
+	* libstetic/wrapper/Container.cs: Call base method when attaching/detaching
+	  designer, since Object has some logic in those methods.
+
+2007-12-13  Lluis Sanchez Gual <lluis@novell.com> 
+
 	* libstetic/wrapper/ScrolledWindow.cs, libstetic/wrapper/objects.xml: Set
 	  the correct default for ScrolledWindow.XscrollbarPolicy.
 
