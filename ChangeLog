@@ -1,3 +1,8 @@
+2007-12-13  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/wrapper/ScrolledWindow.cs, libstetic/wrapper/objects.xml: Set
+	  the correct default for ScrolledWindow.XscrollbarPolicy.
+
 2007-12-12  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/editor/ActionMenuItem.cs: Don't try to remove the menu item

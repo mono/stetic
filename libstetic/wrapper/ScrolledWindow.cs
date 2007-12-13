@@ -6,8 +6,8 @@ namespace Stetic.Wrapper {
 
 	public class ScrolledWindow : Container {
 
-		Gtk.PolicyType hpolicy;
-		Gtk.PolicyType vpolicy;
+		Gtk.PolicyType hpolicy = Gtk.PolicyType.Automatic;
+		Gtk.PolicyType vpolicy = Gtk.PolicyType.Automatic;
 		
 		public override void Wrap (object obj, bool initialized)
 		{
