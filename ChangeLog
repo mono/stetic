@@ -1,3 +1,8 @@
+2008-01-15  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libstetic/wrapper/ComboBox.cs: Fix bug #324925 - Glade import: Text combos
+	  not correctly imported.
+
 2008-01-14  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/editor/Boolean.cs: Improve rendering of checkbox.
