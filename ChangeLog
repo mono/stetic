@@ -1,3 +1,7 @@
+2008-01-16  Lluis Sanchez Gual <lluis@novell.com> 
+
+	* libsteticui/WidgetDesigner.cs: Fix typo.
+
 2008-01-15  Lluis Sanchez Gual <lluis@novell.com> 
 
 	* libstetic/wrapper/ComboBox.cs: Fix bug #324925 - Glade import: Text combos
