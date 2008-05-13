@@ -1,5 +1,16 @@
 2008-05-13  Mike Kestner <mkestner@novell.com> 
 
+	* libsteticui/Application.cs: refactor to split out isolated backend
+	and inprocess backend cases.  Dispose additions.  Destroy handling for
+	the public accessors.
+	* libsteticui/ApplicationBackendController.cs: use IsolatedApplication.
+	* libsteticui/PluggableWidget.cs: IsolatedApplication handling and
+	dispose rework.
+	* libsteticui/Project.cs: ditto.
+	* stetic/Stetic.cs: use new ApplicationFactory.
+
+2008-05-13  Mike Kestner <mkestner@novell.com> 
+
 	* libsteticui/AssemblyResolver.cs: update to JBs latest Linker version.
 	* libsteticui/CecilWidgetLibrary.cs: use new cache API.
 	* libsteticui/LibraryCache.cs: rewritten to use instances, 
