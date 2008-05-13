@@ -1,3 +1,12 @@
+2008-05-13  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/AssemblyResolver.cs: update to JBs latest Linker version.
+	* libsteticui/CecilWidgetLibrary.cs: use new cache API.
+	* libsteticui/LibraryCache.cs: rewritten to use instances, 
+	XmlSerialization of the index and keep the index in memory, and to add
+	HasWidgets capability.  Should be able to remove the other cache from
+	Application now.
+
 2008-05-11  Mike Kestner <mkestner@novell.com> 
 
 	* libsteticui/SignalsEditor.cs: some Disposal bulletproofing.
