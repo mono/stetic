@@ -1,3 +1,8 @@
+2008-05-15  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/Application.cs: remove redundant cache.  Destroy widgets
+	on Dispose instead of Disposing them.
+
 2008-05-13  Mike Kestner <mkestner@novell.com> 
 
 	* libsteticui/Application.cs: refactor to split out isolated backend

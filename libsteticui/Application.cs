@@ -202,8 +202,6 @@ namespace Stetic
 		bool allowInProcLibraries = true;
 		bool disposed;
 		
-		static Hashtable libraryCheckCache; 
-		
 		public AssemblyResolverCallback WidgetLibraryResolver {
 			get { return Backend.WidgetLibraryResolver; }
 			set { Backend.WidgetLibraryResolver = value; }
@@ -273,13 +271,13 @@ namespace Stetic
 			foreach (Project p in copy)
 				p.Dispose ();
 			if (propertiesWidget != null)
-				 propertiesWidget.Dispose ();
+				 propertiesWidget.Destroy ();
 			if (paletteWidget != null)
-				 paletteWidget.Dispose ();
+				 paletteWidget.Destroy ();
 			if (projectWidget != null)
-				 projectWidget.Dispose ();
+				 projectWidget.Destroy ();
 			if (signalsWidget != null)
-				 signalsWidget.Dispose ();
+				 signalsWidget.Destroy ();
 			widgetLibraries.Clear ();
 			System.Runtime.Remoting.RemotingServices.Disconnect (this);
 		}
@@ -369,15 +367,8 @@ namespace Stetic
 				if (path == null)
 					return false;
 			}
-			
-			LibraryData data = GetLibraryCacheData (path);
-			if (data == null) {
-				// There is no info about this library, it has to be checked
-				bool isLib = CecilWidgetLibrary.IsWidgetLibrary (path);
-				SetLibraryCacheData (path, isLib);
-				return isLib;
-			} else
-				return data.IsLibrary;
+
+			return CecilWidgetLibrary.IsWidgetLibrary (path);
 		}
 		
 		public CodeGenerationResult GenerateProjectCode (string file, string namespaceName, CodeDomProvider provider, GenerationOptions options, params Project[] projects)
@@ -578,97 +569,6 @@ namespace Stetic
 			}
 		}
 		
-		static LibraryData GetLibraryCacheData (string path)
-		{
-			if (libraryCheckCache == null)
-				LoadLibraryCheckCache ();
-			LibraryData data = (LibraryData) libraryCheckCache [path];
-			if (data == null)
-				return null;
-
-			DateTime lastWrite = File.GetLastWriteTime (path);
-			if (data.LastCheck == lastWrite)
-				return data;
-			else
-				// Data not valid anymore
-				return null;
-		}
-		
-		static void SetLibraryCacheData (string path, bool isLibrary)
-		{
-			if (libraryCheckCache == null)
-				LoadLibraryCheckCache ();
-
-			LibraryData data = (LibraryData) libraryCheckCache [path];
-			if (data == null) {
-				data = new LibraryData ();
-				libraryCheckCache [path] = data;
-			}
-			data.IsLibrary = isLibrary;
-			data.LastCheck = File.GetLastWriteTime (path);
-			SaveLibraryCheckCache ();
-		}
-		
-		static void LoadLibraryCheckCache ()
-		{
-			bool needsSave = false;;
-			libraryCheckCache = new Hashtable ();
-			string cacheFile = Path.Combine (ConfigDir, "assembly-check-cache");
-			if (!File.Exists (cacheFile))
-				return;
-			
-			try {
-				XmlDocument doc = new XmlDocument ();
-				doc.Load (cacheFile);
-				foreach (XmlElement elem in doc.SelectNodes ("assembly-check-cache/assembly")) {
-					string file = elem.GetAttribute ("path");
-					if (File.Exists (file)) {
-						LibraryData data = new LibraryData ();
-						if (elem.GetAttribute ("isLibrary") == "yes")
-							data.IsLibrary = true;
-						data.LastCheck = XmlConvert.ToDateTime (elem.GetAttribute ("timestamp"), XmlDateTimeSerializationMode.Local);
-					} else
-						needsSave = true;
-				}
-			} catch {
-				// If there is an error, just ignore the cached data
-				needsSave = true;
-			}
-			
-			if (needsSave)
-				SaveLibraryCheckCache ();
-		}
-		
-		static void SaveLibraryCheckCache ()
-		{
-			if (libraryCheckCache == null)
-				return;
-			
-			try {
-				if (!Directory.Exists (ConfigDir))
-					Directory.CreateDirectory (ConfigDir);
-					
-				XmlDocument doc = new XmlDocument ();
-				XmlElement delem = doc.CreateElement ("assembly-check-cache");
-				doc.AppendChild (delem);
-					
-				foreach (DictionaryEntry e in libraryCheckCache) {
-					LibraryData data = (LibraryData) e.Value;
-					XmlElement elem = doc.CreateElement ("assembly");
-					elem.SetAttribute ("path", (string) e.Key);
-					if (data.IsLibrary)
-						elem.SetAttribute ("isLibrary", "yes");
-					elem.SetAttribute ("timestamp", XmlConvert.ToString (data.LastCheck, XmlDateTimeSerializationMode.Local));
-					delem.AppendChild (elem);
-				}
-				
-				doc.Save (Path.Combine (ConfigDir, "assembly-check-cache"));
-			}
-			catch {
-				// If something goes wrong, just ignore the cached info
-			}
-		}
-		
 		static string ConfigDir {
 			get { 
 				string file = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.Personal), ".config");
@@ -679,10 +579,4 @@ namespace Stetic
 
 	internal delegate void BackendChangingHandler ();
 	internal delegate void BackendChangedHandler (ApplicationBackend oldBackend);
-	
-	class LibraryData
-	{
-		public DateTime LastCheck;
-		public bool IsLibrary;
-	}
 }
