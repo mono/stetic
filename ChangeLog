@@ -1,3 +1,8 @@
+2008-05-20  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/LibraryCache.cs: do a recursive delete when revising
+	the cache directory.
+
 2008-05-15  Mike Kestner <mkestner@novell.com> 
 
 	* libsteticui/Application.cs: remove redundant cache.  Destroy widgets
