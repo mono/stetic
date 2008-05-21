@@ -1,3 +1,10 @@
+2008-05-21  Mike Kestner <mkestner@novell.com> 
+
+	* libstetic/wrapper/ActionToolbarWrapper.cs: call FillMenu on Wrap
+	so that the actionTree is populated on the editor.  Otherwise we
+	crash when inserting items.  [Fixes #377672]  Also fix what looks to
+	be a copy/paste error on a UIManagerItemType in the ActionTree.
+
 2008-05-20  Mike Kestner <mkestner@novell.com> 
 
 	* libsteticui/LibraryCache.cs: do a recursive delete when revising
