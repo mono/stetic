@@ -1,3 +1,8 @@
+2008-06-02  Mike Kestner <mkestner@novell.com> 
+
+	libstetic/wrapper/Object.cs: dispose guarding
+	libstetic/wrapper/Widget.cs: dispose guarding
+
 2008-05-28  Mike Kestner <mkestner@novell.com> 
 
 	libstetic/editor/ActionGroupEditor.cs: dispose guarding
