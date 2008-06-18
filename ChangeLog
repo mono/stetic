@@ -1,5 +1,10 @@
 2008-06-18  Mike Kestner <mkestner@novell.com> 
 
+	* libsteticui/CecilWidgetLibrary.cs: remove timestamp code and reuse 
+	cache currency logic. flatten out an unnecessary if branch in Load.
+
+2008-06-18  Mike Kestner <mkestner@novell.com> 
+
 	* libsteticui/Application.cs: remove dead code
 
 2008-06-02  Mike Kestner <mkestner@novell.com> 

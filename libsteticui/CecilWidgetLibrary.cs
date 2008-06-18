@@ -14,7 +14,6 @@ namespace Stetic
 		static LibraryCache cache = LibraryCache.Load ();
 
 		AssemblyDefinition assembly;
-		DateTime timestamp;
 		string name;
 		string fileName;
 		XmlDocument objects;
@@ -40,10 +39,6 @@ namespace Stetic
 			
 			fileName = assemblyPath;
 			this.importContext = importContext;
-			if (File.Exists (assemblyPath))
-				timestamp = System.IO.File.GetLastWriteTime (assemblyPath);
-			else
-				timestamp = DateTime.MinValue;
 			
 			ScanDependencies ();
 		}
@@ -104,7 +99,7 @@ namespace Stetic
 			get {
 				if (!System.IO.File.Exists (fileName))
 					return false;
-				return System.IO.File.GetLastWriteTime (fileName) != timestamp;
+				return cache.IsCurrent (fileName);
 			}
 		}
 		
@@ -116,14 +111,8 @@ namespace Stetic
 			get { return canGenerateCode; }
 		}
 		
-		public DateTime TimeStamp {
-			get { return timestamp; }
-		}
-		
 		public override void Load ()
 		{
-			// Assume that it can generate code
-			canGenerateCode = true;
 			resolvedCache = new Hashtable ();
 			
 			if (!fromCache) {
@@ -132,8 +121,6 @@ namespace Stetic
 						base.Load (new XmlDocument ());
 						return;
 					}
-					
-					timestamp = System.IO.File.GetLastWriteTime (fileName);
 					
 					assembly = AssemblyFactory.GetAssembly (fileName);
 				}
@@ -158,17 +145,17 @@ namespace Stetic
 			
 			Load (objects);
 			
-			if (canGenerateCode) {
-				// If it depends on libraries which can't generate code,
-				// this one can't
-				foreach (string dlib in GetLibraryDependencies ()) {
-					WidgetLibrary lib = Registry.GetWidgetLibrary (dlib);
-					if (lib != null && !lib.CanGenerateCode) {
-						canGenerateCode = false;
-						break;
-					}
+			canGenerateCode = true;
+			// If it depends on libraries which can't generate code,
+			// this one can't
+			foreach (string dlib in GetLibraryDependencies ()) {
+				WidgetLibrary lib = Registry.GetWidgetLibrary (dlib);
+				if (lib != null && !lib.CanGenerateCode) {
+					canGenerateCode = false;
+					break;
 				}
 			}
+
 			if (!fromCache && objects != null) {
 				// Store dependencies in the cached xml
 				XmlElement elem = objects.CreateElement ("dependencies");
