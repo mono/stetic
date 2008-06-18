@@ -1,16 +1,20 @@
+2008-06-18  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/Application.cs: remove dead code
+
 2008-06-02  Mike Kestner <mkestner@novell.com> 
 
-	libstetic/wrapper/Object.cs: dispose guarding
-	libstetic/wrapper/Widget.cs: dispose guarding
+	* libstetic/wrapper/Object.cs: dispose guarding
+	* libstetic/wrapper/Widget.cs: dispose guarding
 
 2008-05-28  Mike Kestner <mkestner@novell.com> 
 
-	libstetic/editor/ActionGroupEditor.cs: dispose guarding
-	libstetic/editor/ActionMenuItem.cs: dispose guarding
-	libsteticui/ActionGroupDesigner.cs: dispose guarding
-	libsteticui/ActionGroupEditSession.cs: dispose guarding
-	libsteticui/ActionGroupToolbar.cs: dispose guarding
-	libsteticui/WidgetActionBar.cs: dispose guarding
+	* libstetic/editor/ActionGroupEditor.cs: dispose guarding
+	* libstetic/editor/ActionMenuItem.cs: dispose guarding
+	* libsteticui/ActionGroupDesigner.cs: dispose guarding
+	* libsteticui/ActionGroupEditSession.cs: dispose guarding
+	* libsteticui/ActionGroupToolbar.cs: dispose guarding
+	* libsteticui/WidgetActionBar.cs: dispose guarding
 
 2008-05-21  Mike Kestner <mkestner@novell.com> 
 

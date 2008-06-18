@@ -568,13 +568,6 @@ namespace Stetic
 				components.Remove (c.Backend);
 			}
 		}
-		
-		static string ConfigDir {
-			get { 
-				string file = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.Personal), ".config");
-				return Path.Combine (file, "stetic");
-			}
-		}
 	}
 
 	internal delegate void BackendChangingHandler ();
