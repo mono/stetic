@@ -75,13 +75,8 @@ namespace Stetic
 				enums[enm.Name] = enm;
 			}
 
-			foreach (XmlElement element in objects.SelectNodes ("/objects/object")) {
-				ClassDescriptor klass = LoadClassDescriptor (element);
-				if (klass == null) continue;
-				klass.SetLibrary (this);
-				classes_by_cname[klass.CName] = klass;
-				classes_by_csname[klass.WrappedTypeName] = klass;
-			}
+			foreach (XmlElement element in objects.SelectNodes ("/objects/object"))
+				AddClass (LoadClassDescriptor (element));
 
 			XmlNamespaceManager nsm = new XmlNamespaceManager (objects.NameTable);
 			nsm.AddNamespace ("xsl", "http://www.w3.org/1999/XSL/Transform");
@@ -97,6 +92,15 @@ namespace Stetic
 				exportElems [n] = (XmlElement) nodes[n];
 		}
 		
+		protected void AddClass (ClassDescriptor klass)
+		{
+			if (klass == null) 
+				return;
+			klass.SetLibrary (this);
+			classes_by_cname[klass.CName] = klass;
+			classes_by_csname[klass.WrappedTypeName] = klass;
+		}
+
 		public virtual void Dispose ()
 		{
 		}

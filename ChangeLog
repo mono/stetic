@@ -1,5 +1,11 @@
 2008-06-18  Mike Kestner <mkestner@novell.com> 
 
+	* libstetic/WidgetLibrary.cs: refactor class addition logic from Load
+	into a protected AddClass method which subclasses can use to add
+	classes marked with [ToolboxItem].
+
+2008-06-18  Mike Kestner <mkestner@novell.com> 
+
 	* libsteticui/CecilWidgetLibrary.cs: remove timestamp code and reuse 
 	cache currency logic. flatten out an unnecessary if branch in Load.
 
