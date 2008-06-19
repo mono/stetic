@@ -1,5 +1,11 @@
 2008-06-19  Mike Kestner <mkestner@novell.com> 
 
+	* configure.in: detect cecil and substitute the dll path.
+	* libsteticui/Makefile.am: build using installed dll.
+	* libsteticui/lib/Mono.Cecil.dll: remove
+
+2008-06-19  Mike Kestner <mkestner@novell.com> 
+
 	* libsteticui/AssemblyWidgetLibrary.cs: refactor to use LibraryCache.
 	* libsteticui/CecilWidgetLibrary.cs: use singleton Cache. Refine 
 	NeedsReload.  Call Load (XmlDocument) conditionally.

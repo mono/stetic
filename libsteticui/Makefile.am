@@ -86,7 +86,7 @@ libsteticui_dll_references =  \
 	-pkg:gnome-sharp-2.0 \
 	-pkg:gtk-sharp-2.0 \
 	-r:$(top_builddir)/bin/libstetic.dll \
-	-r:$(top_srcdir)/libsteticui/lib/Mono.Cecil.dll \
+	-r:$(CECIL_DLL) \
 	-r:Mono.Posix \
 	-r:System.Runtime.Remoting \
 	-r:System.Xml
@@ -99,7 +99,7 @@ all: $(ASSEMBLY) $(DATA_FILE_BUILD) $(CECIL_DLL)
 RESOURCE_FILES = $(addprefix $(srcdir)/, $(libsteticui_dll_resources))
 DATA_FILES = $(addprefix $(srcdir)/, $(libsteticui_dll_datafiles))
 
-$(ASSEMBLY): $(libsteticui_dll_sources) $(RESOURCE_FILES)
+$(ASSEMBLY): $(libsteticui_dll_sources) $(RESOURCE_FILES) $(CECIL_DLL)
 	@rm -f sources.rsp
 	@echo $(libsteticui_dll_sources:%=$(srcdir)/%) > sources.rsp
 	@for resource in $(RESOURCE_FILES); do echo -resource:$$resource,`basename $$resource` >> sources.rsp; done
@@ -114,14 +114,13 @@ $(DATA_FILE_BUILD): $(srcdir)/$(notdir $@)
 CECIL = Mono.Cecil.dll
 CECIL_DLL = $(ASSEMBLY_DIR)/$(CECIL)
 
-$(CECIL_DLL): $(srcdir)/lib/$(CECIL)
+$(CECIL_DLL): $(CECIL_PATH)
 	mkdir -p $(ASSEMBLY_DIR)
-	cp $(srcdir)/lib/$(CECIL) $(ASSEMBLY_DIR)/.
+	cp $(CECIL_PATH) $(ASSEMBLY_DIR)/.
 
 CLEANFILES = $(ASSEMBLY_FILES) sources.rsp
 
 EXTRA_DIST = \
 	$(libsteticui_dll_sources)	\
 	$(RESOURCE_FILES) \
-	$(DATA_FILES) \
-	$(srcdir)/lib/$(CECIL)
+	$(DATA_FILES)
