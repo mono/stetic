@@ -44,7 +44,6 @@ namespace Stetic {
 
 			string file;
 			Guid guid;
-			bool has_widgets;
 			DateTime timestamp;
 
 			string CacheDirectory {
@@ -77,10 +76,8 @@ namespace Stetic {
 				get { return Path.Combine (CacheDirectory, "steticGui"); }
 			}
 
-			[XmlAttribute]
 			public bool HasWidgets {
-				get { return has_widgets; }
-				set { has_widgets = value; }
+				get { return System.IO.File.Exists (ObjectsPath); }
 			}
 
 			public string ObjectsPath {
@@ -131,6 +128,8 @@ namespace Stetic {
 			}
 		}
 
+		public static LibraryCache Cache = Load ();
+
 		[XmlArray]
 		[XmlArrayItem (ElementName="LibraryInfo", Type=typeof(LibraryInfo))]
 		public LibraryInfoCollection Members = new LibraryInfoCollection ();
@@ -155,8 +154,6 @@ namespace Stetic {
 			return info != null && info.Timestamp == File.GetLastWriteTime (file).ToUniversalTime ();
 		}
 
-		AssemblyResolver resolver = new AssemblyResolver ();
-
 		EmbeddedResource GetResource (AssemblyDefinition asm, string name)
 		{
 			foreach (Resource res in asm.MainModule.Resources) {
@@ -167,47 +164,22 @@ namespace Stetic {
 			return null;
 		}
  
-		bool HasGtkReference (AssemblyDefinition assm, StringCollection visited)
+		XmlDocument GetObjectsDoc (string path)
 		{
-			visited.Add (assm.Name.Name);
-
-			foreach (AssemblyNameReference nameRef in assm.MainModule.AssemblyReferences) {
-				if (visited.Contains (nameRef.Name))
-					continue;
-				else if (nameRef.Name == "gtk-sharp" || HasGtkReference (resolver.Resolve (nameRef), visited))
-					return true;
-			}
-
-			return false;
-		}
-
-		bool CheckForWidgets (string path)
-		{
+			XmlDocument result = null;
 			try {
 				AssemblyDefinition adef = AssemblyFactory.GetAssembly (path);
-				if (GetResource (adef, "objects.xml") != null)
-					return true;
-				
-				if (adef.Name.Name == "gtk-sharp")
-					return false;  // Gtk is special-cased, so ignore it.
-
-				if (!HasGtkReference (adef, new StringCollection ()))
-					return false;
-
-				foreach (TypeDefinition type in adef.MainModule.Types) {
-					TypeReference tref = type.BaseType;
-					while (tref != null) {
-						if (tref.FullName == "Gtk.Window") {
-							break;
-						} else if (tref.FullName == "Gtk.Widget") {
-							return true;
-						}
-						tref = resolver.Resolve (tref).BaseType;
-					}
+				EmbeddedResource res = GetResource (adef, "objects.xml");
+				if (res != null) {
+					MemoryStream stream = new MemoryStream (res.Data);
+					result = new XmlDocument ();
+					using (stream)
+						result.Load (stream);
 				}
 			} catch {
+				result = null;
 			}
-			return false;
+			return result;
 		}
 		
 		void RefreshFile (string assembly)
@@ -221,8 +193,10 @@ namespace Stetic {
 			}
 			info.Timestamp = File.GetLastWriteTime (assembly).ToUniversalTime ();
 			info.Guid = Guid.NewGuid ();
-			info.HasWidgets = CheckForWidgets (assembly);
 			Save ();
+			XmlDocument objects = GetObjectsDoc (assembly);
+			if (objects != null)
+				objects.Save (info.ObjectsPath);
 		}
 
 		void Save ()
@@ -249,7 +223,7 @@ namespace Stetic {
 				serializer.Serialize (fs, this);
 		}
 		
-		public static LibraryCache Load ()
+		static LibraryCache Load ()
 		{
 			string index_path = Path.Combine (dir, "index.xml");
 			if (File.Exists (index_path)) {
@@ -266,5 +240,6 @@ namespace Stetic {
 
 			return new LibraryCache ();
 		}
+
 	}
 }

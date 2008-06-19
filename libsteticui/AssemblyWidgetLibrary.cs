@@ -8,19 +8,19 @@ namespace Stetic
 {
 	internal class AssemblyWidgetLibrary: WidgetLibrary
 	{
+		static LibraryCache Cache = LibraryCache.Cache;
+
 		Assembly assembly;
-		DateTime timestamp;
 		string name;
-		bool isWidgetLibrary;
-		XmlDocument objectsDoc;
 		ImportContext importContext;
+		XmlDocument objectsDoc;
+		LibraryCache.LibraryInfo cache_info;
 		
 		public AssemblyWidgetLibrary (string name, Assembly assembly)
 		{
 			this.name = name;
 			this.assembly = assembly;
-			timestamp = System.IO.File.GetLastWriteTime (assembly.Location);
-			Init ();
+			UpdateCache ();
 		}
 		
 		public AssemblyWidgetLibrary (ImportContext importContext, string assemblyPath)
@@ -38,31 +38,29 @@ namespace Stetic
 			} else
 				assembly = Assembly.Load (assemblyPath);
 				
-			if (assembly != null)
-				timestamp = System.IO.File.GetLastWriteTime (assembly.Location);
-			else
-				timestamp = DateTime.MinValue;
+			if (assembly == null)
+				throw new InvalidOperationException ("Couldn't load assembly at " + assemblyPath);
 
-			Init ();
+			UpdateCache ();
 		}
 		
-		void Init ()
+		void UpdateCache ()
 		{
-			objectsDoc = new XmlDocument ();
-			System.IO.Stream stream = null;
-			
-			if (assembly != null)
-				stream = assembly.GetManifestResourceStream ("objects.xml");
+			bool is_current = Cache.IsCurrent (assembly.Location);
+			cache_info = Cache [assembly.Location];
+			if (is_current)
+				return;
+
+			Stream stream = assembly.GetManifestResourceStream ("objects.xml");
 				
-			if (stream == null) {
-				isWidgetLibrary = false;
-			}
-			else {
-				using (stream) {
+			if (stream != null) {
+				objectsDoc = new XmlDocument ();
+				using (stream)
 					objectsDoc.Load (stream);
-				}
-				isWidgetLibrary = true;
 			}
+
+			if (objectsDoc != null)
+				objectsDoc.Save (cache_info.ObjectsPath);
 		}
 		
 		public override string Name {
@@ -71,9 +69,7 @@ namespace Stetic
 		
 		public override bool NeedsReload {
 			get {
-				if (!System.IO.File.Exists (assembly.Location))
-					return false;
-				return System.IO.File.GetLastWriteTime (assembly.Location) != timestamp;
+				return File.Exists (assembly.Location) && !Cache.IsCurrent (assembly.Location);
 			}
 		}
 		
@@ -81,18 +77,13 @@ namespace Stetic
 			get { return false; }
 		}
 		
-		public Assembly Assembly {
-			get { return assembly; }
-		}
-		
-		public DateTime TimeStamp {
-			get { return timestamp; }
-		}
-		
 		public override void Load ()
 		{
-			if (objectsDoc == null)
-				Init ();
+			if (objectsDoc == null) {
+				objectsDoc = new XmlDocument ();
+				using (FileStream stream = File.Open (cache_info.ObjectsPath, FileMode.Open))
+					objectsDoc.Load (stream);
+			}
 			Load (objectsDoc);
 			objectsDoc = null;
 		}
@@ -128,10 +119,7 @@ namespace Stetic
 		
 		public override string[] GetLibraryDependencies ()
 		{
-			if (objectsDoc == null)
-				Init ();
-				
-			if (!isWidgetLibrary)
+			if (!cache_info.HasWidgets)
 				return new string [0];
 				
 			ArrayList list = new ArrayList ();

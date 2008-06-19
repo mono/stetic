@@ -1,3 +1,14 @@
+2008-06-19  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/AssemblyWidgetLibrary.cs: refactor to use LibraryCache.
+	* libsteticui/CecilWidgetLibrary.cs: use singleton Cache. Refine 
+	NeedsReload.  Call Load (XmlDocument) conditionally.
+	* libsteticui/LibraryCache.cs: hide Load and expose a singleton Cache
+	field to share between AssemblyWidgetLibrary and CecilWidgetLibrary.
+	Remove Gtk reference checking, we will use explicit ToolboxItem attrs
+	instead.  Make HasWidgets a check for an objects.xml file, since we
+	will be constructing one for attr-only assemblies.
+
 2008-06-18  Mike Kestner <mkestner@novell.com> 
 
 	* libstetic/WidgetLibrary.cs: refactor class addition logic from Load
