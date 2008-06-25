@@ -1,3 +1,18 @@
+2008-06-25  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/Application.cs: use resolver.
+	* libsteticui/ApplicationBackend.cs: use resolver. 
+	* libsteticui/AssemblyResolver.cs: integrate ImportContext. remove
+	usused method and field resolution methods.
+	* libsteticui/AssemblyWidgetLibrary.cs: refactor ImportContext. 
+	use cached objects doc.
+	* libsteticui/CecilWidgetLibrary.cs: refactor to use cached docs
+	and assembly resolver.
+	* libsteticui/LibraryCache.cs: add document props for objects/gui.
+	add objects and gui resource extraction and caching. Refresh using
+	resolver if available.
+	* libsteticui/ProjectBackend.cs: ImportContext refactor to resolver.
+
 2008-06-19  Mike Kestner <mkestner@novell.com> 
 
 	* configure.in: detect cecil and substitute the dll path.

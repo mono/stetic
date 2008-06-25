@@ -164,7 +164,7 @@ namespace Stetic
 				LoadLibraries (null, visited, libraries);
 				
 				foreach (ProjectBackend project in projects)
-					LoadLibraries (project.ImportContext, visited, project.WidgetLibraries);
+					LoadLibraries (project.Resolver, visited, project.WidgetLibraries);
 				
 				// Unload libraries which are not required
 				
@@ -184,40 +184,40 @@ namespace Stetic
 			}
 		}
 		
-		internal void LoadLibraries (ImportContext ctx, IEnumerable libraries)
+		internal void LoadLibraries (AssemblyResolver resolver, IEnumerable libraries)
 		{
 			try {
 				Registry.BeginChangeSet ();
 				Hashtable visited = new Hashtable ();
-				LoadLibraries (ctx, visited, libraries);
+				LoadLibraries (resolver, visited, libraries);
 			} finally {
 				Registry.EndChangeSet ();
 			}
 		}
 		
-		internal void LoadLibraries (ImportContext ctx, Hashtable visited, IEnumerable libraries)
+		internal void LoadLibraries (AssemblyResolver resolver, Hashtable visited, IEnumerable libraries)
 		{
 			foreach (string s in libraries)
-				AddLibrary (ctx, visited, s);
+				AddLibrary (resolver, visited, s);
 		}
 		
-		WidgetLibrary AddLibrary (ImportContext ctx, Hashtable visited, string s)
+		WidgetLibrary AddLibrary (AssemblyResolver resolver, Hashtable visited, string s)
 		{
 			if (Registry.IsRegistered (s)) {
 				WidgetLibrary lib = Registry.GetWidgetLibrary (s);
-				CheckDependencies (ctx, visited, lib);
+				CheckDependencies (resolver, visited, lib);
 				return lib;
 			}
 
-			WidgetLibrary alib = CreateLibrary (ctx, s);
+			WidgetLibrary alib = CreateLibrary (resolver, s);
 			if (alib == null)
 				return null;
 				
-			RegisterLibrary (ctx, visited, alib);
+			RegisterLibrary (resolver, visited, alib);
 			return alib;
 		}
 		
-		void RegisterLibrary (ImportContext ctx, Hashtable visited, WidgetLibrary lib)
+		void RegisterLibrary (AssemblyResolver resolver, Hashtable visited, WidgetLibrary lib)
 		{
 			if (visited.Contains (lib.Name))
 				return;
@@ -225,9 +225,9 @@ namespace Stetic
 			visited [lib.Name] = lib;
 
 			foreach (string s in lib.GetLibraryDependencies ()) {
-				if (!Application.InternalIsWidgetLibrary (ctx, s))
+				if (!Application.InternalIsWidgetLibrary (resolver, s))
 					continue;
-				AddLibrary (ctx, visited, s);
+				AddLibrary (resolver, visited, s);
 			}
 			
 			try {
@@ -241,13 +241,13 @@ namespace Stetic
 			}
 		}
 		
-		WidgetLibrary CreateLibrary (ImportContext ctx, string name)
+		WidgetLibrary CreateLibrary (AssemblyResolver resolver, string name)
 		{
 			try {
 				if (allowInProcLibraries)
-					return new AssemblyWidgetLibrary (ctx, name);
+					return new AssemblyWidgetLibrary (resolver, name);
 				else
-					return new CecilWidgetLibrary (ctx, name);
+					return new CecilWidgetLibrary (resolver, name);
 			} catch (Exception ex) {
 				// FIXME: handle the error, but keep loading.
 				Console.WriteLine (ex);
@@ -255,7 +255,7 @@ namespace Stetic
 			}
 		}
 		
-		void CheckDependencies (ImportContext ctx, Hashtable visited, WidgetLibrary lib)
+		void CheckDependencies (AssemblyResolver resolver, Hashtable visited, WidgetLibrary lib)
 		{
 			if (visited.Contains (lib.Name))
 				return;
@@ -265,9 +265,9 @@ namespace Stetic
 			foreach (string dep in lib.GetLibraryDependencies ()) {
 				WidgetLibrary depLib = Registry.GetWidgetLibrary (dep);
 				if (depLib == null)
-					AddLibrary (ctx, visited, dep);
+					AddLibrary (resolver, visited, dep);
 				else
-					CheckDependencies (ctx, visited, depLib);
+					CheckDependencies (resolver, visited, depLib);
 			}
 		}
 		

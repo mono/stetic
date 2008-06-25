@@ -348,12 +348,11 @@ namespace Stetic
 		
 		public bool IsWidgetLibrary (string assemblyRef)
 		{
-			ImportContext ic = new ImportContext ();
-			ic.App = this.Backend;
-			return InternalIsWidgetLibrary (ic, assemblyRef);
+			AssemblyResolver resolver = new AssemblyResolver (Backend);
+			return InternalIsWidgetLibrary (resolver, assemblyRef);
 		}
 		
-		internal static bool InternalIsWidgetLibrary (ImportContext ic, string assemblyRef)
+		internal static bool InternalIsWidgetLibrary (AssemblyResolver resolver, string assemblyRef)
 		{
 			string path;
 
@@ -363,7 +362,7 @@ namespace Stetic
 				path = assemblyRef;
 			}
 			else {
-				path = CecilWidgetLibrary.FindAssembly (ic, assemblyRef, null);
+				path = resolver.Resolve (assemblyRef, null);
 				if (path == null)
 					return false;
 			}

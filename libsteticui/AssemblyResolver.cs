@@ -41,15 +41,19 @@ namespace Stetic {
 	internal class AssemblyResolver : BaseAssemblyResolver {
 
 		Hashtable _assemblies;
+		ApplicationBackend app;
 
 		public IDictionary AssemblyCache {
 			get { return _assemblies; }
 		}
 
-		public AssemblyResolver ()
+		public AssemblyResolver (ApplicationBackend app)
 		{
+			this.app = app;
 			_assemblies = new Hashtable ();
 		}
+
+		public StringCollection Directories = new StringCollection ();
 
 		public override AssemblyDefinition Resolve (AssemblyNameReference name)
 		{
@@ -63,7 +67,7 @@ namespace Stetic {
 			return asm;
 		}
 
-		public TypeDefinition Resolve (TypeReference type)
+		TypeDefinition Resolve (TypeReference type)
 		{
 			if (type is TypeDefinition)
 				return (TypeDefinition) type;
@@ -81,109 +85,30 @@ namespace Stetic {
 			throw new NotImplementedException ();
 		}
 
-		public FieldDefinition Resolve (FieldReference field)
-		{
-			TypeDefinition type = Resolve (field.DeclaringType);
-			return GetField (type.Fields, field);
-		}
-
-		static FieldDefinition GetField (ICollection collection, FieldReference reference)
-		{
-			foreach (FieldDefinition field in collection) {
-				if (field.Name != reference.Name)
-					continue;
-
-				if (!AreSame (field.FieldType, reference.FieldType))
-					continue;
-
-				return field;
-			}
-
-			return null;
-		}
-
-		public MethodDefinition Resolve (MethodReference method)
-		{
-			TypeDefinition type = Resolve (method.DeclaringType);
-			if (method.Name == MethodDefinition.Cctor || method.Name == MethodDefinition.Ctor)
-				return GetMethod (type.Constructors, method);
-			else
-				return GetMethod (type, method);
-		}
-
-		MethodDefinition GetMethod (TypeDefinition type, MethodReference reference)
-		{
-			while (type != null) {
-				MethodDefinition method = GetMethod (type.Methods, reference);
-				if (method == null)
-					type = Resolve (type.BaseType);
-				else
-					return method;
-			}
-
-			return null;
-		}
-
-		static MethodDefinition GetMethod (ICollection collection, MethodReference reference)
-		{
-			foreach (MethodDefinition meth in collection) {
-				if (meth.Name != reference.Name)
-					continue;
-
-				if (!AreSame (meth.ReturnType.ReturnType, reference.ReturnType.ReturnType))
-					continue;
-
-				if (!AreSame (meth.Parameters, reference.Parameters))
-					continue;
-
-				return meth;
-			}
-
-			return null;
-		}
-
-		static bool AreSame (ParameterDefinitionCollection a, ParameterDefinitionCollection b)
-		{
-			if (a.Count != b.Count)
-				return false;
-
-			if (a.Count == 0)
-				return true;
-
-			for (int i = 0; i < a.Count; i++)
-				if (!AreSame (a [i].ParameterType, b [i].ParameterType))
-					return false;
-
-			return true;
-		}
-
-		static bool AreSame (TypeReference a, TypeReference b)
-		{
-			while (a is TypeSpecification || b is TypeSpecification) {
-				if (a.GetType () != b.GetType ())
-					return false;
-
-				a = ((TypeSpecification) a).ElementType;
-				b = ((TypeSpecification) b).ElementType;
-			}
-
-			if (a is GenericParameter || b is GenericParameter) {
-				if (a.GetType() != b.GetType())
-					return false;
-
-				GenericParameter pa = (GenericParameter) a;
-				GenericParameter pb = (GenericParameter) b;
-
-				return pa.Position == pb.Position;
-			}
-
-			return a.FullName == b.FullName;
-		}
-
 		public void CacheAssembly (AssemblyDefinition assembly)
 		{
 			_assemblies [assembly.Name.FullName] = assembly;
 			assembly.Resolver = this;
+		}
+
+		public string Resolve (string assemblyName, string basePath)
+		{
+			if (app != null) {
+				string ares = app.ResolveAssembly (assemblyName);
+				if (ares != null)
+					return ares;
+			}
+			
+			StringCollection col = new StringCollection ();
+			col.Add (basePath);
+			foreach (string s in Directories)
+				col.Add (s);
+			
+			try {
+				return Resolve (AssemblyNameReference.Parse (assemblyName), col);
+			} catch {
+			}
+			return null;
 		}
 
 		public string Resolve (AssemblyNameReference name, StringCollection basePaths)

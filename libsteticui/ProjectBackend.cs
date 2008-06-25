@@ -30,7 +30,7 @@ namespace Stetic {
 		ArrayList widgetLibraries;
 		ArrayList internalLibs;
 		ApplicationBackend app;
-		ImportContext importContext;
+		AssemblyResolver resolver;
 		string imagesRootPath;
 		string targetGtkVersion;
 		
@@ -328,8 +328,7 @@ namespace Stetic {
 				}
 				
 				// Load the assembly directories
-				importContext = new ImportContext ();
-				importContext.App = app;
+				resolver = new AssemblyResolver (app);
 				foreach (XmlElement libElem in node.SelectNodes ("import/assembly-directory")) {
 					string dir = libElem.GetAttribute ("path");
 					if (dir.Length > 0) {
@@ -338,7 +337,7 @@ namespace Stetic {
 							if (Directory.Exists (dir))
 								dir = Path.GetFullPath (dir);
 						}
-						importContext.Directories.Add (dir);
+						resolver.Directories.Add (dir);
 					}
 				}
 				
@@ -357,7 +356,7 @@ namespace Stetic {
 						internalLibs.Add (libname);
 				}
 				
-				app.LoadLibraries (importContext, widgetLibraries);
+				app.LoadLibraries (resolver, widgetLibraries);
 				
 				ObjectReader reader = new ObjectReader (this, FileFormat.Native);
 				
@@ -441,13 +440,13 @@ namespace Stetic {
 			if (config.ChildNodes.Count > 0)
 				toplevel.AppendChild (config);
 			
-			if (widgetLibraries.Count > 0 || (importContext != null && importContext.Directories.Count > 0)) {
+			if (widgetLibraries.Count > 0 || (resolver != null && resolver.Directories.Count > 0)) {
 				XmlElement importElem = doc.CreateElement ("import");
 				toplevel.AppendChild (importElem);
 				string basePath = Path.GetDirectoryName (fileName);
 				
-				if (importContext != null && importContext.Directories.Count > 0) {
-					foreach (string dir in importContext.Directories) {
+				if (resolver != null && resolver.Directories.Count > 0) {
+					foreach (string dir in resolver.Directories) {
 						XmlElement dirElem = doc.CreateElement ("assembly-directory");
 						if (basePath != null)
 							dirElem.SetAttribute ("path", AbsoluteToRelativePath (basePath, dir));
@@ -715,8 +714,8 @@ namespace Stetic {
 			}
 		}
 		
-		public ImportContext ImportContext {
-			get { return importContext; }
+		public AssemblyResolver Resolver {
+			get { return resolver; }
 		}
 		
 		public string ImportFile (string filePath)
@@ -1026,12 +1025,6 @@ namespace Stetic {
 			if (WidgetAdded != null)
 				WidgetAdded (this, args);
 		}
-	}
-	
-	class ImportContext
-	{
-		public StringCollection Directories = new StringCollection ();
-		public ApplicationBackend App;
 	}
 	
 	class WidgetData

@@ -45,6 +45,8 @@ namespace Stetic {
 			string file;
 			Guid guid;
 			DateTime timestamp;
+			XmlDocument gui;
+			XmlDocument objects;
 
 			string CacheDirectory {
 				get { 
@@ -72,7 +74,29 @@ namespace Stetic {
 				}
 			}
 
-			public string GuiPath {
+			[XmlIgnore]
+			public XmlDocument GuiDocument {
+				get {
+					if (gui == null) {
+						if (System.IO.File.Exists (GuiPath)) {
+							try {
+								gui = new XmlDocument ();
+								using (Stream stream = System.IO.File.Open (GuiPath, FileMode.Open))
+									gui.Load (stream);
+							} catch (Exception) {
+								gui = null;
+							}
+						}
+					}
+					return gui;
+				}
+				set {
+					gui = value;
+					WriteGuiFile ();
+				}
+			}
+
+			string GuiPath {
 				get { return Path.Combine (CacheDirectory, "steticGui"); }
 			}
 
@@ -80,7 +104,31 @@ namespace Stetic {
 				get { return System.IO.File.Exists (ObjectsPath); }
 			}
 
-			public string ObjectsPath {
+			[XmlIgnore]
+			public XmlDocument ObjectsDocument {
+				get {
+					if (objects == null) {
+						if (System.IO.File.Exists (ObjectsPath)) {
+							try {
+								objects = new XmlDocument ();
+								using (Stream stream = System.IO.File.Open (ObjectsPath, FileMode.Open))
+									objects.Load (stream);
+							} catch (Exception) {
+								objects = null;
+							}
+						}
+					}
+					return objects;
+				}
+				set {
+					objects = value;
+					WriteObjectsFile ();
+					if (objects == null && gui != null)
+						GuiDocument = null;
+				}
+			}
+
+			string ObjectsPath {
 				get { return Path.Combine (CacheDirectory, "objects"); }
 			}
 
@@ -88,6 +136,28 @@ namespace Stetic {
 			public DateTime Timestamp {
 				get { return timestamp; }
 				set { timestamp = value; }
+			}
+
+			void WriteGuiFile ()
+			{
+				if (gui == null) {
+					if (System.IO.File.Exists (GuiPath))
+						System.IO.File.Delete (GuiPath);
+					return;
+				}
+				using (Stream stream = System.IO.File.Create (GuiPath))
+					gui.Save (stream);
+			}
+
+			public void WriteObjectsFile ()
+			{
+				if (objects == null) {
+					if (System.IO.File.Exists (ObjectsPath))
+						System.IO.File.Delete (ObjectsPath);
+					return;
+				}
+				using (Stream stream = System.IO.File.Create (ObjectsPath))
+					objects.Save (stream);
 			}
 		}
 
@@ -142,7 +212,7 @@ namespace Stetic {
 				if (IsCurrent (file))
 					return Members [file];
 
-				RefreshFile (file);
+				Refresh (null, file);
 				return Members [file];
 			}
 		}
@@ -164,27 +234,69 @@ namespace Stetic {
 			return null;
 		}
  
-		XmlDocument GetObjectsDoc (string path)
+		void AddDependencies (XmlElement elem, AssemblyResolver resolver, string filename, AssemblyDefinition asm)
 		{
-			XmlDocument result = null;
+			string dir = Path.GetDirectoryName (filename);
+			foreach (AssemblyNameReference aref in asm.MainModule.AssemblyReferences) {
+				string file = null;
+				if (resolver != null)
+					resolver.Resolve (aref.FullName, dir);
+				if (file != null && Application.InternalIsWidgetLibrary (resolver, file)) {
+					XmlElement edep = elem.OwnerDocument.CreateElement ("dependency");
+					edep.InnerText = file;
+					elem.AppendChild (edep);
+				}
+			}
+		}
+
+		XmlDocument GetGuiDoc (AssemblyDefinition adef)
+		{
+			XmlDocument doc = null;
 			try {
-				AssemblyDefinition adef = AssemblyFactory.GetAssembly (path);
+				EmbeddedResource res = GetResource (adef, "gui.stetic");
+				if (res != null) {
+					MemoryStream stream = new MemoryStream (res.Data);
+					doc = new XmlDocument ();
+					using (stream)
+						doc.Load (stream);
+				}
+			} catch {
+				doc = null;
+			}
+
+			return doc;
+		}
+		
+		XmlDocument GetObjectsDoc (AssemblyResolver resolver, AssemblyDefinition adef, string path)
+		{
+			XmlDocument doc = null;
+			try {
 				EmbeddedResource res = GetResource (adef, "objects.xml");
 				if (res != null) {
 					MemoryStream stream = new MemoryStream (res.Data);
-					result = new XmlDocument ();
+					doc = new XmlDocument ();
 					using (stream)
-						result.Load (stream);
+						doc.Load (stream);
+				}
+				if (doc != null) {
+					XmlElement elem = doc.CreateElement ("dependencies");
+					doc.DocumentElement.AppendChild (elem);
+					AddDependencies (elem, resolver, path, adef);
 				}
 			} catch {
-				result = null;
+				doc = null;
 			}
-			return result;
+
+			return doc;
 		}
 		
-		void RefreshFile (string assembly)
+		internal LibraryInfo Refresh (AssemblyResolver resolver, string assembly)
 		{
 			assembly = Path.GetFullPath (assembly);
+
+			if (IsCurrent (assembly))
+				return Members [assembly];
+
 			LibraryInfo info = Members [assembly];
 			if (info == null) {
 				info = new LibraryInfo ();
@@ -194,9 +306,15 @@ namespace Stetic {
 			info.Timestamp = File.GetLastWriteTime (assembly).ToUniversalTime ();
 			info.Guid = Guid.NewGuid ();
 			Save ();
-			XmlDocument objects = GetObjectsDoc (assembly);
-			if (objects != null)
-				objects.Save (info.ObjectsPath);
+			AssemblyDefinition adef = AssemblyFactory.GetAssembly (assembly);
+			XmlDocument objects = GetObjectsDoc (resolver, adef, assembly);
+			if (objects != null) {
+				info.ObjectsDocument = objects;
+				XmlDocument gui = GetGuiDoc (adef);
+				if (gui != null)
+					info.GuiDocument = gui;
+			}
+			return info;
 		}
 
 		void Save ()

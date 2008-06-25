@@ -12,8 +12,7 @@ namespace Stetic
 
 		Assembly assembly;
 		string name;
-		ImportContext importContext;
-		XmlDocument objectsDoc;
+		AssemblyResolver resolver;
 		LibraryCache.LibraryInfo cache_info;
 		
 		public AssemblyWidgetLibrary (string name, Assembly assembly)
@@ -23,15 +22,15 @@ namespace Stetic
 			UpdateCache ();
 		}
 		
-		public AssemblyWidgetLibrary (ImportContext importContext, string assemblyPath)
+		public AssemblyWidgetLibrary (AssemblyResolver resolver, string assemblyPath)
 		{
 			this.name = assemblyPath;
 			
-			string ares = importContext.App.ResolveAssembly (assemblyPath);
+			string ares = resolver.Resolve (assemblyPath, null);
 			if (ares != null)
 				assemblyPath = ares;
 			
-			this.importContext = importContext;
+			this.resolver = resolver;
 			if (assemblyPath.EndsWith (".dll") || assemblyPath.EndsWith (".exe")) {
 				if (File.Exists (assemblyPath))
 					assembly = Assembly.LoadFrom (assemblyPath);
@@ -46,21 +45,8 @@ namespace Stetic
 		
 		void UpdateCache ()
 		{
-			bool is_current = Cache.IsCurrent (assembly.Location);
+			Cache.Refresh (resolver, assembly.Location);
 			cache_info = Cache [assembly.Location];
-			if (is_current)
-				return;
-
-			Stream stream = assembly.GetManifestResourceStream ("objects.xml");
-				
-			if (stream != null) {
-				objectsDoc = new XmlDocument ();
-				using (stream)
-					objectsDoc.Load (stream);
-			}
-
-			if (objectsDoc != null)
-				objectsDoc.Save (cache_info.ObjectsPath);
 		}
 		
 		public override string Name {
@@ -79,13 +65,7 @@ namespace Stetic
 		
 		public override void Load ()
 		{
-			if (objectsDoc == null) {
-				objectsDoc = new XmlDocument ();
-				using (FileStream stream = File.Open (cache_info.ObjectsPath, FileMode.Open))
-					objectsDoc.Load (stream);
-			}
-			Load (objectsDoc);
-			objectsDoc = null;
+			Load (cache_info.ObjectsDocument);
 		}
 
 		protected override ClassDescriptor LoadClassDescriptor (XmlElement element)
@@ -137,7 +117,7 @@ namespace Stetic
 				}
 				
 				if (depasm == null) {
-					string file = CecilWidgetLibrary.FindAssembly (importContext, aname.FullName, Path.GetDirectoryName (asm.Location));
+					string file = resolver.Resolve (aname.FullName, Path.GetDirectoryName (asm.Location));
 					if (file != null)
 						depasm = Assembly.LoadFrom (file);
 					else
