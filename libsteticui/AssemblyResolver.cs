@@ -67,7 +67,7 @@ namespace Stetic {
 			return asm;
 		}
 
-		TypeDefinition Resolve (TypeReference type)
+		public TypeDefinition Resolve (TypeReference type)
 		{
 			if (type is TypeDefinition)
 				return (TypeDefinition) type;

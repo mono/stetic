@@ -1,3 +1,9 @@
+2008-07-01  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/AssemblyResolver.cs: make type resolver public.
+	* libsteticui/LibraryCache.cs: [ToolboxItem] and [Category] scanner
+	for identification of exported widgets from libraries.
+
 2008-06-25  Mike Kestner <mkestner@novell.com> 
 
 	* libsteticui/Application.cs: use resolver.

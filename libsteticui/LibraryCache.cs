@@ -267,6 +267,106 @@ namespace Stetic {
 			return doc;
 		}
 		
+		bool ReferenceChainContainsGtk (AssemblyResolver resolver, AssemblyNameReference aref, Hashtable visited)
+		{
+			if (aref.Name == "gtk-sharp")
+				return true;
+			else if (visited.Contains (aref.Name))
+				return false;
+
+			visited [aref.Name] = aref;
+
+			AssemblyDefinition adef = resolver.Resolve (aref);
+			if (adef == null)
+				return false;
+
+			foreach (AssemblyNameReference child in adef.MainModule.AssemblyReferences)
+				if (ReferenceChainContainsGtk (resolver, child, visited))
+					return true;
+
+			return false;
+		}
+
+		class ToolboxItemInfo {
+
+			public ToolboxItemInfo (string base_type)
+			{
+				BaseType = base_type;
+			}
+
+			public string BaseType;
+			public string PaletteCategory;
+		}
+
+		ToolboxItemInfo GetToolboxItemInfo (AssemblyResolver resolver, TypeDefinition tdef)
+		{
+			if (tdef == null)
+				return null;
+
+			ToolboxItemInfo info = null;
+			string category = "General";
+			
+			foreach (CustomAttribute attr in tdef.CustomAttributes) {
+				switch (attr.Constructor.DeclaringType.FullName) {
+				case "System.ComponentModel.ToolboxItemAttribute":
+					attr.Resolve ();
+					if (attr.ConstructorParameters.Count > 0) {
+						object param = attr.ConstructorParameters [0];
+						if (param == null)
+							return null;
+						else if (param.GetType () == typeof (bool)) {
+							if ((bool) param)
+								info = new ToolboxItemInfo ("Gtk.Widget");
+							else 
+								return null;
+						} else if (param.GetType () == typeof (System.Type))
+							info = new ToolboxItemInfo ("Gtk.Widget");
+						else
+							return null;
+					}
+					break;
+				case "System.ComponentModel.CategoryAttribute":
+					attr.Resolve ();
+					if (attr.ConstructorParameters.Count > 0) {
+						object param = attr.ConstructorParameters [0];
+						if (param.GetType () == typeof (string))
+							category = (string) param;
+					}
+					break;
+				default:
+					continue;
+				}
+
+			}
+
+			if (info == null && tdef.BaseType != null)
+				info = GetToolboxItemInfo (resolver, resolver.Resolve (tdef.BaseType));
+
+			if (info != null)
+				info.PaletteCategory = category;
+
+			return info;
+		}
+
+		void AddObjects (XmlDocument doc, AssemblyResolver resolver, AssemblyDefinition adef)
+		{
+			foreach (TypeDefinition tdef in adef.MainModule.Types) {
+				if (tdef.IsNotPublic || tdef.IsAbstract || !tdef.IsClass) 
+					continue;
+
+				ToolboxItemInfo tbinfo = GetToolboxItemInfo (resolver, tdef);
+				if (tbinfo == null)
+					continue;
+
+				XmlElement elem = doc.CreateElement ("object");
+				elem.SetAttribute ("type", tdef.FullName);
+				elem.SetAttribute ("allow-children", "false");
+				elem.SetAttribute ("base-type", tbinfo.BaseType);
+				elem.SetAttribute ("palette-category", tbinfo.PaletteCategory);
+				doc.DocumentElement.AppendChild (elem);
+			}
+		}
+
 		XmlDocument GetObjectsDoc (AssemblyResolver resolver, AssemblyDefinition adef, string path)
 		{
 			XmlDocument doc = null;
@@ -278,12 +378,30 @@ namespace Stetic {
 					using (stream)
 						doc.Load (stream);
 				}
+
+				if (resolver == null)
+					resolver = new AssemblyResolver (null);
+
+				Hashtable visited = new Hashtable ();
+				foreach (AssemblyNameReference aref in adef.MainModule.AssemblyReferences) {
+					if (!ReferenceChainContainsGtk (resolver, aref, visited))
+						continue;
+
+					if (doc == null) {
+						doc = new XmlDocument ();
+						doc.AppendChild (doc.CreateElement ("objects"));
+					}
+					AddObjects (doc, resolver, adef);
+					break;
+				}
+
 				if (doc != null) {
 					XmlElement elem = doc.CreateElement ("dependencies");
 					doc.DocumentElement.AppendChild (elem);
 					AddDependencies (elem, resolver, path, adef);
 				}
-			} catch {
+			} catch (Exception e) {
+				Console.WriteLine ("Got exception loading objects: " + e);
 				doc = null;
 			}
 
