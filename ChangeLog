@@ -1,3 +1,8 @@
+2008-07-11  Mike Kestner <mkestner@novell.com> 
+
+	* libsteticui/ApplicationBackend.cs: removed some CWL spew. This
+	case is apparently expected for first-time builds.
+
 2008-07-01  Mike Kestner <mkestner@novell.com> 
 
 	* libsteticui/AssemblyResolver.cs: make type resolver public.

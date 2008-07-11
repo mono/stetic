@@ -250,7 +250,6 @@ namespace Stetic
 					return new CecilWidgetLibrary (resolver, name);
 			} catch (Exception ex) {
 				// FIXME: handle the error, but keep loading.
-				Console.WriteLine (ex);
 				return null;
 			}
 		}
